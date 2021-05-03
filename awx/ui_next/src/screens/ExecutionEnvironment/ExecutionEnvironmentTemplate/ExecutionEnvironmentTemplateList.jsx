@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
 
@@ -23,7 +23,7 @@ const QS_CONFIG = getQSConfig(
   ['id', 'page', 'page_size']
 );
 
-function ExecutionEnvironmentTemplateList({ i18n, executionEnvironment }) {
+function ExecutionEnvironmentTemplateList({ executionEnvironment }) {
   const { id } = executionEnvironment;
   const location = useLocation();
 
@@ -79,44 +79,44 @@ function ExecutionEnvironmentTemplateList({ i18n, executionEnvironment }) {
           hasContentLoading={isLoading}
           items={templates}
           itemCount={templatesCount}
-          pluralizedItemName={i18n._(t`Templates`)}
+          pluralizedItemName={t`Templates`}
           qsConfig={QS_CONFIG}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Type`),
+              name: t`Type`,
               key: 'or__type',
               options: [
-                [`job_template`, i18n._(t`Job Template`)],
-                [`workflow_job_template`, i18n._(t`Workflow Template`)],
+                [`job_template`, t`Job Template`],
+                [`workflow_job_template`, t`Workflow Template`],
               ],
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
           toolbarSortColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name',
             },
             {
-              name: i18n._(t`Created`),
+              name: t`Created`,
               key: 'created',
             },
             {
-              name: i18n._(t`Modified`),
+              name: t`Modified`,
               key: 'modified',
             },
           ]}
@@ -136,4 +136,4 @@ function ExecutionEnvironmentTemplateList({ i18n, executionEnvironment }) {
   );
 }
 
-export default withI18n()(ExecutionEnvironmentTemplateList);
+export default ExecutionEnvironmentTemplateList;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, HostsAPI } from '../../../api';
@@ -21,7 +21,7 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function InventoryHostList({ i18n }) {
+function InventoryHostList() {
   const [selected, setSelected] = useState([]);
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const { id } = useParams();
@@ -110,23 +110,23 @@ function InventoryHostList({ i18n }) {
         hasContentLoading={isLoading || isDeleteLoading || isAdHocLaunchLoading}
         items={hosts}
         itemCount={hostCount}
-        pluralizedItemName={i18n._(t`Hosts`)}
+        pluralizedItemName={t`Hosts`}
         qsConfig={QS_CONFIG}
         toolbarColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
             isSortable: true,
             isSearchable: true,
           },
           {
-            name: i18n._(t`Modified`),
+            name: t`Modified`,
             key: 'modified',
             isSortable: true,
             isNumeric: true,
           },
           {
-            name: i18n._(t`Created`),
+            name: t`Created`,
             key: 'created',
             isSortable: true,
             isNumeric: true,
@@ -159,7 +159,7 @@ function InventoryHostList({ i18n }) {
                 key="delete"
                 onDelete={handleDeleteHosts}
                 itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Hosts`)}
+                pluralizedItemName={t`Hosts`}
               />,
             ]}
           />
@@ -187,10 +187,10 @@ function InventoryHostList({ i18n }) {
         <AlertModal
           isOpen={deletionError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more hosts.`)}
+          {t`Failed to delete one or more hosts.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -198,4 +198,4 @@ function InventoryHostList({ i18n }) {
   );
 }
 
-export default withI18n()(InventoryHostList);
+export default InventoryHostList;

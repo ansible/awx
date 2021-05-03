@@ -10,7 +10,7 @@ export default function useSurveyStep(
   launchConfig,
   surveyConfig,
   resource,
-  i18n,
+
   visitedSteps
 ) {
   const { setFieldError, values } = useFormikContext();
@@ -24,10 +24,10 @@ export default function useSurveyStep(
           id: STEP_ID,
           name: (
             <StepName hasErrors={hasError} id="survey-step">
-              {i18n._(t`Survey`)}
+              {t`Survey`}
             </StepName>
           ),
-          component: <SurveyStep surveyConfig={surveyConfig} i18n={i18n} />,
+          component: <SurveyStep surveyConfig={surveyConfig} />,
           enableNext: true,
         }
       : null,
@@ -49,8 +49,7 @@ export default function useSurveyStep(
         surveyConfig.spec.forEach(question => {
           const errMessage = validateSurveyField(
             question,
-            values[`survey_${question.variable}`],
-            i18n
+            values[`survey_${question.variable}`]
           );
           if (errMessage) {
             setFieldError(`survey_${question.variable}`, errMessage);
@@ -96,26 +95,24 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
   return values;
 }
 
-function validateSurveyField(question, value, i18n) {
+function validateSurveyField(question, value) {
   const isTextField = ['text', 'textarea'].includes(question.type);
   const isNumeric = ['integer', 'float'].includes(question.type);
   if (isTextField && (value || value === 0)) {
     if (question.min && value.length < question.min) {
-      return i18n._(t`This field must be at least ${question.min} characters`);
+      return t`This field must be at least ${question.min} characters`;
     }
     if (question.max && value.length > question.max) {
-      return i18n._(t`This field must not exceed ${question.max} characters`);
+      return t`This field must not exceed ${question.max} characters`;
     }
   }
   if (isNumeric && (value || value === 0)) {
     if (value < question.min || value > question.max) {
-      return i18n._(
-        t`This field must be a number and have a value between ${question.min} and ${question.max}`
-      );
+      return t`This field must be a number and have a value between ${question.min} and ${question.max}`;
     }
   }
   if (question.required && !value && value !== 0) {
-    return i18n._(t`This field must not be blank`);
+    return t`This field must not be blank`;
   }
   return null;
 }

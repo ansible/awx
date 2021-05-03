@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 
-function PromptInventorySourceDetail({ i18n, resource }) {
+function PromptInventorySourceDetail({ resource }) {
   const {
     custom_virtualenv,
     group_by,
@@ -29,11 +29,11 @@ function PromptInventorySourceDetail({ i18n, resource }) {
   } = resource;
 
   const VERBOSITY = {
-    0: i18n._(t`0 (Normal)`),
-    1: i18n._(t`1 (Verbose)`),
-    2: i18n._(t`2 (More Verbose)`),
-    3: i18n._(t`3 (Debug)`),
-    4: i18n._(t`4 (Connection Debug)`),
+    0: t`0 (Normal)`,
+    1: t`1 (Verbose)`,
+    2: t`2 (More Verbose)`,
+    3: t`3 (Debug)`,
+    4: t`4 (Connection Debug)`,
   };
 
   let optionsList = '';
@@ -45,13 +45,11 @@ function PromptInventorySourceDetail({ i18n, resource }) {
   ) {
     optionsList = (
       <List>
-        {overwrite && <ListItem>{i18n._(t`Overwrite`)}</ListItem>}
-        {overwrite_vars && (
-          <ListItem>{i18n._(t`Overwrite Variables`)}</ListItem>
-        )}
-        {update_on_launch && <ListItem>{i18n._(t`Update on Launch`)}</ListItem>}
+        {overwrite && <ListItem>{t`Overwrite`}</ListItem>}
+        {overwrite_vars && <ListItem>{t`Overwrite Variables`}</ListItem>}
+        {update_on_launch && <ListItem>{t`Update on Launch`}</ListItem>}
         {update_on_project_update && (
-          <ListItem>{i18n._(t`Update on Project Update`)}</ListItem>
+          <ListItem>{t`Update on Project Update`}</ListItem>
         )}
       </List>
     );
@@ -61,7 +59,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
     <>
       {summary_fields?.organization ? (
         <Detail
-          label={i18n._(t`Organization`)}
+          label={t`Organization`}
           value={
             <Link
               to={`/organizations/${summary_fields.organization.id}/details`}
@@ -71,11 +69,11 @@ function PromptInventorySourceDetail({ i18n, resource }) {
           }
         />
       ) : (
-        <DeletedDetail label={i18n._(t`Organization`)} />
+        <DeletedDetail label={t`Organization`} />
       )}
       {summary_fields?.inventory && (
         <Detail
-          label={i18n._(t`Inventory`)}
+          label={t`Inventory`}
           value={
             <Link to={`/inventories/${summary_fields.inventory?.id}/details`}>
               {summary_fields?.inventory?.name}
@@ -83,10 +81,10 @@ function PromptInventorySourceDetail({ i18n, resource }) {
           }
         />
       )}
-      <Detail label={i18n._(t`Source`)} value={source} />
+      <Detail label={t`Source`} value={source} />
       {summary_fields?.source_project && (
         <Detail
-          label={i18n._(t`Project`)}
+          label={t`Project`}
           value={
             <Link to={`/projects/${summary_fields.source_project?.id}/details`}>
               {summary_fields.source_project?.name}
@@ -98,16 +96,16 @@ function PromptInventorySourceDetail({ i18n, resource }) {
         virtualEnvironment={custom_virtualenv}
         executionEnvironment={summary_fields?.execution_environment}
       />
-      <Detail label={i18n._(t`Inventory File`)} value={source_path} />
-      <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
+      <Detail label={t`Inventory File`} value={source_path} />
+      <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
       <Detail
-        label={i18n._(t`Cache Timeout`)}
-        value={`${update_cache_timeout} ${i18n._(t`Seconds`)}`}
+        label={t`Cache Timeout`}
+        value={`${update_cache_timeout} ${t`Seconds`}`}
       />
       {summary_fields?.credentials?.length > 0 && (
         <Detail
           fullWidth
-          label={i18n._(t`Credential`)}
+          label={t`Credential`}
           value={summary_fields.credentials.map(cred => (
             <CredentialChip key={cred?.id} credential={cred} isReadOnly />
           ))}
@@ -116,7 +114,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
       {source_regions && (
         <Detail
           fullWidth
-          label={i18n._(t`Regions`)}
+          label={t`Regions`}
           value={
             <ChipGroup
               numChips={5}
@@ -134,7 +132,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
       {instance_filters && (
         <Detail
           fullWidth
-          label={i18n._(t`Instance Filters`)}
+          label={t`Instance Filters`}
           value={
             <ChipGroup
               numChips={5}
@@ -152,7 +150,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
       {group_by && (
         <Detail
           fullWidth
-          label={i18n._(t`Only Group By`)}
+          label={t`Only Group By`}
           value={
             <ChipGroup numChips={5} totalChips={group_by.split(',').length}>
               {group_by.split(',').map(group => (
@@ -164,10 +162,10 @@ function PromptInventorySourceDetail({ i18n, resource }) {
           }
         />
       )}
-      {optionsList && <Detail label={i18n._(t`Options`)} value={optionsList} />}
+      {optionsList && <Detail label={t`Options`} value={optionsList} />}
       {source_vars && (
         <VariablesDetail
-          label={i18n._(t`Source Variables`)}
+          label={t`Source Variables`}
           rows={4}
           value={source_vars}
         />
@@ -176,4 +174,4 @@ function PromptInventorySourceDetail({ i18n, resource }) {
   );
 }
 
-export default withI18n()(PromptInventorySourceDetail);
+export default PromptInventorySourceDetail;

@@ -11,7 +11,7 @@ export default function useCredentialsStep(
   launchConfig,
   resource,
   resourceDefaultCredentials,
-  i18n,
+
   allowCredentialsWithPasswords = false
 ) {
   const [field, meta, helpers] = useField('credentials');
@@ -22,7 +22,7 @@ export default function useCredentialsStep(
   return {
     step: getStep(
       launchConfig,
-      i18n,
+
       allowCredentialsWithPasswords,
       formError,
       resourceDefaultCredentials
@@ -37,7 +37,6 @@ export default function useCredentialsStep(
     validate: () => {
       helpers.setError(
         credentialsValidator(
-          i18n,
           resourceDefaultCredentials,
           allowCredentialsWithPasswords,
           field.value
@@ -49,7 +48,7 @@ export default function useCredentialsStep(
 
 function getStep(
   launchConfig,
-  i18n,
+
   allowCredentialsWithPasswords,
   formError,
   resourceDefaultCredentials
@@ -62,12 +61,11 @@ function getStep(
     key: 4,
     name: (
       <StepName hasErrors={formError} id="credentials-step">
-        {i18n._(t`Credentials`)}
+        {t`Credentials`}
       </StepName>
     ),
     component: (
       <CredentialsStep
-        i18n={i18n}
         allowCredentialsWithPasswords={allowCredentialsWithPasswords}
         defaultCredentials={resourceDefaultCredentials}
       />

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import JobsDetail from './JobsDetail';
 import JobsEdit from './JobsEdit';
 
-function Jobs({ i18n }) {
+function Jobs() {
   const baseURL = '/settings/jobs';
   return (
     <PageSection>
@@ -22,9 +22,7 @@ function Jobs({ i18n }) {
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
-              <Link to={`${baseURL}/details`}>
-                {i18n._(t`View Jobs settings`)}
-              </Link>
+              <Link to={`${baseURL}/details`}>{t`View Jobs settings`}</Link>
             </ContentError>
           </Route>
         </Switch>
@@ -33,4 +31,4 @@ function Jobs({ i18n }) {
   );
 }
 
-export default withI18n()(Jobs);
+export default Jobs;

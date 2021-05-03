@@ -15,7 +15,7 @@ const STEP_ID = 'inventory';
 export default function useInventoryStep(
   launchConfig,
   resource,
-  i18n,
+
   visitedSteps
 ) {
   const [, meta, helpers] = useField('inventory');
@@ -27,7 +27,7 @@ export default function useInventoryStep(
         !meta.value;
 
   return {
-    step: getStep(launchConfig, i18n, formError, resource),
+    step: getStep(launchConfig, formError, resource),
     initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
@@ -37,12 +37,12 @@ export default function useInventoryStep(
     },
     validate: () => {
       if (meta.touched && !meta.value && resource.type === 'job_template') {
-        helpers.setError(i18n._(t`An inventory must be selected`));
+        helpers.setError(t`An inventory must be selected`);
       }
     },
   };
 }
-function getStep(launchConfig, i18n, formError, resource) {
+function getStep(launchConfig, formError, resource) {
   if (!launchConfig.ask_inventory_on_launch) {
     return null;
   }
@@ -50,21 +50,18 @@ function getStep(launchConfig, i18n, formError, resource) {
     id: STEP_ID,
     name: (
       <StepName hasErrors={formError} id="inventory-step">
-        {i18n._(t`Inventory`)}
+        {t`Inventory`}
       </StepName>
     ),
     component: (
       <InventoryStep
-        i18n={i18n}
         warningMessage={
           resource.type === 'workflow_job_template' ? (
             <InventoryAlert
               ouiaId="InventoryStep-alert"
               variant="warning"
               isInline
-              title={i18n._(
-                t`This inventory is applied to all job template nodes within this workflow (${resource.name}) that prompt for an inventory.`
-              )}
+              title={t`This inventory is applied to all job template nodes within this workflow (${resource.name}) that prompt for an inventory.`}
             />
           ) : null
         }

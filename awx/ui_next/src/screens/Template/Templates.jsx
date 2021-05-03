@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { PageSection } from '@patternfly/react-core';
@@ -11,13 +11,11 @@ import WorkflowJobTemplate from './WorkflowJobTemplate';
 import JobTemplateAdd from './JobTemplateAdd';
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
-function Templates({ i18n }) {
+function Templates() {
   const initScreenHeader = useRef({
-    '/templates': i18n._(t`Templates`),
-    '/templates/job_template/add': i18n._(t`Create New Job Template`),
-    '/templates/workflow_job_template/add': i18n._(
-      t`Create New Workflow Template`
-    ),
+    '/templates': t`Templates`,
+    '/templates/job_template/add': t`Create New Job Template`,
+    '/templates/workflow_job_template/add': t`Create New Workflow Template`,
   });
   const [breadcrumbConfig, setScreenHeader] = useState(
     initScreenHeader.current
@@ -41,24 +39,22 @@ function Templates({ i18n }) {
       setScreenHeader({
         ...initScreenHeader.current,
         [templatePath]: `${template.name}`,
-        [`${templatePath}/details`]: i18n._(t`Details`),
-        [`${templatePath}/edit`]: i18n._(t`Edit Details`),
-        [`${templatePath}/access`]: i18n._(t`Access`),
-        [`${templatePath}/notifications`]: i18n._(t`Notifications`),
-        [`${templatePath}/jobs`]: i18n._(t`Jobs`),
-        [surveyPath]: i18n._(t`Survey`),
-        [`${surveyPath}/add`]: i18n._(t`Add Question`),
-        [`${surveyPath}/edit`]: i18n._(t`Edit Question`),
-        [schedulesPath]: i18n._(t`Schedules`),
-        [`${schedulesPath}/add`]: i18n._(t`Create New Schedule`),
+        [`${templatePath}/details`]: t`Details`,
+        [`${templatePath}/edit`]: t`Edit Details`,
+        [`${templatePath}/access`]: t`Access`,
+        [`${templatePath}/notifications`]: t`Notifications`,
+        [`${templatePath}/jobs`]: t`Jobs`,
+        [surveyPath]: t`Survey`,
+        [`${surveyPath}/add`]: t`Add Question`,
+        [`${surveyPath}/edit`]: t`Edit Question`,
+        [schedulesPath]: t`Schedules`,
+        [`${schedulesPath}/add`]: t`Create New Schedule`,
         [`${schedulesPath}/${schedule?.id}`]: `${schedule?.name}`,
-        [`${schedulesPath}/${schedule?.id}/details`]: i18n._(
-          t`Schedule Details`
-        ),
-        [`${schedulesPath}/${schedule?.id}/edit`]: i18n._(t`Edit Schedule`),
+        [`${schedulesPath}/${schedule?.id}/details`]: t`Schedule Details`,
+        [`${schedulesPath}/${schedule?.id}/edit`]: t`Edit Schedule`,
       });
     },
-    [i18n, template, schedule]
+    [template, schedule]
   );
 
   return (
@@ -91,4 +87,4 @@ function Templates({ i18n }) {
 }
 
 export { Templates as _Templates };
-export default withI18n()(withRouter(Templates));
+export default withRouter(Templates);

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
@@ -11,11 +11,11 @@ import SmartInventory from './SmartInventory';
 import InventoryAdd from './InventoryAdd';
 import SmartInventoryAdd from './SmartInventoryAdd';
 
-function Inventories({ i18n }) {
+function Inventories() {
   const initScreenHeader = useRef({
-    '/inventories': i18n._(t`Inventories`),
-    '/inventories/inventory/add': i18n._(t`Create new inventory`),
-    '/inventories/smart_inventory/add': i18n._(t`Create new smart inventory`),
+    '/inventories': t`Inventories`,
+    '/inventories/inventory/add': t`Create new inventory`,
+    '/inventories/smart_inventory/add': t`Create new smart inventory`,
   });
 
   const [breadcrumbConfig, setScreenHeader] = useState(
@@ -55,71 +55,43 @@ function Inventories({ i18n }) {
       setScreenHeader({
         ...initScreenHeader.current,
         [inventoryPath]: `${inventory.name}`,
-        [`${inventoryPath}/access`]: i18n._(t`Access`),
-        [`${inventoryPath}/jobs`]: i18n._(t`Jobs`),
-        [`${inventoryPath}/details`]: i18n._(t`Details`),
-        [`${inventoryPath}/edit`]: i18n._(t`Edit details`),
+        [`${inventoryPath}/access`]: t`Access`,
+        [`${inventoryPath}/jobs`]: t`Jobs`,
+        [`${inventoryPath}/details`]: t`Details`,
+        [`${inventoryPath}/edit`]: t`Edit details`,
 
-        [inventoryHostsPath]: i18n._(t`Hosts`),
-        [`${inventoryHostsPath}/add`]: i18n._(t`Create new host`),
+        [inventoryHostsPath]: t`Hosts`,
+        [`${inventoryHostsPath}/add`]: t`Create new host`,
         [`${inventoryHostsPath}/${nestedObject?.id}`]: `${nestedObject?.name}`,
-        [`${inventoryHostsPath}/${nestedObject?.id}/edit`]: i18n._(
-          t`Edit details`
-        ),
-        [`${inventoryHostsPath}/${nestedObject?.id}/details`]: i18n._(
-          t`Host details`
-        ),
-        [`${inventoryHostsPath}/${nestedObject?.id}/jobs`]: i18n._(t`Jobs`),
-        [`${inventoryHostsPath}/${nestedObject?.id}/facts`]: i18n._(t`Facts`),
-        [`${inventoryHostsPath}/${nestedObject?.id}/groups`]: i18n._(t`Groups`),
+        [`${inventoryHostsPath}/${nestedObject?.id}/edit`]: t`Edit details`,
+        [`${inventoryHostsPath}/${nestedObject?.id}/details`]: t`Host details`,
+        [`${inventoryHostsPath}/${nestedObject?.id}/jobs`]: t`Jobs`,
+        [`${inventoryHostsPath}/${nestedObject?.id}/facts`]: t`Facts`,
+        [`${inventoryHostsPath}/${nestedObject?.id}/groups`]: t`Groups`,
 
-        [inventoryGroupsPath]: i18n._(t`Groups`),
-        [`${inventoryGroupsPath}/add`]: i18n._(t`Create new group`),
+        [inventoryGroupsPath]: t`Groups`,
+        [`${inventoryGroupsPath}/add`]: t`Create new group`,
         [`${inventoryGroupsPath}/${nestedObject?.id}`]: `${nestedObject?.name}`,
-        [`${inventoryGroupsPath}/${nestedObject?.id}/edit`]: i18n._(
-          t`Edit details`
-        ),
-        [`${inventoryGroupsPath}/${nestedObject?.id}/details`]: i18n._(
-          t`Group details`
-        ),
-        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_hosts`]: i18n._(
-          t`Hosts`
-        ),
-        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_hosts/add`]: i18n._(
-          t`Create new host`
-        ),
-        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_groups`]: i18n._(
-          t`Related Groups`
-        ),
-        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_groups/add`]: i18n._(
-          t`Create new group`
-        ),
+        [`${inventoryGroupsPath}/${nestedObject?.id}/edit`]: t`Edit details`,
+        [`${inventoryGroupsPath}/${nestedObject?.id}/details`]: t`Group details`,
+        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_hosts`]: t`Hosts`,
+        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_hosts/add`]: t`Create new host`,
+        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_groups`]: t`Related Groups`,
+        [`${inventoryGroupsPath}/${nestedObject?.id}/nested_groups/add`]: t`Create new group`,
 
-        [`${inventorySourcesPath}`]: i18n._(t`Sources`),
-        [`${inventorySourcesPath}/add`]: i18n._(t`Create new source`),
+        [`${inventorySourcesPath}`]: t`Sources`,
+        [`${inventorySourcesPath}/add`]: t`Create new source`,
         [`${inventorySourcesPath}/${nestedObject?.id}`]: `${nestedObject?.name}`,
-        [`${inventorySourcesPath}/${nestedObject?.id}/details`]: i18n._(
-          t`Details`
-        ),
-        [`${inventorySourcesPath}/${nestedObject?.id}/edit`]: i18n._(
-          t`Edit details`
-        ),
-        [`${inventorySourcesPath}/${nestedObject?.id}/schedules`]: i18n._(
-          t`Schedules`
-        ),
+        [`${inventorySourcesPath}/${nestedObject?.id}/details`]: t`Details`,
+        [`${inventorySourcesPath}/${nestedObject?.id}/edit`]: t`Edit details`,
+        [`${inventorySourcesPath}/${nestedObject?.id}/schedules`]: t`Schedules`,
         [`${inventorySourcesPath}/${nestedObject?.id}/schedules/${schedule?.id}`]: `${schedule?.name}`,
-        [`${inventorySourcesPath}/${nestedObject?.id}/schedules/add`]: i18n._(
-          t`Create New Schedule`
-        ),
-        [`${inventorySourcesPath}/${nestedObject?.id}/schedules/${schedule?.id}/details`]: i18n._(
-          t`Schedule details`
-        ),
-        [`${inventorySourcesPath}/${nestedObject?.id}/notifications`]: i18n._(
-          t`Notifications`
-        ),
+        [`${inventorySourcesPath}/${nestedObject?.id}/schedules/add`]: t`Create New Schedule`,
+        [`${inventorySourcesPath}/${nestedObject?.id}/schedules/${schedule?.id}/details`]: t`Schedule details`,
+        [`${inventorySourcesPath}/${nestedObject?.id}/notifications`]: t`Notifications`,
       });
     },
-    [i18n, inventory, nestedObject, schedule]
+    [inventory, nestedObject, schedule]
   );
 
   return (
@@ -154,4 +126,4 @@ function Inventories({ i18n }) {
 }
 
 export { Inventories as _Inventories };
-export default withI18n()(Inventories);
+export default Inventories;

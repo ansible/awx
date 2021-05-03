@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
@@ -28,10 +28,10 @@ const TooltipWrapper = styled.div`
 // in failing tests.
 const brandName = BrandName;
 
-function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
+function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
   const [moduleNameField, moduleNameMeta, moduleNameHelpers] = useField({
     name: 'module_name',
-    validate: required(null, i18n),
+    validate: required(null),
   });
 
   const [variablesField] = useField('extra_vars');
@@ -41,14 +41,14 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
   );
   const [verbosityField, verbosityMeta, verbosityHelpers] = useField({
     name: 'verbosity',
-    validate: required(null, i18n),
+    validate: required(null),
   });
 
   const argumentsRequired =
     moduleNameField.value === 'command' || moduleNameField.value === 'shell';
   const [, argumentsMeta, argumentsHelpers] = useField({
     name: 'module_args',
-    validate: argumentsRequired && required(null, i18n),
+    validate: argumentsRequired && required(null),
   });
 
   const isValid = !argumentsMeta.error || !argumentsMeta.touched;
@@ -59,8 +59,8 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
         <FormFullWidthLayout>
           <FormGroup
             fieldId="module_name"
-            aria-label={i18n._(t`select module`)}
-            label={i18n._(t`Module`)}
+            aria-label={t`select module`}
+            label={t`Module`}
             isRequired
             helperTextInvalid={moduleNameMeta.error}
             validated={
@@ -70,22 +70,20 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             }
             labelIcon={
               <Popover
-                content={i18n._(
-                  t`These are the modules that ${brandName} supports running commands against.`
-                )}
+                content={t`These are the modules that ${brandName} supports running commands against.`}
               />
             }
           >
             <AnsibleSelect
               {...moduleNameField}
-              placeHolder={i18n._(t`Select a module`)}
+              placeHolder={t`Select a module`}
               isValid={!moduleNameMeta.touched || !moduleNameMeta.error}
               id="module_name"
               data={[
                 {
                   value: '',
                   key: '',
-                  label: i18n._(t`Choose a module`),
+                  label: t`Choose a module`,
                   isDisabled: true,
                 },
                 ...moduleOptions.map(value => ({
@@ -105,9 +103,9 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           <FormField
             id="module_args"
             name="module_args"
-            aria-label={i18n._(t`Arguments`)}
+            aria-label={t`Arguments`}
             type="text"
-            label={i18n._(t`Arguments`)}
+            label={t`Arguments`}
             validated={isValid ? 'default' : 'error'}
             onBlur={() => argumentsHelpers.setTouched(true)}
             isRequired={
@@ -117,27 +115,25 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             tooltip={
               moduleNameField.value ? (
                 <>
-                  {i18n._(
-                    t`These arguments are used with the specified module. You can find information about ${moduleNameField.value} by clicking `
-                  )}
+                  {t`These arguments are used with the specified module. You can find information about ${moduleNameField.value} by clicking `}
                   <a
                     href={`https://docs.ansible.com/ansible/latest/modules/${moduleNameField.value}_module.html`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     {' '}
-                    {i18n._(t`here.`)}
+                    {t`here.`}
                   </a>
                 </>
               ) : (
-                i18n._(t`These arguments are used with the specified module.`)
+                t`These arguments are used with the specified module.`
               )
             }
           />
           <FormGroup
             fieldId="verbosity"
-            aria-label={i18n._(t`select verbosity`)}
-            label={i18n._(t`Verbosity`)}
+            aria-label={t`select verbosity`}
+            label={t`Verbosity`}
             isRequired
             validated={
               !verbosityMeta.touched || !verbosityMeta.error
@@ -147,9 +143,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             helperTextInvalid={verbosityMeta.error}
             labelIcon={
               <Popover
-                content={i18n._(
-                  t`These are the verbosity levels for standard out of the command run that are supported.`
-                )}
+                content={t`These are the verbosity levels for standard out of the command run that are supported.`}
               />
             }
           >
@@ -167,19 +161,17 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             id="limit"
             name="limit"
             type="text"
-            label={i18n._(t`Limit`)}
-            aria-label={i18n._(t`Limit`)}
+            label={t`Limit`}
+            aria-label={t`Limit`}
             tooltip={
               <span>
-                {i18n._(
-                  t`The pattern used to target hosts in the inventory. Leaving the field blank, all, and * will all target all hosts in the inventory. You can find more information about Ansible's host patterns`
-                )}{' '}
+                {t`The pattern used to target hosts in the inventory. Leaving the field blank, all, and * will all target all hosts in the inventory. You can find more information about Ansible's host patterns`}{' '}
                 <a
                   href="https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {i18n._(t`here`)}
+                  {t`here`}
                 </a>
               </span>
             }
@@ -189,67 +181,63 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             name="forks"
             type="number"
             min="0"
-            label={i18n._(t`Forks`)}
-            aria-label={i18n._(t`Forks`)}
+            label={t`Forks`}
+            aria-label={t`Forks`}
             tooltip={
               <span>
-                {i18n._(
-                  t`The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information`
-                )}{' '}
+                {t`The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information`}{' '}
                 <a
                   href="https://docs.ansible.com/ansible/latest/installation_guide/intro_configuration.html#the-ansible-configuration-file"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {i18n._(t`here.`)}
+                  {t`here.`}
                 </a>
               </span>
             }
           />
           <FormColumnLayout>
             <FormGroup
-              label={i18n._(t`Show changes`)}
-              aria-label={i18n._(t`Show changes`)}
+              label={t`Show changes`}
+              aria-label={t`Show changes`}
               labelIcon={
                 <Popover
-                  content={i18n._(
-                    t`If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode.`
-                  )}
+                  content={t`If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode.`}
                 />
               }
             >
               <Switch
                 css="display: inline-flex;"
                 id="diff_mode"
-                label={i18n._(t`On`)}
-                labelOff={i18n._(t`Off`)}
+                label={t`On`}
+                labelOff={t`Off`}
                 isChecked={diffModeField.value}
                 onChange={() => {
                   diffModeHelpers.setValue(!diffModeField.value);
                 }}
-                aria-label={i18n._(t`toggle changes`)}
+                aria-label={t`toggle changes`}
               />
             </FormGroup>
             <FormGroup name="become_enabled" fieldId="become_enabled">
               <FormCheckboxLayout>
                 <Checkbox
-                  aria-label={i18n._(t`Enable privilege escalation`)}
+                  aria-label={t`Enable privilege escalation`}
                   label={
                     <span>
-                      {i18n._(t`Enable privilege escalation`)}
+                      {t`Enable privilege escalation`}
                       &nbsp;
                       <Popover
                         content={
                           <p>
-                            {i18n._(t`Enables creation of a provisioning
+                            {t`Enables creation of a provisioning
                               callback URL. Using the URL a host can contact ${brandName}
                               and request a configuration update using this job
-                              template`)}
+                              template`}
                             &nbsp;
                             <code>--become </code>
-                            {i18n._(t`option to the`)} &nbsp;
+                            {t`option to the`} &nbsp;
                             <code>ansible </code>
-                            {i18n._(t`command`)}
+                            {t`command`}
                           </p>
                         }
                       />
@@ -275,14 +263,12 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             tooltip={
               <TooltipWrapper>
                 <p>
-                  {i18n._(
-                    t`Pass extra command line changes. There are two ansible command line parameters: `
-                  )}
+                  {t`Pass extra command line changes. There are two ansible command line parameters: `}
                   <br />
                   <code>-e</code>, <code>--extra-vars </code>
                   <br />
-                  {i18n._(t`Provide key/value pairs using either
-                  YAML or JSON.`)}
+                  {t`Provide key/value pairs using either
+                  YAML or JSON.`}
                 </p>
                 JSON:
                 <br />
@@ -306,8 +292,8 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
                 </code>
               </TooltipWrapper>
             }
-            label={i18n._(t`Extra variables`)}
-            aria-label={i18n._(t`Extra variables`)}
+            label={t`Extra variables`}
+            aria-label={t`Extra variables`}
           />
         </FormFullWidthLayout>
       </FormColumnLayout>
@@ -320,4 +306,4 @@ AdHocDetailsStep.propTypes = {
   verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-export default withI18n()(AdHocDetailsStep);
+export default AdHocDetailsStep;

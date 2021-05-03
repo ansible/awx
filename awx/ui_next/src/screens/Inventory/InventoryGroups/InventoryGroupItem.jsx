@@ -1,6 +1,6 @@
 import React from 'react';
 import { bool, func, number, oneOfType, string } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import {
@@ -18,13 +18,7 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 import DataListCell from '../../../components/DataListCell';
 import { Group } from '../../../types';
 
-function InventoryGroupItem({
-  i18n,
-  group,
-  inventoryId,
-  isSelected,
-  onSelect,
-}) {
+function InventoryGroupItem({ group, inventoryId, isSelected, onSelect }) {
   const labelId = `check-action-${group.id}`;
   const detailUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/details`;
   const editUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/edit`;
@@ -48,15 +42,15 @@ function InventoryGroupItem({
           ]}
         />
         <DataListAction
-          aria-label={i18n._(t`actions`)}
+          aria-label={t`actions`}
           aria-labelledby={labelId}
           id={labelId}
         >
           {group.summary_fields.user_capabilities.edit && (
-            <Tooltip content={i18n._(t`Edit Group`)} position="top">
+            <Tooltip content={t`Edit Group`} position="top">
               <Button
                 ouiaId={`${group.id}-edit-button`}
-                aria-label={i18n._(t`Edit Group`)}
+                aria-label={t`Edit Group`}
                 variant="plain"
                 component={Link}
                 to={editUrl}
@@ -78,4 +72,4 @@ InventoryGroupItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(InventoryGroupItem);
+export default InventoryGroupItem;

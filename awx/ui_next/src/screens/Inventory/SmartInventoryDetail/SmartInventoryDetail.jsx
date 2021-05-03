@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
-import { shape } from 'prop-types';
 import { Button, Chip, Label } from '@patternfly/react-core';
 
 import { Inventory } from '../../../types';
@@ -24,7 +23,7 @@ import {
 import ErrorDetail from '../../../components/ErrorDetail';
 import Sparkline from '../../../components/Sparkline';
 
-function SmartInventoryDetail({ inventory, i18n }) {
+function SmartInventoryDetail({ inventory }) {
   const history = useHistory();
   const {
     created,
@@ -95,17 +94,17 @@ function SmartInventoryDetail({ inventory, i18n }) {
     <>
       <CardBody>
         <DetailList>
-          <Detail label={i18n._(t`Name`)} value={name} />
+          <Detail label={t`Name`} value={name} />
           {recentJobs.length > 0 && (
             <Detail
-              label={i18n._(t`Activity`)}
+              label={t`Activity`}
               value={<Sparkline jobs={recentJobs} />}
             />
           )}
-          <Detail label={i18n._(t`Description`)} value={description} />
-          <Detail label={i18n._(t`Type`)} value={i18n._(t`Smart inventory`)} />
+          <Detail label={t`Description`} value={description} />
+          <Detail label={t`Type`} value={t`Smart inventory`} />
           <Detail
-            label={i18n._(t`Organization`)}
+            label={t`Organization`}
             value={
               <Link to={`/organizations/${organization.id}/details`}>
                 {organization.name}
@@ -114,13 +113,13 @@ function SmartInventoryDetail({ inventory, i18n }) {
           />
           <Detail
             fullWidth
-            label={i18n._(t`Smart host filter`)}
+            label={t`Smart host filter`}
             value={<Label variant="outline">{host_filter}</Label>}
           />
           {instanceGroups.length > 0 && (
             <Detail
               fullWidth
-              label={i18n._(t`Instance groups`)}
+              label={t`Instance groups`}
               value={
                 <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                   {instanceGroups.map(ig => (
@@ -132,18 +131,10 @@ function SmartInventoryDetail({ inventory, i18n }) {
               }
             />
           )}
-          <VariablesDetail
-            label={i18n._(t`Variables`)}
-            value={variables}
-            rows={4}
-          />
+          <VariablesDetail label={t`Variables`} value={variables} rows={4} />
+          <UserDateDetail label={t`Created`} date={created} user={created_by} />
           <UserDateDetail
-            label={i18n._(t`Created`)}
-            date={created}
-            user={created_by}
-          />
-          <UserDateDetail
-            label={i18n._(t`Last modified`)}
+            label={t`Last modified`}
             date={modified}
             user={modified_by}
           />
@@ -153,20 +144,20 @@ function SmartInventoryDetail({ inventory, i18n }) {
             <Button
               ouiaId="smart-inventory-detail-edit-button"
               component={Link}
-              aria-label={i18n._(t`edit`)}
+              aria-label={t`edit`}
               to={`/inventories/smart_inventory/${id}/edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
           {user_capabilities?.delete && (
             <DeleteButton
               name={name}
-              modalTitle={i18n._(t`Delete smart inventory`)}
+              modalTitle={t`Delete smart inventory`}
               onConfirm={handleDelete}
               isDisabled={isLoading}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
         </CardActionsRow>
@@ -175,10 +166,10 @@ function SmartInventoryDetail({ inventory, i18n }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to delete smart inventory.`)}
+          {t`Failed to delete smart inventory.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -188,7 +179,6 @@ function SmartInventoryDetail({ inventory, i18n }) {
 
 SmartInventoryDetail.propTypes = {
   inventory: Inventory.isRequired,
-  i18n: shape({}).isRequired,
 };
 
-export default withI18n()(SmartInventoryDetail);
+export default SmartInventoryDetail;

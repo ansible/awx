@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { shape, func } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 
@@ -16,12 +16,12 @@ import CustomMessagesSubForm from './CustomMessagesSubForm';
 import hasCustomMessages from './hasCustomMessages';
 import typeFieldNames, { initialConfigValues } from './typeFieldNames';
 
-function NotificationTemplateFormFields({ i18n, defaultMessages, template }) {
+function NotificationTemplateFormFields({ defaultMessages, template }) {
   const { setFieldValue } = useFormikContext();
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [typeField, typeMeta] = useField({
     name: 'notification_type',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   const onOrganizationChange = useCallback(
@@ -37,15 +37,15 @@ function NotificationTemplateFormFields({ i18n, defaultMessages, template }) {
         id="notification-name"
         name="name"
         type="text"
-        label={i18n._(t`Name`)}
-        validate={required(null, i18n)}
+        label={t`Name`}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="notification-description"
         name="description"
         type="text"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
       />
       <OrganizationLookup
         helperTextInvalid={orgMeta.error}
@@ -63,7 +63,7 @@ function NotificationTemplateFormFields({ i18n, defaultMessages, template }) {
         helperTextInvalid={typeMeta.error}
         isRequired
         validated={!typeMeta.touched || !typeMeta.error ? 'default' : 'error'}
-        label={i18n._(t`Type`)}
+        label={t`Type`}
       >
         <AnsibleSelect
           {...typeField}
@@ -73,10 +73,10 @@ function NotificationTemplateFormFields({ i18n, defaultMessages, template }) {
             {
               value: '',
               key: 'none',
-              label: i18n._(t`Choose a Notification Type`),
+              label: t`Choose a Notification Type`,
               isDisabled: true,
             },
-            { value: 'email', key: 'email', label: i18n._(t`E-mail`) },
+            { value: 'email', key: 'email', label: t`E-mail` },
             { value: 'grafana', key: 'grafana', label: 'Grafana' },
             { value: 'irc', key: 'irc', label: 'IRC' },
             { value: 'mattermost', key: 'mattermost', label: 'Mattermost' },
@@ -103,7 +103,6 @@ function NotificationTemplateForm({
   onSubmit,
   onCancel,
   submitError,
-  i18n,
 }) {
   const handleSubmit = values => {
     onSubmit(
@@ -184,7 +183,6 @@ function NotificationTemplateForm({
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <NotificationTemplateFormFields
-              i18n={i18n}
               defaultMessages={defaultMessages}
               template={template}
             />
@@ -217,7 +215,7 @@ NotificationTemplateForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(NotificationTemplateForm);
+export default NotificationTemplateForm;
 
 function normalizeFields(values, defaultMessages) {
   return normalizeTypeFields(normalizeMessageFields(values, defaultMessages));

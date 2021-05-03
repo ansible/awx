@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   DataListItem,
@@ -11,33 +11,33 @@ import { Link } from 'react-router-dom';
 import { DetailList, Detail } from '../../../components/DetailList';
 import DataListCell from '../../../components/DataListCell';
 
-function TeamRoleListItem({ role, i18n, detailUrl, onSelect }) {
+function TeamRoleListItem({ role, detailUrl, onSelect }) {
   const labelId = `teamRole-${role.id}`;
   return (
     <DataListItem key={role.id} aria-labelledby={labelId} id={`${role.id}`}>
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="name" aria-label={i18n._(t`resource name`)}>
+            <DataListCell key="name" aria-label={t`resource name`}>
               <Link to={`${detailUrl}`} id={labelId}>
                 <b>{role.summary_fields.resource_name}</b>
               </Link>
             </DataListCell>,
-            <DataListCell key="type" aria-label={i18n._(t`resource type`)}>
+            <DataListCell key="type" aria-label={t`resource type`}>
               {role.summary_fields && (
                 <DetailList stacked>
                   <Detail
-                    label={i18n._(t`Type`)}
+                    label={t`Type`}
                     value={role.summary_fields.resource_type_display_name}
                   />
                 </DetailList>
               )}
             </DataListCell>,
-            <DataListCell key="role" aria-label={i18n._(t`resource role`)}>
+            <DataListCell key="role" aria-label={t`resource role`}>
               {role.name && (
                 <DetailList stacked>
                   <Detail
-                    label={i18n._(t`Role`)}
+                    label={t`Role`}
                     value={
                       <Chip
                         key={role.name}
@@ -60,4 +60,4 @@ function TeamRoleListItem({ role, i18n, detailUrl, onSelect }) {
     </DataListItem>
   );
 }
-export default withI18n()(TeamRoleListItem);
+export default TeamRoleListItem;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { func, shape } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
@@ -16,7 +16,6 @@ import getSurveyValues from '../../../util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from '../../../util/lists';
 
 function ScheduleAdd({
-  i18n,
   resource,
   apiModel,
   launchConfig,
@@ -77,7 +76,7 @@ function ScheduleAdd({
     }
 
     try {
-      const rule = new RRule(buildRuleObj(values, i18n));
+      const rule = new RRule(buildRuleObj(values));
       const requestData = {
         ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
@@ -131,4 +130,4 @@ ScheduleAdd.propTypes = {
 
 ScheduleAdd.defaultProps = {};
 
-export default withI18n()(ScheduleAdd);
+export default ScheduleAdd;

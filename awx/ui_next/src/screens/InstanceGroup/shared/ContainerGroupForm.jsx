@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { func, shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { jsonToYaml } from '../../../util/yaml';
@@ -21,7 +21,7 @@ import {
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import { VariablesField } from '../../../components/CodeEditor';
 
-function ContainerGroupFormFields({ i18n, instanceGroup }) {
+function ContainerGroupFormFields({ instanceGroup }) {
   const { setFieldValue } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] = useField({
     name: 'credential',
@@ -41,34 +41,29 @@ function ContainerGroupFormFields({ i18n, instanceGroup }) {
       <FormField
         name="name"
         id="container-group-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <CredentialLookup
-        label={i18n._(t`Credential`)}
+        label={t`Credential`}
         credentialTypeKind="kubernetes"
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
         onChange={onCredentialChange}
         value={credentialField.value}
-        tooltip={i18n._(
-          t`Credential to authenticate with Kubernetes or OpenShift. Must be of type "Kubernetes/OpenShift API Bearer Token". If left blank, the underlying Pod's service account will be used.`
-        )}
+        tooltip={t`Credential to authenticate with Kubernetes or OpenShift. Must be of type "Kubernetes/OpenShift API Bearer Token". If left blank, the underlying Pod's service account will be used.`}
         autoPopulate={!instanceGroup?.id}
       />
 
-      <FormGroup
-        fieldId="container-groups-option-checkbox"
-        label={i18n._(t`Options`)}
-      >
+      <FormGroup fieldId="container-groups-option-checkbox" label={t`Options`}>
         <FormCheckboxLayout>
           <CheckboxField
             name="override"
-            aria-label={i18n._(t`Customize pod specification`)}
-            label={i18n._(t`Customize pod specification`)}
+            aria-label={t`Customize pod specification`}
+            label={t`Customize pod specification`}
             id="container-groups-override-pod-specification"
           />
         </FormCheckboxLayout>
@@ -78,12 +73,10 @@ function ContainerGroupFormFields({ i18n, instanceGroup }) {
         <SubFormLayout>
           <FormFullWidthLayout>
             <VariablesField
-              tooltip={i18n._(
-                t`Field for passing a custom Kubernetes or OpenShift Pod specification.`
-              )}
+              tooltip={t`Field for passing a custom Kubernetes or OpenShift Pod specification.`}
               id="custom-pod-spec"
               name="pod_spec_override"
-              label={i18n._(t`Custom pod spec`)}
+              label={t`Custom pod spec`}
             />
           </FormFullWidthLayout>
         </SubFormLayout>
@@ -148,4 +141,4 @@ ContainerGroupForm.defaultProps = {
   initialPodSpec: {},
 };
 
-export default withI18n()(ContainerGroupForm);
+export default ContainerGroupForm;

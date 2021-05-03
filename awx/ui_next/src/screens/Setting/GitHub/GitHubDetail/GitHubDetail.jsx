@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link, Redirect, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -15,7 +15,7 @@ import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
 import { SettingDetail } from '../../shared';
 
-function GitHubDetail({ i18n }) {
+function GitHubDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
@@ -70,39 +70,39 @@ function GitHubDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`GitHub Default`),
+      name: t`GitHub Default`,
       link: `${baseURL}/default/details`,
       id: 0,
     },
     {
-      name: i18n._(t`GitHub Organization`),
+      name: t`GitHub Organization`,
       link: `${baseURL}/organization/details`,
       id: 1,
     },
     {
-      name: i18n._(t`GitHub Team`),
+      name: t`GitHub Team`,
       link: `${baseURL}/team/details`,
       id: 2,
     },
     {
-      name: i18n._(t`GitHub Enterprise`),
+      name: t`GitHub Enterprise`,
       link: `${baseURL}/enterprise/details`,
       id: 3,
     },
     {
-      name: i18n._(t`GitHub Enterprise Organization`),
+      name: t`GitHub Enterprise Organization`,
       link: `${baseURL}/enterprise_organization/details`,
       id: 4,
     },
     {
-      name: i18n._(t`GitHub Enterprise Team`),
+      name: t`GitHub Enterprise Team`,
       link: `${baseURL}/enterprise_team/details`,
       id: 5,
     },
@@ -140,11 +140,11 @@ function GitHubDetail({ i18n }) {
           <CardActionsRow>
             <Button
               ouiaId="github-detail-edit-button"
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to={`${baseURL}/${category}/edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -153,4 +153,4 @@ function GitHubDetail({ i18n }) {
   );
 }
 
-export default withI18n()(GitHubDetail);
+export default GitHubDetail;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { string, bool, func } from 'prop-types';
 import { Label } from '@patternfly/react-core';
@@ -20,7 +20,6 @@ function WorkflowApprovalListItem({
   onSelect,
   detailUrl,
   rowIndex,
-  i18n,
 }) {
   const labelId = `check-action-${workflowApproval.id}`;
   const workflowJob = workflowApproval?.summary_fields?.source_workflow_job;
@@ -32,11 +31,9 @@ function WorkflowApprovalListItem({
     ) {
       return (
         <Label>
-          {i18n._(
-            t`Expires on ${formatDateString(
-              workflowApproval.approval_expiration
-            )}`
-          )}
+          {t`Expires on ${formatDateString(
+            workflowApproval.approval_expiration
+          )}`}
         </Label>
       );
     }
@@ -44,7 +41,7 @@ function WorkflowApprovalListItem({
       workflowApproval.status === 'pending' &&
       !workflowApproval.approval_expiration
     ) {
-      return <Label>{i18n._(t`Never expires`)}</Label>;
+      return <Label>{t`Never expires`}</Label>;
     }
     return <WorkflowApprovalStatus workflowApproval={workflowApproval} />;
   };
@@ -57,29 +54,29 @@ function WorkflowApprovalListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{workflowApproval.name}</b>
         </Link>
       </Td>
       <Td>
         <>
-          <JobLabel>{i18n._(t`Job`)}</JobLabel>
+          <JobLabel>{t`Job`}</JobLabel>
           {workflowJob && workflowJob?.id ? (
             <Link to={`/jobs/workflow/${workflowJob?.id}`}>
               {`${workflowJob?.id} - ${workflowJob?.name}`}
             </Link>
           ) : (
-            i18n._(t`Deleted`)
+            t`Deleted`
           )}
         </>
       </Td>
-      <Td dataLabel={i18n._(t`Started`)}>
+      <Td dataLabel={t`Started`}>
         {formatDateString(workflowApproval.started)}
       </Td>
-      <Td dataLabel={i18n._(t`Status`)}>
+      <Td dataLabel={t`Status`}>
         <div>{getStatus()}</div>
       </Td>
     </Tr>
@@ -93,4 +90,4 @@ WorkflowApprovalListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(WorkflowApprovalListItem);
+export default WorkflowApprovalListItem;

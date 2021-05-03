@@ -7,7 +7,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -21,7 +21,7 @@ import ContentLoading from '../../components/ContentLoading';
 import CredentialTypeDetails from './CredentialTypeDetails';
 import CredentialTypeEdit from './CredentialTypeEdit';
 
-function CredentialType({ i18n, setBreadcrumb }) {
+function CredentialType({ setBreadcrumb }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -52,14 +52,14 @@ function CredentialType({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to credential types`)}
+          {t`Back to credential types`}
         </>
       ),
       link: '/credential_types',
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/credential_types/${id}/details`,
       id: 0,
     },
@@ -72,9 +72,9 @@ function CredentialType({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(t`Credential type not found.`)}{' '}
+                {t`Credential type not found.`}{' '}
                 <Link to="/credential_types">
-                  {i18n._(t`View all credential types`)}
+                  {t`View all credential types`}
                 </Link>
               </span>
             )}
@@ -118,4 +118,4 @@ function CredentialType({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(CredentialType);
+export default CredentialType;

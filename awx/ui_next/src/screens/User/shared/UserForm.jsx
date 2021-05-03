@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -14,7 +14,7 @@ import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { required } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 
-function UserFormFields({ user, i18n }) {
+function UserFormFields({ user }) {
   const [organization, setOrganization] = useState(null);
   const { setFieldValue } = useFormikContext();
 
@@ -26,19 +26,19 @@ function UserFormFields({ user, i18n }) {
     {
       value: 'normal',
       key: 'normal',
-      label: i18n._(t`Normal User`),
+      label: t`Normal User`,
       isDisabled: false,
     },
     {
       value: 'auditor',
       key: 'auditor',
-      label: i18n._(t`System Auditor`),
+      label: t`System Auditor`,
       isDisabled: false,
     },
     {
       value: 'administrator',
       key: 'administrator',
-      label: i18n._(t`System Administrator`),
+      label: t`System Administrator`,
       isDisabled: false,
     },
   ];
@@ -46,7 +46,7 @@ function UserFormFields({ user, i18n }) {
   const [, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate: !user.id
-      ? required(i18n._(t`Select a value for this field`), i18n)
+      ? required(t`Select a value for this field`)
       : () => undefined,
   });
 
@@ -64,40 +64,35 @@ function UserFormFields({ user, i18n }) {
     <>
       <FormField
         id="user-username"
-        label={i18n._(t`Username`)}
+        label={t`Username`}
         name="username"
         type="text"
         validate={
-          !ldapUser && !externalAccount ? required(null, i18n) : () => undefined
+          !ldapUser && !externalAccount ? required(null) : () => undefined
         }
         isRequired={!ldapUser && !externalAccount}
       />
-      <FormField
-        id="user-email"
-        label={i18n._(t`Email`)}
-        name="email"
-        type="text"
-      />
+      <FormField id="user-email" label={t`Email`} name="email" type="text" />
       {!ldapUser && !(socialAuthUser && externalAccount) && (
         <>
           <PasswordField
             id="user-password"
-            label={i18n._(t`Password`)}
+            label={t`Password`}
             name="password"
             validate={
               !user.id
-                ? required(i18n._(t`This field must not be blank`), i18n)
+                ? required(t`This field must not be blank`)
                 : () => undefined
             }
             isRequired={!user.id}
           />
           <PasswordField
             id="user-confirm-password"
-            label={i18n._(t`Confirm Password`)}
+            label={t`Confirm Password`}
             name="confirm_password"
             validate={
               !user.id
-                ? required(i18n._(t`This field must not be blank`), i18n)
+                ? required(t`This field must not be blank`)
                 : () => undefined
             }
             isRequired={!user.id}
@@ -106,13 +101,13 @@ function UserFormFields({ user, i18n }) {
       )}
       <FormField
         id="user-first-name"
-        label={i18n._(t`First Name`)}
+        label={t`First Name`}
         name="first_name"
         type="text"
       />
       <FormField
         id="user-last-name"
-        label={i18n._(t`Last Name`)}
+        label={t`Last Name`}
         name="last_name"
         type="text"
       />
@@ -134,7 +129,7 @@ function UserFormFields({ user, i18n }) {
         validated={
           !userTypeMeta.touched || !userTypeMeta.error ? 'default' : 'error'
         }
-        label={i18n._(t`User Type`)}
+        label={t`User Type`}
       >
         <AnsibleSelect
           isValid={!userTypeMeta.touched || !userTypeMeta.error}
@@ -147,13 +142,11 @@ function UserFormFields({ user, i18n }) {
   );
 }
 
-function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
+function UserForm({ user, handleCancel, handleSubmit, submitError }) {
   const handleValidateAndSubmit = (values, { setErrors }) => {
     if (values.password !== values.confirm_password) {
       setErrors({
-        confirm_password: i18n._(
-          t`This value does not match the password you entered previously. Please confirm that password.`
-        ),
+        confirm_password: t`This value does not match the password you entered previously. Please confirm that password.`,
       });
     } else {
       values.is_superuser = values.user_type === 'administrator';
@@ -192,7 +185,7 @@ function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <UserFormFields user={user} i18n={i18n} />
+            <UserFormFields user={user} />
             <FormSubmitError error={submitError} />
             <FormActionGroup
               onCancel={handleCancel}
@@ -215,4 +208,4 @@ UserForm.defaultProps = {
   user: {},
 };
 
-export default withI18n()(UserForm);
+export default UserForm;

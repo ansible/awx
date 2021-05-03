@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('applications', {
   order_by: 'user__username',
 });
 
-function ApplicationTokenList({ i18n }) {
+function ApplicationTokenList() {
   const { id } = useParams();
   const location = useLocation();
   const {
@@ -100,35 +100,35 @@ function ApplicationTokenList({ i18n }) {
         hasContentLoading={isLoading || deleteLoading}
         items={tokens}
         itemCount={itemCount}
-        pluralizedItemName={i18n._(t`Tokens`)}
+        pluralizedItemName={t`Tokens`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'user__username__icontains',
             isDefault: true,
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'user__username',
           },
           {
-            name: i18n._(t`Scope`),
+            name: t`Scope`,
             key: 'scope',
           },
           {
-            name: i18n._(t`Expiration`),
+            name: t`Expiration`,
             key: 'expires',
           },
           {
-            name: i18n._(t`Created`),
+            name: t`Created`,
             key: 'created',
           },
           {
-            name: i18n._(t`Modified`),
+            name: t`Modified`,
             key: 'modified',
           },
         ]}
@@ -148,7 +148,7 @@ function ApplicationTokenList({ i18n }) {
                 key="delete"
                 onDelete={handleDelete}
                 itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Tokens`)}
+                pluralizedItemName={t`Tokens`}
               />,
             ]}
           />
@@ -167,14 +167,14 @@ function ApplicationTokenList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more tokens.`)}
+        {t`Failed to delete one or more tokens.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>
   );
 }
 
-export default withI18n()(ApplicationTokenList);
+export default ApplicationTokenList;

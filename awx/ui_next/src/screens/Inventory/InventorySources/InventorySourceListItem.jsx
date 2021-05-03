@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
@@ -30,23 +30,23 @@ function InventorySourceListItem({
   source,
   isSelected,
   onSelect,
-  i18n,
+
   detailUrl,
   label,
 }) {
   const generateLastJobTooltip = job => {
     return (
       <>
-        <div>{i18n._(t`MOST RECENT SYNC`)}</div>
+        <div>{t`MOST RECENT SYNC`}</div>
         <div>
-          {i18n._(t`JOB ID:`)} {job.id}
+          {t`JOB ID:`} {job.id}
         </div>
         <div>
-          {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
+          {t`STATUS:`} {job.status.toUpperCase()}
         </div>
         {job.finished && (
           <div>
-            {i18n._(t`FINISHED:`)} {job.finished}
+            {t`FINISHED:`} {job.finished}
           </div>
         )}
       </>
@@ -87,7 +87,7 @@ function InventorySourceListItem({
                   </Tooltip>
                 )}
               </DataListCell>,
-              <DataListCell aria-label={i18n._(t`name`)} key="name">
+              <DataListCell aria-label={t`name`} key="name">
                 <span>
                   <Link to={`${detailUrl}/details`}>
                     <b>{source.name}</b>
@@ -97,9 +97,7 @@ function InventorySourceListItem({
                   <span>
                     <Tooltip
                       className="missing-execution-environment"
-                      content={i18n._(
-                        t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`
-                      )}
+                      content={t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`}
                       position="right"
                     >
                       <ExclamationTriangleIcon />
@@ -107,7 +105,7 @@ function InventorySourceListItem({
                   </span>
                 )}
               </DataListCell>,
-              <DataListCell aria-label={i18n._(t`type`)} key="type">
+              <DataListCell aria-label={t`type`} key="type">
                 {label}
               </DataListCell>,
             ]}
@@ -115,7 +113,7 @@ function InventorySourceListItem({
           <DataListAction
             id="actions"
             aria-labelledby="actions"
-            aria-label={i18n._(t`actions`)}
+            aria-label={t`actions`}
           >
             {source.summary_fields.user_capabilities.start && (
               <InventorySourceSyncButton source={source} />
@@ -123,7 +121,7 @@ function InventorySourceListItem({
             {source.summary_fields.user_capabilities.edit && (
               <Button
                 ouiaId={`${source.id}-edit-button`}
-                aria-label={i18n._(t`Edit Source`)}
+                aria-label={t`Edit Source`}
                 variant="plain"
                 component={Link}
                 to={`${detailUrl}/edit`}
@@ -137,4 +135,4 @@ function InventorySourceListItem({
     </>
   );
 }
-export default withI18n()(InventorySourceListItem);
+export default InventorySourceListItem;

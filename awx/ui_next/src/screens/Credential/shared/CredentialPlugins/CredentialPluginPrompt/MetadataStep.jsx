@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { CredentialTypesAPI } from '../../../../../api';
@@ -12,7 +12,7 @@ import Popover from '../../../../../components/Popover';
 import useRequest from '../../../../../util/useRequest';
 import { required } from '../../../../../util/validators';
 
-function MetadataStep({ i18n }) {
+function MetadataStep() {
   const form = useFormikContext();
   const [selectedCredential] = useField('credential');
   const [inputValues] = useField('inputs');
@@ -95,7 +95,7 @@ function MetadataStep({ i18n }) {
                         onChange={(event, value) => {
                           form.setFieldValue(`inputs.${field.id}`, value);
                         }}
-                        validate={field.required ? required(null, i18n) : null}
+                        validate={field.required ? required(null) : null}
                       />
                     </FormGroup>
                   );
@@ -110,7 +110,7 @@ function MetadataStep({ i18n }) {
                     name={`inputs.${field.id}`}
                     type={field.multiline ? 'textarea' : 'text'}
                     isRequired={field.required}
-                    validate={field.required ? required(null, i18n) : null}
+                    validate={field.required ? required(null) : null}
                   />
                 );
               }
@@ -124,4 +124,4 @@ function MetadataStep({ i18n }) {
   );
 }
 
-export default withI18n()(MetadataStep);
+export default MetadataStep;

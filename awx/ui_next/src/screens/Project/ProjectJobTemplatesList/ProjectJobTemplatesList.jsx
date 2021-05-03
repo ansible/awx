@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
 import { JobTemplatesAPI } from '../../../api';
@@ -22,7 +22,7 @@ const QS_CONFIG = getQSConfig('template', {
   order_by: 'name',
 });
 
-function ProjectJobTemplatesList({ i18n }) {
+function ProjectJobTemplatesList() {
   const { id: projectId } = useParams();
   const location = useLocation();
 
@@ -112,47 +112,47 @@ function ProjectJobTemplatesList({ i18n }) {
           hasContentLoading={isDeleteLoading || isLoading}
           items={jobTemplates}
           itemCount={itemCount}
-          pluralizedItemName={i18n._(t`Job templates`)}
+          pluralizedItemName={t`Job templates`}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
           toolbarSortColumns={[
             {
-              name: i18n._(t`Inventory`),
+              name: t`Inventory`,
               key: 'job_template__inventory__id',
             },
             {
-              name: i18n._(t`Last job run`),
+              name: t`Last job run`,
               key: 'last_job_run',
             },
             {
-              name: i18n._(t`Modified`),
+              name: t`Modified`,
               key: 'modified',
             },
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name',
             },
             {
-              name: i18n._(t`Project`),
+              name: t`Project`,
               key: 'jobtemplate__project__id',
             },
             {
-              name: i18n._(t`Type`),
+              name: t`Type`,
               key: 'type',
             },
           ]}
@@ -173,7 +173,7 @@ function ProjectJobTemplatesList({ i18n }) {
                   key="delete"
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Job templates`)}
+                  pluralizedItemName={t`Job templates`}
                 />,
               ]}
             />
@@ -194,14 +194,14 @@ function ProjectJobTemplatesList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="danger"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more job templates.`)}
+        {t`Failed to delete one or more job templates.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>
   );
 }
 
-export default withI18n()(ProjectJobTemplatesList);
+export default ProjectJobTemplatesList;

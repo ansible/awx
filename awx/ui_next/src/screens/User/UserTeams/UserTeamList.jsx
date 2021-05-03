@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useLocation, useParams } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
@@ -27,7 +27,7 @@ const QS_CONFIG = getQSConfig('teams', {
   order_by: 'name',
 });
 
-function UserTeamList({ i18n }) {
+function UserTeamList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
   const { id: userId } = useParams();
@@ -173,7 +173,7 @@ function UserTeamList({ i18n }) {
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
         itemCount={count}
-        pluralizedItemName={i18n._(t`Teams`)}
+        pluralizedItemName={t`Teams`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
         renderItem={team => (
@@ -201,7 +201,7 @@ function UserTeamList({ i18n }) {
                     <ToolbarAddButton
                       key="associate"
                       onClick={() => setIsModalOpen(true)}
-                      defaultLabel={i18n._(t`Associate`)}
+                      defaultLabel={t`Associate`}
                     />,
                   ]
                 : []),
@@ -209,10 +209,8 @@ function UserTeamList({ i18n }) {
                 key="disassociate"
                 onDisassociate={handleDisassociate}
                 itemsToDisassociate={selected}
-                modalTitle={i18n._(t`Disassociate related team(s)?`)}
-                modalNote={i18n._(
-                  t`This action will disassociate all roles for this user from the selected teams.`
-                )}
+                modalTitle={t`Disassociate related team(s)?`}
+                modalNote={t`This action will disassociate all roles for this user from the selected teams.`}
               />,
             ]}
             emptyStateControls={
@@ -227,12 +225,12 @@ function UserTeamList({ i18n }) {
         )}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Organization`),
+            name: t`Organization`,
             key: 'organization__name__icontains',
           },
         ]}
@@ -241,12 +239,12 @@ function UserTeamList({ i18n }) {
       />
       {isModalOpen && (
         <AssociateModal
-          header={i18n._(t`Teams`)}
+          header={t`Teams`}
           fetchRequest={fetchTeamsToAssociate}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
-          title={i18n._(t`Select Teams`)}
+          title={t`Select Teams`}
           optionsRequest={readTeamOptions}
         />
       )}
@@ -254,12 +252,12 @@ function UserTeamList({ i18n }) {
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           variant="error"
         >
           {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more teams.`)}
+            ? t`Failed to associate.`
+            : t`Failed to disassociate one or more teams.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -267,4 +265,4 @@ function UserTeamList({ i18n }) {
   );
 }
 
-export default withI18n()(UserTeamList);
+export default UserTeamList;

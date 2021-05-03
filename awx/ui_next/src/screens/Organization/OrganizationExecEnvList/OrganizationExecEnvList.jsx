@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
 
@@ -18,7 +18,7 @@ const QS_CONFIG = getQSConfig('organizations', {
   order_by: 'name',
 });
 
-function OrganizationExecEnvList({ i18n, organization }) {
+function OrganizationExecEnvList({ organization }) {
   const { id } = organization;
   const location = useLocation();
 
@@ -74,45 +74,45 @@ function OrganizationExecEnvList({ i18n, organization }) {
           hasContentLoading={isLoading}
           items={executionEnvironments}
           itemCount={executionEnvironmentsCount}
-          pluralizedItemName={i18n._(t`Execution Environments`)}
+          pluralizedItemName={t`Execution Environments`}
           qsConfig={QS_CONFIG}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Image`),
+              name: t`Image`,
               key: 'image__icontains',
               isDefault: false,
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
           toolbarSortColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name',
             },
             {
-              name: i18n._(t`Image`),
+              name: t`Image`,
               key: 'image',
             },
             {
-              name: i18n._(t`Created`),
+              name: t`Created`,
               key: 'created',
             },
             {
-              name: i18n._(t`Modified`),
+              name: t`Modified`,
               key: 'modified',
             },
           ]}
@@ -132,4 +132,4 @@ function OrganizationExecEnvList({ i18n, organization }) {
   );
 }
 
-export default withI18n()(OrganizationExecEnvList);
+export default OrganizationExecEnvList;

@@ -9,7 +9,7 @@ import {
   oneOfType,
 } from 'prop-types';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import SelectedList from '../SelectedList';
 import PaginatedDataList from '../PaginatedDataList';
@@ -41,14 +41,14 @@ function OptionsList({
   deselectItem,
   renderItemChip,
   isLoading,
-  i18n,
+
   displayKey,
 }) {
   return (
     <ModalList>
       {value.length > 0 && (
         <SelectedList
-          label={i18n._(t`Selected`)}
+          label={t`Selected`}
           selected={value}
           onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
@@ -113,4 +113,4 @@ OptionsList.defaultProps = {
   displayKey: 'name',
 };
 
-export default withI18n()(OptionsList);
+export default OptionsList;

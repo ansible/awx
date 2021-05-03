@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Split,
@@ -23,15 +23,7 @@ import {
 import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 
-function VariablesDetail({
-  dataCy,
-  helpText,
-  value,
-  label,
-  rows,
-  fullHeight,
-  i18n,
-}) {
+function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
   const [mode, setMode] = useState(
     isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
   );
@@ -84,7 +76,6 @@ function VariablesDetail({
           setMode={setMode}
           currentValue={currentValue}
           onExpand={() => setIsExpanded(true)}
-          i18n={i18n}
         />
       </DetailName>
       <DetailValue
@@ -107,7 +98,7 @@ function VariablesDetail({
             css="color: var(--pf-global--danger-color--100);
             font-size: var(--pf-global--FontSize--sm"
           >
-            {i18n._(t`Error:`)} {error.message}
+            {t`Error:`} {error.message}
           </div>
         )}
       </DetailValue>
@@ -118,13 +109,13 @@ function VariablesDetail({
         onClose={() => setIsExpanded(false)}
         actions={[
           <Button
-            aria-label={i18n._(t`Done`)}
+            aria-label={t`Done`}
             key="select"
             variant="primary"
             onClick={() => setIsExpanded(false)}
             ouiaId={`${dataCy}-unexpand`}
           >
-            {i18n._(t`Done`)}
+            {t`Done`}
           </Button>,
         ]}
       >
@@ -137,7 +128,6 @@ function VariablesDetail({
             mode={mode}
             setMode={setMode}
             currentValue={currentValue}
-            i18n={i18n}
           />
           <CodeEditor
             id={`${dataCy}-preview-expanded`}
@@ -166,16 +156,7 @@ VariablesDetail.defaultProps = {
   helpText: '',
 };
 
-function ModeToggle({
-  id,
-  label,
-  helpText,
-  dataCy,
-  mode,
-  setMode,
-  onExpand,
-  i18n,
-}) {
+function ModeToggle({ id, label, helpText, dataCy, mode, setMode, onExpand }) {
   return (
     <Split hasGutter>
       <SplitItem isFilled>
@@ -211,7 +192,7 @@ function ModeToggle({
         <SplitItem>
           <Button
             variant="plain"
-            aria-label={i18n._(t`Expand input`)}
+            aria-label={t`Expand input`}
             onClick={onExpand}
             ouiaId={`${dataCy}-expand`}
           >
@@ -223,4 +204,4 @@ function ModeToggle({
   );
 }
 
-export default withI18n()(VariablesDetail);
+export default VariablesDetail;

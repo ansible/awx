@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { WorkflowJobTemplatesAPI } from '../../../../../../api';
@@ -16,11 +16,7 @@ const QS_CONFIG = getQSConfig('workflow-job-templates', {
   order_by: 'name',
 });
 
-function WorkflowJobTemplatesList({
-  i18n,
-  nodeResource,
-  onUpdateNodeResource,
-}) {
+function WorkflowJobTemplatesList({ nodeResource, onUpdateNodeResource }) {
   const location = useLocation();
 
   const {
@@ -89,30 +85,30 @@ function WorkflowJobTemplatesList({
       showPageSizeOptions={false}
       toolbarSearchColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name__icontains',
           isDefault: true,
         },
         {
-          name: i18n._(t`Organization (Name)`),
+          name: t`Organization (Name)`,
           key: 'organization__name__icontains',
         },
         {
-          name: i18n._(t`Inventory (Name)`),
+          name: t`Inventory (Name)`,
           key: 'inventory__name__icontains',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: t`Created By (Username)`,
           key: 'created_by__username__icontains',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: t`Modified By (Username)`,
           key: 'modified_by__username__icontains',
         },
       ]}
       toolbarSortColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
         },
       ]}
@@ -131,4 +127,4 @@ WorkflowJobTemplatesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(WorkflowJobTemplatesList);
+export default WorkflowJobTemplatesList;

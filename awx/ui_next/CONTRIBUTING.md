@@ -336,16 +336,14 @@ Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) 
 
 The lingui library provides various React helpers for dealing with both marking strings for translation, and replacing strings that have been translated. For consistency and ease of use, we have consolidated on one pattern for the codebase. To set strings to be translated in the UI:
 
-- import the withI18n function and wrap the export of your component in it (i.e. `export default withI18n()(Foo)`)
-- doing the above gives you access to the i18n object on props. Make sure to put it in the scope of the function that contains strings needed to be translated (i.e. `const { i18n } = this.props;`)
 - import the t template tag function from the @lingui/macro package.
-- wrap your string using the following format: `` i18n._(t`String to be translated`) ``
+- wrap your string using the following format: `` t`String to be translated` ``
 
-**Note:** Variables that are put inside the t-marked template tag will not be translated. If you have a variable string with text that needs translating, you must wrap it in ` i18n._(t``) ` where it is defined.
+**Note:** If you have a variable string with text that needs translating, you must wrap it in `` t`${variable} string` `` where it is defined. Then you must run `npm run extract-strings` to generate new `.po` files and submit those files along with your pull request.
 
-**Note:** We try to avoid the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo. i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant. Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
+**Note:** We try to avoid the `I18n` consumer, or `i18nMark` function lingui gives us access to in this repo. i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant. Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
 
-**Note:** Pluralization can be complicated so it is best to allow lingui handle cases where we have a string that may need to be pluralized based on number of items, or count. In that case lingui provides a `<Plural>` component, and a `plural()` function. See documentation [here](https://lingui.js.org/guides/plurals.html?highlight=pluralization).
+**Note:** Pluralization can be complicated so it is best to allow lingui handle cases where we have a string that may need to be pluralized based on number of items, or count. In that case lingui provides a `<Plural>` component, and a `plural()` function. When adding or updating strings in a `<Plural/>` tag you must run `npm run extra-strings` and submit the new `.po` files with your pull request. See documentation [here](https://lingui.js.org/guides/plurals.html?highlight=pluralization).
 
 You can learn more about the ways lingui and its React helpers at [this link](https://lingui.js.org/tutorials/react-patterns.html).
 

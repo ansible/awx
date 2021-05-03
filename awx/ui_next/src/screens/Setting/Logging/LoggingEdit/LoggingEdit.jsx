@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { Button, Form, Tooltip } from '@patternfly/react-core';
@@ -25,7 +25,7 @@ import useRequest, { useDismissableError } from '../../../../util/useRequest';
 import { formatJson } from '../../shared/settingUtils';
 import { SettingsAPI } from '../../../../api';
 
-function LoggingEdit({ i18n }) {
+function LoggingEdit() {
   const history = useHistory();
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
@@ -149,16 +149,14 @@ function LoggingEdit({ i18n }) {
                               <>
                                 <br />
                                 <br />
-                                {i18n._(
-                                  t`Cannot enable log aggregator without providing
-                                  logging aggregator host and logging aggregator type.`
-                                )}
+                                {t`Cannot enable log aggregator without providing
+                                  logging aggregator host and logging aggregator type.`}
                               </>
                             )}
                         </>
                       ),
                     }}
-                    ariaLabel={i18n._(t`Enable external logging`)}
+                    ariaLabel={t`Enable external logging`}
                     disabled={
                       !formik.values.LOG_AGGREGATOR_ENABLED &&
                       (!formik.values.LOG_AGGREGATOR_HOST ||
@@ -190,9 +188,7 @@ function LoggingEdit({ i18n }) {
                   />
                   <BooleanField
                     name="LOG_AGGREGATOR_INDIVIDUAL_FACTS"
-                    ariaLabel={i18n._(
-                      t`Enable log system tracking facts individually`
-                    )}
+                    ariaLabel={t`Enable log system tracking facts individually`}
                     config={logging.LOG_AGGREGATOR_INDIVIDUAL_FACTS}
                   />
                   <ChoiceField
@@ -216,9 +212,7 @@ function LoggingEdit({ i18n }) {
                   {formik.values.LOG_AGGREGATOR_PROTOCOL === 'https' && (
                     <BooleanField
                       name="LOG_AGGREGATOR_VERIFY_CERT"
-                      ariaLabel={i18n._(
-                        t`Enable HTTPS certificate verification`
-                      )}
+                      ariaLabel={t`Enable HTTPS certificate verification`}
                       config={logging.LOG_AGGREGATOR_VERIFY_CERT}
                     />
                   )}
@@ -235,17 +229,13 @@ function LoggingEdit({ i18n }) {
                     <Tooltip
                       content={
                         formik.dirty || !formik.values.LOG_AGGREGATOR_ENABLED
-                          ? i18n._(
-                              t`Save and enable log aggregation before testing the log aggregator.`
-                            )
-                          : i18n._(
-                              t`Send a test log message to the configured log aggregator.`
-                            )
+                          ? t`Save and enable log aggregation before testing the log aggregator.`
+                          : t`Send a test log message to the configured log aggregator.`
                       }
                     >
                       <div>
                         <Button
-                          aria-label={i18n._(t`Test logging`)}
+                          aria-label={t`Test logging`}
                           ouiaId="test-logging-button"
                           variant="secondary"
                           type="button"
@@ -257,7 +247,7 @@ function LoggingEdit({ i18n }) {
                             testError
                           }
                         >
-                          {i18n._(t`Test`)}
+                          {t`Test`}
                         </Button>
                       </div>
                     </Tooltip>
@@ -285,4 +275,4 @@ function LoggingEdit({ i18n }) {
   );
 }
 
-export default withI18n()(LoggingEdit);
+export default LoggingEdit;

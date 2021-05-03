@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import { bool, instanceOf } from 'prop-types';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import {
   Title,
   EmptyState,
@@ -18,7 +18,7 @@ async function logout() {
   window.location.replace('/#/login');
 }
 
-function ContentError({ error, children, isNotFound, i18n }) {
+function ContentError({ error, children, isNotFound }) {
   if (error && error.response && error.response.status === 401) {
     if (!error.response.headers['session-timeout']) {
       logout();
@@ -36,17 +36,13 @@ function ContentError({ error, children, isNotFound, i18n }) {
         <EmptyState variant="full">
           <EmptyStateIcon icon={ExclamationTriangleIcon} />
           <Title size="lg" headingLevel="h3">
-            {is404 ? i18n._(t`Not Found`) : i18n._(t`Something went wrong...`)}
+            {is404 ? t`Not Found` : t`Something went wrong...`}
           </Title>
           <EmptyStateBody>
             {is404
-              ? i18n._(t`The page you requested could not be found.`)
-              : i18n._(
-                  t`There was an error loading this content. Please reload the page.`
-                )}{' '}
-            {children || (
-              <Link to="/home">{i18n._(t`Back to Dashboard.`)}</Link>
-            )}
+              ? t`The page you requested could not be found.`
+              : t`There was an error loading this content. Please reload the page.`}{' '}
+            {children || <Link to="/home">{t`Back to Dashboard.`}</Link>}
           </EmptyStateBody>
           {error && <ErrorDetail error={error} />}
         </EmptyState>
@@ -64,4 +60,4 @@ ContentError.defaultProps = {
 };
 
 export { ContentError as _ContentError };
-export default withI18n()(ContentError);
+export default ContentError;

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { func, shape, bool } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
 
@@ -18,7 +18,6 @@ import { required } from '../../../util/validators';
 import useRequest from '../../../util/useRequest';
 
 function ExecutionEnvironmentFormFields({
-  i18n,
   me,
   options,
   executionEnvironment,
@@ -29,9 +28,7 @@ function ExecutionEnvironmentFormFields({
   );
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
-    validate:
-      !me?.is_superuser &&
-      required(i18n._(t`Select a value for this field`), i18n),
+    validate: !me?.is_superuser && required(t`Select a value for this field`),
   });
 
   const isGloballyAvailable = useRef(!organizationField.value);
@@ -77,9 +74,7 @@ function ExecutionEnvironmentFormFields({
           me?.is_superuser &&
           ((!isOrgLookupDisabled && isGloballyAvailable) ||
             organizationField.value === null)
-            ? i18n._(
-                t`Leave this field blank to make the execution environment globally available.`
-              )
+            ? t`Leave this field blank to make the execution environment globally available.`
             : null
         }
         autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
@@ -92,22 +87,20 @@ function ExecutionEnvironmentFormFields({
     <>
       <FormField
         id="execution-environment-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="execution-environment-image"
-        label={i18n._(t`Image name`)}
+        label={t`Image name`}
         name="image"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
-        tooltip={i18n._(
-          t`The registry location where the container is stored.`
-        )}
+        tooltip={t`The registry location where the container is stored.`}
       />
       <FormGroup
         fieldId="execution-environment-container-options"
@@ -117,7 +110,7 @@ function ExecutionEnvironmentFormFields({
             ? 'default'
             : 'error'
         }
-        label={i18n._(t`Pull`)}
+        label={t`Pull`}
       >
         <AnsibleSelect
           {...containerOptionsField}
@@ -130,15 +123,13 @@ function ExecutionEnvironmentFormFields({
       </FormGroup>
       <FormField
         id="execution-environment-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
       {isOrgLookupDisabled && isGloballyAvailable.current ? (
         <Tooltip
-          content={i18n._(
-            t`Globally available execution environment can not be reassigned to a specific Organization`
-          )}
+          content={t`Globally available execution environment can not be reassigned to a specific Organization`}
         >
           {renderOrganizationLookup()}
         </Tooltip>
@@ -147,16 +138,14 @@ function ExecutionEnvironmentFormFields({
       )}
 
       <CredentialLookup
-        label={i18n._(t`Registry credential`)}
+        label={t`Registry credential`}
         credentialTypeKind="registry"
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
         onChange={onCredentialChange}
         value={credentialField.value}
-        tooltip={i18n._(
-          t`Credential to authenticate with a protected container registry.`
-        )}
+        tooltip={t`Credential to authenticate with a protected container registry.`}
       />
     </>
   );
@@ -243,4 +232,4 @@ ExecutionEnvironmentForm.defaultProps = {
   isOrgLookupDisabled: false,
 };
 
-export default withI18n()(ExecutionEnvironmentForm);
+export default ExecutionEnvironmentForm;

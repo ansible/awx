@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Host } from '../../../types';
 import { CardBody } from '../../../components/Card';
@@ -10,7 +10,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import useRequest from '../../../util/useRequest';
 import { HostsAPI } from '../../../api';
 
-function HostFacts({ i18n, host }) {
+function HostFacts({ host }) {
   const { result: facts, isLoading, error, request: fetchFacts } = useRequest(
     useCallback(async () => {
       const [{ data: factsObj }] = await Promise.all([
@@ -36,7 +36,7 @@ function HostFacts({ i18n, host }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <VariablesDetail label={i18n._(t`Facts`)} rows="auto" value={facts} />
+        <VariablesDetail label={t`Facts`} rows="auto" value={facts} />
       </DetailList>
     </CardBody>
   );
@@ -46,4 +46,4 @@ HostFacts.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(HostFacts);
+export default HostFacts;

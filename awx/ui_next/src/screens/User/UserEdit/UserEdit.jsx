@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { CardBody } from '../../../components/Card';
 import UserForm from '../shared/UserForm';
 import { UsersAPI } from '../../../api';
@@ -36,4 +36,4 @@ function UserEdit({ user }) {
   );
 }
 
-export default withI18n()(UserEdit);
+export default UserEdit;

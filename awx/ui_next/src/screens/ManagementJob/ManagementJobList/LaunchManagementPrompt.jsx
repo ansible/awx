@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, TextInput, Tooltip } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
@@ -19,7 +19,6 @@ const clamp = (val, min, max) => {
 };
 
 function LaunchManagementPrompt({
-  i18n,
   isOpen,
   isLoading,
   onClick,
@@ -30,9 +29,9 @@ function LaunchManagementPrompt({
   const [dataRetention, setDataRetention] = useState(defaultDays);
   return (
     <>
-      <Tooltip content={i18n._(t`Launch management job`)} position="top">
+      <Tooltip content={t`Launch management job`} position="top">
         <Button
-          aria-label={i18n._(t`Launch management job`)}
+          aria-label={t`Launch management job`}
           variant="plain"
           onClick={onClick}
           isDisabled={isLoading}
@@ -44,40 +43,40 @@ function LaunchManagementPrompt({
         isOpen={isOpen}
         variant="info"
         onClose={onClose}
-        title={i18n._(t`Launch management job`)}
-        label={i18n._(t`Launch management job`)}
+        title={t`Launch management job`}
+        label={t`Launch management job`}
         actions={[
           <Button
             id="launch-job-confirm-button"
             key="delete"
             variant="primary"
             isDisabled={isLoading}
-            aria-label={i18n._(t`Launch`)}
+            aria-label={t`Launch`}
             onClick={() => onConfirm(dataRetention)}
           >
-            {i18n._(t`Launch`)}
+            {t`Launch`}
           </Button>,
           <Button
             id="launch-job-cancel-button"
             key="cancel"
             variant="link"
-            aria-label={i18n._(t`Cancel`)}
+            aria-label={t`Cancel`}
             onClick={onClose}
           >
-            {i18n._(t`Cancel`)}
+            {t`Cancel`}
           </Button>,
         ]}
       >
-        {i18n._(t`Set how many days of data should be retained.`)}
+        {t`Set how many days of data should be retained.`}
         <TextInput
           value={dataRetention}
           type="number"
           onChange={value => setDataRetention(clamp(value, 0, MAX_RETENTION))}
-          aria-label={i18n._(t`Data retention period`)}
+          aria-label={t`Data retention period`}
         />
       </AlertModal>
     </>
   );
 }
 
-export default withI18n()(LaunchManagementPrompt);
+export default LaunchManagementPrompt;

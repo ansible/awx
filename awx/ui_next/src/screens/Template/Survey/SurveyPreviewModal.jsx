@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 
@@ -19,7 +19,6 @@ function SurveyPreviewModal({
   questions,
   isPreviewModalOpen,
   onToggleModalOpen,
-  i18n,
 }) {
   const initialValues = {};
   questions.forEach(q => {
@@ -29,8 +28,8 @@ function SurveyPreviewModal({
 
   return (
     <Modal
-      title={i18n._(t`Survey Preview`)}
-      aria-label={i18n._(t`Survey preview modal`)}
+      title={t`Survey Preview`}
+      aria-label={t`Survey preview modal`}
       isOpen={isPreviewModalOpen}
       onClose={() => onToggleModalOpen(false)}
       variant="small"
@@ -50,7 +49,7 @@ function SurveyPreviewModal({
                       id={`survey-preview-text-${q.variable}`}
                       value={q.default}
                       isDisabled
-                      aria-label={i18n._(t`Text`)}
+                      aria-label={t`Text`}
                     />
                   </FormGroup>
                 )}
@@ -64,7 +63,7 @@ function SurveyPreviewModal({
                       id={`survey-preview-textArea-${q.variable}`}
                       type={`survey-preview-textArea-${q.variable}`}
                       value={q.default}
-                      aria-label={i18n._(t`Text Area`)}
+                      aria-label={t`Text Area`}
                       isDisabled
                     />
                   </FormGroup>
@@ -87,8 +86,8 @@ function SurveyPreviewModal({
                     <Select
                       id={`survey-preview-multipleChoice-${q.variable}`}
                       isDisabled
-                      aria-label={i18n._(t`Multiple Choice`)}
-                      typeAheadAriaLabel={i18n._(t`Multiple Choice`)}
+                      aria-label={t`Multiple Choice`}
+                      typeAheadAriaLabel={t`Multiple Choice`}
                       placeholderText={q.default}
                       onToggle={() => {}}
                     />
@@ -109,8 +108,8 @@ function SurveyPreviewModal({
                         q.default.length > 0 ? q.default.split('\n') : []
                       }
                       onToggle={() => {}}
-                      aria-label={i18n._(t`Multi-Select`)}
-                      typeAheadAriaLabel={i18n._(t`Multi-Select`)}
+                      aria-label={t`Multi-Select`}
+                      typeAheadAriaLabel={t`Multi-Select`}
                       id={`survey-preview-multiSelect-${q.variable}`}
                     >
                       {q.choices.length > 0 &&
@@ -130,4 +129,4 @@ function SurveyPreviewModal({
     </Modal>
   );
 }
-export default withI18n()(SurveyPreviewModal);
+export default SurveyPreviewModal;
