@@ -11,7 +11,7 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
   const handleSubmit = async question => {
     const formData = { ...question };
     try {
-      if (survey.spec?.some(q => q.variable === formData.variable)) {
+      if (survey?.spec?.some(q => q.variable === formData.variable)) {
         setFormError(
           new Error(
             `Survey already contains a question with variable named “${formData.variable}”`
@@ -41,9 +41,7 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
         formData.choices = choices.trim();
       }
       delete formData.formattedChoices;
-
-      const newSpec = survey.spec ? survey.spec.concat(formData) : [formData];
-
+      const newSpec = survey?.spec ? survey.spec.concat(formData) : [formData];
       await updateSurvey(newSpec);
       history.push(match.url.replace('/add', ''));
     } catch (err) {
