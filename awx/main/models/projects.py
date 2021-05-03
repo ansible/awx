@@ -32,6 +32,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
+from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -188,7 +189,7 @@ class ProjectOptions(models.Model):
         Jobs using the project can use the default_environment, but the project updates
         are not flexible enough to allow customizing the image they use.
         """
-        return self.get_default_execution_environment()
+        return get_default_execution_environment()
 
     def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)
