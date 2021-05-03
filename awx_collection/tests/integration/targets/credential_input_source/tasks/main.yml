@@ -6,11 +6,11 @@
 
 - name: Generate names
   set_fact:
-    src_cred_name: "AWX-Collection-tests-tower_credential_input_source-src_cred-{{ test_id }}"
-    target_cred_name: "AWX-Collection-tests-tower_credential_input_source-target_cred-{{ test_id }}"
+    src_cred_name: "AWX-Collection-tests-credential_input_source-src_cred-{{ test_id }}"
+    target_cred_name: "AWX-Collection-tests-credential_input_source-target_cred-{{ test_id }}"
 
 - block:
-    - name: Add Tower credential Lookup
+    - name: Add credential Lookup
       credential:
         description: Credential for Testing Source
         name: "{{ src_cred_name }}"
@@ -25,7 +25,7 @@
         that:
           - "src_cred_result is changed"
 
-    - name: Add Tower credential Target
+    - name: Add credential Target
       credential:
         description: Credential for Testing Target
         name: "{{ target_cred_name }}"
@@ -54,7 +54,7 @@
         that:
           - "result is changed"
 
-    - name: Add Second Tower credential Lookup
+    - name: Add Second credential Lookup
       credential:
         description: Credential for Testing Source Change
         name: "{{ src_cred_name }}-2"
@@ -77,7 +77,7 @@
           - "result is changed"
 
   always:
-    - name: Remove a Tower credential source
+    - name: Remove a credential source
       credential_input_source:
         input_field_name: password
         target_credential: "{{ target_cred_name }}"
@@ -88,7 +88,7 @@
         that:
           - "result is changed"
 
-    - name: Remove Tower credential Lookup
+    - name: Remove credential Lookup
       credential:
         name: "{{ src_cred_name }}"
         organization: Default
@@ -96,7 +96,7 @@
         state: absent
       register: result
 
-    - name: Remove Alt Tower credential Lookup
+    - name: Remove Alt credential Lookup
       credential:
         name: "{{ src_cred_name }}-2"
         organization: Default
@@ -104,7 +104,7 @@
         state: absent
       register: result
 
-    - name: Remove Tower credential
+    - name: Remove credential
       credential:
         name: "{{ target_cred_name }}"
         organization: Default

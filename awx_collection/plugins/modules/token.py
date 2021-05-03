@@ -17,15 +17,15 @@ DOCUMENTATION = '''
 module: token
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.3"
-short_description: create, update, or destroy Automation Controller tokens.
+short_description: create, update, or destroy Automation Platform Controller tokens.
 description:
-    - Create or destroy Automation Controller tokens. See
+    - Create or destroy Automation Platform Controller tokens. See
       U(https://www.ansible.com/tower) for an overview.
     - In addition, the module sets an Ansible fact which can be passed into other
-      tower_* modules as the parameter tower_oauthtoken. See examples for usage.
+      controller modules as the parameter tower_oauthtoken. See examples for usage.
     - Because of the sensitive nature of tokens, the created token value is only available once
       through the Ansible fact. (See RETURN for details)
-    - Due to the nature of tokens in Tower this module is not idempotent. A second will
+    - Due to the nature of tokens this module is not idempotent. A second will
       with the same parameters will create a new token.
     - If you are creating a temporary token for use with modules you should delete the token
       when you are done with it. See the example for how to do it.
@@ -105,7 +105,7 @@ EXAMPLES = '''
 RETURN = '''
 token:
   type: dict
-  description: An Ansible Fact variable representing a Tower token object which can be used for auth in subsequent modules. See examples for usage.
+  description: An Ansible Fact variable representing a token object which can be used for auth in subsequent modules. See examples for usage.
   contains:
     token:
       description: The token that was generated. This token can never be accessed again, make sure this value is noted before it is lost.

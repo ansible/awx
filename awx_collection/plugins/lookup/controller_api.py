@@ -11,10 +11,10 @@ short_description: Search the API for objects
 requirements:
   - None
 description:
-  - Returns GET requests from the Automation Controller API. See
+  - Returns GET requests from the Automation Platform Controller API. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/index.html) for API usage.
-  - For use that is cross-compatible between the awx.awx and ansible.tower collection
-    see the tower_meta module
+  - For use that is cross-compatible between the awx.awx and ansible.controller collection
+    see the controller_meta module
 extends_documentation_fragment: awx.awx.auth_plugin
 options:
   _terms:
@@ -71,11 +71,11 @@ notes:
 EXAMPLES = """
 - name: Load the UI settings
   set_fact:
-    tower_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui') }}"
+    controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui') }}"
 
 - name: Load the UI settings specifying the connection info
   set_fact:
-    tower_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui' host='tower.example.com', username='admin', password=my_pass_var, verify_ssl=False) }}"
+    controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui' host='tower.example.com', username='admin', password=my_pass_var, verify_ssl=False) }}"
 
 - name: Report the usernames of all users with admin privs
   debug:
@@ -89,14 +89,14 @@ EXAMPLES = """
     label: "{{ item['name'] }}"
 
 - name: Make sure user 'john' is an org admin of the default org if the user exists
-  tower_role:
+  role:
     organization: Default
     role: admin
     user: john
   when: "lookup('awx.awx.controller_api', 'users', query_params={ 'username': 'john' }) | length == 1"
 
 - name: Create an inventory group with all 'foo' hosts
-  tower_group:
+  group:
     name: "Foo Group"
     inventory: "Demo Inventory"
     hosts: >-

@@ -20,9 +20,9 @@ deprecated:
   why: Deprecated in favor of upcoming C(_import) module.
   alternative: Once published, use M(tower_import) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Send assets to Automation Controller.
+short_description: Send assets to Automation Platform Controller.
 description:
-    - Send assets to Automation Controller. See
+    - Send assets to Automation Platform Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     assets:
@@ -62,7 +62,7 @@ extends_documentation_fragment: awx.awx.auth_legacy
 '''
 
 EXAMPLES = '''
-- name: Import all tower assets
+- name: Import all Automation Platform Controller assets
   send:
     assets: "{{ export_output.assets }}"
     tower_config_file: "~/tower_cli.cfg"

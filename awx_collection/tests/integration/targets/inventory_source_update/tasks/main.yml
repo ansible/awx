@@ -5,12 +5,12 @@
 
 - name: Generate names
   set_fact:
-    project_name: "AWX-Collection-tests-tower_inventory_source_update-project-{{ test_id }}"
-    inv_name: "AWX-Collection-tests-tower_inventory_source_update-inv-{{ test_id }}"
-    inv_source1: "AWX-Collection-tests-tower_inventory_source_update-source1-{{ test_id }}"
-    inv_source2: "AWX-Collection-tests-tower_inventory_source_update-source2-{{ test_id }}"
-    inv_source3: "AWX-Collection-tests-tower_inventory_source_update-source3-{{ test_id }}"
-    org_name: "AWX-Collection-tests-tower_inventory_source_update-org-{{ test_id }}"
+    project_name: "AWX-Collection-tests-inventory_source_update-project-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-inventory_source_update-inv-{{ test_id }}"
+    inv_source1: "AWX-Collection-tests-inventory_source_update-source1-{{ test_id }}"
+    inv_source2: "AWX-Collection-tests-inventory_source_update-source2-{{ test_id }}"
+    inv_source3: "AWX-Collection-tests-inventory_source_update-source3-{{ test_id }}"
+    org_name: "AWX-Collection-tests-inventory_source_update-org-{{ test_id }}"
 
 
 - block:

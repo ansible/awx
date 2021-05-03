@@ -78,7 +78,7 @@ def test_children_alias_of_groups(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_tower_group_idempotent(run_module, admin_user):
+def test_group_idempotent(run_module, admin_user):
     # https://github.com/ansible/ansible/issues/46803
     org = Organization.objects.create(name='test-org')
     inv = Inventory.objects.create(name='test-inv', organization=org)

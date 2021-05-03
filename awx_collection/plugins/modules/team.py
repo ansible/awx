@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: team
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller team.
+short_description: create, update, or destroy Automation Platform Controller team.
 description:
-    - Create, update, or destroy Automation Controller teams. See
+    - Create, update, or destroy Automation Platform Controller teams. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -50,7 +50,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Create tower team
+- name: Create team
   team:
     name: Team Name
     description: Team Description

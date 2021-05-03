@@ -17,9 +17,9 @@ DOCUMENTATION = '''
 module: export
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "3.7"
-short_description: export resources from Automation Controller.
+short_description: export resources from Automation Platform Controller.
 description:
-    - Export assets from Automation Controller.
+    - Export assets from Automation Platform Controller.
 options:
     all:
       description:
@@ -82,7 +82,7 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Export all tower assets
+- name: Export all assets
   export:
     all: True
 
@@ -124,7 +124,7 @@ def main():
     if not HAS_EXPORTABLE_RESOURCES:
         module.fail_json(msg="Your version of awxkit does not have import/export")
 
-    # The export process will never change a Tower system
+    # The export process will never change the AWX system
     module.json_output['changed'] = False
 
     # The exporter code currently works like the following:

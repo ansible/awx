@@ -43,7 +43,7 @@ options:
       type: str
     interval:
       description:
-        - The interval in sections, to request an update from Tower.
+        - The interval in sections, to request an update from the controller.
       required: False
       default: 1
       type: float

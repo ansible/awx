@@ -21,7 +21,7 @@ class ControllerAPIModule(ControllerModule):
     # Those values can be found in awx/api/generics.py line 204
     collection_to_version = {
         'awx': 'AWX',
-        'tower': 'Red Hat Automation Controller',
+        'controller': 'Red Hat Automation Platform Controller',
     }
     session = None
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
@@ -190,7 +190,7 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to Tower (if we don't have a token and if not already done so)
+        # Authenticate to AWX (if we don't have a token and if not already done so)
         if not self.oauth_token and not self.authenticated:
             # This method will set a cookie in the cookie jar for us and also an oauth_token
             self.authenticate(**kwargs)
@@ -218,7 +218,7 @@ class ControllerAPIModule(ControllerModule):
                 self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
             # Sanity check: Did we fail to authenticate properly?  If so, fail out now; this is always a failure.
             elif he.code == 401:
-                self.fail_json(msg='Invalid Tower authentication credentials for {0} (HTTP 401).'.format(url.path))
+                self.fail_json(msg='Invalid authentication credentials for {0} (HTTP 401).'.format(url.path))
             # Sanity check: Did we get a forbidden response, which means that the user isn't allowed to do this? Report that.
             elif he.code == 403:
                 self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).".format(url.path, method))
@@ -232,7 +232,7 @@ class ControllerAPIModule(ControllerModule):
             # A 405 means we used a method that isn't allowed. Usually this is a bad request, but it requires special treatment because the
             # API sends it as a logic error in a few situations (e.g. trying to cancel a job that isn't running).
             elif he.code == 405:
-                self.fail_json(msg="The Tower server says you can't make a request with the {0} method to this endpoint {1}".format(method, url.path))
+                self.fail_json(msg="Cannot make a request with the {0} method to this endpoint {1}".format(method, url.path))
             # Sanity check: Did we get some other kind of error?  If so, write an appropriate error message.
             elif he.code >= 400:
                 # We are going to return a 400 so the module can decide what to do with it
@@ -302,7 +302,7 @@ class ControllerAPIModule(ControllerModule):
             # Attempt to get a token from /api/v2/tokens/ by giving it our username/password combo
             # If we have a username and password, we need to get a session cookie
             login_data = {
-                "description": "Automation Controller Module Token",
+                "description": "Automation Platform Controller Module Token",
                 "application": None,
                 "scope": "write",
             }
@@ -349,8 +349,8 @@ class ControllerAPIModule(ControllerModule):
         #   the on_delete parameter will be called as a method pasing in this object and the json from the response
         # This will return one of two things:
         #   1. None if the existing_item is not defined (so no delete needs to happen)
-        #   2. The response from Tower from calling the delete on the endpont. It's up to you to process the response and exit from the module
-        # Note: common error codes from the Tower API can cause the module to fail
+        #   2. The response from AWX from calling the delete on the endpont. It's up to you to process the response and exit from the module
+        # Note: common error codes from the AWX API can cause the module to fail
         if existing_item:
             # If we have an item, we can try to delete it
             try:
@@ -472,8 +472,8 @@ class ControllerAPIModule(ControllerModule):
         #    the on_create parameter will be called as a method pasing in this object and the json from the response
         # This will return one of two things:
         #    1. None if the existing_item is already defined (so no create needs to happen)
-        #    2. The response from Tower from calling the patch on the endpont. It's up to you to process the response and exit from the module
-        # Note: common error codes from the Tower API can cause the module to fail
+        #    2. The response from AWX from calling the patch on the endpont. It's up to you to process the response and exit from the module
+        # Note: common error codes from the AWX API can cause the module to fail
         response = None
         if not endpoint:
             self.fail_json(msg="Unable to create new {0} due to missing endpoint".format(item_type))
@@ -595,8 +595,8 @@ class ControllerAPIModule(ControllerModule):
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
         # This will return one of two things:
         #    1. None if the existing_item does not need to be updated
-        #    2. The response from Tower from patching to the endpoint. It's up to you to process the response and exit from the module.
-        # Note: common error codes from the Tower API can cause the module to fail
+        #    2. The response from AWX from patching to the endpoint. It's up to you to process the response and exit from the module.
+        # Note: common error codes from the AWX API can cause the module to fail
         response = None
         if existing_item:
 

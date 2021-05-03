@@ -6,9 +6,9 @@
 
 - name: Generate names
   set_fact:
-    org_name1: "AWX-Collection-tests-tower_export-organization-{{ test_id }}"
-    org_name2: "AWX-Collection-tests-tower_export-organization2-{{ test_id }}"
-    inventory_name1: "AWX-Collection-tests-tower_export-inv1-{{ test_id }}"
+    org_name1: "AWX-Collection-tests-export-organization-{{ test_id }}"
+    org_name2: "AWX-Collection-tests-export-organization2-{{ test_id }}"
+    inventory_name1: "AWX-Collection-tests-export-inv1-{{ test_id }}"
 
 - block:
     - name: Create some organizations
@@ -23,7 +23,7 @@
         name: "{{ inventory_name1 }}"
         organization: "{{ org_name1 }}"
 
-    - name: Export all tower assets
+    - name: Export all assets
       export:
         all: true
       register: all_assets

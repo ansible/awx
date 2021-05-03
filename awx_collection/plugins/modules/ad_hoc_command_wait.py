@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: ad_hoc_command_wait
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Wait for Automation Controller Ad Hoc Command to finish.
+short_description: Wait for Automation Platform Controller Ad Hoc Command to finish.
 description:
-    - Wait for Automation Controller ad hoc command to finish and report success or failure. See
+    - Wait for Automation Platform Controller ad hoc command to finish and report success or failure. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     command_id:
@@ -28,7 +28,7 @@ options:
       type: int
     interval:
       description:
-        - The interval in sections, to request an update from Tower.
+        - The interval in sections, to request an update from the controller.
       required: False
       default: 1
       type: float
@@ -112,7 +112,7 @@ def main():
     )
 
     if command is None:
-        module.fail_json(msg='Unable to wait on ad hoc command {0}; that ID does not exist in Tower.'.format(command_id))
+        module.fail_json(msg='Unable to wait on ad hoc command {0}; that ID does not exist.'.format(command_id))
 
     # Invoke wait function
     module.wait_on_url(url=command['url'], object_name=command_id, object_type='ad hoc command', timeout=timeout, interval=interval)

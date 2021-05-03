@@ -13,9 +13,9 @@ DOCUMENTATION = '''
 ---
 module: project_update
 author: "Sean Sullivan (@sean-m-sullivan)"
-short_description: Update a Project in Automation Controller
+short_description: Update a Project in Automation Platform Controller
 description:
-    - Update a Automation Controller Project. See
+    - Update a Automation Platform Controller Project. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -39,7 +39,7 @@ options:
       type: bool
     interval:
       description:
-        - The interval to request an update from Tower.
+        - The interval to request an update from the controller.
       required: False
       default: 1
       type: float

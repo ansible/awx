@@ -5,18 +5,18 @@
 
 - name: Generate random names for test objects
   set_fact:
-    org_name: "AWX-Collection-tests-tower_organization-org-{{ test_id }}"
-    scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template-scm-cred-{{ test_id }}"
-    demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ test_id }}"
-    jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ test_id }}"
-    jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ test_id }}"
-    approval_node_name: "AWX-Collection-tests-tower_workflow_approval_node-{{ test_id }}"
-    lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
-    wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ test_id }}"
-    email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
-    webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
-    project_inv: "AWX-Collection-tests-tower_inventory_source-inv-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
+    scm_cred_name: "AWX-Collection-tests-workflow_job_template-scm-cred-{{ test_id }}"
+    demo_project_name: "AWX-Collection-tests-workflow_job_template-proj-{{ test_id }}"
+    jt1_name: "AWX-Collection-tests-workflow_job_template-jt1-{{ test_id }}"
+    jt2_name: "AWX-Collection-tests-workflow_job_template-jt2-{{ test_id }}"
+    approval_node_name: "AWX-Collection-tests-workflow_approval_node-{{ test_id }}"
+    lab1: "AWX-Collection-tests-job_template-lab1-{{ test_id }}"
+    wfjt_name: "AWX-Collection-tests-workflow_job_template-wfjt-{{ test_id }}"
+    email_not: "AWX-Collection-tests-job_template-email-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-notification_template-wehbook-not-{{ test_id }}"
+    project_inv: "AWX-Collection-tests-inventory_source-inv-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_inv_source: "AWX-Collection-tests-inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: "Create a new organization"
   tower_organization:
@@ -85,7 +85,7 @@
     that:
       - "result is changed"
 
-- name: Add a Tower inventory
+- name: Add an inventory
   inventory:
     description: Test inventory
     organization: Default

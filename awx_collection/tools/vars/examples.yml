@@ -1,8 +1,8 @@
 ---
 examples:
   users: |
-    - name: Add tower user
-      tower_user:
+    - name: Add user
+      user:
         username: jdoe
         password: foobarbaz
         email: jdoe@example.org
@@ -11,8 +11,8 @@ examples:
         state: present
         tower_config_file: "~/tower_cli.cfg"
 
-    - name: Add tower user as a system administrator
-      tower_user:
+    - name: Add user as a system administrator
+      user:
         username: jdoe
         password: foobarbaz
         email: jdoe@example.org
@@ -20,8 +20,8 @@ examples:
         state: present
         tower_config_file: "~/tower_cli.cfg"
 
-    - name: Add tower user as a system auditor
-      tower_user:
+    - name: Add user as a system auditor
+      user:
         username: jdoe
         password: foobarbaz
         email: jdoe@example.org
@@ -29,16 +29,16 @@ examples:
         state: present
         tower_config_file: "~/tower_cli.cfg"
 
-    - name: Delete tower user
-      tower_user:
+    - name: Delete user
+      user:
         username: jdoe
         email: jdoe@example.org
         state: absent
         tower_config_file: "~/tower_cli.cfg"
 
   job_templates: |
-    - name: Create tower Ping job template
-      tower_job_template:
+    - name: Create Ping job template
+      job_template:
         name: "Ping"
         job_type: "run"
         inventory: "Local"

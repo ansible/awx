@@ -5,7 +5,7 @@
 
 - name: generate random string for project
   set_fact:
-    sched1: "AWX-Collection-tests-tower_schedule-sched1-{{ test_id }}"
+    sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
 
 - name: Try to create without an rrule
   schedule:

@@ -83,7 +83,7 @@ def tower_auth_config(module):
 
 
 def tower_check_mode(module):
-    '''Execute check mode logic for Automation Controller modules'''
+    '''Execute check mode logic for Automation Platform Controller modules'''
     if module.check_mode:
         try:
             result = client.get('/ping').json()

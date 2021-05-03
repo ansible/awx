@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: job_cancel
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: Cancel an Automation Controller Job.
+short_description: Cancel an Automation Platform Controller Job.
 description:
-    - Cancel Automation Controller jobs. See
+    - Cancel Automation Platform Controller jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     job_id:
@@ -81,7 +81,7 @@ def main():
 
     cancel_page = module.get_endpoint(job['related']['cancel'])
     if 'json' not in cancel_page or 'can_cancel' not in cancel_page['json']:
-        module.fail_json(msg="Failed to cancel job, got unexpected response from tower", **{'response': cancel_page})
+        module.fail_json(msg="Failed to cancel job, got unexpected response from the controller", **{'response': cancel_page})
 
     if not cancel_page['json']['can_cancel']:
         if fail_if_not_running:

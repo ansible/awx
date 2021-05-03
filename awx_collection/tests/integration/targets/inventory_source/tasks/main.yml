@@ -1,11 +1,11 @@
 ---
 - name: Generate names
   set_fact:
-    openstack_cred: "AWX-Collection-tests-tower_inventory_source-cred-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    openstack_inv: "AWX-Collection-tests-tower_inventory_source-inv-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    openstack_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_cred: "AWX-Collection-tests-inventory_source-cred-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_inv: "AWX-Collection-tests-inventory_source-inv-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_inv_source: "AWX-Collection-tests-inventory_source-inv-source-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
-- name: Add a Tower credential
+- name: Add a credential
   credential:
     description: Credentials for Openstack Test project
     name: "{{ openstack_cred }}"
@@ -18,7 +18,7 @@
     domain: test
   register: credential_result
 
-- name: Add a Tower inventory
+- name: Add an inventory
   inventory:
     description: Test inventory
     organization: Default

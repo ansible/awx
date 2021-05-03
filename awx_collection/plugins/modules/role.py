@@ -16,10 +16,10 @@ DOCUMENTATION = '''
 ---
 module: role
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: grant or revoke an Automation Controller role.
+short_description: grant or revoke an Automation Platform Controller role.
 description:
     - Roles are used for access control, this module is for managing user access to server resources.
-    - Grant or revoke Automation Controller roles to users. See U(https://www.ansible.com/tower) for an overview.
+    - Grant or revoke Automation Platform Controller roles to users. See U(https://www.ansible.com/tower) for an overview.
 options:
     user:
       description:

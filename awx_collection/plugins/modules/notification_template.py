@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: notification_template
 author: "Samuel Carpentier (@samcarpentier)"
-short_description: create, update, or destroy Automation Controller notification.
+short_description: create, update, or destroy Automation Platform Controller notification.
 description:
-    - Create, update, or destroy Automation Controller notifications. See
+    - Create, update, or destroy Automation Platform Controller notifications. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:

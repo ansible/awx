@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: inventory
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller inventory.
+short_description: create, update, or destroy Automation Platform Controller inventory.
 description:
-    - Create, update, or destroy Automation Controller inventories. See
+    - Create, update, or destroy Automation Platform Controller inventories. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -77,7 +77,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add tower inventory
+- name: Add inventory
   inventory:
     name: "Foo Inventory"
     description: "Our Foo Cloud Servers"
@@ -85,7 +85,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Copy tower inventory
+- name: Copy inventory
   inventory:
     name: Copy Foo Inventory
     copy_from: Default Inventory

@@ -17,9 +17,9 @@ DOCUMENTATION = '''
 module: credential_input_source
 author: "Tom Page (@Tompage1994)"
 version_added: "2.3"
-short_description: create, update, or destroy Automation Controller credential input sources.
+short_description: create, update, or destroy Automation Platform Controller credential input sources.
 description:
-    - Create, update, or destroy Automation Controller credential input sources. See
+    - Create, update, or destroy Automation Platform Controller credential input sources. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     description:

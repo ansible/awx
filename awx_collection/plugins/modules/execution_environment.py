@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: execution_environment
 author: "Shane McDonald (@shanemcd)"
-short_description: create, update, or destroy Execution Environments in Automation Controller.
+short_description: create, update, or destroy Execution Environments in Automation Platform Controller.
 description:
-    - Create, update, or destroy Execution Environments in Automation Controller. See
+    - Create, update, or destroy Execution Environments in Automation Platform Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -60,7 +60,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add EE to Tower
+- name: Add EE to the controller instance
   execution_environment:
     name: "My EE"
     image: quay.io/ansible/awx-ee

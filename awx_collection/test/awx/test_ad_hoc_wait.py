@@ -41,4 +41,4 @@ def test_ad_hoc_command_wait_failed(run_module, admin_user):
 def test_ad_hoc_command_wait_not_found(run_module, admin_user):
     result = run_module('ad_hoc_command_wait', dict(command_id=42), admin_user)
     result.pop('invocation', None)
-    assert result == {"failed": True, "msg": "Unable to wait on ad hoc command 42; that ID does not exist in Tower."}
+    assert result == {"failed": True, "msg": "Unable to wait on ad hoc command 42; that ID does not exist."}

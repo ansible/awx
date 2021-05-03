@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: credential
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller credential.
+short_description: create, update, or destroy Automation Platform Controller credential.
 description:
-    - Create, update, or destroy Automation Controller credentials. See
+    - Create, update, or destroy Automation Platform Controller credentials. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -56,7 +56,7 @@ options:
       description:
         - >-
           Credential inputs where the keys are var names used in templating.
-          Refer to the Automation Controller documentation for example syntax.
+          Refer to the Automation Platform Controller documentation for example syntax.
         - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
       type: dict
     update_secrets:
@@ -96,7 +96,7 @@ options:
     password:
       description:
         - Password for this credential. ``secret_key`` for AWS. ``api_key`` for RAX.
-        - Use "ASK" and launch in Tower to be prompted.
+        - Use "ASK" and launch job to be prompted.
         - Deprecated, please use inputs
       type: str
     project:
@@ -112,7 +112,7 @@ options:
     ssh_key_unlock:
       description:
         - Unlock password for ssh_key.
-        - Use "ASK" and launch in Tower to be prompted.
+        - Use "ASK" and launch job to be prompted.
         - Deprecated, please use inputs
       type: str
     authorize:
@@ -166,19 +166,19 @@ options:
     become_username:
       description:
         - Become username.
-        - Use "ASK" and launch in Tower to be prompted.
+        - Use "ASK" and launch job to be prompted.
         - Deprecated, please use inputs
       type: str
     become_password:
       description:
         - Become password.
-        - Use "ASK" and launch in Tower to be prompted.
+        - Use "ASK" and launch job to be prompted.
         - Deprecated, please use inputs
       type: str
     vault_password:
       description:
         - Vault password.
-        - Use "ASK" and launch in Tower to be prompted.
+        - Use "ASK" and launch job to be prompted.
         - Deprecated, please use inputs
       type: str
     vault_id:
@@ -203,7 +203,7 @@ notes:
 
 
 EXAMPLES = '''
-- name: Add tower machine credential
+- name: Add machine credential
   credential:
     name: Team Name
     description: Team Description
@@ -229,7 +229,7 @@ EXAMPLES = '''
     src: '$HOME/.ssh/aws-private.pem'
   register: aws_ssh_key
 
-- name: Add Credential Into Tower
+- name: Add Credential
   credential:
     name: Workshop Credential
     credential_type: Machine

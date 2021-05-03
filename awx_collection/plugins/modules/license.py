@@ -15,9 +15,9 @@ DOCUMENTATION = '''
 ---
 module: license
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Set the license for Automation Controller
+short_description: Set the license for Automation Platform Controller
 description:
-    - Get or Set Automation Controller license. See
+    - Get or Set Automation Platform Controller license. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     manifest:

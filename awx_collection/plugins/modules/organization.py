@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: organization
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller organizations
+short_description: create, update, or destroy Automation Platform Controller organizations
 description:
-    - Create, update, or destroy Automation Controller organizations. See
+    - Create, update, or destroy Automation Platform Controller organizations. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -86,21 +86,21 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Create tower organization
+- name: Create organization
   organization:
     name: "Foo"
     description: "Foo bar organization"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Create tower organization using 'foo-venv' as default Python virtualenv
+- name: Create organization using 'foo-venv' as default Python virtualenv
   organization:
     name: "Foo"
     description: "Foo bar organization using foo-venv"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Create tower organization that pulls content from galaxy.ansible.com
+- name: Create organization that pulls content from galaxy.ansible.com
   organization:
     name: "Foo"
     state: present

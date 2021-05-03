@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: schedule
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Automation Controller schedules.
+short_description: create, update, or destroy Automation Platform Controller schedules.
 description:
-    - Create, update, or destroy Automation Controller schedules. See
+    - Create, update, or destroy Automation Platform Controller schedules. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     rrule:
@@ -131,7 +131,7 @@ EXAMPLES = '''
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
-    rrule: "{{ query('awx.awx.tower_schedule_rrule', 'week', start_date='2019-12-19 13:05:51') }}"
+    rrule: "{{ query('awx.awx.schedule_rrule', 'week', start_date='2019-12-19 13:05:51') }}"
   register: result
 '''
 

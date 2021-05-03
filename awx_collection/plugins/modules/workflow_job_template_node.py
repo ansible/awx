@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: workflow_job_template_node
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Automation Controller workflow job template nodes.
+short_description: create, update, or destroy Automation Platform Controller workflow job template nodes.
 description:
-    - Create, update, or destroy Automation Controller workflow job template nodes.
+    - Create, update, or destroy Automation Platform Controller workflow job template nodes.
     - Use this to build a graph for a workflow, which dictates what the workflow runs.
     - Replaces the deprecated tower_workflow_template module schema command.
     - You can create nodes first, and link them afterwards, and not worry about ordering.
@@ -157,7 +157,7 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Create a node, follows tower_workflow_job_template example
+- name: Create a node, follows workflow_job_template example
   workflow_job_template_node:
     identifier: my-first-node
     workflow: example-workflow
@@ -283,7 +283,9 @@ def main():
             wfjt_search_fields['organization'] = organization_id
         wfjt_data = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{'data': wfjt_search_fields})
         if wfjt_data is None:
-            module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(workflow_job_template, organization))
+            module.fail_json(
+                msg="The workflow {0} in organization {1} was not found on the controller instance server".format(workflow_job_template, organization)
+            )
         workflow_job_template_id = wfjt_data['id']
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 

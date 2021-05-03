@@ -5,9 +5,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-    lookup: tower_schedule_rrule
+    lookup: schedule_rrule
     author: John Westcott IV (@john-westcott-iv)
-    short_description: Generate an rrule string which can be used for Tower Schedules
+    short_description: Generate an rrule string which can be used for Schedules
     requirements:
       - pytz
       - python.dateutil >= 2.7.0
@@ -75,7 +75,7 @@ DOCUMENTATION = """
 EXAMPLES = """
     - name: Create a string for a schedule
       debug:
-        msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', start_date='1979-09-13 03:45:07') }}"
+        msg: "{{ query('awx.awx.schedule_rrule', 'none', start_date='1979-09-13 03:45:07') }}"
 """
 
 RETURN = """
@@ -233,7 +233,7 @@ class LookupModule(LookupBase):
 
         my_rule = rrule.rrule(**rrule_kwargs)
 
-        # All frequencies can use a timezone but rrule can't support the format that Tower uses.
+        # All frequencies can use a timezone but rrule can't support the format that AWX uses.
         # So we will do a string manip here if we need to
         timezone = 'America/New_York'
         if 'timezone' in kwargs:
@@ -243,7 +243,7 @@ class LookupModule(LookupBase):
 
         # rrule puts a \n in the rule instad of a space and can't handle timezones
         return_rrule = str(my_rule).replace('\n', ' ').replace('DTSTART:', 'DTSTART;TZID={0}:'.format(timezone))
-        # Tower requires an interval. rrule will not add interval if it's set to 1
+        # AWX requires an interval. rrule will not add interval if it's set to 1
         if kwargs.get('every', 1) == 1:
             return_rrule = "{0};INTERVAL=1".format(return_rrule)
 

@@ -17,9 +17,9 @@ DOCUMENTATION = '''
 module: ad_hoc_command
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "4.0"
-short_description: create, update, or destroy Automation Controller ad hoc commands.
+short_description: create, update, or destroy Automation Platform Controller ad hoc commands.
 description:
-    - Create, update, or destroy Automation Controller ad hoc commands. See
+    - Create, update, or destroy Automation Platform Controller ad hoc commands. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     job_type:
@@ -84,7 +84,7 @@ options:
       type: bool
     interval:
       description:
-        - The interval to request an update from Tower.
+        - The interval to request an update from the controller.
       default: 1
       type: float
     timeout:

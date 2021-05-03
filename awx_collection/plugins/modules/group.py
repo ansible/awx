@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: group
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller group.
+short_description: create, update, or destroy Automation Platform Controller group.
 description:
-    - Create, update, or destroy Automation Controller groups. See
+    - Create, update, or destroy Automation Platform Controller groups. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -53,12 +53,12 @@ options:
         - groups
     preserve_existing_hosts:
       description:
-        - Provide option (False by default) to preserves existing hosts in an existing group in tower.
+        - Provide option (False by default) to preserves existing hosts in an existing group.
       default: False
       type: bool
     preserve_existing_children:
       description:
-        - Provide option (False by default) to preserves existing children in an existing group in tower.
+        - Provide option (False by default) to preserves existing children in an existing group.
       default: False
       type: bool
       aliases:
@@ -78,7 +78,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add tower group
+- name: Add group
   group:
     name: localhost
     description: "Local Host Group"
@@ -86,7 +86,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add tower group
+- name: Add group
   group:
     name: Cities
     description: "Local Host Group"

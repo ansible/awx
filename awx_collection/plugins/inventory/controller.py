@@ -6,14 +6,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = '''
-name: tower
+name: controller
 plugin_type: inventory
 author:
   - Matthew Jones (@matburt)
   - Yunfan Zhang (@YunfanZhang42)
-short_description: Ansible dynamic inventory plugin for Automation Controller.
+short_description: Ansible dynamic inventory plugin for the Automation Platform Controller.
 description:
-    - Reads inventories from Automation Controller.
+    - Reads inventories from the Automation Platform Controller.
     - Supports reading configuration from both YAML config file and environment variables.
     - If reading from the YAML file, the file name must end with tower.(yml|yaml) or tower_inventory.(yml|yaml),
       the path in the command would be /path/to/tower_inventory.(yml|yaml). If some arguments in the config file
@@ -23,7 +23,7 @@ extends_documentation_fragment: awx.awx.auth_plugin
 options:
     inventory_id:
         description:
-            - The ID of the Automation Controller inventory that you wish to import.
+            - The ID of the inventory that you wish to import.
             - This is allowed to be either the inventory primary key or its named URL slug.
             - Primary key values will be accepted as strings or integers, and URL slugs must be strings.
             - Named URL slugs follow the syntax of "inventory_name++organization_name".
@@ -32,7 +32,7 @@ options:
             - name: TOWER_INVENTORY
         required: True
     include_metadata:
-        description: Make extra requests to provide all group vars with metadata about the source Automation Controller host.
+        description: Make extra requests to provide all group vars with metadata about the source host.
         type: bool
         default: False
 '''
@@ -43,11 +43,11 @@ EXAMPLES = '''
 
 # Example for using tower_inventory.yml file
 
-plugin: awx.awx.tower
-host: your_ansible_tower_server_network_address
-username: your_ansible_tower_username
-password: your_ansible_tower_password
-inventory_id: the_ID_of_targeted_ansible_tower_inventory
+plugin: awx.awx.controller
+host: your_automation_controller_server_network_address
+username: your_automation_controller_username
+password: your_automation_controller_password
+inventory_id: the_ID_of_targeted_automation_controller_inventory
 # Then you can run the following command.
 # If some of the arguments are missing, Ansible will attempt to read them from environment variables.
 # ansible-inventory -i /path/to/tower_inventory.yml --list
@@ -59,7 +59,7 @@ inventory_id: the_ID_of_targeted_ansible_tower_inventory
 # export TOWER_USERNAME=YOUR_TOWER_USERNAME
 # export TOWER_PASSWORD=YOUR_TOWER_PASSWORD
 # export TOWER_INVENTORY=THE_ID_OF_TARGETED_INVENTORY
-# Read the inventory specified in TOWER_INVENTORY from Automation Controller, and list them.
+# Read the inventory specified in TOWER_INVENTORY from the controller, and list them.
 # The inventory path must always be @tower_inventory if you are reading all settings from environment variables.
 # ansible-inventory -i @tower_inventory --list
 '''
@@ -80,7 +80,7 @@ def handle_error(**kwargs):
 
 
 class InventoryModule(BaseInventoryPlugin):
-    NAME = 'awx.awx.tower'  # REPLACE
+    NAME = 'awx.awx.controller'  # REPLACE
     # Stays backward compatible with tower inventory script.
     # If the user supplies '@tower_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False

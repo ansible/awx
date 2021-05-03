@@ -6,9 +6,9 @@
 
 - name: Generate names
   set_fact:
-    inv_name: "AWX-Collection-tests-tower_ad_hoc_command_wait-inventory-{{ test_id }}"
-    ssh_cred_name: "AWX-Collection-tests-tower_ad_hoc_command_wait-ssh-cred-{{ test_id }}"
-    org_name: "AWX-Collection-tests-tower_ad_hoc_command_wait-org-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-ad_hoc_command_wait-inventory-{{ test_id }}"
+    ssh_cred_name: "AWX-Collection-tests-ad_hoc_command_wait-ssh-cred-{{ test_id }}"
+    org_name: "AWX-Collection-tests-ad_hoc_command_wait-org-{{ test_id }}"
 
 - name: Create a New Organization
   organization:
@@ -43,7 +43,7 @@
 - assert:
     that:
       - result is failed
-      - "result.msg == 'Unable to wait on ad hoc command 99999999; that ID does not exist in Tower.'"
+      - "result.msg == 'Unable to wait on ad hoc command 99999999; that ID does not exist.'"
 
 - name: Launch command module with sleep 10
   ad_hoc_command:

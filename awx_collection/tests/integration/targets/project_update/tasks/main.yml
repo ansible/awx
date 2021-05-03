@@ -6,7 +6,7 @@
 
 - name: Generate names
   set_fact:
-    project_name1: "AWX-Collection-tests-tower_project_update-project-{{ test_id }}"
+    project_name1: "AWX-Collection-tests-project_update-project-{{ test_id }}"
 
 - name: Create a git project without credentials without waiting
   project:

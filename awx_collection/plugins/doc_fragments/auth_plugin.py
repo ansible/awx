@@ -10,29 +10,29 @@ __metaclass__ = type
 
 class ModuleDocFragment(object):
 
-    # Automation Controller documentation fragment
+    # Automation Platform Controller documentation fragment
     DOCUMENTATION = r'''
 options:
     host:
-        description: The network address of your Automation Controller host.
+        description: The network address of your Automation Platform Controller host.
         env:
             - name: TOWER_HOST
     username:
-        description: The user that you plan to use to access inventories on Automation Controller.
+        description: The user that you plan to use to access inventories on the controller.
         env:
             - name: TOWER_USERNAME
     password:
-        description: The password for your Automation Controller user.
+        description: The password for your controller user.
         env:
             - name: TOWER_PASSWORD
     oauth_token:
         description:
-            - The Tower OAuth token to use.
+            - The OAuth token to use.
         env:
             - name: TOWER_OAUTH_TOKEN
     verify_ssl:
         description:
-            - Specify whether Ansible should verify the SSL certificate of Automation Controller host.
+            - Specify whether Ansible should verify the SSL certificate of the controller host.
             - Defaults to True, but this is handled by the shared module_utils code
         type: bool
         env:
@@ -41,8 +41,8 @@ options:
 
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library
-  defaults to find your Tower host information.
-- I(config_file) should contain Tower configuration in the following format
+  defaults to find your host information.
+- I(config_file) should be in the following format
     host=hostname
     username=username
     password=password

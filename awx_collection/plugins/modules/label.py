@@ -16,11 +16,11 @@ DOCUMENTATION = '''
 ---
 module: label
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller labels.
+short_description: create, update, or destroy Automation Platform Controller labels.
 description:
-    - Create, update, or destroy Automation Controller labels. See
+    - Create, update, or destroy Automation Platform Controller labels. See
       U(https://www.ansible.com/tower) for an overview.
-    - Note, labels can only be created via the Tower API, they can not be deleted.
+    - Note, labels can only be created via the API, they can not be deleted.
       Once they are fully disassociated the API will clean them up on its own.
 options:
     name:
@@ -47,7 +47,7 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Add label to tower organization
+- name: Add label to organization
   label:
     name: Custom Label
     organization: My Organization

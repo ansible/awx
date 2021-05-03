@@ -17,15 +17,15 @@ DOCUMENTATION = '''
 module: import
 author: "John Westcott (@john-westcott-iv)"
 version_added: "3.7"
-short_description: import resources into Automation Controller.
+short_description: import resources into Automation Platform Controller.
 description:
-    - Import assets into Automation Controller. See
+    - Import assets into Automation Platform Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     assets:
       description:
         - The assets to import.
-        - This can be the output of tower_export or loaded from a file
+        - This can be the output of the export module or loaded from a file
       required: True
       type: dict
 requirements:
@@ -39,7 +39,7 @@ EXAMPLES = '''
     all: True
   register: export_output
 
-- name: Import all tower assets from our export
+- name: Import all assets from our export
   import:
     assets: "{{ export_output.assets }}"
 

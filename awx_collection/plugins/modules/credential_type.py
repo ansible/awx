@@ -17,9 +17,9 @@ DOCUMENTATION = '''
 ---
 module: credential_type
 author: "Adrien Fleury (@fleu42)"
-short_description: Create, update, or destroy custom Automation Controller credential type.
+short_description: Create, update, or destroy custom Automation Platform Controller credential type.
 description:
-    - Create, update, or destroy Automation Controller credential type. See
+    - Create, update, or destroy Automation Platform Controller credential type. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -42,14 +42,14 @@ options:
     inputs:
       description:
         - >-
-          Enter inputs using either JSON or YAML syntax. Refer to the Ansible
-          Tower documentation for example syntax.
+          Enter inputs using either JSON or YAML syntax. Refer to the 
+          Automation Platform Controler documentation for example syntax.
       type: dict
     injectors:
       description:
         - >-
           Enter injectors using either JSON or YAML syntax. Refer to the
-          Automation Controller documentation for example syntax.
+          Automation Platform Controller documentation for example syntax.
       type: dict
     state:
       description:

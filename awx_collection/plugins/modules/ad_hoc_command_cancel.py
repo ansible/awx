@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: ad_hoc_command_cancel
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Cancel an Automation Controller Ad Hoc Command.
+short_description: Cancel an Ad Hoc Command.
 description:
-    - Cancel Automation Controller ad hoc command. See
+    - Cancel ad hoc command. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     command_id:
@@ -33,14 +33,14 @@ options:
       type: bool
     interval:
       description:
-        - The interval in seconds, to request an update from Tower.
+        - The interval in seconds, to request an update from .
       required: False
       default: 1
       type: float
     timeout:
       description:
         - Maximum time in seconds to wait for a job to finish.
-        - Not specifying means the task will wait until Tower cancels the command.
+        - Not specifying means the task will wait until the controller cancels the command.
       type: int
 extends_documentation_fragment: awx.awx.auth
 '''

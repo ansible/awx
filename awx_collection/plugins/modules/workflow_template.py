@@ -20,7 +20,7 @@ deprecated:
   why: Deprecated in favor of C(_workflow_job_template) and C(_workflow_job_template_node) modules.
   alternative: Use M(tower_workflow_job_template) and M(_workflow_job_template_node) instead.
 author: "Adrien Fleury (@fleu42)"
-short_description: create, update, or destroy Automation Controller workflow template.
+short_description: create, update, or destroy Automation Platform Controller workflow template.
 description:
     - A tower-cli based module for CRUD actions on workflow job templates.
     - Enables use of the old schema functionality.
@@ -64,7 +64,7 @@ options:
       description:
         - >
           The schema is a JSON- or YAML-formatted string defining the
-          hierarchy structure that connects the nodes. Refer to Tower
+          hierarchy structure that connects the nodes. Refer to the Automation Platform
           documentation for more information.
       type: list
       elements: dict

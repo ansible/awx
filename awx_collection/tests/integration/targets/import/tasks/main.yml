@@ -6,8 +6,8 @@
 
 - name: Generate names
   set_fact:
-    org_name1: "AWX-Collection-tests-tower_import-organization-{{ test_id }}"
-    org_name2: "AWX-Collection-tests-tower_import-organization2-{{ test_id }}"
+    org_name1: "AWX-Collection-tests-import-organization-{{ test_id }}"
+    org_name2: "AWX-Collection-tests-import-organization2-{{ test_id }}"
 
 - block:
     - name: "Import something"

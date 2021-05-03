@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: job_wait
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: Wait for Automation Controller job to finish.
+short_description: Wait for Automation Platform Controller job to finish.
 description:
-    - Wait for Automation Controller job to finish and report success or failure. See
+    - Wait for Automation Platform Controller job to finish and report success or failure. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     job_id:
@@ -28,19 +28,19 @@ options:
       type: int
     interval:
       description:
-        - The interval in sections, to request an update from Tower.
+        - The interval in sections, to request an update from the controller.
         - For backwards compatibility if unset this will be set to the average of min and max intervals
       required: False
       default: 1
       type: float
     min_interval:
       description:
-        - Minimum interval in seconds, to request an update from Tower.
+        - Minimum interval in seconds, to request an update from the controller.
         - deprecated, use interval instead
       type: float
     max_interval:
       description:
-        - Maximum interval in seconds, to request an update from Tower.
+        - Maximum interval in seconds, to request an update from the controller.
         - deprecated, use interval instead
       type: float
     timeout:
@@ -147,7 +147,7 @@ def main():
     )
 
     if job is None:
-        module.fail_json(msg='Unable to wait on ' + job_type.rstrip("s") + ' {0}; that ID does not exist in Tower.'.format(job_id))
+        module.fail_json(msg='Unable to wait on ' + job_type.rstrip("s") + ' {0}; that ID does not exist.'.format(job_id))
 
     # Invoke wait function
     result = module.wait_on_url(url=job['url'], object_name=job_id, object_type='legacy_job_wait', timeout=timeout, interval=interval)

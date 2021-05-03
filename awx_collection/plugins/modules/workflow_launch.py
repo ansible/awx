@@ -13,9 +13,9 @@ DOCUMENTATION = '''
 ---
 module: workflow_launch
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Run a workflow in Automation Controller
+short_description: Run a workflow in Automation Platform Controller
 description:
-    - Launch an Automation Controller workflows. See
+    - Launch an Automation Platform Controller workflows. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -55,7 +55,7 @@ options:
       type: bool
     interval:
       description:
-        - The interval to request an update from Tower.
+        - The interval to request an update from the controller.
       required: False
       default: 1
       type: float

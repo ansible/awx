@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: user
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Automation Controller users.
+short_description: create, update, or destroy Automation Platform Controller users.
 description:
-    - Create, update, or destroy Automation Controller users. See
+    - Create, update, or destroy Automation Platform Controller users. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     username:
@@ -71,7 +71,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add tower user
+- name: Add user
   user:
     username: jdoe
     password: foobarbaz
@@ -81,7 +81,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add tower user as a system administrator
+- name: Add user as a system administrator
   user:
     username: jdoe
     password: foobarbaz
@@ -90,7 +90,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add tower user as a system auditor
+- name: Add user as a system auditor
   user:
     username: jdoe
     password: foobarbaz
@@ -99,7 +99,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Delete tower user
+- name: Delete user
   user:
     username: jdoe
     email: jdoe@example.org

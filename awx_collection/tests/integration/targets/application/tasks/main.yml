@@ -5,9 +5,9 @@
 
 - name: Generate names
   set_fact:
-    app1_name: "AWX-Collection-tests-tower_application-app1-{{ test_id }}"
-    app2_name: "AWX-Collection-tests-tower_application-app2-{{ test_id }}"
-    app3_name: "AWX-Collection-tests-tower_application-app3-{{ test_id }}"
+    app1_name: "AWX-Collection-tests-application-app1-{{ test_id }}"
+    app2_name: "AWX-Collection-tests-application-app2-{{ test_id }}"
+    app3_name: "AWX-Collection-tests-application-app3-{{ test_id }}"
 
 - block:
     - name: Create an application

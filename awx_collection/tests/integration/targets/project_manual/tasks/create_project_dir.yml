@@ -1,9 +1,9 @@
 ---
 - name: Load the UI settings
   set_fact:
-    project_base_dir: "{{ tower_settings.project_base_dir }}"
+    project_base_dir: "{{ controller_settings.project_base_dir }}"
   vars:
-    tower_settings: "{{ lookup('awx.awx.controller_api', 'config/') }}"
+    controller_settings: "{{ lookup('awx.awx.controller_api', 'config/') }}"
 
 - inventory:
     name: localhost

@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: job_template
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller job templates.
+short_description: create, update, or destroy Automation Platform Controller job templates.
 description:
-    - Create, update, or destroy Automation Controller job templates. See
+    - Create, update, or destroy Automation Platform Controller job templates. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -57,7 +57,7 @@ options:
         - Used to help lookup the object, cannot be modified using this module.
         - The Organization is inferred from the associated project
         - If not provided, will lookup by name only, which does not work with duplicates.
-        - Requires Tower Version 3.7.0 or AWX 10.0.0 IS NOT backwards compatible with earlier versions.
+        - Requires Automation Platform Version 3.7.0 or AWX 10.0.0 IS NOT backwards compatible with earlier versions.
       type: str
     project:
       description:
@@ -297,14 +297,14 @@ options:
 extends_documentation_fragment: awx.awx.auth
 
 notes:
-  - JSON for survey_spec can be found in Tower API Documentation. See
+  - JSON for survey_spec can be found in the API Documentation. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_create)
     for POST operation payload example.
 '''
 
 
 EXAMPLES = '''
-- name: Create Tower Ping job template
+- name: Create Ping job template
   job_template:
     name: "Ping"
     job_type: "run"
@@ -534,7 +534,7 @@ def main():
                 }
             )
             if project_data is None:
-                module.fail_json(msg="The project {0} in organization {1} was not found on the Tower server".format(project, organization))
+                module.fail_json(msg="The project {0} in organization {1} was not found on the controller instance server".format(project, organization))
             new_fields['project'] = project_data['id']
         else:
             new_fields['project'] = module.resolve_name_to_id('projects', project)

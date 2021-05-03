@@ -1,8 +1,8 @@
 ---
 - name: Generate names
   set_fact:
-    host_name: "AWX-Collection-tests-tower_host-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    inv_name: "AWX-Collection-tests-tower_host-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    host_name: "AWX-Collection-tests-host-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    inv_name: "AWX-Collection-tests-host-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an Inventory
   inventory:

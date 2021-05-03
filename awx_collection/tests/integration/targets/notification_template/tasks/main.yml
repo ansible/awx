@@ -1,12 +1,12 @@
 ---
 - name: Generate names
   set_fact:
-    slack_not: "AWX-Collection-tests-tower_notification_template-slack-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    email_not: "AWX-Collection-tests-tower_notification_template-email-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    twillo_not: "AWX-Collection-tests-tower_notification_template-twillo-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    pd_not: "AWX-Collection-tests-tower_notification_template-pd-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    irc_not: "AWX-Collection-tests-tower_notification_template-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    slack_not: "AWX-Collection-tests-notification_template-slack-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    webhook_not: "AWX-Collection-tests-notification_template-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    email_not: "AWX-Collection-tests-notification_template-email-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    twillo_not: "AWX-Collection-tests-notification_template-twillo-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    pd_not: "AWX-Collection-tests-notification_template-pd-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    irc_not: "AWX-Collection-tests-notification_template-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Test deprecation warnings with legacy name
   notification_template:

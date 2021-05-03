@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: job_list
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: List Automation Controller jobs.
+short_description: List Automation Platform Controller jobs.
 description:
-    - List Automation Controller jobs. See
+    - List Automation Platform Controller jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     status:

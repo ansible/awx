@@ -5,8 +5,8 @@
 
 - name: Generate an org name
   set_fact:
-    org_name: "AWX-Collection-tests-tower_organization-org-{{ test_id }}"
-    group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
 
 - name: Make sure {{ org_name }} is not there
   organization:

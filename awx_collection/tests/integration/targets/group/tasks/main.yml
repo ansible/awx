@@ -1,13 +1,13 @@
 ---
 - name: Generate names
   set_fact:
-    group_name1: "AWX-Collection-tests-tower_group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    group_name2: "AWX-Collection-tests-tower_group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    group_name3: "AWX-Collection-tests-tower_group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    inv_name: "AWX-Collection-test-tower_group-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name1: "AWX-Collection-test-tower_group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name2: "AWX-Collection-test-tower_group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name3: "AWX-Collection-test-tower_group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    group_name1: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    group_name2: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    group_name3: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    inv_name: "AWX-Collection-tests-group-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    host_name1: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    host_name2: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    host_name3: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an Inventory
   inventory:

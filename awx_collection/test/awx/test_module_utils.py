@@ -10,7 +10,7 @@ from requests.models import Response
 from unittest import mock
 
 awx_name = 'AWX'
-tower_name = 'Red Hat Automation Controller'
+tower_name = 'Red Hat Automation Platform Controller'
 ping_version = '1.2.3'
 
 
@@ -32,7 +32,7 @@ def status(self):
     return 200
 
 
-def mock_tower_ping_response(self, method, url, **kwargs):
+def mock_controller_ping_response(self, method, url, **kwargs):
     r = Response()
     r.getheader = getTowerheader.__get__(r)
     r.read = read.__get__(r)
@@ -86,25 +86,25 @@ def test_version_warning_strictness_awx(collection_import, silence_warning):
     silence_warning.assert_not_called()
 
 
-def test_version_warning_strictness_tower(collection_import, silence_warning):
+def test_version_warning_strictness_controller(collection_import, silence_warning):
     ControllerAPIModule = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     # Compare 1.2.0 to 1.2.3 (major/minor matches)
     with mock.patch.object(sys, 'argv', testargs):
-        with mock.patch('ansible.module_utils.urls.Request.open', new=mock_tower_ping_response):
+        with mock.patch('ansible.module_utils.urls.Request.open', new=mock_controller_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.2.0"
-            my_module._COLLECTION_TYPE = "tower"
+            my_module._COLLECTION_TYPE = "controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_not_called()
 
     # Compare 1.0.0 to 1.2.3 (major/minor fail to match)
     with mock.patch.object(sys, 'argv', testargs):
-        with mock.patch('ansible.module_utils.urls.Request.open', new=mock_tower_ping_response):
+        with mock.patch('ansible.module_utils.urls.Request.open', new=mock_controller_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.0.0"
-            my_module._COLLECTION_TYPE = "tower"
+            my_module._COLLECTION_TYPE = "controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
         'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, tower_name, ping_version)
@@ -119,7 +119,7 @@ def test_type_warning(collection_import, silence_warning):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_awx_ping_response):
             my_module = ControllerAPIModule(argument_spec={})
             my_module._COLLECTION_VERSION = ping_version
-            my_module._COLLECTION_TYPE = "tower"
+            my_module._COLLECTION_TYPE = "controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
         'You are using the {0} version of this collection but connecting to {1}'.format(my_module._COLLECTION_TYPE, awx_name)
@@ -157,7 +157,7 @@ def test_no_templated_values(collection_import):
         'The collection version is templated when the collection is built ' 'and the code should retain the placeholder of "0.0.1-devel".'
     )
     InventoryModule = collection_import('plugins.inventory.controller').InventoryModule
-    assert InventoryModule.NAME == 'awx.awx.tower', (
+    assert InventoryModule.NAME == 'awx.awx.controller', (
         'The inventory plugin FQCN is templated when the collection is built ' 'and the code should retain the default of awx.awx.'
     )
 

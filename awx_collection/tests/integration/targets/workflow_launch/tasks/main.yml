@@ -6,9 +6,9 @@
 
 - name: Generate names
   set_fact:
-    wfjt_name1: "AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id }}"
-    wfjt_name2: "AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id }}-2"
-    approval_node_name: "AWX-Collection-tests-tower_workflow_launch_approval_node-{{ test_id }}"
+    wfjt_name1: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}"
+    wfjt_name2: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}-2"
+    approval_node_name: "AWX-Collection-tests-workflow_launch_approval_node-{{ test_id }}"
 
 - block:
 
@@ -24,7 +24,7 @@
         identifier: leaf
       register: new_node
 
-    - name: Connect to Tower server but request an invalid workflow
+    - name: Connect to controller server but request an invalid workflow
       workflow_launch:
         workflow_template: "Does Not Exist"
       ignore_errors: true
@@ -176,7 +176,7 @@
         unified_job_template: "Demo Job Template"
         identifier: leaf
 
-    # Test tower_workflow_approval and tower_workflow_node_wait
+    # Test workflow_approval and workflow_node_wait
     - name: Create approval node
       workflow_job_template_node:
         identifier: approval_test

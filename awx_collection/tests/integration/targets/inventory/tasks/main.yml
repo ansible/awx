@@ -5,10 +5,10 @@
 
 - name: Generate names
   set_fact:
-    inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ test_id }}"
-    inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ test_id }}"
-    cred_name1: "AWX-Collection-tests-tower_inventory-cred1-{{ test_id }}"
-    group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
+    inv_name1: "AWX-Collection-tests-inventory-inv1-{{ test_id }}"
+    inv_name2: "AWX-Collection-tests-inventory-inv2-{{ test_id }}"
+    cred_name1: "AWX-Collection-tests-inventory-cred1-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
 
 - block:
 

@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: project
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller projects
+short_description: create, update, or destroy Automation Platform Controller projects
 description:
-    - Create, update, or destroy Automation Controller projects. See
+    - Create, update, or destroy Automation Platform Controller projects. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -160,7 +160,7 @@ options:
       type: bool
     interval:
       description:
-        - The interval to request an update from Tower.
+        - The interval to request an update from the controller.
         - Requires wait.
       required: False
       default: 1
@@ -170,7 +170,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add tower project
+- name: Add project
   project:
     name: "Foo"
     description: "Foo bar project"
@@ -178,7 +178,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add Tower Project with cache timeout
+- name: Add Project with cache timeout
   project:
     name: "Foo"
     description: "Foo bar project"
@@ -188,7 +188,7 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Copy tower project
+- name: Copy project
   project:
     name: copy
     copy_from: test

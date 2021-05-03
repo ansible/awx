@@ -18,7 +18,7 @@ module: inventory_source_update
 author: "Bianca Henderson (@beeankha)"
 short_description: Update inventory source(s).
 description:
-    - Update Automation Controller inventory source(s). See
+    - Update Automation Platform Controller inventory source(s). See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -44,7 +44,7 @@ options:
       type: bool
     interval:
       description:
-        - The interval to request an update from Tower.
+        - The interval to request an update from the controller.
       required: False
       default: 1
       type: float

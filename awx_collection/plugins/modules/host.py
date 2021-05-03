@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: host
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Controller host.
+short_description: create, update, or destroy Automation Platform Controller host.
 description:
-    - Create, update, or destroy Automation Controller hosts. See
+    - Create, update, or destroy Automation Platform Controller hosts. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -59,7 +59,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add tower host
+- name: Add host
   host:
     name: localhost
     description: "Local Host Group"

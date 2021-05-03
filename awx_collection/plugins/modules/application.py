@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: application
 author: "Geoffrey Bacheot (@jffz)"
-short_description: create, update, or destroy Automation Controller applications
+short_description: create, update, or destroy Automation Platform Controller applications
 description:
-    - Create, update, or destroy Automation Controller applications. See
+    - Create, update, or destroy Automation Platform Controller applications. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:

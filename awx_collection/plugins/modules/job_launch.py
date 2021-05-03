@@ -18,7 +18,7 @@ module: job_launch
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: Launch an Ansible Job.
 description:
-    - Launch an Automation Controller jobs. See
+    - Launch an Automation Platform Controller jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -51,7 +51,7 @@ options:
     extra_vars:
       description:
         - extra_vars to use for the Job Template.
-        - ask_extra_vars needs to be set to True via tower_job_template module
+        - ask_extra_vars needs to be set to True via job_template module
           when creating the Job Template.
       type: dict
     limit:
@@ -93,7 +93,7 @@ options:
       type: bool
     interval:
       description:
-        - The interval to request an update from Tower.
+        - The interval to request an update from the controller.
       required: False
       default: 1
       type: float
@@ -111,7 +111,7 @@ EXAMPLES = '''
     job_template: "My Job Template"
   register: job
 
-- name: Launch a job template with extra_vars on remote Tower instance
+- name: Launch a job template with extra_vars on remote controller instance
   job_launch:
     job_template: "My Job Template"
     extra_vars:

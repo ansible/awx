@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: settings
 author: "Nikhil Jain (@jainnikhil30)"
-short_description: Modify Automation Controller settings.
+short_description: Modify Automation Platform Controller settings.
 description:
-    - Modify Automation Controller settings. See
+    - Modify Automation Platform Controller settings. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:

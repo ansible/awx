@@ -20,9 +20,9 @@ deprecated:
   why: Deprecated in favor of upcoming C(_export) module.
   alternative: Once published, use M(tower_export) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Receive assets from Automation Controller.
+short_description: Receive assets from Automation Platform Controller.
 description:
-    - Receive assets from Automation Controller. See
+    - Receive assets from Automation Platform Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     all:
@@ -101,7 +101,7 @@ extends_documentation_fragment: awx.awx.auth_legacy
 '''
 
 EXAMPLES = '''
-- name: Export all tower assets
+- name: Export all Automation Platform Controller assets
   receive:
     all: True
     tower_config_file: "~/tower_cli.cfg"

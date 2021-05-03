@@ -4,7 +4,7 @@
     name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/"]'
 
-- name: Set the value of AWX_ISOLATION_SHOW_PATHS to get an error back from Tower
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS to get an error back from the controller
   settings:
     settings:
       AWX_ISOLATION_SHOW_PATHS:

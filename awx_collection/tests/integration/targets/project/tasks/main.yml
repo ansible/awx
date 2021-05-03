@@ -1,13 +1,13 @@
 ---
 - name: Generate names
   set_fact:
-    project_name1: "AWX-Collection-tests-tower_project-project1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_name2: "AWX-Collection-tests-tower_project-project2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_name3: "AWX-Collection-tests-tower_project-project3-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt1: "AWX-Collection-tests-tower_project-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    scm_cred_name: "AWX-Collection-tests-tower_project-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    org_name: "AWX-Collection-tests-tower_project-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    cred_name: "AWX-Collection-tests-tower_project-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_name1: "AWX-Collection-tests-project-project1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_name2: "AWX-Collection-tests-project-project2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_name3: "AWX-Collection-tests-project-project3-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt1: "AWX-Collection-tests-project-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    scm_cred_name: "AWX-Collection-tests-project-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    org_name: "AWX-Collection-tests-project-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred_name: "AWX-Collection-tests-project-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - block:
     - name: Create an SCM Credential
@@ -77,7 +77,7 @@
         scm_credential: "{{ cred_name }}"
       check_mode: true
 
-    - name: "Copy tower project from {{ project_name1 }}"
+    - name: "Copy project from {{ project_name1 }}"
       project:
         name: "{{ project_name2 }}"
         copy_from: "{{ project_name1 }}"

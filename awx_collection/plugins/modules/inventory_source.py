@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: inventory_source
 author: "Adrien Fleury (@fleu42)"
-short_description: create, update, or destroy Automation Controller inventory source.
+short_description: create, update, or destroy Automation Platform Controller inventory source.
 description:
-    - Create, update, or destroy Automation Controller inventory source. See
+    - Create, update, or destroy Automation Platform Controller inventory source. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -162,7 +162,7 @@ def main():
         description=dict(),
         inventory=dict(required=True),
         #
-        # How do we handle manual and file? Tower does not seem to be able to activate them
+        # How do we handle manual and file? The controller does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower"]),
         source_path=dict(),

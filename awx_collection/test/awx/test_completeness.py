@@ -14,7 +14,7 @@ import re
 
 # Read-only endpoints are dynamically created by an options page with no POST section.
 # Normally a read-only endpoint should not have a module (i.e. /api/v2/me) but sometimes we reuse a name
-# For example, we have a tower_role module but /api/v2/roles is a read only endpoint.
+# For example, we have a role module but /api/v2/roles is a read only endpoint.
 # This list indicates which read-only endpoints have associated modules with them.
 read_only_endpoints_with_modules = ['settings', 'role', 'project_update']
 
@@ -61,11 +61,11 @@ no_api_parameter_ok = {
     'workflow_job_template_node': ['organization', 'approval_node'],
     # Survey is how we handle associations
     'workflow_job_template': ['survey_spec', 'destroy_current_schema'],
-    # ad hoc commands support interval and timeout since its more like tower_job_launch
+    # ad hoc commands support interval and timeout since its more like job_launch
     'ad_hoc_command': ['interval', 'timeout', 'wait'],
-    # tower_group parameters to perserve hosts and children.
+    # group parameters to perserve hosts and children.
     'group': ['preserve_existing_children', 'preserve_existing_hosts'],
-    # tower_workflow_approval parameters that do not apply when approving an approval node.
+    # workflow_approval parameters that do not apply when approving an approval node.
     'workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
 }
 
