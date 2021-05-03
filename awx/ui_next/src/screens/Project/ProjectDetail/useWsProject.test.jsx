@@ -2,17 +2,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import WS from 'jest-websocket-mock';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import useWsProjects from './useWsProjects';
+import useWsProject from './useWsProject';
 
 function TestInner() {
   return <div />;
 }
-function Test({ projects }) {
-  const synced = useWsProjects(projects);
-  return <TestInner projects={synced} />;
+function Test({ project }) {
+  const synced = useWsProject(project);
+  return <TestInner project={synced} />;
 }
 
-describe('useWsProjects', () => {
+describe('useWsProject', () => {
   let debug;
   let wrapper;
   beforeEach(() => {
@@ -24,13 +24,13 @@ describe('useWsProjects', () => {
     global.console.debug = debug;
   });
 
-  test('should return projects list', async () => {
-    const projects = [{ id: 1 }];
+  test('should return project detail', async () => {
+    const project = { id: 1 };
     await act(async () => {
-      wrapper = await mountWithContexts(<Test projects={projects} />);
+      wrapper = await mountWithContexts(<Test project={project} />);
     });
 
-    expect(wrapper.find('TestInner').prop('projects')).toEqual(projects);
+    expect(wrapper.find('TestInner').prop('project')).toEqual(project);
     WS.clean();
   });
 
@@ -38,9 +38,9 @@ describe('useWsProjects', () => {
     global.document.cookie = 'csrftoken=abc123';
     const mockServer = new WS('ws://localhost/websocket/');
 
-    const projects = [{ id: 1 }];
+    const project = { id: 1 };
     await act(async () => {
-      wrapper = await mountWithContexts(<Test projects={projects} />);
+      wrapper = await mountWithContexts(<Test project={project} />);
     });
 
     await mockServer.connected;
@@ -60,20 +60,19 @@ describe('useWsProjects', () => {
     global.document.cookie = 'csrftoken=abc123';
     const mockServer = new WS('ws://localhost/websocket/');
 
-    const projects = [
-      {
-        id: 1,
-        summary_fields: {
-          current_job: {
-            id: 1,
-            status: 'running',
-            finished: null,
-          },
+    const project = {
+      id: 1,
+      summary_fields: {
+        last_job: {
+          id: 1,
+          status: 'successful',
+          finished: '2020-07-02T16:25:31.839071Z',
         },
       },
-    ];
+    };
+
     await act(async () => {
-      wrapper = await mountWithContexts(<Test projects={projects} />);
+      wrapper = await mountWithContexts(<Test project={project} />);
     });
 
     await mockServer.connected;
@@ -87,16 +86,43 @@ describe('useWsProjects', () => {
       })
     );
     expect(
-      wrapper.find('TestInner').prop('projects')[0].summary_fields.current_job
-        .status
-    ).toEqual('running');
+      wrapper.find('TestInner').prop('project').summary_fields.current_job
+    ).toBeUndefined();
+    expect(
+      wrapper.find('TestInner').prop('project').summary_fields.last_job.status
+    ).toEqual('successful');
+
     await act(async () => {
       mockServer.send(
         JSON.stringify({
+          group_name: 'jobs',
           project_id: 1,
-          unified_job_id: 12,
+          status: 'running',
           type: 'project_update',
+          unified_job_id: 2,
+          unified_job_template_id: 1,
+        })
+      );
+    });
+    wrapper.update();
+
+    expect(
+      wrapper.find('TestInner').prop('project').summary_fields.current_job
+    ).toEqual({
+      id: 2,
+      status: 'running',
+      finished: undefined,
+    });
+
+    await act(async () => {
+      mockServer.send(
+        JSON.stringify({
+          group_name: 'jobs',
+          project_id: 1,
           status: 'successful',
+          type: 'project_update',
+          unified_job_id: 2,
+          unified_job_template_id: 1,
           finished: '2020-07-02T16:28:31.839071Z',
         })
       );
@@ -104,9 +130,9 @@ describe('useWsProjects', () => {
     wrapper.update();
 
     expect(
-      wrapper.find('TestInner').prop('projects')[0].summary_fields.current_job
+      wrapper.find('TestInner').prop('project').summary_fields.current_job
     ).toEqual({
-      id: 12,
+      id: 2,
       status: 'successful',
       finished: '2020-07-02T16:28:31.839071Z',
     });

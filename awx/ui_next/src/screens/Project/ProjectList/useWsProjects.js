@@ -26,7 +26,7 @@ export default function useWsProjects(initialProjects) {
       ...project,
       summary_fields: {
         ...project.summary_fields,
-        last_job: {
+        current_job: {
           id: lastMessage.unified_job_id,
           status: lastMessage.status,
           finished: lastMessage.finished,

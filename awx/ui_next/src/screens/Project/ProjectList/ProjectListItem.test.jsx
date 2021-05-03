@@ -342,6 +342,10 @@ describe('<ProjectsListItem />', () => {
                   description: '',
                   name: 'Mock org',
                 },
+                last_job: {
+                  id: 9000,
+                  status: 'successful',
+                },
                 user_capabilities: {
                   start: true,
                 },

@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, List, ListItem } from '@patternfly/react-core';
+import { Button, List, ListItem, Tooltip } from '@patternfly/react-core';
 import { Project } from '../../../types';
 import { Config } from '../../../contexts/Config';
 
@@ -22,6 +22,9 @@ import { toTitleCase } from '../../../util/strings';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
+import StatusLabel from '../../../components/StatusLabel';
+import { formatDateString } from '../../../util/dates';
+import useWsProject from './useWsProject';
 
 function ProjectDetail({ project, i18n }) {
   const {
@@ -43,7 +46,7 @@ function ProjectDetail({ project, i18n }) {
     scm_update_cache_timeout,
     scm_url,
     summary_fields,
-  } = project;
+  } = useWsProject(project);
   const history = useHistory();
 
   const { request: deleteProject, isLoading, error: deleteError } = useRequest(
@@ -84,9 +87,52 @@ function ProjectDetail({ project, i18n }) {
     );
   }
 
+  const generateLastJobTooltip = job => {
+    return (
+      <Fragment>
+        <div>{i18n._(t`MOST RECENT SYNC`)}</div>
+        <div>
+          {i18n._(t`JOB ID:`)} {job.id}
+        </div>
+        <div>
+          {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
+        </div>
+        {job.finished && (
+          <div>
+            {i18n._(t`FINISHED:`)} {formatDateString(job.finished)}
+          </div>
+        )}
+      </Fragment>
+    );
+  };
+
+  let job = null;
+
+  if (summary_fields?.current_job) {
+    job = summary_fields.current_job;
+  } else if (summary_fields?.last_job) {
+    job = summary_fields.last_job;
+  }
+
   return (
     <CardBody>
       <DetailList gutter="sm">
+        <Detail
+          label={i18n._(t`Last Job Status`)}
+          value={
+            job && (
+              <Tooltip
+                position="top"
+                content={generateLastJobTooltip(job)}
+                key={job.id}
+              >
+                <Link to={`/jobs/project/${job.id}`}>
+                  <StatusLabel status={job.status} />
+                </Link>
+              </Tooltip>
+            )
+          }
+        />
         <Detail
           label={i18n._(t`Name`)}
           value={name}
@@ -171,7 +217,10 @@ function ProjectDetail({ project, i18n }) {
           </Button>
         )}
         {summary_fields.user_capabilities?.start && (
-          <ProjectSyncButton projectId={project.id} />
+          <ProjectSyncButton
+            projectId={project.id}
+            lastJobStatus={job && job.status}
+          />
         )}
         {summary_fields.user_capabilities?.delete && (
           <DeleteButton
