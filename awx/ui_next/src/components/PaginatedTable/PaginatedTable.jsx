@@ -96,7 +96,10 @@ function PaginatedTable({
     Content = (
       <div css="overflow: auto">
         {hasContentLoading && <LoadingSpinner />}
-        <TableComposable aria-label={dataListLabel} ouiaId={ouiaId}>
+        <TableComposable
+          aria-label={dataListLabel}
+          ouiaId={ouiaId || `paginated-table-${pluralizedItemName}`}
+        >
           {headerRow}
           <Tbody>{items.map(renderRow)}</Tbody>
         </TableComposable>

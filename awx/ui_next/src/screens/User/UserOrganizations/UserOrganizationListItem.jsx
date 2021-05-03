@@ -1,33 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  DataListItemCells,
-  DataListItemRow,
-  DataListItem,
-} from '@patternfly/react-core';
-import DataListCell from '../../../components/DataListCell';
+import { t } from '@lingui/macro';
+import { Tr, Td } from '@patternfly/react-table';
 
 export default function UserOrganizationListItem({ organization }) {
   const labelId = `organization-${organization.id}`;
   return (
-    <DataListItem aria-labelledby={labelId}>
-      <DataListItemRow>
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key={organization.id}>
-              <Link
-                to={`/organizations/${organization.id}/details`}
-                id={labelId}
-              >
-                <b>{organization.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key={organization.description}>
-              {organization.description}
-            </DataListCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr id={`user-org-row-${organization.id}`}>
+      <Td id={labelId} dataLabel={t`Name`}>
+        <Link to={`/organizations/${organization.id}/details`} id={labelId}>
+          {organization.name}
+        </Link>
+      </Td>
+      <Td dataLabel={t`Description`}>{organization.description}</Td>
+    </Tr>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
-import UserOrganizationsList from './UserOrganizationsList';
+import UserOrganizationList from './UserOrganizationList';
 
 function UserOrganizations() {
-  return <UserOrganizationsList />;
+  return <UserOrganizationList />;
 }
 export default UserOrganizations;
