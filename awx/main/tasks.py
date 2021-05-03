@@ -1157,20 +1157,32 @@ class BaseTask(object):
             cpu_time = time.time()
             first_window_time = self.recent_event_timings[0]
             last_window_time = self.recent_event_timings[-1]
-            inverse_effective_rate = cpu_time - first_window_time
-            # if last 30 events (which we sent websockets for) came in under 1 second ago
-            should_skip = bool(
-                inverse_effective_rate < 1.0
-                and self.recent_event_timings.maxlen * (cpu_time - last_window_time) < 1.0
-                and (len(self.recent_event_timings) == self.recent_event_timings.maxlen)
+
+            should_emit = bool(
+                # if 30the most recent websocket message was sent over 1 second ago
+                cpu_time - first_window_time > 1.0
+                # if the very last websocket message came in over 1/30 seconds ago
+                or self.recent_event_timings.maxlen * (cpu_time - last_window_time) > 1.0
+                # if the queue is not yet full
+                or (len(self.recent_event_timings) != self.recent_event_timings.maxlen)
             )
-            if should_skip:
+
+            logger.debug(
+                'Event {} websocket send {}, queue {}, avg rate {}, last rate {}'.format(
+                    event_data['counter'],
+                    should_emit,
+                    len(self.recent_event_timings),
+                    30.0 / (cpu_time - first_window_time),
+                    1.0 / (cpu_time - last_window_time),
+                )
+            )
+
+            if should_emit:
+                self.recent_event_timings.append(cpu_time)
+            else:
                 event_data.setdefault('event_data', {})
                 event_data['event_data']['skip_websocket_message'] = True
-            else:
-                if self.recent_event_timings[0] == self.recent_event_timings[-1]:
-                    logger.debug('Starting a window of event emission')
-                self.recent_event_timings.append(cpu_time)
+
         elif self.recent_event_timings.maxlen:
             self.recent_event_timings.append(time.time())
 
