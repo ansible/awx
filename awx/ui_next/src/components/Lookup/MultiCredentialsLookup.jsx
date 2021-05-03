@@ -12,6 +12,7 @@ import OptionsList from '../OptionsList';
 import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
+import useIsMounted from '../../util/useIsMounted';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,
@@ -28,6 +29,7 @@ async function loadCredentials(params, selectedCredentialTypeId) {
 function MultiCredentialsLookup(props) {
   const { value, onChange, onError, history, i18n } = props;
   const [selectedType, setSelectedType] = useState(null);
+  const isMounted = useIsMounted();
 
   const {
     result: credentialTypes,
@@ -38,8 +40,11 @@ function MultiCredentialsLookup(props) {
     useCallback(async () => {
       const types = await CredentialTypesAPI.loadAllTypes();
       const match = types.find(type => type.kind === 'ssh') || types[0];
-      setSelectedType(match);
+      if (isMounted.current) {
+        setSelectedType(match);
+      }
       return types;
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, []),
     []
   );

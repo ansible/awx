@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
@@ -7,6 +7,7 @@ import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import ContentLoading from '../../../components/ContentLoading';
 import InventoryForm from '../shared/InventoryForm';
 import { getAddedAndRemoved } from '../../../util/lists';
+import useIsMounted from '../../../util/useIsMounted';
 
 function InventoryEdit({ inventory }) {
   const [error, setError] = useState(null);
@@ -14,10 +15,9 @@ function InventoryEdit({ inventory }) {
   const [contentLoading, setContentLoading] = useState(true);
   const [credentialTypeId, setCredentialTypeId] = useState(null);
   const history = useHistory();
-  const isMounted = useRef(null);
+  const isMounted = useIsMounted();
 
   useEffect(() => {
-    isMounted.current = true;
     const loadData = async () => {
       try {
         const [
@@ -47,9 +47,7 @@ function InventoryEdit({ inventory }) {
       }
     };
     loadData();
-    return () => {
-      isMounted.current = false;
-    };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [inventory.id, contentLoading, inventory, credentialTypeId]);
 
   const handleCancel = () => {
