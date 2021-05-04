@@ -26,7 +26,7 @@ import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
-import { parseVariableField } from '../../../util/yaml';
+import { parseVariableField, jsonToYaml } from '../../../util/yaml';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -366,7 +366,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
             )}
             {showVariablesDetail && (
               <VariablesDetail
-                value={extra_data}
+                value={jsonToYaml(JSON.stringify(extra_data))}
                 rows={4}
                 label={t`Variables`}
               />
