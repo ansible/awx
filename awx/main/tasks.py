@@ -1169,7 +1169,7 @@ class BaseTask(object):
 
             logger.debug(
                 'Event {} websocket send {}, queue {}, avg rate {}, last rate {}'.format(
-                    event_data['counter'],
+                    event_data.get('counter', 0),
                     should_emit,
                     len(self.recent_event_timings),
                     30.0 / (cpu_time - first_window_time),
