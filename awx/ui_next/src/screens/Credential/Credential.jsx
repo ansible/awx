@@ -104,49 +104,49 @@ function Credential({ setBreadcrumb }) {
         {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         {hasContentLoading && <ContentLoading />}
         {!hasContentLoading && credential && (
-        <Switch>
-          <Redirect
-            from="/credentials/:id"
-            to="/credentials/:id/details"
-            exact
-          />
-          {credential && [
-            <Route key="details" path="/credentials/:id/details">
-              <CredentialDetail credential={credential} />
-            </Route>,
-            <Route key="edit" path="/credentials/:id/edit">
-              <CredentialEdit credential={credential} />
-            </Route>,
-            <Route key="access" path="/credentials/:id/access">
-              <ResourceAccessList
-                resource={credential}
-                apiModel={CredentialsAPI}
-              />
-            </Route>,
+          <Switch>
+            <Redirect
+              from="/credentials/:id"
+              to="/credentials/:id/details"
+              exact
+            />
+            {credential && [
+              <Route key="details" path="/credentials/:id/details">
+                <CredentialDetail credential={credential} />
+              </Route>,
+              <Route key="edit" path="/credentials/:id/edit">
+                <CredentialEdit credential={credential} />
+              </Route>,
+              <Route key="access" path="/credentials/:id/access">
+                <ResourceAccessList
+                  resource={credential}
+                  apiModel={CredentialsAPI}
+                />
+              </Route>,
+              <Route key="not-found" path="*">
+                {!hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link to={`/credentials/${match.params.id}/details`}>
+                        {t`View Credential Details`}
+                      </Link>
+                    )}
+                  </ContentError>
+                )}
+              </Route>,
+            ]}
             <Route key="not-found" path="*">
               {!hasContentLoading && (
                 <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link to={`/credentials/${match.params.id}/details`}>
+                  {id && (
+                    <Link to={`/credentials/${id}/details`}>
                       {t`View Credential Details`}
                     </Link>
                   )}
                 </ContentError>
               )}
-            </Route>,
-          ]}
-          <Route key="not-found" path="*">
-            {!hasContentLoading && (
-              <ContentError isNotFound>
-                {id && (
-                  <Link to={`/credentials/${id}/details`}>
-                    {t`View Credential Details`}
-                  </Link>
-                )}
-              </ContentError>
-            )}
-          </Route>
-        </Switch>
+            </Route>
+          </Switch>
         )}
       </Card>
     </PageSection>
