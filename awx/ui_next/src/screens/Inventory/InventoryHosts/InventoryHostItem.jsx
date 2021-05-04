@@ -23,6 +23,7 @@ function InventoryHostItem({
   return (
     <Tr id={`host-row-${host.id}`}>
       <Td
+        data-cy={`host-row-${host.id}`}
         select={{
           rowIndex,
           isSelected,
