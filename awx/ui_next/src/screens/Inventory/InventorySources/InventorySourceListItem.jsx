@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import StatusIcon from '../../../components/StatusIcon';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
+import { formatDateString } from '../../../util/dates';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
@@ -38,7 +39,7 @@ function InventorySourceListItem({
         </div>
         {job.finished && (
           <div>
-            {t`FINISHED:`} {job.finished}
+            {t`FINISHED:`} {formatDateString(job.finished)}
           </div>
         )}
       </>
