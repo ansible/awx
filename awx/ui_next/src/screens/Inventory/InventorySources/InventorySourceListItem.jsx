@@ -52,6 +52,7 @@ function InventorySourceListItem({
     <>
       <Tr id={`source-row-${source.id}`}>
         <Td
+          data-cy={`source-row-${source.id}`}
           select={{
             rowIndex,
             isSelected,
