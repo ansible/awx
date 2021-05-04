@@ -17,6 +17,7 @@ function HostListItem({ host, isSelected, onSelect, detailUrl, rowIndex }) {
   return (
     <Tr id={`host-row-${host.id}`}>
       <Td
+        data-cy={`host-row-${host.id}`}
         select={{
           rowIndex,
           isSelected,
