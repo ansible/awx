@@ -3057,7 +3057,7 @@ class AWXReceptorJob:
 
     @property
     def pod_name(self):
-        return f"awx-job-{self.task.instance.id}"
+        return f"automation-job-{self.task.instance.id}"
 
     @property
     def credential(self):
