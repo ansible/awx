@@ -23,6 +23,7 @@ function InventoryHostGroupItem({
   return (
     <Tr id={`inventory-host-group-row-${group.id}`}>
       <Td
+        data-cy={labelId}
         select={{
           rowIndex,
           isSelected,

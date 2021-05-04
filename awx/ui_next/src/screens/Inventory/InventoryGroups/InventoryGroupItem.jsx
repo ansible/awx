@@ -24,6 +24,7 @@ function InventoryGroupItem({
   return (
     <Tr id={`group-row-${group.id}`}>
       <Td
+        data-cy={labelId}
         select={{
           rowIndex,
           isSelected,
