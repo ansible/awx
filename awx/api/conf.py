@@ -28,6 +28,17 @@ register(
     category_slug='authentication',
 )
 register(
+    'DISABLE_LOCAL_AUTH',
+    field_class=fields.BooleanField,
+    label=_('Disable the built-in authentication system'),
+    help_text=_(
+        "Controls whether users are prevented from using the built-in authentication system. "
+        "You probably want to do this if you are using an LDAP or SAML integration."
+    ),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+register(
     'AUTH_BASIC_ENABLED',
     field_class=fields.BooleanField,
     label=_('Enable HTTP Basic Auth'),

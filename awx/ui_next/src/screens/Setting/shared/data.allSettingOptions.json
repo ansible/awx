@@ -34,6 +34,14 @@
               "category_slug": "system",
               "defined_in_file": false
           },
+          "DISABLE_LOCAL_AUTH": {
+              "type": "boolean",
+              "label": "Disable the built-in authentication system",
+              "help_text": "Controls whether users are prevented from using the built-in authentication system. You probably want to do this if you are using an LDAP or SAML integration.",
+              "category": "Authentication",
+              "category_slug": "authentication",
+              "defined_in_file": false
+          },
           "TOWER_URL_BASE": {
               "type": "string",
               "label": "Base URL of the service",
@@ -2958,6 +2966,15 @@
               "category": "System",
               "category_slug": "system",
               "default": true
+          },
+          "DISABLE_LOCAL_AUTH": {
+              "type": "boolean",
+              "required": true,
+              "label": "Disable the built-in authentication system",
+              "help_text": "Controls whether users are prevented from using the built-in authentication system. You probably want to do this if you are using an LDAP or SAML integration.",
+              "category": "Authentication",
+              "category_slug": "authentication",
+              "default": false
           },
           "TOWER_URL_BASE": {
               "type": "string",

@@ -36,7 +36,7 @@ register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
-    help_text=_('Controls whether any Organization Admin can view all users and teams, ' 'even those not associated with their Organization.'),
+    help_text=_('Controls whether any Organization Admin can view all users and teams, even those not associated with their Organization.'),
     category=_('System'),
     category_slug='system',
 )
@@ -59,7 +59,7 @@ register(
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
     label=_('Base URL of the service'),
-    help_text=_('This setting is used by services like notifications to render ' 'a valid url to the service.'),
+    help_text=_('This setting is used by services like notifications to render a valid url to the service.'),
     category=_('System'),
     category_slug='system',
 )
@@ -94,13 +94,12 @@ register(
     category_slug='system',
 )
 
-
 register(
     'LICENSE',
     field_class=fields.DictField,
     default=lambda: {},
     label=_('License'),
-    help_text=_('The license controls which features and functionality are ' 'enabled. Use /api/v2/config/ to update or change ' 'the license.'),
+    help_text=_('The license controls which features and functionality are enabled. Use /api/v2/config/ to update or change the license.'),
     category=_('System'),
     category_slug='system',
 )
@@ -194,7 +193,7 @@ register(
     'CUSTOM_VENV_PATHS',
     field_class=fields.StringListPathField,
     label=_('Custom virtual environment paths'),
-    help_text=_('Paths where Tower will look for custom virtual environments ' '(in addition to /var/lib/awx/venv/). Enter one path per line.'),
+    help_text=_('Paths where Tower will look for custom virtual environments (in addition to /var/lib/awx/venv/). Enter one path per line.'),
     category=_('System'),
     category_slug='system',
     default=[],
@@ -318,7 +317,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Ignore Ansible Galaxy SSL Certificate Verification'),
-    help_text=_('If set to true, certificate validation will not be done when ' 'installing content from any Galaxy server.'),
+    help_text=_('If set to true, certificate validation will not be done when installing content from any Galaxy server.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -433,7 +432,7 @@ register(
     allow_null=False,
     default=200,
     label=_('Maximum number of forks per job'),
-    help_text=_('Saving a Job Template with more than this number of forks will result in an error. ' 'When set to 0, no limit is applied.'),
+    help_text=_('Saving a Job Template with more than this number of forks will result in an error. When set to 0, no limit is applied.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -454,7 +453,7 @@ register(
     allow_null=True,
     default=None,
     label=_('Logging Aggregator Port'),
-    help_text=_('Port on Logging Aggregator to send logs to (if required and not' ' provided in Logging Aggregator).'),
+    help_text=_('Port on Logging Aggregator to send logs to (if required and not provided in Logging Aggregator).'),
     category=_('Logging'),
     category_slug='logging',
     required=False,
@@ -561,7 +560,7 @@ register(
     field_class=fields.IntegerField,
     default=5,
     label=_('TCP Connection Timeout'),
-    help_text=_('Number of seconds for a TCP connection to external log ' 'aggregator to timeout. Applies to HTTPS and TCP log ' 'aggregator protocols.'),
+    help_text=_('Number of seconds for a TCP connection to external log aggregator to timeout. Applies to HTTPS and TCP log aggregator protocols.'),
     category=_('Logging'),
     category_slug='logging',
     unit=_('seconds'),
@@ -627,7 +626,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Enable rsyslogd debugging'),
-    help_text=_('Enabled high verbosity debugging for rsyslogd.  ' 'Useful for debugging connection issues for external log aggregation.'),
+    help_text=_('Enabled high verbosity debugging for rsyslogd.  Useful for debugging connection issues for external log aggregation.'),
     category=_('Logging'),
     category_slug='logging',
 )
