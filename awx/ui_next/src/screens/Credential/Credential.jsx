@@ -102,6 +102,8 @@ function Credential({ setBreadcrumb }) {
     <PageSection>
       <Card>
         {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
+        {hasContentLoading && <ContentLoading />}
+        {!hasContentLoading && credential && (
         <Switch>
           <Redirect
             from="/credentials/:id"
@@ -145,6 +147,7 @@ function Credential({ setBreadcrumb }) {
             )}
           </Route>
         </Switch>
+        )}
       </Card>
     </PageSection>
   );
