@@ -197,8 +197,9 @@ UI_LIVE_UPDATES_ENABLED = True
 # beyond this limit and the value will be removed
 MAX_EVENT_RES_DATA = 700000
 
-# Note: This setting may be overridden by database settings.
+# Note: These settings may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
+MAX_WEBSOCKET_EVENT_RATE = 30
 
 # The amount of time before a stdout file is expired and removed locally
 # Note that this can be recreated if the stdout is downloaded
