@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
@@ -8,9 +7,11 @@ import useSelected from '../../../util/useSelected';
 import useRequest from '../../../util/useRequest';
 import { InventoriesAPI } from '../../../api';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
@@ -104,7 +105,7 @@ function InventoryGroupsList() {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
@@ -135,21 +136,22 @@ function InventoryGroupsList() {
             key: 'modified_by__username__icontains',
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`Name`,
-            key: 'name',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={item => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(item, index) => (
           <InventoryGroupItem
             key={item.id}
             group={item}
             inventoryId={inventoryId}
             isSelected={selected.some(row => row.id === item.id)}
             onSelect={() => handleSelect(item)}
+            rowIndex={index}
           />
         )}
         renderToolbar={props => (

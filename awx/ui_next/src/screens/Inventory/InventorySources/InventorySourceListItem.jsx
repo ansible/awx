@@ -1,23 +1,15 @@
 import React from 'react';
-
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  DataListItem,
-  DataListItemRow,
-  DataListCheck,
-  DataListItemCells,
-  DataListCell,
-  DataListAction,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import {
   ExclamationTriangleIcon as PFExclamationTriangleIcon,
   PencilAltIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import StatusIcon from '../../../components/StatusIcon';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 
@@ -30,9 +22,9 @@ function InventorySourceListItem({
   source,
   isSelected,
   onSelect,
-
   detailUrl,
   label,
+  rowIndex,
 }) {
   const generateLastJobTooltip = job => {
     return (
@@ -58,80 +50,68 @@ function InventorySourceListItem({
 
   return (
     <>
-      <DataListItem aria-labelledby={`check-action-${source.id}`}>
-        <DataListItemRow>
-          <DataListCheck
-            id={`select-source-${source.id}`}
-            checked={isSelected}
-            onChange={onSelect}
-            aria-labelledby={`check-action-${source.id}`}
-          />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="status" isFilled={false}>
-                {source.summary_fields.last_job && (
-                  <Tooltip
-                    position="top"
-                    content={generateLastJobTooltip(
-                      source.summary_fields.last_job
-                    )}
-                    key={source.summary_fields.last_job.id}
-                  >
-                    <Link
-                      to={`/jobs/inventory/${source.summary_fields.last_job.id}`}
-                    >
-                      <StatusIcon
-                        status={source.summary_fields.last_job.status}
-                      />
-                    </Link>
-                  </Tooltip>
-                )}
-              </DataListCell>,
-              <DataListCell aria-label={t`name`} key="name">
-                <span>
-                  <Link to={`${detailUrl}/details`}>
-                    <b>{source.name}</b>
-                  </Link>
-                </span>
-                {missingExecutionEnvironment && (
-                  <span>
-                    <Tooltip
-                      className="missing-execution-environment"
-                      content={t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`}
-                      position="right"
-                    >
-                      <ExclamationTriangleIcon />
-                    </Tooltip>
-                  </span>
-                )}
-              </DataListCell>,
-              <DataListCell aria-label={t`type`} key="type">
-                {label}
-              </DataListCell>,
-            ]}
-          />
-          <DataListAction
-            id="actions"
-            aria-labelledby="actions"
-            aria-label={t`actions`}
-          >
-            {source.summary_fields.user_capabilities.start && (
-              <InventorySourceSyncButton source={source} />
-            )}
-            {source.summary_fields.user_capabilities.edit && (
-              <Button
-                ouiaId={`${source.id}-edit-button`}
-                aria-label={t`Edit Source`}
-                variant="plain"
-                component={Link}
-                to={`${detailUrl}/edit`}
+      <Tr id={`source-row-${source.id}`}>
+        <Td
+          data-cy={`check-action-${source.id}`}
+          select={{
+            rowIndex,
+            isSelected,
+            onSelect,
+          }}
+        />
+        <Td dataLabel={t`Name`}>
+          <Link to={`${detailUrl}/details`}>
+            <b>{source.name}</b>
+          </Link>
+          {missingExecutionEnvironment && (
+            <span>
+              <Tooltip
+                className="missing-execution-environment"
+                content={t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`}
+                position="right"
               >
-                <PencilAltIcon />
-              </Button>
-            )}
-          </DataListAction>
-        </DataListItemRow>
-      </DataListItem>
+                <ExclamationTriangleIcon />
+              </Tooltip>
+            </span>
+          )}
+        </Td>
+        <Td dataLabel={t`Status`}>
+          {source.summary_fields.last_job && (
+            <Tooltip
+              position="top"
+              content={generateLastJobTooltip(source.summary_fields.last_job)}
+              key={source.summary_fields.last_job.id}
+            >
+              <Link to={`/jobs/inventory/${source.summary_fields.last_job.id}`}>
+                <StatusIcon status={source.summary_fields.last_job.status} />
+              </Link>
+            </Tooltip>
+          )}
+        </Td>
+        <Td dataLabel={t`Type`}>{label}</Td>
+        <ActionsTd dataLabel={t`Actions`}>
+          <ActionItem
+            visible={source.summary_fields.user_capabilities.start}
+            tooltip={t`Sync`}
+          >
+            <InventorySourceSyncButton source={source} />
+          </ActionItem>
+          <ActionItem
+            visible={source.summary_fields.user_capabilities.edit}
+            tooltip={t`Edit`}
+          >
+            <Button
+              ouiaId={`${source.id}-edit-button`}
+              aria-label={t`Edit Source`}
+              variant="plain"
+              component={Link}
+              to={`${detailUrl}/edit`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </ActionItem>
+        </ActionsTd>
+      </Tr>
     </>
   );
 }

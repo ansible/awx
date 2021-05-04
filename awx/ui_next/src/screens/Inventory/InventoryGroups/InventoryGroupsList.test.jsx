@@ -93,13 +93,10 @@ describe('<InventoryGroupsList />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
+
   afterEach(() => {
     jest.clearAllMocks();
     wrapper.unmount();
-  });
-
-  test('initially renders successfully', () => {
-    expect(wrapper.find('InventoryGroupsList').length).toBe(1);
   });
 
   test('should fetch groups from api and render them in the list', async () => {
@@ -109,52 +106,71 @@ describe('<InventoryGroupsList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')(
-        true
-      );
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')(true);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(true);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')(
-        false
-      );
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')(false);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
+    expect.assertions(9);
+    wrapper.find('.pf-c-table__check').forEach(el => {
+      expect(el.find('input').props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(true);
+    wrapper.find('.pf-c-table__check').forEach(el => {
+      expect(el.find('input').props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
+    wrapper.find('.pf-c-table__check').forEach(el => {
+      expect(el.find('input').props().checked).toBe(false);
     });
   });
 });
+
 describe('<InventoryGroupsList/> error handling', () => {
   let wrapper;
+
   beforeEach(() => {
     InventoriesAPI.readGroups.mockResolvedValue({
       data: {
@@ -182,10 +198,12 @@ describe('<InventoryGroupsList/> error handling', () => {
       })
     );
   });
+
   afterEach(() => {
     jest.clearAllMocks();
     wrapper.unmount();
   });
+
   test('should show content error when api throws error on initial render', async () => {
     InventoriesAPI.readGroupsOptions.mockImplementationOnce(() =>
       Promise.reject(new Error())
@@ -213,7 +231,11 @@ describe('<InventoryGroupsList/> error handling', () => {
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, HostsAPI } from '../../../api';
@@ -8,7 +7,11 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -105,35 +108,21 @@ function InventoryHostList() {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isDeleteLoading || isAdHocLaunchLoading}
         items={hosts}
         itemCount={hostCount}
         pluralizedItemName={t`Hosts`}
         qsConfig={QS_CONFIG}
-        toolbarColumns={[
-          {
-            name: t`Name`,
-            key: 'name',
-            isSortable: true,
-            isSearchable: true,
-          },
-          {
-            name: t`Modified`,
-            key: 'modified',
-            isSortable: true,
-            isNumeric: true,
-          },
-          {
-            name: t`Created`,
-            key: 'created',
-            isSortable: true,
-            isNumeric: true,
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
         renderToolbar={props => (
           <DataListToolbar
             {...props}
@@ -164,14 +153,15 @@ function InventoryHostList() {
             ]}
           />
         )}
-        renderItem={o => (
+        renderRow={(host, index) => (
           <InventoryHostItem
-            key={o.id}
-            host={o}
-            detailUrl={`/inventories/inventory/${id}/hosts/${o.id}/details`}
-            editUrl={`/inventories/inventory/${id}/hosts/${o.id}/edit`}
-            isSelected={selected.some(row => row.id === o.id)}
-            onSelect={() => handleSelect(o)}
+            key={host.id}
+            host={host}
+            detailUrl={`/inventories/inventory/${id}/hosts/${host.id}/details`}
+            editUrl={`/inventories/inventory/${id}/hosts/${host.id}/edit`}
+            isSelected={selected.some(row => row.id === host.id)}
+            onSelect={() => handleSelect(host)}
+            rowIndex={index}
           />
         )}
         emptyStateControls={

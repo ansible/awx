@@ -137,10 +137,6 @@ describe('<ResourceAccessList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
-    expect(wrapper.find('PaginatedDataList')).toHaveLength(1);
-  });
-
   test('should fetch and display access records on mount', async () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(OrganizationsAPI.readAccessList).toHaveBeenCalled();
@@ -203,7 +199,7 @@ describe('<ResourceAccessList />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
 
     expect(
-      wrapper.find('PaginatedDataList').prop('toolbarSearchColumns')
+      wrapper.find('PaginatedTable').prop('toolbarSearchColumns')
     ).toStrictEqual([
       { isDefault: true, key: 'username__icontains', name: 'Username' },
       { key: 'first_name__icontains', name: 'First Name' },

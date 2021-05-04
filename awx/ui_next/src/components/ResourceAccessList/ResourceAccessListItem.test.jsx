@@ -38,10 +38,14 @@ describe('<ResourceAccessListItem />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <ResourceAccessListItem
-          accessRecord={accessRecord}
-          onRoleDelete={() => {}}
-        />
+        <table>
+          <tbody>
+            <ResourceAccessListItem
+              accessRecord={accessRecord}
+              onRoleDelete={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
 
