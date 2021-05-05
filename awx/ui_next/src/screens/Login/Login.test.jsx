@@ -90,6 +90,12 @@ describe('<Login />', () => {
     expect(passwordInput.props().value).toBe('');
     expect(submitButton.props().isDisabled).toBe(false);
     expect(wrapper.find('AlertModal').length).toBe(0);
+    expect(wrapper.find('LoginMainHeader').prop('subtitle')).toBe(
+      'Please log in'
+    );
+    expect(wrapper.find('LoginMainHeader').prop('title')).toBe(
+      'Welcome to Ansible AWX!'
+    );
   });
 
   test('custom logo renders Brand component with correct src and alt', async () => {
