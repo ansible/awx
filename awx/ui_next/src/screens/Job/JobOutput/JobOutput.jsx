@@ -183,6 +183,11 @@ const OutputWrapper = styled.div`
     Object.keys(cssMap).map(className => `.${className}{${cssMap[className]}}`)}
 `;
 
+const ListWrapper = styled(List)`
+  ${({ isFollowModeEnabled }) =>
+    isFollowModeEnabled ? `overflow: hidden !important;` : ''}
+`;
+
 const OutputFooter = styled.div`
   background-color: #ebebeb;
   border-right: 1px solid #d7d7d7;
@@ -310,6 +315,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [results, setResults] = useState({});
+  const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(false);
 
   useEffect(() => {
     loadJobEvents();
@@ -657,6 +663,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
+  const handleFollowToggle = () => setIsFollowModeEnabled(!isFollowModeEnabled);
+
+  useEffect(() => {
+    if (isFollowModeEnabled) {
+      scrollToRow(remoteRowCount);
+    }
+  }, [remoteRowCount, isFollowModeEnabled]);
+
   const renderSearchComponent = () => (
     <Search
       qsConfig={QS_CONFIG}
@@ -763,6 +777,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                 )}
               </ToolbarItem>
             </ToolbarToggleGroup>
+            {isJobRunning(job.status) ? (
+              <Button onClick={handleFollowToggle}>
+                {isFollowModeEnabled ? t`Unfollow` : t`Follow`}
+              </Button>
+            ) : null}
           </SearchToolbarContent>
         </SearchToolbar>
         <PageControls
@@ -771,7 +790,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
         />
-        <OutputWrapper cssMap={cssMap}>
+        <OutputWrapper
+          cssMap={cssMap}
+          isFollowModeEnabled={isFollowModeEnabled}
+        >
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
@@ -787,7 +809,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                           <ContentLoading />
                         </div>
                       ) : (
-                        <List
+                        <ListWrapper
+                          isFollowModeEnabled={isFollowModeEnabled}
                           ref={ref => {
                             registerChild(ref);
                             listRef.current = ref;
