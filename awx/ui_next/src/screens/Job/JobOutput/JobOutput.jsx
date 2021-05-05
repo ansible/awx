@@ -183,11 +183,6 @@ const OutputWrapper = styled.div`
     Object.keys(cssMap).map(className => `.${className}{${cssMap[className]}}`)}
 `;
 
-const ListWrapper = styled(List)`
-  ${({ isFollowModeEnabled }) =>
-    isFollowModeEnabled ? `overflow: hidden !important;` : ''}
-`;
-
 const OutputFooter = styled.div`
   background-color: #ebebeb;
   border-right: 1px solid #d7d7d7;
@@ -315,7 +310,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [results, setResults] = useState({});
-  const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(false);
+  const [isFollowEnabled, setIsFollowModeEnabled] = useState(false);
 
   useEffect(() => {
     loadJobEvents();
@@ -610,7 +605,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleScrollLast = () => {
-    scrollToRow(remoteRowCount);
+    scrollToRow(remoteRowCount - 1);
   };
 
   const handleResize = ({ width }) => {
@@ -663,13 +658,25 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
-  const handleFollowToggle = () => setIsFollowModeEnabled(!isFollowModeEnabled);
+  const handleFollowToggle = () => {
+    if (isFollowEnabled) {
+      setIsFollowModeEnabled(false);
+    } else {
+      setIsFollowModeEnabled(true);
+      scrollToRow(remoteRowCount - 1);
+    }
+  };
+  const handleScroll = () => {
+    if (listRef?.current?.Grid?._renderedRowStopIndex < remoteRowCount - 1) {
+      setIsFollowModeEnabled(false);
+    }
+  };
 
   useEffect(() => {
-    if (isFollowModeEnabled) {
+    if (isFollowEnabled) {
       scrollToRow(remoteRowCount);
     }
-  }, [remoteRowCount, isFollowModeEnabled]);
+  }, [remoteRowCount, isFollowEnabled]);
 
   const renderSearchComponent = () => (
     <Search
@@ -778,8 +785,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               </ToolbarItem>
             </ToolbarToggleGroup>
             {isJobRunning(job.status) ? (
-              <Button onClick={handleFollowToggle}>
-                {isFollowModeEnabled ? t`Unfollow` : t`Follow`}
+              <Button
+                variant={isFollowEnabled ? 'secondary' : 'primary'}
+                onClick={handleFollowToggle}
+              >
+                {isFollowEnabled ? t`Unfollow` : t`Follow`}
               </Button>
             ) : null}
           </SearchToolbarContent>
@@ -790,10 +800,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
         />
-        <OutputWrapper
-          cssMap={cssMap}
-          isFollowModeEnabled={isFollowModeEnabled}
-        >
+        <OutputWrapper cssMap={cssMap} isFollowEnabled={isFollowEnabled}>
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
@@ -809,8 +816,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                           <ContentLoading />
                         </div>
                       ) : (
-                        <ListWrapper
-                          isFollowModeEnabled={isFollowModeEnabled}
+                        <List
                           ref={ref => {
                             registerChild(ref);
                             listRef.current = ref;
@@ -824,6 +830,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                           scrollToAlignment="start"
                           width={width || 1}
                           overscanRowCount={20}
+                          onScroll={handleScroll}
                         />
                       )}
                     </>
