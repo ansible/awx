@@ -15,6 +15,7 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
+import JobCancelButton from '../../../components/JobCancelButton';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import CredentialChip from '../../../components/CredentialChip';
 import { ProjectsAPI } from '../../../api';
@@ -199,12 +200,20 @@ function ProjectDetail({ project }) {
             {t`Edit`}
           </Button>
         )}
-        {summary_fields.user_capabilities?.start && (
-          <ProjectSyncButton
-            projectId={project.id}
-            lastJobStatus={job && job.status}
-          />
-        )}
+        {summary_fields.user_capabilities?.start &&
+          (['running', 'pending', 'waiting'].includes(job?.status) ? (
+            <JobCancelButton
+              job={{ id: job.id, type: 'project_update' }}
+              errorTitle={t`Project Sync Error`}
+              title={t`Cancel Project Sync`}
+              errorMessage={t`Failed to cancel Project Sync`}
+            />
+          ) : (
+            <ProjectSyncButton
+              projectId={project.id}
+              lastJobStatus={job && job.status}
+            />
+          ))}
         {summary_fields.user_capabilities?.delete && (
           <DeleteButton
             name={name}

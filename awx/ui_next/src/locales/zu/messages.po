@@ -8,7 +8,7 @@ msgstr ""
 "Language: zu\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
+"PO-Revision-Date: \n
 "Last-Translator: \n"
 "Language-Team: \n"
 "Plural-Forms: \n"
@@ -892,16 +892,16 @@ msgid "Cancel subscription edit"
 msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:66
-msgid "Cancel sync"
-msgstr ""
+#~ msgid "Cancel sync"
+#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:58
-msgid "Cancel sync process"
-msgstr ""
+#~ msgid "Cancel sync process"
+#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:62
-msgid "Cancel sync source"
-msgstr ""
+#~ msgid "Cancel sync source"
+#~ msgstr ""
 
 #: components/JobList/JobList.jsx:207
 #: components/Workflow/WorkflowNodeHelp.jsx:95
@@ -2965,12 +2965,25 @@ msgstr ""
 msgid "Failed to associate."
 msgstr ""
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:100
-msgid "Failed to cancel inventory source sync."
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:126
+msgid "Failed to cancel Inventory Source Sync"
 msgstr ""
+
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:209
+#: screens/Project/ProjectList/ProjectListItem.jsx:182
+msgid "Failed to cancel Project Update"
+msgstr ""
+
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:100
+#~ msgid "Failed to cancel inventory source sync."
+#~ msgstr ""
 
 #: components/JobList/JobList.jsx:290
 msgid "Failed to cancel one or more jobs."
+msgstr ""
+
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:185
+msgid "Failed to cancel {0}"
 msgstr ""
 
 #: screens/Credential/CredentialList/CredentialListItem.jsx:85
@@ -3210,7 +3223,7 @@ msgstr ""
 msgid "Failed to send test notification."
 msgstr ""
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:89
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:54
 msgid "Failed to sync inventory source."
 msgstr ""
 
@@ -3541,7 +3554,7 @@ msgstr ""
 msgid "Group details"
 msgstr ""
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:122
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:121
 msgid "Group type"
 msgstr ""
 
@@ -4077,6 +4090,10 @@ msgstr ""
 
 #: screens/Job/JobDetail/JobDetail.jsx:191
 msgid "Inventory Source"
+msgstr ""
+
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:125
+msgid "Inventory Source Error"
 msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:92
@@ -5855,6 +5872,11 @@ msgstr ""
 msgid "Project Update"
 msgstr ""
 
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:207
+#: screens/Project/ProjectList/ProjectListItem.jsx:179
+msgid "Project Update Error"
+msgstr ""
+
 #: screens/Project/Project.jsx:139
 msgid "Project not found."
 msgstr ""
@@ -6218,6 +6240,8 @@ msgid ""
 "The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 msgstr ""
 
+#: components/JobCancelButton/JobCancelButton.jsx:71
+#: components/JobCancelButton/JobCancelButton.jsx:75
 #: components/JobList/JobListCancelButton.jsx:159
 #: components/JobList/JobListCancelButton.jsx:162
 #: screens/Job/JobDetail/JobDetail.jsx:434
@@ -6650,7 +6674,7 @@ msgid "Select a row to approve"
 msgstr ""
 
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:160
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:100
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:99
 msgid "Select a row to delete"
 msgstr ""
 
@@ -6989,7 +7013,7 @@ msgstr ""
 msgid "Show Changes"
 msgstr ""
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:127
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:126
 msgid "Show all groups"
 msgstr ""
 
@@ -7002,7 +7026,7 @@ msgstr ""
 msgid "Show less"
 msgstr ""
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:126
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:125
 msgid "Show only root groups"
 msgstr ""
 
@@ -7301,11 +7325,11 @@ msgstr ""
 msgid "Start message body"
 msgstr ""
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:70
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:35
 msgid "Start sync process"
 msgstr ""
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:74
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:39
 msgid "Start sync source"
 msgstr ""
 

@@ -938,16 +938,16 @@ msgid "Cancel subscription edit"
 msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:66
-msgid "Cancel sync"
-msgstr "取消同步"
+#~ msgid "Cancel sync"
+#~ msgstr "取消同步"
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:58
-msgid "Cancel sync process"
-msgstr "取消同步进程"
+#~ msgid "Cancel sync process"
+#~ msgstr "取消同步进程"
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:62
-msgid "Cancel sync source"
-msgstr "取消同步源"
+#~ msgid "Cancel sync source"
+#~ msgstr "取消同步源"
 
 #: components/JobList/JobList.jsx:207
 #: components/Workflow/WorkflowNodeHelp.jsx:95
@@ -3106,13 +3106,26 @@ msgstr "关联角色失败"
 msgid "Failed to associate."
 msgstr "关联失败。"
 
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:126
+msgid "Failed to cancel Inventory Source Sync"
+msgstr ""
+
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:209
+#: screens/Project/ProjectList/ProjectListItem.jsx:182
+msgid "Failed to cancel Project Update"
+msgstr ""
+
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:100
-msgid "Failed to cancel inventory source sync."
-msgstr "取消清单源同步失败。"
+#~ msgid "Failed to cancel inventory source sync."
+#~ msgstr "取消清单源同步失败。"
 
 #: components/JobList/JobList.jsx:290
 msgid "Failed to cancel one or more jobs."
 msgstr "取消一个或多个作业失败。"
+
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:185
+msgid "Failed to cancel {0}"
+msgstr ""
 
 #: screens/Credential/CredentialList/CredentialListItem.jsx:85
 msgid "Failed to copy credential."
@@ -3351,7 +3364,7 @@ msgstr "获取节点凭证失败。"
 msgid "Failed to send test notification."
 msgstr ""
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:89
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:54
 msgid "Failed to sync inventory source."
 msgstr "同步清单源失败。"
 
@@ -3687,7 +3700,7 @@ msgstr "组"
 msgid "Group details"
 msgstr "组详情"
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:122
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:121
 msgid "Group type"
 msgstr "组类型"
 
@@ -4249,6 +4262,10 @@ msgstr "清单 ID"
 
 #: screens/Job/JobDetail/JobDetail.jsx:191
 msgid "Inventory Source"
+msgstr ""
+
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:125
+msgid "Inventory Source Error"
 msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:92
@@ -6064,6 +6081,11 @@ msgstr "项目同步"
 msgid "Project Update"
 msgstr "项目更新"
 
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:207
+#: screens/Project/ProjectList/ProjectListItem.jsx:179
+msgid "Project Update Error"
+msgstr ""
+
 #: screens/Project/Project.jsx:139
 msgid "Project not found."
 msgstr "未找到项目。"
@@ -6441,6 +6463,8 @@ msgstr ""
 #~ msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 #~ msgstr ""
 
+#: components/JobCancelButton/JobCancelButton.jsx:71
+#: components/JobCancelButton/JobCancelButton.jsx:75
 #: components/JobList/JobListCancelButton.jsx:159
 #: components/JobList/JobListCancelButton.jsx:162
 #: screens/Job/JobDetail/JobDetail.jsx:434
@@ -6877,7 +6901,7 @@ msgid "Select a row to approve"
 msgstr "选择要批准的行"
 
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:160
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:100
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:99
 msgid "Select a row to delete"
 msgstr "选择要删除的行"
 
@@ -7241,7 +7265,7 @@ msgstr "显示"
 msgid "Show Changes"
 msgstr "显示更改"
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:127
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:126
 msgid "Show all groups"
 msgstr "显示所有组"
 
@@ -7254,7 +7278,7 @@ msgstr "显示更改"
 msgid "Show less"
 msgstr "显示更少"
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:126
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:125
 msgid "Show only root groups"
 msgstr "只显示 root 组"
 
@@ -7566,11 +7590,11 @@ msgstr "开始消息"
 msgid "Start message body"
 msgstr "开始消息正文"
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:70
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:35
 msgid "Start sync process"
 msgstr "启动同步进程"
 
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:74
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:39
 msgid "Start sync source"
 msgstr "启动同步源"
 

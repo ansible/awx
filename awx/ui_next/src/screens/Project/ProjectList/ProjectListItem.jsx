@@ -26,6 +26,7 @@ import { toTitleCase } from '../../../util/strings';
 import CopyButton from '../../../components/CopyButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { Project } from '../../../types';
+import JobCancelButton from '../../../components/JobCancelButton';
 
 const Label = styled.span`
   color: var(--pf-global--disabled-color--100);
@@ -172,10 +173,20 @@ function ProjectListItem({
             visible={project.summary_fields.user_capabilities.start}
             tooltip={t`Sync Project`}
           >
-            <ProjectSyncButton
-              projectId={project.id}
-              lastJobStatus={job && job.status}
-            />
+            {['running', 'pending', 'waiting'].includes(job?.status) ? (
+              <JobCancelButton
+                job={{ id: job.id, type: 'project_update' }}
+                errorTitle={t`Project Sync Error`}
+                title={t`Cancel Project Sync`}
+                showIconButton
+                errorMessage={t`Failed to cancel Project Sync`}
+              />
+            ) : (
+              <ProjectSyncButton
+                projectId={project.id}
+                lastJobStatus={job && job.status}
+              />
+            )}
           </ActionItem>
           <ActionItem
             visible={project.summary_fields.user_capabilities.edit}

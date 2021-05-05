@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { bool, shape, func } from 'prop-types';
 import {
-  MinusCircleIcon,
   DownloadIcon,
   RocketIcon,
   TrashAltIcon,
@@ -15,6 +14,7 @@ import {
   LaunchButton,
   ReLaunchDropDown,
 } from '../../../../components/LaunchButton';
+import JobCancelButton from '../../../../components/JobCancelButton';
 
 const BadgeGroup = styled.div`
   margin-left: 20px;
@@ -62,13 +62,7 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
   'inventory_update',
 ];
 
-const OutputToolbar = ({
-  job,
-  onDelete,
-  onCancel,
-  isDeleteDisabled,
-  jobStatus,
-}) => {
+const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 
   const playCount = job?.playbook_counts?.play_count;
@@ -184,16 +178,13 @@ const OutputToolbar = ({
       )}
       {job.summary_fields.user_capabilities.start &&
         ['pending', 'waiting', 'running'].includes(jobStatus) && (
-          <Tooltip content={t`Cancel Job`}>
-            <Button
-              ouiaId="job-output-cancel-button"
-              variant="plain"
-              aria-label={t`Cancel Job`}
-              onClick={onCancel}
-            >
-              <MinusCircleIcon />
-            </Button>
-          </Tooltip>
+          <JobCancelButton
+            job={job}
+            errorTitle={t`Job Cancel Error`}
+            title={t`Job Cancel`}
+            errorMessage={t`Failed to cancel ${job.name}`}
+            showIconButton
+          />
         )}
       {job.summary_fields.user_capabilities.delete &&
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(

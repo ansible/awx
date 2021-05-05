@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
+import { InventorySourcesAPI } from '../../../api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceSyncButton from './InventorySourceSyncButton';
 
@@ -36,17 +36,6 @@ describe('<InventorySourceSyncButton />', () => {
     ).toBe(false);
   });
 
-  test('should render cancel sync button', () => {
-    wrapper = mountWithContexts(
-      <InventorySourceSyncButton
-        source={{ status: 'pending', ...source }}
-        onSyncLoading={onSyncLoading}
-        onFetchSources={() => {}}
-      />
-    );
-    expect(wrapper.find('MinusCircleIcon').length).toBe(1);
-  });
-
   test('should start sync properly', async () => {
     InventorySourcesAPI.createSyncStart.mockResolvedValue({
       data: { status: 'pending' },
@@ -56,33 +45,6 @@ describe('<InventorySourceSyncButton />', () => {
       wrapper.find('Button[aria-label="Start sync source"]').simulate('click')
     );
     expect(InventorySourcesAPI.createSyncStart).toBeCalledWith(1);
-  });
-
-  test('should cancel sync properly', async () => {
-    InventorySourcesAPI.readDetail.mockResolvedValue({
-      data: { summary_fields: { current_update: { id: 120 } } },
-    });
-    InventoryUpdatesAPI.createSyncCancel.mockResolvedValue({
-      data: { status: '' },
-    });
-
-    wrapper = mountWithContexts(
-      <InventorySourceSyncButton
-        source={{ status: 'pending', ...source }}
-        onSyncLoading={onSyncLoading}
-        onFetchSources={() => {}}
-      />
-    );
-    expect(wrapper.find('Button[aria-label="Cancel sync source"]').length).toBe(
-      1
-    );
-
-    await act(async () =>
-      wrapper.find('Button[aria-label="Cancel sync source"]').simulate('click')
-    );
-
-    expect(InventorySourcesAPI.readDetail).toBeCalledWith(1);
-    expect(InventoryUpdatesAPI.createSyncCancel).toBeCalledWith(120);
   });
 
   test('should throw error on sync start properly', async () => {
