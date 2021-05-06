@@ -1160,7 +1160,7 @@ class BaseTask(object):
 
             if event_data.get('event') in MINIMAL_EVENTS:
                 should_emit = True  # always send some types like playbook_on_stats
-            if event_data.get('stdout') == '' and event_data['start_line'] == event_data['end_line']:
+            elif event_data.get('stdout') == '' and event_data['start_line'] == event_data['end_line']:
                 should_emit = False  # exclude events with no output
             else:
                 should_emit = any(
