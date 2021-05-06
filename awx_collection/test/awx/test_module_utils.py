@@ -10,12 +10,12 @@ from requests.models import Response
 from unittest import mock
 
 awx_name = 'AWX'
-tower_name = 'Red Hat Automation Platform Controller'
+controller_name = 'Red Hat Automation Platform Controller'
 ping_version = '1.2.3'
 
 
 def getTowerheader(self, header_name, default):
-    mock_headers = {'X-API-Product-Name': tower_name, 'X-API-Product-Version': ping_version}
+    mock_headers = {'X-API-Product-Name': controller_name, 'X-API-Product-Version': ping_version}
     return mock_headers.get(header_name, default)
 
 
@@ -107,7 +107,7 @@ def test_version_warning_strictness_controller(collection_import, silence_warnin
             my_module._COLLECTION_TYPE = "controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
-        'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, tower_name, ping_version)
+        'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, controller_name, ping_version)
     )
 
 

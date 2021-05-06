@@ -32,11 +32,11 @@ class ItemNotDefined(Exception):
 class ControllerModule(AnsibleModule):
     url = None
     AUTH_ARGSPEC = dict(
-        tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
-        tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
-        tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
-        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
-        tower_oauthtoken=dict(type='raw', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
+        tower_host=dict(required=False, fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
+        tower_username=dict(required=False, fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
+        tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
+        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
+        tower_oauthtoken=dict(type='raw', no_log=True, required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])),
         tower_config_file=dict(type='path', required=False, default=None),
     )
     short_params = {

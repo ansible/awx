@@ -39,93 +39,93 @@ plugin_routing:
       redirect: awx.awx.schedule_rrule
   modules:
     tower_job_list:
-      redirect: job_list
+      redirect: awx.awx.job_list
     tower_job_launch:
-      redirect: job_launch
+      redirect: awx.awx.job_launch
     tower_workflow_job_template:
-      redirect: workflow_job_template
+      redirect: awx.awx.workflow_job_template
     tower_team:
-      redirect: team
+      redirect: awx.awx.team
     tower_job_wait:
-      redirect: job_wait
+      redirect: awx.awx.job_wait
     tower_application:
-      redirect: application
+      redirect: awx.awx.application
     tower_ad_hoc_command_wait:
-      redirect: ad_hoc_command_wait
+      redirect: awx.awx.ad_hoc_command_wait
     tower_credential:
-      redirect: credential
+      redirect: awx.awx.credential
     tower_label:
-      redirect: label
+      redirect: awx.awx.label
     tower_group:
-      redirect: group
+      redirect: awx.awx.group
     tower_host:
-      redirect: host
+      redirect: awx.awx.host
     tower_schedule:
-      redirect: schedule
+      redirect: awx.awx.schedule
     tower_role:
-      redirect: role
+      redirect: awx.awx.role
     tower_ad_hoc_command:
-      redirect: ad_hoc_command
+      redirect: awx.awx.ad_hoc_command
     tower_execution_environment:
-      redirect: execution_environment
+      redirect: awx.awx.execution_environment
     tower_inventory_source_update:
-      redirect: inventory_source_update
+      redirect: awx.awx.inventory_source_update
     tower_instance_group:
-      redirect: instance_group
+      redirect: awx.awx.instance_group
     tower_settings:
-      redirect: settings
+      redirect: awx.awx.settings
     tower_meta:
-      redirect: controller_meta
+      redirect: awx.awx.controller_meta
     tower_export:
-      redirect: export
+      redirect: awx.awx.export
     tower_ad_hoc_command_cancel:
-      redirect: ad_hoc_command_cancel
+      redirect: awx.awx.ad_hoc_command_cancel
     tower_inventory_source:
-      redirect: inventory_source
+      redirect: awx.awx.inventory_source
     tower_user:
-      redirect: user
+      redirect: awx.awx.user
     tower_workflow_launch:
-      redirect: workflow_launch
+      redirect: awx.awx.workflow_launch
     tower_project:
-      redirect: project
+      redirect: awx.awx.project
     tower_token:
-      redirect: token
+      redirect: awx.awx.token
     tower_credential_type:
-      redirect: credential_type
+      redirect: awx.awx.credential_type
     tower_license:
-      redirect: license
+      redirect: awx.awx.license
     tower_project_update:
-      redirect: project_update
+      redirect: awx.awx.project_update
     tower_notification_template:
-      redirect: notification_template
+      redirect: awx.awx.notification_template
     tower_organization:
-      redirect: organization
+      redirect: awx.awx.organization
     tower_job_template:
-      redirect: job_template
+      redirect: awx.awx.job_template
     tower_workflow_job_template_node:
-      redirect: workflow_job_template_node
+      redirect: awx.awx.workflow_job_template_node
     tower_job_cancel:
-      redirect: job_cancel
+      redirect: awx.awx.job_cancel
     tower_import:
-      redirect: import
+      redirect: awx.awx.import
     tower_credential_input_source:
-      redirect: credential_input_source
+      redirect: awx.awx.credential_input_source
     tower_inventory:
-      redirect: inventory
+      redirect: awx.awx.inventory
     tower_receive:
-      redirect: receive
+      redirect: awx.awx.receive
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
     tower_send:
-      redirect: send
+      redirect: awx.awx.send
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
     tower_workflow_template:
-      redirect: workflow_template
+      redirect: awx.awx.workflow_template
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
     tower_notification:
-      redirect: notification_template
+      redirect: awx.awx.notification_template

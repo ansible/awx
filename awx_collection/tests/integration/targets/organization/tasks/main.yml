@@ -90,7 +90,7 @@
     that:
       - "result is not changed"
 
-# Test behaviour common to all tower modules
+# Test behaviour common to all controller modules
 - name: Check that SSL is available and verify_ssl is enabled (task must fail)
   organization:
     name: Default

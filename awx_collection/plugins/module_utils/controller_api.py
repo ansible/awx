@@ -254,26 +254,28 @@ class ControllerAPIModule(ControllerModule):
             # In PY2 we get back an HTTPResponse object but PY2 is returning an addinfourl
             # First try to get the headers in PY3 format and then drop down to PY2.
             try:
-                tower_type = response.getheader('X-API-Product-Name', None)
-                tower_version = response.getheader('X-API-Product-Version', None)
+                controller_type = response.getheader('X-API-Product-Name', None)
+                controller_version = response.getheader('X-API-Product-Version', None)
             except Exception:
-                tower_type = response.info().getheader('X-API-Product-Name', None)
-                tower_version = response.info().getheader('X-API-Product-Version', None)
+                controller_type = response.info().getheader('X-API-Product-Name', None)
+                controller_version = response.info().getheader('X-API-Product-Version', None)
 
             parsed_collection_version = Version(self._COLLECTION_VERSION).version
-            parsed_tower_version = Version(tower_version).version
-            if tower_type == 'AWX':
+            parsed_controller_version = Version(controller_version).version
+            if controller_type == 'AWX':
                 collection_compare_ver = parsed_collection_version[0]
-                tower_compare_ver = parsed_tower_version[0]
+                controller_compare_ver = parsed_controller_version[0]
             else:
                 collection_compare_ver = "{0}.{1}".format(parsed_collection_version[0], parsed_collection_version[1])
-                tower_compare_ver = '{0}.{1}'.format(parsed_tower_version[0], parsed_tower_version[1])
+                controller_compare_ver = '{0}.{1}'.format(parsed_controller_version[0], parsed_controller_version[1])
 
-            if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
-                self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, tower_type))
-            elif collection_compare_ver != tower_compare_ver:
+            if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != controller_type:
+                self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, controller_type))
+            elif collection_compare_ver != controller_compare_ver:
                 self.warn(
-                    "You are running collection version {0} but connecting to {2} version {1}".format(self._COLLECTION_VERSION, tower_version, tower_type)
+                    "You are running collection version {0} but connecting to {2} version {1}".format(
+                        self._COLLECTION_VERSION, controller_version, controller_type
+                    )
                 )
 
             self.version_checked = True
@@ -694,10 +696,10 @@ class ControllerAPIModule(ControllerModule):
                     resp = he.read()
                 except Exception as e:
                     resp = 'unknown {0}'.format(e)
-                self.warn('Failed to release tower token: {0}, response: {1}'.format(he, resp))
+                self.warn('Failed to release token: {0}, response: {1}'.format(he, resp))
             except (Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
-                self.warn('Failed to release tower token {0}: {1}'.format(self.oauth_token_id, e))
+                self.warn('Failed to release token {0}: {1}'.format(self.oauth_token_id, e))
 
     def is_job_done(self, job_status):
         if job_status in ['new', 'pending', 'waiting', 'running']:

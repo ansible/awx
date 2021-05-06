@@ -81,7 +81,7 @@ def handle_error(**kwargs):
 
 class InventoryModule(BaseInventoryPlugin):
     NAME = 'awx.awx.controller'  # REPLACE
-    # Stays backward compatible with tower inventory script.
+    # Stays backward compatible with the inventory script.
     # If the user supplies '@tower_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False
 
