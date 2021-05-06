@@ -14,7 +14,10 @@ import { CubesIcon } from '@patternfly/react-icons';
 import { TeamsAPI, RolesAPI, UsersAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
@@ -36,7 +39,7 @@ function TeamRolesList({ me, team }) {
     request: fetchRoles,
     error: contentError,
     result: {
-      roleCount,
+      // roleCount,
       roles,
       isAdminOfOrg,
       relatedSearchableKeys,
@@ -133,11 +136,11 @@ function TeamRolesList({ me, team }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={roles}
-        itemCount={roleCount}
+        itemCount={0}
         pluralizedItemName={t`Team Roles`}
         qsConfig={QS_CONFIG}
         toolbarSearchColumns={[
@@ -172,14 +175,20 @@ function TeamRolesList({ me, team }) {
             ]}
           />
         )}
-        renderItem={role => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell>{t`Resource Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell sortKey="id">{t`Role`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(role, index) => (
           <TeamRoleListItem
             key={role.id}
             role={role}
             detailUrl={detailUrl(role)}
-            onSelect={item => {
-              setRoleToDisassociate(item);
-            }}
+            onDisassociate={setRoleToDisassociate}
+            index={index}
           />
         )}
       />
@@ -197,7 +206,7 @@ function TeamRolesList({ me, team }) {
               key="disassociate"
               variant="danger"
               aria-label={t`confirm disassociate`}
-              onClick={() => disassociateRole()}
+              onClick={disassociateRole}
             >
               {t`Disassociate`}
             </Button>,

@@ -36,17 +36,15 @@ describe('<TeamRoleListItem/>', () => {
         detailUrl="/templates/job_template/15/details"
       />
     );
-
-    expect(
-      wrapper.find('PFDataListCell[aria-label="resource name"]').text()
-    ).toBe('template delete project');
-    expect(
-      wrapper.find('PFDataListCell[aria-label="resource type"]').text()
-    ).toContain('Job Template');
-    expect(
-      wrapper.find('PFDataListCell[aria-label="resource role"]').text()
-    ).toContain('Admin');
+    expect(wrapper.find('Td[dataLabel="Resource Name"]').text()).toBe(
+      'template delete project'
+    );
+    expect(wrapper.find('Td[dataLabel="Type"]').text()).toContain(
+      'Job Template'
+    );
+    expect(wrapper.find('Td[dataLabel="Role"]').text()).toContain('Admin');
   });
+
   test('should render deletable chip', () => {
     wrapper = mountWithContexts(
       <TeamRoleListItem
