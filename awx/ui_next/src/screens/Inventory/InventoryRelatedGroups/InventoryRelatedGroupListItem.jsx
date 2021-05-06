@@ -1,81 +1,59 @@
 import 'styled-components/macro';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { string, bool, func } from 'prop-types';
+import { string, bool, func, number } from 'prop-types';
 
 import { t } from '@lingui/macro';
 
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Td, Tr } from '@patternfly/react-table';
+import { Button } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
 
 import { Group } from '../../../types';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 24px;
-  grid-template-columns: min-content 40px;
-`;
+import { ActionItem, ActionsTd } from '../../../components/PaginatedTable';
 
 function InventoryRelatedGroupListItem({
   detailUrl,
   editUrl,
   group,
+  rowIndex,
   isSelected,
   onSelect,
 }) {
   const labelId = `check-action-${group.id}`;
 
   return (
-    <DataListItem key={group.id} aria-labelledby={labelId} id={`${group.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-group-${group.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link to={`${detailUrl}`}>
-                <b>{group.name}</b>
-              </Link>
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={t`actions`}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={group.id} aria-labelledby={labelId}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={t`Selected`}
+      />
+      <Td id={labelId}>
+        <Link to={`${detailUrl}`}>
+          <b>{group.name}</b>
+        </Link>
+      </Td>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem
+          tooltip={t`Edit Group`}
+          visible={group.summary_fields.user_capabilities?.edit}
         >
-          {group.summary_fields.user_capabilities?.edit && (
-            <Tooltip content={t`Edit Group`} position="top">
-              <Button
-                ouiaId={`${group.id}-edit-button`}
-                aria-label={t`Edit Group`}
-                css="grid-column: 2"
-                variant="plain"
-                component={Link}
-                to={`${editUrl}`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            ouiaId={`${group.id}-edit-button`}
+            aria-label={t`Edit Group`}
+            variant="plain"
+            component={Link}
+            to={`${editUrl}`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 
@@ -83,6 +61,7 @@ InventoryRelatedGroupListItem.propTypes = {
   detailUrl: string.isRequired,
   editUrl: string.isRequired,
   group: Group.isRequired,
+  rowIndex: number.isRequired,
   isSelected: bool.isRequired,
   onSelect: func.isRequired,
 };

@@ -58,21 +58,21 @@ describe('<InventoryGroupHostList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-host-2"]').props().checked
+      wrapper.find('input[aria-label="Select row 2"]').props().checked
     ).toBe(false);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-2"]').invoke('onChange')();
+      wrapper.find('input[aria-label="Select row 2"]').invoke('onChange')();
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-host-2"]').props().checked
+      wrapper.find('input[aria-label="Select row 2"]').props().checked
     ).toBe(true);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-2"]').invoke('onChange')();
+      wrapper.find('input[aria-label="Select row 2"]').invoke('onChange')();
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-host-2"]').props().checked
+      wrapper.find('input[aria-label="Select row 2"]').props().checked
     ).toBe(false);
   });
 
