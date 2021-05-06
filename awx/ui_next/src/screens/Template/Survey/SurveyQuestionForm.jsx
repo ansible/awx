@@ -258,6 +258,8 @@ function SurveyQuestionForm({
                       href={`${getDocsBaseUrl(
                         config
                       )}/html/userguide/job_templates.html#surveys`}
+                      target="_blank"
+                      rel="noreferrer"
                     >
                       {t`documentation`}{' '}
                     </a>

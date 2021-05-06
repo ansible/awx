@@ -69,6 +69,7 @@ function MultipleChoiceField({ label, tooltip }) {
       {formattedChoicesField.value.map(({ choice, isDefault, id }, i) => (
         <InputGroup key={id}>
           <TextInput
+            data-cy={choice ? `${choice}-input` : 'new-choice-input'}
             aria-label={choice || t`new choice`}
             onKeyUp={e => {
               if (
@@ -111,7 +112,7 @@ function MultipleChoiceField({ label, tooltip }) {
           <Button
             variant="control"
             aria-label={t`Click to toggle default value`}
-            ouiaId={choice}
+            ouiaId={choice ? `${choice}-button` : 'new-choice-button'}
             isDisabled={!choice.trim()}
             onClick={() => {
               const newValues = formattedChoicesField.value.map(

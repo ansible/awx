@@ -258,15 +258,17 @@ describe('<SurveyQuestionForm />', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('Button[ouiaId="alex"]')
+        .find('Button[ouiaId="alex-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(false);
-    await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
+    await act(() =>
+      wrapper.find('Button[ouiaId="alex-button"]').prop('onClick')()
+    );
     wrapper.update();
     expect(
       wrapper
-        .find('Button[ouiaId="alex"]')
+        .find('Button[ouiaId="alex-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(true);
@@ -292,19 +294,23 @@ describe('<SurveyQuestionForm />', () => {
     expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       2
     );
-    await act(() => wrapper.find('Button[ouiaId="spencer"]').prop('onClick')());
+    await act(() =>
+      wrapper.find('Button[ouiaId="spencer-button"]').prop('onClick')()
+    );
     wrapper.update();
     expect(
       wrapper
-        .find('Button[ouiaId="spencer"]')
+        .find('Button[ouiaId="spencer-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(true);
-    await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
+    await act(() =>
+      wrapper.find('Button[ouiaId="alex-button"]').prop('onClick')()
+    );
     wrapper.update();
     expect(
       wrapper
-        .find('Button[ouiaId="alex"]')
+        .find('Button[ouiaId="alex-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(false);
@@ -333,15 +339,17 @@ describe('<SurveyQuestionForm />', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('Button[ouiaId="alex"]')
+        .find('Button[ouiaId="alex-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(false);
-    await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
+    await act(() =>
+      wrapper.find('Button[ouiaId="alex-button"]').prop('onClick')()
+    );
     wrapper.update();
     expect(
       wrapper
-        .find('Button[ouiaId="alex"]')
+        .find('Button[ouiaId="alex-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(true);
@@ -367,18 +375,20 @@ describe('<SurveyQuestionForm />', () => {
     expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       2
     );
-    await act(() => wrapper.find('Button[ouiaId="spencer"]').prop('onClick')());
+    await act(() =>
+      wrapper.find('Button[ouiaId="spencer-button"]').prop('onClick')()
+    );
     wrapper.update();
 
     expect(
       wrapper
-        .find('Button[ouiaId="spencer"]')
+        .find('Button[ouiaId="spencer-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(true);
     expect(
       wrapper
-        .find('Button[ouiaId="alex"]')
+        .find('Button[ouiaId="alex-button"]')
         .find('CheckIcon')
         .prop('selected')
     ).toBe(false);
