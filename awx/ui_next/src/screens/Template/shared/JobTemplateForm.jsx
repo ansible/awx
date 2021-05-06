@@ -313,10 +313,11 @@ function JobTemplateForm({
           >
             <TextInput
               id="template-scm-branch"
-              {...scmField}
               onChange={value => {
                 scmHelpers.setValue(value);
               }}
+              value={scmField.value}
+              aria-label={t`source control branch`}
             />
           </FieldWithPrompt>
         )}
@@ -660,6 +661,7 @@ JobTemplateForm.defaultProps = {
     inventory: undefined,
     project: undefined,
     playbook: '',
+    scm_branch: '',
     summary_fields: {
       inventory: null,
       labels: { results: [] },

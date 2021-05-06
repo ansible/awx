@@ -150,7 +150,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'group': DEFAULT_SUMMARY_FIELDS,
     'default_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
     'execution_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
-    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
+    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type', 'allow_override'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed'),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'kubernetes', 'credential_type_id'),

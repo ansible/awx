@@ -103,6 +103,7 @@
   "inventory": 1,
   "project": 6,
   "playbook": "chatty_tasks.yml",
+  "scm_branch": "main",
   "forks": 0,
   "limit": "",
   "verbosity": 0,

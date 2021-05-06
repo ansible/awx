@@ -83,6 +83,7 @@ export const JobTemplate = shape({
   job_type: oneOf(['run', 'check']),
   playbook: string,
   project: number,
+  scm_branch: string,
 });
 
 export const WorkFlowJobTemplate = shape({

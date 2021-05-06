@@ -70,7 +70,6 @@ function ProjectFormFields({
   project_base_dir,
   project_local_paths,
   formik,
-
   setCredentials,
   credentials,
   scmTypeOptions,
