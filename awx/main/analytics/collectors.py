@@ -58,35 +58,16 @@ def four_hour_slicing(key, since, until, last_gather):
         horizon = until - timedelta(weeks=4)
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
         last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
-        last_entry = max(last_entries.get(key) or last_gather, horizon)
+        try:
+            last_entry = max(last_entries.get(key) or last_gather, horizon)
+        except TypeError:  # last_entries has a stale non-datetime entry for this collector
+            last_entry = max(last_gather, horizon)
 
     start, end = last_entry, None
     while start < until:
         end = min(start + timedelta(hours=4), until)
         yield (start, end)
         start = end
-
-
-def events_slicing(key, since, until, last_gather):
-    from awx.conf.models import Setting
-
-    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
-    horizon = until - timedelta(weeks=4)
-
-    lower = since or last_gather
-    if not since and last_entries.get(key):
-        lower = horizon
-    pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
-
-    previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
-    if not since and last_entries.get(key):
-        previous_pk = max(last_entries[key], previous_pk)
-    final_pk = pk_values['pk__max'] or 0
-
-    step = 100000
-    for start in range(previous_pk, final_pk + 1, step):
-        yield (start, min(start + step, final_pk))
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
@@ -335,7 +316,7 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
+@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table(since, full_path, until, **kwargs):
     def query(event_data):
         return f'''COPY (SELECT main_jobevent.id,
@@ -361,7 +342,7 @@ def events_table(since, full_path, until, **kwargs):
                          {event_data}->'res'->'warnings' AS warnings,
                          {event_data}->'res'->'deprecations' AS deprecations
                          FROM main_jobevent
-                         WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})
+                         WHERE (main_jobevent.modified >= {since} AND main_jobevent.modified <= {until})
                          ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''
 
     try:

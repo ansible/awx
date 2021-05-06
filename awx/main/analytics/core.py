@@ -270,7 +270,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     if not files:
                         if collection_type != 'dry-run':
                             with disable_activity_stream():
-                                last_entries[key] = max(last_entries[key], end) if last_entries.get(key) else end
+                                entry = last_entries.get(key)
+                                last_entries[key] = max(entry, end) if entry and type(entry) == type(end) else end
                                 settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
                         continue
 
@@ -293,7 +294,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
                     if slice_succeeded and collection_type != 'dry-run':
                         with disable_activity_stream():
-                            last_entries[key] = max(last_entries[key], end) if last_entries.get(key) else end
+                            entry = last_entries.get(key)
+                            last_entries[key] = max(entry, end) if entry and type(entry) == type(end) else end
                             settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
             except Exception:
                 succeeded = False
