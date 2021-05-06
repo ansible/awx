@@ -169,11 +169,10 @@ function ProjectListItem({
           />
         </Td>
         <ActionsTd dataLabel={t`Actions`}>
-          <ActionItem
-            visible={project.summary_fields.user_capabilities.start}
-            tooltip={t`Sync Project`}
-          >
-            {['running', 'pending', 'waiting'].includes(job?.status) ? (
+          {['running', 'pending', 'waiting'].includes(job?.status) ? (
+            <ActionItem
+              visible={project.summary_fields.user_capabilities.start}
+            >
               <JobCancelButton
                 job={{ id: job.id, type: 'project_update' }}
                 errorTitle={t`Project Sync Error`}
@@ -181,13 +180,18 @@ function ProjectListItem({
                 showIconButton
                 errorMessage={t`Failed to cancel Project Sync`}
               />
-            ) : (
+            </ActionItem>
+          ) : (
+            <ActionItem
+              visible={project.summary_fields.user_capabilities.start}
+              tooltip={t`Sync Project`}
+            >
               <ProjectSyncButton
                 projectId={project.id}
                 lastJobStatus={job && job.status}
               />
-            )}
-          </ActionItem>
+            </ActionItem>
+          )}
           <ActionItem
             visible={project.summary_fields.user_capabilities.edit}
             tooltip={t`Edit Project`}

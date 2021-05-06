@@ -33,7 +33,7 @@ function JobCancelButton({
           <Button
             aria-label={title}
             ouiaId="cancel job"
-            onClick={setIsOpen}
+            onClick={() => setIsOpen(true)}
             variant="plain"
           >
             <MinusCircleIcon />
@@ -43,7 +43,7 @@ function JobCancelButton({
             aria-label={title}
             variant="secondary"
             ouiaId="cancel job"
-            onClick={setIsOpen}
+            onClick={() => setIsOpen(true)}
           >{t`Cancel Sync`}</Button>
         )}
       </Tooltip>
@@ -77,7 +77,7 @@ function JobCancelButton({
             </Button>,
           ]}
         >
-          {t`Are you sure you want to submit the request to cancel this job?`}
+          {t`Are you sure you want to cancel this job?`}
         </AlertModal>
       )}
       {error && (

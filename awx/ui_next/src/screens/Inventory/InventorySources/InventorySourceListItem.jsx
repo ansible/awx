@@ -92,11 +92,8 @@ function InventorySourceListItem({
         </Td>
         <Td dataLabel={t`Type`}>{label}</Td>
         <ActionsTd dataLabel={t`Actions`}>
-          <ActionItem
-            visible={source.summary_fields.user_capabilities.start}
-            tooltip={t`Sync`}
-          >
-            {['running', 'pending', 'waiting'].includes(source?.status) ? (
+          {['running', 'pending', 'waiting'].includes(source?.status) ? (
+            <ActionItem visible={source.summary_fields.user_capabilities.start}>
               <JobCancelButton
                 job={{
                   type: 'inventory_update',
@@ -107,10 +104,15 @@ function InventorySourceListItem({
                 title={t`Cancel Inventory Source Sync`}
                 showIconButton
               />
-            ) : (
+            </ActionItem>
+          ) : (
+            <ActionItem
+              visible={source.summary_fields.user_capabilities.start}
+              tooltip={t`Sync`}
+            >
               <InventorySourceSyncButton source={source} />
-            )}
-          </ActionItem>
+            </ActionItem>
+          )}
           <ActionItem
             visible={source.summary_fields.user_capabilities.edit}
             tooltip={t`Edit`}
