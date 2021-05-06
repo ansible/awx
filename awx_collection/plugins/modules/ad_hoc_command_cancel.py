@@ -98,7 +98,7 @@ def main():
 
     cancel_page = module.get_endpoint(command['related']['cancel'])
     if 'json' not in cancel_page or 'can_cancel' not in cancel_page['json']:
-        module.fail_json(msg="Failed to cancel command, got unexpected response from tower", **{'response': cancel_page})
+        module.fail_json(msg="Failed to cancel command, got unexpected response", **{'response': cancel_page})
 
     if not cancel_page['json']['can_cancel']:
         if fail_if_not_running:

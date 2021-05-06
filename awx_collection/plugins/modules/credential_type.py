@@ -42,7 +42,7 @@ options:
     inputs:
       description:
         - >-
-          Enter inputs using either JSON or YAML syntax. Refer to the 
+          Enter inputs using either JSON or YAML syntax. Refer to the
           Automation Platform Controler documentation for example syntax.
       type: dict
     injectors:
@@ -66,7 +66,7 @@ EXAMPLES = '''
     name: Nexus
     description: Credentials type for Nexus
     kind: cloud
-    inputs: "{{ lookup('file', 'tower_credential_inputs_nexus.json') }}"
+    inputs: "{{ lookup('file', 'credential_inputs_nexus.json') }}"
     injectors: {'extra_vars': {'nexus_credential': 'test' }}
     state: present
     validate_certs: false

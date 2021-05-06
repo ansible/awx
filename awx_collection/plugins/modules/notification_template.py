@@ -246,7 +246,7 @@ EXAMPLES = '''
     notification_configuration:
       username: user
       password: s3cr3t
-      sender: tower@example.com
+      sender: controller@example.com
       recipients:
         - user1@example.com
       host: smtp.example.com
@@ -286,7 +286,7 @@ EXAMPLES = '''
     name: irc notification
     notification_type: irc
     notification_configuration:
-      nickname: tower
+      nickname: controller
       password: s3cr3t
       targets:
         - user1

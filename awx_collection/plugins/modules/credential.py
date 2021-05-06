@@ -395,7 +395,7 @@ def main():
     # End backwards compatability
     state = module.params.get('state')
 
-    # Deprication warnings
+    # Deprecation warnings
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
             module.deprecate(msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input), version="ansible.tower:4.0.0")
