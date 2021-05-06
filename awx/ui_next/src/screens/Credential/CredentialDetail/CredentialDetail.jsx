@@ -23,7 +23,7 @@ import { Credential } from '../../../types';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
-const PluginInputMetadata = styled(CodeEditor)`
+const PluginInputMetadata = styled.div`
   grid-column: 1 / -1;
 `;
 
@@ -117,16 +117,18 @@ function CredentialDetail({ credential }) {
               </ChipGroup>
             }
           />
-          <PluginInputMetadata
-            dataCy={`credential-${id}-detail`}
-            id={`credential-${id}-metadata`}
-            mode="javascript"
-            readOnly
-            value={JSON.stringify(inputSources[id].metadata, null, 2)}
-            onChange={() => {}}
-            rows={5}
-            hasErrors={false}
-          />
+          <PluginInputMetadata>
+            <CodeEditor
+              dataCy={`credential-${id}-detail`}
+              id={`credential-${id}-metadata`}
+              mode="javascript"
+              readOnly
+              value={JSON.stringify(inputSources[id].metadata, null, 2)}
+              onChange={() => {}}
+              rows={5}
+              hasErrors={false}
+            />
+          </PluginInputMetadata>
         </Fragment>
       );
     }
