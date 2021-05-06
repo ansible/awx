@@ -41,6 +41,7 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
+MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 CENSOR_VALUE = '************'
 ENV_BLOCKLIST = frozenset(
     (

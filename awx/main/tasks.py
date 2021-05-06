@@ -57,7 +57,7 @@ from receptorctl.socket_interface import ReceptorControl
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
@@ -1158,17 +1158,25 @@ class BaseTask(object):
             first_window_time = self.recent_event_timings[0]
             last_window_time = self.recent_event_timings[-1]
 
-            should_emit = bool(
-                # if 30the most recent websocket message was sent over 1 second ago
-                cpu_time - first_window_time > 1.0
-                # if the very last websocket message came in over 1/30 seconds ago
-                or self.recent_event_timings.maxlen * (cpu_time - last_window_time) > 1.0
-                # if the queue is not yet full
-                or (len(self.recent_event_timings) != self.recent_event_timings.maxlen)
-            )
+            if event_data.get('event') in MINIMAL_EVENTS:
+                should_emit = True  # always send some types like playbook_on_stats
+            if event_data.get('stdout') == '' and event_data['start_line'] == event_data['end_line']:
+                should_emit = False  # exclude events with no output
+            else:
+                should_emit = any(
+                    [
+                        # if 30the most recent websocket message was sent over 1 second ago
+                        cpu_time - first_window_time > 1.0,
+                        # if the very last websocket message came in over 1/30 seconds ago
+                        self.recent_event_timings.maxlen * (cpu_time - last_window_time) > 1.0,
+                        # if the queue is not yet full
+                        len(self.recent_event_timings) != self.recent_event_timings.maxlen,
+                    ]
+                )
 
             logger.debug(
-                'Event {} websocket send {}, queue {}, avg rate {}, last rate {}'.format(
+                'Job {} event {} websocket send {}, queued: {}, rate - avg: {:.3f}, last: {:.3f}'.format(
+                    self.instance.id,
                     event_data.get('counter', 0),
                     should_emit,
                     len(self.recent_event_timings),

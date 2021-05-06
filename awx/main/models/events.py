@@ -17,6 +17,7 @@ from awx.api.versioning import reverse
 from awx.main import consumers
 from awx.main.managers import DeferJobCreatedManager
 from awx.main.fields import JSONField
+from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
 
@@ -55,9 +56,6 @@ def create_host_status_counts(event_data):
         host_status_counts[value] += 1
 
     return dict(host_status_counts)
-
-
-MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 
 
 def emit_event_detail(event):
