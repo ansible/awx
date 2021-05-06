@@ -157,9 +157,11 @@ function InstanceGroupList() {
 
   const addButton = (
     <AddDropDownButton
+      ouiaId="add-instance-group-button"
       key="add"
       dropdownItems={[
         <DropdownItem
+          ouiaId="add-container-group-item"
           to="/instance_groups/container_group/add"
           component={Link}
           key={addContainerGroup}
@@ -168,6 +170,7 @@ function InstanceGroupList() {
           {addContainerGroup}
         </DropdownItem>,
         <DropdownItem
+          ouiaId="add-instance-group-item"
           to="/instance_groups/add"
           component={Link}
           key={addInstanceGroup}

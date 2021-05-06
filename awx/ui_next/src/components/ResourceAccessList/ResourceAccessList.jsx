@@ -166,6 +166,7 @@ function ResourceAccessList({ apiModel, resource }) {
               resource?.summary_fields?.user_capabilities?.edit
                 ? [
                     <ToolbarAddButton
+                      ouiaId="access-add-button"
                       key="add"
                       onClick={() => setShowAddModal(true)}
                     />,

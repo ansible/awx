@@ -5,7 +5,7 @@ import { Dropdown, DropdownPosition } from '@patternfly/react-core';
 import { ToolbarAddButton } from '../PaginatedDataList';
 import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
-function AddDropDownButton({ dropdownItems }) {
+function AddDropDownButton({ dropdownItems, ouiaId }) {
   const { isKebabified } = useKebabifiedMenu();
   const [isOpen, setIsOpen] = useState(false);
   const element = useRef(null);
@@ -35,6 +35,7 @@ function AddDropDownButton({ dropdownItems }) {
         position={DropdownPosition.right}
         toggle={
           <ToolbarAddButton
+            ouiaId={ouiaId}
             aria-label={t`Add`}
             showToggleIndicator
             onClick={() => setIsOpen(!isOpen)}

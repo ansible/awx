@@ -25,6 +25,7 @@ function AssociateModal({
   optionsRequest,
   isModalOpen = false,
   displayKey = 'name',
+  ouiaId,
 }) {
   const history = useHistory();
   const { selected, handleSelect } = useSelected([]);
@@ -93,6 +94,7 @@ function AssociateModal({
   return (
     <Fragment>
       <Modal
+        ouiaId={ouiaId}
         variant="large"
         title={title}
         aria-label={t`Association modal`}

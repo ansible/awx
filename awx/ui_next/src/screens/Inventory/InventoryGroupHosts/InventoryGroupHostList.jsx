@@ -149,6 +149,7 @@ function InventoryGroupHostList() {
 
   const addButton = (
     <AddDropDownButton
+      ouiaId="add-hosts-button"
       key="add"
       dropdownItems={[
         <DropdownItem

@@ -215,12 +215,14 @@ function ScheduleList({
               ...(canAdd
                 ? [
                     <ToolbarAddButton
+                      ouiaId="add-schedule-button"
                       key="add"
                       linkTo={`${location.pathname}/add`}
                     />,
                   ]
                 : []),
               <ToolbarDeleteButton
+                ouiaId="delete-schedule-button"
                 key="delete"
                 onDelete={handleDelete}
                 itemsToDelete={selected}
