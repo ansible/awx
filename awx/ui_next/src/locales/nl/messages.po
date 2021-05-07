@@ -23,7 +23,7 @@ msgstr ""
 msgid "(Prompt on launch)"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:259
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:261
 msgid "* This field will be retrieved from an external secret management system using the specified credential."
 msgstr ""
 
@@ -151,7 +151,7 @@ msgstr ""
 
 #: routeConfig.jsx:90
 #: screens/ActivityStream/ActivityStream.jsx:177
-#: screens/Credential/Credential.jsx:60
+#: screens/Credential/Credential.jsx:72
 #: screens/Credential/Credentials.jsx:28
 #: screens/Inventory/Inventories.jsx:58
 #: screens/Inventory/Inventory.jsx:63
@@ -190,7 +190,7 @@ msgstr ""
 #: components/JobList/JobListItem.jsx:85
 #: components/Schedule/ScheduleList/ScheduleList.jsx:172
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:111
-#: components/TemplateList/TemplateList.jsx:224
+#: components/TemplateList/TemplateList.jsx:230
 #: components/TemplateList/TemplateListItem.jsx:154
 #: screens/ActivityStream/ActivityStream.jsx:260
 #: screens/ActivityStream/ActivityStreamListItem.jsx:49
@@ -204,7 +204,7 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:74
 #: screens/Host/HostList/HostList.jsx:170
 #: screens/Host/HostList/HostListItem.jsx:42
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:241
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:244
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:77
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.jsx:39
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:144
@@ -212,7 +212,7 @@ msgstr ""
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:180
 #: screens/Inventory/InventoryHosts/InventoryHostItem.jsx:38
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:123
-#: screens/Inventory/InventoryList/InventoryList.jsx:203
+#: screens/Inventory/InventoryList/InventoryList.jsx:206
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:108
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:220
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:93
@@ -260,7 +260,7 @@ msgstr ""
 msgid "Actor"
 msgstr ""
 
-#: components/AddDropDownButton/AddDropDownButton.jsx:38
+#: components/AddDropDownButton/AddDropDownButton.jsx:39
 #: components/PaginatedDataList/ToolbarAddButton.jsx:15
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:152
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:155
@@ -462,11 +462,11 @@ msgstr ""
 msgid "Ansible Tower Documentation."
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:35
+#: screens/Template/Survey/SurveyQuestionForm.jsx:44
 msgid "Answer type"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:125
+#: screens/Template/Survey/SurveyQuestionForm.jsx:172
 msgid "Answer variable name"
 msgstr ""
 
@@ -601,7 +601,7 @@ msgstr ""
 msgid "Associate role error"
 msgstr ""
 
-#: components/AssociateModal/AssociateModal.jsx:98
+#: components/AssociateModal/AssociateModal.jsx:100
 msgid "Association modal"
 msgstr ""
 
@@ -650,7 +650,7 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: screens/Credential/Credential.jsx:52
+#: screens/Credential/Credential.jsx:64
 msgid "Back to Credentials"
 msgstr ""
 
@@ -813,8 +813,8 @@ msgstr ""
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:126
 #: components/AddRole/AddResourceRole.jsx:286
-#: components/AssociateModal/AssociateModal.jsx:114
-#: components/AssociateModal/AssociateModal.jsx:119
+#: components/AssociateModal/AssociateModal.jsx:116
+#: components/AssociateModal/AssociateModal.jsx:121
 #: components/DeleteButton/DeleteButton.jsx:121
 #: components/DeleteButton/DeleteButton.jsx:124
 #: components/DisassociateButton/DisassociateButton.jsx:122
@@ -936,7 +936,7 @@ msgstr ""
 #~ msgid "Cannot enable log aggregator without providing logging aggregator host and logging aggregator type."
 #~ msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:240
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:243
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:76
 msgid "Capacity"
 msgstr ""
@@ -1030,7 +1030,7 @@ msgstr ""
 msgid "Choose an HTTP method"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:36
+#: screens/Template/Survey/SurveyQuestionForm.jsx:47
 msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
 "Refer to the Ansible Tower Documentation for more additional\n"
@@ -1089,10 +1089,10 @@ msgid "Click to create a new link to this node."
 msgstr ""
 
 #: components/FormField/TextAndCheckboxField.jsx:86
-msgid "Click to select this answer as a default answer."
-msgstr ""
+#~ msgid "Click to select this answer as a default answer."
+#~ msgstr ""
 
-#: components/FormField/TextAndCheckboxField.jsx:94
+#: screens/Template/Survey/MultipleChoiceField.jsx:114
 msgid "Click to toggle default value"
 msgstr ""
 
@@ -1418,7 +1418,7 @@ msgstr ""
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:267
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:104
 #: screens/Application/ApplicationTokens/ApplicationTokenList.jsx:127
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:245
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:247
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:90
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:104
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:142
@@ -1450,7 +1450,7 @@ msgstr ""
 #: components/AdHocCommands/AdHocCredentialStep.jsx:94
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:113
 #: components/AddRole/AddResourceRole.jsx:158
-#: components/AssociateModal/AssociateModal.jsx:143
+#: components/AssociateModal/AssociateModal.jsx:145
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:176
 #: components/LaunchPrompt/steps/InventoryStep.jsx:91
 #: components/Lookup/CredentialLookup.jsx:153
@@ -1461,7 +1461,7 @@ msgstr ""
 #: components/Lookup/ProjectLookup.jsx:129
 #: components/NotificationList/NotificationList.jsx:206
 #: components/Schedule/ScheduleList/ScheduleList.jsx:197
-#: components/TemplateList/TemplateList.jsx:209
+#: components/TemplateList/TemplateList.jsx:215
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:27
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:58
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:104
@@ -1474,10 +1474,10 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:101
 #: screens/Host/HostGroups/HostGroupsList.jsx:163
 #: screens/Host/HostList/HostList.jsx:156
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:191
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:192
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:131
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:167
-#: screens/Inventory/InventoryList/InventoryList.jsx:181
+#: screens/Inventory/InventoryList/InventoryList.jsx:184
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:171
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:93
 #: screens/Organization/OrganizationList/OrganizationList.jsx:145
@@ -1523,7 +1523,7 @@ msgstr ""
 msgid "Credential Name"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:228
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:230
 #: screens/Credential/shared/CredentialForm.jsx:137
 #: screens/Credential/shared/CredentialForm.jsx:199
 msgid "Credential Type"
@@ -1538,7 +1538,7 @@ msgstr ""
 msgid "Credential Types"
 msgstr ""
 
-#: screens/Credential/Credential.jsx:79
+#: screens/Credential/Credential.jsx:91
 msgid "Credential not found."
 msgstr ""
 
@@ -1668,16 +1668,15 @@ msgstr ""
 msgid "Default Execution Environment"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:186
-#: screens/Template/Survey/SurveyQuestionForm.jsx:194
-#: screens/Template/Survey/SurveyQuestionForm.jsx:201
-#: screens/Template/Survey/SurveyQuestionForm.jsx:225
+#: screens/Template/Survey/SurveyQuestionForm.jsx:233
+#: screens/Template/Survey/SurveyQuestionForm.jsx:241
+#: screens/Template/Survey/SurveyQuestionForm.jsx:248
 msgid "Default answer"
 msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.jsx:81
-msgid "Default choice must be answered from the choices listed."
-msgstr ""
+#~ msgid "Default choice must be answered from the choices listed."
+#~ msgstr ""
 
 #: screens/Setting/SettingList.jsx:102
 msgid "Define system-level features and functions"
@@ -1696,11 +1695,11 @@ msgstr ""
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.jsx:30
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:395
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:127
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:282
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:284
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:124
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:138
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:110
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:124
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:111
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:125
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:137
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:98
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:283
@@ -1730,7 +1729,7 @@ msgstr ""
 msgid "Delete All Groups and Hosts"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:276
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:278
 msgid "Delete Credential"
 msgstr ""
 
@@ -1826,8 +1825,8 @@ msgstr ""
 msgid "Delete error"
 msgstr ""
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:104
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:118
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:105
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:119
 msgid "Delete instance group"
 msgstr ""
 
@@ -1874,16 +1873,16 @@ msgstr ""
 msgid "Deleted"
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:269
+#: components/TemplateList/TemplateList.jsx:275
 #: screens/Credential/CredentialList/CredentialList.jsx:191
-#: screens/Inventory/InventoryList/InventoryList.jsx:261
+#: screens/Inventory/InventoryList/InventoryList.jsx:264
 #: screens/Project/ProjectList/ProjectList.jsx:235
 msgid "Deletion Error"
 msgstr ""
 
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:207
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:219
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:260
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:220
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:263
 msgid "Deletion error"
 msgstr ""
 
@@ -1916,12 +1915,12 @@ msgstr ""
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:256
 #: components/Schedule/ScheduleList/ScheduleList.jsx:193
 #: components/Schedule/shared/ScheduleForm.jsx:107
-#: components/TemplateList/TemplateList.jsx:193
+#: components/TemplateList/TemplateList.jsx:199
 #: components/TemplateList/TemplateListItem.jsx:227
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:67
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:126
 #: screens/Application/shared/ApplicationForm.jsx:61
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:210
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:212
 #: screens/Credential/CredentialList/CredentialList.jsx:128
 #: screens/Credential/shared/CredentialForm.jsx:177
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:78
@@ -1935,7 +1934,7 @@ msgstr ""
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:78
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:39
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:82
-#: screens/Inventory/InventoryList/InventoryList.jsx:177
+#: screens/Inventory/InventoryList/InventoryList.jsx:180
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:195
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:104
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:38
@@ -1959,7 +1958,7 @@ msgstr ""
 #: screens/Team/TeamList/TeamList.jsx:134
 #: screens/Team/shared/TeamForm.jsx:43
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:174
-#: screens/Template/Survey/SurveyQuestionForm.jsx:119
+#: screens/Template/Survey/SurveyQuestionForm.jsx:166
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:114
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:166
 #: screens/Template/shared/JobTemplateForm.jsx:221
@@ -1967,7 +1966,7 @@ msgstr ""
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:65
 #: screens/User/UserOrganizations/UserOrganizationListItem.jsx:15
 #: screens/User/UserTeams/UserTeamList.jsx:184
-#: screens/User/UserTeams/UserTeamListItem.jsx:30
+#: screens/User/UserTeams/UserTeamListItem.jsx:32
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:48
 #: screens/User/UserTokenList/UserTokenList.jsx:116
 #: screens/User/shared/UserTokenForm.jsx:57
@@ -2010,7 +2009,7 @@ msgstr ""
 #: components/Schedule/Schedule.jsx:66
 #: screens/Application/Application/Application.jsx:77
 #: screens/Application/Applications.jsx:38
-#: screens/Credential/Credential.jsx:58
+#: screens/Credential/Credential.jsx:70
 #: screens/Credential/Credentials.jsx:27
 #: screens/CredentialType/CredentialType.jsx:62
 #: screens/CredentialType/CredentialTypes.jsx:26
@@ -2116,12 +2115,12 @@ msgstr ""
 msgid "Disassociate"
 msgstr ""
 
-#: screens/Host/HostGroups/HostGroupsList.jsx:211
+#: screens/Host/HostGroups/HostGroupsList.jsx:212
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:220
 msgid "Disassociate group from host?"
 msgstr ""
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:227
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:228
 msgid "Disassociate host from group?"
 msgstr ""
 
@@ -2187,8 +2186,8 @@ msgid "E-mail options"
 msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.jsx:212
-msgid "Each answer choice must be on a separate line."
-msgstr ""
+#~ msgid "Each answer choice must be on a separate line."
+#~ msgstr ""
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:162
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:171
@@ -2217,7 +2216,7 @@ msgstr ""
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:385
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:114
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:116
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:269
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:271
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:109
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:125
 #: screens/Host/HostDetail/HostDetail.jsx:113
@@ -2573,7 +2572,7 @@ msgstr ""
 #~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {brandName} and request a configuration update using this job template"
 #~ msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:153
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:155
 #: screens/Setting/shared/SettingDetail.jsx:74
 msgid "Encrypted"
 msgstr ""
@@ -2701,10 +2700,10 @@ msgstr ""
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:133
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:210
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:148
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:222
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:118
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:132
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:263
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:223
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:119
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:133
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:266
 #: screens/Job/JobOutput/JobOutput.jsx:666
 #: screens/Setting/shared/LoggingTestAlert.jsx:35
 msgid "Error"
@@ -2736,34 +2735,34 @@ msgstr ""
 #: components/LaunchPrompt/LaunchPrompt.jsx:73
 #: components/NotificationList/NotificationList.jsx:246
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:205
-#: components/ResourceAccessList/ResourceAccessList.jsx:230
-#: components/ResourceAccessList/ResourceAccessList.jsx:242
+#: components/ResourceAccessList/ResourceAccessList.jsx:231
+#: components/ResourceAccessList/ResourceAccessList.jsx:243
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:403
-#: components/Schedule/ScheduleList/ScheduleList.jsx:237
+#: components/Schedule/ScheduleList/ScheduleList.jsx:239
 #: components/Schedule/ScheduleToggle/ScheduleToggle.jsx:67
 #: components/Schedule/shared/SchedulePromptableFields.jsx:76
-#: components/TemplateList/TemplateList.jsx:272
+#: components/TemplateList/TemplateList.jsx:278
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:137
 #: contexts/Config.jsx:74
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:135
 #: screens/Application/ApplicationTokens/ApplicationTokenList.jsx:170
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:191
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:290
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:292
 #: screens/Credential/CredentialList/CredentialList.jsx:194
 #: screens/Host/HostDetail/HostDetail.jsx:60
 #: screens/Host/HostDetail/HostDetail.jsx:128
-#: screens/Host/HostGroups/HostGroupsList.jsx:243
+#: screens/Host/HostGroups/HostGroupsList.jsx:245
 #: screens/Host/HostList/HostList.jsx:222
 #: screens/InstanceGroup/Instances/InstanceList.jsx:230
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:146
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:76
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:264
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:275
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:265
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:276
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:60
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:114
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:252
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:180
-#: screens/Inventory/InventoryList/InventoryList.jsx:262
+#: screens/Inventory/InventoryList/InventoryList.jsx:265
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:239
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:290
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:245
@@ -2772,7 +2771,7 @@ msgstr ""
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:146
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:86
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:97
-#: screens/Login/Login.jsx:193
+#: screens/Login/Login.jsx:191
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:127
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:360
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:223
@@ -2881,7 +2880,7 @@ msgstr ""
 #: routeConfig.jsx:140
 #: screens/ActivityStream/ActivityStream.jsx:211
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:120
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:184
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:185
 #: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:13
 #: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:22
 #: screens/Organization/Organization.jsx:127
@@ -3014,7 +3013,7 @@ msgstr ""
 msgid "Failed to approve workflow approval."
 msgstr ""
 
-#: components/ResourceAccessList/ResourceAccessList.jsx:234
+#: components/ResourceAccessList/ResourceAccessList.jsx:235
 msgid "Failed to assign roles properly"
 msgstr ""
 
@@ -3022,9 +3021,9 @@ msgstr ""
 msgid "Failed to associate role"
 msgstr ""
 
-#: screens/Host/HostGroups/HostGroupsList.jsx:247
+#: screens/Host/HostGroups/HostGroupsList.jsx:249
 #: screens/InstanceGroup/Instances/InstanceList.jsx:234
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:267
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:268
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:256
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:243
 #: screens/User/UserTeams/UserTeamList.jsx:268
@@ -3064,7 +3063,7 @@ msgstr ""
 msgid "Failed to delete application."
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:293
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:295
 msgid "Failed to delete credential."
 msgstr ""
 
@@ -3105,7 +3104,7 @@ msgstr ""
 msgid "Failed to delete one or more credentials."
 msgstr ""
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:225
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:226
 msgid "Failed to delete one or more execution environments"
 msgstr ""
 
@@ -3118,11 +3117,11 @@ msgstr ""
 msgid "Failed to delete one or more hosts."
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:266
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:269
 msgid "Failed to delete one or more instance groups."
 msgstr ""
 
-#: screens/Inventory/InventoryList/InventoryList.jsx:265
+#: screens/Inventory/InventoryList/InventoryList.jsx:268
 msgid "Failed to delete one or more inventories."
 msgstr ""
 
@@ -3150,7 +3149,7 @@ msgstr ""
 msgid "Failed to delete one or more projects."
 msgstr ""
 
-#: components/Schedule/ScheduleList/ScheduleList.jsx:240
+#: components/Schedule/ScheduleList/ScheduleList.jsx:242
 msgid "Failed to delete one or more schedules."
 msgstr ""
 
@@ -3158,7 +3157,7 @@ msgstr ""
 msgid "Failed to delete one or more teams."
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:275
+#: components/TemplateList/TemplateList.jsx:281
 msgid "Failed to delete one or more templates."
 msgstr ""
 
@@ -3186,7 +3185,7 @@ msgstr ""
 msgid "Failed to delete project."
 msgstr ""
 
-#: components/ResourceAccessList/ResourceAccessList.jsx:245
+#: components/ResourceAccessList/ResourceAccessList.jsx:246
 msgid "Failed to delete role"
 msgstr ""
 
@@ -3232,13 +3231,13 @@ msgstr ""
 msgid "Failed to deny workflow approval."
 msgstr ""
 
-#: screens/Host/HostGroups/HostGroupsList.jsx:248
+#: screens/Host/HostGroups/HostGroupsList.jsx:250
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:257
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:244
 msgid "Failed to disassociate one or more groups."
 msgstr ""
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:278
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:279
 msgid "Failed to disassociate one or more hosts."
 msgstr ""
 
@@ -3250,7 +3249,7 @@ msgstr ""
 msgid "Failed to disassociate one or more teams."
 msgstr ""
 
-#: screens/Login/Login.jsx:197
+#: screens/Login/Login.jsx:195
 msgid "Failed to fetch custom login configuration settings.  System defaults will be shown instead."
 msgstr ""
 
@@ -3397,7 +3396,7 @@ msgstr ""
 msgid "First Run"
 msgstr ""
 
-#: components/ResourceAccessList/ResourceAccessList.jsx:180
+#: components/ResourceAccessList/ResourceAccessList.jsx:181
 #: components/ResourceAccessList/ResourceAccessListItem.jsx:66
 msgid "First name"
 msgstr ""
@@ -3410,7 +3409,7 @@ msgstr ""
 msgid "Fit the graph to the available screen size"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:62
+#: screens/Template/Survey/SurveyQuestionForm.jsx:95
 msgid "Float"
 msgstr ""
 
@@ -3617,7 +3616,7 @@ msgid "Group type"
 msgstr ""
 
 #: screens/Host/Host.jsx:62
-#: screens/Host/HostGroups/HostGroupsList.jsx:230
+#: screens/Host/HostGroups/HostGroupsList.jsx:232
 #: screens/Host/Hosts.jsx:30
 #: screens/Inventory/Inventories.jsx:70
 #: screens/Inventory/Inventories.jsx:72
@@ -3749,8 +3748,8 @@ msgstr ""
 #: screens/Inventory/Inventories.jsx:77
 #: screens/Inventory/Inventory.jsx:65
 #: screens/Inventory/InventoryGroup/InventoryGroup.jsx:68
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:181
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:251
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:182
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:252
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:116
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:151
 #: screens/Inventory/SmartInventory.jsx:71
@@ -4056,7 +4055,7 @@ msgstr ""
 #: routeConfig.jsx:130
 #: screens/ActivityStream/ActivityStream.jsx:199
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:130
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:219
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:222
 #: screens/InstanceGroup/InstanceGroups.jsx:16
 #: screens/InstanceGroup/InstanceGroups.jsx:26
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:91
@@ -4083,7 +4082,7 @@ msgid "Instance groups"
 msgstr ""
 
 #: screens/InstanceGroup/InstanceGroup.jsx:69
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:239
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:242
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:75
 #: screens/InstanceGroup/InstanceGroups.jsx:31
 #: screens/InstanceGroup/Instances/InstanceList.jsx:148
@@ -4091,7 +4090,7 @@ msgstr ""
 msgid "Instances"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:61
+#: screens/Template/Survey/SurveyQuestionForm.jsx:94
 msgid "Integer"
 msgstr ""
 
@@ -4116,8 +4115,8 @@ msgstr ""
 #: screens/ActivityStream/ActivityStream.jsx:171
 #: screens/Dashboard/Dashboard.jsx:140
 #: screens/Inventory/Inventories.jsx:16
-#: screens/Inventory/InventoryList/InventoryList.jsx:168
-#: screens/Inventory/InventoryList/InventoryList.jsx:219
+#: screens/Inventory/InventoryList/InventoryList.jsx:171
+#: screens/Inventory/InventoryList/InventoryList.jsx:222
 #: util/getRelatedResourceDeleteDetails.js:66
 #: util/getRelatedResourceDeleteDetails.js:208
 #: util/getRelatedResourceDeleteDetails.js:276
@@ -4309,7 +4308,7 @@ msgid "Job Tags"
 msgstr ""
 
 #: components/JobList/JobListItem.jsx:132
-#: components/TemplateList/TemplateList.jsx:200
+#: components/TemplateList/TemplateList.jsx:206
 #: components/Workflow/WorkflowLegend.jsx:92
 #: components/Workflow/WorkflowNodeHelp.jsx:47
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:96
@@ -4506,7 +4505,7 @@ msgstr ""
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:105
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:43
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:165
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:252
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:254
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:95
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:110
 #: screens/Host/HostDetail/HostDetail.jsx:99
@@ -4538,7 +4537,7 @@ msgstr ""
 msgid "Last Name"
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:223
+#: components/TemplateList/TemplateList.jsx:229
 #: components/TemplateList/TemplateListItem.jsx:153
 msgid "Last Ran"
 msgstr ""
@@ -4562,7 +4561,7 @@ msgstr ""
 msgid "Last modified"
 msgstr ""
 
-#: components/ResourceAccessList/ResourceAccessList.jsx:181
+#: components/ResourceAccessList/ResourceAccessList.jsx:182
 #: components/ResourceAccessList/ResourceAccessListItem.jsx:67
 msgid "Last name"
 msgstr ""
@@ -4678,7 +4677,7 @@ msgstr ""
 msgid "Local time zone"
 msgstr ""
 
-#: screens/Login/Login.jsx:171
+#: screens/Login/Login.jsx:169
 msgid "Log In"
 msgstr ""
 
@@ -4798,11 +4797,11 @@ msgstr ""
 msgid "Max Hosts"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:168
+#: screens/Template/Survey/SurveyQuestionForm.jsx:215
 msgid "Maximum"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:152
+#: screens/Template/Survey/SurveyQuestionForm.jsx:199
 msgid "Maximum length"
 msgstr ""
 
@@ -4831,11 +4830,11 @@ msgstr ""
 msgid "Microsoft Azure Resource Manager"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:162
+#: screens/Template/Survey/SurveyQuestionForm.jsx:209
 msgid "Minimum"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:146
+#: screens/Template/Survey/SurveyQuestionForm.jsx:193
 msgid "Minimum length"
 msgstr ""
 
@@ -4893,7 +4892,7 @@ msgstr ""
 #: components/AdHocCommands/AdHocCredentialStep.jsx:98
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:117
 #: components/AddRole/AddResourceRole.jsx:162
-#: components/AssociateModal/AssociateModal.jsx:147
+#: components/AssociateModal/AssociateModal.jsx:149
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:180
 #: components/LaunchPrompt/steps/InventoryStep.jsx:95
 #: components/Lookup/CredentialLookup.jsx:157
@@ -4904,7 +4903,7 @@ msgstr ""
 #: components/Lookup/ProjectLookup.jsx:125
 #: components/NotificationList/NotificationList.jsx:210
 #: components/Schedule/ScheduleList/ScheduleList.jsx:201
-#: components/TemplateList/TemplateList.jsx:213
+#: components/TemplateList/TemplateList.jsx:219
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:31
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:62
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:100
@@ -4917,10 +4916,10 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:105
 #: screens/Host/HostGroups/HostGroupsList.jsx:167
 #: screens/Host/HostList/HostList.jsx:160
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:195
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:196
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:135
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:171
-#: screens/Inventory/InventoryList/InventoryList.jsx:185
+#: screens/Inventory/InventoryList/InventoryList.jsx:188
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:175
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:97
 #: screens/Organization/OrganizationList/OrganizationList.jsx:149
@@ -4975,15 +4974,15 @@ msgstr ""
 msgid "Multiple Choice"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:59
+#: screens/Template/Survey/SurveyQuestionForm.jsx:92
 msgid "Multiple Choice (multiple select)"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:54
+#: screens/Template/Survey/SurveyQuestionForm.jsx:87
 msgid "Multiple Choice (single select)"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:210
+#: screens/Template/Survey/SurveyQuestionForm.jsx:253
 msgid "Multiple Choice Options"
 msgstr ""
 
@@ -4993,8 +4992,8 @@ msgstr ""
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:123
 #: components/AddRole/AddResourceRole.jsx:153
 #: components/AddRole/AddResourceRole.jsx:169
-#: components/AssociateModal/AssociateModal.jsx:138
-#: components/AssociateModal/AssociateModal.jsx:153
+#: components/AssociateModal/AssociateModal.jsx:140
+#: components/AssociateModal/AssociateModal.jsx:155
 #: components/HostForm/HostForm.jsx:85
 #: components/JobList/JobList.jsx:168
 #: components/JobList/JobList.jsx:217
@@ -5036,8 +5035,8 @@ msgstr ""
 #: components/Schedule/ScheduleList/ScheduleList.jsx:188
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:77
 #: components/Schedule/shared/ScheduleForm.jsx:99
-#: components/TemplateList/TemplateList.jsx:188
-#: components/TemplateList/TemplateList.jsx:221
+#: components/TemplateList/TemplateList.jsx:194
+#: components/TemplateList/TemplateList.jsx:227
 #: components/TemplateList/TemplateListItem.jsx:126
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:18
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:37
@@ -5061,7 +5060,7 @@ msgstr ""
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:121
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:161
 #: screens/Application/shared/ApplicationForm.jsx:53
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:204
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:206
 #: screens/Credential/CredentialList/CredentialList.jsx:123
 #: screens/Credential/CredentialList/CredentialList.jsx:142
 #: screens/Credential/CredentialList/CredentialListItem.jsx:55
@@ -5089,7 +5088,7 @@ msgstr ""
 #: screens/Host/HostList/HostListItem.jsx:28
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:45
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:50
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:235
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:238
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:63
 #: screens/InstanceGroup/Instances/InstanceList.jsx:155
 #: screens/InstanceGroup/Instances/InstanceList.jsx:162
@@ -5097,8 +5096,8 @@ msgstr ""
 #: screens/InstanceGroup/shared/InstanceGroupForm.jsx:20
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:74
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:35
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:186
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:201
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:187
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:202
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.jsx:34
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:117
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:143
@@ -5108,9 +5107,9 @@ msgstr ""
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:179
 #: screens/Inventory/InventoryHosts/InventoryHostItem.jsx:33
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:122
-#: screens/Inventory/InventoryList/InventoryList.jsx:172
-#: screens/Inventory/InventoryList/InventoryList.jsx:191
-#: screens/Inventory/InventoryList/InventoryList.jsx:199
+#: screens/Inventory/InventoryList/InventoryList.jsx:175
+#: screens/Inventory/InventoryList/InventoryList.jsx:194
+#: screens/Inventory/InventoryList/InventoryList.jsx:202
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:79
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:166
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:181
@@ -5324,7 +5323,7 @@ msgstr ""
 msgid "Not configured for inventory sync."
 msgstr ""
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:228
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:229
 msgid ""
 "Note that only hosts directly in this group can\n"
 "be disassociated. Hosts in sub-groups must be disassociated\n"
@@ -5335,7 +5334,7 @@ msgstr ""
 #~ msgid "Note that only hosts directly in this group can be disassociated. Hosts in sub-groups must be disassociated directly from the sub-group level that they belong."
 #~ msgstr ""
 
-#: screens/Host/HostGroups/HostGroupsList.jsx:212
+#: screens/Host/HostGroups/HostGroupsList.jsx:213
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:221
 msgid ""
 "Note that you may still see the group in the list after\n"
@@ -5549,7 +5548,7 @@ msgstr ""
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:167
 #: components/PromptDetail/PromptProjectDetail.jsx:93
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:85
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:140
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:142
 #: screens/Credential/shared/TypeInputsSubForm.jsx:47
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:61
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:245
@@ -5577,13 +5576,13 @@ msgstr ""
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:72
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:36
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:163
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:217
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:219
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:72
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:146
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:158
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:63
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:81
-#: screens/Inventory/InventoryList/InventoryList.jsx:202
+#: screens/Inventory/InventoryList/InventoryList.jsx:205
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:96
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:199
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:107
@@ -5600,7 +5599,7 @@ msgstr ""
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:123
 #: screens/User/UserTeams/UserTeamList.jsx:183
 #: screens/User/UserTeams/UserTeamList.jsx:242
-#: screens/User/UserTeams/UserTeamListItem.jsx:21
+#: screens/User/UserTeams/UserTeamListItem.jsx:23
 msgid "Organization"
 msgstr ""
 
@@ -5724,11 +5723,11 @@ msgstr ""
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
-#: screens/Login/Login.jsx:181
+#: screens/Login/Login.jsx:179
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:112
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:223
-#: screens/Template/Survey/SurveyQuestionForm.jsx:50
+#: screens/Template/Survey/SurveyQuestionForm.jsx:83
 #: screens/User/shared/UserForm.jsx:80
 msgid "Password"
 msgstr ""
@@ -5810,7 +5809,7 @@ msgstr ""
 msgid "Playbook Started"
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:205
+#: components/TemplateList/TemplateList.jsx:211
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:23
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:54
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:88
@@ -5850,7 +5849,7 @@ msgstr ""
 msgid "Please enter a value."
 msgstr ""
 
-#: screens/Login/Login.jsx:153
+#: screens/Login/Login.jsx:151
 msgid "Please log in"
 msgstr ""
 
@@ -5919,6 +5918,10 @@ msgstr ""
 msgid "Preconditions for running this node when there are multiple parents. Refer to the"
 msgstr ""
 
+#: screens/Template/Survey/MultipleChoiceField.jsx:58
+msgid "Press 'Enter' to add more answer choices. One answer choice per line."
+msgstr ""
+
 #: components/CodeEditor/CodeEditor.jsx:187
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
@@ -5932,8 +5935,8 @@ msgstr ""
 #~ msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.jsx:229
-msgid "Press Enter to get additional {num} inputs. Refer to the"
-msgstr ""
+#~ msgid "Press Enter to get additional {num} inputs. Refer to the"
+#~ msgstr ""
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
@@ -6022,7 +6025,7 @@ msgstr ""
 
 #: components/CodeEditor/VariablesField.jsx:219
 #: components/FieldWithPrompt/FieldWithPrompt.jsx:47
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:166
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:168
 msgid "Prompt on launch"
 msgstr ""
 
@@ -6105,7 +6108,7 @@ msgstr ""
 msgid "Pull"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:111
+#: screens/Template/Survey/SurveyQuestionForm.jsx:158
 msgid "Question"
 msgstr ""
 
@@ -6183,6 +6186,10 @@ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:282
 msgid "Redirecting to subscription detail"
+msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:256
+msgid "Refer to the"
 msgstr ""
 
 #: screens/Template/shared/JobTemplateForm.jsx:409
@@ -6313,7 +6320,7 @@ msgid "Request subscription"
 msgstr ""
 
 #: screens/Template/Survey/SurveyListItem.jsx:106
-#: screens/Template/Survey/SurveyQuestionForm.jsx:136
+#: screens/Template/Survey/SurveyQuestionForm.jsx:183
 msgid "Required"
 msgstr ""
 
@@ -6436,7 +6443,7 @@ msgstr ""
 
 #: components/ResourceAccessList/ResourceAccessList.jsx:143
 #: components/ResourceAccessList/ResourceAccessList.jsx:156
-#: components/ResourceAccessList/ResourceAccessList.jsx:182
+#: components/ResourceAccessList/ResourceAccessList.jsx:183
 #: components/ResourceAccessList/ResourceAccessListItem.jsx:68
 #: screens/Team/Team.jsx:57
 #: screens/Team/Teams.jsx:31
@@ -6491,7 +6498,7 @@ msgstr ""
 msgid "Running Handlers"
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:237
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:240
 msgid "Running Jobs"
 msgstr ""
 
@@ -6547,8 +6554,8 @@ msgid "Saturday"
 msgstr ""
 
 #: components/AddRole/AddResourceRole.jsx:265
-#: components/AssociateModal/AssociateModal.jsx:104
-#: components/AssociateModal/AssociateModal.jsx:110
+#: components/AssociateModal/AssociateModal.jsx:106
+#: components/AssociateModal/AssociateModal.jsx:112
 #: components/FormActionGroup/FormActionGroup.jsx:14
 #: components/FormActionGroup/FormActionGroup.jsx:20
 #: components/Schedule/shared/ScheduleForm.jsx:611
@@ -6604,7 +6611,7 @@ msgstr ""
 msgid "Schedule is missing rrule"
 msgstr ""
 
-#: components/Schedule/ScheduleList/ScheduleList.jsx:227
+#: components/Schedule/ScheduleList/ScheduleList.jsx:229
 #: routeConfig.jsx:42
 #: screens/ActivityStream/ActivityStream.jsx:151
 #: screens/Inventory/Inventories.jsx:87
@@ -6690,13 +6697,13 @@ msgstr ""
 msgid "Select Credential Type"
 msgstr ""
 
-#: screens/Host/HostGroups/HostGroupsList.jsx:236
+#: screens/Host/HostGroups/HostGroupsList.jsx:238
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:245
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:232
 msgid "Select Groups"
 msgstr ""
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:257
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:258
 msgid "Select Hosts"
 msgstr ""
 
@@ -6840,7 +6847,7 @@ msgstr ""
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.jsx:18
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:40
 #: screens/Team/shared/TeamForm.jsx:20
-#: screens/Template/Survey/SurveyQuestionForm.jsx:28
+#: screens/Template/Survey/SurveyQuestionForm.jsx:30
 #: screens/Template/shared/JobTemplateForm.jsx:86
 #: screens/Template/shared/JobTemplateForm.jsx:153
 #: screens/User/shared/UserForm.jsx:49
@@ -7164,43 +7171,43 @@ msgstr ""
 msgid "Show only root groups"
 msgstr ""
 
-#: screens/Login/Login.jsx:215
+#: screens/Login/Login.jsx:213
 msgid "Sign in with Azure AD"
 msgstr ""
 
-#: screens/Login/Login.jsx:228
+#: screens/Login/Login.jsx:226
 msgid "Sign in with GitHub"
 msgstr ""
 
-#: screens/Login/Login.jsx:267
+#: screens/Login/Login.jsx:265
 msgid "Sign in with GitHub Enterprise"
 msgstr ""
 
-#: screens/Login/Login.jsx:281
+#: screens/Login/Login.jsx:279
 msgid "Sign in with GitHub Enterprise Organizations"
 msgstr ""
 
-#: screens/Login/Login.jsx:296
+#: screens/Login/Login.jsx:294
 msgid "Sign in with GitHub Enterprise Teams"
 msgstr ""
 
-#: screens/Login/Login.jsx:241
+#: screens/Login/Login.jsx:239
 msgid "Sign in with GitHub Organizations"
 msgstr ""
 
-#: screens/Login/Login.jsx:254
+#: screens/Login/Login.jsx:252
 msgid "Sign in with GitHub Teams"
 msgstr ""
 
-#: screens/Login/Login.jsx:310
+#: screens/Login/Login.jsx:308
 msgid "Sign in with Google"
 msgstr ""
 
-#: screens/Login/Login.jsx:328
+#: screens/Login/Login.jsx:326
 msgid "Sign in with SAML"
 msgstr ""
 
-#: screens/Login/Login.jsx:327
+#: screens/Login/Login.jsx:325
 msgid "Sign in with SAML {samlIDP}"
 msgstr ""
 
@@ -7480,7 +7487,7 @@ msgstr ""
 #: components/JobList/JobList.jsx:197
 #: components/JobList/JobList.jsx:218
 #: components/JobList/JobListItem.jsx:77
-#: screens/Inventory/InventoryList/InventoryList.jsx:200
+#: screens/Inventory/InventoryList/InventoryList.jsx:203
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:88
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:218
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:79
@@ -7799,8 +7806,8 @@ msgstr ""
 msgid "Template type"
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:183
-#: components/TemplateList/TemplateList.jsx:240
+#: components/TemplateList/TemplateList.jsx:189
+#: components/TemplateList/TemplateList.jsx:246
 #: routeConfig.jsx:63
 #: screens/ActivityStream/ActivityStream.jsx:162
 #: screens/ExecutionEnvironment/ExecutionEnvironment.jsx:69
@@ -7839,7 +7846,7 @@ msgid "Test passed"
 msgstr ""
 
 #: screens/Template/Survey/SurveyPreviewModal.jsx:52
-#: screens/Template/Survey/SurveyQuestionForm.jsx:48
+#: screens/Template/Survey/SurveyQuestionForm.jsx:81
 msgid "Text"
 msgstr ""
 
@@ -7847,7 +7854,7 @@ msgstr ""
 msgid "Text Area"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:49
+#: screens/Template/Survey/SurveyQuestionForm.jsx:82
 msgid "Textarea"
 msgstr ""
 
@@ -7949,7 +7956,7 @@ msgstr ""
 msgid "The resource associated with this node has been deleted."
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:128
+#: screens/Template/Survey/SurveyQuestionForm.jsx:175
 msgid ""
 "The suggested format for variable names is lowercase and\n"
 "underscore-separated (for example, foo_bar, user_id, host_name,\n"
@@ -7977,6 +7984,10 @@ msgstr ""
 #: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:53
 #~ msgid "There are no available playbook directories in {project_base_dir}. Either that directory is empty, or all of the contents are already assigned to other projects. Create a new directory there and make sure the playbook files can be read by the \"awx\" system user, or have {brandName} directly retrieve your playbooks from source control using the Source Control Type option above."
 #~ msgstr ""
+
+#: screens/Template/Survey/MultipleChoiceField.jsx:31
+msgid "There must be a value in at least one input"
+msgstr ""
 
 #: screens/Login/Login.jsx:130
 msgid "There was a problem logging in. Please try again."
@@ -8044,11 +8055,11 @@ msgstr ""
 msgid "This action will disassociate the following:"
 msgstr ""
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:108
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:109
 msgid "This container group is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.jsx:280
+#: screens/Credential/CredentialDetail/CredentialDetail.jsx:282
 msgid "This credential is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8139,7 +8150,7 @@ msgstr ""
 msgid "This field will be retrieved from an external secret management system using the specified credential."
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:122
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:123
 msgid "This instance group is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8372,7 +8383,7 @@ msgstr ""
 msgid "Top Pagination"
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:238
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:241
 msgid "Total Jobs"
 msgstr ""
 
@@ -8432,8 +8443,8 @@ msgstr ""
 #: components/PromptDetail/PromptDetail.jsx:112
 #: components/Schedule/ScheduleList/ScheduleList.jsx:170
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:94
-#: components/TemplateList/TemplateList.jsx:197
-#: components/TemplateList/TemplateList.jsx:222
+#: components/TemplateList/TemplateList.jsx:203
+#: components/TemplateList/TemplateList.jsx:228
 #: components/TemplateList/TemplateListItem.jsx:152
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:85
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:154
@@ -8444,11 +8455,11 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:93
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:50
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:55
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:236
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:239
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:68
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:80
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:79
-#: screens/Inventory/InventoryList/InventoryList.jsx:201
+#: screens/Inventory/InventoryList/InventoryList.jsx:204
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:93
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:219
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:92
@@ -8473,6 +8484,10 @@ msgstr ""
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:44
 #: screens/Project/shared/ProjectForm.jsx:243
 msgid "Type Details"
+msgstr ""
+
+#: screens/Template/Survey/MultipleChoiceField.jsx:57
+msgid "Type answer then click checkbox on right to select answer as default."
 msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:84
@@ -8647,8 +8662,8 @@ msgstr ""
 #: components/AddRole/AddResourceRole.jsx:124
 #: components/AddRole/AddResourceRole.jsx:139
 #: components/ResourceAccessList/ResourceAccessList.jsx:127
-#: components/ResourceAccessList/ResourceAccessList.jsx:179
-#: screens/Login/Login.jsx:184
+#: components/ResourceAccessList/ResourceAccessList.jsx:180
+#: screens/Login/Login.jsx:182
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:78
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:180
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:230
@@ -8752,8 +8767,8 @@ msgstr ""
 msgid "View Azure AD settings"
 msgstr ""
 
-#: screens/Credential/Credential.jsx:117
-#: screens/Credential/Credential.jsx:129
+#: screens/Credential/Credential.jsx:131
+#: screens/Credential/Credential.jsx:143
 msgid "View Credential Details"
 msgstr ""
 
@@ -8878,7 +8893,7 @@ msgstr ""
 msgid "View activity stream"
 msgstr ""
 
-#: screens/Credential/Credential.jsx:80
+#: screens/Credential/Credential.jsx:92
 msgid "View all Credentials."
 msgstr ""
 
@@ -9103,7 +9118,7 @@ msgstr ""
 msgid "Weekend day"
 msgstr ""
 
-#: screens/Login/Login.jsx:151
+#: screens/Login/Login.jsx:150
 msgid "Welcome to Ansible {brandName}!"
 msgstr ""
 
@@ -9191,7 +9206,7 @@ msgstr ""
 msgid "Workflow Link"
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:201
+#: components/TemplateList/TemplateList.jsx:207
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:97
 msgid "Workflow Template"
 msgstr ""
@@ -9395,6 +9410,7 @@ msgstr ""
 msgid "disassociate"
 msgstr ""
 
+#: screens/Template/Survey/SurveyQuestionForm.jsx:264
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:222
 msgid "documentation"
 msgstr ""
@@ -9429,7 +9445,7 @@ msgstr ""
 msgid "for more info."
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:238
+#: screens/Template/Survey/SurveyQuestionForm.jsx:266
 msgid "for more information."
 msgstr ""
 
@@ -9500,6 +9516,10 @@ msgstr ""
 
 #: components/Lookup/HostListItem.jsx:23
 msgid "name"
+msgstr ""
+
+#: screens/Template/Survey/MultipleChoiceField.jsx:73
+msgid "new choice"
 msgstr ""
 
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:465
@@ -9603,7 +9623,7 @@ msgstr ""
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr ""
 
-#: screens/Inventory/InventoryList/InventoryList.jsx:229
+#: screens/Inventory/InventoryList/InventoryList.jsx:232
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
 msgstr ""
 
@@ -9627,11 +9647,11 @@ msgstr ""
 msgid "{0, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} other {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}"
 msgstr ""
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:187
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:188
 msgid "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}"
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:223
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:226
 msgid "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
@@ -9639,7 +9659,7 @@ msgstr ""
 msgid "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
 msgstr ""
 
-#: screens/Inventory/InventoryList/InventoryList.jsx:222
+#: screens/Inventory/InventoryList/InventoryList.jsx:225
 msgid "{0, plural, one {This invetory is currently being used by some temeplates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
@@ -9651,7 +9671,7 @@ msgstr ""
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
-#: components/TemplateList/TemplateList.jsx:243
+#: components/TemplateList/TemplateList.jsx:249
 msgid "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
@@ -9723,11 +9743,11 @@ msgstr ""
 msgid "{minutes} min {seconds} sec"
 msgstr ""
 
-#: components/JobList/JobListCancelButton.jsx:92
+#: components/JobList/JobListCancelButton.jsx:106
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
 msgstr ""
 
-#: components/JobList/JobListCancelButton.jsx:151
+#: components/JobList/JobListCancelButton.jsx:167
 msgid "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
 msgstr ""
 
