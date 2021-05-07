@@ -56,7 +56,7 @@ function PlaybookSelect({
       onToggle={setIsOpen}
       placeholderText={t`Select a playbook`}
       typeAheadAriaLabel={t`Select a playbook`}
-      isCreateable={false}
+      isCreatable={false}
       onSelect={(event, value) => {
         setIsOpen(false);
         onChange(value);
