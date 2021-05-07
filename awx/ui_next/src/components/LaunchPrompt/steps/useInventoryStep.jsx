@@ -12,12 +12,7 @@ const InventoryAlert = styled(Alert)`
 
 const STEP_ID = 'inventory';
 
-export default function useInventoryStep(
-  launchConfig,
-  resource,
-
-  visitedSteps
-) {
+export default function useInventoryStep(launchConfig, resource, visitedSteps) {
   const [, meta, helpers] = useField('inventory');
   const formError =
     !resource || resource?.type === 'workflow_job_template'

@@ -13,7 +13,6 @@ import AlertModal from '../AlertModal';
 
 function PromptModalForm({
   launchConfig,
-
   onCancel,
   onSubmit,
   resource,
@@ -33,7 +32,6 @@ function PromptModalForm({
     launchConfig,
     surveyConfig,
     resource,
-
     resourceDefaultCredentials
   );
 
@@ -124,7 +122,6 @@ function PromptModalForm({
 
 function LaunchPrompt({
   launchConfig,
-
   onCancel,
   onLaunch,
   resource = {},

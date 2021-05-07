@@ -107,4 +107,29 @@ describe('OtherPromptsStep', () => {
       true
     );
   });
+
+  test('should pass mode and onModeChange to VariablesField', async () => {
+    let wrapper;
+    const onModeChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ extra_vars: '{}' }}>
+          <OtherPromptsStep
+            variablesMode="javascript"
+            onVarModeChange={onModeChange}
+            launchConfig={{
+              ask_variables_on_launch: true,
+            }}
+          />
+        </Formik>
+      );
+    });
+
+    expect(wrapper.find('VariablesField').prop('initialMode')).toEqual(
+      'javascript'
+    );
+    expect(wrapper.find('VariablesField').prop('onModeChange')).toEqual(
+      onModeChange
+    );
+  });
 });
