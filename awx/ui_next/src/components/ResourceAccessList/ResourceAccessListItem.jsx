@@ -57,10 +57,10 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
       <Td id={`access-record-${accessRecord.id}`} dataLabel={t`Name`}>
         {accessRecord.id ? (
           <Link to={{ pathname: `/users/${accessRecord.id}/details` }}>
-            {accessRecord.username}
+            <b>{accessRecord.username}</b>
           </Link>
         ) : (
-          accessRecord.username
+          <b>{accessRecord.username}</b>
         )}
       </Td>
       <Td dataLabel={t`First name`}>{accessRecord.first_name}</Td>
