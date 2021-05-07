@@ -37,14 +37,15 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
   };
 
   const handleSubmit = async formData => {
+    const submittedData = { ...formData };
     try {
       if (
-        formData.variable !== question.variable &&
-        survey.spec.find(q => q.variable === formData.variable)
+        submittedData.variable !== question.variable &&
+        survey.spec.find(q => q.variable === submittedData.variable)
       ) {
         setFormError(
           new Error(
-            `Survey already contains a question with variable named “${formData.variable}”`
+            `Survey already contains a question with variable named “${submittedData.variable}”`
           )
         );
         return;
@@ -55,16 +56,31 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');
       }
-      if (formData.type === 'multiselect') {
-        formData.default = formData.default
-          .split('\n')
-          .filter(v => v !== '' || '\n')
-          .map(v => v.trim())
-          .join('\n');
+      let choices = '';
+      let defaultAnswers = '';
+      if (
+        submittedData.type === 'multiselect' ||
+        submittedData.type === 'multiplechoice'
+      ) {
+        submittedData.formattedChoices.forEach(({ choice, isDefault }, i) => {
+          choices =
+            i === submittedData.formattedChoices.length - 1
+              ? choices.concat(`${choice}`)
+              : choices.concat(`${choice}\n`);
+          if (isDefault) {
+            defaultAnswers =
+              i === submittedData.formattedChoices.length - 1
+                ? defaultAnswers.concat(`${choice}`)
+                : defaultAnswers.concat(`${choice}\n`);
+          }
+        });
+        submittedData.default = defaultAnswers.trim();
+        submittedData.choices = choices.trim();
       }
+
       await updateSurvey([
         ...survey.spec.slice(0, questionIndex),
-        formData,
+        submittedData,
         ...survey.spec.slice(questionIndex + 1),
       ]);
       navigateToList();

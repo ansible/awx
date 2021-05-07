@@ -1,7 +1,6 @@
 import React from 'react';
 import { func, string, bool, number, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
-
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { FormColumnLayout } from '../../../components/FormLayout';
@@ -11,6 +10,8 @@ import FormField, {
   PasswordField,
   FormSubmitError,
 } from '../../../components/FormField';
+import { useConfig } from '../../../contexts/Config';
+import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import Popover from '../../../components/Popover';
 import {
@@ -21,12 +22,22 @@ import {
   integer,
   number as numberValidator,
 } from '../../../util/validators';
+import MultipleChoiceField from './MultipleChoiceField';
 
 function AnswerTypeField() {
-  const [field] = useField({
+  const [field, meta, helpers] = useField({
     name: 'type',
     validate: required(t`Select a value for this field`),
   });
+  const [choicesField, choicesMeta, choicesHelpers] = useField(
+    'formattedChoices'
+  );
+
+  const singleDefault = choicesField.value.map((c, i) =>
+    i === 0
+      ? { choice: c.choice, isDefault: true, id: c.id }
+      : { choice: c.choice, isDefault: false, id: c.id }
+  );
 
   return (
     <FormGroup
@@ -44,6 +55,28 @@ function AnswerTypeField() {
       <AnsibleSelect
         id="question-type"
         {...field}
+        onChange={(e, val) => {
+          helpers.setValue(val);
+
+          // Edit Mode: Makes the first choice the default value if
+          // the type switches from multiselect, to multiple choice
+          if (
+            val === 'multiplechoice' &&
+            ['multiplechoice', 'multiselect'].includes(meta.initialValue) &&
+            val !== meta.initialValue
+          ) {
+            choicesHelpers.setValue(singleDefault);
+          }
+
+          // Edit Mode: Resets Multiple choice or Multiselect values if the user move type
+          // back to one of those values
+          if (
+            ['multiplechoice', 'multiselect'].includes(val) &&
+            val === meta.initialValue
+          ) {
+            choicesHelpers.setValue(choicesMeta.initialValue);
+          }
+        }}
         data={[
           { key: 'text', value: 'text', label: t`Text` },
           { key: 'textarea', value: 'textarea', label: t`Textarea` },
@@ -72,33 +105,47 @@ function SurveyQuestionForm({
   handleCancel,
   submitError,
 }) {
-  const defaultIsNotAvailable = choices => {
-    return defaultValue => {
-      let errorMessage;
-      const found = [...defaultValue].every(dA => choices.indexOf(dA) > -1);
+  const config = useConfig();
 
-      if (!found) {
-        errorMessage = t`Default choice must be answered from the choices listed.`;
-      }
-      return errorMessage;
-    };
+  let initialValues = {
+    question_name: question?.question_name || '',
+    question_description: question?.question_description || '',
+    required: question ? question?.required : true,
+    type: question?.type || 'text',
+    variable: question?.variable || '',
+    min: question?.min || 0,
+    max: question?.max || 1024,
+    default: question?.default || '',
+    choices: question?.choices || '',
+    formattedChoices: [{ choice: '', isDefault: false, id: 0 }],
+    new_question: !question,
   };
+  if (question?.type === 'multiselect' || question?.type === 'multiplechoice') {
+    const newQuestions = question.choices.split('\n').map((c, i) => {
+      if (question.default.split('\n').includes(c)) {
+        return { choice: c, isDefault: true, id: i };
+      }
+
+      return { choice: c, isDefault: false, id: i };
+    });
+
+    initialValues = {
+      question_name: question?.question_name || '',
+      question_description: question?.question_description || '',
+      required: question ? question?.required : true,
+      type: question?.type || 'text',
+      variable: question?.variable || '',
+      min: question?.min || 0,
+      max: question?.max || 1024,
+      formattedChoices: newQuestions,
+      new_question: !question,
+    };
+  }
 
   return (
     <Formik
       enableReinitialize
-      initialValues={{
-        question_name: question?.question_name || '',
-        question_description: question?.question_description || '',
-        required: question ? question?.required : true,
-        type: question?.type || 'text',
-        variable: question?.variable || '',
-        min: question?.min || 0,
-        max: question?.max || 1024,
-        default: question?.default || '',
-        choices: question?.choices || '',
-        new_question: !question,
-      }}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
     >
       {formik => (
@@ -202,29 +249,24 @@ function SurveyQuestionForm({
               />
             )}
             {['multiplechoice', 'multiselect'].includes(formik.values.type) && (
-              <>
-                <FormField
-                  id="question-options"
-                  name="choices"
-                  type="textarea"
-                  label={t`Multiple Choice Options`}
-                  validate={required(null)}
-                  tooltip={t`Each answer choice must be on a separate line.`}
-                  isRequired
-                  rows="10"
-                />
-                <FormField
-                  id="question-default"
-                  name="default"
-                  validate={defaultIsNotAvailable(formik.values.choices)}
-                  type={
-                    formik.values.type === 'multiplechoice'
-                      ? 'text'
-                      : 'textarea'
-                  }
-                  label={t`Default answer`}
-                />
-              </>
+              <MultipleChoiceField
+                label={t`Multiple Choice Options`}
+                tooltip={
+                  <>
+                    <span>{t`Refer to the`} </span>
+                    <a
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/userguide/job_templates.html#surveys`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t`documentation`}{' '}
+                    </a>
+                    {t`for more information.`}
+                  </>
+                }
+              />
             )}
           </FormColumnLayout>
           <FormSubmitError error={submitError} />
@@ -256,5 +298,4 @@ SurveyQuestionForm.defaultProps = {
   question: null,
   submitError: null,
 };
-
 export default SurveyQuestionForm;
