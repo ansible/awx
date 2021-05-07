@@ -72,6 +72,12 @@ options:
       description:
         - Execution Environment to use for the source.
       type: str
+    custom_virtualenv:
+      description:
+        - Local absolute file path containing a custom Python virtualenv to use.
+        - Only compatible with older versions of AWX/Tower
+        - Deprecated, will be removed in the future
+      type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.
@@ -166,6 +172,7 @@ def main():
         host_filter=dict(),
         credential=dict(),
         execution_environment=dict(),
+        custom_virtualenv=dict(),
         organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
@@ -258,6 +265,7 @@ def main():
         'source_vars',
         'overwrite',
         'overwrite_vars',
+        'custom_virtualenv',
         'timeout',
         'verbosity',
         'update_on_launch',
