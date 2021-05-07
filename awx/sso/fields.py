@@ -196,6 +196,7 @@ class AuthenticationBackendsField(fields.StringListField):
                 ],
             ),
             ('django.contrib.auth.backends.ModelBackend', []),
+            ('awx.main.backends.AWXModelBackend', []),
         ]
     )
 

@@ -364,7 +364,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
-    'django.contrib.auth.backends.ModelBackend',
+    'awx.main.backends.AWXModelBackend',
 )
 
 
