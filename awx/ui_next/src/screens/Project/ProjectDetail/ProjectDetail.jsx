@@ -207,6 +207,7 @@ function ProjectDetail({ project }) {
               errorTitle={t`Project Sync Error`}
               title={t`Cancel Project Sync`}
               errorMessage={t`Failed to cancel Project Sync`}
+              buttonText={t`Cancel Sync`}
             />
           ) : (
             <ProjectSyncButton

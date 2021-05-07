@@ -14,6 +14,8 @@ import {
   LaunchButton,
   ReLaunchDropDown,
 } from '../../../../components/LaunchButton';
+import { useConfig } from '../../../../contexts/Config';
+
 import JobCancelButton from '../../../../components/JobCancelButton';
 
 const BadgeGroup = styled.div`
@@ -73,6 +75,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
     (sum, key) => sum + job?.host_status_counts[key],
     0
   );
+  const { me } = useConfig();
 
   return (
     <Wrapper>
@@ -125,9 +128,10 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
           <Badge isRead>{toHHMMSS(job.elapsed)}</Badge>
         </Tooltip>
       </BadgeGroup>
-
-      {job.summary_fields.user_capabilities?.start &&
-        (['pending', 'waiting', 'running'].includes(jobStatus) ? (
+      {['pending', 'waiting', 'running'].includes(jobStatus) &&
+        (job.type === 'system_job'
+          ? me.is_superuser
+          : job?.summary_fields?.user_capabilities?.start) && (
           <JobCancelButton
             job={job}
             errorTitle={t`Job Cancel Error`}
@@ -135,41 +139,42 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
             errorMessage={t`Failed to cancel ${job.name}`}
             showIconButton
           />
-        ) : (
-          <Tooltip
-            content={
-              job.status === 'failed' && job.type === 'job'
-                ? t`Relaunch using host parameters`
-                : t`Relaunch Job`
-            }
-          >
-            {job.status === 'failed' && job.type === 'job' ? (
-              <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
-                  <ReLaunchDropDown
-                    handleRelaunch={handleRelaunch}
-                    ouiaId="job-output-relaunch-dropdown"
-                    isLaunching={isLaunching}
-                  />
-                )}
-              </LaunchButton>
-            ) : (
-              <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
-                  <Button
-                    ouiaId="job-output-relaunch-button"
-                    variant="plain"
-                    onClick={handleRelaunch}
-                    aria-label={t`Relaunch`}
-                    isDisabled={isLaunching}
-                  >
-                    <RocketIcon />
-                  </Button>
-                )}
-              </LaunchButton>
-            )}
-          </Tooltip>
-        ))}
+        )}
+      {job.summary_fields.user_capabilities?.start && (
+        <Tooltip
+          content={
+            job.status === 'failed' && job.type === 'job'
+              ? t`Relaunch using host parameters`
+              : t`Relaunch Job`
+          }
+        >
+          {job.status === 'failed' && job.type === 'job' ? (
+            <LaunchButton resource={job}>
+              {({ handleRelaunch, isLaunching }) => (
+                <ReLaunchDropDown
+                  handleRelaunch={handleRelaunch}
+                  ouiaId="job-output-relaunch-dropdown"
+                  isLaunching={isLaunching}
+                />
+              )}
+            </LaunchButton>
+          ) : (
+            <LaunchButton resource={job}>
+              {({ handleRelaunch, isLaunching }) => (
+                <Button
+                  ouiaId="job-output-relaunch-button"
+                  variant="plain"
+                  onClick={handleRelaunch}
+                  aria-label={t`Relaunch`}
+                  isDisabled={isLaunching}
+                >
+                  <RocketIcon />
+                </Button>
+              )}
+            </LaunchButton>
+          )}
+        </Tooltip>
+      )}
 
       {job.related?.stdout && (
         <Tooltip content={t`Download Output`}>
@@ -184,16 +189,6 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
           </a>
         </Tooltip>
       )}
-      {/* {job.summary_fields.user_capabilities.start &&
-        ['pending', 'waiting', 'running'].includes(jobStatus) && (
-          <JobCancelButton
-            job={job}
-            errorTitle={t`Job Cancel Error`}
-            title={t`Job Cancel`}
-            errorMessage={t`Failed to cancel ${job.name}`}
-            showIconButton
-          />
-        )} */}
       {job.summary_fields.user_capabilities.delete &&
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(
           jobStatus

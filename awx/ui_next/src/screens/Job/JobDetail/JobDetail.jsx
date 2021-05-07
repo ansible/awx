@@ -1,11 +1,12 @@
 import 'styled-components/macro';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import styled from 'styled-components';
 
+import { useConfig } from '../../../contexts/Config';
 import AlertModal from '../../../components/AlertModal';
 import {
   DetailList,
@@ -28,7 +29,6 @@ import JobCancelButton from '../../../components/JobCancelButton';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from '../../../util/jobs';
 import { toTitleCase } from '../../../util/strings';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { formatDateString } from '../../../util/dates';
 import { Job } from '../../../types';
 
@@ -54,6 +54,7 @@ const VERBOSITY = {
 };
 
 function JobDetail({ job }) {
+  const { me } = useConfig();
   const {
     created_by,
     credential,
@@ -71,24 +72,6 @@ function JobDetail({ job }) {
   } = job.summary_fields;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
-
-  const [showCancelModal, setShowCancelModal] = useState(false);
-
-  const {
-    error: cancelError,
-    isLoading: isCancelling,
-    request: cancelJob,
-  } = useRequest(
-    useCallback(async () => {
-      await getJobModel(job.type).cancel(job.id, job.type);
-    }, [job.id, job.type]),
-    {}
-  );
-
-  const {
-    error: dismissableCancelError,
-    dismissError: dismissCancelError,
-  } = useDismissableError(cancelError);
 
   const jobTypes = {
     project_update: t`Source Control Update`,
@@ -387,7 +370,9 @@ function JobDetail({ job }) {
             </LaunchButton>
           ))}
         {isJobRunning(job.status) &&
-          job?.summary_fields?.user_capabilities?.start && (
+          (job.type === 'system_job'
+            ? me.is_superuser
+            : job?.summary_fields?.user_capabilities?.start) && (
             <JobCancelButton
               job={job}
               errorTitle={t`Job Cancel Error`}
@@ -407,49 +392,6 @@ function JobDetail({ job }) {
             </DeleteButton>
           )}
       </CardActionsRow>
-      {showCancelModal && isJobRunning(job.status) && (
-        <AlertModal
-          isOpen={showCancelModal}
-          variant="danger"
-          onClose={() => setShowCancelModal(false)}
-          title={t`Cancel Job`}
-          label={t`Cancel Job`}
-          actions={[
-            <Button
-              id="cancel-job-confirm-button"
-              key="delete"
-              variant="danger"
-              isDisabled={isCancelling}
-              aria-label={t`Cancel job`}
-              onClick={cancelJob}
-            >
-              {t`Cancel job`}
-            </Button>,
-            <Button
-              id="cancel-job-return-button"
-              key="cancel"
-              variant="secondary"
-              aria-label={t`Return`}
-              onClick={() => setShowCancelModal(false)}
-            >
-              {t`Return`}
-            </Button>,
-          ]}
-        >
-          {t`Are you sure you want to submit the request to cancel this job?`}
-        </AlertModal>
-      )}
-      {dismissableCancelError && (
-        <AlertModal
-          isOpen={dismissableCancelError}
-          variant="danger"
-          onClose={dismissCancelError}
-          title={t`Job Cancel Error`}
-          label={t`Job Cancel Error`}
-        >
-          <ErrorDetail error={dismissableCancelError} />
-        </AlertModal>
-      )}
       {errorMsg && (
         <AlertModal
           isOpen={errorMsg}

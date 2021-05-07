@@ -13,6 +13,7 @@ function JobCancelButton({
   title,
   showIconButton,
   errorMessage,
+  buttonText,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { error: cancelError, request: cancelJob } = useRequest(
@@ -44,7 +45,9 @@ function JobCancelButton({
             variant="secondary"
             ouiaId="cancel job"
             onClick={() => setIsOpen(true)}
-          >{t`Cancel Sync`}</Button>
+          >
+            {buttonText || t`Cancel Job`}
+          </Button>
         )}
       </Tooltip>
       {isOpen && (
