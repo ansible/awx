@@ -615,7 +615,7 @@ msgstr ""
 msgid "Are you sure you want to remove {0} access from {username}?"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.jsx:441
+#: screens/Job/JobDetail/JobDetail.jsx:439
 #: screens/Job/JobOutput/JobOutput.jsx:807
 msgid "Are you sure you want to submit the request to cancel this job?"
 msgstr "Are you sure you want to submit the request to cancel this job?"
@@ -625,7 +625,7 @@ msgstr "Are you sure you want to submit the request to cancel this job?"
 msgid "Arguments"
 msgstr "Arguments"
 
-#: screens/Job/JobDetail/JobDetail.jsx:357
+#: screens/Job/JobDetail/JobDetail.jsx:358
 msgid "Artifacts"
 msgstr "Artifacts"
 
@@ -879,8 +879,6 @@ msgstr "Cache timeout (seconds)"
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:101
 #: screens/Credential/shared/ExternalTestModal.jsx:98
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:107
-#: screens/Job/JobDetail/JobDetail.jsx:392
-#: screens/Job/JobDetail/JobDetail.jsx:397
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:63
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:66
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:83
@@ -907,8 +905,8 @@ msgstr ""
 msgid "Cancel Inventory Source Sync"
 msgstr "Cancel Inventory Source Sync"
 
-#: screens/Job/JobDetail/JobDetail.jsx:417
-#: screens/Job/JobDetail/JobDetail.jsx:418
+#: screens/Job/JobDetail/JobDetail.jsx:415
+#: screens/Job/JobDetail/JobDetail.jsx:416
 #: screens/Job/JobOutput/JobOutput.jsx:783
 #: screens/Job/JobOutput/JobOutput.jsx:784
 msgid "Cancel Job"
@@ -923,8 +921,8 @@ msgstr "Cancel Project Sync"
 msgid "Cancel Sync"
 msgstr "Cancel Sync"
 
-#: screens/Job/JobDetail/JobDetail.jsx:425
-#: screens/Job/JobDetail/JobDetail.jsx:428
+#: screens/Job/JobDetail/JobDetail.jsx:423
+#: screens/Job/JobDetail/JobDetail.jsx:426
 #: screens/Job/JobOutput/JobOutput.jsx:791
 #: screens/Job/JobOutput/JobOutput.jsx:794
 msgid "Cancel job"
@@ -975,6 +973,7 @@ msgstr "Cancel subscription edit"
 #~ msgid "Cancel sync source"
 #~ msgstr "Cancel sync source"
 
+#: screens/Job/JobDetail/JobDetail.jsx:394
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:134
 msgid "Cancel {0}"
 msgstr "Cancel {0}"
@@ -1220,7 +1219,7 @@ msgstr ""
 
 #: components/JobList/JobList.jsx:187
 #: components/JobList/JobListItem.jsx:34
-#: screens/Job/JobDetail/JobDetail.jsx:96
+#: screens/Job/JobDetail/JobDetail.jsx:97
 #: screens/Job/JobOutput/HostEventModal.jsx:135
 msgid "Command"
 msgstr "Command"
@@ -1278,7 +1277,7 @@ msgstr "Confirm revert all"
 msgid "Confirm selection"
 msgstr "Confirm selection"
 
-#: screens/Job/JobDetail/JobDetail.jsx:244
+#: screens/Job/JobDetail/JobDetail.jsx:245
 msgid "Container Group"
 msgstr "Container Group"
 
@@ -1529,7 +1528,7 @@ msgstr "Create user token"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:254
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:135
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:48
-#: screens/Job/JobDetail/JobDetail.jsx:334
+#: screens/Job/JobDetail/JobDetail.jsx:335
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:315
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:105
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:111
@@ -1674,7 +1673,7 @@ msgstr "Credential type not found."
 #: screens/Credential/CredentialList/CredentialList.jsx:175
 #: screens/Credential/Credentials.jsx:13
 #: screens/Credential/Credentials.jsx:23
-#: screens/Job/JobDetail/JobDetail.jsx:272
+#: screens/Job/JobDetail/JobDetail.jsx:273
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:275
 #: screens/Template/shared/JobTemplateForm.jsx:349
 #: util/getRelatedResourceDeleteDetails.js:97
@@ -1806,7 +1805,7 @@ msgstr "Define system-level features and functions"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:72
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:76
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:99
-#: screens/Job/JobDetail/JobDetail.jsx:408
+#: screens/Job/JobDetail/JobDetail.jsx:406
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:352
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:168
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:226
@@ -1851,7 +1850,7 @@ msgstr "Delete Host"
 msgid "Delete Inventory"
 msgstr "Delete Inventory"
 
-#: screens/Job/JobDetail/JobDetail.jsx:404
+#: screens/Job/JobDetail/JobDetail.jsx:402
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:201
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:205
 msgid "Delete Job"
@@ -2912,8 +2911,7 @@ msgstr "Error saving the workflow!"
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:258
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:169
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:146
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:86
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:97
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:51
 #: screens/Login/Login.jsx:191
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:127
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:360
@@ -3034,7 +3032,7 @@ msgstr "Execution Environment"
 msgid "Execution Environments"
 msgstr "Execution Environments"
 
-#: screens/Job/JobDetail/JobDetail.jsx:235
+#: screens/Job/JobDetail/JobDetail.jsx:236
 msgid "Execution Node"
 msgstr "Execution Node"
 
@@ -3195,6 +3193,7 @@ msgstr "Failed to cancel Project Sync"
 msgid "Failed to cancel one or more jobs."
 msgstr "Failed to cancel one or more jobs."
 
+#: screens/Job/JobDetail/JobDetail.jsx:395
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:135
 msgid "Failed to cancel {0}"
 msgstr "Failed to cancel {0}"
@@ -3532,7 +3531,7 @@ msgstr "File, directory or script"
 msgid "Finish Time"
 msgstr "Finish Time"
 
-#: screens/Job/JobDetail/JobDetail.jsx:138
+#: screens/Job/JobDetail/JobDetail.jsx:139
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:171
 msgid "Finished"
 msgstr "Finished"
@@ -4249,7 +4248,7 @@ msgstr "Instance"
 msgid "Instance Filters"
 msgstr "Instance Filters"
 
-#: screens/Job/JobDetail/JobDetail.jsx:238
+#: screens/Job/JobDetail/JobDetail.jsx:239
 msgid "Instance Group"
 msgstr "Instance Group"
 
@@ -4356,7 +4355,7 @@ msgstr "Inventories with sources cannot be copied"
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:94
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:40
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.jsx:47
-#: screens/Job/JobDetail/JobDetail.jsx:175
+#: screens/Job/JobDetail/JobDetail.jsx:176
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:135
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:192
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:199
@@ -4381,7 +4380,7 @@ msgstr "Inventory ID"
 #~ msgid "Inventory Scripts"
 #~ msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.jsx:191
+#: screens/Job/JobDetail/JobDetail.jsx:192
 msgid "Inventory Source"
 msgstr "Inventory Source"
 
@@ -4408,7 +4407,7 @@ msgstr "Inventory Sources"
 #: components/JobList/JobListItem.jsx:32
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:36
 #: components/Workflow/WorkflowLegend.jsx:100
-#: screens/Job/JobDetail/JobDetail.jsx:94
+#: screens/Job/JobDetail/JobDetail.jsx:95
 msgid "Inventory Sync"
 msgstr "Inventory Sync"
 
@@ -4487,21 +4486,22 @@ msgstr "January"
 msgid "Job"
 msgstr "Job"
 
-#: screens/Job/JobDetail/JobDetail.jsx:449
-#: screens/Job/JobDetail/JobDetail.jsx:450
+#: screens/Job/JobDetail/JobDetail.jsx:393
+#: screens/Job/JobDetail/JobDetail.jsx:447
+#: screens/Job/JobDetail/JobDetail.jsx:448
 #: screens/Job/JobOutput/JobOutput.jsx:826
 #: screens/Job/JobOutput/JobOutput.jsx:827
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:133
 msgid "Job Cancel Error"
 msgstr "Job Cancel Error"
 
-#: screens/Job/JobDetail/JobDetail.jsx:460
+#: screens/Job/JobDetail/JobDetail.jsx:458
 #: screens/Job/JobOutput/JobOutput.jsx:815
 #: screens/Job/JobOutput/JobOutput.jsx:816
 msgid "Job Delete Error"
 msgstr "Job Delete Error"
 
-#: screens/Job/JobDetail/JobDetail.jsx:251
+#: screens/Job/JobDetail/JobDetail.jsx:252
 msgid "Job Slice"
 msgstr "Job Slice"
 
@@ -4520,7 +4520,7 @@ msgstr "Job Status"
 #: components/PromptDetail/PromptDetail.jsx:198
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:220
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:334
-#: screens/Job/JobDetail/JobDetail.jsx:300
+#: screens/Job/JobDetail/JobDetail.jsx:301
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:324
 #: screens/Template/shared/JobTemplateForm.jsx:494
 msgid "Job Tags"
@@ -4532,7 +4532,7 @@ msgstr "Job Tags"
 #: components/Workflow/WorkflowNodeHelp.jsx:47
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:96
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.jsx:29
-#: screens/Job/JobDetail/JobDetail.jsx:141
+#: screens/Job/JobDetail/JobDetail.jsx:142
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:98
 msgid "Job Template"
 msgstr "Job Template"
@@ -4562,7 +4562,7 @@ msgstr "Job Templates with credentials that prompt for passwords cannot be selec
 #: components/PromptDetail/PromptDetail.jsx:151
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:85
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:283
-#: screens/Job/JobDetail/JobDetail.jsx:171
+#: screens/Job/JobDetail/JobDetail.jsx:172
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:175
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:145
 #: screens/Template/shared/JobTemplateForm.jsx:226
@@ -4702,7 +4702,7 @@ msgstr "Label Name"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:187
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:102
 #: components/TemplateList/TemplateListItem.jsx:306
-#: screens/Job/JobDetail/JobDetail.jsx:285
+#: screens/Job/JobDetail/JobDetail.jsx:286
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:291
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:195
 #: screens/Template/shared/JobTemplateForm.jsx:367
@@ -4737,7 +4737,7 @@ msgstr "Last Login"
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:114
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:43
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:86
-#: screens/Job/JobDetail/JobDetail.jsx:338
+#: screens/Job/JobDetail/JobDetail.jsx:339
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:320
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:110
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:187
@@ -4877,7 +4877,7 @@ msgstr "Less than or equal to comparison."
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:133
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:76
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:311
-#: screens/Job/JobDetail/JobDetail.jsx:229
+#: screens/Job/JobDetail/JobDetail.jsx:230
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:220
 #: screens/Template/shared/JobTemplateForm.jsx:416
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:160
@@ -4952,7 +4952,7 @@ msgstr "MOST RECENT SYNC"
 #: components/AdHocCommands/AdHocCredentialStep.jsx:67
 #: components/AdHocCommands/AdHocCredentialStep.jsx:68
 #: components/AdHocCommands/AdHocCredentialStep.jsx:84
-#: screens/Job/JobDetail/JobDetail.jsx:257
+#: screens/Job/JobDetail/JobDetail.jsx:258
 msgid "Machine Credential"
 msgstr "Machine Credential"
 
@@ -4972,7 +4972,7 @@ msgstr "Managed nodes"
 #: components/JobList/JobList.jsx:188
 #: components/JobList/JobListItem.jsx:35
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:39
-#: screens/Job/JobDetail/JobDetail.jsx:97
+#: screens/Job/JobDetail/JobDetail.jsx:98
 msgid "Management Job"
 msgstr "Management Job"
 
@@ -6054,13 +6054,13 @@ msgid "Play Started"
 msgstr "Play Started"
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:131
-#: screens/Job/JobDetail/JobDetail.jsx:228
+#: screens/Job/JobDetail/JobDetail.jsx:229
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:218
 #: screens/Template/shared/JobTemplateForm.jsx:330
 msgid "Playbook"
 msgstr "Playbook"
 
-#: screens/Job/JobDetail/JobDetail.jsx:95
+#: screens/Job/JobDetail/JobDetail.jsx:96
 msgid "Playbook Check"
 msgstr "Playbook Check"
 
@@ -6077,7 +6077,7 @@ msgstr "Playbook Directory"
 #: components/JobList/JobList.jsx:186
 #: components/JobList/JobListItem.jsx:33
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:37
-#: screens/Job/JobDetail/JobDetail.jsx:95
+#: screens/Job/JobDetail/JobDetail.jsx:96
 msgid "Playbook Run"
 msgstr "Playbook Run"
 
@@ -6263,8 +6263,8 @@ msgstr "Privilege escalation password"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:124
 #: components/TemplateList/TemplateListItem.jsx:268
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:213
-#: screens/Job/JobDetail/JobDetail.jsx:203
-#: screens/Job/JobDetail/JobDetail.jsx:218
+#: screens/Job/JobDetail/JobDetail.jsx:204
+#: screens/Job/JobDetail/JobDetail.jsx:219
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:151
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:203
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:211
@@ -6555,8 +6555,8 @@ msgstr "Related Groups"
 
 #: components/JobList/JobListItem.jsx:113
 #: components/LaunchButton/ReLaunchDropDown.jsx:81
-#: screens/Job/JobDetail/JobDetail.jsx:375
-#: screens/Job/JobDetail/JobDetail.jsx:383
+#: screens/Job/JobDetail/JobDetail.jsx:376
+#: screens/Job/JobDetail/JobDetail.jsx:384
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:163
 msgid "Relaunch"
 msgstr "Relaunch"
@@ -6699,8 +6699,8 @@ msgstr ""
 #: components/JobCancelButton/JobCancelButton.jsx:76
 #: components/JobList/JobListCancelButton.jsx:159
 #: components/JobList/JobListCancelButton.jsx:162
-#: screens/Job/JobDetail/JobDetail.jsx:434
-#: screens/Job/JobDetail/JobDetail.jsx:437
+#: screens/Job/JobDetail/JobDetail.jsx:432
+#: screens/Job/JobDetail/JobDetail.jsx:435
 #: screens/Job/JobOutput/JobOutput.jsx:800
 #: screens/Job/JobOutput/JobOutput.jsx:803
 msgid "Return"
@@ -6749,7 +6749,7 @@ msgstr "Revert settings"
 msgid "Revert to factory default."
 msgstr "Revert to factory default."
 
-#: screens/Job/JobDetail/JobDetail.jsx:227
+#: screens/Job/JobDetail/JobDetail.jsx:228
 #: screens/Project/ProjectList/ProjectList.jsx:176
 #: screens/Project/ProjectList/ProjectListItem.jsx:156
 msgid "Revision"
@@ -7587,7 +7587,7 @@ msgstr "Simple key select"
 #: components/PromptDetail/PromptDetail.jsx:221
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:235
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:352
-#: screens/Job/JobDetail/JobDetail.jsx:318
+#: screens/Job/JobDetail/JobDetail.jsx:319
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:339
 #: screens/Template/shared/JobTemplateForm.jsx:510
 msgid "Skip Tags"
@@ -7741,7 +7741,7 @@ msgstr "Source Control URL"
 #: components/JobList/JobList.jsx:184
 #: components/JobList/JobListItem.jsx:31
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:38
-#: screens/Job/JobDetail/JobDetail.jsx:93
+#: screens/Job/JobDetail/JobDetail.jsx:94
 msgid "Source Control Update"
 msgstr "Source Control Update"
 
@@ -7754,7 +7754,7 @@ msgid "Source Variables"
 msgstr "Source Variables"
 
 #: components/JobList/JobListItem.jsx:154
-#: screens/Job/JobDetail/JobDetail.jsx:163
+#: screens/Job/JobDetail/JobDetail.jsx:164
 msgid "Source Workflow Job"
 msgstr "Source Workflow Job"
 
@@ -7862,7 +7862,7 @@ msgstr "Start sync process"
 msgid "Start sync source"
 msgstr "Start sync source"
 
-#: screens/Job/JobDetail/JobDetail.jsx:137
+#: screens/Job/JobDetail/JobDetail.jsx:138
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:229
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:76
 msgid "Started"
@@ -7875,7 +7875,7 @@ msgstr "Started"
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:88
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:218
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:80
-#: screens/Job/JobDetail/JobDetail.jsx:127
+#: screens/Job/JobDetail/JobDetail.jsx:128
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:197
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:111
 #: screens/Project/ProjectList/ProjectList.jsx:174
@@ -9185,7 +9185,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/InventoryForm.jsx:87
 #: screens/Inventory/shared/InventoryGroupForm.jsx:49
 #: screens/Inventory/shared/SmartInventoryForm.jsx:96
-#: screens/Job/JobDetail/JobDetail.jsx:347
+#: screens/Job/JobDetail/JobDetail.jsx:348
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:354
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:210
 #: screens/Template/shared/JobTemplateForm.jsx:387
@@ -9217,7 +9217,7 @@ msgstr "Verbose"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:306
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:227
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:90
-#: screens/Job/JobDetail/JobDetail.jsx:230
+#: screens/Job/JobDetail/JobDetail.jsx:231
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:221
 #: screens/Template/shared/JobTemplateForm.jsx:437
 msgid "Verbosity"
@@ -9653,7 +9653,7 @@ msgstr "Workflow Approvals"
 #: components/JobList/JobList.jsx:189
 #: components/JobList/JobListItem.jsx:36
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:40
-#: screens/Job/JobDetail/JobDetail.jsx:98
+#: screens/Job/JobDetail/JobDetail.jsx:99
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:134
 msgid "Workflow Job"
 msgstr "Workflow Job"
@@ -9661,7 +9661,7 @@ msgstr "Workflow Job"
 #: components/JobList/JobListItem.jsx:142
 #: components/Workflow/WorkflowNodeHelp.jsx:51
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.jsx:30
-#: screens/Job/JobDetail/JobDetail.jsx:151
+#: screens/Job/JobDetail/JobDetail.jsx:152
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:110
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:147
 #: util/getRelatedResourceDeleteDetails.js:111

@@ -24,6 +24,7 @@ import {
   ReLaunchDropDown,
 } from '../../../components/LaunchButton';
 import StatusIcon from '../../../components/StatusIcon';
+import JobCancelButton from '../../../components/JobCancelButton';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from '../../../util/jobs';
 import { toTitleCase } from '../../../util/strings';
@@ -387,15 +388,12 @@ function JobDetail({ job }) {
           ))}
         {isJobRunning(job.status) &&
           job?.summary_fields?.user_capabilities?.start && (
-            <Button
-              variant="secondary"
-              aria-label={t`Cancel`}
-              isDisabled={isCancelling}
-              onClick={() => setShowCancelModal(true)}
-              ouiaId="job-detail-cancel-button"
-            >
-              {t`Cancel`}
-            </Button>
+            <JobCancelButton
+              job={job}
+              errorTitle={t`Job Cancel Error`}
+              title={t`Cancel ${job.name}`}
+              errorMessage={t`Failed to cancel ${job.name}`}
+            />
           )}
         {!isJobRunning(job.status) &&
           job?.summary_fields?.user_capabilities?.delete && (
