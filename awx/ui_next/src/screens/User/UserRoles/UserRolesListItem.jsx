@@ -12,10 +12,10 @@ function UserRolesListItem({ role, detailUrl, onSelect }) {
       <Td id={labelId} dataLabel={t`Name`}>
         {role.summary_fields.resource_name ? (
           <Link to={`${detailUrl}`} id={labelId}>
-            {role.summary_fields.resource_name}
+            <b>{role.summary_fields.resource_name}</b>
           </Link>
         ) : (
-          t`System`
+          <b>{t`System`}</b>
         )}
       </Td>
       <Td dataLabel={t`Type`}>

@@ -16,7 +16,9 @@ function UserTeamListItem({ team, isSelected, onSelect, rowIndex }) {
         }}
       />
       <Td id={`team-${team.id}`} dataLabel={t`Name`}>
-        <Link to={`/teams/${team.id}/details`}>{team.name}</Link>
+        <Link to={`/teams/${team.id}/details`}>
+          <b>{team.name}</b>
+        </Link>
       </Td>
       <Td dataLabel={t`Organization`}>
         {team.summary_fields.organization ? (
