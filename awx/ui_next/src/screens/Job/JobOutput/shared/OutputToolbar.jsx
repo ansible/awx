@@ -126,8 +126,16 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
         </Tooltip>
       </BadgeGroup>
 
-      {job.type !== 'system_job' &&
-        job.summary_fields.user_capabilities?.start && (
+      {job.summary_fields.user_capabilities?.start &&
+        (['pending', 'waiting', 'running'].includes(jobStatus) ? (
+          <JobCancelButton
+            job={job}
+            errorTitle={t`Job Cancel Error`}
+            title={t`Cancel ${job.name}`}
+            errorMessage={t`Failed to cancel ${job.name}`}
+            showIconButton
+          />
+        ) : (
           <Tooltip
             content={
               job.status === 'failed' && job.type === 'job'
@@ -161,7 +169,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
               </LaunchButton>
             )}
           </Tooltip>
-        )}
+        ))}
 
       {job.related?.stdout && (
         <Tooltip content={t`Download Output`}>
@@ -176,7 +184,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
           </a>
         </Tooltip>
       )}
-      {job.summary_fields.user_capabilities.start &&
+      {/* {job.summary_fields.user_capabilities.start &&
         ['pending', 'waiting', 'running'].includes(jobStatus) && (
           <JobCancelButton
             job={job}
@@ -185,7 +193,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
             errorMessage={t`Failed to cancel ${job.name}`}
             showIconButton
           />
-        )}
+        )} */}
       {job.summary_fields.user_capabilities.delete &&
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(
           jobStatus

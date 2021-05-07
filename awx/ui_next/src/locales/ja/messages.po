@@ -214,7 +214,7 @@ msgstr "アクション"
 #: screens/Inventory/InventoryList/InventoryList.jsx:206
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:108
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:220
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:93
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:94
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:104
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.jsx:73
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:199
@@ -222,7 +222,7 @@ msgstr "アクション"
 #: screens/Organization/OrganizationList/OrganizationList.jsx:160
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:68
 #: screens/Project/ProjectList/ProjectList.jsx:177
-#: screens/Project/ProjectList/ProjectListItem.jsx:170
+#: screens/Project/ProjectList/ProjectListItem.jsx:171
 #: screens/Team/TeamList/TeamList.jsx:156
 #: screens/Team/TeamList/TeamListItem.jsx:47
 #: screens/User/UserList/UserList.jsx:166
@@ -415,7 +415,7 @@ msgid "All job types"
 msgstr "すべてのジョブタイプ"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:48
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:79
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:80
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:105
 msgid "Allow Branch Override"
 msgstr "ブランチの上書き許可"
@@ -567,6 +567,10 @@ msgstr "{0} - {1} により承認済"
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:127
 msgid "April"
 msgstr "4 月"
+
+#: components/JobCancelButton/JobCancelButton.jsx:80
+msgid "Are you sure you want to cancel this job?"
+msgstr ""
 
 #: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:116
 #~ msgid "Are you sure you want to delete the {0} below?"
@@ -828,7 +832,7 @@ msgstr ""
 
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:102
 #: components/PromptDetail/PromptProjectDetail.jsx:95
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:165
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:166
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:123
 msgid "Cache Timeout"
 msgstr "キャッシュタイムアウト"
@@ -888,14 +892,25 @@ msgstr "キャッシュのタイムアウト (秒)"
 msgid "Cancel"
 msgstr "取り消し"
 
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:104
+msgid "Cancel Inventory Source Sync"
+msgstr ""
+
 #: screens/Job/JobDetail/JobDetail.jsx:417
 #: screens/Job/JobDetail/JobDetail.jsx:418
 #: screens/Job/JobOutput/JobOutput.jsx:783
 #: screens/Job/JobOutput/JobOutput.jsx:784
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:187
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:191
 msgid "Cancel Job"
 msgstr "ジョブの取り消し"
+
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:208
+#: screens/Project/ProjectList/ProjectListItem.jsx:179
+msgid "Cancel Project Sync"
+msgstr ""
+
+#: components/JobCancelButton/JobCancelButton.jsx:47
+msgid "Cancel Sync"
+msgstr ""
 
 #: screens/Job/JobDetail/JobDetail.jsx:425
 #: screens/Job/JobDetail/JobDetail.jsx:428
@@ -948,6 +963,10 @@ msgstr ""
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:62
 #~ msgid "Cancel sync source"
 #~ msgstr "同期プロセスの取り消し"
+
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:134
+msgid "Cancel {0}"
+msgstr ""
 
 #: components/JobList/JobList.jsx:207
 #: components/Workflow/WorkflowNodeHelp.jsx:95
@@ -1092,7 +1111,7 @@ msgid "Choose the type of resource that will be receiving new roles.  For exampl
 msgstr "新しいロールを受け取るリソースのタイプを選択します。たとえば、一連のユーザーに新しいロールを追加する場合は、ユーザーを選択して次へをクリックしてください。次のステップで特定のリソースを選択できるようになります。"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:40
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:71
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:72
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:71
 msgid "Clean"
 msgstr "クリーニング"
@@ -1217,6 +1236,14 @@ msgstr "削除の確認"
 msgid "Confirm Password"
 msgstr "パスワードの確認"
 
+#: components/JobCancelButton/JobCancelButton.jsx:62
+msgid "Confirm cancel job"
+msgstr ""
+
+#: components/JobCancelButton/JobCancelButton.jsx:66
+msgid "Confirm cancellation"
+msgstr ""
+
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.jsx:27
 msgid "Confirm delete"
 msgstr "削除の確認"
@@ -1333,7 +1360,7 @@ msgstr "インベントリーのコピー"
 msgid "Copy Notification Template"
 msgstr "通知テンプレートのコピー"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:196
+#: screens/Project/ProjectList/ProjectListItem.jsx:211
 msgid "Copy Project"
 msgstr "プロジェクトのコピー"
 
@@ -1341,7 +1368,7 @@ msgstr "プロジェクトのコピー"
 msgid "Copy Template"
 msgstr "テンプレートのコピー"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:165
+#: screens/Project/ProjectList/ProjectListItem.jsx:166
 msgid "Copy full revision to clipboard."
 msgstr "完全なリビジョンをクリップボードにコピーします。"
 
@@ -1500,7 +1527,7 @@ msgstr "ユーザートークンの作成"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:315
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:105
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:111
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:181
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:182
 #: screens/Team/TeamDetail/TeamDetail.jsx:43
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:263
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:183
@@ -1661,10 +1688,10 @@ msgid "Custom pod spec"
 msgstr "カスタム Pod 仕様"
 
 #: components/TemplateList/TemplateListItem.jsx:144
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:71
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:72
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:54
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:89
-#: screens/Project/ProjectList/ProjectListItem.jsx:130
+#: screens/Project/ProjectList/ProjectListItem.jsx:131
 msgid "Custom virtual environment {0} must be replaced by an execution environment."
 msgstr ""
 
@@ -1776,7 +1803,7 @@ msgstr "システムレベルの機能および関数の定義"
 #: screens/Job/JobDetail/JobDetail.jsx:408
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:352
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:168
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:217
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:226
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:77
 #: screens/Team/TeamDetail/TeamDetail.jsx:66
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:396
@@ -1819,8 +1846,8 @@ msgid "Delete Inventory"
 msgstr "インベントリーの削除"
 
 #: screens/Job/JobDetail/JobDetail.jsx:404
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:202
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:206
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:201
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:205
 msgid "Delete Job"
 msgstr "ジョブの削除"
 
@@ -1836,7 +1863,7 @@ msgstr "通知の削除"
 msgid "Delete Organization"
 msgstr "組織の削除"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:211
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:220
 msgid "Delete Project"
 msgstr "プロジェクトの削除"
 
@@ -1899,7 +1926,7 @@ msgid "Delete inventory source"
 msgstr "インベントリーソースの削除"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:41
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:72
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:73
 msgid "Delete on Update"
 msgstr "更新時のデプロイ"
 
@@ -2014,9 +2041,9 @@ msgstr ""
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:95
 #: screens/Organization/OrganizationList/OrganizationList.jsx:141
 #: screens/Organization/shared/OrganizationForm.jsx:67
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:131
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:132
 #: screens/Project/ProjectList/ProjectList.jsx:142
-#: screens/Project/ProjectList/ProjectListItem.jsx:215
+#: screens/Project/ProjectList/ProjectListItem.jsx:230
 #: screens/Project/shared/ProjectForm.jsx:176
 #: screens/Team/TeamDetail/TeamDetail.jsx:34
 #: screens/Team/TeamList/TeamList.jsx:134
@@ -2236,8 +2263,8 @@ msgstr ""
 msgid "Done"
 msgstr ""
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:173
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:178
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:175
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:180
 msgid "Download Output"
 msgstr "出力のダウンロード"
 
@@ -2291,14 +2318,14 @@ msgstr ""
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:60
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:99
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:269
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:102
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:118
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:150
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:339
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:341
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:132
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:151
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:155
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:199
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:200
 #: screens/Setting/ActivityStream/ActivityStreamDetail/ActivityStreamDetail.jsx:88
 #: screens/Setting/ActivityStream/ActivityStreamDetail/ActivityStreamDetail.jsx:92
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:80
@@ -2424,8 +2451,8 @@ msgstr "通知テンプレートの編集"
 msgid "Edit Organization"
 msgstr "組織の編集"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:182
-#: screens/Project/ProjectList/ProjectListItem.jsx:187
+#: screens/Project/ProjectList/ProjectListItem.jsx:197
+#: screens/Project/ProjectList/ProjectListItem.jsx:202
 msgid "Edit Project"
 msgstr "プロジェクトの編集"
 
@@ -2439,7 +2466,7 @@ msgstr "質問の編集"
 msgid "Edit Schedule"
 msgstr "スケジュールの編集"
 
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:106
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:122
 msgid "Edit Source"
 msgstr "ソースの編集"
 
@@ -2509,16 +2536,16 @@ msgid "Edit this node"
 msgstr "このノードの編集"
 
 #: components/Workflow/WorkflowNodeHelp.jsx:146
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:129
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:123
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:181
 msgid "Elapsed"
 msgstr "経過時間"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:128
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:122
 msgid "Elapsed Time"
 msgstr "経過時間"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:130
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:124
 msgid "Elapsed time that the job ran"
 msgstr "ジョブ実行の経過時間"
 
@@ -2854,7 +2881,7 @@ msgstr ""
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:163
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:177
 #: screens/Organization/OrganizationList/OrganizationList.jsx:210
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:226
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:234
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:197
 #: screens/Project/ProjectList/ProjectList.jsx:236
 #: screens/Project/shared/ProjectSyncButton.jsx:62
@@ -3045,9 +3072,9 @@ msgid "Extra variables"
 msgstr "追加変数"
 
 #: components/Sparkline/Sparkline.jsx:35
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:42
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:96
-#: screens/Project/ProjectList/ProjectListItem.jsx:75
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:43
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:97
+#: screens/Project/ProjectList/ProjectListItem.jsx:76
 msgid "FINISHED:"
 msgstr "終了日時:"
 
@@ -3064,15 +3091,15 @@ msgstr "ファクト"
 #: components/Workflow/WorkflowNodeHelp.jsx:89
 #: screens/Dashboard/shared/ChartTooltip.jsx:66
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:47
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:117
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:111
 msgid "Failed"
 msgstr "失敗"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:116
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:110
 msgid "Failed Host Count"
 msgstr "失敗したホスト数"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:118
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:112
 msgid "Failed Hosts"
 msgstr "失敗したホスト"
 
@@ -3106,14 +3133,19 @@ msgstr "ロールの関連付けに失敗しました"
 msgid "Failed to associate."
 msgstr "関連付けに失敗しました。"
 
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:126
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:103
 msgid "Failed to cancel Inventory Source Sync"
 msgstr ""
 
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:209
-#: screens/Project/ProjectList/ProjectListItem.jsx:182
-msgid "Failed to cancel Project Update"
+#: screens/Project/ProjectList/ProjectListItem.jsx:181
+msgid "Failed to cancel Project Sync"
 msgstr ""
+
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:209
+#: screens/Project/ProjectList/ProjectListItem.jsx:182
+#~ msgid "Failed to cancel Project Update"
+#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:100
 #~ msgid "Failed to cancel inventory source sync."
@@ -3123,7 +3155,7 @@ msgstr ""
 msgid "Failed to cancel one or more jobs."
 msgstr "1 つ以上のジョブを取り消すことができませんでした。"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:185
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:135
 msgid "Failed to cancel {0}"
 msgstr ""
 
@@ -3139,7 +3171,7 @@ msgstr ""
 msgid "Failed to copy inventory."
 msgstr "インベントリーをコピーできませんでした。"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:204
+#: screens/Project/ProjectList/ProjectListItem.jsx:219
 msgid "Failed to copy project."
 msgstr "プロジェクトをコピーできませんでした。"
 
@@ -3270,7 +3302,7 @@ msgstr "1 つ以上のワークフロー承認を削除できませんでした�
 msgid "Failed to delete organization."
 msgstr "組織を削除できませんでした。"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:229
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:237
 msgid "Failed to delete project."
 msgstr "プロジェクトを削除できませんでした。"
 
@@ -3700,7 +3732,7 @@ msgstr "グループ"
 msgid "Group details"
 msgstr "グループの詳細"
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:121
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:122
 msgid "Group type"
 msgstr "グループタイプ"
 
@@ -3760,7 +3792,7 @@ msgstr ""
 msgid "Host Config Key"
 msgstr "ホスト設定キー"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:100
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:94
 msgid "Host Count"
 msgstr "ホスト数"
 
@@ -3843,7 +3875,7 @@ msgstr ""
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:151
 #: screens/Inventory/SmartInventory.jsx:71
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.jsx:62
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:101
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:95
 #: util/getRelatedResourceDeleteDetails.js:129
 msgid "Hosts"
 msgstr ""
@@ -4265,12 +4297,16 @@ msgid "Inventory Source"
 msgstr ""
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:125
-msgid "Inventory Source Error"
-msgstr ""
+#~ msgid "Inventory Source Error"
+#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:92
 msgid "Inventory Source Sync"
 msgstr "インベントリーソース同期"
+
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:102
+msgid "Inventory Source Sync Error"
+msgstr ""
 
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:165
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:184
@@ -4335,9 +4371,9 @@ msgid "Items per page"
 msgstr "ページ別の項目"
 
 #: components/Sparkline/Sparkline.jsx:28
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:35
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:89
-#: screens/Project/ProjectList/ProjectListItem.jsx:68
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:36
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:90
+#: screens/Project/ProjectList/ProjectListItem.jsx:69
 msgid "JOB ID:"
 msgstr "ジョブ ID:"
 
@@ -4366,6 +4402,7 @@ msgstr "ジョブ"
 #: screens/Job/JobDetail/JobDetail.jsx:450
 #: screens/Job/JobOutput/JobOutput.jsx:826
 #: screens/Job/JobOutput/JobOutput.jsx:827
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:133
 msgid "Job Cancel Error"
 msgstr "ジョブキャンセルエラー"
 
@@ -4584,7 +4621,7 @@ msgstr "ラベル"
 msgid "Last"
 msgstr "最終"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:115
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:116
 msgid "Last Job Status"
 msgstr ""
 
@@ -4610,7 +4647,7 @@ msgstr "前回のログイン"
 #: screens/Job/JobDetail/JobDetail.jsx:338
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:320
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:110
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:186
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:187
 #: screens/Team/TeamDetail/TeamDetail.jsx:44
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:268
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:69
@@ -4650,7 +4687,7 @@ msgstr "最後のジョブ実行"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:257
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:137
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:51
-#: screens/Project/ProjectList/ProjectListItem.jsx:242
+#: screens/Project/ProjectList/ProjectListItem.jsx:257
 msgid "Last modified"
 msgstr "最終更新日"
 
@@ -4659,7 +4696,7 @@ msgstr "最終更新日"
 msgid "Last name"
 msgstr ""
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:247
+#: screens/Project/ProjectList/ProjectListItem.jsx:262
 msgid "Last used"
 msgstr ""
 
@@ -4809,9 +4846,9 @@ msgstr "ルックアップタイプ"
 msgid "Lookup typeahead"
 msgstr "ルックアップの先行入力"
 
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:33
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:87
-#: screens/Project/ProjectList/ProjectListItem.jsx:66
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:34
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:88
+#: screens/Project/ProjectList/ProjectListItem.jsx:67
 msgid "MOST RECENT SYNC"
 msgstr "直近の同期"
 
@@ -4869,9 +4906,9 @@ msgstr "管理ジョブ"
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:88
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:157
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:82
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:146
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:147
 #: screens/Project/ProjectList/ProjectList.jsx:149
-#: screens/Project/ProjectList/ProjectListItem.jsx:153
+#: screens/Project/ProjectList/ProjectListItem.jsx:154
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:89
 msgid "Manual"
 msgstr "手動"
@@ -5208,7 +5245,7 @@ msgstr "複数の選択オプション"
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:181
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:194
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:217
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:63
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:64
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:97
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:31
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.jsx:67
@@ -5234,12 +5271,12 @@ msgstr "複数の選択オプション"
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.jsx:66
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.jsx:81
 #: screens/Organization/shared/OrganizationForm.jsx:59
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:130
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:131
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:120
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:147
 #: screens/Project/ProjectList/ProjectList.jsx:137
 #: screens/Project/ProjectList/ProjectList.jsx:173
-#: screens/Project/ProjectList/ProjectListItem.jsx:121
+#: screens/Project/ProjectList/ProjectListItem.jsx:122
 #: screens/Project/shared/ProjectForm.jsx:168
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:139
 #: screens/Team/TeamDetail/TeamDetail.jsx:33
@@ -5645,7 +5682,7 @@ msgstr "必要に応じて、ステータスの更新を Webhook サービスに
 #: screens/Credential/shared/TypeInputsSubForm.jsx:47
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:61
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:245
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:163
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:164
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:66
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:260
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:180
@@ -5681,9 +5718,9 @@ msgstr "オプション"
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:107
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:55
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:65
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:134
-#: screens/Project/ProjectList/ProjectListItem.jsx:221
-#: screens/Project/ProjectList/ProjectListItem.jsx:232
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:135
+#: screens/Project/ProjectList/ProjectListItem.jsx:236
+#: screens/Project/ProjectList/ProjectListItem.jsx:247
 #: screens/Team/TeamDetail/TeamDetail.jsx:36
 #: screens/Team/TeamList/TeamList.jsx:155
 #: screens/Team/TeamList/TeamListItem.jsx:38
@@ -5862,7 +5899,7 @@ msgstr "パーソナルアクセストークン"
 msgid "Play"
 msgstr "プレイ"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:88
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:82
 msgid "Play Count"
 msgstr "再生回数"
 
@@ -5886,7 +5923,7 @@ msgid "Playbook Complete"
 msgstr ""
 
 #: components/PromptDetail/PromptProjectDetail.jsx:103
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:178
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:179
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:85
 msgid "Playbook Directory"
 msgstr "Playbook ディレクトリー"
@@ -5913,7 +5950,7 @@ msgstr "Playbook 名"
 msgid "Playbook run"
 msgstr "Playbook 実行"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:89
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:83
 msgid "Plays"
 msgstr "プレイ"
 
@@ -6067,7 +6104,7 @@ msgid "Project"
 msgstr "プロジェクト"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:100
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:175
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:176
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:63
 msgid "Project Base Path"
 msgstr "プロジェクトのベースパス"
@@ -6077,14 +6114,19 @@ msgstr "プロジェクトのベースパス"
 msgid "Project Sync"
 msgstr "プロジェクトの同期"
 
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:207
+#: screens/Project/ProjectList/ProjectListItem.jsx:178
+msgid "Project Sync Error"
+msgstr ""
+
 #: components/Workflow/WorkflowNodeHelp.jsx:55
 msgid "Project Update"
 msgstr "プロジェクトの更新"
 
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:207
 #: screens/Project/ProjectList/ProjectListItem.jsx:179
-msgid "Project Update Error"
-msgstr ""
+#~ msgid "Project Update Error"
+#~ msgstr ""
 
 #: screens/Project/Project.jsx:139
 msgid "Project not found."
@@ -6327,12 +6369,12 @@ msgstr "関連するグループ"
 #: components/LaunchButton/ReLaunchDropDown.jsx:81
 #: screens/Job/JobDetail/JobDetail.jsx:375
 #: screens/Job/JobDetail/JobDetail.jsx:383
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:161
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:163
 msgid "Relaunch"
 msgstr "再起動"
 
 #: components/JobList/JobListItem.jsx:94
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:141
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:143
 msgid "Relaunch Job"
 msgstr "ジョブの再起動"
 
@@ -6350,7 +6392,7 @@ msgid "Relaunch on"
 msgstr "再起動時"
 
 #: components/JobList/JobListItem.jsx:93
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:140
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:142
 msgid "Relaunch using host parameters"
 msgstr "ホストパラメーターを使用した再起動"
 
@@ -6463,8 +6505,8 @@ msgstr ""
 #~ msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 #~ msgstr ""
 
-#: components/JobCancelButton/JobCancelButton.jsx:71
-#: components/JobCancelButton/JobCancelButton.jsx:75
+#: components/JobCancelButton/JobCancelButton.jsx:72
+#: components/JobCancelButton/JobCancelButton.jsx:76
 #: components/JobList/JobListCancelButton.jsx:159
 #: components/JobList/JobListCancelButton.jsx:162
 #: screens/Job/JobDetail/JobDetail.jsx:434
@@ -6519,7 +6561,7 @@ msgstr "工場出荷時のデフォルトに戻します。"
 
 #: screens/Job/JobDetail/JobDetail.jsx:227
 #: screens/Project/ProjectList/ProjectList.jsx:176
-#: screens/Project/ProjectList/ProjectListItem.jsx:155
+#: screens/Project/ProjectList/ProjectListItem.jsx:156
 msgid "Revision"
 msgstr "リビジョン"
 
@@ -6640,9 +6682,9 @@ msgid "START"
 msgstr "開始"
 
 #: components/Sparkline/Sparkline.jsx:31
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:38
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:92
-#: screens/Project/ProjectList/ProjectListItem.jsx:71
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:39
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:93
+#: screens/Project/ProjectList/ProjectListItem.jsx:72
 msgid "STATUS:"
 msgstr "ステータス:"
 
@@ -6779,7 +6821,7 @@ msgstr "第 2"
 
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:103
 #: components/PromptDetail/PromptProjectDetail.jsx:96
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:166
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:167
 msgid "Seconds"
 msgstr "秒"
 
@@ -6901,7 +6943,7 @@ msgid "Select a row to approve"
 msgstr "承認する行の選択"
 
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:160
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:99
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:100
 msgid "Select a row to delete"
 msgstr "削除する行の選択"
 
@@ -7157,7 +7199,7 @@ msgstr "{0} の選択"
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:77
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:104
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:42
-#: screens/Project/ProjectList/ProjectListItem.jsx:119
+#: screens/Project/ProjectList/ProjectListItem.jsx:120
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:253
 #: screens/Team/TeamList/TeamListItem.jsx:31
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:57
@@ -7265,7 +7307,7 @@ msgstr "表示"
 msgid "Show Changes"
 msgstr "変更の表示"
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:126
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:127
 msgid "Show all groups"
 msgstr "すべてのグループの表示"
 
@@ -7278,7 +7320,7 @@ msgstr "変更の表示"
 msgid "Show less"
 msgstr "簡易表示"
 
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:125
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:126
 msgid "Show only root groups"
 msgstr "root グループのみを表示"
 
@@ -7432,7 +7474,7 @@ msgstr "ソース"
 #: components/PromptDetail/PromptProjectDetail.jsx:79
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:75
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:309
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:149
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:150
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:217
 #: screens/Template/shared/JobTemplateForm.jsx:308
 msgid "Source Control Branch"
@@ -7443,7 +7485,7 @@ msgid "Source Control Branch/Tag/Commit"
 msgstr "ソースコントロールブランチ/タグ/コミット"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:83
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:153
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:154
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:57
 msgid "Source Control Credential"
 msgstr "ソースコントロール認証情報"
@@ -7453,13 +7495,13 @@ msgid "Source Control Credential Type"
 msgstr "ソースコントロール認証情報タイプ"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:80
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:150
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:151
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:50
 msgid "Source Control Refspec"
 msgstr "ソースコントロールの Refspec"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:75
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:145
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:146
 msgid "Source Control Type"
 msgstr "ソースコントロールのタイプ"
 
@@ -7467,7 +7509,7 @@ msgstr "ソースコントロールのタイプ"
 #: components/PromptDetail/PromptProjectDetail.jsx:78
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:96
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:165
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:148
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:149
 #: screens/Project/ProjectList/ProjectList.jsx:157
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:18
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:97
@@ -7610,12 +7652,12 @@ msgstr "開始"
 #: screens/Inventory/InventoryList/InventoryList.jsx:203
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:88
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:218
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:79
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:80
 #: screens/Job/JobDetail/JobDetail.jsx:127
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:197
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:111
 #: screens/Project/ProjectList/ProjectList.jsx:174
-#: screens/Project/ProjectList/ProjectListItem.jsx:139
+#: screens/Project/ProjectList/ProjectListItem.jsx:140
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:49
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:108
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:230
@@ -7708,7 +7750,7 @@ msgstr "成功メッセージボディー"
 msgid "Successful"
 msgstr "成功"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:166
+#: screens/Project/ProjectList/ProjectListItem.jsx:167
 msgid "Successfully copied to clipboard!"
 msgstr "クリップボードへのコピーに成功しました!"
 
@@ -7748,14 +7790,14 @@ msgstr "Survey プレビューモーダル"
 msgid "Survey questions"
 msgstr "Survey の質問"
 
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:96
-#: screens/Inventory/shared/InventorySourceSyncButton.jsx:78
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:111
+#: screens/Inventory/shared/InventorySourceSyncButton.jsx:43
 #: screens/Project/shared/ProjectSyncButton.jsx:43
 #: screens/Project/shared/ProjectSyncButton.jsx:55
 msgid "Sync"
 msgstr "同期"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:173
+#: screens/Project/ProjectList/ProjectListItem.jsx:187
 #: screens/Project/shared/ProjectSyncButton.jsx:39
 #: screens/Project/shared/ProjectSyncButton.jsx:50
 msgid "Sync Project"
@@ -7774,7 +7816,7 @@ msgstr "すべてのソースの同期"
 msgid "Sync error"
 msgstr "同期エラー"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:159
+#: screens/Project/ProjectList/ProjectListItem.jsx:160
 msgid "Sync for revision"
 msgstr "リビジョンの同期"
 
@@ -7871,7 +7913,7 @@ msgstr "ターゲット URL"
 msgid "Task"
 msgstr "タスク"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:94
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:88
 msgid "Task Count"
 msgstr "タスク数"
 
@@ -7879,7 +7921,7 @@ msgstr "タスク数"
 msgid "Task Started"
 msgstr ""
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:95
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:89
 msgid "Tasks"
 msgstr "タスク"
 
@@ -8306,7 +8348,7 @@ msgstr ""
 msgid "This organization is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:215
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:224
 msgid "This project is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8526,7 +8568,7 @@ msgid "Track submodules"
 msgstr ""
 
 #: components/PromptDetail/PromptProjectDetail.jsx:43
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:74
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:75
 msgid "Track submodules latest commit on branch"
 msgstr ""
 
@@ -8586,7 +8628,7 @@ msgstr "Twilio"
 #: screens/Inventory/InventoryList/InventoryList.jsx:204
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:93
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:219
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:92
+#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:93
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:105
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:198
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:114
@@ -8631,15 +8673,15 @@ msgid "Unlimited"
 msgstr ""
 
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:51
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:107
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:101
 msgid "Unreachable"
 msgstr "到達不能"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:106
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:100
 msgid "Unreachable Host Count"
 msgstr "到達不能なホスト数"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:108
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:102
 msgid "Unreachable Hosts"
 msgstr "到達不能なホスト"
 
@@ -8652,7 +8694,7 @@ msgid "Unsaved changes modal"
 msgstr "保存されていない変更モーダル"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:46
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:77
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:78
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:97
 msgid "Update Revision on Launch"
 msgstr "起動時のリビジョン更新"
@@ -9528,7 +9570,7 @@ msgstr "関連付けの解除の確認"
 #~ msgid "controller instance"
 #~ msgstr "コントローラインスタンス"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:158
+#: screens/Project/ProjectList/ProjectListItem.jsx:159
 msgid "copy to clipboard disabled"
 msgstr "クリップボードへのコピーが無効"
 
@@ -9557,7 +9599,7 @@ msgstr ""
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:95
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:266
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:147
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:195
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:196
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:154
 #: screens/User/UserDetail/UserDetail.jsx:84
 msgid "edit"
