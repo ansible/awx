@@ -5,7 +5,6 @@ import { Chip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 
 import { Link } from 'react-router-dom';
-import { Detail } from '../../../components/DetailList';
 
 function TeamRoleListItem({ role, detailUrl, onDisassociate }) {
   return (
@@ -19,18 +18,14 @@ function TeamRoleListItem({ role, detailUrl, onDisassociate }) {
         {role.summary_fields.resource_type_display_name}
       </Td>
       <Td dataLabel={t`Role`}>
-        <Detail
-          value={
-            <Chip
-              key={role.name}
-              aria-label={role.name}
-              onClick={() => onDisassociate(role)}
-              isReadOnly={!role.summary_fields.user_capabilities.unattach}
-            >
-              {role.name}
-            </Chip>
-          }
-        />
+        <Chip
+          key={role.name}
+          aria-label={role.name}
+          onClick={() => onDisassociate(role)}
+          isReadOnly={!role.summary_fields.user_capabilities.unattach}
+        >
+          {role.name}
+        </Chip>
       </Td>
     </Tr>
   );

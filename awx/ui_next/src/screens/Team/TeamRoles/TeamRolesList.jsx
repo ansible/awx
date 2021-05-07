@@ -39,7 +39,7 @@ function TeamRolesList({ me, team }) {
     request: fetchRoles,
     error: contentError,
     result: {
-      // roleCount,
+      roleCount,
       roles,
       isAdminOfOrg,
       relatedSearchableKeys,
@@ -140,7 +140,7 @@ function TeamRolesList({ me, team }) {
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={roles}
-        itemCount={0}
+        itemCount={roleCount}
         pluralizedItemName={t`Team Roles`}
         qsConfig={QS_CONFIG}
         toolbarSearchColumns={[
