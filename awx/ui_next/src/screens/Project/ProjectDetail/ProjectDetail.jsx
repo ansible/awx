@@ -219,7 +219,7 @@ function ProjectDetail({ project }) {
             name={name}
             modalTitle={t`Delete Project`}
             onConfirm={deleteProject}
-            isDisabled={isLoading}
+            isDisabled={isLoading || job?.status === 'running'}
             deleteDetailsRequests={deleteDetailsRequests}
             deleteMessage={t`This project is currently being used by other resources. Are you sure you want to delete it?`}
           >
@@ -227,7 +227,6 @@ function ProjectDetail({ project }) {
           </DeleteButton>
         )}
       </CardActionsRow>
-      {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
       {error && (
         <AlertModal
           isOpen={error}
