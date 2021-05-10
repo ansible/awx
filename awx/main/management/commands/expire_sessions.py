@@ -31,6 +31,7 @@ class Command(BaseCommand):
         for session in sessions:
             user_id = session.get_decoded().get('_auth_user_id')
             if (user is None) or (user_id and user.id == int(user_id)):
+                # The Session model instance doesn't have .flush(), we need a SessionStore instance.
                 session = import_module(settings.SESSION_ENGINE).SessionStore(session.session_key)
                 # Log out the session, but without the need for a request object.
                 session.flush()

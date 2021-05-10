@@ -3,10 +3,11 @@ import logging
 
 # Django
 from django.conf import settings
+from django.core.cache import cache
 from django.core.signals import setting_changed
 from django.db.models.signals import post_save, pre_delete, post_delete
-from django.core.cache import cache
 from django.dispatch import receiver
+from django.utils import timezone
 
 # AWX
 from awx.conf import settings_registry
@@ -25,7 +26,7 @@ def handle_setting_change(key, for_delete=False):
         # Note: Doesn't handle multiple levels of dependencies!
         setting_keys.append(dependent_key)
     # NOTE: This block is probably duplicated.
-    cache_keys = set([Setting.get_cache_key(k) for k in setting_keys])
+    cache_keys = {Setting.get_cache_key(k) for k in setting_keys}
     cache.delete_many(cache_keys)
 
     # Send setting_changed signal with new value for each setting.
@@ -58,3 +59,31 @@ def on_post_delete_setting(sender, **kwargs):
     key = getattr(instance, '_saved_key_', None)
     if key:
         handle_setting_change(key, True)
+
+
+@receiver(setting_changed)
+def disable_local_auth(**kwargs):
+    if (kwargs['setting'], kwargs['value']) == ('DISABLE_LOCAL_AUTH', True):
+        from django.contrib.auth.models import User
+        from django.contrib.sessions.models import Session
+        from oauth2_provider.models import RefreshToken
+        from awx.main.models.oauth import OAuth2AccessToken
+        from awx.main.management.commands.revoke_oauth2_tokens import revoke_tokens
+
+        logger.warning("Triggering session and token invalidation for local users.")
+
+        qs = User.objects.filter(profile__ldap_dn='', enterprise_auth__isnull=True, social_auth__isnull=True)
+        revoke_tokens(RefreshToken.objects.filter(revoked=None, user__in=qs))
+        revoke_tokens(OAuth2AccessToken.objects.filter(user__in=qs))
+
+        user_ids = set(qs.values_list('id', flat=True))
+
+        start = timezone.now()
+        sessions = Session.objects.filter(expire_date__gte=start).iterator()
+        for session in sessions:
+            decoded = session.get_decoded()
+            user_id = int(decoded.get('_auth_user_id') or '-1')
+            if user_id in user_ids:
+                # The Session model instance doesn't have .flush(), we need a SessionStore instance.
+                session_store = session.get_session_store_class()(session.session_key)
+                session_store.flush()
