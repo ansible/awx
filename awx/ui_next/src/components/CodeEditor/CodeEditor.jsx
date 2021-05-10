@@ -84,7 +84,7 @@ function CodeEditor({
 }) {
   if (rows && typeof rows !== 'number' && rows !== 'auto') {
     // eslint-disable-next-line no-console
-    console.warning(
+    console.warn(
       `CodeEditor: Unexpected value for 'rows': ${rows}; expected number or 'auto'`
     );
   }
