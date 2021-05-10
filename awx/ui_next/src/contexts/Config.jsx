@@ -22,13 +22,7 @@ export const useConfig = () => {
 };
 
 export const ConfigProvider = ({ children }) => {
-  const {
-    error: configError,
-    isLoading,
-    request,
-    result: config,
-    setValue: setConfig,
-  } = useRequest(
+  const { error: configError, isLoading, request, result: config } = useRequest(
     useCallback(async () => {
       const [
         { data },
@@ -55,10 +49,10 @@ export const ConfigProvider = ({ children }) => {
     }
   }, [error]);
 
-  const value = useMemo(() => ({ ...config, isLoading, setConfig }), [
+  const value = useMemo(() => ({ ...config, request, isLoading }), [
     config,
+    request,
     isLoading,
-    setConfig,
   ]);
 
   return (

@@ -12,7 +12,7 @@ import {
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import { ConfigAPI, SettingsAPI, MeAPI, RootAPI } from '../../../../api';
+import { ConfigAPI, SettingsAPI, RootAPI } from '../../../../api';
 import useRequest, { useDismissableError } from '../../../../util/useRequest';
 import ContentLoading from '../../../../components/ContentLoading';
 import ContentError from '../../../../components/ContentError';
@@ -91,7 +91,7 @@ const CustomFooter = ({ isSubmitLoading }) => {
 
 function SubscriptionEdit() {
   const history = useHistory();
-  const { license_info, setConfig } = useConfig();
+  const { request: updateConfig, license_info } = useConfig();
   const hasValidKey = Boolean(license_info?.valid_key);
   const subscriptionMgmtRoute = useRouteMatch({
     path: '/subscription_management',
@@ -164,16 +164,7 @@ function SubscriptionEdit() {
         }
       }
 
-      const [
-        { data },
-        {
-          data: {
-            results: [me],
-          },
-        },
-      ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
-      const newConfig = { ...data, me };
-      setConfig(newConfig);
+      await updateConfig();
 
       return true;
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
