@@ -68,12 +68,6 @@ describe('<ExecutionEnvironmentAdd/>', () => {
   let history;
 
   beforeEach(async () => {
-    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
-    ExecutionEnvironmentsAPI.create.mockResolvedValue({
-      data: {
-        id: 42,
-      },
-    });
     CredentialTypesAPI.read.mockResolvedValue(
       containerRegistryCredentialResolve
     );
