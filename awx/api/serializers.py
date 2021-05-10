@@ -2207,6 +2207,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             'org_host_limit_error',
             'source_project_update',
             'custom_virtualenv',
+            'instance_group',
             '-controller_node',
         )
 
