@@ -52,6 +52,9 @@ function parseFieldErrors(obj, formValues) {
       }
       formErrors = formErrors.concat(parsed.formErrors);
     }
+    if (typeof formValues[key] === 'boolean') {
+      formErrors = formErrors.concat(value);
+    }
   });
 
   return { fieldErrors, formErrors };
