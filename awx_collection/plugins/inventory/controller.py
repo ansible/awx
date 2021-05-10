@@ -82,15 +82,26 @@ def handle_error(**kwargs):
 class InventoryModule(BaseInventoryPlugin):
     NAME = 'awx.awx.controller'  # REPLACE
     # Stays backward compatible with the inventory script.
-    # If the user supplies '@tower_inventory' as path, the plugin will read from environment variables.
+    # If the user supplies '@controller_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False
 
     def verify_file(self, path):
-        if path.endswith('@tower_inventory'):
+        if path.endswith('@controller_inventory') or path.endswith('@tower_inventory'):
             self.no_config_file_supplied = True
             return True
         elif super(InventoryModule, self).verify_file(path):
-            return path.endswith(('tower_inventory.yml', 'tower_inventory.yaml', 'tower.yml', 'tower.yaml'))
+            return path.endswith(
+                (
+                    'controller_inventory.yml',
+                    'controller_inventory.yaml',
+                    'controller.yml',
+                    'controller.yaml',
+                    'tower_inventory.yml',
+                    'tower_inventory.yaml',
+                    'tower.yml',
+                    'tower.yaml',
+                )
+            )
         else:
             return False
 
