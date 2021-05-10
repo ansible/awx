@@ -32,7 +32,7 @@ function JobCancelButton({
         {showIconButton ? (
           <Button
             aria-label={title}
-            ouiaId="cancel job"
+            ouiaId="cancel-job-button"
             onClick={() => setIsOpen(true)}
             variant="plain"
           >
@@ -60,7 +60,7 @@ function JobCancelButton({
               key="delete"
               variant="danger"
               aria-label={t`Confirm cancel job`}
-              ouiaId="confirm cancel job"
+              ouiaId="cancel-job-confirm-button"
               onClick={cancelJob}
             >
               {t`Confirm cancellation`}
