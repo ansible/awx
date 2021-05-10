@@ -141,7 +141,7 @@ function AppContainer({ navRouteConfig = [], children }) {
 
   useEffect(() => {
     if ('analytics_status' in config) {
-      issuePendoIdentity(config, 'foobar');
+      issuePendoIdentity(config);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.analytics_status]);
