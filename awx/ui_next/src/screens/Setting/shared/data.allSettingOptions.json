@@ -78,7 +78,7 @@
           "REDHAT_USERNAME": {
               "type": "string",
               "label": "Red Hat customer username",
-              "help_text": "This username is used to send data to Automation Analytics",
+              "help_text": "This username is used to send data to Insights for Ansible",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -86,7 +86,7 @@
           "REDHAT_PASSWORD": {
               "type": "string",
               "label": "Red Hat customer password",
-              "help_text": "This password is used to send data to Automation Analytics",
+              "help_text": "This password is used to send data to Insights for Ansible",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -109,8 +109,8 @@
           },
           "AUTOMATION_ANALYTICS_URL": {
               "type": "string",
-              "label": "Automation Analytics upload URL",
-              "help_text": "This setting is used to to configure data collection for the Automation Analytics dashboard",
+              "label": "Insights for Ansible upload URL",
+              "help_text": "This setting is used to to configure data collection for the Insights for Ansible dashboard",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -260,7 +260,7 @@
           },
           "INSIGHTS_TRACKING_STATE": {
               "type": "boolean",
-              "label": "Gather data for Automation Analytics",
+              "label": "Gather data for Insights for Ansible",
               "help_text": "Enables gathering of data on automation for Red Hat Insights.",
               "category": "System",
               "category_slug": "system",
@@ -589,14 +589,14 @@
           },
           "AUTOMATION_ANALYTICS_LAST_GATHER": {
               "type": "datetime",
-              "label": "Last gather date for Automation Analytics.",
+              "label": "Last gather date for Insights for Ansible.",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
           },
           "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
               "type": "integer",
-              "label": "Automation Analytics Gather Interval",
+              "label": "Insights for Ansible Gather Interval",
               "help_text": "Interval (in seconds) between data gathering.",
               "min_value": 1800,
               "category": "System",
@@ -3003,7 +3003,7 @@
               "type": "string",
               "required": false,
               "label": "Red Hat customer username",
-              "help_text": "This username is used to send data to Automation Analytics",
+              "help_text": "This username is used to send data to Insights for Ansible",
               "category": "System",
               "category_slug": "system",
               "default": ""
@@ -3012,7 +3012,7 @@
               "type": "string",
               "required": false,
               "label": "Red Hat customer password",
-              "help_text": "This password is used to send data to Automation Analytics",
+              "help_text": "This password is used to send data to Insights for Ansible",
               "category": "System",
               "category_slug": "system",
               "default": ""
@@ -3038,8 +3038,8 @@
           "AUTOMATION_ANALYTICS_URL": {
               "type": "string",
               "required": false,
-              "label": "Automation Analytics upload URL",
-              "help_text": "This setting is used to to configure data collection for the Automation Analytics dashboard",
+              "label": "Insights for Ansible upload URL",
+              "help_text": "This setting is used to to configure data collection for the Insights for Ansible dashboard",
               "category": "System",
               "category_slug": "system",
               "default": "https://example.com"
@@ -3200,7 +3200,7 @@
           "INSIGHTS_TRACKING_STATE": {
               "type": "boolean",
               "required": false,
-              "label": "Gather data for Automation Analytics",
+              "label": "Gather data for Insights for Ansible",
               "help_text": "Enables the service to gather data on automation for Red Hat Insights.",
               "category": "System",
               "category_slug": "system",
@@ -3569,7 +3569,7 @@
           "AUTOMATION_ANALYTICS_LAST_GATHER": {
               "type": "datetime",
               "required": true,
-              "label": "Last gather date for Automation Analytics.",
+              "label": "Last gather date for Insights for Ansible.",
               "category": "System",
               "category_slug": "system",
               "default": null
@@ -3577,7 +3577,7 @@
           "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
               "type": "integer",
               "required": false,
-              "label": "Automation Analytics Gather Interval",
+              "label": "Insights for Ansible Gather Interval",
               "help_text": "Interval (in seconds) between data gathering.",
               "min_value": 1800,
               "category": "System",
