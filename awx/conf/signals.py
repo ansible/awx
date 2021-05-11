@@ -7,7 +7,6 @@ from django.core.cache import cache
 from django.core.signals import setting_changed
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
-from django.utils import timezone
 
 # AWX
 from awx.conf import settings_registry
@@ -65,25 +64,12 @@ def on_post_delete_setting(sender, **kwargs):
 def disable_local_auth(**kwargs):
     if (kwargs['setting'], kwargs['value']) == ('DISABLE_LOCAL_AUTH', True):
         from django.contrib.auth.models import User
-        from django.contrib.sessions.models import Session
         from oauth2_provider.models import RefreshToken
         from awx.main.models.oauth import OAuth2AccessToken
         from awx.main.management.commands.revoke_oauth2_tokens import revoke_tokens
 
-        logger.warning("Triggering session and token invalidation for local users.")
+        logger.warning("Triggering token invalidation for local users.")
 
         qs = User.objects.filter(profile__ldap_dn='', enterprise_auth__isnull=True, social_auth__isnull=True)
         revoke_tokens(RefreshToken.objects.filter(revoked=None, user__in=qs))
         revoke_tokens(OAuth2AccessToken.objects.filter(user__in=qs))
-
-        user_ids = set(qs.values_list('id', flat=True))
-
-        start = timezone.now()
-        sessions = Session.objects.filter(expire_date__gte=start).iterator()
-        for session in sessions:
-            decoded = session.get_decoded()
-            user_id = int(decoded.get('_auth_user_id') or '-1')
-            if user_id in user_ids:
-                # The Session model instance doesn't have .flush(), we need a SessionStore instance.
-                session_store = session.get_session_store_class()(session.session_key)
-                session_store.flush()

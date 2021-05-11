@@ -7,6 +7,7 @@ import time
 import urllib.parse
 
 from django.conf import settings
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.db.migrations.executor import MigrationExecutor
 from django.db import connection
@@ -69,6 +70,21 @@ class SessionTimeoutMiddleware(MiddlewareMixin):
             request.session.set_expiry(expiry)
             response['Session-Timeout'] = expiry
         return response
+
+
+class DisableLocalAuthMiddleware(MiddlewareMixin):
+    """
+    Respects the presence of the DISABLE_LOCAL_AUTH setting and forces
+    local-only users to logout when they make a request.
+    """
+
+    def process_request(self, request):
+        if settings.DISABLE_LOCAL_AUTH:
+            user = request.user
+            if not user.pk:
+                return
+            if not (user.profile.ldap_dn or user.social_auth.exists() or user.enterprise_auth.exists()):
+                logout(request)
 
 
 def _customize_graph():
