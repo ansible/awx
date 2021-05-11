@@ -185,68 +185,6 @@
                   "type": "string"
               }
           },
-          "AWX_ISOLATED_CHECK_INTERVAL": {
-              "type": "integer",
-              "label": "Isolated status check interval",
-              "help_text": "The number of seconds to sleep between status checks for jobs running on isolated instances.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "unit": "seconds"
-          },
-          "AWX_ISOLATED_LAUNCH_TIMEOUT": {
-              "type": "integer",
-              "label": "Isolated launch timeout",
-              "help_text": "The timeout (in seconds) for launching jobs on isolated instances.  This includes the time needed to copy source control files (playbooks) to the isolated instance.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "unit": "seconds"
-          },
-          "AWX_ISOLATED_CONNECTION_TIMEOUT": {
-              "type": "integer",
-              "label": "Isolated connection timeout",
-              "help_text": "Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. Value should be substantially greater than expected network latency.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "unit": "seconds"
-          },
-          "AWX_ISOLATED_HOST_KEY_CHECKING": {
-              "type": "boolean",
-              "label": "Isolated host key checking",
-              "help_text": "When set to True, AWX will enforce strict host key checking for communication with isolated nodes.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_ISOLATED_KEY_GENERATION": {
-              "type": "boolean",
-              "label": "Generate RSA keys for isolated instances",
-              "help_text": "If set, a random RSA key will be generated and distributed to isolated instances.  To disable this behavior and manage authentication for isolated instances outside of Tower, disable this setting.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_ISOLATED_PRIVATE_KEY": {
-              "type": "string",
-              "label": "The RSA private key for SSH traffic to isolated instances",
-              "help_text": "The RSA private key for SSH traffic to isolated instances",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_ISOLATED_PUBLIC_KEY": {
-              "type": "string",
-              "label": "The RSA public key for SSH traffic to isolated instances",
-              "help_text": "The RSA public key for SSH traffic to isolated instances",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
           "AWX_TASK_ENV": {
               "type": "nested object",
               "label": "Extra Environment Variables",
@@ -3137,48 +3075,6 @@
                   "required": true,
                   "read_only": false
               }
-          },
-          "AWX_ISOLATED_CHECK_INTERVAL": {
-              "type": "integer",
-              "required": true,
-              "label": "Isolated status check interval",
-              "help_text": "The number of seconds to sleep between status checks for jobs running on isolated instances.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "unit": "seconds",
-              "default": 1
-          },
-          "AWX_ISOLATED_LAUNCH_TIMEOUT": {
-              "type": "integer",
-              "required": true,
-              "label": "Isolated launch timeout",
-              "help_text": "The timeout (in seconds) for launching jobs on isolated instances.  This includes the time needed to copy source control files (playbooks) to the isolated instance.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "unit": "seconds",
-              "default": 600
-          },
-          "AWX_ISOLATED_CONNECTION_TIMEOUT": {
-              "type": "integer",
-              "required": false,
-              "label": "Isolated connection timeout",
-              "help_text": "Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. Value should be substantially greater than expected network latency.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "unit": "seconds",
-              "default": 10
-          },
-          "AWX_ISOLATED_HOST_KEY_CHECKING": {
-              "type": "boolean",
-              "required": false,
-              "label": "Isolated host key checking",
-              "help_text": "When set to True, AWX will enforce strict host key checking for communication with isolated nodes.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": false
           },
           "AWX_TASK_ENV": {
               "type": "nested object",

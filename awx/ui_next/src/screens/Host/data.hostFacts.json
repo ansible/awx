@@ -112,7 +112,6 @@
       "ANSIBLE_FORCE_COLOR": "True",
       "ANSIBLE_CACHE_PLUGIN": "jsonfile",
       "AWX_PRIVATE_DATA_DIR": "/tmp/awx_13_r1ffeqze",
-      "AWX_ISOLATED_DATA_DIR": "/tmp/awx_13_r1ffeqze/artifacts/13",
       "SUPERVISOR_GROUP_NAME": "tower-processes",
       "SUPERVISOR_SERVER_URL": "unix:///tmp/supervisor.sock",
       "DJANGO_SETTINGS_MODULE": "awx.settings.development",

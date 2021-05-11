@@ -165,8 +165,7 @@
       "ANSIBLE_CALLBACK_PLUGINS": "/awx_devel/awx/plugins/callback",
       "AWX_HOST": "https://towerhost",
       "ANSIBLE_SSH_CONTROL_PATH_DIR": "/tmp/awx_2_a4b1afiw/cp",
-      "ANSIBLE_STDOUT_CALLBACK": "awx_display",
-      "AWX_ISOLATED_DATA_DIR": "/tmp/awx_2_a4b1afiw/artifacts/2"
+      "ANSIBLE_STDOUT_CALLBACK": "awx_display"
   },
   "job_explanation": "",
   "execution_node": "awx",

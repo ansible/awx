@@ -26,9 +26,6 @@ function JobsDetail() {
 
       const {
         ALLOW_JINJA_IN_EXTRA_VARS,
-        AWX_ISOLATED_KEY_GENERATION,
-        AWX_ISOLATED_PRIVATE_KEY,
-        AWX_ISOLATED_PUBLIC_KEY,
         STDOUT_MAX_BYTES_DISPLAY,
         EVENT_STDOUT_MAX_BYTES_DISPLAY,
         ...jobsData

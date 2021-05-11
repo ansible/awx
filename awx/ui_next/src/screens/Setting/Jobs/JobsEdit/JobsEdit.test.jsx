@@ -78,9 +78,6 @@ describe('<JobsEdit />', () => {
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     const {
       ALLOW_JINJA_IN_EXTRA_VARS,
-      AWX_ISOLATED_KEY_GENERATION,
-      AWX_ISOLATED_PRIVATE_KEY,
-      AWX_ISOLATED_PUBLIC_KEY,
       EVENT_STDOUT_MAX_BYTES_DISPLAY,
       STDOUT_MAX_BYTES_DISPLAY,
       ...jobRequest
