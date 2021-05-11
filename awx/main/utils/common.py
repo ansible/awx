@@ -14,6 +14,8 @@ import threading
 import contextlib
 import tempfile
 import psutil
+import traceback
+import sys
 from functools import reduce, wraps
 
 from decimal import Decimal
@@ -898,25 +900,26 @@ def get_custom_venv_choices():
     custom_venv_choices = []
 
     for venv_path in all_venv_paths:
-        try:
-            if os.path.exists(venv_path):
-                custom_venv_choices.extend(
-                    [os.path.join(venv_path, x) for x in os.listdir(venv_path) if os.path.exists(os.path.join(venv_path, x, 'bin', 'pip'))]
-                )
-        except Exception:
-            logger.exception("Encountered an error while discovering custom virtual environments.")
+        if os.path.exists(venv_path):
+            for d in os.listdir(venv_path):
+                if venv_path == settings.BASE_VENV_PATH and d == 'awx':
+                    continue
+
+                if os.path.exists(os.path.join(venv_path, d, 'bin', 'pip')):
+                    custom_venv_choices.append(os.path.join(venv_path, d))
+
     return custom_venv_choices
 
 
 def get_custom_venv_pip_freeze(venv_path):
-    venv_path = os.path.join(venv_path, 'bin', 'pip')
+    pip_path = os.path.join(venv_path, 'bin', 'pip')
+
     try:
-        if os.path.exists(venv_path):
-            freeze_data = subprocess.run([venv_path, "freeze"], capture_output=True)
-            pip_data = (freeze_data.stdout).decode('UTF-8')
-            return pip_data
+        freeze_data = subprocess.run([pip_path, "freeze"], capture_output=True)
+        pip_data = (freeze_data.stdout).decode('UTF-8')
+        return pip_data
     except Exception:
-        logger.exception("Encountered an error while discovering Pip Freeze data for custom virtual environments.")
+        logger.exception("Encountered an error while trying to run 'pip freeze' for custom virtual environments:")
 
 
 def is_ansible_variable(key):
