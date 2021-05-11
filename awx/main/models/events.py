@@ -511,7 +511,7 @@ class JobEvent(BasePlaybookEvent):
 
             from awx.main.models import Host, JobHostSummary  # circular import
 
-            all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name', 'last_job_id', 'last_job_host_summary_id')
+            all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
             existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
