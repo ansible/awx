@@ -361,7 +361,7 @@ msgstr "Add resource type"
 msgid "Add smart inventory"
 msgstr "Add smart inventory"
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:168
+#: screens/Team/TeamRoles/TeamRolesList.jsx:171
 msgid "Add team permissions"
 msgstr "Add team permissions"
 
@@ -885,8 +885,8 @@ msgstr "Cache timeout (seconds)"
 #: screens/Setting/shared/RevertAllAlert.jsx:32
 #: screens/Setting/shared/RevertFormActionGroup.jsx:32
 #: screens/Setting/shared/RevertFormActionGroup.jsx:38
-#: screens/Team/TeamRoles/TeamRolesList.jsx:208
-#: screens/Team/TeamRoles/TeamRolesList.jsx:211
+#: screens/Team/TeamRoles/TeamRolesList.jsx:217
+#: screens/Team/TeamRoles/TeamRolesList.jsx:220
 #: screens/Template/Survey/SurveyList.jsx:116
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/DeleteAllNodesModal.jsx:31
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.jsx:39
@@ -1658,7 +1658,7 @@ msgstr ""
 msgid "Credentials that require passwords on launch are not permitted.  Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
 msgstr "Credentials that require passwords on launch are not permitted.  Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
 
-#: components/Pagination/Pagination.jsx:34
+#: components/Pagination/Pagination.jsx:33
 msgid "Current page"
 msgstr ""
 
@@ -2192,7 +2192,7 @@ msgstr "Disable SSL verification"
 #: components/DisassociateButton/DisassociateButton.jsx:92
 #: components/DisassociateButton/DisassociateButton.jsx:96
 #: components/DisassociateButton/DisassociateButton.jsx:116
-#: screens/Team/TeamRoles/TeamRolesList.jsx:202
+#: screens/Team/TeamRoles/TeamRolesList.jsx:211
 #: screens/User/UserRoles/UserRolesList.jsx:207
 msgid "Disassociate"
 msgstr "Disassociate"
@@ -2218,12 +2218,12 @@ msgstr "Disassociate related group(s)?"
 msgid "Disassociate related team(s)?"
 msgstr "Disassociate related team(s)?"
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:189
+#: screens/Team/TeamRoles/TeamRolesList.jsx:198
 #: screens/User/UserRoles/UserRolesList.jsx:194
 msgid "Disassociate role"
 msgstr "Disassociate role"
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:192
+#: screens/Team/TeamRoles/TeamRolesList.jsx:201
 #: screens/User/UserRoles/UserRolesList.jsx:197
 msgid "Disassociate role!"
 msgstr "Disassociate role!"
@@ -2900,7 +2900,7 @@ msgstr "Error saving the workflow!"
 #: screens/Project/shared/ProjectSyncButton.jsx:62
 #: screens/Team/TeamDetail/TeamDetail.jsx:74
 #: screens/Team/TeamList/TeamList.jsx:205
-#: screens/Team/TeamRoles/TeamRolesList.jsx:226
+#: screens/Team/TeamRoles/TeamRolesList.jsx:235
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:405
 #: screens/Template/TemplateSurvey.jsx:130
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:257
@@ -3305,7 +3305,7 @@ msgstr "Failed to delete project."
 msgid "Failed to delete role"
 msgstr "Failed to delete role"
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:229
+#: screens/Team/TeamRoles/TeamRolesList.jsx:238
 #: screens/User/UserRoles/UserRolesList.jsx:234
 msgid "Failed to delete role."
 msgstr "Failed to delete role."
@@ -3676,19 +3676,19 @@ msgstr "Globally Available"
 msgid "Globally available execution environment can not be reassigned to a specific Organization"
 msgstr "Globally available execution environment can not be reassigned to a specific Organization"
 
-#: components/Pagination/Pagination.jsx:29
+#: components/Pagination/Pagination.jsx:28
 msgid "Go to first page"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:31
+#: components/Pagination/Pagination.jsx:30
 msgid "Go to last page"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:32
+#: components/Pagination/Pagination.jsx:31
 msgid "Go to next page"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:30
+#: components/Pagination/Pagination.jsx:29
 msgid "Go to previous page"
 msgstr ""
 
@@ -3905,7 +3905,7 @@ msgstr "I agree to the End User License Agreement"
 
 #: components/JobList/JobList.jsx:173
 #: components/Lookup/HostFilterLookup.jsx:82
-#: screens/Team/TeamRoles/TeamRolesList.jsx:152
+#: screens/Team/TeamRoles/TeamRolesList.jsx:155
 msgid "ID"
 msgstr "ID"
 
@@ -4402,7 +4402,7 @@ msgstr "Item Skipped"
 msgid "Items"
 msgstr "Items"
 
-#: components/Pagination/Pagination.jsx:27
+#: components/Pagination/Pagination.jsx:26
 msgid "Items per page"
 msgstr ""
 
@@ -5889,7 +5889,7 @@ msgstr "Pagerduty Subdomain"
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty subdomain"
 
-#: components/Pagination/Pagination.jsx:35
+#: components/Pagination/Pagination.jsx:34
 msgid "Pagination"
 msgstr ""
 
@@ -6584,6 +6584,11 @@ msgstr "Request subscription"
 msgid "Required"
 msgstr "Required"
 
+#: screens/Team/TeamRoles/TeamRoleListItem.jsx:12
+#: screens/Team/TeamRoles/TeamRolesList.jsx:180
+msgid "Resource Name"
+msgstr "Resource Name"
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.jsx:194
 msgid "Resource deleted"
 msgstr "Resource deleted"
@@ -6693,8 +6698,9 @@ msgstr "Revision #"
 msgid "Rocket.Chat"
 msgstr "Rocket.Chat"
 
-#: screens/Team/TeamRoles/TeamRoleListItem.jsx:40
-#: screens/Team/TeamRoles/TeamRolesList.jsx:145
+#: screens/Team/TeamRoles/TeamRoleListItem.jsx:20
+#: screens/Team/TeamRoles/TeamRolesList.jsx:148
+#: screens/Team/TeamRoles/TeamRolesList.jsx:182
 #: screens/User/UserList/UserList.jsx:165
 #: screens/User/UserList/UserListItem.jsx:69
 #: screens/User/UserRoles/UserRolesList.jsx:145
@@ -6950,7 +6956,7 @@ msgstr "See errors on the left"
 #: components/JobList/JobListItem.jsx:66
 #: components/Lookup/HostFilterLookup.jsx:318
 #: components/Lookup/Lookup.jsx:141
-#: components/Pagination/Pagination.jsx:33
+#: components/Pagination/Pagination.jsx:32
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:89
 msgid "Select"
 msgstr ""
@@ -7981,7 +7987,7 @@ msgstr "Sync for revision"
 msgid "System"
 msgstr ""
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:125
+#: screens/Team/TeamRoles/TeamRolesList.jsx:128
 #: screens/User/UserDetail/UserDetail.jsx:42
 #: screens/User/UserList/UserListItem.jsx:19
 #: screens/User/UserRoles/UserRolesList.jsx:126
@@ -8003,7 +8009,7 @@ msgstr "System Auditor"
 msgid "System Warning"
 msgstr "System Warning"
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:128
+#: screens/Team/TeamRoles/TeamRolesList.jsx:131
 #: screens/User/UserRoles/UserRolesList.jsx:129
 msgid "System administrators have unrestricted access to all resources."
 msgstr "System administrators have unrestricted access to all resources."
@@ -8104,7 +8110,7 @@ msgid "Team"
 msgstr ""
 
 #: components/ResourceAccessList/ResourceAccessListItem.jsx:82
-#: screens/Team/TeamRoles/TeamRolesList.jsx:141
+#: screens/Team/TeamRoles/TeamRolesList.jsx:144
 msgid "Team Roles"
 msgstr ""
 
@@ -8411,7 +8417,7 @@ msgstr "This action will delete the following:"
 msgid "This action will disassociate all roles for this user from the selected teams."
 msgstr "This action will disassociate all roles for this user from the selected teams."
 
-#: screens/Team/TeamRoles/TeamRolesList.jsx:216
+#: screens/Team/TeamRoles/TeamRolesList.jsx:225
 #: screens/User/UserRoles/UserRolesList.jsx:221
 msgid "This action will disassociate the following role from {0}:"
 msgstr "This action will disassociate the following role from {0}:"
@@ -8855,7 +8861,8 @@ msgstr "Twilio"
 #: screens/Project/ProjectList/ProjectList.jsx:146
 #: screens/Project/ProjectList/ProjectList.jsx:175
 #: screens/Project/ProjectList/ProjectListItem.jsx:152
-#: screens/Team/TeamRoles/TeamRoleListItem.jsx:30
+#: screens/Team/TeamRoles/TeamRoleListItem.jsx:17
+#: screens/Team/TeamRoles/TeamRolesList.jsx:181
 #: screens/Template/Survey/SurveyListItem.jsx:117
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:86
 #: screens/User/UserDetail/UserDetail.jsx:70
@@ -9802,7 +9809,7 @@ msgid "confirm delete"
 msgstr ""
 
 #: components/DisassociateButton/DisassociateButton.jsx:113
-#: screens/Team/TeamRoles/TeamRolesList.jsx:199
+#: screens/Team/TeamRoles/TeamRolesList.jsx:208
 msgid "confirm disassociate"
 msgstr "confirm disassociate"
 
@@ -9919,7 +9926,7 @@ msgstr "instance type"
 msgid "inventory"
 msgstr "inventory"
 
-#: components/Pagination/Pagination.jsx:24
+#: components/Pagination/Pagination.jsx:23
 msgid "items"
 msgstr ""
 
@@ -9963,15 +9970,15 @@ msgstr "of"
 msgid "option to the"
 msgstr "option to the"
 
-#: components/Pagination/Pagination.jsx:25
+#: components/Pagination/Pagination.jsx:24
 msgid "page"
 msgstr "page"
 
-#: components/Pagination/Pagination.jsx:26
+#: components/Pagination/Pagination.jsx:25
 msgid "pages"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:28
+#: components/Pagination/Pagination.jsx:27
 msgid "per page"
 msgstr ""
 
@@ -9981,16 +9988,16 @@ msgid "relaunch jobs"
 msgstr "relaunch jobs"
 
 #: screens/Team/TeamRoles/TeamRoleListItem.jsx:21
-msgid "resource name"
-msgstr "resource name"
+#~ msgid "resource name"
+#~ msgstr "resource name"
 
 #: screens/Team/TeamRoles/TeamRoleListItem.jsx:36
-msgid "resource role"
-msgstr "resource role"
+#~ msgid "resource role"
+#~ msgstr "resource role"
 
 #: screens/Team/TeamRoles/TeamRoleListItem.jsx:26
-msgid "resource type"
-msgstr "resource type"
+#~ msgid "resource type"
+#~ msgstr "resource type"
 
 #: src/pages/Organizations/components/OrganizationEdit.jsx:22
 #~ msgid "save/cancel and go back to view"
@@ -10100,13 +10107,17 @@ msgstr "{0, plural, one {This execution environment is currently being used by o
 msgid "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
+#: screens/Inventory/InventoryList/InventoryList.jsx:225
+msgid "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
+
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:187
 msgid "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
 msgstr "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
 
 #: screens/Inventory/InventoryList/InventoryList.jsx:225
-msgid "{0, plural, one {This invetory is currently being used by some temeplates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This invetory is currently being used by some temeplates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
+#~ msgid "{0, plural, one {This invetory is currently being used by some temeplates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
+#~ msgstr "{0, plural, one {This invetory is currently being used by some temeplates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
 
 #: screens/Organization/OrganizationList/OrganizationList.jsx:181
 msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
