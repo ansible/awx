@@ -574,6 +574,8 @@ class TowerAPIModule(TowerModule):
             return bool(new_field == old_field)
 
     def objects_could_be_different(self, old, new, field_set=None, warning=False):
+        diff = []
+        changed = False
         if field_set is None:
             field_set = set(fd for fd in new.keys() if fd not in ('modified', 'related', 'summary_fields'))
         for field in field_set:
@@ -581,13 +583,24 @@ class TowerAPIModule(TowerModule):
             old_field = old.get(field, None)
             if old_field != new_field:
                 if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
-                    return True  # Something doesn't match, or something might not match
+                    diff.append({
+                            "item":  field,
+                            "val_old": old_field,   
+                            "val_expected": new_field
+                        })
+                    changed = True  # Something doesn't match, or something might not match
             elif self.has_encrypted_values(new_field) or field not in new:
                 if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
                     # case of 'field not in new' - user password write-only field that API will not display
                     self._encrypted_changed_warning(field, old, warning=warning)
-                    return True
-        return False
+                    diff.append({
+                            "item":  field,
+                            "val_old": old_field,  
+                            "val_expected": new_field
+                        })
+                    changed = True
+        self.json_output['diff'] = diff
+        return True if changed else False
 
     def update_if_needed(self, existing_item, new_item, on_update=None, auto_exit=True, associations=None):
         # This will exit from the module on its own
