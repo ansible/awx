@@ -28,6 +28,7 @@ import threading
 import concurrent.futures
 from base64 import b64encode
 import subprocess
+import sys
 
 # Django
 from django.conf import settings
@@ -1369,7 +1370,12 @@ class BaseTask(object):
             if isinstance(self.instance, SystemJob):
                 cwd = self.build_cwd(self.instance, private_data_dir)
                 res = ansible_runner.interface.run(
-                    project_dir=cwd, event_handler=self.event_handler, finished_callback=self.finished_callback, status_handler=self.status_handler, **params
+                    project_dir=cwd,
+                    event_handler=self.event_handler,
+                    finished_callback=self.finished_callback,
+                    status_handler=self.status_handler,
+                    debug=True,
+                    **params,
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
@@ -2886,6 +2892,16 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, u
         update_inventory_computed_fields.delay(new_obj.id)
 
 
+class TransmitterThread(threading.Thread):
+    def run(self):
+        self.exc = None
+
+        try:
+            super().run()
+        except Exception:
+            self.exc = sys.exc_info()
+
+
 class AWXReceptorJob:
     def __init__(self, task=None, runner_params=None):
         self.task = task
@@ -2913,7 +2929,8 @@ class AWXReceptorJob:
         # reading.
         sockin, sockout = socket.socketpair()
 
-        threading.Thread(target=self.transmit, args=[sockin]).start()
+        transmitter_thread = TransmitterThread(target=self.transmit, args=[sockin])
+        transmitter_thread.start()
 
         # submit our work, passing
         # in the right side of our socketpair for reading.
@@ -2922,6 +2939,11 @@ class AWXReceptorJob:
 
         sockin.close()
         sockout.close()
+
+        if transmitter_thread.exc:
+            raise transmitter_thread.exc[1].with_traceback(transmitter_thread.exc[2])
+
+        transmitter_thread.join()
 
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
         # Both "processor" and "cancel_watcher" are spawned in separate threads.
@@ -2969,10 +2991,11 @@ class AWXReceptorJob:
         if not settings.IS_K8S and self.work_type == 'local':
             self.runner_params['only_transmit_kwargs'] = True
 
-        ansible_runner.interface.run(streamer='transmit', _output=_socket.makefile('wb'), **self.runner_params)
-
-        # Socket must be shutdown here, or the reader will hang forever.
-        _socket.shutdown(socket.SHUT_WR)
+        try:
+            ansible_runner.interface.run(streamer='transmit', _output=_socket.makefile('wb'), debug=True, **self.runner_params)
+        finally:
+            # Socket must be shutdown here, or the reader will hang forever.
+            _socket.shutdown(socket.SHUT_WR)
 
     def processor(self, resultfile):
         return ansible_runner.interface.run(
@@ -2982,6 +3005,7 @@ class AWXReceptorJob:
             event_handler=self.task.event_handler,
             finished_callback=self.task.finished_callback,
             status_handler=self.task.status_handler,
+            debug=True,
             **self.runner_params,
         )
 
