@@ -6,9 +6,12 @@ import { func, shape } from 'prop-types';
 import { ProjectsAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
 import useRequest from '../../../../../../util/useRequest';
-import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../../../../components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('projects', {
   page: 1,
@@ -55,15 +58,20 @@ function ProjectsList({ nodeResource, onUpdateNodeResource }) {
   }, [fetchProjects]);
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={error}
       hasContentLoading={isLoading}
       itemCount={count}
       items={projects}
-      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
-      renderItem={item => (
+      headerRow={
+        <HeaderRow isExpandable={false} qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(item, index) => (
         <CheckboxListItem
+          rowIndex={index}
           isSelected={!!(nodeResource && nodeResource.id === item.id)}
           itemId={item.id}
           key={item.id}
@@ -104,12 +112,6 @@ function ProjectsList({ nodeResource, onUpdateNodeResource }) {
         {
           name: t`Created By (Username)`,
           key: 'created_by__username__icontains',
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
         },
       ]}
       toolbarSearchableKeys={searchableKeys}

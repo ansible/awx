@@ -19,15 +19,7 @@ import { CredentialPluginPrompt } from './CredentialPluginPrompt';
 import CredentialPluginSelected from './CredentialPluginSelected';
 
 function CredentialPluginInput(props) {
-  const {
-    children,
-
-    isDisabled,
-    isRequired,
-    validated,
-    fieldOptions,
-  } = props;
-
+  const { children, isDisabled, isRequired, validated, fieldOptions } = props;
   const [showPluginWizard, setShowPluginWizard] = useState(false);
   const [inputField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);

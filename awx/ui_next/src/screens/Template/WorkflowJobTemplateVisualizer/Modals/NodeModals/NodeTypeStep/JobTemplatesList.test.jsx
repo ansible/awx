@@ -61,7 +61,6 @@ describe('JobTemplatesList', () => {
       );
     });
     wrapper.update();
-    // expect(wrapper.debug()).toBe(false);
     expect(
       wrapper.find('CheckboxListItem[name="Test Job Template"]').props()
         .isSelected
@@ -72,7 +71,7 @@ describe('JobTemplatesList', () => {
     ).toBe(false);
     wrapper
       .find('CheckboxListItem[name="Test Job Template 2"]')
-      .simulate('click');
+      .prop('onSelect')();
     expect(onUpdateNodeResource).toHaveBeenCalledWith({
       id: 2,
       name: 'Test Job Template 2',

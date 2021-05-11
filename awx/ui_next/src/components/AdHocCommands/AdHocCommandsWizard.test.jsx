@@ -153,7 +153,8 @@ describe('<AdHocCommandsWizard/>', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-1"]')
+        .find('td#check-action-item-1')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
 
@@ -178,7 +179,8 @@ describe('<AdHocCommandsWizard/>', () => {
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-1"]')
+        .find('td#check-action-item-1')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
 

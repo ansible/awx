@@ -7,9 +7,12 @@ import { CredentialsAPI } from '../../../../../api';
 import CheckboxListItem from '../../../../../components/CheckboxListItem';
 import ContentError from '../../../../../components/ContentError';
 import DataListToolbar from '../../../../../components/DataListToolbar';
-import PaginatedDataList from '../../../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../../../util/qs';
 import useRequest from '../../../../../util/useRequest';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../../../components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,
@@ -59,15 +62,20 @@ function CredentialsStep() {
   }
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={credentialsError}
       hasContentLoading={isCredentialsLoading}
       itemCount={count}
       items={credentials}
-      onRowClick={row => selectedCredentialHelper.setValue(row)}
       qsConfig={QS_CONFIG}
-      renderItem={credential => (
+      headerRow={
+        <HeaderRow isExpandable={false} qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(credential, index) => (
         <CheckboxListItem
+          rowIndex={index}
           isSelected={selectedCredential?.value?.id === credential.id}
           itemId={credential.id}
           key={credential.id}
@@ -93,12 +101,6 @@ function CredentialsStep() {
         {
           name: t`Modified By (Username)`,
           key: 'modified_by__username__icontains',
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
         },
       ]}
       toolbarSearchableKeys={searchableKeys}

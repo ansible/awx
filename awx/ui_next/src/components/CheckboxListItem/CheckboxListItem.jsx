@@ -1,34 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import {
-  DataListItem,
-  DataListItemRow as PFDataListItemRow,
-  DataListItemCells,
-  DataListCheck,
-  Radio,
-} from '@patternfly/react-core';
-import _DataListCell from '../DataListCell';
-
-const Label = styled.label`
-  ${({ isDisabled }) =>
-    isDisabled &&
-    `
-    opacity: 0.5;
-  `}
-`;
-
-const DataListItemRow = styled(PFDataListItemRow)`
-  && {
-    align-items: center;
-  }
-`;
-
-const DataListCell = styled(_DataListCell)`
-  && {
-    margin-left: 10px;
-  }
-`;
+import { t } from '@lingui/macro';
+import { Td, Tr } from '@patternfly/react-table';
 
 const CheckboxListItem = ({
   isDisabled = false,
@@ -38,43 +11,27 @@ const CheckboxListItem = ({
   label,
   name,
   onDeselect,
+  rowIndex,
   onSelect,
 }) => {
-  const CheckboxRadio = isRadio ? Radio : DataListCheck;
   return (
-    <DataListItem
-      key={itemId}
-      aria-labelledby={`check-action-item-${itemId}`}
-      id={`${itemId}`}
-    >
-      <DataListItemRow>
-        <CheckboxRadio
-          aria-label={`check-action-item-${itemId}`}
-          aria-labelledby={`check-action-item-${itemId}`}
-          checked={isSelected}
-          isDisabled={isDisabled}
-          id={`selected-${itemId}`}
-          isChecked={isSelected}
-          name={name}
-          onChange={isSelected ? onDeselect : onSelect}
-          value={itemId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Label
-                id={`check-action-item-${itemId}`}
-                htmlFor={`selected-${itemId}`}
-                className="check-action-item"
-                isDisabled={isDisabled}
-              >
-                <b>{label}</b>
-              </Label>
-            </DataListCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr ouiaId={`list-item-${itemId}`} id={`list-item-${itemId}`}>
+      <Td
+        id={`check-action-item-${itemId}`}
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect: isSelected ? onDeselect : onSelect,
+          disable: isDisabled,
+          variant: isRadio ? 'radio' : 'checkbox',
+        }}
+        name={name}
+        dataLabel={t`Selected`}
+      />
+      <Td aria-labelledby={itemId} dataLabel={t`Name`}>
+        <b>{label}</b>
+      </Td>
+    </Tr>
   );
 };
 

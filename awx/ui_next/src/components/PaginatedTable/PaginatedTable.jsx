@@ -35,7 +35,6 @@ function PaginatedTable({
   toolbarRelatedSearchableKeys,
   pluralizedItemName,
   showPageSizeOptions,
-
   renderToolbar,
   emptyContentMessage,
   ouiaId,
