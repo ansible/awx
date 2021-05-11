@@ -224,7 +224,7 @@ function InventoryList() {
                   deleteMessage={
                     <Plural
                       value={selected.length}
-                      one="This invetory is currently being used by some temeplates. Are you sure you want to delete it?"
+                      one="This inventory is currently being used by some templates. Are you sure you want to delete it?"
                       other="Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?"
                     />
                   }
