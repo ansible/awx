@@ -1373,7 +1373,12 @@ class BaseTask(object):
             if isinstance(self.instance, SystemJob):
                 cwd = self.build_cwd(self.instance, private_data_dir)
                 res = ansible_runner.interface.run(
-                    project_dir=cwd, event_handler=self.event_handler, finished_callback=self.finished_callback, status_handler=self.status_handler, **params
+                    project_dir=cwd,
+                    event_handler=self.event_handler,
+                    finished_callback=self.finished_callback,
+                    status_handler=self.status_handler,
+                    debug=True,
+                    **params,
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
@@ -2993,7 +2998,11 @@ class AWXReceptorJob:
             self.runner_params['only_transmit_kwargs'] = True
 
         try:
+<<<<<<< HEAD
             ansible_runner.interface.run(streamer='transmit', _output=_socket.makefile('wb'), **self.runner_params)
+=======
+            ansible_runner.interface.run(streamer='transmit', _output=_socket.makefile('wb'), debug=True, **self.runner_params)
+>>>>>>> 279d7a866b (created TransmitterThread class to spawn AWXReceptorJobs as threads. Join back to calling program when thread has completed)
         finally:
             # Socket must be shutdown here, or the reader will hang forever.
             _socket.shutdown(socket.SHUT_WR)
@@ -3006,6 +3015,7 @@ class AWXReceptorJob:
             event_handler=self.task.event_handler,
             finished_callback=self.task.finished_callback,
             status_handler=self.task.status_handler,
+            debug=True,
             **self.runner_params,
         )
 
