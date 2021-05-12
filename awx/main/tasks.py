@@ -994,6 +994,9 @@ class BaseTask(object):
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
+        if self.instance.execution_environment is None:
+            raise RuntimeError('The project could not sync because there is no Execution Environment.')
+
         ee_cred = self.instance.execution_environment.credential
         if ee_cred:
             verify_ssl = ee_cred.get_input('verify_ssl')
@@ -1708,6 +1711,10 @@ class RunJob(BaseTask):
         elif job.project is None:
             error = _('Job could not start because it does not have a valid project.')
             self.update_model(job.pk, status='failed', job_explanation=error)
+            raise RuntimeError(error)
+        elif job.execution_environment is None:
+            error = _('Job could not start because no Execution Environment could be found.')
+            self.update_model(job.pk, status='error', job_explanation=error)
             raise RuntimeError(error)
         elif job.project.status in ('error', 'failed'):
             msg = _('The project revision for this job template is unknown due to a failed update.')

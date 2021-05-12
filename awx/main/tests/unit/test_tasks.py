@@ -1927,3 +1927,37 @@ def test_notification_job_finished(mocker):
     with mocker.patch('awx.main.models.UnifiedJob.objects.get', mocker.MagicMock(return_value=uj)):
         tasks.handle_success_and_failure_notifications(1)
         uj.send_notification_templates.assert_called()
+
+
+@pytest.mark.django_db
+class TestNullExecutionEnvironment(TestJobExecution):
+    def test_job_run_no_ee(self, execution_environment, private_data_dir, job):
+        org = Organization(pk=1)
+        proj = Project(pk=1, organization=org)
+        job = Job(project=proj, organization=org, inventory=Inventory(pk=1))
+        job.execution_environment = None
+        task = tasks.RunJob()
+        task.instance = job
+        task.update_model = mock.Mock(return_value=job)
+        task.model.objects.get = mock.Mock(return_value=job)
+
+        with mock.patch('awx.main.tasks.copy_tree'):
+            with pytest.raises(RuntimeError) as e:
+                task.pre_run_hook(job, private_data_dir)
+
+        update_model_call = task.update_model.call_args[1]
+        assert update_model_call['status'] == 'error'
+        assert 'Job could not start because no Execution Environment could be found' in str(e.value)
+
+    def test_project_update_no_ee(self, execution_environment, job):
+        org = Organization(pk=1)
+        proj = Project(pk=1, organization=org)
+        project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
+        project_update.execution_environment = None
+        task = tasks.RunProjectUpdate()
+        task.instance = project_update
+
+        with pytest.raises(RuntimeError) as e:
+            task.build_env(job, {})
+
+        assert 'The project could not sync because there is no Execution Environment' in str(e.value)
