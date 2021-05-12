@@ -15,10 +15,10 @@ short_description: Ansible dynamic inventory plugin for the Automation Platform 
 description:
     - Reads inventories from the Automation Platform Controller.
     - Supports reading configuration from both YAML config file and environment variables.
-    - If reading from the YAML file, the file name must end with tower.(yml|yaml) or tower_inventory.(yml|yaml),
-      the path in the command would be /path/to/tower_inventory.(yml|yaml). If some arguments in the config file
+    - If reading from the YAML file, the file name must end with controller.(yml|yaml) or controller_inventory.(yml|yaml),
+      the path in the command would be /path/to/controller_inventory.(yml|yaml). If some arguments in the config file
       are missing, this plugin will try to fill in missing arguments by reading from environment variables.
-    - If reading configurations from environment variables, the path in the command must be @tower_inventory.
+    - If reading configurations from environment variables, the path in the command must be @controller_inventory.
 extends_documentation_fragment: awx.awx.auth_plugin
 options:
     inventory_id:
@@ -29,7 +29,7 @@ options:
             - Named URL slugs follow the syntax of "inventory_name++organization_name".
         type: raw
         env:
-            - name: TOWER_INVENTORY
+            - name: CONTROLLER_INVENTORY
         required: True
     include_metadata:
         description: Make extra requests to provide all group vars with metadata about the source host.
@@ -41,7 +41,7 @@ EXAMPLES = '''
 # Before you execute the following commands, you should make sure this file is in your plugin path,
 # and you enabled this plugin.
 
-# Example for using tower_inventory.yml file
+# Example for using controller_inventory.yml file
 
 plugin: awx.awx.controller
 host: your_automation_controller_server_network_address
@@ -50,18 +50,18 @@ password: your_automation_controller_password
 inventory_id: the_ID_of_targeted_automation_controller_inventory
 # Then you can run the following command.
 # If some of the arguments are missing, Ansible will attempt to read them from environment variables.
-# ansible-inventory -i /path/to/tower_inventory.yml --list
+# ansible-inventory -i /path/to/controller_inventory.yml --list
 
 # Example for reading from environment variables:
 
 # Set environment variables:
-# export TOWER_HOST=YOUR_TOWER_HOST_ADDRESS
-# export TOWER_USERNAME=YOUR_TOWER_USERNAME
-# export TOWER_PASSWORD=YOUR_TOWER_PASSWORD
-# export TOWER_INVENTORY=THE_ID_OF_TARGETED_INVENTORY
-# Read the inventory specified in TOWER_INVENTORY from the controller, and list them.
-# The inventory path must always be @tower_inventory if you are reading all settings from environment variables.
-# ansible-inventory -i @tower_inventory --list
+# export CONTROLLER_HOST=YOUR_AUTOMATION_PLATFORM_CONTROLLER_HOST_ADDRESS
+# export CONTROLLER_USERNAME=YOUR_CONTROLLER_USERNAME
+# export CONTROLLER_PASSWORD=YOUR_CONTROLLER_PASSWORD
+# export CONTROLLER_INVENTORY=THE_ID_OF_TARGETED_INVENTORY
+# Read the inventory specified in CONTROLLER_INVENTORY from the controller, and list them.
+# The inventory path must always be @controller_inventory if you are reading all settings from environment variables.
+# ansible-inventory -i @controller_inventory --list
 '''
 
 import os
