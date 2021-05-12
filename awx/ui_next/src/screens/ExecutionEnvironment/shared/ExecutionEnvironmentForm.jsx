@@ -95,7 +95,7 @@ function ExecutionEnvironmentFormFields({
       />
       <FormField
         id="execution-environment-image"
-        label={t`Image name`}
+        label={t`Image`}
         name="image"
         type="text"
         validate={required(null)}
