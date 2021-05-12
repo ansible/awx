@@ -43,7 +43,7 @@ function JobCancelButton({
           <Button
             aria-label={title}
             variant="secondary"
-            ouiaId="cancel job"
+            ouiaId="cancel-job-button"
             onClick={() => setIsOpen(true)}
           >
             {buttonText || t`Cancel Job`}
