@@ -51,6 +51,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     webhook_key: 'Foo webhook key',
     execution_environment: 4,
     scm_branch: 'main',
+    limit: 'servers',
   };
 
   beforeEach(async () => {
@@ -114,6 +115,11 @@ describe('<WorkflowJobTemplateDetail/>', () => {
         element: 'Detail[label="Source Control Branch"]',
         prop: 'value',
         value: 'main',
+      },
+      {
+        element: 'Detail[label="Limit"]',
+        prop: 'value',
+        value: 'servers',
       },
       {
         element: "Detail[label='Webhook Service']",
