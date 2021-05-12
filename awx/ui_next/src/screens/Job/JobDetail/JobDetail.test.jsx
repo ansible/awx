@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../../testUtils/testUtils';
 import JobDetail from './JobDetail';
@@ -14,6 +15,10 @@ describe('<JobDetail />', () => {
     expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
     expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
   }
+  afterEach(() => {
+    wrapper.unmount();
+    jest.clearAllMocks();
+  });
 
   test('should display details', () => {
     wrapper = mountWithContexts(
@@ -145,18 +150,15 @@ describe('<JobDetail />', () => {
   });
 
   test('DELETED is shown for required Job resources that have been deleted', () => {
-    wrapper = mountWithContexts(
-      <JobDetail
-        job={{
-          ...mockJobData,
-          summary_fields: {
-            ...mockJobData.summary_fields,
-            inventory: null,
-            project: null,
-          },
-        }}
-      />
-    );
+    const newMockData = {
+      ...mockJobData,
+      summary_fields: {
+        ...mockJobData.summary_fields,
+        inventory: null,
+        project: null,
+      },
+    };
+    wrapper = mountWithContexts(<JobDetail job={newMockData} />);
     const detail = wrapper.find('JobDetail');
     async function assertMissingDetail(label) {
       expect(detail.length).toBe(1);
@@ -177,5 +179,129 @@ describe('<JobDetail />', () => {
       />
     );
     assertDetail('Job Type', 'Playbook Check');
+  });
+
+  test('should not show cancel job button, not super user', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/settings/miscellaneous_system/edit'],
+    });
+
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          status: 'pending',
+          type: 'system_job',
+        }}
+      />,
+      {
+        context: {
+          router: {
+            history,
+          },
+          config: {
+            me: {
+              is_superuser: false,
+            },
+          },
+        },
+      }
+    );
+    expect(
+      wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
+    ).toHaveLength(0);
+  });
+
+  test('should not show cancel job button, job completed', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/settings/miscellaneous_system/edit'],
+    });
+
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          status: 'success',
+          type: 'project_update',
+        }}
+      />,
+      {
+        context: {
+          router: {
+            history,
+          },
+          config: {
+            me: {
+              is_superuser: true,
+            },
+          },
+        },
+      }
+    );
+    expect(
+      wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
+    ).toHaveLength(0);
+  });
+
+  test('should show cancel button, pending, super user', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/settings/miscellaneous_system/edit'],
+    });
+
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          status: 'pending',
+          type: 'system_job',
+        }}
+      />,
+      {
+        context: {
+          router: {
+            history,
+          },
+          config: {
+            me: {
+              is_superuser: true,
+            },
+          },
+        },
+      }
+    );
+    expect(
+      wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
+    ).toHaveLength(1);
+  });
+
+  test('should show cancel button, pending, super project update, not super user', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/settings/miscellaneous_system/edit'],
+    });
+
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          status: 'pending',
+          type: 'project_update',
+        }}
+      />,
+      {
+        context: {
+          router: {
+            history,
+          },
+          config: {
+            me: {
+              is_superuser: false,
+            },
+          },
+        },
+      }
+    );
+    expect(
+      wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
+    ).toHaveLength(1);
   });
 });

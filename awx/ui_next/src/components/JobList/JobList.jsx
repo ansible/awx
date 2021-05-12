@@ -12,6 +12,8 @@ import useRequest, {
   useDeleteItems,
   useDismissableError,
 } from '../../util/useRequest';
+import { useConfig } from '../../contexts/Config';
+
 import { isJobRunning, getJobModel } from '../../util/jobs';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
@@ -31,6 +33,8 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     },
     ['id', 'page', 'page_size']
   );
+
+  const { me } = useConfig();
 
   const [selected, setSelected] = useState([]);
   const location = useLocation();
@@ -261,6 +265,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
             <JobListItem
               key={job.id}
               job={job}
+              isSuperUser={me?.is_superuser}
               showTypeColumn={showTypeColumn}
               onSelect={() => handleSelect(job)}
               isSelected={selected.some(row => row.id === job.id)}

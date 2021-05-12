@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import StatusIcon from '../../../components/StatusIcon';
+import JobCancelButton from '../../../components/JobCancelButton';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import { formatDateString } from '../../../util/dates';
 
@@ -91,12 +92,27 @@ function InventorySourceListItem({
         </Td>
         <Td dataLabel={t`Type`}>{label}</Td>
         <ActionsTd dataLabel={t`Actions`}>
-          <ActionItem
-            visible={source.summary_fields.user_capabilities.start}
-            tooltip={t`Sync`}
-          >
-            <InventorySourceSyncButton source={source} />
-          </ActionItem>
+          {['running', 'pending', 'waiting'].includes(source?.status) ? (
+            <ActionItem visible={source.summary_fields.user_capabilities.start}>
+              <JobCancelButton
+                job={{
+                  type: 'inventory_update',
+                  id: source.summary_fields.last_job.id,
+                }}
+                errorTitle={t`Inventory Source Sync Error`}
+                errorMessage={t`Failed to cancel Inventory Source Sync`}
+                title={t`Cancel Inventory Source Sync`}
+                showIconButton
+              />
+            </ActionItem>
+          ) : (
+            <ActionItem
+              visible={source.summary_fields.user_capabilities.start}
+              tooltip={t`Sync`}
+            >
+              <InventorySourceSyncButton source={source} />
+            </ActionItem>
+          )}
           <ActionItem
             visible={source.summary_fields.user_capabilities.edit}
             tooltip={t`Edit`}
