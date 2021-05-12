@@ -253,10 +253,9 @@ class TaskManager:
         }
         dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
-        controller_node = None
         if task.supports_isolation() and rampart_group.controller_id:
             try:
-                controller_node = rampart_group.choose_online_controller_node()
+                rampart_group.choose_online_controller_node()
             except IndexError:
                 logger.debug("No controllers available in group {} to run {}".format(rampart_group.name, task.log_format))
                 return

@@ -6,7 +6,7 @@ import platform
 import distro
 
 from django.db import connection
-from django.db.models import Count, Max, Min
+from django.db.models import Count
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
