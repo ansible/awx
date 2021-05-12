@@ -1,4 +1,5 @@
 import collections
+import json
 import logging
 from base64 import b64encode
 
@@ -50,6 +51,72 @@ class PodManager(object):
             logger.exception('Failed to list pods for container group {}'.format(instance_group))
 
         return pods
+
+    @classmethod
+    def create_secret(self, job):
+        task = collections.namedtuple('Task', 'id instance_group')(id='', instance_group=job.instance_group)
+        pm = PodManager(task)
+        registry_cred = job.execution_environment.credential
+        host = registry_cred.get_input('host').split('/')[0]
+        username = registry_cred.get_input("username")
+        password = registry_cred.get_input("password")
+
+        # Construct container auth dict and base64 encode it
+        token = b64encode("{}:{}".format(username, password).encode('ascii')).decode()
+        auth_dict = json.dumps({"auths": {host: {"auth": token}}}, indent=4)
+        auth_data = b64encode(str(auth_dict).encode('ascii')).decode()
+
+        # Construct Secret object
+        secret = client.V1Secret()
+        secret_name = "automation-{0}-image-pull-secret-{1}".format(settings.INSTALL_UUID[:5], job.execution_environment.credential.id)
+        secret.metadata = client.V1ObjectMeta(name="{}".format(secret_name))
+        secret.type = "kubernetes.io/dockerconfigjson"
+        secret.kind = "Secret"
+        secret.data = {".dockerconfigjson": auth_data}
+
+        # Check if secret already exists
+        secrets = None
+        try:
+            secrets = pm.kube_api.list_namespaced_secret(namespace=pm.namespace)
+        except client.rest.ApiException:
+            error_msg = 'Invalid openshift or k8s cluster credential'
+            logger.exception(error_msg)
+            job.cancel(job_explanation=error_msg)
+            raise
+
+        if secrets:
+            secret_exists = False
+            secrets_dict = secrets.to_dict().get('items', [])
+            for s in secrets_dict:
+                if s['metadata']['name'] == secret_name:
+                    secret_exists = True
+            if secret_exists:
+                try:
+                    # Try to replace existing secret
+                    pm.kube_api.delete_namespaced_secret(name=secret.metadata.name, namespace=pm.namespace)
+                    pm.kube_api.create_namespaced_secret(namespace=pm.namespace, body=secret)
+                except Exception:
+                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(task.instance_group.name)
+                    logger.exception(error_msg)
+                    job.cancel(job_explanation=error_msg)
+                    raise
+            else:
+                # Create an image pull secret in namespace
+                try:
+                    pm.kube_api.create_namespaced_secret(namespace=pm.namespace, body=secret)
+                except client.rest.ApiException as e:
+                    if e.status == 401:
+                        error_msg = 'Failed to create imagePullSecret: {}. Check that openshift or k8s credential has permission to create a secret.'.format(
+                            e.status
+                        )
+                        logger.exception(error_msg)
+                        # let job run for the case that the secret exists but the cluster cred doesn't have permission to create a secret
+                except Exception:
+                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(task.instance_group.name)
+                    logger.exception(error_msg)
+                    job.cancel(job_explanation=error_msg)
+
+        return secret.metadata.name
 
     @property
     def namespace(self):

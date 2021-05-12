@@ -3077,7 +3077,20 @@ class AWXReceptorJob:
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
         if self.task and self.task.instance.execution_environment:
-            pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+            if self.task.instance.execution_environment.pull:
+                pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+
+        if self.task and self.task.instance.is_container_group_task:
+            # If EE credential is passed, create an imagePullSecret
+            if self.task.instance.execution_environment and self.task.instance.execution_environment.credential:
+                # Create pull secret in k8s cluster based on ee cred
+                from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
+
+                pm = PodManager(self.task.instance)
+                secret_name = pm.create_secret(job=self.task.instance)
+
+                # Inject secret name into podspec
+                pod_spec['spec']['imagePullSecrets'] = [{"name": secret_name}]
 
         if self.task:
             pod_spec['metadata'] = deepmerge(
