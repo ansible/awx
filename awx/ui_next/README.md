@@ -92,6 +92,9 @@ docker exec -it tools_awx_1 bash
 # add the updated package.json and package-lock.json files to scm
 git add awx/ui_next_next/package.json awx/ui_next_next/package-lock.json
 ```
+#### Note:
+- Building the ui can use up a lot of resources. If you're running docker for mac or similar
+virtualization, the default memory limit may not be enough and you should increase it.
 
 ## Building for Production
 ```shell
