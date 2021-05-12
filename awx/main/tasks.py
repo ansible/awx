@@ -3074,6 +3074,11 @@ class AWXReceptorJob:
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
 
+        # Enforce EE Pull Policy
+        pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
+        if self.task and self.task.instance.execution_environment:
+            pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+
         if self.task:
             pod_spec['metadata'] = deepmerge(
                 pod_spec.get('metadata', {}),
