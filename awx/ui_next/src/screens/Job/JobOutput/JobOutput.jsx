@@ -38,6 +38,7 @@ import { HostStatusBar, OutputToolbar } from './shared';
 import getRowRangePageSize from './shared/jobOutputUtils';
 import { getJobModel, isJobRunning } from '../../../util/jobs';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import useInterval from '../../../util/useInterval';
 import {
   parseQueryString,
   mergeParams,
@@ -297,12 +298,13 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const listRef = useRef(null);
   const previousWidth = useRef(0);
   const jobSocketCounter = useRef(0);
-  const interval = useRef(null);
   const isMounted = useIsMounted();
+  const scrollTop = useRef(0);
+  const scrollHeight = useRef(0);
+  const currentlyLoading = useRef([]);
   const history = useHistory();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
-  const [currentlyLoading, setCurrentlyLoading] = useState([]);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [hostEvent, setHostEvent] = useState({});
   const [isHostModalOpen, setIsHostModalOpen] = useState(false);
@@ -310,7 +312,17 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [results, setResults] = useState({});
-  const [isFollowEnabled, setIsFollowModeEnabled] = useState(false);
+  const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(
+    isJobRunning(job.status)
+  );
+  const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
+
+  useInterval(
+    () => {
+      monitorJobSocketCounter();
+    },
+    isMonitoringWebsocket ? 5000 : null
+  );
 
   useEffect(() => {
     loadJobEvents();
@@ -331,14 +343,15 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           }
         }
       });
-      interval.current = setInterval(() => monitorJobSocketCounter(), 5000);
+      setIsMonitoringWebsocket(true);
     }
 
     return function cleanup() {
       if (ws) {
         ws.close();
       }
-      clearInterval(interval.current);
+      setIsMonitoringWebsocket(false);
+      isMounted.current = false;
     };
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -346,7 +359,23 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current?.recomputeRowHeights) {
       listRef.current.recomputeRowHeights();
     }
-  }, [currentlyLoading, cssMap, remoteRowCount]);
+  }, [currentlyLoading.current, cssMap, remoteRowCount]);
+
+  useEffect(() => {
+    if (jobStatus && !isJobRunning(jobStatus)) {
+      if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+        setRemoteRowCount(jobSocketCounter.current);
+      }
+
+      if (isMonitoringWebsocket) {
+        setIsMonitoringWebsocket(false);
+      }
+
+      if (isFollowModeEnabled) {
+        setTimeout(() => setIsFollowModeEnabled(false), 1000);
+      }
+    }
+  }, [jobStatus]);
 
   const {
     error: cancelError,
@@ -382,14 +411,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   } = useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
+    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+      setRemoteRowCount(jobSocketCounter.current);
+    }
     if (
       jobSocketCounter.current === remoteRowCount &&
       !isJobRunning(job.status)
     ) {
-      clearInterval(interval.current);
-    }
-    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-      setRemoteRowCount(jobSocketCounter.current);
+      setIsMonitoringWebsocket(false);
     }
   };
 
@@ -398,9 +427,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     if (isMounted.current) {
       setHasContentLoading(true);
-      setCurrentlyLoading(prevCurrentlyLoading =>
-        prevCurrentlyLoading.concat(loadRange)
-      );
+      currentlyLoading.current = currentlyLoading.current.concat(loadRange);
     }
 
     try {
@@ -466,8 +493,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     } finally {
       if (isMounted.current) {
         setHasContentLoading(false);
-        setCurrentlyLoading(prevCurrentlyLoading =>
-          prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+        currentlyLoading.current = currentlyLoading.current.filter(
+          n => !loadRange.includes(n)
         );
         loadRange.forEach(n => {
           cache.clear(n);
@@ -480,7 +507,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (results[index]) {
       return true;
     }
-    return currentlyLoading.includes(index);
+    return currentlyLoading.current.includes(index);
   };
 
   const handleHostEventClick = hostEventToOpen => {
@@ -493,6 +520,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const rowRenderer = ({ index, parent, key, style }) => {
+    if (listRef.current && isFollowModeEnabled) {
+      setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
+    }
     let actualLineTextHtml = [];
     if (results[index]) {
       const { lineTextHtml } = getLineTextHtml(results[index]);
@@ -545,9 +575,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     );
 
     if (isMounted.current) {
-      setCurrentlyLoading(prevCurrentlyLoading =>
-        prevCurrentlyLoading.concat(loadRange)
-      );
+      currentlyLoading.current = currentlyLoading.current.concat(loadRange);
     }
 
     const params = {
@@ -574,8 +602,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             ...prevCssMap,
             ...newResultsCssMap,
           }));
-          setCurrentlyLoading(prevCurrentlyLoading =>
-            prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+          currentlyLoading.current = currentlyLoading.current.filter(
+            n => !loadRange.includes(n)
           );
           loadRange.forEach(n => {
             cache.clear(n);
@@ -585,7 +613,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const scrollToRow = rowIndex => {
-    listRef.current.scrollToRow(rowIndex);
+    if (listRef.current) {
+      listRef.current.scrollToRow(rowIndex);
+    }
   };
 
   const handleScrollPrevious = () => {
@@ -659,24 +689,25 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleFollowToggle = () => {
-    if (isFollowEnabled) {
+    if (isFollowModeEnabled) {
       setIsFollowModeEnabled(false);
     } else {
       setIsFollowModeEnabled(true);
       scrollToRow(remoteRowCount - 1);
     }
   };
-  const handleScroll = () => {
-    if (listRef?.current?.Grid?._renderedRowStopIndex < remoteRowCount - 1) {
+
+  const handleScroll = e => {
+    if (
+      isFollowModeEnabled &&
+      scrollTop.current > e.scrollTop &&
+      scrollHeight.current === e.scrollHeight
+    ) {
       setIsFollowModeEnabled(false);
     }
+    scrollTop.current = e.scrollTop;
+    scrollHeight.current = e.scrollHeight;
   };
-
-  useEffect(() => {
-    if (isFollowEnabled) {
-      scrollToRow(remoteRowCount);
-    }
-  }, [remoteRowCount, isFollowEnabled]);
 
   const renderSearchComponent = () => (
     <Search
@@ -786,10 +817,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             </ToolbarToggleGroup>
             {isJobRunning(job.status) ? (
               <Button
-                variant={isFollowEnabled ? 'secondary' : 'primary'}
+                variant={isFollowModeEnabled ? 'secondary' : 'primary'}
                 onClick={handleFollowToggle}
               >
-                {isFollowEnabled ? t`Unfollow` : t`Follow`}
+                {isFollowModeEnabled ? t`Unfollow` : t`Follow`}
               </Button>
             ) : null}
           </SearchToolbarContent>
@@ -800,7 +831,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
         />
-        <OutputWrapper cssMap={cssMap} isFollowEnabled={isFollowEnabled}>
+        <OutputWrapper cssMap={cssMap}>
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
