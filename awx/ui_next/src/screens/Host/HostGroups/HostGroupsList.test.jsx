@@ -280,4 +280,41 @@ describe('<HostGroupsList />', () => {
     wrapper.update();
     expect(wrapper.find('AlertModal ErrorDetail').length).toBe(1);
   });
+
+  test('Associate modal does not close on sort', async () => {
+    InventoriesAPI.readGroups.mockResolvedValue({
+      data: {
+        results: [
+          { id: 1, name: 'Group A', url: '' },
+          { id: 2, name: 'Group B', url: '' },
+        ],
+        count: 1,
+      },
+    });
+    InventoriesAPI.readGroupsOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
+    await act(async () => wrapper.find('ToolbarAddButton').prop('onClick')());
+    wrapper.update();
+    await act(async () =>
+      wrapper
+        .find('Modal')
+        .find('Button[aria-label="Sort"]')
+        .prop('onClick')()
+    );
+    InventoriesAPI.readGroups.mockResolvedValue({
+      data: {
+        results: [
+          { id: 2, name: 'Group B', url: '' },
+          { id: 1, name: 'Group A', url: '' },
+        ],
+        count: 1,
+      },
+    });
+    InventoriesAPI.readGroupsOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
+    wrapper.update();
+    expect(wrapper.find('AssociateModal')).toHaveLength(1);
+  });
 });

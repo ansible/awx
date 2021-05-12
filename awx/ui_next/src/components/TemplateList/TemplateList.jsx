@@ -70,7 +70,7 @@ function TemplateList({ defaultParams }) {
           responses[3].data.actions?.GET || {}
         ).filter(key => responses[3].data.actions?.GET[key].filterable),
       };
-    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
+    }, [location.pathname]), // eslint-disable-line react-hooks/exhaustive-deps
     {
       results: [],
       count: 0,
