@@ -1370,11 +1370,7 @@ class BaseTask(object):
             if isinstance(self.instance, SystemJob):
                 cwd = self.build_cwd(self.instance, private_data_dir)
                 res = ansible_runner.interface.run(
-                    project_dir=cwd, 
-                    event_handler=self.event_handler, 
-                    finished_callback=self.finished_callback, 
-                    status_handler=self.status_handler, 
-                    **params
+                    project_dir=cwd, event_handler=self.event_handler, finished_callback=self.finished_callback, status_handler=self.status_handler, **params
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
@@ -3003,7 +2999,7 @@ class AWXReceptorJob:
             event_handler=self.task.event_handler,
             finished_callback=self.task.finished_callback,
             status_handler=self.task.status_handler,
-            **self.runner_params
+            **self.runner_params,
         )
 
     @property
