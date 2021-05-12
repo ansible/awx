@@ -3010,7 +3010,7 @@ class AWXReceptorJob:
             event_handler=self.task.event_handler,
             finished_callback=self.task.finished_callback,
             status_handler=self.task.status_handler,
-            **self.runner_params
+            **self.runner_params,
         )
 
     @property
