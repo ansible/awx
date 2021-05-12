@@ -1929,7 +1929,7 @@ def test_notification_job_finished(mocker):
         uj.send_notification_templates.assert_called()
 
 
-def test_job_run_no_ee(execution_environment, private_data_dir, job):
+def test_job_run_no_ee():
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))
@@ -1948,7 +1948,7 @@ def test_job_run_no_ee(execution_environment, private_data_dir, job):
     assert 'Job could not start because no Execution Environment could be found' in str(e.value)
 
 
-def test_project_update_no_ee(execution_environment, job):
+def test_project_update_no_ee():
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
