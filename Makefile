@@ -387,7 +387,7 @@ clean-ui:
 	rm -rf $(UI_BUILD_FLAG_FILE)
 
 awx/ui_next/node_modules:
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn ci
+	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui_next --loglevel warn ci
 
 $(UI_BUILD_FLAG_FILE):
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
