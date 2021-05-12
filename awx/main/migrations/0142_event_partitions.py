@@ -64,7 +64,7 @@ class FakeAddField(migrations.AddField):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0140_rename'),
+        ('main', '0141_remove_isolated_instances'),
     ]
 
     operations = [
