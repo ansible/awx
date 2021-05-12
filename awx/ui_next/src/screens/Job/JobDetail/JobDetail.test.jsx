@@ -64,6 +64,7 @@ describe('<JobDetail />', () => {
     assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
+    assertDetail('Source Control Branch', 'main');
 
     const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
     expect(executionEnvironment).toHaveLength(1);

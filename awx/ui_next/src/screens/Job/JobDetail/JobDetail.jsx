@@ -68,6 +68,7 @@ function JobDetail({ job }) {
     source_workflow_job,
     execution_environment: executionEnvironment,
   } = job.summary_fields;
+  const { scm_branch: scmBranch } = job;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
 
@@ -222,6 +223,13 @@ function JobDetail({ job }) {
                 <Link to={`/projects/${project.id}`}>{project.name}</Link>
               </StatusDetailValue>
             }
+          />
+        )}
+        {scmBranch && (
+          <Detail
+            dataCy="source-control-branch"
+            label={t`Source Control Branch`}
+            value={scmBranch}
           />
         )}
         <Detail label={t`Revision`} value={job.scm_revision} />
