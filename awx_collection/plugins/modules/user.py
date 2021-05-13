@@ -79,7 +79,7 @@ EXAMPLES = '''
     first_name: John
     last_name: Doe
     state: present
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 
 - name: Add user as a system administrator
   user:
@@ -88,7 +88,7 @@ EXAMPLES = '''
     email: jdoe@example.org
     superuser: yes
     state: present
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 
 - name: Add user as a system auditor
   user:
@@ -97,14 +97,14 @@ EXAMPLES = '''
     email: jdoe@example.org
     auditor: yes
     state: present
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 
 - name: Delete user
   user:
     username: jdoe
     email: jdoe@example.org
     state: absent
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

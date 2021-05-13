@@ -48,7 +48,7 @@ EXAMPLES = '''
   job_list:
     status: running
     query: {"playbook": "testing.yml"}
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
   register: testing_jobs
 '''
 

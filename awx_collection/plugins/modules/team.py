@@ -56,7 +56,7 @@ EXAMPLES = '''
     description: Team Description
     organization: test-org
     state: present
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

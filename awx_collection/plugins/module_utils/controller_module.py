@@ -32,19 +32,19 @@ class ItemNotDefined(Exception):
 class ControllerModule(AnsibleModule):
     url = None
     AUTH_ARGSPEC = dict(
-        tower_host=dict(required=False, fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
-        tower_username=dict(required=False, fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
-        tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
+        controller_host=dict(required=False, fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
+        controller_username=dict(required=False, fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
+        controller_password=dict(no_log=True, required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
         validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
-        tower_oauthtoken=dict(type='raw', no_log=True, required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])),
-        tower_config_file=dict(type='path', required=False, default=None),
+        controller_oauthtoken=dict(type='raw', no_log=True, required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])),
+        controller_config_file=dict(type='path', required=False, default=None),
     )
     short_params = {
-        'host': 'tower_host',
-        'username': 'tower_username',
-        'password': 'tower_password',
+        'host': 'controller_host',
+        'username': 'controller_username',
+        'password': 'controller_password',
         'verify_ssl': 'validate_certs',
-        'oauth_token': 'tower_oauthtoken',
+        'oauth_token': 'controller_oauthtoken',
     }
     host = '127.0.0.1'
     username = None
@@ -82,18 +82,18 @@ class ControllerModule(AnsibleModule):
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
 
-        # Perform magic depending on whether tower_oauthtoken is a string or a dict
-        if self.params.get('tower_oauthtoken'):
-            token_param = self.params.get('tower_oauthtoken')
+        # Perform magic depending on whether controller_oauthtoken is a string or a dict
+        if self.params.get('controller_oauthtoken'):
+            token_param = self.params.get('controller_oauthtoken')
             if type(token_param) is dict:
                 if 'token' in token_param:
-                    self.oauth_token = self.params.get('tower_oauthtoken')['token']
+                    self.oauth_token = self.params.get('controller_oauthtoken')['token']
                 else:
-                    self.fail_json(msg="The provided dict in tower_oauthtoken did not properly contain the token entry")
+                    self.fail_json(msg="The provided dict in controller_oauthtoken did not properly contain the token entry")
             elif isinstance(token_param, string_types):
-                self.oauth_token = self.params.get('tower_oauthtoken')
+                self.oauth_token = self.params.get('controller_oauthtoken')
             else:
-                error_msg = "The provided tower_oauthtoken type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
+                error_msg = "The provided controller_oauthtoken type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
                 self.fail_json(msg=error_msg)
 
         # Perform some basic validation
@@ -104,14 +104,14 @@ class ControllerModule(AnsibleModule):
         try:
             self.url = urlparse(self.host)
         except Exception as e:
-            self.fail_json(msg="Unable to parse tower_host as a URL ({1}): {0}".format(self.host, e))
+            self.fail_json(msg="Unable to parse controller_host as a URL ({1}): {0}".format(self.host, e))
 
         # Try to resolve the hostname
         hostname = self.url.netloc.split(':')[0]
         try:
             gethostbyname(hostname)
         except Exception as e:
-            self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
+            self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(hostname, e))
 
     def build_url(self, endpoint, query_params=None):
         # Make sure we start with /api/vX
@@ -140,18 +140,18 @@ class ControllerModule(AnsibleModule):
             config_files.insert(2, join(local_dir, ".{0}".format(self.config_name)))
 
         # If we have a specified  tower config, load it
-        if self.params.get('tower_config_file'):
-            duplicated_params = [fn for fn in self.AUTH_ARGSPEC if fn != 'tower_config_file' and self.params.get(fn) is not None]
+        if self.params.get('controller_config_file'):
+            duplicated_params = [fn for fn in self.AUTH_ARGSPEC if fn != 'controller_config_file' and self.params.get(fn) is not None]
             if duplicated_params:
                 self.warn(
                     (
-                        'The parameter(s) {0} were provided at the same time as tower_config_file. '
+                        'The parameter(s) {0} were provided at the same time as controller_config_file. '
                         'Precedence may be unstable, we suggest either using config file or params.'
                     ).format(', '.join(duplicated_params))
                 )
             try:
                 # TODO: warn if there are conflicts with other params
-                self.load_config(self.params.get('tower_config_file'))
+                self.load_config(self.params.get('controller_config_file'))
             except ConfigFileException as cfe:
                 # Since we were told specifically to load this we want it to fail if we have an error
                 self.fail_json(msg=cfe)

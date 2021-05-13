@@ -210,7 +210,7 @@ EXAMPLES = '''
     organization: test-org
     credential_type: Machine
     state: present
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 
 - name: Create a valid SCM credential from a private_key file
   credential:
@@ -244,9 +244,9 @@ EXAMPLES = '''
     name: Workshop Credential
     credential_type: MyCloudCredential
     organization: Default
-    tower_username: admin
-    tower_password: ansible
-    tower_host: https://localhost
+    controller_username: admin
+    controller_password: ansible
+    controller_host: https://localhost
 
 - name: Create a Vaiult credential (example for notes)
   credential:

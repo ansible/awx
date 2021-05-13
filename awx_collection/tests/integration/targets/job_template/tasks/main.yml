@@ -18,7 +18,7 @@
     group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
 
 - name: "Create a new organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     galaxy_credentials:
       - Ansible Galaxy
@@ -53,7 +53,7 @@
     kind: ssh
 
 - name: Create Labels
-  tower_label:
+  label:
     name: "{{ lab1 }}"
     organization: "{{ item }}"
   loop:
@@ -423,7 +423,7 @@
     state: absent
 
 - name: "Remove the organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     state: absent
   register: result

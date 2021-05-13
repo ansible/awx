@@ -16,27 +16,27 @@ options:
     host:
         description: The network address of your Automation Platform Controller host.
         env:
-            - name: TOWER_HOST
+            - name: CONTROLLER_HOST
     username:
         description: The user that you plan to use to access inventories on the controller.
         env:
-            - name: TOWER_USERNAME
+            - name: CONTROLLER_USERNAME
     password:
         description: The password for your controller user.
         env:
-            - name: TOWER_PASSWORD
+            - name: CONTROLLER_PASSWORD
     oauth_token:
         description:
             - The OAuth token to use.
         env:
-            - name: TOWER_OAUTH_TOKEN
+            - name: CONTROLLER_OAUTH_TOKEN
     verify_ssl:
         description:
             - Specify whether Ansible should verify the SSL certificate of the controller host.
             - Defaults to True, but this is handled by the shared module_utils code
         type: bool
         env:
-            - name: TOWER_VERIFY_SSL
+            - name: CONTROLLER_VERIFY_SSL
         aliases: [ validate_certs ]
 
 notes:

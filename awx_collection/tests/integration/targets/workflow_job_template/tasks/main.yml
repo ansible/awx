@@ -19,7 +19,7 @@
     project_inv_source: "AWX-Collection-tests-inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: "Create a new organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     galaxy_credentials:
       - Ansible Galaxy
@@ -64,7 +64,7 @@
   register: result
 
 - name: Create Labels
-  tower_label:
+  label:
     name: "{{ lab1 }}"
     organization: "{{ item }}"
   loop:
@@ -667,7 +667,7 @@
     state: absent
 
 - name: "Remove the organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     state: absent
   register: result

@@ -129,7 +129,7 @@ def test_type_warning(collection_import, silence_warning):
 def test_duplicate_config(collection_import, silence_warning):
     # imports done here because of PATH issues unique to this test suite
     ControllerAPIModule = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
-    data = {'name': 'zigzoom', 'zig': 'zoom', 'tower_username': 'bob', 'tower_config_file': 'my_config'}
+    data = {'name': 'zigzoom', 'zig': 'zoom', 'controller_username': 'bob', 'controller_config_file': 'my_config'}
 
     with mock.patch.object(ControllerAPIModule, 'load_config') as mock_load:
         argument_spec = dict(
@@ -140,8 +140,8 @@ def test_duplicate_config(collection_import, silence_warning):
         assert mock_load.mock_calls[-1] == mock.call('my_config')
 
     silence_warning.assert_called_once_with(
-        'The parameter(s) tower_username were provided at the same time as '
-        'tower_config_file. Precedence may be unstable, '
+        'The parameter(s) controller_username were provided at the same time as '
+        'controller_config_file. Precedence may be unstable, '
         'we suggest either using config file or params.'
     )
 
@@ -167,7 +167,7 @@ def test_conflicting_name_and_id(run_module, admin_user):
     one item has an id that matches input
     one item has a name that matches input
     We should preference the id over the name.
-    Otherwise, the universality of the tower_api lookup plugin is compromised.
+    Otherwise, the universality of the controller_api lookup plugin is compromised.
     """
     org_by_id = Organization.objects.create(name='foo')
     slug = str(org_by_id.id)

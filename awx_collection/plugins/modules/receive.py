@@ -104,7 +104,7 @@ EXAMPLES = '''
 - name: Export all Automation Platform Controller assets
   receive:
     all: True
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 
 - name: Export all inventories
   receive:

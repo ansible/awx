@@ -315,7 +315,7 @@ EXAMPLES = '''
     credentials:
       - "Local"
     state: "present"
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
     survey_enabled: yes
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
 

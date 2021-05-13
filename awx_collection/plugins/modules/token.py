@@ -22,7 +22,7 @@ description:
     - Create or destroy Automation Platform Controller tokens. See
       U(https://www.ansible.com/tower) for an overview.
     - In addition, the module sets an Ansible fact which can be passed into other
-      controller modules as the parameter tower_oauthtoken. See examples for usage.
+      controller modules as the parameter controller_oauthtoken. See examples for usage.
     - Because of the sensitive nature of tokens, the created token value is only available once
       through the Ansible fact. (See RETURN for details)
     - Due to the nature of tokens this module is not idempotent. A second will
@@ -49,7 +49,7 @@ options:
       default: 'write'
       choices: ["read", "write"]
     existing_token:
-      description: The data structure produced from tower_token in create mode to be used with state absent.
+      description: The data structure produced from token in create mode to be used with state absent.
       type: dict
     existing_token_id:
       description: A token ID (number) which can be used to delete an arbitrary token with state absent.
@@ -70,11 +70,11 @@ EXAMPLES = '''
         description: '{{ token_description }}'
         scope: "write"
         state: present
-        tower_oauthtoken: "{{ my_existing_token }}"
+        controller_oauthtoken: "{{ my_existing_token }}"
 
     - name: Delete this token
       token:
-        existing_token: "{{ tower_token }}"
+        existing_token: "{{ token }}"
         state: absent
 
     - name: Create a new token using username/password
@@ -82,19 +82,19 @@ EXAMPLES = '''
         description: '{{ token_description }}'
         scope: "write"
         state: present
-        tower_username: "{{ my_username }}"
-        tower_password: "{{ my_password }}"
+        controller_username: "{{ my_username }}"
+        controller_password: "{{ my_password }}"
 
     - name: Use our new token to make another call
       job_list:
-        tower_oauthtoken: "{{ tower_token }}"
+        controller_oauthtoken: "{{ token }}"
 
   always:
     - name: Delete our Token with the token we created
       token:
-        existing_token: "{{ tower_token }}"
+        existing_token: "{{ token }}"
         state: absent
-      when: tower_token is defined
+      when: token is defined
 
 - name: Delete a token by its id
   token:
@@ -125,7 +125,7 @@ def return_token(module, last_response):
     # This method will return the entire token object we got back so that a user has access to the token
 
     module.json_output['ansible_facts'] = {
-        'tower_token': last_response,
+        'token': last_response,
     }
     module.exit_json(**module.json_output)
 

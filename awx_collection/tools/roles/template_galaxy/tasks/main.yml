@@ -36,9 +36,9 @@
 
     - name: Change runtime.yml redirect destinations
       replace:
-        path: "{{ collection_path}}/meta/runtime.yml"
+        path: "{{ collection_path }}/meta/runtime.yml"
         regexp: "redirect: awx.awx."
-        replace: "redirect: '{{ collection_namespace }}.{{ collection_package }}."
+        replace: "redirect: {{ collection_namespace }}.{{ collection_package }}."
 
     - name: get list of test files
       find:

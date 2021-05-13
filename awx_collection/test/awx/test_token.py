@@ -14,12 +14,12 @@ def test_create_token(run_module, admin_user):
         'description': 'barfoo',
         'state': 'present',
         'scope': 'read',
-        'tower_host': None,
-        'tower_username': None,
-        'tower_password': None,
+        'controller_host': None,
+        'controller_username': None,
+        'controller_password': None,
         'validate_certs': None,
-        'tower_oauthtoken': None,
-        'tower_config_file': None,
+        'controller_oauthtoken': None,
+        'controller_config_file': None,
     }
 
     result = run_module('token', module_args, admin_user)

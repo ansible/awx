@@ -65,7 +65,7 @@ EXAMPLES = '''
 - name: Import all Automation Platform Controller assets
   send:
     assets: "{{ export_output.assets }}"
-    tower_config_file: "~/tower_cli.cfg"
+    controller_config_file: "~/tower_cli.cfg"
 '''
 
 RETURN = '''

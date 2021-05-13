@@ -110,11 +110,11 @@
     email: joe@example.org
     state: present
     validate_certs: true
-    tower_host: http://foo.invalid
+    controller_host: http://foo.invalid
   ignore_errors: true
   register: result
 
 - assert:
     that:
-      - "'Unable to resolve tower_host' in result.msg or
+      - "'Unable to resolve controller_host' in result.msg or
         'Can not verify ssl with non-https protocol' in result.exception"
