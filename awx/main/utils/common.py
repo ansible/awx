@@ -26,6 +26,8 @@ from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
 from django.db.models import Q
+from django.db import connection as django_connection
+from django.core.cache import cache as django_cache
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError
@@ -85,6 +87,7 @@ __all__ = [
     'create_temporary_fifo',
     'truncate_stdout',
     'deepmerge',
+    'cleanup_new_process',
 ]
 
 
@@ -1019,3 +1022,17 @@ def deepmerge(a, b):
         return a
     else:
         return b
+
+
+def cleanup_new_process(func):
+    """
+    Cleanup django connection, cache connection, before executing new thread or processes entry point, func.
+    """
+
+    @wraps(func)
+    def wrapper_cleanup_new_process(*args, **kwargs):
+        django_connection.close()
+        django_cache.close()
+        return func(*args, **kwargs)
+
+    return wrapper_cleanup_new_process
