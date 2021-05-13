@@ -9,7 +9,7 @@ from django.core.management import call_command
 
 from awx.main.management.commands import cleanup_jobs
 from awx.main.utils.deletion import AWXCollector
-from awx.main.models import JobTemplate, User, Job, JobEvent, Notification, WorkflowJobNode, JobHostSummary
+from awx.main.models import JobTemplate, User, Job, Notification, WorkflowJobNode, JobHostSummary
 
 
 @pytest.fixture
