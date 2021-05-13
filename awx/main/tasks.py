@@ -1189,7 +1189,7 @@ class BaseTask(object):
                 self.recent_event_timings.append(cpu_time)
             else:
                 event_data.setdefault('event_data', {})
-                event_data['event_data']['skip_websocket_message'] = True
+                event_data['skip_websocket_message'] = True
 
         elif self.recent_event_timings.maxlen:
             self.recent_event_timings.append(time.time())

@@ -142,7 +142,7 @@ class CallbackBrokerWorker(BaseWorker):
                             logger.exception('Database Error Saving Job Event')
                 duration_to_save = time.perf_counter() - duration_to_save
                 for e in events:
-                    if not e.event_data.get('skip_websocket_message', False):
+                    if not getattr(e, '_skip_websocket_message', False):
                         emit_event_detail(e)
             self.buff = {}
             self.last_flush = time.time()
@@ -208,7 +208,13 @@ class CallbackBrokerWorker(BaseWorker):
                         GuidMiddleware.set_guid('')
                     return
 
+                skip_websocket_message = body.pop('skip_websocket_message', False)
+
                 event = cls.create_from_data(**body)
+
+                if skip_websocket_message:
+                    event._skip_websocket_message = True
+
                 self.buff.setdefault(cls, []).append(event)
 
             retries = 0
