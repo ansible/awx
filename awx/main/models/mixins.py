@@ -593,6 +593,7 @@ class WebhookMixin(models.Model):
         service_header = {
             'github': ('Authorization', 'token {}'),
             'gitlab': ('PRIVATE-TOKEN', '{}'),
+            'generic': ('Authorization', 'token {}'),
         }
         service_statuses = {
             'github': {
@@ -608,6 +609,14 @@ class WebhookMixin(models.Model):
                 'successful': 'success',
                 'failed': 'failed',
                 'error': 'failed',  # GitLab doesn't have an 'error' status distinct from 'failed' :(
+                'canceled': 'canceled',
+            },
+            'generic': {
+                'pending': 'pending',
+                'running': 'running',
+                'successful': 'success',
+                'failed': 'failed',
+                'error': 'failed',
                 'canceled': 'canceled',
             },
         }

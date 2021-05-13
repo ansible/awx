@@ -83,6 +83,7 @@ def test_default_cred_types():
         'conjur',
         'galaxy_api_token',
         'gce',
+        'generic_token',
         'github_token',
         'gitlab_token',
         'hashivault_kv',

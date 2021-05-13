@@ -82,7 +82,7 @@ options:
       required: False
       type: str
       choices: ["aws", "tower", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
-                "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
+                "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "generic_token", "vault"]
     host:
       description:
         - Host for this credential.
@@ -312,6 +312,7 @@ KIND_CHOICES = {
     'ssh': 'Machine',
     'github_token': 'GitHub Personal Access Token',
     'gitlab_token': 'GitLab Personal Access Token',
+    'generic_token': 'Generic Personal Access Token',
     'vault': 'Vault',
 }
 

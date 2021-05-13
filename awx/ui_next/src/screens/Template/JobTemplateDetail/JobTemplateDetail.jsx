@@ -258,7 +258,7 @@ function JobTemplateDetail({ i18n, template }) {
         )}
         {webhook_service && (
           <Detail
-            label={i18n._(t`Webhook Service`)}
+            label={t`Webhook Service`}
             value={
               webhook_translation(webhook_service)
             }

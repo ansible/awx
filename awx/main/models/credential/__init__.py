@@ -939,6 +939,25 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='generic_token',
+    kind='token',
+    name=ugettext_noop('Generic Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'token',
+                'label': ugettext_noop('Token'),
+                'type': 'string',
+                'secret': True,
+                'help_text': ugettext_noop('This token is used to authenticate with a generic webhook reciever'),
+            }
+        ],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=ugettext_noop('Insights'),
