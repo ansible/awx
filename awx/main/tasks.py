@@ -1174,17 +1174,6 @@ class BaseTask(object):
                     ]
                 )
 
-            logger.debug(
-                'Job {} event {} websocket send {}, queued: {}, rate - avg: {:.3f}, last: {:.3f}'.format(
-                    self.instance.id,
-                    event_data.get('counter', 0),
-                    should_emit,
-                    len(self.recent_event_timings),
-                    30.0 / (cpu_time - first_window_time),
-                    1.0 / (cpu_time - last_window_time),
-                )
-            )
-
             if should_emit:
                 self.recent_event_timings.append(cpu_time)
             else:
