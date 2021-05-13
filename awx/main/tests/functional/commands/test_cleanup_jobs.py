@@ -2,10 +2,12 @@ import pytest
 from datetime import datetime, timedelta
 from pytz import timezone
 from collections import OrderedDict
+from unittest import mock
 
 from django.db.models.deletion import Collector, SET_NULL, CASCADE
 from django.core.management import call_command
 
+from awx.main.management.commands import cleanup_jobs
 from awx.main.utils.deletion import AWXCollector
 from awx.main.models import JobTemplate, User, Job, JobEvent, Notification, WorkflowJobNode, JobHostSummary
 
@@ -32,19 +34,20 @@ def setup_environment(inventory, project, machine_credential, host, notification
     notification.save()
 
     for i in range(3):
+        # create jobs with current time
         job1 = jt.create_job()
         job1.created = datetime.now(tz=timezone('UTC'))
         job1.save()
-        # create jobs with current time
-        JobEvent.create_from_data(job_id=job1.pk, uuid='abc123', event='runner_on_start', stdout='a' * 1025).save()
+        # sqlite does not support partitioning so we cannot test partition-based jobevent cleanup
+        # JobEvent.create_from_data(job_id=job1.pk, uuid='abc123', event='runner_on_start', stdout='a' * 1025).save()
         new_jobs.append(job1)
 
-        job2 = jt.create_job()
         # create jobs 10 days ago
+        job2 = jt.create_job()
         job2.created = datetime.now(tz=timezone('UTC')) - timedelta(days=days)
         job2.save()
         job2.dependent_jobs.add(job1)
-        JobEvent.create_from_data(job_id=job2.pk, uuid='abc123', event='runner_on_start', stdout='a' * 1025).save()
+        # JobEvent.create_from_data(job_id=job2.pk, uuid='abc123', event='runner_on_start', stdout='a' * 1025).save()
         old_jobs.append(job2)
 
     jt.last_job = job2
@@ -62,7 +65,13 @@ def setup_environment(inventory, project, machine_credential, host, notification
     return (old_jobs, new_jobs, days_str)
 
 
+# sqlite does not support table partitioning so we mock out the methods responsible for pruning
+# job event partitions during the job cleanup task
+# https://github.com/ansible/awx/issues/9039
 @pytest.mark.django_db
+@mock.patch.object(cleanup_jobs.DeleteMeta, 'identify_excluded_partitions', mock.MagicMock())
+@mock.patch.object(cleanup_jobs.DeleteMeta, 'find_partitions_to_drop', mock.MagicMock())
+@mock.patch.object(cleanup_jobs.DeleteMeta, 'drop_partitions', mock.MagicMock())
 def test_cleanup_jobs(setup_environment):
     (old_jobs, new_jobs, days_str) = setup_environment
 
