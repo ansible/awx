@@ -1,44 +1,77 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { t } from '@lingui/macro';
-import { jsonToYaml, parseVariableField } from '../../../util/yaml';
+import { useField } from 'formik';
+import { jsonToYaml, yamlToJson } from '../../../util/yaml';
 import OtherPromptsStep from './OtherPromptsStep';
 import StepName from './StepName';
 
 const STEP_ID = 'other';
+export const YAML_MODE = 'yaml';
+export const JSON_MODE = 'javascript';
 
 const getVariablesData = resource => {
   if (resource?.extra_data) {
     return jsonToYaml(JSON.stringify(resource.extra_data));
   }
   if (resource?.extra_vars && resource?.extra_vars !== '---') {
-    return jsonToYaml(JSON.stringify(parseVariableField(resource.extra_vars)));
+    return resource.extra_vars;
   }
   return '---';
 };
 
+const FIELD_NAMES = [
+  'job_type',
+  'limit',
+  'verbosity',
+  'diff_mode',
+  'job_tags',
+  'skip_tags',
+  'extra_vars',
+];
+
 export default function useOtherPromptsStep(launchConfig, resource) {
+  const [variablesField] = useField('extra_vars');
+  const [variablesMode, setVariablesMode] = useState(null);
+  const [isTouched, setIsTouched] = useState(false);
+
+  const handleModeChange = mode => {
+    setVariablesMode(mode);
+  };
+
+  const validateVariables = () => {
+    if (!isTouched) {
+      return false;
+    }
+    try {
+      if (variablesMode === JSON_MODE) {
+        JSON.parse(variablesField.value);
+      } else {
+        yamlToJson(variablesField.value);
+      }
+    } catch (error) {
+      return true;
+    }
+    return false;
+  };
+  const hasError = launchConfig.ask_variables_on_launch
+    ? validateVariables()
+    : false;
+
   return {
-    step: getStep(launchConfig),
+    step: getStep(launchConfig, hasError, variablesMode, handleModeChange),
     initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
-    hasError: false,
+    hasError,
     setTouched: setFieldTouched => {
-      [
-        'job_type',
-        'limit',
-        'verbosity',
-        'diff_mode',
-        'job_tags',
-        'skip_tags',
-        'extra_vars',
-      ].forEach(field => setFieldTouched(field, true, false));
+      setIsTouched(true);
+      FIELD_NAMES.forEach(fieldName => setFieldTouched(fieldName, true, false));
     },
     validate: () => {},
   };
 }
 
-function getStep(launchConfig) {
+function getStep(launchConfig, hasError, variablesMode, handleModeChange) {
   if (!shouldShowPrompt(launchConfig)) {
     return null;
   }
@@ -46,11 +79,17 @@ function getStep(launchConfig) {
     id: STEP_ID,
     key: 5,
     name: (
-      <StepName hasErrors={false} id="other-prompts-step">
+      <StepName hasErrors={hasError} id="other-prompts-step">
         {t`Other prompts`}
       </StepName>
     ),
-    component: <OtherPromptsStep launchConfig={launchConfig} />,
+    component: (
+      <OtherPromptsStep
+        launchConfig={launchConfig}
+        variablesMode={variablesMode}
+        onVarModeChange={handleModeChange}
+      />
+    ),
     enableNext: true,
   };
 }

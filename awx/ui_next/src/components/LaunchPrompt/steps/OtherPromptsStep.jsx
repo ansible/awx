@@ -20,7 +20,7 @@ const FieldHeader = styled.div`
   }
 `;
 
-function OtherPromptsStep({ launchConfig }) {
+function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
   return (
     <Form
       onSubmit={e => {
@@ -78,6 +78,8 @@ function OtherPromptsStep({ launchConfig }) {
           id="prompt-variables"
           name="extra_vars"
           label={t`Variables`}
+          initialMode={variablesMode}
+          onModeChange={onVarModeChange}
         />
       )}
     </Form>
