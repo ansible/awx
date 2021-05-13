@@ -92,6 +92,7 @@ __all__ = [
     'truncate_stdout',
     'deepmerge',
     'get_event_partition_epoch',
+    'cleanup_new_process',
 ]
 
 
@@ -1083,3 +1084,17 @@ def create_partition(tblname, start=None, end=None, partition_label=None, minute
             f'PARTITION OF {tblname} '
             f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
         )
+
+
+def cleanup_new_process(func):
+    """
+    Cleanup django connection, cache connection, before executing new thread or processes entry point, func.
+    """
+
+    @wraps(func)
+    def wrapper_cleanup_new_process(*args, **kwargs):
+        django_connection.close()
+        django_cache.close()
+        return func(*args, **kwargs)
+
+    return wrapper_cleanup_new_process
