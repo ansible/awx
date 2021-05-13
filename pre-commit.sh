@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 if [ -z $AWX_IGNORE_BLACK ]
 then
         black --check $(git diff --cached --name-only --diff-filter=AM | grep -E '\.py') || \
