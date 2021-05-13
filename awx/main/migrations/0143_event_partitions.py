@@ -64,7 +64,7 @@ class FakeAddField(migrations.AddField):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0141_remove_isolated_instances'),
+        ('main', '0142_update_ee_image_field_description'),
     ]
 
     operations = [
