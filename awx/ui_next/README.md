@@ -72,7 +72,7 @@ container to ensure consistency.
 docker exec -it tools_awx_1 bash
 
 # start with a fresh install of the current dependencies
-(tools_awx_1)$ make clean-ui && make ui-devel
+(tools_awx_1)$ make clean-ui && npm --prefix=awx/ui_next ci
 
 # add an exact development dependency
 (tools_awx_1)$ npm --prefix awx/ui_next install --save-dev --save-exact dev-package@1.2.3
