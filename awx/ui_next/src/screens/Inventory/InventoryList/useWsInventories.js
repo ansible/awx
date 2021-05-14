@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
-} from '../../../util/qs';
+import { parseQueryString, replaceNamespacedParams } from '../../../util/qs';
 import useWebsocket from '../../../util/useWebsocket';
 import useThrottle from '../../../util/useThrottle';
 
@@ -90,12 +86,9 @@ export default function useWsInventories(
       ) {
         // We've deleted the last inventory on this page so we'll
         // try to navigate back to the previous page
-        const newParams = encodeNonDefaultQueryString(
-          qsConfig,
-          replaceParams(params, {
-            page: params.page - 1,
-          })
-        );
+        const newParams = replaceNamespacedParams(qsConfig, location.search, {
+          page: params.page - 1,
+        });
         history.push(`${location.pathname}?${newParams}`);
         return;
       }

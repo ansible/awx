@@ -4,6 +4,7 @@ import {
   parseQueryString,
   replaceParams,
   encodeNonDefaultQueryString,
+  replaceNamespacedParams,
 } from './qs';
 import useIsMounted from './useIsMounted';
 
@@ -111,12 +112,9 @@ export function useDeleteItems(
     }
     const params = parseQueryString(qsConfig, location.search);
     if (params.page > 1 && allItemsSelected) {
-      const newParams = encodeNonDefaultQueryString(
-        qsConfig,
-        replaceParams(params, {
-          page: params.page - 1,
-        })
-      );
+      const newParams = replaceNamespacedParams(qsConfig, location.search, {
+        page: params.page - 1,
+      });
       history.push(`${location.pathname}?${newParams}`);
     } else {
       fetchItems();

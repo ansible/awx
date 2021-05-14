@@ -246,3 +246,22 @@ export function replaceParams(oldParams, newParams) {
     ...newParams,
   };
 }
+
+/**
+ * Update namespaced param(s), returning a new query string. Leaves params
+ * from other namespaces unaltered
+ * @param {object} qs config object for namespacing params, filtering defaults
+ * @param {string} the url query string to update
+ * @param {object} namespaced params to add or update
+ * @return {string} url query string
+ */
+export function replaceNamespacedParams(config, queryString, newParams) {
+  const oldParams = parseQueryString(config, queryString);
+  const updatedParams = replaceParams(oldParams, newParams);
+  const nonNamespacedParams = parseQueryString({}, queryString);
+  return encodeNonDefaultQueryString(
+    config,
+    updatedParams,
+    nonNamespacedParams
+  );
+}
