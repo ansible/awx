@@ -15,7 +15,7 @@ import ErrorDetail from '../ErrorDetail';
 
 async function logout() {
   await RootAPI.logout();
-  window.location.replace('/#/login');
+  window.location.replace('#/login');
 }
 
 function ContentError({ error, children, isNotFound }) {

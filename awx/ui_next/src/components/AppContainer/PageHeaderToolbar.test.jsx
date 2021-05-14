@@ -60,7 +60,7 @@ describe('PageHeaderToolbar', () => {
     wrapper.update();
     expect(
       wrapper.find('DropdownItem[aria-label="User details"]').prop('href')
-    ).toBe('/#/users/1/details');
+    ).toBe('#/users/1/details');
     expect(wrapper.find('DropdownItem')).toHaveLength(2);
 
     const logout = wrapper.find('DropdownItem li button');

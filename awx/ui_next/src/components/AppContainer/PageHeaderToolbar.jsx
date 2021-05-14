@@ -151,8 +151,8 @@ function PageHeaderToolbar({
                   aria-label={t`User details`}
                   href={
                     loggedInUser
-                      ? `/#/users/${loggedInUser.id}/details`
-                      : '/#/home'
+                      ? `#/users/${loggedInUser.id}/details`
+                      : '#/home'
                   }
                 >
                   {t`User Details`}
