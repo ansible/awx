@@ -7,6 +7,7 @@ import {
   Switch,
   Redirect,
 } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
 import { I18nProvider } from '@lingui/react';
 import { i18n } from '@lingui/core';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -14,6 +15,7 @@ import { Card, PageSection } from '@patternfly/react-core';
 import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
 import AppContainer from './components/AppContainer';
 import Background from './components/Background';
+import ContentError from './components/ContentError';
 import NotFound from './screens/NotFound';
 import Login from './screens/Login';
 
@@ -24,6 +26,16 @@ import Metrics from './screens/Metrics';
 
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
+
+function ErrorFallback({ error }) {
+  return (
+    <PageSection>
+      <Card>
+        <ContentError error={error} />
+      </Card>
+    </PageSection>
+  );
+}
 
 const AuthorizedRoutes = ({ routeConfig }) => {
   const isAuthorized = useAuthorizedPath();
@@ -72,7 +84,11 @@ const AuthorizedRoutes = ({ routeConfig }) => {
 
 const ProtectedRoute = ({ children, ...rest }) =>
   isAuthenticated(document.cookie) ? (
-    <Route {...rest}>{children}</Route>
+    <Route {...rest}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        {children}
+      </ErrorBoundary>
+    </Route>
   ) : (
     <Redirect to="/login" />
   );
