@@ -556,11 +556,15 @@ msgstr "承認"
 msgid "Approve"
 msgstr "承認"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:48
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:59
 msgid "Approved"
 msgstr "承認済"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:42
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:52
+msgid "Approved - {0}.  See the Activity Stream for more information."
+msgstr ""
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:49
 msgid "Approved by {0} - {1}"
 msgstr "{0} - {1} により承認済"
 
@@ -727,7 +731,7 @@ msgstr "スケジュールに戻る"
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:39
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.jsx:73
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:39
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:57
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:54
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:90
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:63
 #: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:110
@@ -971,7 +975,7 @@ msgstr ""
 #: components/JobList/JobList.jsx:211
 #: components/Workflow/WorkflowNodeHelp.jsx:95
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:176
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:21
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:20
 msgid "Canceled"
 msgstr "取り消されました"
 
@@ -1090,6 +1094,13 @@ msgid ""
 "information about each option."
 msgstr ""
 
+#: screens/Template/Survey/SurveyQuestionForm.jsx:37
+#~ msgid ""
+#~ "Choose an answer type or format you want as the prompt for the user.\n"
+#~ "Refer to the Documentation for more additional\n"
+#~ "information about each option."
+#~ msgstr ""
+
 #: src/screens/Template/Survey/SurveyQuestionForm.jsx:37
 #~ msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
 #~ msgstr ""
@@ -1144,10 +1155,6 @@ msgstr "このボタンをクリックして、選択した認証情報と指定
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.jsx:150
 msgid "Click to create a new link to this node."
 msgstr "クリックして、このノードへの新しいリンクを作成します。"
-
-#: components/FormField/TextAndCheckboxField.jsx:86
-#~ msgid "Click to select this answer as a default answer."
-#~ msgstr ""
 
 #: screens/Template/Survey/MultipleChoiceField.jsx:114
 msgid "Click to toggle default value"
@@ -1384,6 +1391,11 @@ msgstr ""
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:225
 msgid "Create"
 msgstr "作成"
+
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:14
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:24
+#~ msgid "Create Execution environments"
+#~ msgstr ""
 
 #: screens/Application/Applications.jsx:26
 #: screens/Application/Applications.jsx:35
@@ -1645,7 +1657,7 @@ msgstr "認証情報のパスワード"
 msgid "Credential to authenticate with Kubernetes or OpenShift. Must be of type \"Kubernetes/OpenShift API Bearer Token\". If left blank, the underlying Pod's service account will be used."
 msgstr ""
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:148
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:163
 msgid "Credential to authenticate with a protected container registry."
 msgstr ""
 
@@ -1765,7 +1777,7 @@ msgstr ""
 msgid "Default answer"
 msgstr "デフォルトの応答"
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:81
+#: screens/Template/Survey/SurveyQuestionForm.jsx:85
 #~ msgid "Default choice must be answered from the choices listed."
 #~ msgstr "デフォルトで指定されている選択項目は、一覧から回答する必要があります。"
 
@@ -1977,11 +1989,15 @@ msgstr "削除エラー"
 msgid "Deletion error"
 msgstr "削除エラー"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:33
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:38
 msgid "Denied"
 msgstr "拒否済み"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:27
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:31
+msgid "Denied - {0}.  See the Activity Stream for more information."
+msgstr ""
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:28
 msgid "Denied by {0} - {1}"
 msgstr "{0} - {1} により拒否済み"
 
@@ -2019,7 +2035,7 @@ msgstr ""
 #: screens/CredentialType/shared/CredentialTypeForm.jsx:32
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:62
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:150
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:126
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:141
 #: screens/Host/HostDetail/HostDetail.jsx:81
 #: screens/Host/HostList/HostList.jsx:152
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:78
@@ -2133,7 +2149,7 @@ msgstr "送信先チャネルまたはユーザー"
 #: screens/Setting/ActivityStream/ActivityStreamDetail/ActivityStreamDetail.jsx:54
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:46
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:46
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:64
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:61
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:70
 #: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:117
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:46
@@ -2276,7 +2292,7 @@ msgstr "メール"
 msgid "E-mail options"
 msgstr "メールオプション"
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:212
+#: screens/Template/Survey/SurveyQuestionForm.jsx:220
 #~ msgid "Each answer choice must be on a separate line."
 #~ msgstr "各回答の選択肢は別々の行にある必要があります。"
 
@@ -2334,8 +2350,8 @@ msgstr ""
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.jsx:147
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:80
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:84
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:97
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:101
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:94
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:98
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:161
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:165
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:101
@@ -2651,6 +2667,10 @@ msgstr ""
 #~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact BRAND_NAME and request a configuration update using this job template."
 #~ msgstr ""
 
+#: src/components/AdHocCommands/AdHocDetailsStep.jsx:244
+#~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {brandName} and request a configuration update using this job template"
+#~ msgstr ""
+
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:155
 #: screens/Setting/shared/SettingDetail.jsx:74
 msgid "Encrypted"
@@ -2684,9 +2704,17 @@ msgstr "新規スマートインベントリーを作成するために 1 つ以
 msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
 msgstr "JSON または YAML 構文のいずれかを使用してインジェクターを入力します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
+#: screens/CredentialType/shared/CredentialTypeForm.jsx:49
+#~ msgid "Enter injectors using either JSON or YAML syntax. Refer to the documentation for example syntax."
+#~ msgstr ""
+
 #: screens/CredentialType/shared/CredentialTypeForm.jsx:38
 msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
 msgstr "JSON または YAML 構文のいずれかを使用して入力を行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+
+#: screens/CredentialType/shared/CredentialTypeForm.jsx:39
+#~ msgid "Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax."
+#~ msgstr ""
 
 #: screens/Inventory/shared/SmartInventoryForm.jsx:97
 msgid ""
@@ -2695,6 +2723,13 @@ msgid ""
 "Ansible Tower documentation for example syntax."
 msgstr ""
 
+#: screens/Inventory/shared/SmartInventoryForm.jsx:100
+#~ msgid ""
+#~ "Enter inventory variables using either JSON or YAML syntax.\n"
+#~ "Use the radio button to toggle between the two. Refer to the\n"
+#~ "documentation for example syntax."
+#~ msgstr ""
+
 #: screens/Inventory/shared/InventoryForm.jsx:84
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
@@ -2702,6 +2737,10 @@ msgstr "JSON または YAML 構文のいずれかを使用してインベント�
 #: src/screens/Inventory/shared/SmartInventoryForm.jsx:100
 #~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 #~ msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文間で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+
+#: screens/Inventory/shared/InventoryForm.jsx:85
+#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the documentation for example syntax"
+#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:193
 msgid "Enter one Annotation Tag per line, without commas."
@@ -2834,7 +2873,7 @@ msgstr ""
 #: components/InstanceToggle/InstanceToggle.jsx:61
 #: components/JobList/JobList.jsx:281
 #: components/JobList/JobList.jsx:292
-#: components/LaunchButton/LaunchButton.jsx:171
+#: components/LaunchButton/LaunchButton.jsx:173
 #: components/LaunchPrompt/LaunchPrompt.jsx:73
 #: components/NotificationList/NotificationList.jsx:246
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:205
@@ -2956,6 +2995,10 @@ msgstr "Subversion Source Control のサンプル URL には以下が含まれ�
 msgid "Examples include:"
 msgstr "以下に例を示します。"
 
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:108
+msgid "Examples:"
+msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/RunStep.jsx:48
 msgid "Execute regardless of the parent node's final state."
 msgstr "親ノードの最終状態に関係なく実行します。"
@@ -3010,6 +3053,11 @@ msgstr ""
 msgid "Execution environment not found."
 msgstr ""
 
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:13
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:23
+#~ msgid "Execution environments"
+#~ msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:23
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:26
 msgid "Exit Without Saving"
@@ -3053,7 +3101,7 @@ msgid "Expires on UTC"
 msgstr ""
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:34
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:12
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:11
 msgid "Expires on {0}"
 msgstr "{0} の有効期限"
 
@@ -3141,11 +3189,6 @@ msgstr ""
 #: screens/Project/ProjectList/ProjectListItem.jsx:181
 msgid "Failed to cancel Project Sync"
 msgstr ""
-
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:209
-#: screens/Project/ProjectList/ProjectListItem.jsx:182
-#~ msgid "Failed to cancel Project Update"
-#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:100
 #~ msgid "Failed to cancel inventory source sync."
@@ -3377,7 +3420,7 @@ msgid "Failed to fetch custom login configuration settings.  System defaults wil
 msgstr "カスタムログイン構成設定を取得できません。代わりに、システムのデフォルトが表示されます。"
 
 #: components/AdHocCommands/AdHocCommands.jsx:113
-#: components/LaunchButton/LaunchButton.jsx:174
+#: components/LaunchButton/LaunchButton.jsx:176
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:130
 msgid "Failed to launch job."
 msgstr "ジョブを起動できませんでした。"
@@ -3676,7 +3719,7 @@ msgstr ""
 msgid "Globally Available"
 msgstr ""
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:132
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:147
 msgid "Globally available execution environment can not be reassigned to a specific Organization"
 msgstr ""
 
@@ -3982,7 +4025,7 @@ msgstr ""
 #~ msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 #~ msgstr "チェックが付けられている場合、子グループおよびホストのすべての変数が削除され、外部ソースにあるものによって置き換えられます。"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:125
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:126
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:135
 #~ msgid ""
 #~ "If checked, any hosts and groups that were\n"
@@ -4034,6 +4077,10 @@ msgid ""
 "Ansible tasks, where supported. This is equivalent\n"
 "to Ansible's --diff mode."
 msgstr ""
+
+#: src/screens/Template/shared/JobTemplateForm.jsx:448
+#~ msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode."
+#~ msgstr ""
 
 #: components/AdHocCommands/AdHocDetailsStep.jsx:205
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode."
@@ -4090,14 +4137,15 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:138
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:157
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:62
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:98
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:88
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:107
 msgid "Image"
 msgstr ""
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:98
-msgid "Image name"
-msgstr ""
+#~ msgid "Image name"
+#~ msgstr ""
 
 #: screens/Job/JobOutput/JobOutput.jsx:653
 msgid "Including File"
@@ -4310,10 +4358,6 @@ msgstr "インベントリー ID"
 #: screens/Job/JobDetail/JobDetail.jsx:176
 msgid "Inventory Source"
 msgstr ""
-
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:125
-#~ msgid "Inventory Source Error"
-#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:92
 msgid "Inventory Source Sync"
@@ -5346,7 +5390,7 @@ msgid "Never Updated"
 msgstr "未更新"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:44
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:13
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:12
 msgid "Never expires"
 msgstr "期限切れなし"
 
@@ -5872,6 +5916,10 @@ msgstr ""
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:242
+#~ msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the documentation for example syntax."
+#~ msgstr ""
+
 #: screens/Login/Login.jsx:179
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:112
@@ -6045,6 +6093,14 @@ msgstr "外部のシークレット管理システムからフィールドにデ
 #~ "examples."
 #~ msgstr ""
 
+#: components/Lookup/HostFilterLookup.jsx:288
+#~ msgid ""
+#~ "Populate the hosts for this inventory by using a search\n"
+#~ "filter. Example: ansible_facts.ansible_distribution:\"RedHat\".\n"
+#~ "Refer to the documentation for further syntax and\n"
+#~ "examples."
+#~ msgstr ""
+
 #: components/Lookup/HostFilterLookup.jsx:287
 msgid ""
 "Populate the hosts for this inventory by using a search\n"
@@ -6074,18 +6130,6 @@ msgstr ""
 #: components/CodeEditor/CodeEditor.jsx:187
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:223
-#~ msgid "Press Enter to get additional inputs."
-#~ msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:229
-#~ msgid "Press Enter to get additional inputs. Refer to the"
-#~ msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:229
-#~ msgid "Press Enter to get additional {num} inputs. Refer to the"
-#~ msgstr ""
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
@@ -6141,11 +6185,6 @@ msgstr ""
 #: components/Workflow/WorkflowNodeHelp.jsx:55
 msgid "Project Update"
 msgstr "プロジェクトの更新"
-
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:207
-#: screens/Project/ProjectList/ProjectListItem.jsx:179
-#~ msgid "Project Update Error"
-#~ msgstr ""
 
 #: screens/Project/Project.jsx:139
 msgid "Project not found."
@@ -6267,7 +6306,7 @@ msgid "Provisioning Callbacks"
 msgstr "プロビジョニングコールバック"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:88
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:113
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:128
 msgid "Pull"
 msgstr ""
 
@@ -6365,6 +6404,10 @@ msgid ""
 "about the configuration file."
 msgstr ""
 
+#: src/screens/Template/shared/JobTemplateForm.jsx:383
+#~ msgid "Refer to the Ansible documentation for details about the configuration file."
+#~ msgstr ""
+
 #: screens/User/UserTokens/UserTokens.jsx:76
 msgid "Refresh Token"
 msgstr "トークンの更新"
@@ -6378,7 +6421,7 @@ msgstr "トークンの有効期限の更新"
 msgid "Regions"
 msgstr "リージョン"
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:141
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:156
 msgid "Registry credential"
 msgstr ""
 
@@ -7595,6 +7638,12 @@ msgid ""
 "the Ansible Tower documentation for example syntax."
 msgstr ""
 
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:478
+#~ msgid ""
+#~ "Specify HTTP Headers in JSON format. Refer to\n"
+#~ "the documentation for example syntax."
+#~ msgstr ""
+
 #: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:478
 #~ msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
 #~ msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
@@ -8103,6 +8152,10 @@ msgstr ""
 #~ msgid "The first fetches all references. The second fetches the Github pull request number 62, in this example the branch needs to be \"pull/62/head\"."
 #~ msgstr "最初は全参照を取得します。2 番目は Github の Pull 要求の 62 番を取得します。この例では、ブランチは \"pull/62/head\" である必要があります。"
 
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:105
+msgid "The full image location, including the container registry, image name, and version tag."
+msgstr ""
+
 #: screens/Organization/shared/OrganizationForm.jsx:75
 msgid ""
 "The maximum number of hosts allowed to be managed by this organization.\n"
@@ -8141,8 +8194,8 @@ msgid "The pattern used to target hosts in the inventory. Leaving the field blan
 msgstr "インベントリー内のホストをターゲットにするために使用されるパターン。フィールドを空白のままにすると、all、および * はすべて、インベントリー内のすべてのホストを対象とします。Ansible のホストパターンに関する詳細情報を確認できます。"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:103
-msgid "The registry location where the container is stored."
-msgstr ""
+#~ msgid "The registry location where the container is stored."
+#~ msgstr ""
 
 #: components/Workflow/WorkflowNodeHelp.jsx:123
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.jsx:126
@@ -8186,7 +8239,7 @@ msgstr ""
 msgid "There was a problem logging in. Please try again."
 msgstr ""
 
-#: screens/Login/Login.jsx:120
+#: screens/Login/Login.jsx:130
 #~ msgid "There was a problem signing in. Please try again."
 #~ msgstr "サインインに問題がありました。もう一度やり直してください。"
 
@@ -8259,6 +8312,20 @@ msgstr ""
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:121
 msgid "This credential type is currently being used by some credentials and cannot be deleted"
 msgstr ""
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:73
+#~ msgid ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and help\n"
+#~ "streamline customer experience and success."
+#~ msgstr ""
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:85
+#~ msgid ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and to provide\n"
+#~ "Insights Analytics to subscribers."
+#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:85
 msgid ""
@@ -8472,7 +8539,7 @@ msgstr ""
 #~ msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 #~ msgstr "インベントリーの同期が最新の状態であることを判別するために使用される時間 (秒単位) です。ジョブの実行およびコールバック時に、タスクシステムは最新の同期のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合は最新とは見なされず、インベントリーの同期が新たに実行されます。"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:17
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:16
 msgid "Timed out"
 msgstr "タイムアウト"
 
@@ -9327,7 +9394,7 @@ msgstr "週末"
 msgid "Welcome to Ansible {brandName}!"
 msgstr ""
 
-#: screens/Login/Login.jsx:142
+#: screens/Login/Login.jsx:152
 #~ msgid "Welcome to Ansible {brandName}! Please Sign In."
 #~ msgstr "Ansible {brandName} へようこそ! サインインしてください。"
 

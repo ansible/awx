@@ -385,6 +385,11 @@ msgid ""
 "like the Ansible inventory .ini file format."
 msgstr ""
 
+#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:168
+#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:177
+#~ msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
+#~ msgstr ""
+
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:508
 msgid "After number of occurrences"
 msgstr ""
@@ -454,6 +459,16 @@ msgstr ""
 msgid "An inventory must be selected"
 msgstr ""
 
+#: src/components/PromptDetail/PromptInventorySourceDetail.jsx:87
+#: src/components/PromptDetail/PromptProjectDetail.jsx:92
+#: src/screens/Inventory/shared/InventorySourceForm.jsx:143
+#: src/screens/Organization/OrganizationDetail/OrganizationDetail.jsx:94
+#: src/screens/Organization/shared/OrganizationForm.jsx:82
+#: src/screens/Project/ProjectDetail/ProjectDetail.jsx:128
+#: src/screens/Project/shared/ProjectForm.jsx:274
+#~ msgid "Ansible Environment"
+#~ msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:98
 msgid "Ansible Tower"
 msgstr ""
@@ -461,6 +476,14 @@ msgstr ""
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:99
 msgid "Ansible Tower Documentation."
 msgstr ""
+
+#: src/components/About/About.jsx:58
+#~ msgid "Ansible Version"
+#~ msgstr ""
+
+#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:204
+#~ msgid "Ansible environment"
+#~ msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.jsx:44
 msgid "Answer type"
@@ -534,11 +557,15 @@ msgstr ""
 msgid "Approve"
 msgstr ""
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:48
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:59
 msgid "Approved"
 msgstr ""
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:42
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:52
+msgid "Approved - {0}.  See the Activity Stream for more information."
+msgstr ""
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:49
 msgid "Approved by {0} - {1}"
 msgstr ""
 
@@ -549,6 +576,10 @@ msgstr ""
 #: components/JobCancelButton/JobCancelButton.jsx:83
 msgid "Are you sure you want to cancel this job?"
 msgstr ""
+
+#: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:116
+#~ msgid "Are you sure you want to delete the {0} below?"
+#~ msgstr ""
 
 #: components/DeleteButton/DeleteButton.jsx:128
 msgid "Are you sure you want to delete:"
@@ -701,7 +732,7 @@ msgstr ""
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:39
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.jsx:73
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:39
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:57
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:54
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:90
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:63
 #: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:110
@@ -766,6 +797,10 @@ msgid ""
 "Together the base path and selected playbook directory provide the full\n"
 "path used to locate playbooks."
 msgstr ""
+
+#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:70
+#~ msgid "Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. Together the base path and selected playbook directory provide the full path used to locate playbooks."
+#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:456
 msgid "Basic auth password"
@@ -941,7 +976,7 @@ msgstr ""
 #: components/JobList/JobList.jsx:211
 #: components/Workflow/WorkflowNodeHelp.jsx:95
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:176
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:21
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:20
 msgid "Canceled"
 msgstr ""
 
@@ -985,6 +1020,10 @@ msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
 msgstr ""
+
+#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:76
+#~ msgid "Change PROJECTS_ROOT when deploying {brandName} to change this location."
+#~ msgstr ""
 
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:43
 msgid "Changed"
@@ -1056,6 +1095,17 @@ msgid ""
 "information about each option."
 msgstr ""
 
+#: screens/Template/Survey/SurveyQuestionForm.jsx:37
+#~ msgid ""
+#~ "Choose an answer type or format you want as the prompt for the user.\n"
+#~ "Refer to the Documentation for more additional\n"
+#~ "information about each option."
+#~ msgstr ""
+
+#: src/screens/Template/Survey/SurveyQuestionForm.jsx:37
+#~ msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
+#~ msgstr ""
+
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:142
 msgid "Choose an email option"
 msgstr ""
@@ -1106,10 +1156,6 @@ msgstr ""
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.jsx:150
 msgid "Click to create a new link to this node."
 msgstr ""
-
-#: components/FormField/TextAndCheckboxField.jsx:86
-#~ msgid "Click to select this answer as a default answer."
-#~ msgstr ""
 
 #: screens/Template/Survey/MultipleChoiceField.jsx:114
 msgid "Click to toggle default value"
@@ -1164,6 +1210,22 @@ msgstr ""
 #: screens/Job/JobOutput/HostEventModal.jsx:135
 msgid "Command"
 msgstr ""
+
+#: src/screens/Host/Host.jsx:67
+#: src/screens/Host/Hosts.jsx:32
+#: src/screens/Inventory/Inventory.jsx:68
+#: src/screens/Inventory/InventoryHost/InventoryHost.jsx:88
+#: src/screens/Template/Template.jsx:151
+#: src/screens/Template/Templates.jsx:48
+#: src/screens/Template/WorkflowJobTemplate.jsx:145
+#~ msgid "Completed Jobs"
+#~ msgstr ""
+
+#: src/screens/Inventory/Inventories.jsx:59
+#: src/screens/Inventory/Inventories.jsx:73
+#: src/screens/Inventory/SmartInventory.jsx:73
+#~ msgid "Completed jobs"
+#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:53
 msgid "Compliant"
@@ -1263,6 +1325,16 @@ msgid ""
 "produce as the playbook executes."
 msgstr ""
 
+#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:152
+#: src/screens/Template/shared/JobTemplateForm.jsx:414
+#~ msgid "Control the level of output ansible will produce as the playbook executes."
+#~ msgstr ""
+
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:64
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:69
+#~ msgid "Controller"
+#~ msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:208
 msgid "Convergence"
 msgstr ""
@@ -1320,6 +1392,11 @@ msgstr ""
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:225
 msgid "Create"
 msgstr ""
+
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:14
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:24
+#~ msgid "Create Execution environments"
+#~ msgstr ""
 
 #: screens/Application/Applications.jsx:26
 #: screens/Application/Applications.jsx:35
@@ -1581,7 +1658,7 @@ msgstr ""
 msgid "Credential to authenticate with Kubernetes or OpenShift. Must be of type \"Kubernetes/OpenShift API Bearer Token\". If left blank, the underlying Pod's service account will be used."
 msgstr ""
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:148
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:163
 msgid "Credential to authenticate with a protected container registry."
 msgstr ""
 
@@ -1701,7 +1778,7 @@ msgstr ""
 msgid "Default answer"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:81
+#: screens/Template/Survey/SurveyQuestionForm.jsx:85
 #~ msgid "Default choice must be answered from the choices listed."
 #~ msgstr ""
 
@@ -1913,11 +1990,15 @@ msgstr ""
 msgid "Deletion error"
 msgstr ""
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:33
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:38
 msgid "Denied"
 msgstr ""
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:27
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:31
+msgid "Denied - {0}.  See the Activity Stream for more information."
+msgstr ""
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:28
 msgid "Denied by {0} - {1}"
 msgstr ""
 
@@ -1955,7 +2036,7 @@ msgstr ""
 #: screens/CredentialType/shared/CredentialTypeForm.jsx:32
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:62
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:150
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:126
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:141
 #: screens/Host/HostDetail/HostDetail.jsx:81
 #: screens/Host/HostList/HostList.jsx:152
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:78
@@ -2069,7 +2150,7 @@ msgstr ""
 #: screens/Setting/ActivityStream/ActivityStreamDetail/ActivityStreamDetail.jsx:54
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:46
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:46
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:64
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:61
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:70
 #: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:117
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:46
@@ -2212,7 +2293,7 @@ msgstr ""
 msgid "E-mail options"
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:212
+#: screens/Template/Survey/SurveyQuestionForm.jsx:220
 #~ msgid "Each answer choice must be on a separate line."
 #~ msgstr ""
 
@@ -2270,8 +2351,8 @@ msgstr ""
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.jsx:147
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:80
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:84
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:97
-#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:101
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:94
+#: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:98
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:161
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:165
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:101
@@ -2632,9 +2713,17 @@ msgstr ""
 msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
+#: screens/CredentialType/shared/CredentialTypeForm.jsx:49
+#~ msgid "Enter injectors using either JSON or YAML syntax. Refer to the documentation for example syntax."
+#~ msgstr ""
+
 #: screens/CredentialType/shared/CredentialTypeForm.jsx:38
 msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
+
+#: screens/CredentialType/shared/CredentialTypeForm.jsx:39
+#~ msgid "Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax."
+#~ msgstr ""
 
 #: screens/Inventory/shared/SmartInventoryForm.jsx:97
 msgid ""
@@ -2643,9 +2732,24 @@ msgid ""
 "Ansible Tower documentation for example syntax."
 msgstr ""
 
+#: screens/Inventory/shared/SmartInventoryForm.jsx:100
+#~ msgid ""
+#~ "Enter inventory variables using either JSON or YAML syntax.\n"
+#~ "Use the radio button to toggle between the two. Refer to the\n"
+#~ "documentation for example syntax."
+#~ msgstr ""
+
 #: screens/Inventory/shared/InventoryForm.jsx:84
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr ""
+
+#: src/screens/Inventory/shared/SmartInventoryForm.jsx:100
+#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
+#~ msgstr ""
+
+#: screens/Inventory/shared/InventoryForm.jsx:85
+#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the documentation for example syntax"
+#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:193
 msgid "Enter one Annotation Tag per line, without commas."
@@ -2658,11 +2762,19 @@ msgid ""
 "required."
 msgstr ""
 
+#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:244
+#~ msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
+#~ msgstr ""
+
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:377
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 msgstr ""
+
+#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:377
+#~ msgid "Enter one Slack channel per line. The pound symbol (#) is required for channels."
+#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:92
 msgid ""
@@ -2670,17 +2782,29 @@ msgid ""
 "list for this type of notification."
 msgstr ""
 
+#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:92
+#~ msgid "Enter one email address per line to create a recipient list for this type of notification."
+#~ msgstr ""
+
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:426
 msgid ""
 "Enter one phone number per line to specify where to\n"
 "route SMS messages."
 msgstr ""
 
+#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:426
+#~ msgid "Enter one phone number per line to specify where to route SMS messages."
+#~ msgstr ""
+
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:416
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
 msgstr ""
+
+#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:416
+#~ msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
+#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.jsx:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
@@ -2758,7 +2882,7 @@ msgstr ""
 #: components/InstanceToggle/InstanceToggle.jsx:61
 #: components/JobList/JobList.jsx:281
 #: components/JobList/JobList.jsx:292
-#: components/LaunchButton/LaunchButton.jsx:171
+#: components/LaunchButton/LaunchButton.jsx:173
 #: components/LaunchPrompt/LaunchPrompt.jsx:73
 #: components/NotificationList/NotificationList.jsx:246
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:205
@@ -2880,6 +3004,10 @@ msgstr ""
 msgid "Examples include:"
 msgstr ""
 
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:108
+msgid "Examples:"
+msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/RunStep.jsx:48
 msgid "Execute regardless of the parent node's final state."
 msgstr ""
@@ -2934,6 +3062,11 @@ msgstr ""
 msgid "Execution environment not found."
 msgstr ""
 
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:13
+#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:23
+#~ msgid "Execution environments"
+#~ msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:23
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:26
 msgid "Exit Without Saving"
@@ -2977,7 +3110,7 @@ msgid "Expires on UTC"
 msgstr ""
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:34
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:12
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:11
 msgid "Expires on {0}"
 msgstr ""
 
@@ -3065,11 +3198,6 @@ msgstr ""
 #: screens/Project/ProjectList/ProjectListItem.jsx:181
 msgid "Failed to cancel Project Sync"
 msgstr ""
-
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:209
-#: screens/Project/ProjectList/ProjectListItem.jsx:182
-#~ msgid "Failed to cancel Project Update"
-#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:100
 #~ msgid "Failed to cancel inventory source sync."
@@ -3301,7 +3429,7 @@ msgid "Failed to fetch custom login configuration settings.  System defaults wil
 msgstr ""
 
 #: components/AdHocCommands/AdHocCommands.jsx:113
-#: components/LaunchButton/LaunchButton.jsx:174
+#: components/LaunchButton/LaunchButton.jsx:176
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:130
 msgid "Failed to launch job."
 msgstr ""
@@ -3600,7 +3728,7 @@ msgstr ""
 msgid "Globally Available"
 msgstr ""
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:132
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:147
 msgid "Globally available execution environment can not be reassigned to a specific Organization"
 msgstr ""
 
@@ -3906,7 +4034,7 @@ msgstr ""
 #~ msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 #~ msgstr ""
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:125
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:126
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:135
 #~ msgid ""
 #~ "If checked, any hosts and groups that were\n"
@@ -3988,6 +4116,10 @@ msgid ""
 "injected into the fact cache at runtime."
 msgstr ""
 
+#: src/screens/Template/shared/JobTemplateForm.jsx:559
+#~ msgid "If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime."
+#~ msgstr ""
+
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:140
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
 msgstr ""
@@ -4014,14 +4146,15 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:138
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:157
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:62
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:98
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:88
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:107
 msgid "Image"
 msgstr ""
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:98
-msgid "Image name"
-msgstr ""
+#~ msgid "Image name"
+#~ msgstr ""
 
 #: screens/Job/JobOutput/JobOutput.jsx:653
 msgid "Including File"
@@ -4234,10 +4367,6 @@ msgstr ""
 #: screens/Job/JobDetail/JobDetail.jsx:176
 msgid "Inventory Source"
 msgstr ""
-
-#: screens/Inventory/InventorySources/InventorySourceListItem.jsx:125
-#~ msgid "Inventory Source Error"
-#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:92
 msgid "Inventory Source Sync"
@@ -5270,7 +5399,7 @@ msgid "Never Updated"
 msgstr ""
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:44
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:13
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:12
 msgid "Never expires"
 msgstr ""
 
@@ -5796,6 +5925,10 @@ msgstr ""
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:242
+#~ msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the documentation for example syntax."
+#~ msgstr ""
+
 #: screens/Login/Login.jsx:179
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:112
@@ -5969,6 +6102,14 @@ msgstr ""
 #~ "examples."
 #~ msgstr ""
 
+#: components/Lookup/HostFilterLookup.jsx:288
+#~ msgid ""
+#~ "Populate the hosts for this inventory by using a search\n"
+#~ "filter. Example: ansible_facts.ansible_distribution:\"RedHat\".\n"
+#~ "Refer to the documentation for further syntax and\n"
+#~ "examples."
+#~ msgstr ""
+
 #: components/Lookup/HostFilterLookup.jsx:287
 msgid ""
 "Populate the hosts for this inventory by using a search\n"
@@ -5998,18 +6139,6 @@ msgstr ""
 #: components/CodeEditor/CodeEditor.jsx:187
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:223
-#~ msgid "Press Enter to get additional inputs."
-#~ msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:229
-#~ msgid "Press Enter to get additional inputs. Refer to the"
-#~ msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:229
-#~ msgid "Press Enter to get additional {num} inputs. Refer to the"
-#~ msgstr ""
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
@@ -6065,11 +6194,6 @@ msgstr ""
 #: components/Workflow/WorkflowNodeHelp.jsx:55
 msgid "Project Update"
 msgstr ""
-
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:207
-#: screens/Project/ProjectList/ProjectListItem.jsx:179
-#~ msgid "Project Update Error"
-#~ msgstr ""
 
 #: screens/Project/Project.jsx:139
 msgid "Project not found."
@@ -6191,7 +6315,7 @@ msgid "Provisioning Callbacks"
 msgstr ""
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:88
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:113
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:128
 msgid "Pull"
 msgstr ""
 
@@ -6306,7 +6430,7 @@ msgstr ""
 msgid "Regions"
 msgstr ""
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:141
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:156
 msgid "Registry credential"
 msgstr ""
 
@@ -7005,6 +7129,10 @@ msgid ""
 "directory provide the full path used to locate playbooks."
 msgstr ""
 
+#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:89
+#~ msgid "Select from the list of directories found in the Project Base Path. Together the base path and the playbook directory provide the full path used to locate playbooks."
+#~ msgstr ""
+
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:94
 msgid "Select items from list"
 msgstr ""
@@ -7086,6 +7214,11 @@ msgid ""
 "Select the inventory containing the hosts\n"
 "you want this job to manage."
 msgstr ""
+
+#: src/components/Lookup/InventoryLookup.jsx:89
+#: src/screens/Template/shared/JobTemplateForm.jsx:248
+#~ msgid "Select the inventory containing the hosts you want this job to manage."
+#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:105
 msgid ""
@@ -7350,6 +7483,11 @@ msgid ""
 "documentation for details on the usage of tags."
 msgstr ""
 
+#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:74
+#: src/screens/Template/shared/JobTemplateForm.jsx:487
+#~ msgid "Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
+#~ msgstr ""
+
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:39
 msgid "Skipped"
 msgstr ""
@@ -7508,6 +7646,16 @@ msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
 msgstr ""
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:478
+#~ msgid ""
+#~ "Specify HTTP Headers in JSON format. Refer to\n"
+#~ "the documentation for example syntax."
+#~ msgstr ""
+
+#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:478
+#~ msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
+#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:392
 msgid ""
@@ -7987,6 +8135,10 @@ msgid ""
 "timeout."
 msgstr ""
 
+#: src/screens/Template/shared/JobTemplateForm.jsx:439
+#~ msgid "The amount of time (in seconds) to run before the job is canceled. Defaults to 0 for no job timeout."
+#~ msgstr ""
+
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:164
 msgid ""
 "The base URL of the Grafana server - the\n"
@@ -8008,6 +8160,10 @@ msgstr ""
 #: src/screens/Project/shared/ProjectSubForms/GitSubForm.jsx:74
 #~ msgid "The first fetches all references. The second fetches the Github pull request number 62, in this example the branch needs to be \"pull/62/head\"."
 #~ msgstr ""
+
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:105
+msgid "The full image location, including the container registry, image name, and version tag."
+msgstr ""
 
 #: screens/Organization/shared/OrganizationForm.jsx:75
 msgid ""
@@ -8047,8 +8203,8 @@ msgid "The pattern used to target hosts in the inventory. Leaving the field blan
 msgstr ""
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:103
-msgid "The registry location where the container is stored."
-msgstr ""
+#~ msgid "The registry location where the container is stored."
+#~ msgstr ""
 
 #: components/Workflow/WorkflowNodeHelp.jsx:123
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.jsx:126
@@ -8092,7 +8248,7 @@ msgstr ""
 msgid "There was a problem logging in. Please try again."
 msgstr ""
 
-#: screens/Login/Login.jsx:120
+#: screens/Login/Login.jsx:130
 #~ msgid "There was a problem signing in. Please try again."
 #~ msgstr ""
 
@@ -8165,6 +8321,20 @@ msgstr ""
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:121
 msgid "This credential type is currently being used by some credentials and cannot be deleted"
 msgstr ""
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:73
+#~ msgid ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and help\n"
+#~ "streamline customer experience and success."
+#~ msgstr ""
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:85
+#~ msgid ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and to provide\n"
+#~ "Insights Analytics to subscribers."
+#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:85
 msgid ""
@@ -8378,7 +8548,7 @@ msgstr ""
 #~ msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 #~ msgstr ""
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:17
+#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:16
 msgid "Timed out"
 msgstr ""
 
@@ -8708,6 +8878,10 @@ msgid ""
 "notifications sent when a job starts, succeeds, or fails. Use\n"
 "curly braces to access information about the job:"
 msgstr ""
+
+#: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:72
+#~ msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job:"
+#~ msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:83
@@ -9229,7 +9403,7 @@ msgstr ""
 msgid "Welcome to Ansible {brandName}!"
 msgstr ""
 
-#: screens/Login/Login.jsx:142
+#: screens/Login/Login.jsx:152
 #~ msgid "Welcome to Ansible {brandName}! Please Sign In."
 #~ msgstr ""
 
@@ -9259,6 +9433,11 @@ msgid ""
 "hosts and groups not found on the external source will remain\n"
 "untouched by the inventory update process."
 msgstr ""
+
+#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:127
+#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:141
+#~ msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
+#~ msgstr ""
 
 #: components/Workflow/WorkflowLegend.jsx:96
 msgid "Workflow"
@@ -9601,6 +9780,12 @@ msgstr ""
 msgid "inventory"
 msgstr ""
 
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:51
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:59
+#: screens/Job/JobDetail/JobDetail.jsx:119
+#~ msgid "isolated instance"
+#~ msgstr ""
+
 #: components/Pagination/Pagination.jsx:23
 msgid "items"
 msgstr ""
@@ -9640,6 +9825,10 @@ msgstr ""
 #: components/AdHocCommands/AdHocDetailsStep.jsx:238
 msgid "option to the"
 msgstr ""
+
+#: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:84
+#~ msgid "or attributes of the job such as"
+#~ msgstr ""
 
 #: components/Pagination/Pagination.jsx:24
 msgid "page"
@@ -9867,9 +10056,17 @@ msgstr ""
 msgid "{minutes} min {seconds} sec"
 msgstr ""
 
+#: src/screens/Inventory/InventoryList/InventoryList.jsx:215
+#~ msgid "{numItemsToDelete, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
+#~ msgstr ""
+
 #: components/JobList/JobListCancelButton.jsx:106
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
 msgstr ""
+
+#: src/components/JobList/JobListCancelButton.jsx:81
+#~ msgid "{numJobsToCancel, plural, one {Cancel selected job} other {Cancel selected jobs}}"
+#~ msgstr ""
 
 #: components/JobList/JobListCancelButton.jsx:167
 msgid "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
@@ -9879,7 +10076,19 @@ msgstr ""
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 msgstr ""
 
+#: src/components/JobList/JobListCancelButton.jsx:68
+#~ msgid "{numJobsUnableToCancel, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
+#~ msgstr ""
+
+#: src/components/JobList/JobListCancelButton.jsx:57
+#~ msgid "{numJobsUnableToCancel, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
+#~ msgstr ""
+
 #: components/PaginatedDataList/PaginatedDataList.jsx:92
 #: components/PaginatedTable/PaginatedTable.jsx:77
 msgid "{pluralizedItemName} List"
 msgstr ""
+
+#: src/components/JobList/JobListCancelButton.jsx:96
+#~ msgid "{zeroOrOneJobSelected, plural, one {Cancel job} other {Cancel jobs}}"
+#~ msgstr ""
