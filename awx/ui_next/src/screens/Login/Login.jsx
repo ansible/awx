@@ -147,7 +147,7 @@ function AWXLogin({ alt, isAuthenticated }) {
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
         data-cy="login-header"
-        title={brandName ? t`Welcome to Ansible ${brandName}!` : ''}
+        title={brandName ? t`Welcome to ${brandName}!` : ''}
         subtitle={t`Please log in`}
       />
       <LoginMainBody>

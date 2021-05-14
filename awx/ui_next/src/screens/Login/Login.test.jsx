@@ -94,7 +94,7 @@ describe('<Login />', () => {
       'Please log in'
     );
     expect(wrapper.find('LoginMainHeader').prop('title')).toBe(
-      'Welcome to Ansible AWX!'
+      'Welcome to AWX!'
     );
   });
 

@@ -9395,8 +9395,8 @@ msgid "Weekend day"
 msgstr "Jour du week-end"
 
 #: screens/Login/Login.jsx:150
-msgid "Welcome to Ansible {brandName}!"
-msgstr ""
+#~ msgid "Welcome to Ansible {brandName}!"
+#~ msgstr ""
 
 #: screens/Login/Login.jsx:152
 #~ msgid "Welcome to Ansible {brandName}! Please Sign In."
@@ -9406,6 +9406,10 @@ msgstr ""
 msgid ""
 "Welcome to Red Hat Ansible Automation Platform!\n"
 "Please complete the steps below to activate your subscription."
+msgstr ""
+
+#: screens/Login/Login.jsx:150
+msgid "Welcome to {brandName}!"
 msgstr ""
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:150
