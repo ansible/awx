@@ -4905,8 +4905,8 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_name(self, value):
-        if self.instance and self.instance.name == 'tower' and value != 'tower':
-            raise serializers.ValidationError(_('tower instance group name may not be changed.'))
+        if self.instance and self.instance.name == settings.DEFAULT_QUEUE_NAME and value != settings.DEFAULT_QUEUE_NAME:
+            raise serializers.ValidationError(_('%s instance group name may not be changed.' % settings.DEFAULT_QUEUE_NAME))
         return value
 
     def validate_credential(self, value):

@@ -1408,7 +1408,7 @@ class UnifiedJob(
     def global_instance_groups(self):
         from awx.main.models.ha import InstanceGroup
 
-        default_instance_group = InstanceGroup.objects.filter(name='tower')
+        default_instance_group = InstanceGroup.objects.filter(name=settings.DEFAULT_QUEUE_NAME)
         if default_instance_group.exists():
             return [default_instance_group.first()]
         return []
