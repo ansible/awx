@@ -1767,6 +1767,7 @@ class RunJob(BaseTask):
             )
             if branch_override:
                 sync_metafields['scm_branch'] = job.scm_branch
+                sync_metafields['scm_clean'] = True  # to accomidate force pushes
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
