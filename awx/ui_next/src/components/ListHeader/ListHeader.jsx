@@ -6,11 +6,10 @@ import { Toolbar, ToolbarContent } from '@patternfly/react-core';
 import DataListToolbar from '../DataListToolbar';
 
 import {
-  encodeNonDefaultQueryString,
   parseQueryString,
   mergeParams,
-  replaceParams,
   removeParams,
+  replaceNamespacedParams,
 } from '../../util/qs';
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
@@ -38,60 +37,59 @@ class ListHeader extends React.Component {
 
   handleSearch(key, value) {
     const { location, qsConfig } = this.props;
-    let params = parseQueryString(qsConfig, location.search);
-    params = mergeParams(params, { [key]: value });
-    params = replaceParams(params, { page: 1 });
-    this.pushHistoryState(params);
+    const params = parseQueryString(qsConfig, location.search);
+    const qs = replaceNamespacedParams(qsConfig, location.search, {
+      ...mergeParams(params, { [key]: value }),
+      page: 1,
+    });
+    this.pushHistoryState(qs);
   }
 
   handleReplaceSearch(key, value) {
     const { location, qsConfig } = this.props;
-    const oldParams = parseQueryString(qsConfig, location.search);
-    this.pushHistoryState(replaceParams(oldParams, { [key]: value }));
+    const qs = replaceNamespacedParams(qsConfig, location.search, {
+      [key]: value,
+    });
+    this.pushHistoryState(qs);
   }
 
   handleRemove(key, value) {
     const { location, qsConfig } = this.props;
-    let oldParams = parseQueryString(qsConfig, location.search);
-    if (parseInt(value, 10)) {
-      oldParams = removeParams(qsConfig, oldParams, {
-        [key]: parseInt(value, 10),
-      });
-    }
-    this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
+    const oldParams = parseQueryString(qsConfig, location.search);
+    const updatedParams = removeParams(qsConfig, oldParams, {
+      [key]: value,
+    });
+    const qs = replaceNamespacedParams(
+      qsConfig,
+      location.search,
+      updatedParams
+    );
+    this.pushHistoryState(qs);
   }
 
   handleRemoveAll() {
-    // remove everything in oldParams except for page_size and order_by
     const { location, qsConfig } = this.props;
     const oldParams = parseQueryString(qsConfig, location.search);
-    const oldParamsClone = { ...oldParams };
-    delete oldParamsClone.page_size;
-    delete oldParamsClone.order_by;
-    this.pushHistoryState(removeParams(qsConfig, oldParams, oldParamsClone));
+    Object.keys(oldParams).forEach(key => {
+      oldParams[key] = null;
+    });
+    const qs = replaceNamespacedParams(qsConfig, location.search, oldParams);
+    this.pushHistoryState(qs);
   }
 
   handleSort(key, order) {
     const { location, qsConfig } = this.props;
-    const oldParams = parseQueryString(qsConfig, location.search);
-    this.pushHistoryState(
-      replaceParams(oldParams, {
-        order_by: order === 'ascending' ? key : `-${key}`,
-        page: null,
-      })
-    );
+    const qs = replaceNamespacedParams(qsConfig, location.search, {
+      order_by: order === 'ascending' ? key : `-${key}`,
+      page: null,
+    });
+    this.pushHistoryState(qs);
   }
 
-  pushHistoryState(params) {
-    const { history, qsConfig } = this.props;
+  pushHistoryState(queryString) {
+    const { history } = this.props;
     const { pathname } = history.location;
-    const nonNamespacedParams = parseQueryString({}, history.location.search);
-    const encodedParams = encodeNonDefaultQueryString(
-      qsConfig,
-      params,
-      nonNamespacedParams
-    );
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+    history.push(queryString ? `${pathname}?${queryString}` : pathname);
   }
 
   render() {

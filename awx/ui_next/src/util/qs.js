@@ -164,9 +164,10 @@ export function removeParams(config, oldParams, paramsToRemove) {
   };
   Object.keys(oldParams).forEach(key => {
     const value = removeParam(oldParams[key], paramsToRemove[key]);
-    if (value !== null) {
-      updated[key] = value;
+    if (value == null && Object.prototype.hasOwnProperty.call(updated, key)) {
+      return;
     }
+    updated[key] = value;
   });
   return updated;
 }

@@ -341,6 +341,7 @@ describe('qs (qs.js)', () => {
         baz: 'bar',
         page: 3,
         page_size: 15,
+        bag: null,
       });
     });
 
@@ -429,6 +430,7 @@ describe('qs (qs.js)', () => {
         baz: ['bar', 'bang'],
         page: 3,
         page_size: 15,
+        pat: null,
       });
     });
 
@@ -443,6 +445,7 @@ describe('qs (qs.js)', () => {
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         page: 3,
         page_size: 15,
+        baz: null,
       });
     });
 
@@ -457,6 +460,7 @@ describe('qs (qs.js)', () => {
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         page: 1,
         page_size: 15,
+        baz: null,
       });
     });
 
@@ -526,6 +530,7 @@ describe('qs (qs.js)', () => {
         baz: ['one', 'two', 'three'],
         page: 3,
         page_size: 15,
+        bag: null,
       });
     });
 
@@ -546,6 +551,7 @@ describe('qs (qs.js)', () => {
         baz: ['bar', 'bang'],
         page: 3,
         page_size: 15,
+        pat: null,
       });
     });
 
@@ -559,6 +565,7 @@ describe('qs (qs.js)', () => {
       const toRemove = { bag: 'boom' };
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: '',
+        bag: null,
         page: 3,
         page_size: 15,
       });
@@ -860,6 +867,8 @@ describe('qs (qs.js)', () => {
       );
     });
 
+    // This fix needed after we're confident refactoring components
+    // to use replaceNamespacedParams provides equivalent functionality
     test.skip('should not alter params of other namespaces', () => {
       const query =
         'template.name__icontains=workflow&template.page=2&credential.page=3';
