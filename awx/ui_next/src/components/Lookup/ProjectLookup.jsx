@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { node, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from '../../api';
@@ -32,6 +31,8 @@ function ProjectLookup({
   onBlur,
   history,
   isOverrideDisabled,
+  validate,
+  fieldName,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
@@ -72,6 +73,24 @@ function ProjectLookup({
     }
   );
 
+  const checkProjectName = useCallback(
+    async name => {
+      if (name && name !== '') {
+        try {
+          const {
+            data: { results: nameMatchResults, count: nameMatchCount },
+          } = await ProjectsAPI.read({ name });
+          onChange(nameMatchCount ? nameMatchResults[0] : null);
+        } catch {
+          onChange(null);
+        }
+      } else {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
@@ -92,6 +111,9 @@ function ProjectLookup({
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onDebounce={checkProjectName}
+        fieldName={fieldName}
+        validate={validate}
         required={required}
         isLoading={isLoading}
         isDisabled={!canEdit}
@@ -164,6 +186,8 @@ ProjectLookup.propTypes = {
   tooltip: string,
   value: Project,
   isOverrideDisabled: bool,
+  validate: func,
+  fieldName: string,
 };
 
 ProjectLookup.defaultProps = {
@@ -175,6 +199,8 @@ ProjectLookup.defaultProps = {
   tooltip: '',
   value: null,
   isOverrideDisabled: false,
+  validate: () => undefined,
+  fieldName: 'project',
 };
 
 export { ProjectLookup as _ProjectLookup };

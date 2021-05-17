@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { node, func, bool } from 'prop-types';
+import { node, func, bool, string } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { OrganizationsAPI } from '../../api';
@@ -21,7 +20,6 @@ const QS_CONFIG = getQSConfig('organizations', {
 
 function OrganizationLookup({
   helperTextInvalid,
-
   isValid,
   onBlur,
   onChange,
@@ -31,6 +29,8 @@ function OrganizationLookup({
   autoPopulate,
   isDisabled,
   helperText,
+  validate,
+  fieldName,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
@@ -69,6 +69,24 @@ function OrganizationLookup({
     }
   );
 
+  const checkOrganizationName = useCallback(
+    async name => {
+      if (name && name !== '') {
+        try {
+          const {
+            data: { results: nameMatchResults, count: nameMatchCount },
+          } = await OrganizationsAPI.read({ name });
+          onChange(nameMatchCount ? nameMatchResults[0] : null);
+        } catch {
+          onChange(null);
+        }
+      } else {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchOrganizations();
   }, [fetchOrganizations]);
@@ -89,6 +107,9 @@ function OrganizationLookup({
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onDebounce={checkOrganizationName}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         required={required}
         sortedColumnKey="name"
@@ -144,6 +165,8 @@ OrganizationLookup.propTypes = {
   value: Organization,
   autoPopulate: bool,
   isDisabled: bool,
+  validate: func,
+  fieldName: string,
 };
 
 OrganizationLookup.defaultProps = {
@@ -154,6 +177,8 @@ OrganizationLookup.defaultProps = {
   value: null,
   autoPopulate: false,
   isDisabled: false,
+  validate: () => undefined,
+  fieldName: 'organization',
 };
 
 export { OrganizationLookup as _OrganizationLookup };

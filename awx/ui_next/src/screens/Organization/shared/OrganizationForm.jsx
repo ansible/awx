@@ -39,9 +39,7 @@ function OrganizationFormFields({
     executionEnvironmentField,
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
-  ] = useField({
-    name: 'default_environment',
-  });
+  ] = useField('default_environment');
 
   const handleCredentialUpdate = useCallback(
     value => {
@@ -97,6 +95,7 @@ function OrganizationFormFields({
         globallyAvailable
         organizationId={organizationId}
         isDefaultEnvironment
+        fieldName="default_environment"
       />
       <CredentialLookup
         credentialTypeNamespace="galaxy_api_token"
@@ -107,6 +106,7 @@ function OrganizationFormFields({
         onChange={handleCredentialUpdate}
         value={galaxyCredentialsField.value}
         multiple
+        fieldName="galaxy_credentials"
       />
     </>
   );

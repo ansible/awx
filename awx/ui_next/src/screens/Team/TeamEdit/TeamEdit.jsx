@@ -14,7 +14,11 @@ function TeamEdit({ team }) {
 
   const handleSubmit = async values => {
     try {
-      await TeamsAPI.update(team.id, values);
+      const valuesToSend = { ...values };
+      if (valuesToSend.organization) {
+        valuesToSend.organization = valuesToSend.organization.id;
+      }
+      await TeamsAPI.update(team.id, valuesToSend);
       history.push(`/teams/${team.id}/details`);
     } catch (err) {
       setError(err);

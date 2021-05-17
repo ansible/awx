@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { func, shape, bool } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
-
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
-
 import { ExecutionEnvironmentsAPI } from '../../../api';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import FormActionGroup from '../../../components/FormActionGroup';
@@ -26,14 +24,13 @@ function ExecutionEnvironmentFormFields({
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
   );
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: !me?.is_superuser && required(t`Select a value for this field`),
-  });
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
 
   const isGloballyAvailable = useRef(!organizationField.value);
 
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const onCredentialChange = useCallback(
     value => {
@@ -42,20 +39,19 @@ function ExecutionEnvironmentFormFields({
     [setFieldValue]
   );
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const [
     containerOptionsField,
     containerOptionsMeta,
     containerOptionsHelpers,
-  ] = useField({
-    name: 'pull',
-  });
+  ] = useField('pull');
 
   const containerPullChoices = options?.actions?.POST?.pull?.choices.map(
     ([value, label]) => ({ value, label, key: value })
@@ -67,7 +63,7 @@ function ExecutionEnvironmentFormFields({
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required={!me.is_superuser}
         helperText={
@@ -79,6 +75,11 @@ function ExecutionEnvironmentFormFields({
         }
         autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
         isDisabled={!!isOrgLookupDisabled && isGloballyAvailable.current}
+        validate={
+          !me?.is_superuser
+            ? required(t`Select a value for this field`)
+            : undefined
+        }
       />
     );
   };

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { Form } from '@patternfly/react-core';
@@ -238,14 +237,20 @@ function MiscSystemEdit() {
                       formik.setFieldTouched('DEFAULT_EXECUTION_ENVIRONMENT')
                     }
                     value={formik.values.DEFAULT_EXECUTION_ENVIRONMENT}
-                    onChange={value =>
+                    onChange={value => {
                       formik.setFieldValue(
                         'DEFAULT_EXECUTION_ENVIRONMENT',
                         value
-                      )
-                    }
+                      );
+                      formik.setFieldTouched(
+                        'DEFAULT_EXECUTION_ENVIRONMENT',
+                        true,
+                        false
+                      );
+                    }}
                     popoverContent={t`The Execution Environment to be used when one has not been configured for a job template.`}
                     isGlobalDefaultEnvironment
+                    fieldName="DEFAULT_EXECUTION_ENVIRONMENT"
                   />
                   <InputField
                     name="TOWER_URL_BASE"

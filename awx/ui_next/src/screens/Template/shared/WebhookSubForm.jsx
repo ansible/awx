@@ -213,6 +213,7 @@ function WebhookSubForm({ templateType }) {
           isValid={!webhookCredentialMeta.error}
           helperTextInvalid={webhookCredentialMeta.error}
           value={webhookCredentialField.value}
+          fieldName="webhook_credential"
         />
       )}
     </FormColumnLayout>

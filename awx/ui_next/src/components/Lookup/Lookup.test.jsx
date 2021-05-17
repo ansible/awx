@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-pascal-case */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import {
   mountWithContexts,
   waitForElement,
@@ -56,22 +57,25 @@ describe('<Lookup />', () => {
     const mockSelected = [{ name: 'foo', id: 1, url: '/api/v2/item/1' }];
     await act(async () => {
       wrapper = mountWithContexts(
-        <Lookup
-          id="test"
-          multiple
-          header="Foo Bar"
-          value={mockSelected}
-          onChange={onChange}
-          qsConfig={QS_CONFIG}
-          renderOptionsList={({ state, dispatch, canDelete }) => (
-            <TestList
-              id="options-list"
-              state={state}
-              dispatch={dispatch}
-              canDelete={canDelete}
-            />
-          )}
-        />
+        <Formik>
+          <Lookup
+            id="test"
+            multiple
+            header="Foo Bar"
+            value={mockSelected}
+            onChange={onChange}
+            qsConfig={QS_CONFIG}
+            renderOptionsList={({ state, dispatch, canDelete }) => (
+              <TestList
+                id="options-list"
+                state={state}
+                dispatch={dispatch}
+                canDelete={canDelete}
+              />
+            )}
+            fieldName="foo"
+          />
+        </Formik>
       );
     });
     return wrapper;
@@ -137,22 +141,25 @@ describe('<Lookup />', () => {
     await act(async () => {
       const mockSelected = { name: 'foo', id: 1, url: '/api/v2/item/1' };
       wrapper = mountWithContexts(
-        <Lookup
-          id="test"
-          header="Foo Bar"
-          required
-          value={mockSelected}
-          onChange={onChange}
-          qsConfig={QS_CONFIG}
-          renderOptionsList={({ state, dispatch, canDelete }) => (
-            <TestList
-              id="options-list"
-              state={state}
-              dispatch={dispatch}
-              canDelete={canDelete}
-            />
-          )}
-        />
+        <Formik>
+          <Lookup
+            id="test"
+            header="Foo Bar"
+            required
+            value={mockSelected}
+            onChange={onChange}
+            qsConfig={QS_CONFIG}
+            renderOptionsList={({ state, dispatch, canDelete }) => (
+              <TestList
+                id="options-list"
+                state={state}
+                dispatch={dispatch}
+                canDelete={canDelete}
+              />
+            )}
+            fieldName="foo"
+          />
+        </Formik>
       );
     });
     wrapper.find('button[aria-label="Search"]').simulate('click');
@@ -163,23 +170,26 @@ describe('<Lookup />', () => {
   test('should be disabled while isLoading is true', async () => {
     const mockSelected = [{ name: 'foo', id: 1, url: '/api/v2/item/1' }];
     wrapper = mountWithContexts(
-      <Lookup
-        id="test"
-        multiple
-        header="Foo Bar"
-        value={mockSelected}
-        onChange={onChange}
-        qsConfig={QS_CONFIG}
-        isLoading
-        renderOptionsList={({ state, dispatch, canDelete }) => (
-          <TestList
-            id="options-list"
-            state={state}
-            dispatch={dispatch}
-            canDelete={canDelete}
-          />
-        )}
-      />
+      <Formik>
+        <Lookup
+          id="test"
+          multiple
+          header="Foo Bar"
+          value={mockSelected}
+          onChange={onChange}
+          qsConfig={QS_CONFIG}
+          isLoading
+          renderOptionsList={({ state, dispatch, canDelete }) => (
+            <TestList
+              id="options-list"
+              state={state}
+              dispatch={dispatch}
+              canDelete={canDelete}
+            />
+          )}
+          fieldName="foo"
+        />
+      </Formik>
     );
     checkRootElementNotPresent('body div[role="dialog"]');
     const button = wrapper.find('button[aria-label="Search"]');

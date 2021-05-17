@@ -82,7 +82,8 @@
           "rows",
           "href",
           "modifier",
-          "data-cy"
+          "data-cy",
+          "fieldName"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [

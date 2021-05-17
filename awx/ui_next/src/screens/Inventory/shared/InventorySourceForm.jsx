@@ -1,13 +1,11 @@
 import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { func, shape } from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import { InventorySourcesAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
-
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -58,9 +56,7 @@ const InventorySourceFormFields = ({
     executionEnvironmentField,
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
-  ] = useField({
-    name: 'execution_environment',
-  });
+  ] = useField('execution_environment');
 
   const resetSubFormFields = sourceType => {
     if (sourceType === initialValues.source) {
@@ -97,6 +93,14 @@ const InventorySourceFormFields = ({
     }
   };
 
+  const handleExecutionEnvironmentUpdate = useCallback(
+    value => {
+      setFieldValue('execution_environment', value);
+      setFieldTouched('execution_environment', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
   return (
     <>
       <FormField
@@ -120,7 +124,7 @@ const InventorySourceFormFields = ({
         }
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
-        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        onChange={handleExecutionEnvironmentUpdate}
         globallyAvailable
         organizationId={organizationId}
       />

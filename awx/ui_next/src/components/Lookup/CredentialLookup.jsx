@@ -39,11 +39,12 @@ function CredentialLookup({
   credentialTypeKind,
   credentialTypeNamespace,
   value,
-
   tooltip,
   isDisabled,
   autoPopulate,
   multiple,
+  validate,
+  fieldName,
 }) {
   const history = useHistory();
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
@@ -111,6 +112,39 @@ function CredentialLookup({
     }
   );
 
+  const checkCredentialName = useCallback(
+    async name => {
+      if (name && name !== '') {
+        try {
+          const typeIdParams = credentialTypeId
+            ? { credential_type: credentialTypeId }
+            : {};
+          const typeKindParams = credentialTypeKind
+            ? { credential_type__kind: credentialTypeKind }
+            : {};
+          const typeNamespaceParams = credentialTypeNamespace
+            ? { credential_type__namespace: credentialTypeNamespace }
+            : {};
+
+          const {
+            data: { results: nameMatchResults, count: nameMatchCount },
+          } = await CredentialsAPI.read({
+            name,
+            ...typeIdParams,
+            ...typeKindParams,
+            ...typeNamespaceParams,
+          });
+          onChange(nameMatchCount ? nameMatchResults[0] : null);
+        } catch {
+          onChange(null);
+        }
+      } else {
+        onChange(null);
+      }
+    },
+    [onChange, credentialTypeId, credentialTypeKind, credentialTypeNamespace]
+  );
+
   useEffect(() => {
     fetchCredentials();
   }, [fetchCredentials]);
@@ -132,6 +166,9 @@ function CredentialLookup({
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onDebounce={checkCredentialName}
+        fieldName={fieldName}
+        validate={validate}
         required={required}
         qsConfig={QS_CONFIG}
         isDisabled={isDisabled}
@@ -212,6 +249,8 @@ CredentialLookup.propTypes = {
   value: oneOfType([Credential, arrayOf(Credential)]),
   isDisabled: bool,
   autoPopulate: bool,
+  validate: func,
+  fieldName: string,
 };
 
 CredentialLookup.defaultProps = {
@@ -225,6 +264,8 @@ CredentialLookup.defaultProps = {
   value: null,
   isDisabled: false,
   autoPopulate: false,
+  validate: () => undefined,
+  fieldName: 'credential',
 };
 
 export { CredentialLookup as _CredentialLookup };

@@ -52,12 +52,7 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
   const isGalaxyCredential =
     !!credentialTypeId && credentialTypes[credentialTypeId]?.kind === 'galaxy';
 
-  const [orgField, orgMeta, orgHelpers] = useField({
-    name: 'organization',
-    validate:
-      isGalaxyCredential &&
-      required(t`Galaxy credentials must be owned by an Organization.`),
-  });
+  const [orgField, orgMeta, orgHelpers] = useField('organization');
 
   const credentialTypeOptions = Object.keys(credentialTypes)
     .map(key => {
@@ -122,11 +117,12 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
     }
   }, [resetSubFormFields, credentialTypeId]);
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const isCredentialTypeDisabled = pathname.includes('edit');
@@ -182,12 +178,17 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={orgField.value}
         touched={orgMeta.touched}
         error={orgMeta.error}
         required={isGalaxyCredential}
         isDisabled={initialValues.isOrgLookupDisabled}
+        validate={
+          isGalaxyCredential
+            ? required(t`Galaxy credentials must be owned by an Organization.`)
+            : undefined
+        }
       />
       <FormGroup
         fieldId="credential-Type"

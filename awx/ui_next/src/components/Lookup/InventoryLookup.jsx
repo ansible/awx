@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { func, bool } from 'prop-types';
+import { func, bool, string } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { InventoriesAPI } from '../../api';
 import { Inventory } from '../../types';
@@ -23,7 +22,6 @@ function InventoryLookup({
   value,
   onChange,
   onBlur,
-
   history,
   required,
   isPromptableField,
@@ -31,6 +29,8 @@ function InventoryLookup({
   promptId,
   promptName,
   isOverrideDisabled,
+  validate,
+  fieldName,
 }) {
   const {
     result: {
@@ -50,6 +50,7 @@ function InventoryLookup({
         InventoriesAPI.read(params),
         InventoriesAPI.readOptions(),
       ]);
+
       return {
         inventories: data.results,
         count: data.count,
@@ -71,6 +72,24 @@ function InventoryLookup({
       searchableKeys: [],
       canEdit: false,
     }
+  );
+
+  const checkInventoryName = useCallback(
+    async name => {
+      if (name && name !== '') {
+        try {
+          const {
+            data: { results: nameMatchResults, count: nameMatchCount },
+          } = await InventoriesAPI.read({ name });
+          onChange(nameMatchCount ? nameMatchResults[0] : null);
+        } catch {
+          onChange(null);
+        }
+      } else {
+        onChange(null);
+      }
+    },
+    [onChange]
   );
 
   useEffect(() => {
@@ -96,6 +115,9 @@ function InventoryLookup({
           onChange={onChange}
           onBlur={onBlur}
           required={required}
+          onDebounce={checkInventoryName}
+          fieldName={fieldName}
+          validate={validate}
           isLoading={isLoading}
           isDisabled={!canEdit}
           qsConfig={QS_CONFIG}
@@ -147,6 +169,9 @@ function InventoryLookup({
         header={t`Inventory`}
         value={value}
         onChange={onChange}
+        onDebounce={checkInventoryName}
+        fieldName={fieldName}
+        validate={validate}
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
@@ -200,12 +225,16 @@ InventoryLookup.propTypes = {
   onChange: func.isRequired,
   required: bool,
   isOverrideDisabled: bool,
+  validate: func,
+  fieldName: string,
 };
 
 InventoryLookup.defaultProps = {
   value: null,
   required: false,
   isOverrideDisabled: false,
+  validate: () => {},
+  fieldName: 'inventory',
 };
 
 export default withRouter(InventoryLookup);

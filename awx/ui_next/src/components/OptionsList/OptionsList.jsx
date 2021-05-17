@@ -41,7 +41,6 @@ function OptionsList({
   deselectItem,
   renderItemChip,
   isLoading,
-
   displayKey,
 }) {
   return (

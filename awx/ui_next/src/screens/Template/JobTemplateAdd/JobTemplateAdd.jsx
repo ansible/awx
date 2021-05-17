@@ -14,6 +14,8 @@ function JobTemplateAdd() {
       labels,
       instanceGroups,
       initialInstanceGroups,
+      inventory,
+      project,
       credentials,
       webhook_credential,
       webhook_key,
@@ -22,8 +24,9 @@ function JobTemplateAdd() {
     } = values;
 
     setFormSubmitError(null);
-    remainingValues.project = remainingValues.project.id;
+    remainingValues.project = project.id;
     remainingValues.webhook_credential = webhook_credential?.id;
+    remainingValues.inventory = inventory?.id || null;
     try {
       const {
         data: { id, type },

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { bool, func, shape } from 'prop-types';
-import { Formik, useField } from 'formik';
-
+import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
-
 import { Form, FormGroup } from '@patternfly/react-core';
 import FormField, { FormSubmitError } from '../FormField';
 import FormActionGroup from '../FormActionGroup/FormActionGroup';
@@ -13,15 +11,19 @@ import { FormColumnLayout, FormFullWidthLayout } from '../FormLayout';
 import Popover from '../Popover';
 import { required } from '../../util/validators';
 
-const InventoryLookupField = ({ host }) => {
-  const [inventory, setInventory] = useState(
-    host ? host.summary_fields.inventory : ''
+const InventoryLookupField = () => {
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [inventoryField, inventoryMeta, inventoryHelpers] = useField(
+    'inventory'
   );
 
-  const [, inventoryMeta, inventoryHelpers] = useField({
-    name: 'inventory',
-    validate: required(t`Select a value for this field`),
-  });
+  const handleInventoryUpdate = useCallback(
+    value => {
+      setFieldValue('inventory', value);
+      setFieldTouched('inventory', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
 
   return (
     <FormGroup
@@ -40,18 +42,16 @@ const InventoryLookupField = ({ host }) => {
     >
       <InventoryLookup
         fieldId="inventory-lookup"
-        value={inventory}
+        value={inventoryField.value}
         onBlur={() => inventoryHelpers.setTouched()}
         tooltip={t`Select the inventory that this host will belong to.`}
         isValid={!inventoryMeta.touched || !inventoryMeta.error}
         helperTextInvalid={inventoryMeta.error}
-        onChange={value => {
-          inventoryHelpers.setValue(value.id);
-          setInventory(value);
-        }}
+        onChange={handleInventoryUpdate}
         required
         touched={inventoryMeta.touched}
         error={inventoryMeta.error}
+        validate={required(t`Select a value for this field`)}
       />
     </FormGroup>
   );
@@ -62,7 +62,6 @@ const HostForm = ({
   handleSubmit,
   host,
   isInventoryVisible,
-
   submitError,
 }) => {
   return (
@@ -70,7 +69,7 @@ const HostForm = ({
       initialValues={{
         name: host.name,
         description: host.description,
-        inventory: host.inventory || '',
+        inventory: host.summary_fields?.inventory || null,
         variables: host.variables,
       }}
       onSubmit={handleSubmit}
@@ -92,7 +91,7 @@ const HostForm = ({
               type="text"
               label={t`Description`}
             />
-            {isInventoryVisible && <InventoryLookupField host={host} />}
+            {isInventoryVisible && <InventoryLookupField />}
             <FormFullWidthLayout>
               <VariablesField
                 id="host-variables"

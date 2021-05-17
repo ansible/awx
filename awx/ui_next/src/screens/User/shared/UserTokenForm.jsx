@@ -1,7 +1,6 @@
-import React from 'react';
-
+import React, { useCallback } from 'react';
 import { t } from '@lingui/macro';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
@@ -9,18 +8,24 @@ import FormField, { FormSubmitError } from '../../../components/FormField';
 import ApplicationLookup from '../../../components/Lookup/ApplicationLookup';
 import Popover from '../../../components/Popover';
 import { required } from '../../../util/validators';
-
 import { FormColumnLayout } from '../../../components/FormLayout';
 
 function UserTokenFormFields() {
-  const [applicationField, applicationMeta, applicationHelpers] = useField(
-    'application'
-  );
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [applicationField, applicationMeta] = useField('application');
 
   const [scopeField, scopeMeta, scopeHelpers] = useField({
     name: 'scope',
     validate: required(t`Please enter a value.`),
   });
+
+  const handleApplicationUpdate = useCallback(
+    value => {
+      setFieldValue('application', value);
+      setFieldTouched('application', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
 
   return (
     <>
@@ -36,9 +41,7 @@ function UserTokenFormFields() {
       >
         <ApplicationLookup
           value={applicationField.value}
-          onChange={value => {
-            applicationHelpers.setValue(value);
-          }}
+          onChange={handleApplicationUpdate}
           label={
             <span>
               {t`Application`}
@@ -89,7 +92,6 @@ function UserTokenForm({
   handleCancel,
   handleSubmit,
   submitError,
-
   token = {},
 }) {
   return (

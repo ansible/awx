@@ -13,6 +13,7 @@ function UserEdit({ user }) {
   const handleSubmit = async values => {
     setFormSubmitError(null);
     try {
+      delete values.organization;
       await UsersAPI.update(user.id, values);
       history.push(`/users/${user.id}/details`);
     } catch (error) {

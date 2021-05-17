@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import {
   mountWithContexts,
   waitForElement,
@@ -9,7 +10,7 @@ import { CredentialsAPI, CredentialTypesAPI } from '../../api';
 
 jest.mock('../../api');
 
-describe('<MultiCredentialsLookup />', () => {
+describe('<Formik><MultiCredentialsLookup /></Formik>', () => {
   let wrapper;
 
   const credentials = [
@@ -128,12 +129,14 @@ describe('<MultiCredentialsLookup />', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={onChange}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={onChange}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     wrapper.update();
@@ -145,12 +148,14 @@ describe('<MultiCredentialsLookup />', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={onChange}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={onChange}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const chip = wrapper.find('CredentialChip');
@@ -182,12 +187,14 @@ describe('<MultiCredentialsLookup />', () => {
   test('should change credential types', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={() => {}}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={() => {}}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const searchButton = await waitForElement(
@@ -227,12 +234,14 @@ describe('<MultiCredentialsLookup />', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={onChange}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={onChange}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const searchButton = await waitForElement(
@@ -294,12 +303,14 @@ describe('<MultiCredentialsLookup />', () => {
   test('should properly render vault credential labels', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={() => {}}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={() => {}}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const searchButton = await waitForElement(
@@ -325,12 +336,14 @@ describe('<MultiCredentialsLookup />', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={onChange}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={onChange}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const searchButton = await waitForElement(
@@ -392,12 +405,14 @@ describe('<MultiCredentialsLookup />', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={onChange}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={onChange}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const searchButton = await waitForElement(
@@ -466,12 +481,14 @@ describe('<MultiCredentialsLookup />', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <MultiCredentialsLookup
-          value={credentials}
-          tooltip="This is credentials look up"
-          onChange={onChange}
-          onError={() => {}}
-        />
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={onChange}
+            onError={() => {}}
+          />
+        </Formik>
       );
     });
     const searchButton = await waitForElement(

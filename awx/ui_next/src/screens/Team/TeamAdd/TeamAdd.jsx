@@ -18,7 +18,9 @@ class TeamAdd extends React.Component {
   async handleSubmit(values) {
     const { history } = this.props;
     try {
-      const { data: response } = await TeamsAPI.create(values);
+      const valuesToSend = { ...values };
+      valuesToSend.organization = valuesToSend.organization.id;
+      const { data: response } = await TeamsAPI.create(valuesToSend);
       history.push(`/teams/${response.id}`);
     } catch (error) {
       this.setState({ error });

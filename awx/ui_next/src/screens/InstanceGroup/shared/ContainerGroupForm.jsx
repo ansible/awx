@@ -22,18 +22,19 @@ import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import { VariablesField } from '../../../components/CodeEditor';
 
 function ContainerGroupFormFields({ instanceGroup }) {
-  const { setFieldValue } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField({
-    name: 'credential',
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [credentialField, credentialMeta, credentialHelpers] = useField(
+    'credential'
+  );
 
   const [overrideField] = useField('override');
 
-  const onCredentialChange = useCallback(
+  const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -52,7 +53,7 @@ function ContainerGroupFormFields({ instanceGroup }) {
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
-        onChange={onCredentialChange}
+        onChange={handleCredentialUpdate}
         value={credentialField.value}
         tooltip={t`Credential to authenticate with Kubernetes or OpenShift. Must be of type "Kubernetes/OpenShift API Bearer Token". If left blank, the underlying Pod's service account will be used.`}
         autoPopulate={!instanceGroup?.id}

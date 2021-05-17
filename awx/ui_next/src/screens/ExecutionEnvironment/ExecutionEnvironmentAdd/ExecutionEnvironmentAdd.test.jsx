@@ -60,6 +60,7 @@ const containerRegistryCredentialResolve = {
         kind: 'registry',
       },
     ],
+    count: 1,
   },
 };
 

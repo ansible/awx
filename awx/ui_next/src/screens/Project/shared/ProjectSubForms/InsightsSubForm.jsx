@@ -12,18 +12,16 @@ const InsightsSubForm = ({
   scmUpdateOnLaunch,
   autoPopulateCredential,
 }) => {
-  const { setFieldValue } = useFormikContext();
-  const [, credMeta, credHelpers] = useField({
-    name: 'credential',
-    validate: required(t`Select a value for this field`),
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [, credMeta, credHelpers] = useField('credential');
 
   const onCredentialChange = useCallback(
     value => {
       onCredentialSelection('insights', value);
-      setFieldValue('credential', value.id);
+      setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [onCredentialSelection, setFieldValue]
+    [onCredentialSelection, setFieldValue, setFieldTouched]
   );
 
   return (
@@ -38,6 +36,7 @@ const InsightsSubForm = ({
         value={credential.value}
         required
         autoPopulate={autoPopulateCredential}
+        validate={required(t`Select a value for this field`)}
       />
       <ScmTypeOptions hideAllowOverride scmUpdateOnLaunch={scmUpdateOnLaunch} />
     </>

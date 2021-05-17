@@ -16,18 +16,18 @@ import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 import { useConfig } from '../../../../contexts/Config';
 
 const TowerSubForm = ({ autoPopulateCredential }) => {
-  const { setFieldValue } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField({
-    name: 'credential',
-    validate: required(t`Select a value for this field`),
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [credentialField, credentialMeta, credentialHelpers] = useField(
+    'credential'
+  );
   const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const pluginLink = `${getDocsBaseUrl(
@@ -48,6 +48,7 @@ const TowerSubForm = ({ autoPopulateCredential }) => {
         value={credentialField.value}
         required
         autoPopulate={autoPopulateCredential}
+        validate={required(t`Select a value for this field`)}
       />
       <VerbosityField />
       <HostFilterField />

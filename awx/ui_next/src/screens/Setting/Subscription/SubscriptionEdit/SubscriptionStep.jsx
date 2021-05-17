@@ -40,21 +40,13 @@ function SubscriptionStep() {
     values.subscription ? 'selectSubscription' : 'uploadManifest'
   );
   const { isModalOpen, toggleModal, closeModal } = useModal();
-  const [manifest, manifestMeta, manifestHelpers] = useField({
-    name: 'manifest_file',
-  });
-  const [manifestFilename, , manifestFilenameHelpers] = useField({
-    name: 'manifest_filename',
-  });
-  const [subscription, , subscriptionHelpers] = useField({
-    name: 'subscription',
-  });
-  const [username, usernameMeta, usernameHelpers] = useField({
-    name: 'username',
-  });
-  const [password, passwordMeta, passwordHelpers] = useField({
-    name: 'password',
-  });
+  const [manifest, manifestMeta, manifestHelpers] = useField('manifest_file');
+  const [manifestFilename, , manifestFilenameHelpers] = useField(
+    'manifest_filename'
+  );
+  const [subscription, , subscriptionHelpers] = useField('subscription');
+  const [username, usernameMeta, usernameHelpers] = useField('username');
+  const [password, passwordMeta, passwordHelpers] = useField('password');
 
   return (
     <Flex

@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-
 import { t, Trans } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import {
@@ -15,15 +14,16 @@ import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 import { useConfig } from '../../../../contexts/Config';
 
 const EC2SubForm = () => {
-  const { setFieldValue } = useFormikContext();
-  const [credentialField] = useField('credential');
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [credentialField, credentialMeta] = useField('credential');
   const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const pluginLink = `${getDocsBaseUrl(
@@ -35,6 +35,8 @@ const EC2SubForm = () => {
   return (
     <>
       <CredentialLookup
+        helperTextInvalid={credentialMeta.error}
+        isValid={!credentialMeta.touched || !credentialMeta.error}
         credentialTypeNamespace="aws"
         label={t`Credential`}
         value={credentialField.value}

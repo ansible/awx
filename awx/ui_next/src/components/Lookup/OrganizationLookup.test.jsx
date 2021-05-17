@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import OrganizationLookup, { _OrganizationLookup } from './OrganizationLookup';
 import { OrganizationsAPI } from '../../api';
@@ -16,14 +17,22 @@ describe('OrganizationLookup', () => {
 
   test('should render successfully', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<OrganizationLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <OrganizationLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     expect(wrapper).toHaveLength(1);
   });
 
   test('should fetch organizations', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<OrganizationLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <OrganizationLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     expect(OrganizationsAPI.read).toHaveBeenCalledTimes(1);
     expect(OrganizationsAPI.read).toHaveBeenCalledWith({
@@ -35,7 +44,11 @@ describe('OrganizationLookup', () => {
 
   test('should display "Organization" label', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<OrganizationLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <OrganizationLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     const title = wrapper.find('FormGroup .pf-c-form__label-text');
     expect(title.text()).toEqual('Organization');
@@ -43,7 +56,11 @@ describe('OrganizationLookup', () => {
 
   test('should define default value for function props', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<OrganizationLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <OrganizationLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     expect(_OrganizationLookup.defaultProps.onBlur).toBeInstanceOf(Function);
     expect(_OrganizationLookup.defaultProps.onBlur).not.toThrow();
@@ -59,7 +76,9 @@ describe('OrganizationLookup', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationLookup autoPopulate onChange={onChange} />
+        <Formik>
+          <OrganizationLookup autoPopulate onChange={onChange} />
+        </Formik>
       );
     });
     expect(onChange).toHaveBeenCalledWith({ id: 1 });
@@ -74,7 +93,11 @@ describe('OrganizationLookup', () => {
     });
     const onChange = jest.fn();
     await act(async () => {
-      wrapper = mountWithContexts(<OrganizationLookup onChange={onChange} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <OrganizationLookup onChange={onChange} />
+        </Formik>
+      );
     });
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -89,7 +112,9 @@ describe('OrganizationLookup', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationLookup autoPopulate onChange={onChange} />
+        <Formik>
+          <OrganizationLookup autoPopulate onChange={onChange} />
+        </Formik>
       );
     });
     expect(onChange).not.toHaveBeenCalled();

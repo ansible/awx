@@ -20,11 +20,10 @@ function ApplicationFormFields({
   clientTypeOptions,
 }) {
   const match = useRouteMatch();
-  const { setFieldValue } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: required(null),
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
   const [
     authorizationTypeField,
     authorizationTypeMeta,
@@ -39,11 +38,12 @@ function ApplicationFormFields({
     validate: required(null),
   });
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -66,10 +66,11 @@ function ApplicationFormFields({
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required
         autoPopulate={!application?.id}
+        validate={required(null)}
       />
       <FormGroup
         fieldId="authType"
