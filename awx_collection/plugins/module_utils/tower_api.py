@@ -232,7 +232,7 @@ class TowerAPIModule(TowerModule):
             # A 405 means we used a method that isn't allowed. Usually this is a bad request, but it requires special treatment because the
             # API sends it as a logic error in a few situations (e.g. trying to cancel a job that isn't running).
             elif he.code == 405:
-                self.fail_json(msg="The Tower server says you can't make a request with the {0} method to this endpoing {1}".format(method, url.path))
+                self.fail_json(msg="The Tower server says you can't make a request with the {0} method to this endpoint {1}".format(method, url.path))
             # Sanity check: Did we get some other kind of error?  If so, write an appropriate error message.
             elif he.code >= 400:
                 # We are going to return a 400 so the module can decide what to do with it
