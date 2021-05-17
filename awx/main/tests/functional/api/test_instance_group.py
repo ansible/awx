@@ -13,7 +13,7 @@ from awx.main.utils import camelcase_to_underscore
 
 @pytest.fixture
 def tower_instance_group():
-    ig = InstanceGroup(name='tower')
+    ig = InstanceGroup(name='default')
     ig.save()
     return ig
 
@@ -117,8 +117,8 @@ def test_delete_rename_tower_instance_group_prevented(delete, options, tower_ins
     assert 'GET' in resp.data['actions']
     assert 'PUT' in resp.data['actions']
 
-    # Rename 'tower' instance group denied
-    patch(url, {'name': 'tower_prime'}, super_user, expect=400)
+    # Rename 'default' instance group denied
+    patch(url, {'name': 'default_prime'}, super_user, expect=400)
 
     # Rename, other instance group OK
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})

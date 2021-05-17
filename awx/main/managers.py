@@ -33,7 +33,7 @@ class HostManager(models.Manager):
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(inventory_sources__source='tower').values('name').distinct().count()
+        return self.order_by().exclude(inventory_sources__source=settings.DEFAULT_QUEUE_NAME).values('name').distinct().count()
 
     def org_active_count(self, org_id):
         """Return count of active, unique hosts used by an organization.

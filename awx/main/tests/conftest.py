@@ -81,7 +81,7 @@ def instance_group_factory():
 
 @pytest.fixture
 def default_instance_group(instance_factory, instance_group_factory):
-    return create_instance_group("tower", instances=[create_instance("hostA")])
+    return create_instance_group("default", instances=[create_instance("hostA")])
 
 
 @pytest.fixture
