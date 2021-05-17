@@ -14,7 +14,10 @@ import useSelected from '../../../util/useSelected';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
@@ -172,7 +175,7 @@ function InventoryGroupHostList() {
   );
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={
           isLoading || isDisassociateLoading || isAdHocLaunchLoading
@@ -203,6 +206,13 @@ function InventoryGroupHostList() {
             key: 'name',
           },
         ]}
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Activity`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
@@ -235,14 +245,15 @@ function InventoryGroupHostList() {
             ]}
           />
         )}
-        renderItem={o => (
+        renderRow={(host, index) => (
           <InventoryGroupHostListItem
-            key={o.id}
-            host={o}
-            detailUrl={`/inventories/inventory/${inventoryId}/hosts/${o.id}/details`}
-            editUrl={`/inventories/inventory/${inventoryId}/hosts/${o.id}/edit`}
-            isSelected={selected.some(row => row.id === o.id)}
-            onSelect={() => handleSelect(o)}
+            key={host.id}
+            rowIndex={index}
+            host={host}
+            detailUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/details`}
+            editUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/edit`}
+            isSelected={selected.some(row => row.id === host.id)}
+            onSelect={() => handleSelect(host)}
           />
         )}
         emptyStateControls={canAdd && addButton}

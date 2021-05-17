@@ -10,7 +10,10 @@ import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
 import InventoryGroupRelatedGroupListItem from './InventoryRelatedGroupListItem';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
@@ -131,6 +134,7 @@ function InventoryRelatedGroupList() {
   const addButton = (
     <AddDropDownButton
       key="add"
+      ouiaId="add-existing-group-button"
       dropdownItems={[
         <DropdownItem
           key={addExistingGroup}
@@ -140,6 +144,7 @@ function InventoryRelatedGroupList() {
           {addExistingGroup}
         </DropdownItem>,
         <DropdownItem
+          ouiaId="add-new-group-button"
           component={Link}
           to={`${addFormUrl}`}
           key={addNewGroup}
@@ -153,7 +158,7 @@ function InventoryRelatedGroupList() {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
@@ -209,14 +214,21 @@ function InventoryRelatedGroupList() {
             ]}
           />
         )}
-        renderItem={o => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(group, index) => (
           <InventoryGroupRelatedGroupListItem
-            key={o.id}
-            group={o}
-            detailUrl={`/inventories/inventory/${inventoryId}/groups/${o.id}/details`}
-            editUrl={`/inventories/inventory/${inventoryId}/groups/${o.id}/edit`}
-            isSelected={selected.some(row => row.id === o.id)}
-            onSelect={() => handleSelect(o)}
+            key={group.id}
+            rowIndex={index}
+            group={group}
+            detailUrl={`/inventories/inventory/${inventoryId}/groups/${group.id}/details`}
+            editUrl={`/inventories/inventory/${inventoryId}/groups/${group.id}/edit`}
+            isSelected={selected.some(row => row.id === group.id)}
+            onSelect={() => handleSelect(group)}
           />
         )}
         emptyStateControls={canAdd && addButton}

@@ -1,38 +1,22 @@
 import 'styled-components/macro';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { string, bool, func } from 'prop-types';
-
+import { string, bool, func, number } from 'prop-types';
 import { t } from '@lingui/macro';
-
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
 
+import { Td, Tr } from '@patternfly/react-table';
+import { ActionItem, ActionsTd } from '../../../components/PaginatedTable';
 import HostToggle from '../../../components/HostToggle';
 import Sparkline from '../../../components/Sparkline';
 import { Host } from '../../../types';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 24px;
-  grid-template-columns: min-content 40px;
-`;
 
 function InventoryGroupHostListItem({
   detailUrl,
   editUrl,
   host,
+  rowIndex,
   isSelected,
   onSelect,
 }) {
@@ -44,55 +28,55 @@ function InventoryGroupHostListItem({
   const labelId = `check-action-${host.id}`;
 
   return (
-    <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-host-${host.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link to={`${detailUrl}`}>
-                <b>{host.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="recentJobs">
-              <Sparkline jobs={recentPlaybookJobs} />
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={t`actions`}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={host.id} arialabelledby={labelId}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={t`Selected`}
+      />
+      <Td id={labelId}>
+        <Link to={`${detailUrl}`}>
+          <b>{host.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={t`Activity`}>
+        <Sparkline jobs={recentPlaybookJobs} />
+      </Td>
+      <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
+        <ActionItem
+          visible={host.summary_fields.user_capabilities?.edit}
+          tooltip={t`Toggle host`}
         >
-          <HostToggle css="grid-column: 1" host={host} />
-          {host.summary_fields.user_capabilities?.edit && (
-            <Tooltip content={t`Edit Host`} position="top">
-              <Button
-                ouiaId={`${host.id}-edit-button`}
-                aria-label={t`Edit Host`}
-                css="grid-column: 2"
-                variant="plain"
-                component={Link}
-                to={`${editUrl}`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <HostToggle host={host} />
+        </ActionItem>
+        <ActionItem
+          tooltip={t`Edit Host`}
+          visible={host.summary_fields.user_capabilities?.edit}
+        >
+          <Tooltip content={t`Edit Host`} position="top">
+            <Button
+              ouiaId={`${host.id}-edit-button`}
+              aria-label={t`Edit Host`}
+              variant="plain"
+              component={Link}
+              to={`${editUrl}`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </Tooltip>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 
 InventoryGroupHostListItem.propTypes = {
   detailUrl: string.isRequired,
   editUrl: string.isRequired,
+  rowIndex: number.isRequired,
   host: Host.isRequired,
   isSelected: bool.isRequired,
   onSelect: func.isRequired,

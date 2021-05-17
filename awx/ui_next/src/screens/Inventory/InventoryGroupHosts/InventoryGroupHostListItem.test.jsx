@@ -17,6 +17,7 @@ describe('<InventoryGroupHostListItem />', () => {
         host={mockHost}
         isSelected={false}
         onSelect={() => {}}
+        rowIndex={0}
       />
     );
   });
@@ -26,12 +27,9 @@ describe('<InventoryGroupHostListItem />', () => {
   });
 
   test('should display expected row item content', () => {
-    expect(
-      wrapper
-        .find('DataListCell')
-        .first()
-        .text()
-    ).toBe('.host-000001.group-00000.dummy');
+    expect(wrapper.find('b').text()).toContain(
+      '.host-000001.group-00000.dummy'
+    );
     expect(wrapper.find('Sparkline').length).toBe(1);
     expect(wrapper.find('HostToggle').length).toBe(1);
   });
@@ -50,6 +48,7 @@ describe('<InventoryGroupHostListItem />', () => {
         host={mockHost}
         isSelected={false}
         onSelect={() => {}}
+        rowIndex={0}
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
