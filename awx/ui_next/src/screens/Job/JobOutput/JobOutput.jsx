@@ -39,12 +39,11 @@ import getRowRangePageSize from './shared/jobOutputUtils';
 import { getJobModel, isJobRunning } from '../../../util/jobs';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import {
-  encodeNonDefaultQueryString,
   parseQueryString,
   mergeParams,
-  replaceParams,
   removeParams,
   getQSConfig,
+  replaceNamespacedParams,
 } from '../../../util/qs';
 import useIsMounted from '../../../util/useIsMounted';
 
@@ -589,35 +588,47 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleSearch = (key, value) => {
-    let params = parseQueryString(QS_CONFIG, location.search);
-    params = mergeParams(params, { [key]: value });
-    pushHistoryState(params);
+    const params = parseQueryString(QS_CONFIG, location.search);
+    const qs = replaceNamespacedParams(
+      QS_CONFIG,
+      location.search,
+      mergeParams(params, { [key]: value })
+    );
+    pushHistoryState(qs);
   };
 
   const handleReplaceSearch = (key, value) => {
-    const oldParams = parseQueryString(QS_CONFIG, location.search);
-    pushHistoryState(replaceParams(oldParams, { [key]: value }));
+    const qs = replaceNamespacedParams(QS_CONFIG, location.search, {
+      [key]: value,
+    });
+    pushHistoryState(qs);
   };
 
   const handleRemoveSearchTerm = (key, value) => {
-    let oldParams = parseQueryString(QS_CONFIG, location.search);
-    if (parseInt(value, 10)) {
-      oldParams = removeParams(QS_CONFIG, oldParams, {
-        [key]: parseInt(value, 10),
-      });
-    }
-    pushHistoryState(removeParams(QS_CONFIG, oldParams, { [key]: value }));
+    const oldParams = parseQueryString(QS_CONFIG, location.search);
+    const updatedParams = removeParams(QS_CONFIG, oldParams, {
+      [key]: value,
+    });
+    const qs = replaceNamespacedParams(
+      QS_CONFIG,
+      location.search,
+      updatedParams
+    );
+    pushHistoryState(qs);
   };
 
   const handleRemoveAllSearchTerms = () => {
     const oldParams = parseQueryString(QS_CONFIG, location.search);
-    pushHistoryState(removeParams(QS_CONFIG, oldParams, { ...oldParams }));
+    Object.keys(oldParams).forEach(key => {
+      oldParams[key] = null;
+    });
+    const qs = replaceNamespacedParams(QS_CONFIG, location.search, oldParams);
+    pushHistoryState(qs);
   };
 
-  const pushHistoryState = params => {
+  const pushHistoryState = qs => {
     const { pathname } = history.location;
-    const encodedParams = encodeNonDefaultQueryString(QS_CONFIG, params);
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const renderSearchComponent = () => (

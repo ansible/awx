@@ -1,11 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
-  replaceNamespacedParams,
-} from './qs';
+import { parseQueryString, replaceNamespacedParams } from './qs';
 import useIsMounted from './useIsMounted';
 
 /*
