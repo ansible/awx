@@ -63,10 +63,11 @@
     command_id: "{{ command.id }}"
     fail_if_not_running: true
   register: results
+  ignore_errors: true
 
 - assert:
     that:
-      - results is changed
+      - results is failed
 
 - name: Cancel an already canceled command (assert failure)
   tower_ad_hoc_command_cancel:
