@@ -30,9 +30,11 @@ export default function ActionsTd({ children, gridColumns, ...props }) {
     >
       <ActionsGrid numActions={numActions} gridColumns={gridColumns}>
         {React.Children.map(children, (child, i) =>
-          React.cloneElement(child, {
-            column: i + 1,
-          })
+          child
+            ? React.cloneElement(child, {
+                column: i + 1,
+              })
+            : null
         )}
       </ActionsGrid>
     </Td>

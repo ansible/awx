@@ -53,8 +53,8 @@ function TemplateSurvey({ template, canEdit }) {
   );
   const updateSurveySpec = spec => {
     updateSurvey({
-      name: survey.name || '',
-      description: survey.description || '',
+      name: survey?.name || '',
+      description: survey?.description || '',
       spec,
     });
   };

@@ -7,7 +7,7 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import UserOrganizationsList from './UserOrganizationsList';
+import UserOrganizationList from './UserOrganizationList';
 import { UsersAPI } from '../../../api';
 
 jest.mock('../../../api/models/Users');
@@ -15,6 +15,7 @@ jest.mock('../../../api/models/Users');
 describe('<UserOrganizationlist />', () => {
   let history;
   let wrapper;
+
   beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['/users/1/organizations'],
@@ -36,7 +37,7 @@ describe('<UserOrganizationlist />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/users/:id/organizations"
-          component={() => <UserOrganizationsList />}
+          component={() => <UserOrganizationList />}
         />,
         {
           context: {
@@ -52,12 +53,15 @@ describe('<UserOrganizationlist />', () => {
       );
     });
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   test('successfully mounts', async () => {
     await waitForElement(wrapper, 'UserOrganizationListItem');
   });
+
   test('calls api to get organizations', () => {
     expect(UsersAPI.readOrganizations).toBeCalledWith('1', {
       order_by: 'name',

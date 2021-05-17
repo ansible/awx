@@ -50,6 +50,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     webhook_service: 'Github',
     webhook_key: 'Foo webhook key',
     execution_environment: 4,
+    scm_branch: 'main',
   };
 
   beforeEach(async () => {
@@ -108,6 +109,11 @@ describe('<WorkflowJobTemplateDetail/>', () => {
         element: 'Detail[label="Webhook URL"]',
         prop: 'value',
         value: 'http://localhost/api/v2/workflow_job_templates/45/github/',
+      },
+      {
+        element: 'Detail[label="Source Control Branch"]',
+        prop: 'value',
+        value: 'main',
       },
       {
         element: "Detail[label='Webhook Service']",

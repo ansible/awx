@@ -30,7 +30,7 @@ class ExecutionEnvironment(CommonModel):
     image = models.CharField(
         max_length=1024,
         verbose_name=_('image location'),
-        help_text=_("The registry location where the container is stored."),
+        help_text=_("The full image location, including the container registry, image name, and version tag."),
     )
     managed_by_tower = models.BooleanField(default=False, editable=False)
     credential = models.ForeignKey(

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { string, bool } from 'prop-types';
+import { string, bool, func, oneOf } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
@@ -24,11 +24,20 @@ const StyledCheckboxField = styled(CheckboxField)`
   margin-left: auto;
 `;
 
-function VariablesField({ id, name, label, readOnly, promptId, tooltip }) {
+function VariablesField({
+  id,
+  name,
+  label,
+  readOnly,
+  promptId,
+  tooltip,
+  initialMode,
+  onModeChange,
+}) {
   // track focus manually, because the Code Editor library doesn't wire
   // into Formik completely
   const [shouldValidate, setShouldValidate] = useState(false);
-  const [mode, setMode] = useState(YAML_MODE);
+  const [mode, setMode] = useState(initialMode || YAML_MODE);
   const validate = useCallback(
     value => {
       if (!shouldValidate) {
@@ -54,6 +63,7 @@ function VariablesField({ id, name, label, readOnly, promptId, tooltip }) {
       // mode's useState above couldn't be initialized to JSON_MODE because
       // the field value had to be defined below it
       setMode(JSON_MODE);
+      onModeChange(JSON_MODE);
       helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -76,6 +86,7 @@ function VariablesField({ id, name, label, readOnly, promptId, tooltip }) {
     if (newMode === YAML_MODE && !isJsonEdited && lastYamlValue !== null) {
       helpers.setValue(lastYamlValue, false);
       setMode(newMode);
+      onModeChange(newMode);
       return;
     }
 
@@ -86,6 +97,7 @@ function VariablesField({ id, name, label, readOnly, promptId, tooltip }) {
           : yamlToJson(field.value);
       helpers.setValue(newVal, false);
       setMode(newMode);
+      onModeChange(newMode);
     } catch (err) {
       helpers.setError(err.message);
     }
@@ -163,10 +175,14 @@ VariablesField.propTypes = {
   label: string.isRequired,
   readOnly: bool,
   promptId: string,
+  initialMode: oneOf([YAML_MODE, JSON_MODE]),
+  onModeChange: func,
 };
 VariablesField.defaultProps = {
   readOnly: false,
   promptId: null,
+  initialMode: YAML_MODE,
+  onModeChange: () => {},
 };
 
 function VariablesFieldInternals({
@@ -189,7 +205,11 @@ function VariablesFieldInternals({
     if (mode === YAML_MODE) {
       return;
     }
-    helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
+    try {
+      helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
+    } catch (e) {
+      helpers.setError(e.message);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

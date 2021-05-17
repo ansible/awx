@@ -272,7 +272,7 @@ black: reports
 	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
 .git/hooks/pre-commit:
-	@echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only --diff-filter=AM | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
+	@echo "./pre-commit.sh" > .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 
 genschema: reports
@@ -469,7 +469,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e cluster_node_count=$(CLUSTER_NODE_COUNT)
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml up $(COMPOSE_UP_OPTS)
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"

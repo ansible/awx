@@ -150,7 +150,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'group': DEFAULT_SUMMARY_FIELDS,
     'default_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
     'execution_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
-    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
+    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type', 'allow_override'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed'),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'kubernetes', 'credential_type_id'),
@@ -2207,6 +2207,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             'org_host_limit_error',
             'source_project_update',
             'custom_virtualenv',
+            'instance_group',
             '-controller_node',
         )
 
@@ -4374,7 +4375,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         return res
 
     def _recent_notifications(self, obj):
-        return [{'id': x.id, 'status': x.status, 'created': x.created} for x in obj.notifications.all().order_by('-created')[:5]]
+        return [{'id': x.id, 'status': x.status, 'created': x.created, 'error': x.error} for x in obj.notifications.all().order_by('-created')[:5]]
 
     def get_summary_fields(self, obj):
         d = super(NotificationTemplateSerializer, self).get_summary_fields(obj)

@@ -34,20 +34,24 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
   };
 
   if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
-    const initialExtraVars =
-      launchConfig.ask_variables_on_launch && (overrides.extra_vars || '---');
-    if (surveyConfig?.spec) {
-      const passwordFields = surveyConfig.spec
-        .filter(q => q.type === 'password')
-        .map(q => q.variable);
-      const masked = maskPasswords(surveyValues, passwordFields);
-      overrides.extra_vars = yaml.safeDump(
-        mergeExtraVars(initialExtraVars, masked)
-      );
-    } else {
-      overrides.extra_vars = yaml.safeDump(
-        mergeExtraVars(initialExtraVars, {})
-      );
+    try {
+      const initialExtraVars =
+        launchConfig.ask_variables_on_launch && (overrides.extra_vars || '---');
+      if (surveyConfig?.spec) {
+        const passwordFields = surveyConfig.spec
+          .filter(q => q.type === 'password')
+          .map(q => q.variable);
+        const masked = maskPasswords(surveyValues, passwordFields);
+        overrides.extra_vars = yaml.safeDump(
+          mergeExtraVars(initialExtraVars, masked)
+        );
+      } else {
+        overrides.extra_vars = yaml.safeDump(
+          mergeExtraVars(initialExtraVars, {})
+        );
+      }
+    } catch (e) {
+      //
     }
   }
 

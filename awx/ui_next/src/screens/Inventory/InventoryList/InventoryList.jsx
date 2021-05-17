@@ -135,9 +135,11 @@ function InventoryList() {
   const addSmartInventory = t`Add smart inventory`;
   const addButton = (
     <AddDropDownButton
+      ouiaId="add-inventory-button"
       key="add"
       dropdownItems={[
         <DropdownItem
+          ouiaId="add-inventory-item"
           to={`${match.url}/inventory/add/`}
           component={Link}
           key={addInventory}
@@ -146,6 +148,7 @@ function InventoryList() {
           {addInventory}
         </DropdownItem>,
         <DropdownItem
+          ouiaId="add-smart-inventory-item"
           to={`${match.url}/smart_inventory/add/`}
           component={Link}
           key={addSmartInventory}
@@ -221,7 +224,7 @@ function InventoryList() {
                   deleteMessage={
                     <Plural
                       value={selected.length}
-                      one="This invetory is currently being used by some temeplates. Are you sure you want to delete it?"
+                      one="This inventory is currently being used by some templates. Are you sure you want to delete it?"
                       other="Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?"
                     />
                   }

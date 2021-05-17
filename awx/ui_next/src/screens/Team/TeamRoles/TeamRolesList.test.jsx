@@ -194,21 +194,36 @@ describe('<TeamRolesList />', () => {
     });
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
 
-    expect(wrapper.find(`Link#teamRole-2`).prop('to')).toBe(
-      '/templates/job_template/15/details'
-    );
-    expect(wrapper.find(`Link#teamRole-3`).prop('to')).toBe(
-      '/templates/workflow_job_template/16/details'
-    );
-    expect(wrapper.find('Link#teamRole-4').prop('to')).toBe(
-      '/credentials/75/details'
-    );
-    expect(wrapper.find('Link#teamRole-5').prop('to')).toBe(
-      '/inventories/inventory/76/details'
-    );
-    expect(wrapper.find('Link#teamRole-6').prop('to')).toBe(
-      '/inventories/smart_inventory/77/details'
-    );
+    expect(
+      wrapper
+        .find('Tr#role-item-row-2')
+        .find(`LinkAnchor`)
+        .prop('href')
+    ).toBe('/templates/job_template/15/details');
+    expect(
+      wrapper
+        .find('Tr#role-item-row-3')
+        .find(`LinkAnchor`)
+        .prop('href')
+    ).toBe('/templates/workflow_job_template/16/details');
+    expect(
+      wrapper
+        .find('Tr#role-item-row-4')
+        .find('LinkAnchor')
+        .prop('href')
+    ).toBe('/credentials/75/details');
+    expect(
+      wrapper
+        .find('Tr#role-item-row-5')
+        .find('LinkAnchor')
+        .prop('href')
+    ).toBe('/inventories/inventory/76/details');
+    expect(
+      wrapper
+        .find('Tr#role-item-row-6')
+        .find('LinkAnchor')
+        .prop('href')
+    ).toBe('/inventories/smart_inventory/77/details');
   });
   test('should not render add button when user cannot edit team and is not an admin of the org', async () => {
     UsersAPI.readAdminOfOrganizations.mockResolvedValueOnce({

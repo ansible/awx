@@ -172,6 +172,7 @@ function ExecutionEnvironmentList() {
                   ...(canAdd
                     ? [
                         <ToolbarAddButton
+                          ouiaId="add-execution-environment"
                           key="add"
                           linkTo={`${match.url}/add`}
                         />,

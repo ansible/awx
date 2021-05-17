@@ -44,6 +44,7 @@ function WorkflowJobTemplateDetail({ template }) {
     related,
     webhook_credential,
     webhook_key,
+    scm_branch: scmBranch,
   } = template;
 
   const urlOrigin = window.location.origin;
@@ -128,6 +129,13 @@ function WorkflowJobTemplateDetail({ template }) {
                 <Label>{summary_fields.organization.name}</Label>
               </Link>
             }
+          />
+        )}
+        {scmBranch && (
+          <Detail
+            dataCy="source-control-branch"
+            label={t`Source Control Branch`}
+            value={scmBranch}
           />
         )}
         {summary_fields?.execution_environment && (

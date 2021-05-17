@@ -176,21 +176,33 @@ def main():
     optional_args = {}
     # Extract our parameters
     name = module.params.get('name')
-    optional_args['job_type'] = module.params.get('job_type')
     inventory = module.params.get('inventory')
     organization = module.params.get('organization')
     credentials = module.params.get('credentials')
-    optional_args['limit'] = module.params.get('limit')
-    optional_args['tags'] = module.params.get('tags')
-    optional_args['extra_vars'] = module.params.get('extra_vars')
-    optional_args['scm_branch'] = module.params.get('scm_branch')
-    optional_args['skip_tags'] = module.params.get('skip_tags')
-    optional_args['verbosity'] = module.params.get('verbosity')
-    optional_args['diff_mode'] = module.params.get('diff_mode')
-    optional_args['credential_passwords'] = module.params.get('credential_passwords')
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
+
+    for field_name in (
+        'job_type',
+        'limit',
+        'extra_vars',
+        'scm_branch',
+        'verbosity',
+        'diff_mode',
+        'credential_passwords',
+    ):
+        field_val = module.params.get(field_name)
+        if field_val is not None:
+            optional_args[field_name] = field_val
+
+        # Special treatment of tags parameters
+        job_tags = module.params.get('tags')
+        if job_tags is not None:
+            optional_args['job_tags'] = ",".join(job_tags)
+        skip_tags = module.params.get('skip_tags')
+        if skip_tags is not None:
+            optional_args['skip_tags'] = ",".join(skip_tags)
 
     # Create a datastructure to pass into our job launch
     post_data = {}

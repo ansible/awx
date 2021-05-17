@@ -26,15 +26,20 @@ describe('<InventorySourceListItem />', () => {
     wrapper.unmount();
     jest.clearAllMocks();
   });
+
   test('should mount properly', () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={source}
-        isSelected={false}
-        onSelect={onSelect}
-        label="Source Bar"
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={source}
+            isSelected={false}
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('InventorySourceListItem').length).toBe(1);
   });
@@ -42,32 +47,35 @@ describe('<InventorySourceListItem />', () => {
   test('all buttons and text fields should render properly', () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={source}
-        isSelected={false}
-        onSelect={onSelect}
-        label="Source Bar"
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={source}
+            isSelected={false}
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('StatusIcon').length).toBe(1);
     expect(
       wrapper
         .find('Link')
-        .at(0)
+        .at(1)
         .prop('to')
     ).toBe('/jobs/inventory/664');
-    expect(wrapper.find('DataListCheck').length).toBe(1);
-    expect();
+    expect(wrapper.find('.pf-c-table__check').length).toBe(1);
     expect(
       wrapper
-        .find('DataListCell')
+        .find('Td')
         .at(1)
         .text()
     ).toBe('Foo');
     expect(
       wrapper
-        .find('DataListCell')
-        .at(2)
+        .find('Td')
+        .at(3)
         .text()
     ).toBe('Source Bar');
     expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
@@ -77,32 +85,46 @@ describe('<InventorySourceListItem />', () => {
   test('item should be checked', () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={source}
-        isSelected
-        onSelect={onSelect}
-        label="Source Bar"
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={source}
+            isSelected
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
     );
-    expect(wrapper.find('DataListCheck').length).toBe(1);
-    expect(wrapper.find('DataListCheck').prop('checked')).toBe(true);
+    wrapper.update();
+    expect(wrapper.find('.pf-c-table__check').length).toBe(1);
+    expect(
+      wrapper
+        .find('Td')
+        .first()
+        .prop('select').isSelected
+    ).toEqual(true);
   });
 
   test('should not render status icon', () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={{
-          ...source,
-          summary_fields: {
-            user_capabilities: { start: true, edit: true },
-            last_job: null,
-          },
-        }}
-        isSelected={false}
-        onSelect={onSelect}
-        label="Source Bar"
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={{
+              ...source,
+              summary_fields: {
+                user_capabilities: { start: true, edit: true },
+                last_job: null,
+              },
+            }}
+            isSelected={false}
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('StatusIcon').length).toBe(0);
   });
@@ -110,14 +132,20 @@ describe('<InventorySourceListItem />', () => {
   test('should not render sync buttons', async () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={{
-          ...source,
-          summary_fields: { user_capabilities: { start: false, edit: true } },
-        }}
-        isSelected={false}
-        onSelect={onSelect}
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={{
+              ...source,
+              summary_fields: {
+                user_capabilities: { start: false, edit: true },
+              },
+            }}
+            isSelected={false}
+            onSelect={onSelect}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('InventorySourceSyncButton').length).toBe(0);
     expect(wrapper.find('Button[aria-label="Edit Source"]').length).toBe(1);
@@ -126,15 +154,21 @@ describe('<InventorySourceListItem />', () => {
   test('should not render edit buttons', async () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={{
-          ...source,
-          summary_fields: { user_capabilities: { start: true, edit: false } },
-        }}
-        isSelected={false}
-        onSelect={onSelect}
-        label="Source Bar"
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={{
+              ...source,
+              summary_fields: {
+                user_capabilities: { start: true, edit: false },
+              },
+            }}
+            isSelected={false}
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Button[aria-label="Edit Source"]').length).toBe(0);
     expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
@@ -143,16 +177,20 @@ describe('<InventorySourceListItem />', () => {
   test('should render warning about missing execution environment', () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
-      <InventorySourceListItem
-        source={{
-          ...source,
-          custom_virtualenv: '/var/lib/awx/env',
-          execution_environment: null,
-        }}
-        isSelected={false}
-        onSelect={onSelect}
-        label="Source Bar"
-      />
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={{
+              ...source,
+              custom_virtualenv: '/var/lib/awx/env',
+              execution_environment: null,
+            }}
+            isSelected={false}
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
     );
     expect(
       wrapper.find('.missing-execution-environment').prop('content')

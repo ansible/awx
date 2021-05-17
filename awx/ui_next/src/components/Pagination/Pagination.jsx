@@ -4,7 +4,6 @@ import {
   Pagination as PFPagination,
   DropdownDirection,
 } from '@patternfly/react-core';
-import {} from '@lingui/core';
 import { t } from '@lingui/macro';
 
 const AWXPagination = styled(PFPagination)`

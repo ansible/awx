@@ -113,33 +113,31 @@ function ExecutionEnvironmentDetails({ executionEnvironment }) {
           dataCy="execution-environment-modified"
         />
       </DetailList>
-      {!managedByTower && (
-        <CardActionsRow>
-          {summary_fields.user_capabilities?.edit && (
-            <Button
-              ouiaId="execution-environment-detail-edit-button"
-              aria-label={t`edit`}
-              component={Link}
-              to={`/execution_environments/${id}/edit`}
-            >
-              {t`Edit`}
-            </Button>
-          )}
-          {summary_fields.user_capabilities?.delete && (
-            <DeleteButton
-              name={image}
-              modalTitle={t`Delete Execution Environment`}
-              onConfirm={deleteExecutionEnvironment}
-              isDisabled={isLoading}
-              ouiaId="delete-button"
-              deleteDetailsRequests={deleteDetailsRequests}
-              deleteMessage={t`This execution environment is currently being used by other resources. Are you sure you want to delete it?`}
-            >
-              {t`Delete`}
-            </DeleteButton>
-          )}
-        </CardActionsRow>
-      )}
+      <CardActionsRow>
+        {summary_fields.user_capabilities?.edit && (
+          <Button
+            ouiaId="execution-environment-detail-edit-button"
+            aria-label={t`edit`}
+            component={Link}
+            to={`/execution_environments/${id}/edit`}
+          >
+            {t`Edit`}
+          </Button>
+        )}
+        {summary_fields.user_capabilities?.delete && (
+          <DeleteButton
+            name={image}
+            modalTitle={t`Delete Execution Environment`}
+            onConfirm={deleteExecutionEnvironment}
+            isDisabled={isLoading}
+            ouiaId="delete-button"
+            deleteDetailsRequests={deleteDetailsRequests}
+            deleteMessage={t`This execution environment is currently being used by other resources. Are you sure you want to delete it?`}
+          >
+            {t`Delete`}
+          </DeleteButton>
+        )}
+      </CardActionsRow>
 
       {error && (
         <AlertModal

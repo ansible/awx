@@ -19,63 +19,84 @@ describe('<UserRolesListItem/>', () => {
   };
   test('should mount properly', () => {
     wrapper = mountWithContexts(
-      <UserRolesListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <UserRolesListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.length).toBe(1);
   });
 
   test('should render proper list item data', () => {
     wrapper = mountWithContexts(
-      <UserRolesListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <UserRolesListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
-    expect(
-      wrapper.find('PFDataListCell[aria-label="Resource name"]').text()
-    ).toBe('template delete project');
-    expect(
-      wrapper.find('PFDataListCell[aria-label="Resource type"]').text()
-    ).toContain('Job Template');
-    expect(
-      wrapper.find('PFDataListCell[aria-label="Resource role"]').text()
-    ).toContain('Admin');
+    const cells = wrapper.find('Td');
+    expect(cells.at(0).text()).toBe('template delete project');
+    expect(cells.at(1).text()).toContain('Job Template');
+    expect(cells.at(2).text()).toContain('Admin');
   });
+
   test('should render deletable chip', () => {
     wrapper = mountWithContexts(
-      <UserRolesListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <UserRolesListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Chip').prop('isReadOnly')).toBe(false);
   });
+
   test('should render read only chip', () => {
     role.summary_fields.user_capabilities.unattach = false;
     wrapper = mountWithContexts(
-      <UserRolesListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <UserRolesListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Chip').prop('isReadOnly')).toBe(true);
   });
+
   test('should display System as name when no resource_name is present in summary_fields', () => {
     wrapper = mountWithContexts(
-      <UserRolesListItem
-        role={{
-          ...role,
-          summary_fields: {
-            user_capabilities: { unattach: false },
-          },
-        }}
-      />
+      <table>
+        <tbody>
+          <UserRolesListItem
+            role={{
+              ...role,
+              summary_fields: {
+                user_capabilities: { unattach: false },
+              },
+            }}
+          />
+        </tbody>
+      </table>
     );
     expect(
-      wrapper.find('PFDataListCell[aria-label="Resource name"]').text()
+      wrapper
+        .find('Td')
+        .at(0)
+        .text()
     ).toBe('System');
   });
 });

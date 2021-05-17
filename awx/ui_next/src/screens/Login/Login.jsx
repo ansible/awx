@@ -127,7 +127,7 @@ function AWXLogin({ alt, isAuthenticated }) {
   if (authError?.response?.status === 401) {
     helperText = t`Invalid username or password. Please try again.`;
   } else {
-    helperText = t`There was a problem signing in. Please try again.`;
+    helperText = t`There was a problem logging in. Please try again.`;
   }
 
   const HeaderBrand = (
@@ -147,9 +147,8 @@ function AWXLogin({ alt, isAuthenticated }) {
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
         data-cy="login-header"
-        title={
-          brandName ? t`Welcome to Ansible ${brandName}! Please Sign In.` : ''
-        }
+        title={brandName ? t`Welcome to ${brandName}!` : ''}
+        subtitle={t`Please log in`}
       />
       <LoginMainBody>
         <Formik

@@ -155,8 +155,7 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     wrapper.update();
-
-    expect(wrapper.find('button').prop('disabled')).toEqual(true);
+    expect(wrapper.find('button').prop('disabled')).toEqual(false);
   });
 
   test('should relaunch job correctly', async () => {

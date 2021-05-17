@@ -48,6 +48,8 @@
     job_type: run
     ask_credential: true
     ask_inventory: true
+    ask_tags_on_launch: true
+    ask_skip_tags_on_launch: true
     state: present
   register: result
 
@@ -56,6 +58,10 @@
     job_template: "{{ jt_name1 }}"
     inventory: "Demo Inventory"
     credential: "Demo Credential"
+    tags:
+      - sometimes
+    skip_tags:
+      - always
   register: result
 
 - assert:

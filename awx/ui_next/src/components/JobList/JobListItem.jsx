@@ -15,6 +15,7 @@ import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { formatDateString } from '../../util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
+import JobCancelButton from '../JobCancelButton';
 
 const Dash = styled.span``;
 function JobListItem({
@@ -23,6 +24,7 @@ function JobListItem({
   isSelected,
   onSelect,
   showTypeColumn = false,
+  isSuperUser = false,
 }) {
   const labelId = `check-action-${job.id}`;
   const [isExpanded, setIsExpanded] = useState(false);
@@ -83,6 +85,20 @@ function JobListItem({
           {job.finished ? formatDateString(job.finished) : ''}
         </Td>
         <ActionsTd dataLabel={t`Actions`}>
+          <ActionItem
+            visible={
+              ['pending', 'waiting', 'running'].includes(job.status) &&
+              (job.type === 'system_job' ? isSuperUser : true)
+            }
+          >
+            <JobCancelButton
+              job={job}
+              errorTitle={t`Job Cancel Error`}
+              title={t`Cancel ${job.name}`}
+              errorMessage={t`Failed to cancel ${job.name}`}
+              showIconButton
+            />
+          </ActionItem>
           <ActionItem
             visible={
               job.type !== 'system_job' &&

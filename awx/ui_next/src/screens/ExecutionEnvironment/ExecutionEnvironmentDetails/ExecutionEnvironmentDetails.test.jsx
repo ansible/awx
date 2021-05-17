@@ -153,7 +153,7 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(history.location.pathname).toBe('/execution_environments');
   });
 
-  test('should not render action buttons to ee managed by tower', async () => {
+  test('should render action buttons to ee managed by tower', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <ExecutionEnvironmentDetails
@@ -185,9 +185,9 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(dates).toHaveLength(2);
     expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);
     expect(dates.at(1).prop('date')).toEqual(executionEnvironment.modified);
-    expect(wrapper.find('Button[aria-label="edit"]')).toHaveLength(0);
+    expect(wrapper.find('Button[aria-label="edit"]')).toHaveLength(1);
 
-    expect(wrapper.find('Button[aria-label="Delete"]')).toHaveLength(0);
+    expect(wrapper.find('Button[aria-label="Delete"]')).toHaveLength(1);
   });
 
   test('should have proper number of delete detail requests', async () => {

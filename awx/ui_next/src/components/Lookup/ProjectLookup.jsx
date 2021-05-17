@@ -24,7 +24,6 @@ const QS_CONFIG = getQSConfig('project', {
 function ProjectLookup({
   helperTextInvalid,
   autoPopulate,
-
   isValid,
   onChange,
   required,

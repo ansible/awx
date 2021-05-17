@@ -633,4 +633,109 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
+  test('should submit survey with default values properly, without opening prompt wizard', async () => {
+    let scheduleSurveyWrapper;
+    await act(async () => {
+      scheduleSurveyWrapper = mountWithContexts(
+        <ScheduleEdit
+          schedule={mockSchedule}
+          resource={{
+            id: 700,
+            type: 'job_template',
+            iventory: 1,
+            summary_fields: {
+              credentials: [
+                { name: 'job template credential', id: 75, kind: 'ssh' },
+              ],
+            },
+          }}
+          resourceDefaultCredentials={[]}
+          launchConfig={{
+            can_start_without_user_input: false,
+            passwords_needed_to_start: [],
+            ask_scm_branch_on_launch: false,
+            ask_variables_on_launch: false,
+            ask_tags_on_launch: false,
+            ask_diff_mode_on_launch: false,
+            ask_skip_tags_on_launch: false,
+            ask_job_type_on_launch: false,
+            ask_limit_on_launch: false,
+            ask_verbosity_on_launch: false,
+            ask_inventory_on_launch: true,
+            ask_credential_on_launch: true,
+            survey_enabled: true,
+            variables_needed_to_start: [],
+            credential_needed_to_start: true,
+            inventory_needed_to_start: true,
+            job_template_data: {
+              name: 'Demo Job Template',
+              id: 7,
+              description: '',
+            },
+            defaults: {
+              extra_vars: '---',
+              diff_mode: false,
+              limit: '',
+              job_tags: '',
+              skip_tags: '',
+              job_type: 'run',
+              verbosity: 0,
+              inventory: {
+                name: null,
+                id: null,
+              },
+              scm_branch: '',
+              credentials: [],
+            },
+          }}
+          surveyConfig={{
+            spec: [
+              {
+                question_name: 'text',
+                question_description: '',
+                required: true,
+                type: 'text',
+                variable: 'text',
+                min: 0,
+                max: 1024,
+                default: 'text variable',
+                choices: '',
+                new_question: true,
+              },
+              {
+                question_name: 'mc',
+                question_description: '',
+                required: true,
+                type: 'multiplechoice',
+                variable: 'mc',
+                min: 0,
+                max: 1024,
+                default: 'first',
+                choices: 'first\nsecond',
+                new_question: true,
+              },
+            ],
+          }}
+        />
+      );
+    });
+    await act(async () => {
+      scheduleSurveyWrapper.find('Formik').invoke('onSubmit')({
+        description: 'test description',
+        end: 'never',
+        frequency: 'none',
+        interval: 1,
+        name: 'Run once schedule',
+        startDateTime: '2020-03-25T10:00:00',
+        timezone: 'America/New_York',
+      });
+    });
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
+      description: 'test description',
+      name: 'Run once schedule',
+      extra_data: { mc: 'first', text: 'text variable' },
+      rrule:
+        'DTSTART;TZID=America/New_York:20200325T100000 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
+    });
+  });
 });

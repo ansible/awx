@@ -186,10 +186,11 @@ function WorkflowJobTemplateForm({
         >
           <TextInput
             id="wfjt-scm-branch"
-            {...scmField}
+            value={scmField.value}
             onChange={value => {
               scmHelpers.setValue(value);
             }}
+            aria-label={t`source control branch`}
           />
         </FieldWithPrompt>
         <ExecutionEnvironmentLookup

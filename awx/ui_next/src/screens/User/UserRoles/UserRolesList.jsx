@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -13,7 +12,10 @@ import { CubesIcon } from '@patternfly/react-icons';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { UsersAPI, RolesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 
@@ -131,7 +133,7 @@ function UserRolesList({ user }) {
   }
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={error}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={roles}
@@ -145,15 +147,16 @@ function UserRolesList({ user }) {
             isDefault: true,
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`ID`,
-            key: 'id',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={role => {
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell>{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell>{t`Role`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(role, index) => {
           return (
             <UserRolesListItem
               key={role.id}
@@ -164,6 +167,7 @@ function UserRolesList({ user }) {
               onSelect={item => {
                 setRoleToDisassociate(item);
               }}
+              rowIndex={index}
             />
           );
         }}

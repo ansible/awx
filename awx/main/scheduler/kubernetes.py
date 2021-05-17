@@ -81,7 +81,7 @@ class PodManager(object):
 
     @property
     def pod_name(self):
-        return f"awx-job-{self.task.id}"
+        return f"automation-job-{self.task.id}"
 
     @property
     def pod_definition(self):

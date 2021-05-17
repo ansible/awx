@@ -78,6 +78,8 @@ function LaunchButton({ resource, children, history }) {
       }
     } catch (err) {
       setError(err);
+    } finally {
+      setIsLaunching(false);
     }
   };
 

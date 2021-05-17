@@ -12,9 +12,11 @@ import { HostsAPI, InventoriesAPI } from '../../../api';
 import DataListToolbar from '../../../components/DataListToolbar';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
@@ -146,7 +148,7 @@ function InventoryHostGroupsList() {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={
           isLoading || isDisassociateLoading || isAdHocLaunchLoading
@@ -170,21 +172,22 @@ function InventoryHostGroupsList() {
             key: 'modified_by__username__icontains',
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`Name`,
-            key: 'name',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={item => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(item, index) => (
           <InventoryHostGroupItem
             key={item.id}
             group={item}
             inventoryId={item.summary_fields.inventory.id}
             isSelected={selected.some(row => row.id === item.id)}
             onSelect={() => handleSelect(item)}
+            rowIndex={index}
           />
         )}
         renderToolbar={props => (

@@ -59,7 +59,7 @@ class NavExpandableGroup extends Component {
 
 NavExpandableGroup.propTypes = {
   groupId: PropTypes.string.isRequired,
-  groupTitle: PropTypes.string.isRequired,
+  groupTitle: PropTypes.element.isRequired,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 

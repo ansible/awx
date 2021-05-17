@@ -58,7 +58,7 @@ $ ansible-playbook ansible/deploy-operator.yml \
 ## Deploy AWX into Minikube using the AWX Operator
 
 If have have not made any changes to the AWX Dockerfile, run the following
-command. If you need to test out changes to the Dockerfile, see the 
+command. If you need to test out changes to the Dockerfile, see the
 "Custom AWX Development Image for Kubernetes" section below.
 
 In the root of awx-operator:
@@ -66,7 +66,8 @@ In the root of awx-operator:
 ```
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
-    -e tower_image=quay.io/awx/awx_kube_devel:devel \
+    -e tower_image=quay.io/awx/awx_kube_devel \
+    -e tower_image_version=devel \
     -e tower_image_pull_policy=Always \
     -e tower_ingress_type=ingress
 ```
@@ -89,13 +90,14 @@ In the root of awx-operator:
 ```
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
-    -e tower_image=quay.io/awx/awx_kube_devel:${COMPOSE_TAG} \
+    -e tower_image=quay.io/awx/awx_kube_devel \
+    -e tower_image_version=${COMPOSE_TAG} \
     -e tower_image_pull_policy=Always \
     -e tower_ingress_type=ingress
 ```
 
 To iterate on changes to the Dockerfile, rebuild and push the image, then delete
-the AWX Pod. A new Pod will respawn with the latest revision. 
+the AWX Pod. A new Pod will respawn with the latest revision.
 
 ## Accessing AWX
 

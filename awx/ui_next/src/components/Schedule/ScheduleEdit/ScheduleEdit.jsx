@@ -61,6 +61,16 @@ function ScheduleEdit({
 
     let extraVars;
     const surveyValues = getSurveyValues(values);
+
+    if (
+      !Object.values(surveyValues).length &&
+      surveyConfiguration?.spec?.length
+    ) {
+      surveyConfiguration.spec.forEach(q => {
+        surveyValues[q.variable] = q.default;
+      });
+    }
+
     const initialExtraVars =
       launchConfiguration?.ask_variables_on_launch &&
       (values.extra_vars || '---');
@@ -91,7 +101,9 @@ function ScheduleEdit({
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (!requestData.extra_data) {
-          requestData.extra_data = JSON.stringify({ days: values.daysToKeep });
+          requestData.extra_data = JSON.stringify({
+            days: values.daysToKeep,
+          });
         } else {
           requestData.extra_data.days = values.daysToKeep;
         }

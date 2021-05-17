@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
-
 import { useLocation, useParams } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DataListToolbar from '../../../components/DataListToolbar';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AssociateModal from '../../../components/AssociateModal';
@@ -168,7 +169,7 @@ function UserTeamList() {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         items={teams}
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
@@ -176,7 +177,14 @@ function UserTeamList() {
         pluralizedItemName={t`Teams`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
-        renderItem={team => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Organization`}</HeaderCell>
+            <HeaderCell>{t`Description`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(team, index) => (
           <UserTeamListItem
             key={team.id}
             value={team.name}
@@ -184,6 +192,7 @@ function UserTeamList() {
             detailUrl={`/teams/${team.id}/details`}
             onSelect={() => handleSelect(team)}
             isSelected={selected.some(row => row.id === team.id)}
+            rowIndex={index}
           />
         )}
         renderToolbar={props => (
