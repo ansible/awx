@@ -163,11 +163,19 @@ export function removeParams(config, oldParams, paramsToRemove) {
     ...config.defaultParams,
   };
   Object.keys(oldParams).forEach(key => {
-    const value = removeParam(oldParams[key], paramsToRemove[key]);
-    if (value == null && Object.prototype.hasOwnProperty.call(updated, key)) {
+    const valToRemove = paramsToRemove[key];
+    const isInt = config.integerFields?.includes(key);
+    const updatedValue = removeParam(
+      oldParams[key],
+      isInt ? parseInt(valToRemove, 10) : valToRemove
+    );
+    if (
+      updatedValue == null &&
+      Object.prototype.hasOwnProperty.call(updated, key)
+    ) {
       return;
     }
-    updated[key] = value;
+    updated[key] = updatedValue;
   });
   return updated;
 }
@@ -253,7 +261,8 @@ export function replaceParams(oldParams, newParams) {
  * from other namespaces unaltered
  * @param {object} qs config object for namespacing params, filtering defaults
  * @param {string} the url query string to update
- * @param {object} namespaced params to add or update
+ * @param {object} namespaced params to add or update. use null to indicate
+ *        a param should be deleted from the query string
  * @return {string} url query string
  */
 export function replaceNamespacedParams(config, queryString, newParams) {

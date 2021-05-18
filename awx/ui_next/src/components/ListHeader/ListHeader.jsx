@@ -73,6 +73,8 @@ class ListHeader extends React.Component {
     Object.keys(oldParams).forEach(key => {
       oldParams[key] = null;
     });
+    delete oldParams.page_size;
+    delete oldParams.order_by;
     const qs = replaceNamespacedParams(qsConfig, location.search, oldParams);
     this.pushHistoryState(qs);
   }

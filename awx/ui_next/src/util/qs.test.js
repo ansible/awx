@@ -570,6 +570,38 @@ describe('qs (qs.js)', () => {
         page_size: 15,
       });
     });
+
+    test('should remove integer fields when given string value', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['id', 'page', 'page_size'],
+      };
+      const oldParams = { id: 199, foo: 'bar', page: 1, page_size: 15 };
+      const toRemove = { id: '199' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        foo: 'bar',
+        id: null,
+        page: 1,
+        page_size: 15,
+      });
+    });
+
+    test('should remove integer fields from array when given string value', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['id', 'page', 'page_size'],
+      };
+      const oldParams = { id: [199, 200], foo: 'bar', page: 1, page_size: 15 };
+      const toRemove = { id: '199' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        foo: 'bar',
+        id: 200,
+        page: 1,
+        page_size: 15,
+      });
+    });
   });
 
   describe('_stringToObject', () => {

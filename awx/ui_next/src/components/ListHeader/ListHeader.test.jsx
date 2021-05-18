@@ -71,7 +71,7 @@ describe('ListHeader', () => {
     expect(history.location.search).toEqual(query);
     const toolbar = wrapper.find('DataListToolbar');
     toolbar.prop('clearAllFilters')();
-    expect(history.location.search).toEqual('');
+    expect(history.location.search).toEqual('?item.page_size=5');
   });
 
   test('should test handle search', () => {
