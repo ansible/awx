@@ -69,7 +69,7 @@ class Command(BaseCommand):
                     changed = True
 
                 for ee in reversed(settings.DEFAULT_EXECUTION_ENVIRONMENTS):
-                    _, created = ExecutionEnvironment.objects.get_or_create(name=ee['name'], defaults={'image': ee['image'], 'managed_by_tower': True})
+                    _, created = ExecutionEnvironment.objects.update_or_create(name=ee['name'], defaults={'image': ee['image'], 'managed_by_tower': True})
 
                 if created:
                     changed = True
