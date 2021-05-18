@@ -6,7 +6,7 @@
     "node": "14.x"
   },
   "dependencies": {
-    "@lingui/react": "^3.7.1",
+    "@lingui/react": "3.9.0",
     "@patternfly/patternfly": "^4.102.1",
     "@patternfly/react-core": "^4.115.1",
     "@patternfly/react-icons": "4.7.22",
