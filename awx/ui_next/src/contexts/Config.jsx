@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
@@ -22,15 +22,7 @@ export const useConfig = () => {
 };
 
 export const ConfigProvider = ({ children }) => {
-  const { pathname } = useLocation();
-
-  const {
-    error: configError,
-    isLoading,
-    request,
-    result: config,
-    setValue: setConfig,
-  } = useRequest(
+  const { error: configError, isLoading, request, result: config } = useRequest(
     useCallback(async () => {
       const [
         { data },
@@ -48,10 +40,8 @@ export const ConfigProvider = ({ children }) => {
   const { error, dismissError } = useDismissableError(configError);
 
   useEffect(() => {
-    if (pathname !== '/login') {
-      request();
-    }
-  }, [request, pathname]);
+    request();
+  }, [request]);
 
   useEffect(() => {
     if (error?.response?.status === 401) {
@@ -59,10 +49,10 @@ export const ConfigProvider = ({ children }) => {
     }
   }, [error]);
 
-  const value = useMemo(() => ({ ...config, isLoading, setConfig }), [
+  const value = useMemo(() => ({ ...config, request, isLoading }), [
     config,
+    request,
     isLoading,
-    setConfig,
   ]);
 
   return (

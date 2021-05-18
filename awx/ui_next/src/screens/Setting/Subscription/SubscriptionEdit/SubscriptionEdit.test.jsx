@@ -14,7 +14,6 @@ import {
 } from '../../../../api';
 import SubscriptionEdit from './SubscriptionEdit';
 
-jest.mock('./bootstrapPendo');
 jest.mock('../../../../api');
 
 const mockConfig = {
@@ -53,7 +52,7 @@ const emptyConfig = {
   license_info: {
     valid_key: false,
   },
-  setConfig: jest.fn(),
+  request: jest.fn(),
 };
 
 describe('<SubscriptionEdit />', () => {
@@ -269,7 +268,7 @@ describe('<SubscriptionEdit />', () => {
           context: {
             config: {
               mockConfig,
-              setConfig: jest.fn(),
+              request: jest.fn(),
             },
             me: {
               is_superuser: true,

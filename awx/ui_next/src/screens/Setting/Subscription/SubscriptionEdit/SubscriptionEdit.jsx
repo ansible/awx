@@ -12,13 +12,12 @@ import {
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import { ConfigAPI, SettingsAPI, MeAPI, RootAPI } from '../../../../api';
+import { ConfigAPI, SettingsAPI, RootAPI } from '../../../../api';
 import useRequest, { useDismissableError } from '../../../../util/useRequest';
 import ContentLoading from '../../../../components/ContentLoading';
 import ContentError from '../../../../components/ContentError';
 import { FormSubmitError } from '../../../../components/FormField';
 import { useConfig } from '../../../../contexts/Config';
-import issuePendoIdentity from './pendoUtils';
 import SubscriptionStep from './SubscriptionStep';
 import AnalyticsStep from './AnalyticsStep';
 import EulaStep from './EulaStep';
@@ -92,7 +91,7 @@ const CustomFooter = ({ isSubmitLoading }) => {
 
 function SubscriptionEdit() {
   const history = useHistory();
-  const { license_info, setConfig } = useConfig();
+  const { request: updateConfig, license_info } = useConfig();
   const hasValidKey = Boolean(license_info?.valid_key);
   const subscriptionMgmtRoute = useRouteMatch({
     path: '/subscription_management',
@@ -102,20 +101,18 @@ function SubscriptionEdit() {
     isLoading: isContentLoading,
     error: contentError,
     request: fetchContent,
-    result: { brandName, pendoApiKey },
+    result: { brandName },
   } = useRequest(
     useCallback(async () => {
       const {
-        data: { BRAND_NAME, PENDO_API_KEY },
+        data: { BRAND_NAME },
       } = await RootAPI.readAssetVariables();
       return {
         brandName: BRAND_NAME,
-        pendoApiKey: PENDO_API_KEY,
       };
     }, []),
     {
       brandName: null,
-      pendoApiKey: null,
     }
   );
 
@@ -145,23 +142,11 @@ function SubscriptionEdit() {
         });
       }
 
-      const [
-        { data },
-        {
-          data: {
-            results: [me],
-          },
-        },
-      ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
-      const newConfig = { ...data, me };
-      setConfig(newConfig);
-
       if (!hasValidKey) {
         if (form.pendo) {
           await SettingsAPI.updateCategory('ui', {
             PENDO_TRACKING_STATE: 'detailed',
           });
-          await issuePendoIdentity(newConfig, pendoApiKey);
         } else {
           await SettingsAPI.updateCategory('ui', {
             PENDO_TRACKING_STATE: 'off',
@@ -178,6 +163,9 @@ function SubscriptionEdit() {
           });
         }
       }
+
+      await updateConfig();
+
       return true;
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
   );

@@ -19,6 +19,7 @@ import { MeAPI, RootAPI } from '../../api';
 import { useConfig, useAuthorizedPath } from '../../contexts/Config';
 import { SESSION_TIMEOUT_KEY } from '../../constants';
 import { isAuthenticated } from '../../util/auth';
+import issuePendoIdentity from '../../util/issuePendoIdentity';
 import About from '../About';
 import AlertModal from '../AlertModal';
 import BrandLogo from './BrandLogo';
@@ -137,6 +138,13 @@ function AppContainer({ navRouteConfig = [], children }) {
       handleLogout();
     }
   }, [handleLogout, timeRemaining]);
+
+  useEffect(() => {
+    if ('analytics_status' in config) {
+      issuePendoIdentity(config);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.analytics_status]);
 
   const brandName = config?.license_info?.product_name;
   const alt = brandName ? t`${brandName} logo` : t`brand logo`;
