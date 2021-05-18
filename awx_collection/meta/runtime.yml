@@ -96,20 +96,10 @@ plugin_routing:
       redirect: awx.awx.project_update
     tower_project:
       redirect: awx.awx.project
-    tower_receive:
-      redirect: awx.awx.receive
-      deprecation:
-        removal_date: TBD
-        warning_text: see plugin documentation for details
     tower_role:
       redirect: awx.awx.role
     tower_schedule:
       redirect: awx.awx.schedule
-    tower_send:
-      redirect: awx.awx.send
-      deprecation:
-        removal_date: TBD
-        warning_text: see plugin documentation for details
     tower_settings:
       redirect: awx.awx.settings
     tower_team:
@@ -128,8 +118,3 @@ plugin_routing:
       redirect: awx.awx.workflow_launch
     tower_workflow_node_wait:
       redirect: awx.awx.workflow_node_wait
-    tower_workflow_template:
-      redirect: awx.awx.workflow_template
-      deprecation:
-        removal_date: TBD
-        warning_text: see plugin documentation for details
