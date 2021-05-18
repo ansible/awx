@@ -272,7 +272,9 @@ black: reports
 	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
 .git/hooks/pre-commit:
-	@echo "./pre-commit.sh" > .git/hooks/pre-commit
+	@echo "if [ -x pre-commit.sh ]; then" > .git/hooks/pre-commit
+	@echo "    ./pre-commit.sh;" >> .git/hooks/pre-commit
+	@echo "fi" >> .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 
 genschema: reports
