@@ -96,6 +96,7 @@ from awx.main.utils import (
     get_awx_version,
     deepmerge,
     parse_yaml_or_json,
+    cleanup_new_process,
 )
 from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec
 from awx.main.utils.ansible import read_ansible_config
@@ -2989,6 +2990,7 @@ class AWXReceptorJob:
 
     # Spawned in a thread so Receptor can start reading before we finish writing, we
     # write our payload to the left side of our socketpair.
+    @cleanup_new_process
     def transmit(self, _socket):
         if not settings.IS_K8S and self.work_type == 'local':
             self.runner_params['only_transmit_kwargs'] = True
@@ -2999,6 +3001,7 @@ class AWXReceptorJob:
             # Socket must be shutdown here, or the reader will hang forever.
             _socket.shutdown(socket.SHUT_WR)
 
+    @cleanup_new_process
     def processor(self, resultfile):
         return ansible_runner.interface.run(
             streamer='process',
@@ -3040,6 +3043,7 @@ class AWXReceptorJob:
 
         return work_type
 
+    @cleanup_new_process
     def cancel_watcher(self, processor_future):
         while True:
             if processor_future.done():
