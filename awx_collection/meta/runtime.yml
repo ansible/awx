@@ -38,94 +38,98 @@ plugin_routing:
     tower_schedule_rrule:
       redirect: awx.awx.schedule_rrule
   modules:
-    tower_job_list:
-      redirect: awx.awx.job_list
-    tower_job_launch:
-      redirect: awx.awx.job_launch
-    tower_workflow_job_template:
-      redirect: awx.awx.workflow_job_template
-    tower_team:
-      redirect: awx.awx.team
-    tower_job_wait:
-      redirect: awx.awx.job_wait
-    tower_application:
-      redirect: awx.awx.application
+    tower_ad_hoc_command_cancel:
+      redirect: awx.awx.ad_hoc_command_cancel
     tower_ad_hoc_command_wait:
       redirect: awx.awx.ad_hoc_command_wait
+    tower_ad_hoc_command:
+      redirect: awx.awx.ad_hoc_command
+    tower_application:
+      redirect: awx.awx.application
+    tower_meta:
+      redirect: awx.awx.controller_meta
+    tower_credential_input_source:
+      redirect: awx.awx.credential_input_source
+    tower_credential_type:
+      redirect: awx.awx.credential_type
     tower_credential:
       redirect: awx.awx.credential
-    tower_label:
-      redirect: awx.awx.label
+    tower_execution_environment:
+      redirect: awx.awx.execution_environment
+    tower_export:
+      redirect: awx.awx.export
     tower_group:
       redirect: awx.awx.group
     tower_host:
       redirect: awx.awx.host
-    tower_schedule:
-      redirect: awx.awx.schedule
-    tower_role:
-      redirect: awx.awx.role
-    tower_ad_hoc_command:
-      redirect: awx.awx.ad_hoc_command
-    tower_execution_environment:
-      redirect: awx.awx.execution_environment
-    tower_inventory_source_update:
-      redirect: awx.awx.inventory_source_update
+    tower_import:
+      redirect: awx.awx.import
     tower_instance_group:
       redirect: awx.awx.instance_group
-    tower_settings:
-      redirect: awx.awx.settings
-    tower_meta:
-      redirect: awx.awx.controller_meta
-    tower_export:
-      redirect: awx.awx.export
-    tower_ad_hoc_command_cancel:
-      redirect: awx.awx.ad_hoc_command_cancel
+    tower_inventory_source_update:
+      redirect: awx.awx.inventory_source_update
     tower_inventory_source:
       redirect: awx.awx.inventory_source
-    tower_user:
-      redirect: awx.awx.user
-    tower_workflow_launch:
-      redirect: awx.awx.workflow_launch
-    tower_project:
-      redirect: awx.awx.project
-    tower_token:
-      redirect: awx.awx.token
-    tower_credential_type:
-      redirect: awx.awx.credential_type
+    tower_inventory:
+      redirect: awx.awx.inventory
+    tower_job_cancel:
+      redirect: awx.awx.job_cancel
+    tower_job_launch:
+      redirect: awx.awx.job_launch
+    tower_job_list:
+      redirect: awx.awx.job_list
+    tower_job_template:
+      redirect: awx.awx.job_template
+    tower_job_wait:
+      redirect: awx.awx.job_wait
+    tower_label:
+      redirect: awx.awx.label
     tower_license:
       redirect: awx.awx.license
-    tower_project_update:
-      redirect: awx.awx.project_update
     tower_notification_template:
+      redirect: awx.awx.notification_template
+    tower_notification:
       redirect: awx.awx.notification_template
     tower_organization:
       redirect: awx.awx.organization
-    tower_job_template:
-      redirect: awx.awx.job_template
-    tower_workflow_job_template_node:
-      redirect: awx.awx.workflow_job_template_node
-    tower_job_cancel:
-      redirect: awx.awx.job_cancel
-    tower_import:
-      redirect: awx.awx.import
-    tower_credential_input_source:
-      redirect: awx.awx.credential_input_source
-    tower_inventory:
-      redirect: awx.awx.inventory
+    tower_project_update:
+      redirect: awx.awx.project_update
+    tower_project:
+      redirect: awx.awx.project
     tower_receive:
       redirect: awx.awx.receive
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
+    tower_role:
+      redirect: awx.awx.role
+    tower_schedule:
+      redirect: awx.awx.schedule
     tower_send:
       redirect: awx.awx.send
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
+    tower_settings:
+      redirect: awx.awx.settings
+    tower_team:
+      redirect: awx.awx.team
+    tower_token:
+      redirect: awx.awx.token
+    tower_user:
+      redirect: awx.awx.user
+    tower_workflow_approval:
+      redirect: awx.awx.workflow_approval
+    tower_workflow_job_template_node:
+      redirect: awx.awx.workflow_job_template_node
+    tower_workflow_job_template:
+      redirect: awx.awx.workflow_job_template
+    tower_workflow_launch:
+      redirect: awx.awx.workflow_launch
+    tower_workflow_node_wait:
+      redirect: awx.awx.workflow_node_wait
     tower_workflow_template:
       redirect: awx.awx.workflow_template
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
-    tower_notification:
-      redirect: awx.awx.notification_template
