@@ -899,6 +899,17 @@ describe('qs (qs.js)', () => {
       );
     });
 
+    test('should omit default values', () => {
+      const query = 'template.page=2';
+      const newParams = {
+        page: 3,
+        page_size: 5,
+      };
+      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+        'template.page=3'
+      );
+    });
+
     // This fix needed after we're confident refactoring components
     // to use replaceNamespacedParams provides equivalent functionality
     test.skip('should not alter params of other namespaces', () => {
