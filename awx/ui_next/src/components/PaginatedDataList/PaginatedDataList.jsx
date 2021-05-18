@@ -13,7 +13,7 @@ import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 
-import { parseQueryString, replaceNamespacedParams } from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
@@ -46,22 +46,22 @@ function PaginatedDataList({
   };
 
   const handleSetPage = (event, pageNumber) => {
-    const encodedParams = replaceNamespacedParams(qsConfig, search, {
+    const qs = updateQueryString(qsConfig, search, {
       page: pageNumber,
     });
-    pushHistoryState(encodedParams);
+    pushHistoryState(qs);
   };
 
   const handleSetPageSize = (event, pageSize, page) => {
-    const encodedParams = replaceNamespacedParams(qsConfig, search, {
+    const qs = updateQueryString(qsConfig, search, {
       page_size: pageSize,
       page,
     });
-    pushHistoryState(encodedParams);
+    pushHistoryState(qs);
   };
 
-  const pushHistoryState = encodedParams => {
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  const pushHistoryState = qs => {
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const searchColumns = toolbarSearchColumns.length

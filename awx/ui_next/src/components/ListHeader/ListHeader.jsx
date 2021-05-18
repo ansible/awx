@@ -9,7 +9,7 @@ import {
   parseQueryString,
   mergeParams,
   removeParams,
-  replaceNamespacedParams,
+  updateQueryString,
 } from '../../util/qs';
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
@@ -38,7 +38,7 @@ class ListHeader extends React.Component {
   handleSearch(key, value) {
     const { location, qsConfig } = this.props;
     const params = parseQueryString(qsConfig, location.search);
-    const qs = replaceNamespacedParams(qsConfig, location.search, {
+    const qs = updateQueryString(qsConfig, location.search, {
       ...mergeParams(params, { [key]: value }),
       page: 1,
     });
@@ -47,7 +47,7 @@ class ListHeader extends React.Component {
 
   handleReplaceSearch(key, value) {
     const { location, qsConfig } = this.props;
-    const qs = replaceNamespacedParams(qsConfig, location.search, {
+    const qs = updateQueryString(qsConfig, location.search, {
       [key]: value,
     });
     this.pushHistoryState(qs);
@@ -59,11 +59,7 @@ class ListHeader extends React.Component {
     const updatedParams = removeParams(qsConfig, oldParams, {
       [key]: value,
     });
-    const qs = replaceNamespacedParams(
-      qsConfig,
-      location.search,
-      updatedParams
-    );
+    const qs = updateQueryString(qsConfig, location.search, updatedParams);
     this.pushHistoryState(qs);
   }
 
@@ -75,13 +71,13 @@ class ListHeader extends React.Component {
     });
     delete oldParams.page_size;
     delete oldParams.order_by;
-    const qs = replaceNamespacedParams(qsConfig, location.search, oldParams);
+    const qs = updateQueryString(qsConfig, location.search, oldParams);
     this.pushHistoryState(qs);
   }
 
   handleSort(key, order) {
     const { location, qsConfig } = this.props;
-    const qs = replaceNamespacedParams(qsConfig, location.search, {
+    const qs = updateQueryString(qsConfig, location.search, {
       order_by: order === 'ascending' ? key : `-${key}`,
       page: null,
     });

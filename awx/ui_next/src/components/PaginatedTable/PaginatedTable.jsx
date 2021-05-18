@@ -14,7 +14,7 @@ import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 import LoadingSpinner from '../LoadingSpinner';
 
-import { parseQueryString, replaceNamespacedParams } from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 import { QSConfig, SearchColumns } from '../../types';
 
 function PaginatedTable({
@@ -38,23 +38,23 @@ function PaginatedTable({
   const { search, pathname } = useLocation();
   const history = useHistory();
 
-  const pushHistoryState = encodedParams => {
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  const pushHistoryState = qs => {
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const handleSetPage = (event, pageNumber) => {
-    const encodedParams = replaceNamespacedParams(qsConfig, search, {
+    const qs = updateQueryString(qsConfig, search, {
       page: pageNumber,
     });
-    pushHistoryState(encodedParams);
+    pushHistoryState(qs);
   };
 
   const handleSetPageSize = (event, pageSize, page) => {
-    const encodedParams = replaceNamespacedParams(qsConfig, search, {
+    const qs = updateQueryString(qsConfig, search, {
       page_size: pageSize,
       page,
     });
-    pushHistoryState(encodedParams);
+    pushHistoryState(qs);
   };
 
   const searchColumns = toolbarSearchColumns.length

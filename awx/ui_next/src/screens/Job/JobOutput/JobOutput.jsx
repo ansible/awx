@@ -43,7 +43,7 @@ import {
   mergeParams,
   removeParams,
   getQSConfig,
-  replaceNamespacedParams,
+  updateQueryString,
 } from '../../../util/qs';
 import useIsMounted from '../../../util/useIsMounted';
 
@@ -589,7 +589,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const handleSearch = (key, value) => {
     const params = parseQueryString(QS_CONFIG, location.search);
-    const qs = replaceNamespacedParams(
+    const qs = updateQueryString(
       QS_CONFIG,
       location.search,
       mergeParams(params, { [key]: value })
@@ -598,7 +598,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleReplaceSearch = (key, value) => {
-    const qs = replaceNamespacedParams(QS_CONFIG, location.search, {
+    const qs = updateQueryString(QS_CONFIG, location.search, {
       [key]: value,
     });
     pushHistoryState(qs);
@@ -609,11 +609,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     const updatedParams = removeParams(QS_CONFIG, oldParams, {
       [key]: value,
     });
-    const qs = replaceNamespacedParams(
-      QS_CONFIG,
-      location.search,
-      updatedParams
-    );
+    const qs = updateQueryString(QS_CONFIG, location.search, updatedParams);
     pushHistoryState(qs);
   };
 
@@ -622,7 +618,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     Object.keys(oldParams).forEach(key => {
       oldParams[key] = null;
     });
-    const qs = replaceNamespacedParams(QS_CONFIG, location.search, oldParams);
+    const qs = updateQueryString(QS_CONFIG, location.search, oldParams);
     pushHistoryState(qs);
   };
 

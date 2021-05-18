@@ -262,10 +262,10 @@ export function replaceParams(oldParams, newParams) {
  * @param {object} qs config object for namespacing params, filtering defaults
  * @param {string} the url query string to update
  * @param {object} namespaced params to add or update. use null to indicate
- *        a param should be deleted from the query string
+ *        a param that should be deleted from the query string
  * @return {string} url query string
  */
-export function replaceNamespacedParams(config, queryString, newParams) {
+export function updateQueryString(config, queryString, newParams) {
   const oldParams = parseQueryString(config, queryString);
   const updatedParams = replaceParams(oldParams, newParams);
   const nonNamespacedParams = parseQueryString({}, queryString);

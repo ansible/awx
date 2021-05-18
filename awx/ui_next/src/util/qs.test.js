@@ -8,7 +8,7 @@ import {
   _addDefaultsToObject,
   mergeParams,
   replaceParams,
-  replaceNamespacedParams,
+  updateQueryString,
 } from './qs';
 
 describe('qs (qs.js)', () => {
@@ -851,7 +851,7 @@ describe('qs (qs.js)', () => {
     });
   });
 
-  describe('replaceNamespacedParams', () => {
+  describe('updateQueryString', () => {
     const config = {
       namespace: 'template',
       defaultParams: { page: 1, page_size: 5, order_by: 'name' },
@@ -863,7 +863,7 @@ describe('qs (qs.js)', () => {
       const newParams = {
         page: 3,
       };
-      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+      expect(updateQueryString(config, query, newParams)).toEqual(
         'template.name__icontains=workflow&template.page=3'
       );
     });
@@ -873,7 +873,7 @@ describe('qs (qs.js)', () => {
       const newParams = {
         or__type: 'job_template',
       };
-      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+      expect(updateQueryString(config, query, newParams)).toEqual(
         'template.name__icontains=workflow&template.or__type=job_template&template.page=2'
       );
     });
@@ -883,7 +883,7 @@ describe('qs (qs.js)', () => {
       const newParams = {
         page: 3,
       };
-      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+      expect(updateQueryString(config, query, newParams)).toEqual(
         'foo=bar&template.name__icontains=workflow&template.page=3'
       );
     });
@@ -894,7 +894,7 @@ describe('qs (qs.js)', () => {
         page: 3,
         name__icontains: null,
       };
-      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+      expect(updateQueryString(config, query, newParams)).toEqual(
         'template.page=3'
       );
     });
@@ -905,20 +905,20 @@ describe('qs (qs.js)', () => {
         page: 3,
         page_size: 5,
       };
-      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+      expect(updateQueryString(config, query, newParams)).toEqual(
         'template.page=3'
       );
     });
 
     // This fix needed after we're confident refactoring components
-    // to use replaceNamespacedParams provides equivalent functionality
+    // to use updateQueryString provides equivalent functionality
     test.skip('should not alter params of other namespaces', () => {
       const query =
         'template.name__icontains=workflow&template.page=2&credential.page=3';
       const newParams = {
         page: 3,
       };
-      expect(replaceNamespacedParams(config, query, newParams)).toEqual(
+      expect(updateQueryString(config, query, newParams)).toEqual(
         'template.name__icontains=workflow&template.page=3&credential.page=3'
       );
     });
