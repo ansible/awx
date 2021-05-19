@@ -266,12 +266,33 @@ export function replaceParams(oldParams, newParams) {
  * @return {string} url query string
  */
 export function updateQueryString(config, queryString, newParams) {
-  const oldParams = parseQueryString(config, queryString);
-  const updatedParams = replaceParams(oldParams, newParams);
-  const nonNamespacedParams = parseQueryString({}, queryString);
-  return encodeNonDefaultQueryString(
-    config,
-    updatedParams,
-    nonNamespacedParams
-  );
+  const allParams = parseFullQueryString(queryString);
+  const { namespace = null, defaultParams = {} } = config || {};
+  Object.keys(newParams).forEach(key => {
+    const val = newParams[key];
+    const fullKey = namespace ? `${namespace}.${key}` : key;
+    if (val === null || val === defaultParams[key]) {
+      delete allParams[fullKey];
+    } else {
+      allParams[fullKey] = newParams[key];
+    }
+  });
+  return encodeQueryString(allParams);
+}
+
+function parseFullQueryString(queryString) {
+  const allParams = {};
+  queryString
+    .replace(/^\?/, '')
+    .split('&')
+    .map(s => s.split('='))
+    .forEach(([rawKey, rawValue]) => {
+      if (!rawKey) {
+        return;
+      }
+      const key = decodeURIComponent(rawKey);
+      const value = decodeURIComponent(rawValue);
+      allParams[key] = mergeParam(allParams[key], value);
+    });
+  return allParams;
 }

@@ -22,8 +22,7 @@ import useRequest from '../../util/useRequest';
 import {
   getQSConfig,
   parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
+  updateQueryString,
 } from '../../util/qs';
 import { ActivityStreamAPI } from '../../api';
 
@@ -96,16 +95,14 @@ function ActivityStream() {
   }, [fetchActivityStream]);
 
   const pushHistoryState = urlParamsToAdd => {
-    let searchParams = parseQueryString(QS_CONFIG, location.search);
-    searchParams = replaceParams(searchParams, { page: 1 });
-    const encodedParams = encodeNonDefaultQueryString(QS_CONFIG, searchParams, {
+    const pageOneQs = updateQueryString(QS_CONFIG, location.search, {
+      page: 1,
+    });
+    const qs = updateQueryString(null, pageOneQs, {
       type: urlParamsToAdd.get('type'),
     });
-    history.push(
-      encodedParams
-        ? `${location.pathname}?${encodedParams}`
-        : location.pathname
-    );
+
+    history.push(qs ? `${location.pathname}?${qs}` : location.pathname);
   };
 
   return (

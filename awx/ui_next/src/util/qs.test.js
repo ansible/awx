@@ -858,6 +858,15 @@ describe('qs (qs.js)', () => {
       integerFields: ['page'],
     };
 
+    test('should add param to empty query string', () => {
+      const newParams = {
+        page: 3,
+      };
+      expect(updateQueryString(config, '', newParams)).toEqual(
+        'template.page=3'
+      );
+    });
+
     test('should update namespaced param', () => {
       const query = 'template.name__icontains=workflow&template.page=2';
       const newParams = {
@@ -910,16 +919,25 @@ describe('qs (qs.js)', () => {
       );
     });
 
-    // This fix needed after we're confident refactoring components
-    // to use updateQueryString provides equivalent functionality
-    test.skip('should not alter params of other namespaces', () => {
+    test('should update non-namespaced param', () => {
+      const query =
+        'activity_stream.name__icontains=workflow&activity_stream.page=2';
+      const newParams = {
+        type: 'job',
+      };
+      expect(updateQueryString(null, query, newParams)).toEqual(
+        'activity_stream.name__icontains=workflow&activity_stream.page=2&type=job'
+      );
+    });
+
+    test('should not alter params of other namespaces', () => {
       const query =
         'template.name__icontains=workflow&template.page=2&credential.page=3';
       const newParams = {
         page: 3,
       };
       expect(updateQueryString(config, query, newParams)).toEqual(
-        'template.name__icontains=workflow&template.page=3&credential.page=3'
+        'credential.page=3&template.name__icontains=workflow&template.page=3'
       );
     });
   });
