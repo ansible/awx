@@ -37,6 +37,7 @@ from awx.main.models.credential import ManagedCredentialType
 from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
+from awx.main.utils.execution_environments import CONTAINER_ROOT, to_host_path
 
 from awx.main.utils.licensing import Licenser
 
@@ -48,6 +49,10 @@ class TestJobExecution(object):
 @pytest.fixture
 def private_data_dir():
     private_data = tempfile.mkdtemp(prefix='awx_')
+    for subfolder in ('inventory', 'env'):
+        runner_subfolder = os.path.join(private_data, subfolder)
+        if not os.path.exists(runner_subfolder):
+            os.mkdir(runner_subfolder)
     yield private_data
     shutil.rmtree(private_data, True)
 
@@ -337,8 +342,8 @@ def pytest_generate_tests(metafunc):
 def parse_extra_vars(args, private_data_dir):
     extra_vars = {}
     for chunk in args:
-        if chunk.startswith('@/runner/'):
-            local_path = os.path.join(private_data_dir, os.path.basename(chunk.strip('@')))
+        if chunk.startswith(f'@{CONTAINER_ROOT}'):
+            local_path = chunk[len('@') :].replace(CONTAINER_ROOT, private_data_dir)  # container path to host path
             with open(local_path, 'r') as f:
                 extra_vars.update(yaml.load(f, Loader=SafeLoader))
     return extra_vars
@@ -888,7 +893,7 @@ class TestJobCredentials(TestJobExecution):
 
         if verify:
             assert env['K8S_AUTH_VERIFY_SSL'] == 'True'
-            local_path = os.path.join(private_data_dir, os.path.basename(env['K8S_AUTH_SSL_CA_CERT']))
+            local_path = to_host_path(env['K8S_AUTH_SSL_CA_CERT'], private_data_dir)
             cert = open(local_path, 'r').read()
             assert cert == 'CERTDATA'
         else:
@@ -938,7 +943,7 @@ class TestJobCredentials(TestJobExecution):
         safe_env = {}
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
         runner_path = env['GCE_CREDENTIALS_FILE_PATH']
-        local_path = os.path.join(private_data_dir, os.path.basename(runner_path))
+        local_path = to_host_path(runner_path, private_data_dir)
         json_data = json.load(open(local_path, 'rb'))
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
@@ -1010,8 +1015,7 @@ class TestJobCredentials(TestJobExecution):
         env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
-        # convert container path to host machine path
-        config_loc = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
+        config_loc = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
         shade_config = open(config_loc, 'r').read()
         assert shade_config == '\n'.join(
             [
@@ -1046,7 +1050,8 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         config = configparser.ConfigParser()
-        config.read(os.path.join(private_data_dir, os.path.basename(env['OVIRT_INI_PATH'])))
+        host_path = to_host_path(env['OVIRT_INI_PATH'], private_data_dir)
+        config.read(host_path)
         assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
         assert config.get('ovirt', 'ovirt_username') == 'bob'
         assert config.get('ovirt', 'ovirt_password') == 'some-pass'
@@ -1259,7 +1264,7 @@ class TestJobCredentials(TestJobExecution):
         env = {}
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
-        path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
+        path = to_host_path(env['MY_CLOUD_INI_FILE'], private_data_dir)
         assert open(path, 'r').read() == '[mycloud]\nABC123'
 
     def test_custom_environment_injectors_with_unicode_content(self, private_data_dir):
@@ -1279,7 +1284,7 @@ class TestJobCredentials(TestJobExecution):
         env = {}
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
-        path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
+        path = to_host_path(env['MY_CLOUD_INI_FILE'], private_data_dir)
         assert open(path, 'r').read() == value
 
     def test_custom_environment_injectors_with_files(self, private_data_dir):
@@ -1298,8 +1303,8 @@ class TestJobCredentials(TestJobExecution):
         env = {}
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
-        cert_path = os.path.join(private_data_dir, os.path.basename(env['MY_CERT_INI_FILE']))
-        key_path = os.path.join(private_data_dir, os.path.basename(env['MY_KEY_INI_FILE']))
+        cert_path = to_host_path(env['MY_CERT_INI_FILE'], private_data_dir)
+        key_path = to_host_path(env['MY_KEY_INI_FILE'], private_data_dir)
         assert open(cert_path, 'r').read() == '[mycert]\nCERT123'
         assert open(key_path, 'r').read() == '[mykey]\nKEY123'
 
@@ -1322,7 +1327,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
 
-        path = os.path.join(private_data_dir, os.path.basename(env['GCE_CREDENTIALS_FILE_PATH']))
+        path = to_host_path(env['GCE_CREDENTIALS_FILE_PATH'], private_data_dir)
         json_data = json.load(open(path, 'rb'))
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
@@ -1703,7 +1708,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
-        path = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
+        path = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
         shade_config = open(path, 'r').read()
         assert (
             '\n'.join(

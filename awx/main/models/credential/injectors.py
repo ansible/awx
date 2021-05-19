@@ -6,6 +6,8 @@ import tempfile
 
 from django.conf import settings
 
+from awx.main.utils.execution_environments import to_container_path
+
 
 def aws(cred, env, private_data_dir):
     env['AWS_ACCESS_KEY_ID'] = cred.get_input('username', default='')
@@ -25,13 +27,14 @@ def gce(cred, env, private_data_dir):
         env['GCE_PROJECT'] = project
     json_cred['token_uri'] = 'https://oauth2.googleapis.com/token'
 
-    handle, path = tempfile.mkstemp(dir=private_data_dir)
+    handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
     f = os.fdopen(handle, 'w')
     json.dump(json_cred, f, indent=2)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    env['GCE_CREDENTIALS_FILE_PATH'] = os.path.join('/runner', os.path.basename(path))
-    env['GCP_SERVICE_ACCOUNT_FILE'] = os.path.join('/runner', os.path.basename(path))
+    container_path = to_container_path(path, private_data_dir)
+    env['GCE_CREDENTIALS_FILE_PATH'] = container_path
+    env['GCP_SERVICE_ACCOUNT_FILE'] = container_path
 
     # Handle env variables for new module types.
     # This includes gcp_compute inventory plugin and
@@ -96,14 +99,13 @@ def _openstack_data(cred):
 
 
 def openstack(cred, env, private_data_dir):
-    handle, path = tempfile.mkstemp(dir=private_data_dir)
+    handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
     f = os.fdopen(handle, 'w')
     openstack_data = _openstack_data(cred)
     yaml.safe_dump(openstack_data, f, default_flow_style=False, allow_unicode=True)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    # TODO: constant for container base path
-    env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', os.path.basename(path))
+    env['OS_CLIENT_CONFIG_FILE'] = to_container_path(path, private_data_dir)
 
 
 def kubernetes_bearer_token(cred, env, private_data_dir):
@@ -111,10 +113,10 @@ def kubernetes_bearer_token(cred, env, private_data_dir):
     env['K8S_AUTH_API_KEY'] = cred.get_input('bearer_token', default='')
     if cred.get_input('verify_ssl') and 'ssl_ca_cert' in cred.inputs:
         env['K8S_AUTH_VERIFY_SSL'] = 'True'
-        handle, path = tempfile.mkstemp(dir=private_data_dir)
+        handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
         with os.fdopen(handle, 'w') as f:
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             f.write(cred.get_input('ssl_ca_cert'))
-        env['K8S_AUTH_SSL_CA_CERT'] = os.path.join('/runner', os.path.basename(path))
+        env['K8S_AUTH_SSL_CA_CERT'] = to_container_path(path, private_data_dir)
     else:
         env['K8S_AUTH_VERIFY_SSL'] = 'False'

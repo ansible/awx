@@ -31,6 +31,7 @@ from awx.main.fields import (
 )
 from awx.main.utils import decrypt_field, classproperty
 from awx.main.utils.safe_yaml import safe_dump
+from awx.main.utils.execution_environments import to_container_path
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
 from awx.main.models.mixins import ResourceMixin
@@ -493,12 +494,11 @@ class CredentialType(CommonModelNameNotUnique):
 
         for file_label, file_tmpl in file_tmpls.items():
             data = sandbox_env.from_string(file_tmpl).render(**namespace)
-            _, path = tempfile.mkstemp(dir=private_data_dir)
+            _, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            # FIXME: develop some better means of referencing paths inside containers
-            container_path = os.path.join('/runner', os.path.basename(path))
+            container_path = to_container_path(path, private_data_dir)
 
             # determine if filename indicates single file or many
             if file_label.find('.') == -1:
@@ -526,7 +526,7 @@ class CredentialType(CommonModelNameNotUnique):
                 extra_vars[var_name] = sandbox_env.from_string(tmpl).render(**namespace)
 
             def build_extra_vars_file(vars, private_dir):
-                handle, path = tempfile.mkstemp(dir=private_dir)
+                handle, path = tempfile.mkstemp(dir=os.path.join(private_dir, 'env'))
                 f = os.fdopen(handle, 'w')
                 f.write(safe_dump(vars))
                 f.close()
@@ -535,8 +535,7 @@ class CredentialType(CommonModelNameNotUnique):
 
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
-                # FIXME: develop some better means of referencing paths inside containers
-                container_path = os.path.join('/runner', os.path.basename(path))
+                container_path = to_container_path(path, private_data_dir)
                 args.extend(['-e', '@%s' % container_path])
 
 
