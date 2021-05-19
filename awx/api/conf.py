@@ -99,8 +99,6 @@ register(
 
 
 def authentication_validate(serializer, attrs):
-    from django.contrib.auth.models import User
-
     remote_auth_settings = [
         'AUTH_LDAP_SERVER_URI',
         'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY',
@@ -114,8 +112,6 @@ def authentication_validate(serializer, attrs):
     if attrs.get('DISABLE_LOCAL_AUTH', False):
         if not any(getattr(settings, s, None) for s in remote_auth_settings):
             raise serializers.ValidationError(_("There are no remote authentication systems configured."))
-        if not User.objects.exclude(profile__ldap_dn='', enterprise_auth__isnull=True, social_auth__isnull=True).exists():
-            raise serializers.ValidationError(_("There are no remote users in the system."))
     return attrs
 
 
