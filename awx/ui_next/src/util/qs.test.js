@@ -1,13 +1,11 @@
 import {
   encodeQueryString,
-  encodeNonDefaultQueryString,
   parseQueryString,
   getQSConfig,
   removeParams,
   _stringToObject,
   _addDefaultsToObject,
   mergeParams,
-  replaceParams,
   updateQueryString,
 } from './qs';
 
@@ -45,70 +43,6 @@ describe('qs (qs.js)', () => {
         foo: ['one', 'two', 'three'],
       };
       expect(encodeQueryString(vals)).toEqual('foo=one&foo=two&foo=three');
-    });
-  });
-
-  describe('encodeNonDefaultQueryString', () => {
-    const config = {
-      namespace: null,
-      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
-      integerFields: ['page'],
-    };
-
-    test('should return the expected queryString', () => {
-      [
-        [null, ''],
-        [{}, ''],
-        [{ order_by: 'name', page: 1, page_size: 5 }, ''],
-        [{ order_by: '-name', page: 1, page_size: 5 }, 'order_by=-name'],
-        [
-          { order_by: '-name', page: 3, page_size: 10 },
-          'order_by=-name&page=3&page_size=10',
-        ],
-        [
-          { order_by: '-name', page: 3, page_size: 10, foo: 'bar' },
-          'foo=bar&order_by=-name&page=3&page_size=10',
-        ],
-      ].forEach(([params, expectedQueryString]) => {
-        const actualQueryString = encodeNonDefaultQueryString(config, params);
-
-        expect(actualQueryString).toEqual(expectedQueryString);
-      });
-    });
-
-    test('should omit null values', () => {
-      const vals = {
-        order_by: 'foo',
-        page: null,
-      };
-      expect(encodeNonDefaultQueryString(config, vals)).toEqual('order_by=foo');
-    });
-
-    test('should namespace encoded params', () => {
-      const conf = {
-        namespace: 'item',
-        defaultParams: { page: 1 },
-      };
-      const params = {
-        page: 1,
-        foo: 'bar',
-      };
-      expect(encodeNonDefaultQueryString(conf, params)).toEqual('item.foo=bar');
-    });
-
-    test('should handle array values', () => {
-      const vals = {
-        foo: ['one', 'two'],
-        bar: ['alpha', 'beta'],
-      };
-      const conf = {
-        defaultParams: {
-          foo: ['one', 'two'],
-        },
-      };
-      expect(encodeNonDefaultQueryString(conf, vals)).toEqual(
-        'bar=alpha&bar=beta'
-      );
     });
   });
 
@@ -799,54 +733,6 @@ describe('qs (qs.js)', () => {
         pat: 'pal',
         page: 3,
         page_size: 15,
-      });
-    });
-  });
-
-  describe('replaceParams', () => {
-    it('should collect params into one object', () => {
-      const oldParams = { foo: 'one' };
-      const newParams = { bar: 'two' };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'one',
-        bar: 'two',
-      });
-    });
-
-    it('should retain unaltered params', () => {
-      const oldParams = {
-        foo: 'one',
-        bar: 'baz',
-      };
-      const newParams = { foo: 'two' };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'two',
-        bar: 'baz',
-      });
-    });
-
-    it('should override old values with new ones', () => {
-      const oldParams = {
-        foo: 'one',
-        bar: 'three',
-      };
-      const newParams = {
-        foo: 'two',
-        baz: 'four',
-      };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'two',
-        bar: 'three',
-        baz: 'four',
-      });
-    });
-
-    it('should handle exact duplicates', () => {
-      const oldParams = { foo: 'one' };
-      const newParams = { foo: 'one', bar: 'two' };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'one',
-        bar: 'two',
       });
     });
   });

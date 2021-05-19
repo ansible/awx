@@ -114,44 +114,6 @@ function encodeValue(key, value) {
 }
 
 /**
- * Convert query param object to url query string, adding namespace and
- * removing defaults. Used to put into url bar after ui route
- * @param {object} qs config object for namespacing params, filtering defaults
- * @param {object} query param object
- * @param {object} any non-namespaced params to append
- * @return {string} url query string
- */
-export const encodeNonDefaultQueryString = (
-  config,
-  params,
-  nonNamespacedParams = {}
-) => {
-  if (!params) return '';
-  const paramsWithoutDefaults = removeParams({}, params, config.defaultParams);
-  return encodeQueryString({
-    ...namespaceParams(config.namespace, paramsWithoutDefaults),
-    ...nonNamespacedParams,
-  });
-};
-
-/**
- * helper function to namespace params object
- * @param {string} namespace to append to params
- * @param {object} params object to append namespace to
- * @return {object} params object with namespaced keys
- */
-const namespaceParams = (namespace, params) => {
-  if (!namespace) return params;
-
-  const namespaced = {};
-  Object.keys(params).forEach(key => {
-    namespaced[`${namespace}.${key}`] = params[key];
-  });
-
-  return namespaced;
-};
-
-/**
  * Removes params from the search string and returns the updated list of params
  * @param {object} qs config object (used for getting defaults, current query params etc.)
  * @param {object} object with params from existing search
@@ -240,20 +202,6 @@ function dedupeArray(arr) {
     return deduped[0];
   }
   return deduped;
-}
-
-/**
- * Join old and new params together, replacing old values with new ones where
- * necessary
- * @param {object} namespaced params object of old params
- * @param {object} namespaced params object of new params
- * @return {object} joined namespaced params object
- */
-export function replaceParams(oldParams, newParams) {
-  return {
-    ...oldParams,
-    ...newParams,
-  };
 }
 
 /**
