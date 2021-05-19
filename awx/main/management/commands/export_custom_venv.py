@@ -14,7 +14,7 @@ class Command(BaseCommand):
             type=str,
             nargs='?',
             default='',
-            help='run this with a path to a virutal environment as an argument to see the pip freeze data',
+            help='run this with a path to a virtual environment as an argument to see the pip freeze data',
         )
 
     def handle(self, *args, **options):
