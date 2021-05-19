@@ -9,7 +9,7 @@ case "$1" in
 		exec systemctl $1 automation-controller.service
 		;;
 	status)
-		exec systemctl status automation-controller.service $TOWER_SERVICES
+		exec systemctl status automation-controller.service $CONTROLLER_SERVICES
 		;;
         *)
                 echo "Usage: automation-controller-service start|stop|restart|status"
