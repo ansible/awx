@@ -118,7 +118,7 @@ function getInitialValues(launchConfig, resource) {
     initialValues.job_type = resource?.job_type || '';
   }
   if (launchConfig.ask_limit_on_launch) {
-    initialValues.limit = resource?.limit || '';
+    initialValues.limit = resource?.limit || null;
   }
   if (launchConfig.ask_verbosity_on_launch) {
     initialValues.verbosity = resource?.verbosity || 0;

@@ -45,6 +45,7 @@ function WorkflowJobTemplateDetail({ template }) {
     webhook_credential,
     webhook_key,
     scm_branch: scmBranch,
+    limit,
   } = template;
 
   const urlOrigin = window.location.origin;
@@ -160,6 +161,7 @@ function WorkflowJobTemplateDetail({ template }) {
             )}
           />
         )}
+        <Detail dataCy="limit" label={t`Limit`} value={limit} />
         <Detail
           label={t`Webhook Service`}
           value={toTitleCase(template.webhook_service)}

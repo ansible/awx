@@ -19,7 +19,6 @@ const StyledCheckboxField = styled(CheckboxField)`
 function FieldWithPrompt({
   children,
   fieldId,
-
   isRequired,
   label,
   promptId,
