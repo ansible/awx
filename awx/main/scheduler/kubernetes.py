@@ -2,6 +2,7 @@ import collections
 import json
 import logging
 from base64 import b64encode
+from urllib import parse as urlparse
 
 from django.conf import settings
 from kubernetes import client, config
@@ -52,19 +53,26 @@ class PodManager(object):
 
         return pods
 
-    @classmethod
     def create_secret(self, job):
-        task = collections.namedtuple('Task', 'id instance_group')(id='', instance_group=job.instance_group)
-        pm = PodManager(task)
         registry_cred = job.execution_environment.credential
-        host = registry_cred.get_input('host').split('/')[0]
+        host = registry_cred.get_input('host')
+        scheme = 'https'
+        # urlparse requires '//' to be provided if scheme is not specified
+        original_parsed = urlparse.urlsplit(host)
+        if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
+            host = '%s://%s' % (scheme, host)
+        parsed = urlparse.urlsplit(host)
+        host = parsed.hostname
+        if parsed.port:
+            host = "{0}:{1}".format(host, parsed.port)
+
         username = registry_cred.get_input("username")
         password = registry_cred.get_input("password")
 
         # Construct container auth dict and base64 encode it
-        token = b64encode("{}:{}".format(username, password).encode('ascii')).decode()
+        token = b64encode("{}:{}".format(username, password).encode('UTF-8')).decode()
         auth_dict = json.dumps({"auths": {host: {"auth": token}}}, indent=4)
-        auth_data = b64encode(str(auth_dict).encode('ascii')).decode()
+        auth_data = b64encode(str(auth_dict).encode('UTF-8')).decode()
 
         # Construct Secret object
         secret = client.V1Secret()
@@ -77,7 +85,7 @@ class PodManager(object):
         # Check if secret already exists
         secrets = None
         try:
-            secrets = pm.kube_api.list_namespaced_secret(namespace=pm.namespace)
+            secrets = self.kube_api.list_namespaced_secret(namespace=self.namespace)
         except client.rest.ApiException:
             error_msg = 'Invalid openshift or k8s cluster credential'
             logger.exception(error_msg)
@@ -90,20 +98,21 @@ class PodManager(object):
             for s in secrets_dict:
                 if s['metadata']['name'] == secret_name:
                     secret_exists = True
+                    break
             if secret_exists:
                 try:
                     # Try to replace existing secret
-                    pm.kube_api.delete_namespaced_secret(name=secret.metadata.name, namespace=pm.namespace)
-                    pm.kube_api.create_namespaced_secret(namespace=pm.namespace, body=secret)
+                    self.kube_api.delete_namespaced_secret(name=secret.metadata.name, namespace=self.namespace)
+                    self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
                 except Exception:
-                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(task.instance_group.name)
+                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
                     logger.exception(error_msg)
                     job.cancel(job_explanation=error_msg)
                     raise
             else:
                 # Create an image pull secret in namespace
                 try:
-                    pm.kube_api.create_namespaced_secret(namespace=pm.namespace, body=secret)
+                    self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
                 except client.rest.ApiException as e:
                     if e.status == 401:
                         error_msg = 'Failed to create imagePullSecret: {}. Check that openshift or k8s credential has permission to create a secret.'.format(
@@ -112,7 +121,7 @@ class PodManager(object):
                         logger.exception(error_msg)
                         # let job run for the case that the secret exists but the cluster cred doesn't have permission to create a secret
                 except Exception:
-                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(task.instance_group.name)
+                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
                     logger.exception(error_msg)
                     job.cancel(job_explanation=error_msg)
 

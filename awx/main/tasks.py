@@ -842,7 +842,7 @@ class BaseTask(object):
                     username = cred.get_input('username')
                     password = cred.get_input('password')
                     token = "{}:{}".format(username, password)
-                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
+                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('UTF-8')).decode('UTF-8')}}}
                     authfile.write(json.dumps(auth_data, indent=4))
                 params["container_options"].append(f'--authfile={authfile.name}')
             else:
