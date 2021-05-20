@@ -264,6 +264,8 @@ function MiscSystemEdit() {
                   />
                   <BooleanField
                     name="DISABLE_LOCAL_AUTH"
+                    needsConfirmationModal
+                    modalTitle={t`Confirm Disable Local Authorization`}
                     config={system.DISABLE_LOCAL_AUTH}
                   />
                   <InputField

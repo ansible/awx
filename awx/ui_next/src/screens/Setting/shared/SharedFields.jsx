@@ -3,6 +3,7 @@ import { shape, string } from 'prop-types';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
+  Button,
   FileUpload,
   FormGroup as PFFormGroup,
   InputGroup,
@@ -25,6 +26,7 @@ import {
   url,
 } from '../../../util/validators';
 import RevertButton from './RevertButton';
+import AlertModal from '../../../components/AlertModal';
 
 const FormGroup = styled(PFFormGroup)`
   .pf-c-form__group-label {
@@ -73,8 +75,56 @@ const SettingGroup = ({
     </FormGroup>
   );
 };
-const BooleanField = ({ ariaLabel = '', name, config, disabled = false }) => {
+const BooleanField = ({
+  ariaLabel = '',
+  name,
+  config,
+  disabled = false,
+  needsConfirmationModal,
+  modalTitle,
+}) => {
   const [field, meta, helpers] = useField(name);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  if (isModalOpen) {
+    return (
+      <AlertModal
+        isOpen
+        title={modalTitle}
+        variant="danger"
+        aria-label={modalTitle}
+        onClose={() => {
+          helpers.setValue(false);
+        }}
+        actions={[
+          <Button
+            ouiaId="confirm-misc-settings-modal"
+            key="confirm"
+            variant="danger"
+            aria-label={t`Confirm`}
+            onClick={() => {
+              helpers.setValue(true);
+              setIsModalOpen(false);
+            }}
+          >
+            {t`Confirm`}
+          </Button>,
+          <Button
+            ouiaId="cancel-misc-settings-modal"
+            key="cancel"
+            variant="link"
+            aria-label={t`Cancel`}
+            onClick={() => {
+              helpers.setValue(false);
+              setIsModalOpen(false);
+            }}
+          >
+            {t`Cancel`}
+          </Button>,
+        ]}
+      >{t`Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change.`}</AlertModal>
+    );
+  }
 
   return config ? (
     <SettingGroup
@@ -92,7 +142,11 @@ const BooleanField = ({ ariaLabel = '', name, config, disabled = false }) => {
         isDisabled={disabled}
         label={t`On`}
         labelOff={t`Off`}
-        onChange={() => helpers.setValue(!field.value)}
+        onChange={() =>
+          needsConfirmationModal
+            ? setIsModalOpen(true)
+            : helpers.setValue(!field.value)
+        }
         aria-label={ariaLabel || config.label}
       />
     </SettingGroup>
