@@ -12,7 +12,11 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { I18nProvider } from '@lingui/react';
 import { i18n } from '@lingui/core';
 import { Card, PageSection } from '@patternfly/react-core';
-import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
+import {
+  ConfigProvider,
+  useAuthorizedPath,
+  useUserProfile,
+} from './contexts/Config';
 import { SessionProvider, useSession } from './contexts/Session';
 import AppContainer from './components/AppContainer';
 import Background from './components/Background';
@@ -37,6 +41,17 @@ function ErrorFallback({ error }) {
     </PageSection>
   );
 }
+
+const RenderAppContainer = () => {
+  const userProfile = useUserProfile();
+  const navRouteConfig = getRouteConfig(userProfile);
+
+  return (
+    <AppContainer navRouteConfig={navRouteConfig}>
+      <AuthorizedRoutes routeConfig={navRouteConfig} />
+    </AppContainer>
+  );
+};
 
 const AuthorizedRoutes = ({ routeConfig }) => {
   const isAuthorized = useAuthorizedPath();
@@ -150,9 +165,7 @@ function App() {
             </Route>
             <ProtectedRoute>
               <ConfigProvider>
-                <AppContainer navRouteConfig={getRouteConfig()}>
-                  <AuthorizedRoutes routeConfig={getRouteConfig()} />
-                </AppContainer>
+                <RenderAppContainer />
               </ConfigProvider>
             </ProtectedRoute>
           </Switch>

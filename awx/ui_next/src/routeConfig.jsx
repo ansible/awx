@@ -22,8 +22,8 @@ import Users from './screens/User';
 import WorkflowApprovals from './screens/WorkflowApproval';
 import { Jobs } from './screens/Job';
 
-function getRouteConfig() {
-  return [
+function getRouteConfig(userProfile = {}) {
+  let routeConfig = [
     {
       groupTitle: <Trans>Views</Trans>,
       groupId: 'views_group',
@@ -155,6 +155,29 @@ function getRouteConfig() {
       ],
     },
   ];
+
+  const deleteRoute = name => {
+    routeConfig.forEach(group => {
+      group.routes = group.routes.filter(({ path }) => !path.includes(name));
+    });
+    routeConfig = routeConfig.filter(groups => groups.routes.length);
+  };
+
+  const deleteRouteGroup = name => {
+    routeConfig = routeConfig.filter(({ groupId }) => !groupId.includes(name));
+  };
+
+  if (userProfile?.isSuperUser || userProfile?.isSystemAuditor)
+    return routeConfig;
+  deleteRouteGroup('settings');
+  deleteRoute('management_jobs');
+  deleteRoute('credential_types');
+  if (userProfile?.isOrgAdmin) return routeConfig;
+  deleteRoute('applications');
+  deleteRoute('instance_groups');
+  if (!userProfile?.isNotificationAdmin) deleteRoute('notification_templates');
+
+  return routeConfig;
 }
 
 export default getRouteConfig;
