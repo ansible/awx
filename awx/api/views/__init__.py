@@ -172,6 +172,7 @@ from awx.api.views.root import (  # noqa
     ApiV2AttachView,
 )
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
+from awx.api.pagination import JobEventPagination
 
 
 logger = logging.getLogger('awx.api.views')
@@ -3832,6 +3833,7 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = models.Job
+    pagination_class = JobEventPagination
 
     def get_queryset(self):
         job = self.get_parent_object()
