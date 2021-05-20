@@ -53,13 +53,15 @@ async function issuePendoIdentity(config) {
     const {
       data: { PENDO_API_KEY },
     } = await RootAPI.readAssetVariables();
-    bootstrapPendo(PENDO_API_KEY);
-    const pendoOptions = buildPendoOptions(config, PENDO_API_KEY);
-    const pendoOptionsWithRole = await buildPendoOptionsRole(
-      pendoOptions,
-      config
-    );
-    window.pendo.initialize(pendoOptionsWithRole);
+    if (PENDO_API_KEY && PENDO_API_KEY !== '') {
+      bootstrapPendo(PENDO_API_KEY);
+      const pendoOptions = buildPendoOptions(config, PENDO_API_KEY);
+      const pendoOptionsWithRole = await buildPendoOptionsRole(
+        pendoOptions,
+        config
+      );
+      window.pendo.initialize(pendoOptionsWithRole);
+    }
   }
 }
 
