@@ -15,6 +15,10 @@ import AnsibleSelect from '../../AnsibleSelect';
 import FormField from '../../FormField';
 import { required } from '../../../util/validators';
 
+const DateTimeGroup = styled.span`
+  display: flex;
+`;
+
 const RunOnRadio = styled(Radio)`
   label {
     display: block;
@@ -74,9 +78,8 @@ const FrequencyDetailSubform = () => {
   const [runOnTheMonth] = useField({
     name: 'runOnTheMonth',
   });
-  const [startDateTime] = useField({
-    name: 'startDateTime',
-  });
+  const [startDate] = useField('startDate');
+
   const [daysOfWeek, daysOfWeekMeta, daysOfWeekHelpers] = useField({
     name: 'daysOfWeek',
     validate: required(t`Select a value for this field`),
@@ -93,10 +96,15 @@ const FrequencyDetailSubform = () => {
     name: 'runOn',
     validate: required(t`Select a value for this field`),
   });
-  const [endDateTime, endDateTimeMeta] = useField({
-    name: 'endDateTime',
+  const [endDate, endDateMeta] = useField({
+    name: 'endDate',
     validate: required(t`Select a value for this field`),
   });
+  const [endTime, endTimeMeta] = useField({
+    name: 'endTime',
+    validate: required(t`Select a value for this field`),
+  });
+
   const [frequency] = useField({
     name: 'frequency',
   });
@@ -317,7 +325,7 @@ const FrequencyDetailSubform = () => {
         </FormGroup>
       )}
       {(frequency?.value === 'month' || frequency?.value === 'year') &&
-        !isNaN(new Date(startDateTime.value)) && (
+        !isNaN(new Date(startDate.value)) && (
           <FormGroup
             name="runOn"
             fieldId="schedule-run-on"
@@ -540,27 +548,34 @@ const FrequencyDetailSubform = () => {
       {end?.value === 'onDate' && (
         <FormGroup
           fieldId="schedule-end-datetime"
-          helperTextInvalid={endDateTimeMeta.error}
+          helperTextInvalid={endDateMeta.error || endTimeMeta.error}
           isRequired
           validated={
-            !endDateTimeMeta.touched || !endDateTimeMeta.error
+            (!endDateMeta.touched || !endDateMeta.error) &&
+            (!endTimeMeta.touched || !endTimeMeta.error)
               ? 'default'
               : 'error'
           }
           label={t`End date/time`}
         >
-          <input
-            className="pf-c-form-control"
-            type="datetime-local"
-            id="schedule-end-datetime"
-            step="1"
-            {...endDateTime}
-          />
+          <DateTimeGroup>
+            <input
+              className="pf-c-form-control"
+              type="date"
+              {...endDate}
+              id="schedule-end-date"
+            />
+            <input
+              className="pf-c-form-control"
+              type="time"
+              {...endTime}
+              id="schedule-end-time"
+            />
+          </DateTimeGroup>
         </FormGroup>
       )}
     </>
   );
-  /* eslint-enable no-restricted-globals */
 };
 
 export default FrequencyDetailSubform;

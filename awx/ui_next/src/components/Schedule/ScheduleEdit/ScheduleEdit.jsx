@@ -41,7 +41,6 @@ function ScheduleEdit({
       end,
       frequency,
       interval,
-      startDateTime,
       timezone,
       occurences,
       runOn,
@@ -49,7 +48,6 @@ function ScheduleEdit({
       runOnTheMonth,
       runOnDayMonth,
       runOnDayNumber,
-      endDateTime,
       runOnTheOccurence,
       daysOfWeek,
       ...submitValues

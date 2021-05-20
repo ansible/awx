@@ -11,6 +11,7 @@ import {
   Title,
   ActionGroup,
 } from '@patternfly/react-core';
+import styled from 'styled-components';
 import { Config } from '../../../contexts/Config';
 import { SchedulesAPI } from '../../../api';
 import AnsibleSelect from '../../AnsibleSelect';
@@ -22,12 +23,16 @@ import {
   SubFormLayout,
   FormFullWidthLayout,
 } from '../../FormLayout';
-import { dateToInputDateTime, formatDateStringUTC } from '../../../util/dates';
+import { dateToInputDateTime } from '../../../util/dates';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 import { parseVariableField } from '../../../util/yaml';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
+
+const DateTimeGroup = styled.span`
+  display: flex;
+`;
 
 const generateRunOnTheDay = (days = []) => {
   if (
@@ -79,8 +84,12 @@ const generateRunOnTheDay = (days = []) => {
 };
 
 function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
-  const [startDateTime, startDateTimeMeta] = useField({
-    name: 'startDateTime',
+  const [startTime, startTimeMeta] = useField({
+    name: 'startTime',
+    validate: required(t`Select a valid date and time for this field`),
+  });
+  const [startDate, startDateMeta] = useField({
+    name: 'startDate',
     validate: required(t`Select a valid date and time for this field`),
   });
   const [timezone, timezoneMeta] = useField({
@@ -110,22 +119,37 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
       />
       <FormGroup
         fieldId="schedule-start-datetime"
-        helperTextInvalid={startDateTimeMeta.error}
+        helperTextInvalid={
+          startDateMeta.error ||
+          startDateMeta.error ||
+          startTimeMeta.error ||
+          startTimeMeta.error
+        }
         isRequired
         validated={
-          !startDateTimeMeta.touched || !startDateTimeMeta.error
+          !startDateMeta.touched ||
+          !startDateMeta.error ||
+          startTimeMeta.error ||
+          startTimeMeta.error
             ? 'default'
             : 'error'
         }
         label={t`Start date/time`}
       >
-        <input
-          className="pf-c-form-control"
-          type="datetime-local"
-          id="schedule-start-datetime"
-          step="1"
-          {...startDateTime}
-        />
+        <DateTimeGroup>
+          <input
+            className="pf-c-form-control"
+            type="date"
+            {...startDate}
+            id="schedule-start-date"
+          />
+          <input
+            type="time"
+            {...startTime}
+            id="schedule-start-time"
+            className="pf-c-form-control"
+          />
+        </DateTimeGroup>
       </FormGroup>
       <FormGroup
         name="timezone"
@@ -399,7 +423,8 @@ function ScheduleForm({
     daysOfWeek: [],
     description: schedule.description || '',
     end: 'never',
-    endDateTime: dateToInputDateTime(tomorrow),
+    endDate: dateToInputDateTime(tomorrow).split('T')[0],
+    endTime: dateToInputDateTime(tomorrow).split('T')[1],
     frequency: 'none',
     interval: 1,
     name: schedule.name || '',
@@ -410,7 +435,8 @@ function ScheduleForm({
     runOnTheDay: 'sunday',
     runOnTheMonth: 1,
     runOnTheOccurrence: 1,
-    startDateTime: dateToInputDateTime(closestQuarterHour),
+    startDate: dateToInputDateTime(closestQuarterHour).split('T')[0],
+    startTime: dateToInputDateTime(closestQuarterHour).split('T')[1],
     timezone: schedule.timezone || 'America/New_York',
   };
   const submitSchedule = (
@@ -462,14 +488,20 @@ function ScheduleForm({
         } = RRule.fromString(schedule.rrule.replace(' ', '\n'));
 
         if (dtstart) {
-          overriddenValues.startDateTime = dateToInputDateTime(
-            new Date(formatDateStringUTC(dtstart))
+          const [startDate, startTime] = dateToInputDateTime(dtstart).split(
+            'T'
           );
+
+          overriddenValues.startDate = startDate;
+          overriddenValues.startTime = startTime;
         }
 
         if (schedule.until) {
           overriddenValues.end = 'onDate';
-          overriddenValues.endDateTime = schedule.until;
+
+          const [endDate, endTime] = schedule.until.split('T');
+          overriddenValues.endDate = endDate;
+          overriddenValues.endTime = endTime;
         } else if (count) {
           overriddenValues.end = 'after';
           overriddenValues.occurrences = count;
@@ -553,18 +585,15 @@ function ScheduleForm({
               const errors = {};
               const {
                 end,
-                endDateTime,
+                endDate,
                 frequency,
                 runOn,
                 runOnDayNumber,
-                startDateTime,
+                startDate,
               } = values;
 
-              if (
-                end === 'onDate' &&
-                new Date(startDateTime) > new Date(endDateTime)
-              ) {
-                errors.endDateTime = t`Please select an end date/time that comes after the start date/time.`;
+              if (end === 'onDate' && new Date(startDate) > new Date(endDate)) {
+                errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
               }
 
               if (

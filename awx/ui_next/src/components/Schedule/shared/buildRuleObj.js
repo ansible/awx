@@ -3,14 +3,16 @@ import { RRule } from 'rrule';
 import { getRRuleDayConstants } from '../../../util/dates';
 
 export default function buildRuleObj(values) {
-  const [startDate, startTime] = values.startDateTime.split('T');
   // Dates are formatted like "YYYY-MM-DD"
-  const [startYear, startMonth, startDay] = startDate.split('-');
+  const [startYear, startMonth, startDay] = values.startDate.split('-');
   // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
   // have been specified
-  const [startHour = 0, startMinute = 0, startSecond = 0] = startTime.split(
-    ':'
-  );
+
+  const [
+    startHour = 0,
+    startMinute = 0,
+    startSecond = 0,
+  ] = values.startTime.split(':');
 
   const ruleObj = {
     interval: values.interval,
@@ -77,9 +79,12 @@ export default function buildRuleObj(values) {
         ruleObj.count = values.occurrences;
         break;
       case 'onDate': {
-        const [endDate, endTime] = values.endDateTime.split('T');
-        const [endYear, endMonth, endDay] = endDate.split('-');
-        const [endHour = 0, endMinute = 0, endSecond = 0] = endTime.split(':');
+        const [endYear, endMonth, endDay] = values.endDate.split('-');
+        const [
+          endHour = 0,
+          endMinute = 0,
+          endSecond = 0,
+        ] = values.endTime.split(':');
         ruleObj.until = new Date(
           Date.UTC(
             endYear,

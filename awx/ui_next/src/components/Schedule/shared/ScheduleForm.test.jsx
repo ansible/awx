@@ -5,6 +5,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
+import { dateToInputDateTime } from '../../../util/dates';
 import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from '../../../api';
 import ScheduleForm from './ScheduleForm';
 
@@ -99,8 +100,11 @@ const nonRRuleValuesMatch = () => {
   expect(wrapper.find('input#schedule-description').prop('value')).toBe(
     'test description'
   );
-  expect(wrapper.find('input#schedule-start-datetime').prop('value')).toBe(
-    '2020-04-02T14:45:00'
+  expect(wrapper.find('input#schedule-start-date').prop('value')).toBe(
+    '2020-04-02'
+  );
+  expect(wrapper.find('input#schedule-start-time').prop('value')).toBe(
+    '14:45:00'
   );
   expect(wrapper.find('select#schedule-timezone').prop('value')).toBe(
     'America/New_York'
@@ -453,6 +457,11 @@ describe('<ScheduleForm />', () => {
       wrapper.unmount();
     });
     test('initially renders expected fields and values', () => {
+      const now = new Date();
+      const closestQuarterHour = new Date(
+        Math.ceil(now.getTime() / 900000) * 900000
+      );
+      const [date, time] = dateToInputDateTime(closestQuarterHour).split('T');
       expect(wrapper.find('ScheduleForm').length).toBe(1);
       defaultFieldsVisible();
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(0);
@@ -464,9 +473,13 @@ describe('<ScheduleForm />', () => {
 
       expect(wrapper.find('input#schedule-name').prop('value')).toBe('');
       expect(wrapper.find('input#schedule-description').prop('value')).toBe('');
-      expect(
-        wrapper.find('input#schedule-start-datetime').prop('value')
-      ).toMatch(/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d/);
+
+      expect(wrapper.find('input#schedule-start-date').prop('value')).toMatch(
+        `${date}`
+      );
+      expect(wrapper.find('input#schedule-start-time').prop('value')).toMatch(
+        `${time}`
+      );
       expect(wrapper.find('select#schedule-timezone').prop('value')).toBe(
         'America/New_York'
       );
@@ -684,14 +697,14 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(true);
       expect(wrapper.find('#schedule-end-datetime-helper').length).toBe(0);
       await act(async () => {
-        wrapper.find('input#schedule-end-datetime').simulate('change', {
-          target: { name: 'endDateTime', value: '2020-03-14T01:45:00' },
+        wrapper.find('input#schedule-end-date').simulate('change', {
+          target: { name: 'endDate', value: '2020-03-14T01:45:00' },
         });
       });
       wrapper.update();
 
       await act(async () => {
-        wrapper.find('input#schedule-end-datetime').simulate('blur');
+        wrapper.find('input#schedule-end-date').simulate('blur');
       });
       wrapper.update();
 
@@ -1034,8 +1047,11 @@ describe('<ScheduleForm />', () => {
       expect(
         wrapper.find('input#schedule-days-of-week-sat').prop('checked')
       ).toBe(false);
-      expect(wrapper.find('input#schedule-end-datetime').prop('value')).toBe(
-        '2021-01-01T00:00:00'
+      expect(wrapper.find('input#schedule-end-date').prop('value')).toBe(
+        '2021-01-01'
+      );
+      expect(wrapper.find('input#schedule-end-time').prop('value')).toBe(
+        '00:00:00'
       );
     });
     test('initially renders expected fields and values with existing schedule that runs every month on the last weekday', async () => {
