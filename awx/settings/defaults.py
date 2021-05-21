@@ -693,6 +693,14 @@ SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
+# ----------------
+# -- Red Hat Insights --
+# ----------------
+# INSIGHTS_ENABLED_VAR =
+# INSIGHTS_ENABLED_VALUE =
+INSIGHTS_INSTANCE_ID_VAR = 'insights_id'
+INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
+
 # ---------------------
 # ----- Custom -----
 # ---------------------

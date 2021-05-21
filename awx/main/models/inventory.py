@@ -828,6 +828,7 @@ class InventorySourceOptions(BaseModel):
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
         ('tower', _('Ansible Tower')),
+        ('insights', _('Red Hat Insights')),
     ]
 
     # From the options of the Django management base command
@@ -1546,6 +1547,22 @@ class tower(PluginFileInjector):
     base_injector = 'template'
     namespace = 'awx'
     collection = 'awx'
+
+
+class insights(PluginFileInjector):
+    plugin_name = 'insights'
+    base_injector = 'template'
+    namespace = 'redhatinsights'
+    collection = 'insights'
+    downstream_namespace = 'redhat'
+    downstream_collection = 'insights'
+    use_fqcn = 'true'
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(insights, self).inventory_as_dict(inventory_update, private_data_dir)
+        # this inventory plugin requires the fully qualified inventory plugin name
+        ret['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
+        return ret
 
 
 for cls in PluginFileInjector.__subclasses__():

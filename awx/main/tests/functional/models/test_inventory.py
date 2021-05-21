@@ -209,6 +209,7 @@ class TestInventorySourceInjectors:
             ('vmware', 'community.vmware.vmware_vm_inventory'),
             ('rhv', 'ovirt.ovirt.ovirt'),
             ('satellite6', 'theforeman.foreman.foreman'),
+            ('insights', 'redhatinsights.insights.insights'),
             ('tower', 'awx.awx.tower'),
         ],
     )
