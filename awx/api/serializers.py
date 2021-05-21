@@ -3031,7 +3031,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         res = super(JobSerializer, self).get_related(obj)
         res.update(
             dict(
-                job_events=self.reverse('api:job_job_events_list', kwargs={'pk': obj.pk}),
+                job_events=self.reverse('api:job_job_events_list', kwargs={'pk': obj.pk}),  # TODO: consider adding job_created
                 job_host_summaries=self.reverse('api:job_job_host_summaries_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:job_activity_stream_list', kwargs={'pk': obj.pk}),
                 notifications=self.reverse('api:job_notifications_list', kwargs={'pk': obj.pk}),
@@ -3098,8 +3098,8 @@ class JobDetailSerializer(JobSerializer):
         fields = ('*', 'host_status_counts', 'playbook_counts', 'custom_virtualenv')
 
     def get_playbook_counts(self, obj):
-        task_count = obj.job_events.filter(event='playbook_on_task_start').count()
-        play_count = obj.job_events.filter(event='playbook_on_play_start').count()
+        task_count = obj.get_event_queryset().filter(event='playbook_on_task_start').count()
+        play_count = obj.get_event_queryset().filter(event='playbook_on_play_start').count()
 
         data = {'play_count': play_count, 'task_count': task_count}
 
@@ -3107,7 +3107,7 @@ class JobDetailSerializer(JobSerializer):
 
     def get_host_status_counts(self, obj):
         try:
-            counts = obj.job_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
+            counts = obj.get_event_queryset().only('event_data').get(event='playbook_on_stats').get_host_status_counts()
         except JobEvent.DoesNotExist:
             counts = {}
 

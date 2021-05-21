@@ -38,6 +38,9 @@ from awx.api.serializers import (
 )
 from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, ControlledByScmMixin
 
+from awx.api.pagination import UnifiedJobEventPagination
+
+
 logger = logging.getLogger('awx.api.views.organization')
 
 
@@ -49,6 +52,7 @@ class InventoryUpdateEventsList(SubListAPIView):
     relationship = 'inventory_update_events'
     name = _('Inventory Update Events List')
     search_fields = ('stdout',)
+    pagination_class = UnifiedJobEventPagination
 
     def get_queryset(self):
         iu = self.get_parent_object()

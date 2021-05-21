@@ -47,11 +47,16 @@ def migrate_event_data(apps, schema_editor):
 
             cursor.execute(f'DROP TABLE tmp_{tblname}')
 
-            # let's go ahead and add and subtract a few indexes while we're here
-            cursor.execute(f'CREATE INDEX {tblname}_modified_idx ON {tblname} (modified);')
-
             # recreate primary key constraint
             cursor.execute(f'ALTER TABLE ONLY {tblname} ' f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);')
+
+    with connection.cursor() as cursor:
+        """
+        Big int migration introduced the brin index main_jobevent_job_id_brin_idx index. For upgardes, we drop the index, new installs do nothing.
+        I have seen the second index in my dev environment. I can not find where in the code it was created. Drop it just in case
+        """
+        cursor.execute('DROP INDEX IF EXISTS main_jobevent_job_id_brin_idx')
+        cursor.execute('DROP INDEX IF EXISTS main_jobevent_job_id_idx')
 
 
 class FakeAddField(migrations.AddField):
@@ -93,11 +98,6 @@ class Migration(migrations.Migration):
             model_name='systemjobevent',
             name='job_created',
             field=models.DateTimeField(null=True, editable=False),
-        ),
-        migrations.AlterField(
-            model_name='jobevent',
-            name='job',
-            field=models.ForeignKey(editable=False, null=True, on_delete=models.deletion.DO_NOTHING, related_name='job_events', to='main.Job'),
         ),
         migrations.CreateModel(
             name='UnpartitionedAdHocCommandEvent',
@@ -148,5 +148,121 @@ class Migration(migrations.Migration):
                 'constraints': [],
             },
             bases=('main.systemjobevent',),
+        ),
+        migrations.AlterField(
+            model_name='adhoccommandevent',
+            name='ad_hoc_command',
+            field=models.ForeignKey(
+                db_index=False, editable=False, on_delete=models.deletion.DO_NOTHING, related_name='ad_hoc_command_events', to='main.AdHocCommand'
+            ),
+        ),
+        migrations.AlterField(
+            model_name='adhoccommandevent',
+            name='created',
+            field=models.DateTimeField(default=None, editable=False, null=True),
+        ),
+        migrations.AlterField(
+            model_name='adhoccommandevent',
+            name='modified',
+            field=models.DateTimeField(db_index=True, default=None, editable=False),
+        ),
+        migrations.AlterField(
+            model_name='inventoryupdateevent',
+            name='created',
+            field=models.DateTimeField(default=None, editable=False, null=True),
+        ),
+        migrations.AlterField(
+            model_name='inventoryupdateevent',
+            name='inventory_update',
+            field=models.ForeignKey(
+                db_index=False, editable=False, on_delete=models.deletion.DO_NOTHING, related_name='inventory_update_events', to='main.InventoryUpdate'
+            ),
+        ),
+        migrations.AlterField(
+            model_name='inventoryupdateevent',
+            name='modified',
+            field=models.DateTimeField(db_index=True, default=None, editable=False),
+        ),
+        migrations.AlterField(
+            model_name='jobevent',
+            name='created',
+            field=models.DateTimeField(default=None, editable=False, null=True),
+        ),
+        migrations.AlterField(
+            model_name='jobevent',
+            name='job',
+            field=models.ForeignKey(db_index=False, editable=False, null=True, on_delete=models.deletion.DO_NOTHING, related_name='job_events', to='main.Job'),
+        ),
+        migrations.AlterField(
+            model_name='jobevent',
+            name='modified',
+            field=models.DateTimeField(db_index=True, default=None, editable=False),
+        ),
+        migrations.AlterField(
+            model_name='projectupdateevent',
+            name='created',
+            field=models.DateTimeField(default=None, editable=False, null=True),
+        ),
+        migrations.AlterField(
+            model_name='projectupdateevent',
+            name='modified',
+            field=models.DateTimeField(db_index=True, default=None, editable=False),
+        ),
+        migrations.AlterField(
+            model_name='projectupdateevent',
+            name='project_update',
+            field=models.ForeignKey(
+                db_index=False, editable=False, on_delete=models.deletion.DO_NOTHING, related_name='project_update_events', to='main.ProjectUpdate'
+            ),
+        ),
+        migrations.AlterField(
+            model_name='systemjobevent',
+            name='created',
+            field=models.DateTimeField(default=None, editable=False, null=True),
+        ),
+        migrations.AlterField(
+            model_name='systemjobevent',
+            name='modified',
+            field=models.DateTimeField(db_index=True, default=None, editable=False),
+        ),
+        migrations.AlterField(
+            model_name='systemjobevent',
+            name='system_job',
+            field=models.ForeignKey(
+                db_index=False, editable=False, on_delete=models.deletion.DO_NOTHING, related_name='system_job_events', to='main.SystemJob'
+            ),
+        ),
+        migrations.AlterIndexTogether(
+            name='adhoccommandevent',
+            index_together={
+                ('ad_hoc_command', 'job_created', 'event'),
+                ('ad_hoc_command', 'job_created', 'counter'),
+                ('ad_hoc_command', 'job_created', 'uuid'),
+            },
+        ),
+        migrations.AlterIndexTogether(
+            name='inventoryupdateevent',
+            index_together={('inventory_update', 'job_created', 'counter'), ('inventory_update', 'job_created', 'uuid')},
+        ),
+        migrations.AlterIndexTogether(
+            name='jobevent',
+            index_together={
+                ('job', 'job_created', 'counter'),
+                ('job', 'job_created', 'uuid'),
+                ('job', 'job_created', 'event'),
+                ('job', 'job_created', 'parent_uuid'),
+            },
+        ),
+        migrations.AlterIndexTogether(
+            name='projectupdateevent',
+            index_together={
+                ('project_update', 'job_created', 'uuid'),
+                ('project_update', 'job_created', 'event'),
+                ('project_update', 'job_created', 'counter'),
+            },
+        ),
+        migrations.AlterIndexTogether(
+            name='systemjobevent',
+            index_together={('system_job', 'job_created', 'uuid'), ('system_job', 'job_created', 'counter')},
         ),
     ]

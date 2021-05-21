@@ -172,7 +172,7 @@ from awx.api.views.root import (  # noqa
     ApiV2AttachView,
 )
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
-from awx.api.pagination import JobEventPagination
+from awx.api.pagination import UnifiedJobEventPagination
 
 
 logger = logging.getLogger('awx.api.views')
@@ -888,6 +888,7 @@ class ProjectUpdateEventsList(SubListAPIView):
     relationship = 'project_update_events'
     name = _('Project Update Events List')
     search_fields = ('stdout',)
+    pagination_class = UnifiedJobEventPagination
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
@@ -907,6 +908,7 @@ class SystemJobEventsList(SubListAPIView):
     relationship = 'system_job_events'
     name = _('System Job Events List')
     search_fields = ('stdout',)
+    pagination_class = UnifiedJobEventPagination
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
@@ -3622,7 +3624,7 @@ class JobRelaunch(RetrieveAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             host_qs = obj.retry_qs(retry_hosts)
-            if not obj.job_events.filter(event='playbook_on_stats').exists():
+            if not obj.get_event_queryset().filter(event='playbook_on_stats').exists():
                 return Response(
                     {'hosts': _('Cannot retry on {status_value} hosts, playbook stats not available.').format(status_value=retry_hosts)},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -3833,7 +3835,7 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = models.Job
-    pagination_class = JobEventPagination
+    pagination_class = UnifiedJobEventPagination
 
     def get_queryset(self):
         job = self.get_parent_object()
@@ -4021,6 +4023,7 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     relationship = 'ad_hoc_command_events'
     name = _('Ad Hoc Command Events List')
     search_fields = ('stdout',)
+    pagination_class = UnifiedJobEventPagination
 
     def get_queryset(self):
         parent = self.get_parent_object()

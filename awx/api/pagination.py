@@ -103,7 +103,7 @@ class LimitPagination(pagination.BasePagination):
         return self.default_limit
 
 
-class JobEventPagination(Pagination):
+class UnifiedJobEventPagination(Pagination):
     """
     By default, use Pagination for all operations.
     If `limit` query parameter specified use LimitPagination
