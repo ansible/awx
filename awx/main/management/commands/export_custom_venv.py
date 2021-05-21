@@ -12,6 +12,7 @@ class Command(BaseCommand):
         parser.add_argument(
             'path',
             type=str,
+            nargs=1,
             default='',
             help='run this with a path to a virtual environment as an argument to see the pip freeze data',
         )
@@ -19,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         super(Command, self).__init__()
         if options.get('path'):
-            pip_data = get_custom_venv_pip_freeze(options.get('path'))
+            pip_data = get_custom_venv_pip_freeze(options.get('path')[0])
             if pip_data:
                 print(pip_data)
                 msg = [
@@ -27,5 +28,3 @@ class Command(BaseCommand):
                     'awx-manage list_custom_venvs',
                 ]
                 print('\n'.join(msg))
-        else:
-            print("missing argument: please include a path argument following the command.")
