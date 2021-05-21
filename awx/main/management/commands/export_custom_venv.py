@@ -12,7 +12,6 @@ class Command(BaseCommand):
         parser.add_argument(
             'path',
             type=str,
-            nargs='?',
             default='',
             help='run this with a path to a virtual environment as an argument to see the pip freeze data',
         )
@@ -24,7 +23,7 @@ class Command(BaseCommand):
             if pip_data:
                 print(pip_data)
                 msg = [
-                    'To list all available custom virtual environments run:',
+                    'To list all (now deprecated) custom virtual environments run:',
                     'awx-manage list_custom_venvs',
                 ]
                 print('\n'.join(msg))

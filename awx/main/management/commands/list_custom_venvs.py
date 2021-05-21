@@ -8,7 +8,7 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
-    """Returns either a list of custom venv paths from the path passed in the argument"""
+    """Returns a list of custom venv paths from the path passed in the argument"""
 
     def handle(self, *args, **options):
         super(Command, self).__init__()
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
             msg = [
                 '',
-                'To export the contents of a virtual environment, ' 'run the following command while supplying the path as an argument:',
+                'To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
                 'awx-manage export_custom_venv /path/to/venv',
             ]
             print('\n'.join(msg))
