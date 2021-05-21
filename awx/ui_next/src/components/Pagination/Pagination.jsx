@@ -19,6 +19,7 @@ const AWXPagination = styled(PFPagination)`
 
 export default props => (
   <AWXPagination
+    ouiaId="pagination"
     titles={{
       items: t`items`,
       page: t`page`,
