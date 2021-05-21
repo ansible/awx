@@ -1,9 +1,3 @@
-plugins/modules/receive.py validate-modules:deprecation-mismatch
-plugins/modules/receive.py validate-modules:invalid-documentation
-plugins/modules/send.py validate-modules:deprecation-mismatch
-plugins/modules/send.py validate-modules:invalid-documentation
-plugins/modules/workflow_template.py validate-modules:deprecation-mismatch
-plugins/modules/workflow_template.py validate-modules:invalid-documentation
 plugins/inventory/controller.py pylint:raise-missing-from
 plugins/inventory/controller.py pylint:super-with-arguments
 plugins/lookup/schedule_rrule.py pylint:raise-missing-from
