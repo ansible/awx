@@ -16,7 +16,6 @@ from awx.api.views import (
     HostSmartInventoriesList,
     HostAdHocCommandsList,
     HostAdHocCommandEventsList,
-    HostInsights,
 )
 
 
@@ -33,7 +32,6 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/smart_inventories/$', HostSmartInventoriesList.as_view(), name='host_smart_inventories_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$', HostAdHocCommandsList.as_view(), name='host_ad_hoc_commands_list'),
     url(r'^(?P<pk>[0-9]+)/ad_hoc_command_events/$', HostAdHocCommandEventsList.as_view(), name='host_ad_hoc_command_events_list'),
-    url(r'^(?P<pk>[0-9]+)/insights/$', HostInsights.as_view(), name='host_insights'),
 ]
 
 __all__ = ['urls']

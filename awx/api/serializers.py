@@ -1753,10 +1753,9 @@ class HostSerializer(BaseSerializerWithVariables):
             'has_inventory_sources',
             'last_job',
             'last_job_host_summary',
-            'insights_system_id',
             'ansible_facts_modified',
         )
-        read_only_fields = ('last_job', 'last_job_host_summary', 'insights_system_id', 'ansible_facts_modified')
+        read_only_fields = ('last_job', 'last_job_host_summary', 'ansible_facts_modified')
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(HostSerializer, self).build_relational_field(field_name, relation_info)
@@ -1780,7 +1779,6 @@ class HostSerializer(BaseSerializerWithVariables):
                 smart_inventories=self.reverse('api:host_smart_inventories_list', kwargs={'pk': obj.pk}),
                 ad_hoc_commands=self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
                 ad_hoc_command_events=self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
-                insights=self.reverse('api:host_insights', kwargs={'pk': obj.pk}),
                 ansible_facts=self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
             )
         )

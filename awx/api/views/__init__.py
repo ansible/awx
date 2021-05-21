@@ -90,17 +90,14 @@ from awx.main import models
 from awx.main.utils import (
     camelcase_to_underscore,
     extract_ansible_vars,
-    get_awx_http_client_headers,
     get_object_or_400,
     getattrd,
     get_pk_from_dict,
     schedule_task_manager,
     ignore_inventory_computed_fields,
-    set_environ,
 )
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
-from awx.main.utils.insights import filter_insights_api_response
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
@@ -1698,106 +1695,6 @@ class GatewayTimeout(APIException):
     status_code = status.HTTP_504_GATEWAY_TIMEOUT
     default_detail = ''
     default_code = 'gateway_timeout'
-
-
-class HostInsights(GenericAPIView):
-
-    model = models.Host
-    serializer_class = serializers.EmptySerializer
-
-    def _call_insights_api(self, url, session, headers):
-        try:
-            with set_environ(**settings.AWX_TASK_ENV):
-                res = session.get(url, headers=headers, timeout=120)
-        except requests.exceptions.SSLError:
-            raise BadGateway(_('SSLError while trying to connect to {}').format(url))
-        except requests.exceptions.Timeout:
-            raise GatewayTimeout(_('Request to {} timed out.').format(url))
-        except requests.exceptions.RequestException as e:
-            raise BadGateway(_('Unknown exception {} while trying to GET {}').format(e, url))
-
-        if res.status_code == 401:
-            raise BadGateway(_('Unauthorized access. Please check your Insights Credential username and password.'))
-        elif res.status_code != 200:
-            raise BadGateway(
-                _('Failed to access the Insights API at URL {}.' ' Server responded with {} status code and message {}').format(
-                    url, res.status_code, res.content
-                )
-            )
-
-        try:
-            return res.json()
-        except ValueError:
-            raise BadGateway(_('Expected JSON response from Insights at URL {}' ' but instead got {}').format(url, res.content))
-
-    def _get_session(self, username, password):
-        session = requests.Session()
-        session.auth = requests.auth.HTTPBasicAuth(username, password)
-
-        return session
-
-    def _get_platform_info(self, host, session, headers):
-        url = '{}/api/inventory/v1/hosts?insights_id={}'.format(settings.INSIGHTS_URL_BASE, host.insights_system_id)
-        res = self._call_insights_api(url, session, headers)
-        try:
-            res['results'][0]['id']
-        except (IndexError, KeyError):
-            raise NotFound(_('Could not translate Insights system ID {}' ' into an Insights platform ID.').format(host.insights_system_id))
-
-        return res['results'][0]
-
-    def _get_reports(self, platform_id, session, headers):
-        url = '{}/api/insights/v1/system/{}/reports/'.format(settings.INSIGHTS_URL_BASE, platform_id)
-
-        return self._call_insights_api(url, session, headers)
-
-    def _get_remediations(self, platform_id, session, headers):
-        url = '{}/api/remediations/v1/remediations?system={}'.format(settings.INSIGHTS_URL_BASE, platform_id)
-
-        remediations = []
-
-        # Iterate over all of the pages of content.
-        while url:
-            data = self._call_insights_api(url, session, headers)
-            remediations.extend(data['data'])
-
-            url = data['links']['next']  # Will be `None` if this is the last page.
-
-        return remediations
-
-    def _get_insights(self, host, session, headers):
-        platform_info = self._get_platform_info(host, session, headers)
-        platform_id = platform_info['id']
-        reports = self._get_reports(platform_id, session, headers)
-        remediations = self._get_remediations(platform_id, session, headers)
-
-        return {'insights_content': filter_insights_api_response(platform_info, reports, remediations)}
-
-    def get(self, request, *args, **kwargs):
-        host = self.get_object()
-        cred = None
-
-        if host.insights_system_id is None:
-            return Response(dict(error=_('This host is not recognized as an Insights host.')), status=status.HTTP_404_NOT_FOUND)
-
-        if host.inventory and host.inventory.insights_credential:
-            cred = host.inventory.insights_credential
-        else:
-            return Response(dict(error=_('The Insights Credential for "{}" was not found.').format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
-
-        username = cred.get_input('username', default='')
-        password = cred.get_input('password', default='')
-        session = self._get_session(username, password)
-        headers = get_awx_http_client_headers()
-
-        data = self._get_insights(host, session, headers)
-        return Response(data, status=status.HTTP_200_OK)
-
-    def handle_exception(self, exc):
-        # Continue supporting the slightly different way we have handled error responses on this view.
-        response = super().handle_exception(exc)
-        response.data['error'] = response.data.pop('detail')
-        return response
 
 
 class GroupList(ListCreateAPIView):

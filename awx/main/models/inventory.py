@@ -503,13 +503,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         null=True,
         help_text=_('The date and time ansible_facts was last modified.'),
     )
-    insights_system_id = models.TextField(
-        blank=True,
-        default=None,
-        null=True,
-        db_index=True,
-        help_text=_('Red Hat Insights host unique identifier.'),
-    )
 
     objects = HostManager()
 

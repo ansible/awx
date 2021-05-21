@@ -71,7 +71,7 @@ def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker,
     for h in hosts:
         h.save = mocker.Mock()
 
-    ansible_facts_new = {"foo": "bar", "insights": {"system_id": "updated_by_scan"}}
+    ansible_facts_new = {"foo": "bar"}
     filepath = os.path.join(fact_cache, hosts[1].name)
     with open(filepath, 'w') as f:
         f.write(json.dumps(ansible_facts_new))
@@ -90,29 +90,7 @@ def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker,
         assert host.ansible_facts == {"a": 1, "b": 2}
         assert host.ansible_facts_modified is None
     assert hosts[1].ansible_facts == ansible_facts_new
-    assert hosts[1].insights_system_id == "updated_by_scan"
     hosts[1].save.assert_called_once_with()
-
-
-def test_finish_job_fact_cache_with_malformed_fact(job, hosts, inventory, mocker, tmpdir):
-    fact_cache = os.path.join(tmpdir, 'facts')
-    modified_times = {}
-    job.start_job_fact_cache(fact_cache, modified_times, 0)
-
-    for h in hosts:
-        h.save = mocker.Mock()
-
-    for h in hosts:
-        filepath = os.path.join(fact_cache, h.name)
-        with open(filepath, 'w') as f:
-            json.dump({'ansible_local': {'insights': 'this is an unexpected error from ansible'}}, f)
-            new_modification_time = time.time() + 3600
-            os.utime(filepath, (new_modification_time, new_modification_time))
-
-    job.finish_job_fact_cache(fact_cache, modified_times)
-
-    for h in hosts:
-        assert h.insights_system_id is None
 
 
 def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpdir):
