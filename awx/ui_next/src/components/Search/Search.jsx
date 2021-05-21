@@ -264,6 +264,7 @@ function Search({
                 {/* TODO: add support for dates:
           qsConfig.dateFields.filter(field => field === key).length && "date" */}
                 <TextInput
+                  data-cy="search-text-input"
                   type={
                     (qsConfig.integerFields.find(
                       field => field === searchKey
@@ -279,6 +280,7 @@ function Search({
                 />
                 <div css={!searchValue && `cursor:not-allowed`}>
                   <Button
+                    ouiaId="search-submit-button"
                     variant={ButtonVariant.control}
                     isDisabled={!searchValue || isDisabled}
                     aria-label={t`Search submit button`}

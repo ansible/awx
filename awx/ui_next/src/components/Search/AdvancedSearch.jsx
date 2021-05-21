@@ -85,6 +85,7 @@ function AdvancedSearch({
   return (
     <AdvancedGroup>
       <Select
+        ouiaId="set-type-typeahead"
         aria-label={t`Set type select`}
         className="setTypeSelect"
         variant={SelectVariant.typeahead}
@@ -99,22 +100,26 @@ function AdvancedSearch({
         noResultsFoundText={t`No results found`}
       >
         <SelectOption
+          id="and-option-select"
           key="and"
           value="and"
           description={t`Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected.`}
         />
         <SelectOption
+          id="or-option-select"
           key="or"
           value="or"
           description={t`Returns results that satisfy this one or any other filters.`}
         />
         <SelectOption
+          id="not-option-select"
           key="not"
           value="not"
           description={t`Returns results that have values other than this one as well as other filters.`}
         />
       </Select>
       <Select
+        ouiaId="set-key-typeahead"
         aria-label={t`Key select`}
         className="keySelect"
         variant={SelectVariant.typeahead}
@@ -131,12 +136,17 @@ function AdvancedSearch({
         noResultsFoundText={t`No results found`}
       >
         {allKeys.map(optionKey => (
-          <SelectOption key={optionKey} value={optionKey}>
+          <SelectOption
+            key={optionKey}
+            value={optionKey}
+            id={`select-option-${optionKey}`}
+          >
             {optionKey}
           </SelectOption>
         ))}
       </Select>
       <Select
+        ouiaId="set-lookup-typeahead"
         aria-label={t`Lookup select`}
         className="lookupSelect"
         variant={SelectVariant.typeahead}
@@ -151,81 +161,97 @@ function AdvancedSearch({
         noResultsFoundText={t`No results found`}
       >
         <SelectOption
+          id="exact-option-select"
           key="exact"
           value="exact"
           description={t`Exact match (default lookup if not specified).`}
         />
         <SelectOption
+          id="iexact-option-select"
           key="iexact"
           value="iexact"
           description={t`Case-insensitive version of exact.`}
         />
         <SelectOption
+          id="contains-option-select"
           key="contains"
           value="contains"
           description={t`Field contains value.`}
         />
         <SelectOption
+          id="icontains-option-select"
           key="icontains"
           value="icontains"
           description={t`Case-insensitive version of contains`}
         />
         <SelectOption
+          id="startswith-option-select"
           key="startswith"
           value="startswith"
           description={t`Field starts with value.`}
         />
         <SelectOption
+          id="istartswith-option-select"
           key="istartswith"
           value="istartswith"
           description={t`Case-insensitive version of startswith.`}
         />
         <SelectOption
+          id="endswith-option-select"
           key="endswith"
           value="endswith"
           description={t`Field ends with value.`}
         />
         <SelectOption
+          id="iendswith-option-select"
           key="iendswith"
           value="iendswith"
           description={t`Case-insensitive version of endswith.`}
         />
         <SelectOption
+          id="regex-option-select"
           key="regex"
           value="regex"
           description={t`Field matches the given regular expression.`}
         />
         <SelectOption
+          id="iregex-option-select"
           key="iregex"
           value="iregex"
           description={t`Case-insensitive version of regex.`}
         />
         <SelectOption
+          id="gt-option-select"
           key="gt"
           value="gt"
           description={t`Greater than comparison.`}
         />
         <SelectOption
+          id="gte-option-select"
           key="gte"
           value="gte"
           description={t`Greater than or equal to comparison.`}
         />
         <SelectOption
+          id="lt-option-select"
           key="lt"
           value="lt"
           description={t`Less than comparison.`}
         />
         <SelectOption
+          id="lte-option-select"
           key="lte"
           value="lte"
           description={t`Less than or equal to comparison.`}
         />
         <SelectOption
+          id="isnull-option-select"
           key="isnull"
           value="isnull"
           description={t`Check whether the given field or related object is null; expects a boolean value.`}
         />
         <SelectOption
+          id="in-option-select"
           key="in"
           value="in"
           description={t`Check whether the given field's value is present in the list provided; expects a comma-separated list of items.`}
@@ -233,6 +259,7 @@ function AdvancedSearch({
       </Select>
       <InputGroup>
         <TextInput
+          data-cy="advanced-search-text-input"
           type="search"
           aria-label={t`Advanced search value input`}
           isDisabled={!keySelection}
@@ -242,6 +269,7 @@ function AdvancedSearch({
         />
         <div css={!searchValue && `cursor:not-allowed`}>
           <Button
+            ouiaId="advanced-search-text-input"
             variant={ButtonVariant.control}
             isDisabled={!searchValue}
             aria-label={t`Search submit button`}
@@ -253,6 +281,7 @@ function AdvancedSearch({
       </InputGroup>
       <Tooltip content={t`Advanced search documentation`} position="bottom">
         <Button
+          ouiaId="search-docs-button"
           component="a"
           variant="plain"
           target="_blank"
