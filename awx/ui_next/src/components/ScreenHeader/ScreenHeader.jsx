@@ -78,7 +78,7 @@ const ActualTitle = ({ breadcrumbConfig }) => {
 
   if (match.isExact) {
     titleElement = (
-      <Title size="2xl" headingLevel="h2">
+      <Title size="2xl" headingLevel="h2" data-cy="screen-title">
         {title}
       </Title>
     );
