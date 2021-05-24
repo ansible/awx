@@ -83,47 +83,68 @@ class PodManager(object):
         secret.data = {".dockerconfigjson": auth_data}
 
         # Check if secret already exists
-        secrets = None
+        replace_secret = False
         try:
-            secrets = self.kube_api.list_namespaced_secret(namespace=self.namespace)
-        except client.rest.ApiException:
-            error_msg = 'Invalid openshift or k8s cluster credential'
-            logger.exception(error_msg)
-            job.cancel(job_explanation=error_msg)
-            raise
-
-        if secrets:
-            secret_exists = False
-            secrets_dict = secrets.to_dict().get('items', [])
-            for s in secrets_dict:
-                if s['metadata']['name'] == secret_name:
-                    secret_exists = True
-                    break
-            if secret_exists:
-                try:
-                    # Try to replace existing secret
-                    self.kube_api.delete_namespaced_secret(name=secret.metadata.name, namespace=self.namespace)
-                    self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
-                except Exception:
-                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
-                    logger.exception(error_msg)
-                    job.cancel(job_explanation=error_msg)
-                    raise
+            existing_secret = self.kube_api.read_namespaced_secret(namespace=self.namespace, name=secret_name)
+            if existing_secret.data != secret.data:
+                replace_secret = True
+            secret_exists = True
+        except client.rest.ApiException as e:
+            if e.status == 404:
+                secret_exists = False
             else:
-                # Create an image pull secret in namespace
-                try:
-                    self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
-                except client.rest.ApiException as e:
-                    if e.status == 401:
-                        error_msg = 'Failed to create imagePullSecret: {}. Check that openshift or k8s credential has permission to create a secret.'.format(
-                            e.status
+                error_msg = _('Invalid openshift or k8s cluster credential')
+                if e.status == 403:
+                    error_msg = _(
+                        'Failed to create secret for container group {} because the needed service account roles are needed.  Add get, list, create and delete roles for secret resources for your cluster credential.'.format(
+                            job.instance_group.name
                         )
-                        logger.exception(error_msg)
-                        # let job run for the case that the secret exists but the cluster cred doesn't have permission to create a secret
-                except Exception:
-                    error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
+                    )
+                full_error_msg = '{0}: {1}'.format(error_msg, str(e))
+                logger.exception(full_error_msg)
+                job.job_explanation = error_msg
+                job.save()
+                raise PermissionError(full_error_msg)
+
+        if replace_secret:
+            try:
+                # Try to replace existing secret
+                self.kube_api.delete_namespaced_secret(name=secret.metadata.name, namespace=self.namespace)
+                self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
+            except client.rest.ApiException as e:
+                error_msg = _('Invalid openshift or k8s cluster credential')
+                if e.status == 403:
+                    error_msg = _(
+                        'Failed to delete secret for container group {} because the needed service account roles are needed.  Add create and delete roles for secret resources for your cluster credential.'.format(
+                            job.instance_group.name
+                        )
+                    )
+                full_error_msg = '{0}: {1}'.format(error_msg, str(e))
+                logger.exception(full_error_msg)
+                job.job_explanation = error_msg
+                job.save()
+                # let job continue for the case where secret was created manually and cluster cred doesn't have permission to create a secret
+            except Exception as e:
+                error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
+                logger.exception('{0}: {1}'.format(error_msg, str(e)))
+                raise RuntimeError(error_msg)
+        elif secret_exists and not replace_secret:
+            pass
+        else:
+            # Create an image pull secret in namespace
+            try:
+                self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
+            except client.rest.ApiException as e:
+                if e.status == 403:
+                    error_msg = _(
+                        'Failed to create imagePullSecret: {}. Check that openshift or k8s credential has permission to create a secret.'.format(e.status)
+                    )
                     logger.exception(error_msg)
-                    job.cancel(job_explanation=error_msg)
+                    # let job continue for the case where secret was created manually and cluster cred doesn't have permission to create a secret
+            except Exception:
+                error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
+                logger.exception(error_msg)
+                job.cancel(job_explanation=error_msg)
 
         return secret.metadata.name
 
