@@ -115,7 +115,7 @@ function ActivityStream() {
         className="pf-m-condensed"
         style={{ display: 'flex', justifyContent: 'space-between' }}
       >
-        <Title size="2xl" headingLevel="h2">
+        <Title size="2xl" headingLevel="h2" data-cy="screen-title">
           {t`Activity Stream`}
         </Title>
         <span id="grouped-type-select-id" hidden>
