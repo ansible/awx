@@ -163,7 +163,7 @@ class ControllerAPIModule(ControllerModule):
         if len(sample['json']['results']) > 1:
             sample['json']['results'] = sample['json']['results'][:2] + ['...more results snipped...']
         url = self.build_url(endpoint, query_params)
-        display_endpoint = url.geturl()[len(self.host) :]  # truncate to not include the base URL
+        display_endpoint = url.geturl()[len(self.host):]  # truncate to not include the base URL
         self.fail_json(
             msg="Request to {0} returned {1} items, expected 1".format(display_endpoint, response['json']['count']),
             query=query_params,
