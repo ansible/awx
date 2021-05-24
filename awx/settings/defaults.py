@@ -70,9 +70,9 @@ IS_K8S = False
 
 RECEPTOR_RELEASE_WORK = True
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
-AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
-AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
+# Timeout when waiting for pod to enter running state. If the pod is still in pending state , it will be terminated. Valid time units are "s", "m", "h". Example : "5m" , "10s".
+AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "5m"
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
