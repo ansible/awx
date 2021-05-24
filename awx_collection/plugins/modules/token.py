@@ -16,7 +16,7 @@ DOCUMENTATION = '''
 ---
 module: token
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.3"
+version_added: "2.3.0"
 short_description: create, update, or destroy Automation Platform Controller tokens.
 description:
     - Create or destroy Automation Platform Controller tokens. See

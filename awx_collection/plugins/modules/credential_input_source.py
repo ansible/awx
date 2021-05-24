@@ -16,7 +16,7 @@ DOCUMENTATION = '''
 ---
 module: credential_input_source
 author: "Tom Page (@Tompage1994)"
-version_added: "2.3"
+version_added: "2.3.0"
 short_description: create, update, or destroy Automation Platform Controller credential input sources.
 description:
     - Create, update, or destroy Automation Platform Controller credential input sources. See

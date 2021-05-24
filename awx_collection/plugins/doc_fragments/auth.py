@@ -40,7 +40,7 @@ options:
     - A dictionary structure as returned by the token module.
     - If value not set, will try environment variable C(CONTROLLER_OAUTH_TOKEN) and then config files
     type: raw
-    version_added: "3.7"
+    version_added: "3.7.0"
     aliases: [ tower_oauthtoken ]
   validate_certs:
     description:

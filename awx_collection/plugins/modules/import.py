@@ -16,7 +16,7 @@ DOCUMENTATION = '''
 ---
 module: import
 author: "John Westcott (@john-westcott-iv)"
-version_added: "3.7"
+version_added: "3.7.0"
 short_description: import resources into Automation Platform Controller.
 description:
     - Import assets into Automation Platform Controller. See

@@ -16,7 +16,7 @@ DOCUMENTATION = '''
 ---
 module: instance_group
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "4.0"
+version_added: "4.0.0"
 short_description: create, update, or destroy Automation Platform Controller instance groups.
 description:
     - Create, update, or destroy Automation Platform Controller instance groups. See
