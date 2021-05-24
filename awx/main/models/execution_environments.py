@@ -14,7 +14,7 @@ class ExecutionEnvironment(CommonModel):
 
     PULL_CHOICES = [
         ('always', _("Always pull container before running.")),
-        ('missing', _("No pull option has been selected.")),
+        ('missing', _("Only pull the image if not present before running.")),
         ('never', _("Never pull container before running.")),
     ]
 
