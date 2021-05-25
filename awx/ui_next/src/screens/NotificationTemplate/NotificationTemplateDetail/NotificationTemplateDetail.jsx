@@ -306,7 +306,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
               label={t`HTTP Headers`}
               value={JSON.stringify(configuration.headers)}
               mode="json"
-              rows="6"
+              rows={6}
               dataCy="nt-detail-webhook-headers"
             />
           </>

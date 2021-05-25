@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { TableComposable, Tbody } from '@patternfly/react-table';
 
@@ -33,10 +33,16 @@ function PaginatedTable({
   showPageSizeOptions,
   renderToolbar,
   emptyContentMessage,
+  clearSelected,
   ouiaId,
 }) {
   const { search, pathname } = useLocation();
   const history = useHistory();
+  const location = useLocation();
+
+  useEffect(() => {
+    clearSelected();
+  }, [location.search, clearSelected]);
 
   const pushHistoryState = qs => {
     history.push(qs ? `${pathname}?${qs}` : pathname);
@@ -127,7 +133,7 @@ function PaginatedTable({
   );
 
   return (
-    <Fragment>
+    <>
       <ListHeader
         itemCount={itemCount}
         renderToolbar={renderToolbar}
@@ -159,7 +165,7 @@ function PaginatedTable({
           onPerPageSelect={handleSetPageSize}
         />
       ) : null}
-    </Fragment>
+    </>
   );
 }
 
@@ -182,6 +188,7 @@ PaginatedTable.propTypes = {
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
   contentError: PropTypes.shape(),
+  clearSelected: PropTypes.func,
   ouiaId: PropTypes.string,
 };
 
@@ -195,6 +202,7 @@ PaginatedTable.defaultProps = {
   showPageSizeOptions: true,
   renderToolbar: props => <DataListToolbar {...props} />,
   ouiaId: null,
+  clearSelected: () => {},
 };
 
 export { PaginatedTable as _PaginatedTable };

@@ -15,6 +15,7 @@ import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import useSelected from '../../../util/useSelected';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';
 
@@ -25,7 +26,6 @@ const QS_CONFIG = getQSConfig('host', {
 });
 
 function InventoryHostList() {
-  const [selected, setSelected] = useState([]);
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const { id } = useParams();
   const { search } = useLocation();
@@ -74,17 +74,14 @@ function InventoryHostList() {
     fetchData();
   }, [fetchData]);
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...hosts] : []);
-  };
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(hosts);
 
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteHosts,
@@ -99,12 +96,11 @@ function InventoryHostList() {
 
   const handleDeleteHosts = async () => {
     await deleteHosts();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected = selected.length > 0 && selected.length === hosts.length;
 
   return (
     <>
@@ -115,6 +111,7 @@ function InventoryHostList() {
         itemCount={hostCount}
         pluralizedItemName={t`Hosts`}
         qsConfig={QS_CONFIG}
+        clearSelected={clearSelected}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         headerRow={
@@ -128,7 +125,7 @@ function InventoryHostList() {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={handleSelectAll}
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd

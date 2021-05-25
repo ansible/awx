@@ -19,6 +19,7 @@ import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 import SurveyPreviewModal from './SurveyPreviewModal';
+import useSelected from '../../../util/useSelected';
 
 const Button = styled(_Button)`
   margin: 20px;
@@ -36,15 +37,16 @@ function SurveyList({
   const match = useRouteMatch();
 
   const questions = survey?.spec || [];
-  const [selected, setSelected] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-  const isAllSelected =
-    selected.length === questions?.length && selected.length > 0;
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...questions] : []);
-  };
+  const {
+    selected,
+    isAllSelected,
+    setSelected,
+    selectAll,
+    clearSelected,
+  } = useSelected(questions);
 
   const handleSelect = item => {
     if (selected.some(q => q.variable === item.variable)) {
@@ -61,7 +63,7 @@ function SurveyList({
       await updateSurvey(questions.filter(q => !selected.includes(q)));
     }
     setIsDeleteModalOpen(false);
-    setSelected([]);
+    clearSelected();
   };
 
   const moveUp = question => {
@@ -91,7 +93,7 @@ function SurveyList({
       isOpen={isDeleteModalOpen}
       onClose={() => {
         setIsDeleteModalOpen(false);
-        setSelected([]);
+        clearSelected();
       }}
       actions={[
         <Button
@@ -110,7 +112,7 @@ function SurveyList({
           aria-label={t`cancel delete`}
           onClick={() => {
             setIsDeleteModalOpen(false);
-            setSelected([]);
+            clearSelected();
           }}
         >
           {t`Cancel`}
@@ -181,7 +183,7 @@ function SurveyList({
     <>
       <SurveyToolbar
         isAllSelected={isAllSelected}
-        onSelectAll={handleSelectAll}
+        onSelectAll={selectAll}
         surveyEnabled={surveyEnabled}
         onToggleSurvey={toggleSurvey}
         isDeleteDisabled={selected?.length === 0}

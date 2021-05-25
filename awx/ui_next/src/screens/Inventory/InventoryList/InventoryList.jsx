@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -27,7 +28,6 @@ const QS_CONFIG = getQSConfig('inventory', {
 function InventoryList() {
   const location = useLocation();
   const match = useRouteMatch();
-  const [selected, setSelected] = useState([]);
 
   const {
     result: {
@@ -89,8 +89,14 @@ function InventoryList() {
     QS_CONFIG
   );
 
-  const isAllSelected =
-    selected.length === inventories.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(inventories);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteInventories,
@@ -107,25 +113,11 @@ function InventoryList() {
 
   const handleInventoryDelete = async () => {
     await deleteInventories();
-    setSelected([]);
+    clearSelected();
   };
 
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...inventories] : []);
-  };
-
-  const handleSelect = row => {
-    if (!row.pending_deletion) {
-      if (selected.some(s => s.id === row.id)) {
-        setSelected(selected.filter(s => s.id !== row.id));
-      } else {
-        setSelected(selected.concat(row));
-      }
-    }
-  };
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventory(
     selected[0]
@@ -197,6 +189,7 @@ function InventoryList() {
           ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          clearSelected={clearSelected}
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG}>
               <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
@@ -211,7 +204,7 @@ function InventoryList() {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={selectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAdd ? [addButton] : []),
@@ -251,7 +244,11 @@ function InventoryList() {
                   ? `${match.url}/smart_inventory/${inventory.id}/details`
                   : `${match.url}/inventory/${inventory.id}/details`
               }
-              onSelect={() => handleSelect(inventory)}
+              onSelect={() => {
+                if (!inventory.pending_deletion) {
+                  handleSelect(inventory);
+                }
+              }}
               isSelected={selected.some(row => row.id === inventory.id)}
             />
           )}

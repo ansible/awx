@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, DropdownItem } from '@patternfly/react-core';
@@ -13,6 +13,7 @@ import ErrorDetail from '../ErrorDetail';
 import { ToolbarDeleteButton } from '../PaginatedDataList';
 import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
+import useSelected from '../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useWsTemplates from '../../util/useWsTemplates';
 import AddDropDownButton from '../AddDropDownButton';
@@ -35,8 +36,6 @@ function TemplateList({ defaultParams }) {
   );
 
   const location = useLocation();
-  const [selected, setSelected] = useState([]);
-
   const {
     result: {
       results,
@@ -87,8 +86,14 @@ function TemplateList({ defaultParams }) {
 
   const templates = useWsTemplates(results);
 
-  const isAllSelected =
-    selected.length === templates.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(templates);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteTemplates,
@@ -117,19 +122,7 @@ function TemplateList({ defaultParams }) {
 
   const handleTemplateDelete = async () => {
     await deleteTemplates();
-    setSelected([]);
-  };
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...templates] : []);
-  };
-
-  const handleSelect = template => {
-    if (selected.some(s => s.id === template.id)) {
-      setSelected(selected.filter(s => s.id !== template.id));
-    } else {
-      setSelected(selected.concat(template));
-    }
+    clearSelected();
   };
 
   const canAddJT =
@@ -179,7 +172,7 @@ function TemplateList({ defaultParams }) {
   );
 
   return (
-    <Fragment>
+    <>
       <Card>
         <PaginatedTable
           contentError={contentError}
@@ -188,7 +181,7 @@ function TemplateList({ defaultParams }) {
           itemCount={count}
           pluralizedItemName={t`Templates`}
           qsConfig={qsConfig}
-          onRowClick={handleSelect}
+          clearSelected={clearSelected}
           toolbarSearchColumns={[
             {
               name: t`Name`,
@@ -235,7 +228,7 @@ function TemplateList({ defaultParams }) {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={selectAll}
               qsConfig={qsConfig}
               additionalControls={[
                 ...(canAddJT || canAddWFJT ? [addButton] : []),
@@ -281,7 +274,7 @@ function TemplateList({ defaultParams }) {
         {t`Failed to delete one or more templates.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-    </Fragment>
+    </>
   );
 }
 
