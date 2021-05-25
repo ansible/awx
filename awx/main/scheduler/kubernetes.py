@@ -7,6 +7,7 @@ from urllib import parse as urlparse
 from django.conf import settings
 from kubernetes import client, config
 from django.utils.functional import cached_property
+from django.utils.translation import ugettext_lazy as _
 
 from awx.main.utils.common import parse_yaml_or_json
 from awx.main.utils.execution_environments import get_default_pod_spec
@@ -56,11 +57,10 @@ class PodManager(object):
     def create_secret(self, job):
         registry_cred = job.execution_environment.credential
         host = registry_cred.get_input('host')
-        scheme = 'https'
         # urlparse requires '//' to be provided if scheme is not specified
         original_parsed = urlparse.urlsplit(host)
         if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
-            host = '%s://%s' % (scheme, host)
+            host = 'https://%s' % (host)
         parsed = urlparse.urlsplit(host)
         host = parsed.hostname
         if parsed.port:
@@ -102,8 +102,6 @@ class PodManager(object):
                     )
                 full_error_msg = '{0}: {1}'.format(error_msg, str(e))
                 logger.exception(full_error_msg)
-                job.job_explanation = error_msg
-                job.save()
                 raise PermissionError(full_error_msg)
 
         if replace_secret:
@@ -121,8 +119,6 @@ class PodManager(object):
                     )
                 full_error_msg = '{0}: {1}'.format(error_msg, str(e))
                 logger.exception(full_error_msg)
-                job.job_explanation = error_msg
-                job.save()
                 # let job continue for the case where secret was created manually and cluster cred doesn't have permission to create a secret
             except Exception as e:
                 error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
