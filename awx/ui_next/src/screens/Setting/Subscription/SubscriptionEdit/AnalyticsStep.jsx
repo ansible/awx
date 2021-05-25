@@ -79,12 +79,12 @@ function AnalyticsStep() {
         <CheckboxField
           name="insights"
           isDisabled={!config.me.is_superuser}
-          aria-label={t`Insights for Ansible`}
-          label={t`Insights for Ansible`}
+          aria-label={t`Insights for Ansible Automation Platform`}
+          label={t`Insights for Ansible Automation Platform`}
           id="insights-field"
           description={t`This data is used to enhance
                    future releases of the Software and to provide
-                   Red Hat Insights for Ansible.`}
+                   Insights for Ansible Automation Platform.`}
         />
       </FormGroup>
       {requireCredentialFields && (
@@ -93,7 +93,7 @@ function AnalyticsStep() {
           <p>
             <Trans>
               Provide your Red Hat or Red Hat Satellite credentials to enable
-              Insights for Ansible.
+              Insights for Ansible Automation Platform.
             </Trans>
           </p>
           <FormField
@@ -119,7 +119,7 @@ function AnalyticsStep() {
         <img
           width="300"
           src="/static/media/insights-analytics-dashboard.jpeg"
-          alt={t`Insights for Ansible dashboard`}
+          alt={t`Insights for Ansible Automation Platform dashboard`}
         />
         <Button
           component="a"
@@ -128,7 +128,9 @@ function AnalyticsStep() {
           variant="secondary"
           ouiaId="analytics-link"
         >
-          <Trans>Learn more about Insights for Ansible</Trans>
+          <Trans>
+            Learn more about Insights for Ansible Automation Platform
+          </Trans>
         </Button>
       </Flex>
     </Flex>
