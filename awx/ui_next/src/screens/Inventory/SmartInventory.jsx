@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect } from 'react';
-
 import { t } from '@lingui/macro';
 import {
   Link,

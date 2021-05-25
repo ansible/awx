@@ -122,10 +122,42 @@ describe('<SmartInventoryForm />', () => {
       expect(groupChipGroup.find('Chip').length).toBe(1);
     });
 
+    test('should display filter chips for advanced host filter', async () => {
+      await act(async () => {
+        wrapper.find('HostFilterLookup').invoke('onBlur')();
+        wrapper.find('HostFilterLookup').invoke('onChange')(
+          'name__contains=f or name__contains=o'
+        );
+      });
+      wrapper.update();
+      const nameChipGroup = wrapper.find(
+        'HostFilterLookup ChipGroup[categoryName="name__contains"]'
+      );
+      expect(nameChipGroup.find('Chip').length).toBe(2);
+      expect(
+        nameChipGroup
+          .find('Chip')
+          .at(0)
+          .prop('children')
+      ).toBe('f');
+      expect(
+        nameChipGroup
+          .find('Chip')
+          .at(1)
+          .prop('children')
+      ).toBe('o');
+    });
+
     test('should submit expected form values on save', async () => {
       await act(async () => {
         wrapper.find('InstanceGroupsLookup').invoke('onChange')(
           mockFormValues.instance_groups
+        );
+      });
+      await act(async () => {
+        wrapper.find('HostFilterLookup').invoke('onBlur')();
+        wrapper.find('HostFilterLookup').invoke('onChange')(
+          mockFormValues.host_filter
         );
       });
       wrapper.update();
