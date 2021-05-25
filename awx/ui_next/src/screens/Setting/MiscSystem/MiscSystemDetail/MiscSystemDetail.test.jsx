@@ -86,17 +86,21 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'Authorization Code Expiration', '2 seconds');
     assertDetail(
       wrapper,
-      'Insights for Ansible Gather Interval',
+      'Insights for Ansible Automation Platform Gather Interval',
       '14400 seconds'
     );
     assertDetail(
       wrapper,
-      'Insights for Ansible upload URL',
+      'Insights for Ansible Automation Platform upload URL',
       'https://example.com'
     );
     assertDetail(wrapper, 'Base URL of the service', 'https://towerhost');
     assertDetail(wrapper, 'Enable HTTP Basic Auth', 'On');
-    assertDetail(wrapper, 'Gather data for Insights for Ansible', 'Off');
+    assertDetail(
+      wrapper,
+      'Gather data for Insights for Ansible Automation Platform',
+      'Off'
+    );
     assertDetail(wrapper, 'Idle Time Force Log Out', '30000000000 seconds');
     assertDetail(
       wrapper,
