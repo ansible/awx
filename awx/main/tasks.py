@@ -842,7 +842,7 @@ class BaseTask(object):
                     username = cred.get_input('username')
                     password = cred.get_input('password')
                     token = "{}:{}".format(username, password)
-                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
+                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('UTF-8')).decode('UTF-8')}}}
                     authfile.write(json.dumps(auth_data, indent=4))
                 params["container_options"].append(f'--authfile={authfile.name}')
             else:
@@ -3073,6 +3073,24 @@ class AWXReceptorJob:
 
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
+
+        # Enforce EE Pull Policy
+        pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
+        if self.task and self.task.instance.execution_environment:
+            if self.task.instance.execution_environment.pull:
+                pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+
+        if self.task and self.task.instance.is_container_group_task:
+            # If EE credential is passed, create an imagePullSecret
+            if self.task.instance.execution_environment and self.task.instance.execution_environment.credential:
+                # Create pull secret in k8s cluster based on ee cred
+                from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
+
+                pm = PodManager(self.task.instance)
+                secret_name = pm.create_secret(job=self.task.instance)
+
+                # Inject secret name into podspec
+                pod_spec['spec']['imagePullSecrets'] = [{"name": secret_name}]
 
         if self.task:
             pod_spec['metadata'] = deepmerge(

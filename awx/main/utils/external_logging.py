@@ -47,11 +47,10 @@ def construct_rsyslog_conf_template(settings=settings):
         return tmpl
 
     if protocol.startswith('http'):
-        scheme = 'https'
         # urlparse requires '//' to be provided if scheme is not specified
         original_parsed = urlparse.urlsplit(host)
         if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
-            host = '%s://%s' % (scheme, host) if scheme else '//%s' % host
+            host = 'https://%s' % (host)
         parsed = urlparse.urlsplit(host)
 
         host = escape_quotes(parsed.hostname)
