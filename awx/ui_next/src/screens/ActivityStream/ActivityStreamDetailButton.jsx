@@ -52,7 +52,9 @@ function ActivityStreamDetailButton({ streamItem, user, description }) {
             <VariablesDetail
               label={t`Changes`}
               rows={changeRows}
-              value={streamItem?.changes}
+              value={
+                streamItem?.changes ? JSON.stringify(streamItem.changes) : ''
+              }
             />
           )}
         </DetailList>
