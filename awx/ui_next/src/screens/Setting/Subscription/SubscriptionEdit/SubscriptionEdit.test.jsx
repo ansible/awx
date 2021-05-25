@@ -186,20 +186,7 @@ describe('<SubscriptionEdit />', () => {
       });
       wrapper.update();
       expect(wrapper.find('EulaStep').length).toBe(1);
-      expect(wrapper.find('CheckboxField').length).toBe(1);
       expect(wrapper.find('button#subscription-wizard-submit').length).toBe(1);
-    });
-
-    test('checking EULA agreement should enable Submit button', async () => {
-      expect(
-        wrapper.find('button#subscription-wizard-submit').prop('disabled')
-      ).toBe(true);
-      await act(async () => {
-        wrapper.find('Checkbox[name="eula"] input').simulate('change', {
-          target: { value: true, name: 'eula' },
-        });
-      });
-      wrapper.update();
       expect(
         wrapper.find('button#subscription-wizard-submit').prop('disabled')
       ).toBe(false);
@@ -369,18 +356,6 @@ describe('<SubscriptionEdit />', () => {
       expect(wrapper.find('SubscriptionStep').length).toBe(0);
       expect(wrapper.find('AnalyticsStep').length).toBe(0);
       expect(wrapper.find('EulaStep').length).toBe(1);
-    });
-
-    test('submit should be disabled until EULA agreement checked', async () => {
-      expect(
-        wrapper.find('button#subscription-wizard-submit').prop('disabled')
-      ).toBe(true);
-      await act(async () => {
-        wrapper.find('Checkbox[name="eula"] input').simulate('change', {
-          target: { value: true, name: 'eula' },
-        });
-      });
-      wrapper.update();
       expect(
         wrapper.find('button#subscription-wizard-submit').prop('disabled')
       ).toBe(false);

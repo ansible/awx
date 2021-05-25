@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory, Link, useRouteMatch } from 'react-router-dom';
-
 import { t, Trans } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import {
@@ -41,7 +40,6 @@ const CustomFooter = ({ isSubmitLoading }) => {
                 isDisabled={
                   (!values.manifest_file && !values.subscription) ||
                   !me?.is_superuser ||
-                  !values.eula ||
                   Object.keys(errors).length !== 0
                 }
                 type="button"
@@ -133,13 +131,9 @@ function SubscriptionEdit() {
       if (form.manifest_file) {
         await ConfigAPI.create({
           manifest: form.manifest_file,
-          eula_accepted: form.eula,
         });
       } else if (form.subscription) {
         await ConfigAPI.attach({ pool_id: form.subscription.pool_id });
-        await ConfigAPI.create({
-          eula_accepted: form.eula,
-        });
       }
 
       if (!hasValidKey) {
@@ -223,7 +217,6 @@ function SubscriptionEdit() {
     <>
       <Formik
         initialValues={{
-          eula: false,
           insights: true,
           manifest_file: null,
           manifest_filename: '',
