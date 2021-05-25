@@ -29,7 +29,6 @@ options:
       description:
         - By default, the license manifest will only be applied if Tower is currently
           unlicensed or trial licensed.  When force=true, the license is always applied.
-      required: True
       type: bool
       default: 'False'
 extends_documentation_fragment: awx.awx.auth
@@ -52,7 +51,8 @@ def main():
     module = ControllerAPIModule(
         argument_spec=dict(
             manifest=dict(type='str', required=True),
-            force=dict(type='bool', required=False),
+            eula_accepted=dict(type='bool', required=True),
+            force=dict(type='bool', default=False),
         ),
     )
 

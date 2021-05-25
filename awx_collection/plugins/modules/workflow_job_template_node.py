@@ -255,7 +255,7 @@ def main():
     required_if = [
         ['state', 'absent', ['identifier']],
         ['state', 'present', ['identifier']],
-        ['state', 'present', ['unified_job_template', 'approval_node', 'success_nodes', 'always_nodes', 'failure_nodes'], 'true'],
+        ['state', 'present', ['unified_job_template', 'approval_node', 'success_nodes', 'always_nodes', 'failure_nodes'], True],
     ]
 
     # Create a module for ourselves

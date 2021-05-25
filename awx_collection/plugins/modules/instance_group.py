@@ -58,6 +58,7 @@ options:
         - List of exact-match Instances that will be assigned to this group
       required: False
       type: list
+      elements: str
     pod_spec_override:
       description:
         - A custom Kubernetes or OpenShift Pod specification.
@@ -68,6 +69,7 @@ options:
         - The instances associated with this instance_group
       required: False
       type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
@@ -89,12 +91,12 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         credential=dict(),
-        is_container_group=dict(type='bool', default=False),
+        is_container_group=dict(type='bool', default=None),
         policy_instance_percentage=dict(type='int', default='0'),
         policy_instance_minimum=dict(type='int', default='0'),
-        policy_instance_list=dict(type='list'),
+        policy_instance_list=dict(type='list', elements='str'),
         pod_spec_override=dict(),
-        instances=dict(required=False, type="list", default=None),
+        instances=dict(required=False, type="list", elements='str', default=None),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

@@ -148,6 +148,7 @@ options:
       description:
         - A json list of nodes and their coresponding options. The following suboptions describe a single node.
       type: list
+      elements: dict
       suboptions:
         extra_data:
           description:

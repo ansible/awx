@@ -112,6 +112,18 @@ except ImportError:
 def main():
     argument_spec = dict(
         all=dict(type='bool', default=False),
+        credential_types=dict(type='str'),
+        credentials=dict(type='str'),
+        execution_environments=dict(type='str'),
+        inventory=dict(type='str'),
+        inventory_sources=dict(type='str'),
+        job_templates=dict(type='str'),
+        notification_templates=dict(type='str'),
+        organizations=dict(type='str'),
+        projects=dict(type='str'),
+        teams=dict(type='str'),
+        users=dict(type='str'),
+        workflow_job_templates=dict(type='str'),
     )
 
     # We are not going to raise an error here because the __init__ method of ControllerAWXKitModule will do that for us
