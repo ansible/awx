@@ -84,35 +84,22 @@ _raw:
     - String in the rrule format
   type: string
 """
+import re
 
+from ansible.module_utils.six import raise_from
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from datetime import datetime
-import re
+from dateutil import rrule
 from distutils.version import LooseVersion
 
-missing_modules = []
 try:
     import pytz
-except ImportError:
-    missing_modules.append('pytz')
-
-try:
     from dateutil import rrule
-except ImportError:
-    missing_modules.append('python.dateutil')
-
-# Validate the version of python.dateutil
-try:
-    import dateutil
-
-    if LooseVersion(dateutil.__version__) < LooseVersion("2.7.0"):
-        raise Exception
-except Exception:
-    missing_modules.append('python.dateutil>=2.7.0')
-
-if len(missing_modules) > 0:
-    raise AnsibleError('You are missing the modules {0}'.format(', '.join(missing_modules)))
+except ImportError as imp_exc:
+    LIBRARY_IMPORT_ERROR = imp_exc
+else:
+    LIBRARY_IMPORT_ERROR = None
 
 
 class LookupModule(LookupBase):
@@ -142,6 +129,14 @@ class LookupModule(LookupBase):
         'fourth': 4,
         'last': -1,
     }
+
+    # plugin constructor
+    def __init__(self):
+        if self.LIBRARY_IMPORT_ERROR:
+            raise_from(
+                AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)),
+                LIBRARY_IMPORT_ERROR
+            )
 
     @staticmethod
     def parse_date_time(date_string):
