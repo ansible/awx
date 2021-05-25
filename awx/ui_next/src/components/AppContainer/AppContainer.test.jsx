@@ -22,7 +22,7 @@ describe('<AppContainer />', () => {
     RootAPI.readAssetVariables.mockResolvedValue({
       data: {
         BRAND_NAME: 'AWX',
-        PENDO_API_KEY: '',
+        PENDO_API_KEY: 'some-pendo-key',
       },
     });
     MeAPI.read.mockResolvedValue({ data: { results: [{}] } });
@@ -37,7 +37,7 @@ describe('<AppContainer />', () => {
   test('expected content is rendered', async () => {
     const routeConfig = [
       {
-        groupTitle: 'Group One',
+        groupTitle: <span>Group One</span>,
         groupId: 'group_one',
         routes: [
           { title: 'Foo', path: '/foo' },
@@ -45,7 +45,7 @@ describe('<AppContainer />', () => {
         ],
       },
       {
-        groupTitle: 'Group Two',
+        groupTitle: <span>Group Two</span>,
         groupId: 'group_two',
         routes: [{ title: 'Fiz', path: '/fiz' }],
       },
@@ -95,7 +95,36 @@ describe('<AppContainer />', () => {
     expect(global.pendo.initialize).toHaveBeenCalledTimes(1);
   });
 
-  test('expected content is rendered', async () => {
+  test('Pendo not initialized when key is missing', async () => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+        PENDO_API_KEY: '',
+      },
+    });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: {
+          config: {
+            analytics_status: 'detailed',
+            ansible_version: null,
+            custom_virtualenvs: [],
+            version: '9000',
+            me: { is_superuser: true },
+            toJSON: () => '/config/',
+            license_info: {
+              valid_key: true,
+            },
+          },
+        },
+      });
+    });
+    wrapper.update();
+    expect(global.pendo.initialize).toHaveBeenCalledTimes(0);
+  });
+
+  test('Pendo not initialized when status is analytics off', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<AppContainer />, {
