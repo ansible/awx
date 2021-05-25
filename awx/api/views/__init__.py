@@ -4023,9 +4023,11 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     search_fields = ('stdout',)
 
     def get_queryset(self):
-        adhoc = self.get_parent_object()
-        self.check_parent_access(adhoc)
-        return adhoc.get_event_queryset()
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        if isinstance(parent, models.Host):
+            return super(BaseAdHocCommandEventsList, self).get_queryset()
+        return parent.get_event_queryset()
 
 
 class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
