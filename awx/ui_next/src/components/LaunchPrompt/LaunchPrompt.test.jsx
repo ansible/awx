@@ -24,6 +24,8 @@ jest.mock('../../api/models/JobTemplates');
 let config;
 const resource = {
   id: 1,
+  description: 'Foo Description',
+  name: 'Foobar',
   type: 'job_template',
 };
 const noop = () => {};
@@ -147,6 +149,10 @@ describe('LaunchPrompt', () => {
     expect(steps[3].name.props.children).toEqual('Other prompts');
     expect(steps[4].name.props.children).toEqual('Survey');
     expect(steps[5].name.props.children).toEqual('Preview');
+    expect(wizard.find('WizardHeader').prop('title')).toBe('Launch | Foobar');
+    expect(wizard.find('WizardHeader').prop('description')).toBe(
+      'Foo Description'
+    );
   });
 
   test('should add inventory step', async () => {

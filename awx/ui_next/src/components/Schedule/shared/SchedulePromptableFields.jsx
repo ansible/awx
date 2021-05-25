@@ -1,6 +1,5 @@
 import React from 'react';
 import { Wizard } from '@patternfly/react-core';
-
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import AlertModal from '../../AlertModal';
@@ -37,7 +36,6 @@ function SchedulePromptableFields({
     launchConfig,
     schedule,
     resource,
-
     credentials,
     resourceDefaultCredentials
   );
@@ -107,7 +105,8 @@ function SchedulePromptableFields({
           validateStep(nextStep.id);
         }
       }}
-      title={t`Prompts`}
+      title={t`Prompt | ${resource.name}`}
+      description={resource.description}
       steps={
         isReady
           ? steps

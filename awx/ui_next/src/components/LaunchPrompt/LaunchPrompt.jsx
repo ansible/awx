@@ -1,6 +1,5 @@
 import React from 'react';
 import { Wizard } from '@patternfly/react-core';
-
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import ContentError from '../ContentError';
@@ -102,7 +101,8 @@ function PromptModalForm({
           validateStep(nextStep.id);
         }
       }}
-      title={t`Prompts`}
+      title={t`Launch | ${resource.name}`}
+      description={resource.description}
       steps={
         isReady
           ? steps
