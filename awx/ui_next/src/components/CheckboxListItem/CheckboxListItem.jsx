@@ -13,6 +13,8 @@ const CheckboxListItem = ({
   onDeselect,
   rowIndex,
   onSelect,
+  columns,
+  item,
 }) => {
   return (
     <Tr ouiaId={`list-item-${itemId}`} id={`list-item-${itemId}`}>
@@ -28,9 +30,18 @@ const CheckboxListItem = ({
         name={name}
         dataLabel={t`Selected`}
       />
-      <Td aria-labelledby={itemId} dataLabel={t`Name`}>
-        <b>{label}</b>
-      </Td>
+
+      {columns?.length > 0 ? (
+        columns.map(col => (
+          <Td aria-label={col.name} dataLabel={col.key}>
+            {item[col.key]}
+          </Td>
+        ))
+      ) : (
+        <Td aria-labelledby={itemId} dataLabel={label}>
+          <b>{label}</b>
+        </Td>
+      )}
     </Tr>
   );
 };
