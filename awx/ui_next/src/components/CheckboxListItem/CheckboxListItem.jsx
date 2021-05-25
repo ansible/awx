@@ -4,7 +4,6 @@ import { t } from '@lingui/macro';
 import { Td, Tr } from '@patternfly/react-table';
 
 const CheckboxListItem = ({
-  isDisabled = false,
   isRadio = false,
   isSelected = false,
   itemId,
