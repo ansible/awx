@@ -4028,14 +4028,15 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        if isinstance(parent, models.Host):
-            return super(BaseAdHocCommandEventsList, self).get_queryset()
         return parent.get_event_queryset()
 
 
 class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
 
     parent_model = models.Host
+
+    def get_queryset(self):
+        return super(BaseAdHocCommandEventsList, self).get_queryset()
 
 
 # class GroupJobEventsList(BaseJobEventsList):
