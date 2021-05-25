@@ -193,7 +193,7 @@ function ProjectFormFields({
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
         onChange={value => executionEnvironmentHelpers.setValue(value)}
-        popoverContent={t`Select the default execution environment for this project.`}
+        popoverContent={t`The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level.`}
         tooltip={t`Select an organization before editing the default execution environment.`}
         globallyAvailable
         isDisabled={!organizationField.value}
