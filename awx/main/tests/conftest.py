@@ -160,3 +160,18 @@ def mock_has_unpartitioned_events():
     # We mock this out to circumvent the migration query.
     with mock.patch.object(UnifiedJob, 'has_unpartitioned_events', new=False) as _fixture:
         yield _fixture
+
+
+@pytest.fixture(scope='session', autouse=True)
+def mock_get_event_queryset_no_job_created():
+    """
+    SQLite friendly since partitions aren't supported. Do not add the faked job_created field to the filter. If we do, it will result in an sql query for the
+    job_created field. That field does not actually exist in a non-partition scenario.
+    """
+
+    def event_qs(self):
+        kwargs = {self.event_parent_key: self.id}
+        return self.event_class.objects.filter(**kwargs)
+
+    with mock.patch.object(UnifiedJob, 'get_event_queryset', lambda self: event_qs(self)) as _fixture:
+        yield _fixture

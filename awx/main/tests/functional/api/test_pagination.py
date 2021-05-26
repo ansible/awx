@@ -4,6 +4,7 @@ from unittest.mock import patch
 from urllib.parse import urlencode
 
 from awx.main.models.inventory import Group, Host
+from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.api.pagination import Pagination
 from awx.api.versioning import reverse
 
@@ -61,3 +62,46 @@ def test_pagination_cap_page_size(get, admin, inventory):
 
         assert jdata['previous'] == host_list_url({'page': '1', 'page_size': '5'})
         assert jdata['next'] == host_list_url({'page': '3', 'page_size': '5'})
+
+
+class TestUnifiedJobEventPagination:
+    @pytest.fixture
+    def ad_hoc_command(self, ad_hoc_command_factory):
+        return ad_hoc_command_factory()
+
+    def _test_unified_job(self, get, admin, template, job_attribute, list_endpoint):
+        if isinstance(template, AdHocCommand):
+            job = template
+        else:
+            job = template.create_unified_job()
+        kwargs = {job_attribute: job.pk}
+        for i in range(20):
+            job.event_class.create_from_data(**kwargs).save()
+
+        url = reverse(f'api:{list_endpoint}', kwargs={'pk': job.pk}) + '?limit=7'
+        resp = get(url, user=admin, expect=200)
+
+        assert 'count' not in resp.data
+        assert 'next' not in resp.data
+        assert 'previous' not in resp.data
+        assert len(resp.data['results']) == 7
+
+    @pytest.mark.django_db
+    def test_job(self, get, admin, job_template):
+        self._test_unified_job(get, admin, job_template, 'job_id', 'job_job_events_list')
+
+    @pytest.mark.django_db
+    def test_project_update(self, get, admin, project):
+        self._test_unified_job(get, admin, project, 'project_update_id', 'project_update_events_list')
+
+    @pytest.mark.django_db
+    def test_inventory_update(self, get, admin, inventory_source):
+        self._test_unified_job(get, admin, inventory_source, 'inventory_update_id', 'inventory_update_events_list')
+
+    @pytest.mark.django_db
+    def test_system_job(self, get, admin, system_job_template):
+        self._test_unified_job(get, admin, system_job_template, 'system_job_id', 'system_job_events_list')
+
+    @pytest.mark.django_db
+    def test_adhoc_command(self, get, admin, ad_hoc_command):
+        self._test_unified_job(get, admin, ad_hoc_command, 'ad_hoc_command_id', 'ad_hoc_command_ad_hoc_command_events_list')
