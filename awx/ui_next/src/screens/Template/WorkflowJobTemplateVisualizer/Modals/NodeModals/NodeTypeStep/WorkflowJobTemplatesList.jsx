@@ -6,9 +6,12 @@ import { func, shape } from 'prop-types';
 import { WorkflowJobTemplatesAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
 import useRequest from '../../../../../../util/useRequest';
-import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../../../../components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('workflow-job-templates', {
   page: 1,
@@ -62,15 +65,20 @@ function WorkflowJobTemplatesList({ nodeResource, onUpdateNodeResource }) {
   }, [fetchWorkflowJobTemplates]);
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={error}
       hasContentLoading={isLoading}
       itemCount={count}
       items={workflowJobTemplates}
-      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
-      renderItem={item => (
+      headerRow={
+        <HeaderRow isExpandable={false} qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(item, index) => (
         <CheckboxListItem
+          rowIndex={index}
           isSelected={!!(nodeResource && nodeResource.id === item.id)}
           itemId={item.id}
           key={item.id}
@@ -104,12 +112,6 @@ function WorkflowJobTemplatesList({ nodeResource, onUpdateNodeResource }) {
         {
           name: t`Modified By (Username)`,
           key: 'modified_by__username__icontains',
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
         },
       ]}
       toolbarSearchableKeys={searchableKeys}

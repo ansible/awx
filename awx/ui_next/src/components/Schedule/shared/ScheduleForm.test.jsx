@@ -330,7 +330,8 @@ describe('<ScheduleForm />', () => {
       ).toBe(true);
       await act(async () => {
         promptWrapper
-          .find('input[aria-labelledby="check-action-item-1"]')
+          .find('td#check-action-item-1')
+          .find('input')
           .simulate('change', {
             target: {
               checked: true,
@@ -340,7 +341,8 @@ describe('<ScheduleForm />', () => {
       promptWrapper.update();
       expect(
         promptWrapper
-          .find('input[aria-labelledby="check-action-item-1"]')
+          .find('td#check-action-item-1')
+          .find('input')
           .prop('checked')
       ).toBe(true);
       await act(async () =>

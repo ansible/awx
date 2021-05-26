@@ -206,7 +206,8 @@ describe('<AdHocCommands />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
 
@@ -224,7 +225,8 @@ describe('<AdHocCommands />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-4"]')
+        .find('td#check-action-item-4')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
 
@@ -373,7 +375,8 @@ describe('<AdHocCommands />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .simulate('change', {
           target: {
             checked: true,
@@ -395,7 +398,8 @@ describe('<AdHocCommands />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-4"]')
+        .find('td#check-action-item-4')
+        .find('input')
         .simulate('change', {
           target: {
             checked: true,

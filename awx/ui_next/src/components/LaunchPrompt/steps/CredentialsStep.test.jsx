@@ -181,7 +181,8 @@ describe('CredentialsStep', () => {
     expect(wrapper.find('Alert').length).toBe(0);
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
     wrapper.update();
@@ -241,7 +242,8 @@ describe('CredentialsStep', () => {
     ).toBe(true);
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-5"]')
+        .find('td#check-action-item-5')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
     wrapper.update();
@@ -317,7 +319,8 @@ describe('CredentialsStep', () => {
     wrapper.update();
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-33"]')
+        .find('td#check-action-item-33')
+        .find('input')
         .simulate('change', { target: { checked: true } });
     });
     wrapper.update();

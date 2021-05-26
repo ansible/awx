@@ -68,7 +68,7 @@ describe('WorkflowJobTemplatesList', () => {
     ).toBe(false);
     wrapper
       .find('CheckboxListItem[name="Test Workflow Job Template 2"]')
-      .simulate('click');
+      .prop('onSelect')();
     expect(onUpdateNodeResource).toHaveBeenCalledWith({
       id: 2,
       name: 'Test Workflow Job Template 2',

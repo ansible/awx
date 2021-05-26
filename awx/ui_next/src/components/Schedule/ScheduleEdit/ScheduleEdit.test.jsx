@@ -471,7 +471,8 @@ describe('<ScheduleEdit />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-1"]')
+        .find('td#check-action-item-1')
+        .find('input')
         .simulate('change', {
           target: {
             checked: true,
@@ -482,7 +483,8 @@ describe('<ScheduleEdit />', () => {
 
     expect(
       wrapper
-        .find('input[aria-labelledby="check-action-item-1"]')
+        .find('td#check-action-item-1')
+        .find('input')
         .prop('checked')
     ).toBe(true);
     await act(async () =>
@@ -502,13 +504,15 @@ describe('<ScheduleEdit />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .simulate('click');
     });
     wrapper.update();
     expect(
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .prop('checked')
     ).toBe(true);
     await act(async () =>
@@ -599,7 +603,8 @@ describe('<ScheduleEdit />', () => {
     wrapper.update();
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .simulate('change', {
           target: {
             checked: true,
@@ -610,7 +615,8 @@ describe('<ScheduleEdit />', () => {
 
     expect(
       wrapper
-        .find('input[aria-labelledby="check-action-item-2"]')
+        .find('td#check-action-item-2')
+        .find('input')
         .prop('checked')
     ).toBe(true);
     await act(async () =>

@@ -5,11 +5,11 @@ import { t } from '@lingui/macro';
 import useRequest from '../../util/useRequest';
 
 import { SearchColumns, SortColumns } from '../../types';
-import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
 import { getQSConfig, parseQueryString } from '../../util/qs';
+import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 
 const QS_Config = sortColumns => {
   return getQSConfig('resource', {
@@ -86,7 +86,8 @@ function SelectResourceStep({
           selected={selectedResourceRows}
         />
       )}
-      <PaginatedDataList
+
+      <PaginatedTable
         hasContentLoading={isLoading}
         contentError={error}
         items={resources}
@@ -97,11 +98,21 @@ function SelectResourceStep({
         toolbarSortColumns={sortColumns}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={item => (
+        headerRow={
+          <HeaderRow qsConfig={QS_Config(sortColumns)}>
+            {sortColumns.map(({ name, key }) => (
+              <HeaderCell sortKey={key}>{name}</HeaderCell>
+            ))}
+          </HeaderRow>
+        }
+        renderRow={(item, index) => (
           <CheckboxListItem
             isSelected={selectedResourceRows.some(i => i.id === item.id)}
             itemId={item.id}
+            item={item}
+            rowIndex={index}
             key={item.id}
+            columns={sortColumns}
             name={item[displayKey]}
             label={item[displayKey]}
             onSelect={() => onRowClick(item)}

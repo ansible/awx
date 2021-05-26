@@ -27,7 +27,7 @@ describe('<OptionsList />', () => {
         name="Item"
       />
     );
-    expect(wrapper.find('PaginatedDataList').prop('items')).toEqual(options);
+    expect(wrapper.find('PaginatedTable').prop('items')).toEqual(options);
     expect(wrapper.find('SelectedList')).toHaveLength(0);
   });
 

@@ -6,9 +6,12 @@ import { func, shape } from 'prop-types';
 import { InventorySourcesAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
 import useRequest from '../../../../../../util/useRequest';
-import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../../../../components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('inventory-sources', {
   page: 1,
@@ -55,16 +58,21 @@ function InventorySourcesList({ nodeResource, onUpdateNodeResource }) {
   }, [fetchInventorySources]);
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={error}
       hasContentLoading={isLoading}
       itemCount={count}
       items={inventorySources}
-      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
       showPageSizeOptions={false}
-      renderItem={item => (
+      headerRow={
+        <HeaderRow isExpandable={false} qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(item, index) => (
         <CheckboxListItem
+          rowIndex={index}
           isSelected={!!(nodeResource && nodeResource.id === item.id)}
           itemId={item.id}
           key={item.id}
@@ -97,12 +105,6 @@ function InventorySourcesList({ nodeResource, onUpdateNodeResource }) {
             [`rhv`, t`Red Hat Virtualization`],
             [`tower`, t`Ansible Tower`],
           ],
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
         },
       ]}
       toolbarSearchableKeys={searchableKeys}

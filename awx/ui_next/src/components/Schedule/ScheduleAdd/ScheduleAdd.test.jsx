@@ -339,7 +339,8 @@ describe('<ScheduleAdd />', () => {
     ).toBe(true);
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-1"]')
+        .find('td#check-action-item-1')
+        .find('input')
         .simulate('change', {
           target: {
             checked: true,
@@ -349,7 +350,8 @@ describe('<ScheduleAdd />', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('input[aria-labelledby="check-action-item-1"]')
+        .find('td#check-action-item-1')
+        .find('input')
         .prop('checked')
     ).toBe(true);
     await act(async () =>
