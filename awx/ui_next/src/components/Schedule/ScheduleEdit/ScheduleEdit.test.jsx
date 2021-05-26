@@ -16,7 +16,10 @@ import ScheduleEdit from './ScheduleEdit';
 jest.mock('../../../api');
 
 let wrapper;
-
+const now = new Date();
+const closestQuarterHour = new Date(Math.ceil(now.getTime() / 900000) * 900000);
+const tomorrow = new Date(closestQuarterHour);
+tomorrow.setDate(tomorrow.getDate() + 1);
 const mockSchedule = {
   rrule:
     'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
@@ -202,7 +205,8 @@ describe('<ScheduleEdit />', () => {
         frequency: 'none',
         interval: 1,
         name: 'Run once schedule',
-        startDateTime: '2020-03-25T10:00:00',
+        startDate: '2020-03-25',
+        startTime: '10:00:00',
         timezone: 'America/New_York',
       });
     });
@@ -223,7 +227,8 @@ describe('<ScheduleEdit />', () => {
         interval: 10,
         name: 'Run every 10 minutes 10 times',
         occurrences: 10,
-        startDateTime: '2020-03-25T10:30:00',
+        startDate: '2020-03-25',
+        startTime: '10:30:00',
         timezone: 'America/New_York',
       });
     });
@@ -241,11 +246,13 @@ describe('<ScheduleEdit />', () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
         end: 'onDate',
-        endDateTime: '2020-03-26T10:45:00',
+        endDate: '2020-03-26',
+        endTime: '10:45:00',
         frequency: 'hour',
         interval: 1,
         name: 'Run every hour until date',
-        startDateTime: '2020-03-25T10:45:00',
+        startDate: '2020-03-25',
+        startTime: '10:45:00',
         timezone: 'America/New_York',
       });
     });
@@ -265,7 +272,8 @@ describe('<ScheduleEdit />', () => {
         frequency: 'day',
         interval: 1,
         name: 'Run daily',
-        startDateTime: '2020-03-25T10:45:00',
+        startDate: '2020-03-25',
+        startTime: '10:45:00',
         timezone: 'America/New_York',
       });
     });
@@ -287,7 +295,8 @@ describe('<ScheduleEdit />', () => {
         interval: 1,
         name: 'Run weekly on mon/wed/fri',
         occurrences: 1,
-        startDateTime: '2020-03-25T10:45:00',
+        startDate: '2020-03-25',
+        startTime: '10:45:00',
         timezone: 'America/New_York',
       });
     });
@@ -310,7 +319,8 @@ describe('<ScheduleEdit />', () => {
         occurrences: 1,
         runOn: 'day',
         runOnDayNumber: 1,
-        startDateTime: '2020-04-01T10:45',
+        startDate: '2020-04-01',
+        startTime: '10:45',
         timezone: 'America/New_York',
       });
     });
@@ -336,12 +346,14 @@ describe('<ScheduleEdit />', () => {
         runOn: 'the',
         runOnTheDay: 'tuesday',
         runOnTheOccurrence: -1,
-        startDateTime: '2020-03-31T11:00',
+        startDate: '2020-03-31',
+        startTime: '11:00',
         timezone: 'America/New_York',
       });
     });
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
+      endDateTime: '2020-03-26T11:00:00',
       name: 'Run monthly on the last Tuesday',
       extra_data: {},
       occurrences: 1,
@@ -362,7 +374,8 @@ describe('<ScheduleEdit />', () => {
         runOn: 'day',
         runOnDayMonth: 3,
         runOnDayNumber: 1,
-        startDateTime: '2020-03-01T00:00',
+        startTime: '00:00',
+        startDate: '2020-03-01',
         timezone: 'America/New_York',
       });
     });
@@ -388,7 +401,8 @@ describe('<ScheduleEdit />', () => {
         runOnTheOccurrence: 2,
         runOnTheDay: 'friday',
         runOnTheMonth: 4,
-        startDateTime: '2020-04-10T11:15',
+        startTime: '11:15',
+        startDate: '2020-04-10',
         timezone: 'America/New_York',
       });
     });
@@ -415,7 +429,8 @@ describe('<ScheduleEdit />', () => {
         runOnTheOccurrence: 1,
         runOnTheDay: 'weekday',
         runOnTheMonth: 10,
-        startDateTime: '2020-04-10T11:15',
+        startTime: '11:15',
+        startDate: '2020-04-10',
         timezone: 'America/New_York',
       });
     });
@@ -526,7 +541,8 @@ describe('<ScheduleEdit />', () => {
       wrapper.find('Formik').invoke('onSubmit')({
         name: mockSchedule.name,
         end: 'never',
-        endDateTime: '2021-01-29T14:15:00',
+        endDate: '2021-01-29',
+        endTime: '14:15:00',
         frequency: 'none',
         occurrences: 1,
         runOn: 'day',
@@ -536,7 +552,8 @@ describe('<ScheduleEdit />', () => {
         runOnTheMonth: 1,
         runOnTheOccurrence: 1,
         skip_tags: '',
-        startDateTime: '2021-01-28T14:15:00',
+        startDate: '2021-01-28',
+        startTime: '14:15:00',
         timezone: 'America/New_York',
         credentials: [
           { id: 3, name: 'Credential 3', kind: 'ssh', url: '' },
@@ -622,7 +639,10 @@ describe('<ScheduleEdit />', () => {
     await act(async () =>
       wrapper.find('Button[aria-label="Save"]').prop('onClick')()
     );
+
     expect(SchedulesAPI.update).toBeCalledWith(27, {
+      endDateTime: undefined,
+      startDateTime: undefined,
       description: '',
       extra_data: {},
       occurrences: 1,
@@ -630,7 +650,7 @@ describe('<ScheduleEdit />', () => {
       name: 'foo',
       inventory: 702,
       rrule:
-        'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
+        'DTSTART;TZID=America/New_York:20200402T184500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
   test('should submit survey with default values properly, without opening prompt wizard', async () => {
@@ -728,7 +748,8 @@ describe('<ScheduleEdit />', () => {
         frequency: 'none',
         interval: 1,
         name: 'Run once schedule',
-        startDateTime: '2020-03-25T10:00:00',
+        startDate: '2020-03-25',
+        startTime: '10:00:00',
         timezone: 'America/New_York',
       });
     });

@@ -22,12 +22,13 @@ import {
   SubFormLayout,
   FormFullWidthLayout,
 } from '../../FormLayout';
-import { dateToInputDateTime, formatDateStringUTC } from '../../../util/dates';
+import { dateToInputDateTime } from '../../../util/dates';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 import { parseVariableField } from '../../../util/yaml';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
+import DateTimePicker from './DateTimePicker';
 
 const generateRunOnTheDay = (days = []) => {
   if (
@@ -79,10 +80,6 @@ const generateRunOnTheDay = (days = []) => {
 };
 
 function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
-  const [startDateTime, startDateTimeMeta] = useField({
-    name: 'startDateTime',
-    validate: required(t`Select a valid date and time for this field`),
-  });
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
     validate: required(t`Select a value for this field`),
@@ -108,25 +105,11 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
         name="description"
         type="text"
       />
-      <FormGroup
-        fieldId="schedule-start-datetime"
-        helperTextInvalid={startDateTimeMeta.error}
-        isRequired
-        validated={
-          !startDateTimeMeta.touched || !startDateTimeMeta.error
-            ? 'default'
-            : 'error'
-        }
-        label={t`Start date/time`}
-      >
-        <input
-          className="pf-c-form-control"
-          type="datetime-local"
-          id="schedule-start-datetime"
-          step="1"
-          {...startDateTime}
-        />
-      </FormGroup>
+      <DateTimePicker
+        dateFieldName="startDate"
+        timeFieldName="startTime"
+        label={t`Start`}
+      />
       <FormGroup
         name="timezone"
         fieldId="schedule-timezone"
@@ -394,12 +377,15 @@ function ScheduleForm({
   ) {
     showPromptButton = true;
   }
+  const [currentDate, time] = dateToInputDateTime(closestQuarterHour);
 
+  const [tomorrowDate] = dateToInputDateTime(tomorrow);
   const initialValues = {
     daysOfWeek: [],
     description: schedule.description || '',
     end: 'never',
-    endDateTime: dateToInputDateTime(tomorrow),
+    endDate: tomorrowDate,
+    endTime: time,
     frequency: 'none',
     interval: 1,
     name: schedule.name || '',
@@ -410,7 +396,8 @@ function ScheduleForm({
     runOnTheDay: 'sunday',
     runOnTheMonth: 1,
     runOnTheOccurrence: 1,
-    startDateTime: dateToInputDateTime(closestQuarterHour),
+    startDate: currentDate,
+    startTime: time,
     timezone: schedule.timezone || 'America/New_York',
   };
   const submitSchedule = (
@@ -462,14 +449,19 @@ function ScheduleForm({
         } = RRule.fromString(schedule.rrule.replace(' ', '\n'));
 
         if (dtstart) {
-          overriddenValues.startDateTime = dateToInputDateTime(
-            new Date(formatDateStringUTC(dtstart))
-          );
+          const [startDate, startTime] = dateToInputDateTime(schedule.dtstart);
+
+          overriddenValues.startDate = startDate;
+          overriddenValues.startTime = startTime;
         }
 
         if (schedule.until) {
           overriddenValues.end = 'onDate';
-          overriddenValues.endDateTime = schedule.until;
+
+          const [endDate, endTime] = dateToInputDateTime(schedule.until);
+
+          overriddenValues.endDate = endDate;
+          overriddenValues.endTime = endTime;
         } else if (count) {
           overriddenValues.end = 'after';
           overriddenValues.occurrences = count;
@@ -553,18 +545,18 @@ function ScheduleForm({
               const errors = {};
               const {
                 end,
-                endDateTime,
+                endDate,
                 frequency,
                 runOn,
                 runOnDayNumber,
-                startDateTime,
+                startDate,
               } = values;
 
               if (
                 end === 'onDate' &&
-                new Date(startDateTime) > new Date(endDateTime)
+                new Date(startDate) >= new Date(endDate)
               ) {
-                errors.endDateTime = t`Please select an end date/time that comes after the start date/time.`;
+                errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
               }
 
               if (

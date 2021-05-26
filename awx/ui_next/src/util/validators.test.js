@@ -9,6 +9,7 @@ import {
   combine,
   regExp,
   requiredEmail,
+  validateTime,
 } from './validators';
 
 describe('validators', () => {
@@ -167,5 +168,14 @@ describe('validators', () => {
 
   test('bob has email', () => {
     expect(requiredEmail()('bob@localhost')).toBeUndefined();
+  });
+  test('validate time validates properly', () => {
+    expect(validateTime()('12:15 PM')).toBeUndefined();
+    expect(validateTime()('1:15 PM')).toBeUndefined();
+    expect(validateTime()('01:15 PM')).toBeUndefined();
+    expect(validateTime()('12:15')).toBeUndefined();
+    expect(validateTime()('12:15: PM')).toEqual('Invalid time format');
+    expect(validateTime()('12.15 PM')).toEqual('Invalid time format');
+    expect(validateTime()('12;15 PM')).toEqual('Invalid time format');
   });
 });

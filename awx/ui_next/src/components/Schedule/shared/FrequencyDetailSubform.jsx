@@ -14,6 +14,7 @@ import {
 import AnsibleSelect from '../../AnsibleSelect';
 import FormField from '../../FormField';
 import { required } from '../../../util/validators';
+import DateTimePicker from './DateTimePicker';
 
 const RunOnRadio = styled(Radio)`
   label {
@@ -74,9 +75,8 @@ const FrequencyDetailSubform = () => {
   const [runOnTheMonth] = useField({
     name: 'runOnTheMonth',
   });
-  const [startDateTime] = useField({
-    name: 'startDateTime',
-  });
+  const [startDate] = useField('startDate');
+
   const [daysOfWeek, daysOfWeekMeta, daysOfWeekHelpers] = useField({
     name: 'daysOfWeek',
     validate: required(t`Select a value for this field`),
@@ -91,10 +91,6 @@ const FrequencyDetailSubform = () => {
   });
   const [runOn, runOnMeta] = useField({
     name: 'runOn',
-    validate: required(t`Select a value for this field`),
-  });
-  const [endDateTime, endDateTimeMeta] = useField({
-    name: 'endDateTime',
     validate: required(t`Select a value for this field`),
   });
   const [frequency] = useField({
@@ -317,7 +313,7 @@ const FrequencyDetailSubform = () => {
         </FormGroup>
       )}
       {(frequency?.value === 'month' || frequency?.value === 'year') &&
-        !isNaN(new Date(startDateTime.value)) && (
+        !isNaN(new Date(startDate.value)) && (
           <FormGroup
             name="runOn"
             fieldId="schedule-run-on"
@@ -538,29 +534,14 @@ const FrequencyDetailSubform = () => {
         />
       )}
       {end?.value === 'onDate' && (
-        <FormGroup
-          fieldId="schedule-end-datetime"
-          helperTextInvalid={endDateTimeMeta.error}
-          isRequired
-          validated={
-            !endDateTimeMeta.touched || !endDateTimeMeta.error
-              ? 'default'
-              : 'error'
-          }
-          label={t`End date/time`}
-        >
-          <input
-            className="pf-c-form-control"
-            type="datetime-local"
-            id="schedule-end-datetime"
-            step="1"
-            {...endDateTime}
-          />
-        </FormGroup>
+        <DateTimePicker
+          dateFieldName="endDate"
+          timeFieldName="endTime"
+          label={t`End`}
+        />
       )}
     </>
   );
-  /* eslint-enable no-restricted-globals */
 };
 
 export default FrequencyDetailSubform;

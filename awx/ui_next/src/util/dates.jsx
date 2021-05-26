@@ -44,15 +44,19 @@ export function timeOfDay() {
 }
 
 export function dateToInputDateTime(dateObj) {
-  // input type="date-time" expects values to be formatted
-  // like: YYYY-MM-DDTHH-MM-SS
-  const year = dateObj.getFullYear();
-  const month = prependZeros(dateObj.getMonth() + 1);
-  const day = prependZeros(dateObj.getDate());
-  const hour = prependZeros(dateObj.getHours());
-  const minute = prependZeros(dateObj.getMinutes());
-  const second = prependZeros(dateObj.getSeconds());
-  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+  let date = dateObj;
+  if (typeof dateObj === 'string') {
+    date = new Date(dateObj);
+  }
+  const year = date.getFullYear();
+  const month = prependZeros(date.getMonth() + 1);
+  const day = prependZeros(date.getDate());
+  const hour =
+    date.getHours() > 12 ? parseInt(date.getHours(), 10) - 12 : date.getHours();
+  const minute = prependZeros(date.getMinutes());
+  const amPmText = date.getHours() > 11 ? 'PM' : 'AM';
+
+  return [`${year}-${month}-${day}`, `${hour}:${minute} ${amPmText}`];
 }
 
 export function getRRuleDayConstants(dayString) {

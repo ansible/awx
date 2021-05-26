@@ -41,7 +41,6 @@ function ScheduleAdd({
       end,
       frequency,
       interval,
-      startDateTime,
       timezone,
       occurrences,
       runOn,
@@ -49,7 +48,6 @@ function ScheduleAdd({
       runOnTheMonth,
       runOnDayMonth,
       runOnDayNumber,
-      endDateTime,
       runOnTheOccurrence,
       credentials,
       daysOfWeek,
@@ -100,6 +98,10 @@ function ScheduleAdd({
           });
         }
       }
+      delete requestData.startDate;
+      delete requestData.startTime;
+      delete requestData.endDate;
+      delete requestData.endTime;
 
       const {
         data: { id: scheduleId },

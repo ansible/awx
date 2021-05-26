@@ -1,4 +1,5 @@
 import { t } from '@lingui/macro';
+import { isValidDate } from '@patternfly/react-core';
 
 export function required(message) {
   const errorMessage = message || t`This field must not be blank`;
@@ -13,6 +14,25 @@ export function required(message) {
       return errorMessage;
     }
     return undefined;
+  };
+}
+export function validateTime() {
+  return value => {
+    const timeRegex = new RegExp(
+      `^\\s*(\\d\\d?):([0-5])(\\d)\\s*([AaPp][Mm])?\\s*$`
+    );
+    let message;
+    const timeComponents = value.split(':');
+
+    const date = new Date();
+    date.setHours(parseInt(timeComponents[0], 10));
+    date.setMinutes(parseInt(timeComponents[1], 10));
+
+    if (!isValidDate(date) || !timeRegex.test(value)) {
+      message = t`Invalid time format`;
+    }
+
+    return message;
   };
 }
 

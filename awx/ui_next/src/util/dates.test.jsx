@@ -70,7 +70,7 @@ describe('dateToInputDateTime', () => {
   test('it returns the expected value', () => {
     expect(
       dateToInputDateTime(new Date('2018-01-31T01:14:52.969227Z'))
-    ).toEqual('2018-01-31T01:14:52');
+    ).toEqual(['2018-01-31', '1:14 AM']);
   });
 });
 
