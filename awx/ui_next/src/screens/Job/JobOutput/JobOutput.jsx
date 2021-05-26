@@ -359,7 +359,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current?.recomputeRowHeights) {
       listRef.current.recomputeRowHeights();
     }
-  }, [currentlyLoading.current, cssMap, remoteRowCount]);
+  }, [cssMap, remoteRowCount]);
 
   useEffect(() => {
     if (jobStatus && !isJobRunning(jobStatus)) {
@@ -375,7 +375,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         setTimeout(() => setIsFollowModeEnabled(false), 1000);
       }
     }
-  }, [jobStatus]);
+  }, [jobStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     error: cancelError,
