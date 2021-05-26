@@ -702,12 +702,6 @@ INSIGHTS_INSTANCE_ID_VAR = 'insights_id'
 INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 
 # ---------------------
-# --- Thycotic DSV ----
-# ---------------------
-DSV_SHOW_TLD = False  # overridden when LOCALE != en_US
-DSV_SHOW_URL_TEMPLATE = False
-
-# ---------------------
 # ----- Custom -----
 # ---------------------
 # CUSTOM_ENABLED_VAR =
