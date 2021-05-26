@@ -54,7 +54,7 @@ function useStorage(key) {
     }
   });
   const setValue = val => {
-    window.localStorage.setItem(key, val);
+    window.localStorage.setItem(key, JSON.stringify(val));
     setStorageVal(val);
   };
   return [storageVal, setValue];
@@ -70,16 +70,18 @@ function SessionProvider({ children }) {
   const sessionIntervalId = useRef();
   const [sessionTimeout, setSessionTimeout] = useStorage(SESSION_TIMEOUT_KEY);
   const [sessionCountdown, setSessionCountdown] = useState(0);
-  const [authRedirectTo, setAuthRedirectTo] = useState('/home');
+  const [authRedirectTo, setAuthRedirectTo] = useState('/');
 
   const logout = useCallback(async () => {
-    if (!isSessionExpired.current) setAuthRedirectTo(null);
+    if (!isSessionExpired.current) {
+      history.replace('/');
+    }
     await RootAPI.logout();
-    setSessionTimeout(null);
+    setSessionTimeout(0);
     setSessionCountdown(0);
     clearTimeout(sessionTimeoutId.current);
     clearInterval(sessionIntervalId.current);
-  }, [setSessionTimeout, setSessionCountdown]);
+  }, [setSessionTimeout, setSessionCountdown, history]);
 
   useEffect(() => {
     if (!isAuthenticated(document.cookie)) {
@@ -104,6 +106,7 @@ function SessionProvider({ children }) {
       }, 1000);
     };
 
+    setSessionCountdown(0);
     clearTimeout(sessionTimeoutId.current);
     clearInterval(sessionIntervalId.current);
 

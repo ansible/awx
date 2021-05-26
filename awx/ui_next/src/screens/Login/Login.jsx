@@ -30,6 +30,7 @@ import { AuthAPI, RootAPI } from '../../api';
 import AlertModal from '../../components/AlertModal';
 import ErrorDetail from '../../components/ErrorDetail';
 import { useSession } from '../../contexts/Session';
+import { SESSION_REDIRECT_URL } from '../../constants';
 
 const loginLogoSrc = '/static/media/logo-login.svg';
 
@@ -96,6 +97,7 @@ function AWXLogin({ alt, isAuthenticated }) {
   useEffect(() => {
     fetchCustomLoginInfo();
   }, [fetchCustomLoginInfo]);
+
   const {
     isLoading: isAuthenticating,
     error: authenticationError,
@@ -147,6 +149,10 @@ function AWXLogin({ alt, isAuthenticated }) {
       }}
     />
   );
+
+  function setSessionRedirect() {
+    window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
+  }
 
   return (
     <Login header={Header} footer={Footer}>
@@ -221,6 +227,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-azure"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with Azure AD`}>
                         <AzureIcon />
@@ -234,6 +241,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub`}>
                         <GithubIcon />
@@ -247,6 +255,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-org"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Organizations`}>
                         <GithubIcon />
@@ -260,6 +269,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-team"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Teams`}>
                         <GithubIcon />
@@ -273,6 +283,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-enterprise"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Enterprise`}>
                         <GithubIcon />
@@ -286,6 +297,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-enterprise-org"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={t`Sign in with GitHub Enterprise Organizations`}
@@ -301,6 +313,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-enterprise-team"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={t`Sign in with GitHub Enterprise Teams`}
@@ -316,6 +329,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-google"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with Google`}>
                         <GoogleIcon />
@@ -330,6 +344,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-saml"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={

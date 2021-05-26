@@ -6,6 +6,7 @@ import {
   Route,
   Switch,
   Redirect,
+  useHistory,
 } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { I18nProvider } from '@lingui/react';
@@ -27,6 +28,7 @@ import Metrics from './screens/Metrics';
 
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
+import { SESSION_REDIRECT_URL } from './constants';
 
 function ErrorFallback({ error }) {
   return (
@@ -84,7 +86,7 @@ const AuthorizedRoutes = ({ routeConfig }) => {
 };
 
 const ProtectedRoute = ({ children, ...rest }) => {
-  const { authRedirectTo, setAuthRedirectTo } = useSession();
+  const { setAuthRedirectTo } = useSession();
   const { pathname } = useLocation();
 
   if (isAuthenticated(document.cookie)) {
@@ -97,11 +99,13 @@ const ProtectedRoute = ({ children, ...rest }) => {
     );
   }
 
-  if (authRedirectTo !== null) setAuthRedirectTo(pathname);
+  setAuthRedirectTo(pathname);
   return <Redirect to="/login" />;
 };
 
 function App() {
+  const history = useHistory();
+  const { hash, search, pathname } = useLocation();
   let language = getLanguageWithoutRegionCode(navigator);
   if (!Object.keys(locales).includes(language)) {
     // If there isn't a string catalog available for the browser's
@@ -112,7 +116,12 @@ function App() {
     dynamicActivate(language);
   }, [language]);
 
-  const { hash, search, pathname } = useLocation();
+  const redirectURL = window.sessionStorage.getItem(SESSION_REDIRECT_URL);
+  if (redirectURL) {
+    window.sessionStorage.removeItem(SESSION_REDIRECT_URL);
+    if (redirectURL !== '/' || redirectURL !== '/home')
+      history.replace(redirectURL);
+  }
 
   return (
     <I18nProvider i18n={i18n}>
