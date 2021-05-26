@@ -96,6 +96,7 @@ def test_default_cred_types():
         'satellite6',
         'scm',
         'ssh',
+        'thycotic_dsv',
         'tower',
         'vault',
         'vmware',
