@@ -18,7 +18,7 @@ import PaginatedTable, {
 } from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
-
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import UserRolesListItem from './UserRolesListItem';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
@@ -34,6 +34,8 @@ const QS_CONFIG = getQSConfig('roles', {
 function UserRolesList({ user }) {
   const { search } = useLocation();
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [associateError, setAssociateError] = useState(null);
 
   const {
     isLoading,
@@ -178,10 +180,10 @@ function UserRolesList({ user }) {
             additionalControls={[
               ...(canAdd
                 ? [
-                    <UserAndTeamAccessAdd
-                      apiModel={UsersAPI}
-                      onFetchData={fetchRoles}
-                      title={t`Add user permissions`}
+                    <ToolbarAddButton
+                      ouiaId="role-add-button"
+                      key="add"
+                      onClick={() => setShowAddModal(true)}
                     />,
                   ]
                 : []),
@@ -189,6 +191,18 @@ function UserRolesList({ user }) {
           />
         )}
       />
+      {showAddModal && (
+        <UserAndTeamAccessAdd
+          apiModel={UsersAPI}
+          onFetchData={() => {
+            setShowAddModal(false);
+            fetchRoles();
+          }}
+          title={t`Add user permissions`}
+          onClose={() => setShowAddModal(false)}
+          onError={err => setAssociateError(err)}
+        />
+      )}
       {roleToDisassociate && (
         <AlertModal
           aria-label={t`Disassociate role`}
@@ -222,6 +236,18 @@ function UserRolesList({ user }) {
             <br />
             <strong>{roleToDisassociate.name}</strong>
           </div>
+        </AlertModal>
+      )}
+      {associateError && (
+        <AlertModal
+          aria-label={t`Associate role error`}
+          isOpen={associateError}
+          variant="error"
+          title={t`Error!`}
+          onClose={() => setAssociateError(null)}
+        >
+          {t`Failed to associate role`}
+          <ErrorDetail error={associateError} />
         </AlertModal>
       )}
       {disassociationError && (

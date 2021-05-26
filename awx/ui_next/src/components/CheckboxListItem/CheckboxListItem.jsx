@@ -33,7 +33,7 @@ const CheckboxListItem = ({
 
       {columns?.length > 0 ? (
         columns.map(col => (
-          <Td aria-label={col.name} dataLabel={col.key}>
+          <Td aria-label={col.name} dataLabel={col.key} key={col.key}>
             {item[col.key]}
           </Td>
         ))

@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
-
 import {
   Button,
   EmptyState,
@@ -22,6 +20,7 @@ import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import TeamRoleListItem from './TeamRoleListItem';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
@@ -33,6 +32,8 @@ const QS_CONFIG = getQSConfig('roles', {
 function TeamRolesList({ me, team }) {
   const { search } = useLocation();
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [associateError, setAssociateError] = useState(null);
 
   const {
     isLoading,
@@ -165,10 +166,10 @@ function TeamRolesList({ me, team }) {
             additionalControls={[
               ...(canAdd
                 ? [
-                    <UserAndTeamAccessAdd
-                      apiModel={TeamsAPI}
-                      onFetchData={fetchRoles}
-                      title={t`Add team permissions`}
+                    <ToolbarAddButton
+                      ouiaId="role-add-button"
+                      key="add"
+                      onClick={() => setShowAddModal(true)}
                     />,
                   ]
                 : []),
@@ -192,7 +193,18 @@ function TeamRolesList({ me, team }) {
           />
         )}
       />
-
+      {showAddModal && (
+        <UserAndTeamAccessAdd
+          apiModel={TeamsAPI}
+          onFetchData={() => {
+            setShowAddModal(false);
+            fetchRoles();
+          }}
+          title={t`Add team permissions`}
+          onClose={() => setShowAddModal(false)}
+          onError={err => setAssociateError(err)}
+        />
+      )}
       {roleToDisassociate && (
         <AlertModal
           aria-label={t`Disassociate role`}
@@ -226,6 +238,18 @@ function TeamRolesList({ me, team }) {
             <br />
             <strong>{roleToDisassociate.name}</strong>
           </div>
+        </AlertModal>
+      )}
+      {associateError && (
+        <AlertModal
+          aria-label={t`Associate role error`}
+          isOpen={associateError}
+          variant="error"
+          title={t`Error!`}
+          onClose={() => setAssociateError(null)}
+        >
+          {t`Failed to associate role`}
+          <ErrorDetail error={associateError} />
         </AlertModal>
       )}
       {disassociationError && (

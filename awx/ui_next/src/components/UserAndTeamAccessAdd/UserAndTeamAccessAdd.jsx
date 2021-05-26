@@ -1,14 +1,9 @@
-import React, { useState, useCallback, useEffect, useContext } from 'react';
-
+import React, { useState, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, DropdownItem } from '@patternfly/react-core';
-import { KebabifiedContext } from '../../contexts/Kebabified';
-import useRequest, { useDismissableError } from '../../util/useRequest';
+import useRequest from '../../util/useRequest';
 import SelectableCard from '../SelectableCard';
-import AlertModal from '../AlertModal';
-import ErrorDetail from '../ErrorDetail';
 import Wizard from '../Wizard/Wizard';
 import useSelected from '../../util/useSelected';
 import SelectResourceStep from '../AddRole/SelectResourceStep';
@@ -22,21 +17,20 @@ const Grid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 `;
 
-function UserAndTeamAccessAdd({ title, onFetchData, apiModel }) {
+function UserAndTeamAccessAdd({
+  title,
+  onFetchData,
+  apiModel,
+  onClose,
+  onError,
+}) {
   const [selectedResourceType, setSelectedResourceType] = useState(null);
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
   const { id: userId } = useParams();
-  const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const {
     selected: resourcesSelected,
     handleSelect: handleResourceSelect,
   } = useSelected([]);
-  useEffect(() => {
-    if (isKebabified) {
-      onKebabModalChange(isWizardOpen);
-    }
-  }, [isKebabified, isWizardOpen, onKebabModalChange]);
 
   const {
     selected: rolesSelected,
@@ -60,12 +54,9 @@ function UserAndTeamAccessAdd({ title, onFetchData, apiModel }) {
 
       await Promise.all(roleRequests);
       onFetchData();
-      setIsWizardOpen(false);
     }, [onFetchData, rolesSelected, apiModel, userId, resourcesSelected]),
     {}
   );
-
-  const { error, dismissError } = useDismissableError(saveError);
 
   const steps = [
     {
@@ -128,56 +119,22 @@ function UserAndTeamAccessAdd({ title, onFetchData, apiModel }) {
     },
   ];
 
-  if (error) {
-    return (
-      <AlertModal
-        aria-label={t`Associate role error`}
-        isOpen={error}
-        variant="error"
-        title={t`Error!`}
-        onClose={dismissError}
-      >
-        {t`Failed to associate role`}
-        <ErrorDetail error={error} />
-      </AlertModal>
-    );
+  if (saveError) {
+    onError(saveError);
+    onClose();
   }
 
   return (
-    <>
-      {isKebabified ? (
-        <DropdownItem
-          key="add"
-          component="button"
-          aria-label={t`Add`}
-          onClick={() => setIsWizardOpen(true)}
-        >
-          {t`Add`}
-        </DropdownItem>
-      ) : (
-        <Button
-          ouiaId="access-add-button"
-          variant="primary"
-          aria-label={t`Add`}
-          onClick={() => setIsWizardOpen(true)}
-          key="add"
-        >
-          {t`Add`}
-        </Button>
-      )}
-      {isWizardOpen && (
-        <Wizard
-          isOpen={isWizardOpen}
-          title={title}
-          steps={steps}
-          onClose={() => setIsWizardOpen(false)}
-          onNext={({ id }) =>
-            setStepIdReached(stepIdReached < id ? id : stepIdReached)
-          }
-          onSave={handleWizardSave}
-        />
-      )}
-    </>
+    <Wizard
+      isOpen
+      title={title}
+      steps={steps}
+      onClose={onClose}
+      onNext={({ id }) =>
+        setStepIdReached(stepIdReached < id ? id : stepIdReached)
+      }
+      onSave={handleWizardSave}
+    />
   );
 }
 
