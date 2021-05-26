@@ -93,7 +93,7 @@ function OrganizationFormFields({
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
         onChange={value => executionEnvironmentHelpers.setValue(value)}
-        popoverContent={t`Select the default execution environment for this organization.`}
+        popoverContent={t`The execution environment that will be used for jobs inside of this organization. This will be used a fallback when an execution environment has not been explicitly assigned at the project, job template or workflow level.`}
         globallyAvailable
         organizationId={organizationId}
         isDefaultEnvironment
