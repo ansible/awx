@@ -15,8 +15,20 @@ const CheckboxListItem = ({
   columns,
   item,
 }) => {
+  const handleRowClick = () => {
+    if (isSelected && !isRadio) {
+      onDeselect(itemId);
+    } else {
+      onSelect(itemId);
+    }
+  };
+
   return (
-    <Tr ouiaId={`list-item-${itemId}`} id={`list-item-${itemId}`}>
+    <Tr
+      ouiaId={`list-item-${itemId}`}
+      id={`list-item-${itemId}`}
+      onClick={handleRowClick}
+    >
       <Td
         id={`check-action-item-${itemId}`}
         select={{
