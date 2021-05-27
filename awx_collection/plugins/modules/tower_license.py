@@ -25,11 +25,6 @@ options:
         - file path to a Red Hat subscription manifest (a .zip file)
       required: True
       type: str
-    eula_accepted:
-      description:
-        - Whether or not the EULA is accepted.
-      required: True
-      type: bool
     force:
       description:
         - By default, the license manifest will only be applied if Tower is currently
@@ -46,7 +41,6 @@ EXAMPLES = '''
 - name: Set the license using a file
   tower_license:
     manifest: "/tmp/my_manifest.zip"
-    eula_accepted: True
 '''
 
 import base64
@@ -58,15 +52,11 @@ def main():
     module = TowerAPIModule(
         argument_spec=dict(
             manifest=dict(type='str', required=True),
-            eula_accepted=dict(type='bool', required=True),
             force=dict(type='bool', required=False),
         ),
     )
 
     json_output = {'changed': False}
-
-    if not module.params.get('eula_accepted'):
-        module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
 
     try:
         manifest = base64.b64encode(open(module.params.get('manifest'), 'rb').read())
@@ -94,7 +84,7 @@ def main():
     # Do the actual install, if we need to
     if perform_install:
         json_output['changed'] = True
-        module.post_endpoint('config', data={'eula_accepted': True, 'manifest': manifest.decode()})
+        module.post_endpoint('config', data={'manifest': manifest.decode()})
 
     module.exit_json(**json_output)
 

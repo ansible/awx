@@ -24,7 +24,7 @@ from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
-from awx.main.utils import get_awx_version, get_custom_venv_choices, to_python_boolean
+from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
@@ -313,16 +313,6 @@ class ApiV2ConfigView(APIView):
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid subscription data")}, status=status.HTTP_400_BAD_REQUEST)
-        if "eula_accepted" not in request.data:
-            return Response({"error": _("Missing 'eula_accepted' property")}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            eula_accepted = to_python_boolean(request.data["eula_accepted"])
-        except ValueError:
-            return Response({"error": _("'eula_accepted' value is invalid")}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not eula_accepted:
-            return Response({"error": _("'eula_accepted' must be True")}, status=status.HTTP_400_BAD_REQUEST)
-        request.data.pop("eula_accepted")
         try:
             data_actual = json.dumps(request.data)
         except Exception:
