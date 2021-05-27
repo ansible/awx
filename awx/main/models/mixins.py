@@ -464,11 +464,20 @@ class ExecutionEnvironmentMixin(models.Model):
 
     def resolve_execution_environment(self):
         """
-        Return the execution environment that should be used when creating a new job.
+        Return the execution environment that should be used when executing a job.
         """
         if self.execution_environment is not None:
             return self.execution_environment
-        if getattr(self, 'project_id', None) and self.project.default_environment is not None:
+        template = getattr(self, 'unified_job_template', None)
+        if template is not None and template.execution_environment is not None:
+            return template.execution_environment
+        wf_node = getattr(self, 'unified_job_node', None)
+        while wf_node is not None:
+            wf_template = wf_node.workflow_job.workflow_job_template
+            if wf_template.execution_environment is not None:
+                return wf_template.execution_environment
+            wf_node = getattr(wf_node.workflow_job, 'unified_job_node', None)
+        if getattr(self, 'project', None) and self.project.default_environment is not None:
             return self.project.default_environment
         if getattr(self, 'organization', None) and self.organization.default_environment is not None:
             return self.organization.default_environment

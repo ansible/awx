@@ -3059,8 +3059,8 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
-        if self.task:
-            ee = self.task.instance.resolve_execution_environment()
+        if self.task and self.task.instance.execution_environment:
+            ee = self.task.instance.execution_environment
         else:
             ee = get_default_execution_environment()
 
