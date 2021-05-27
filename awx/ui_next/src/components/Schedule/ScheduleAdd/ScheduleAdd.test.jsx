@@ -66,6 +66,8 @@ describe('<ScheduleAdd />', () => {
             type: 'job_template',
             inventory: 2,
             summary_fields: { credentials: [] },
+            name: 'Foo Job Template',
+            description: '',
           }}
           launchConfig={launchConfig}
         />
@@ -417,6 +419,8 @@ describe('<ScheduleAdd />', () => {
             type: 'job_template',
             inventory: 2,
             summary_fields: { credentials: [] },
+            name: 'Foo Job Template',
+            description: '',
           }}
           launchConfig={launchConfig}
           surveyConfig={{
