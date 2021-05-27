@@ -11,7 +11,7 @@ const SmallButton = styled(Button)`
   }
 `;
 
-function MultiButtonToggle({ buttons, value, onChange, }) {
+function MultiButtonToggle({ buttons, value, onChange }) {
   const setValue = newValue => {
     if (value !== newValue) {
       onChange(newValue);
