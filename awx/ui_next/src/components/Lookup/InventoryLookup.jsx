@@ -76,16 +76,17 @@ function InventoryLookup({
 
   const checkInventoryName = useCallback(
     async name => {
-      if (name && name !== '') {
-        try {
-          const {
-            data: { results: nameMatchResults, count: nameMatchCount },
-          } = await InventoriesAPI.read({ name });
-          onChange(nameMatchCount ? nameMatchResults[0] : null);
-        } catch {
-          onChange(null);
-        }
-      } else {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await InventoriesAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
         onChange(null);
       }
     },

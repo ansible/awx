@@ -57,16 +57,17 @@ function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
 
   const checkApplicationName = useCallback(
     async name => {
-      if (name && name !== '') {
-        try {
-          const {
-            data: { results: nameMatchResults, count: nameMatchCount },
-          } = await ApplicationsAPI.read({ name });
-          onChange(nameMatchCount ? nameMatchResults[0] : null);
-        } catch {
-          onChange(null);
-        }
-      } else {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await ApplicationsAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
         onChange(null);
       }
     },

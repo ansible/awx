@@ -114,31 +114,32 @@ function CredentialLookup({
 
   const checkCredentialName = useCallback(
     async name => {
-      if (name && name !== '') {
-        try {
-          const typeIdParams = credentialTypeId
-            ? { credential_type: credentialTypeId }
-            : {};
-          const typeKindParams = credentialTypeKind
-            ? { credential_type__kind: credentialTypeKind }
-            : {};
-          const typeNamespaceParams = credentialTypeNamespace
-            ? { credential_type__namespace: credentialTypeNamespace }
-            : {};
+      if (!name) {
+        onChange(null);
+        return;
+      }
 
-          const {
-            data: { results: nameMatchResults, count: nameMatchCount },
-          } = await CredentialsAPI.read({
-            name,
-            ...typeIdParams,
-            ...typeKindParams,
-            ...typeNamespaceParams,
-          });
-          onChange(nameMatchCount ? nameMatchResults[0] : null);
-        } catch {
-          onChange(null);
-        }
-      } else {
+      try {
+        const typeIdParams = credentialTypeId
+          ? { credential_type: credentialTypeId }
+          : {};
+        const typeKindParams = credentialTypeKind
+          ? { credential_type__kind: credentialTypeKind }
+          : {};
+        const typeNamespaceParams = credentialTypeNamespace
+          ? { credential_type__namespace: credentialTypeNamespace }
+          : {};
+
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await CredentialsAPI.read({
+          name,
+          ...typeIdParams,
+          ...typeKindParams,
+          ...typeNamespaceParams,
+        });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
         onChange(null);
       }
     },
