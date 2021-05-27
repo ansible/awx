@@ -107,7 +107,7 @@ function PromptModalForm({
         resource.description.length > 512 ? (
           <ExpandableSection
             toggleText={
-              showDescription ? t`Hide description` : 'Show description'
+              showDescription ? t`Hide description` : t`Show description`
             }
             onToggle={() => {
               setShowDescription(!showDescription);
