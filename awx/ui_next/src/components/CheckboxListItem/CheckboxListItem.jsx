@@ -23,7 +23,6 @@ const CheckboxListItem = ({
           rowIndex,
           isSelected,
           onSelect: isSelected ? onDeselect : onSelect,
-          disable: isDisabled,
           variant: isRadio ? 'radio' : 'checkbox',
         }}
         name={name}
