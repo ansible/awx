@@ -48,6 +48,7 @@ function MiscSystemDetail() {
         'INSIGHTS_TRACKING_STATE',
         'LOGIN_REDIRECT_OVERRIDE',
         'MANAGE_ORGANIZATION_AUTH',
+        'DISABLE_LOCAL_AUTH',
         'OAUTH2_PROVIDER',
         'ORG_ADMINS_CAN_SEE_ALL_USERS',
         'REDHAT_PASSWORD',

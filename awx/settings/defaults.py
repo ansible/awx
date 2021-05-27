@@ -364,7 +364,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
-    'django.contrib.auth.backends.ModelBackend',
+    'awx.main.backends.AWXModelBackend',
 )
 
 
@@ -716,6 +716,7 @@ CALLBACK_QUEUE = "callback_tasks"
 # Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 MANAGE_ORGANIZATION_AUTH = True
+DISABLE_LOCAL_AUTH = False
 
 # Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
@@ -913,6 +914,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',

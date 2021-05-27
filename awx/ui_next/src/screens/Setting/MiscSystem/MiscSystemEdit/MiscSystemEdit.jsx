@@ -48,6 +48,7 @@ function MiscSystemEdit() {
         'INSIGHTS_TRACKING_STATE',
         'LOGIN_REDIRECT_OVERRIDE',
         'MANAGE_ORGANIZATION_AUTH',
+        'DISABLE_LOCAL_AUTH',
         'OAUTH2_PROVIDER',
         'ORG_ADMINS_CAN_SEE_ALL_USERS',
         'REDHAT_PASSWORD',
@@ -260,6 +261,12 @@ function MiscSystemEdit() {
                   <BooleanField
                     name="MANAGE_ORGANIZATION_AUTH"
                     config={system.MANAGE_ORGANIZATION_AUTH}
+                  />
+                  <BooleanField
+                    name="DISABLE_LOCAL_AUTH"
+                    needsConfirmationModal
+                    modalTitle={t`Confirm Disable Local Authorization`}
+                    config={system.DISABLE_LOCAL_AUTH}
                   />
                   <InputField
                     name="SESSION_COOKIE_AGE"

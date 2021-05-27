@@ -30,6 +30,7 @@ describe('<MiscSystemDetail />', () => {
         INSIGHTS_TRACKING_STATE: false,
         LOGIN_REDIRECT_OVERRIDE: 'https://redirect.com',
         MANAGE_ORGANIZATION_AUTH: true,
+        DISABLE_LOCAL_AUTH: false,
         OAUTH2_PROVIDER: {
           ACCESS_TOKEN_EXPIRE_SECONDS: 1,
           AUTHORIZATION_CODE_EXPIRE_SECONDS: 2,
