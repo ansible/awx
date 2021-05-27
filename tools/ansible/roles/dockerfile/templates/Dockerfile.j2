@@ -157,6 +157,10 @@ RUN dnf install -y podman
 RUN echo -e 'cgroup_manager = "cgroupfs"\nevents_logger = "file"' > /etc/containers/libpod.conf
 {% endif %}
 
+# Ensure we must use fully qualified image names
+# This prevents podman prompt that hangs when trying to pull unqualified images
+RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
+
 # Copy app from builder
 COPY --from=builder /var/lib/awx /var/lib/awx
 
