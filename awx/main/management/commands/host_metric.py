@@ -10,8 +10,8 @@ class Command(BaseCommand):
     help = 'This is for offline licensing usage'
 
     def add_arguments(self, parser):
-        parser.add_argument('--since', type=datetime.datetime.fromisoformat, help='Start Date in ISO format')
-        parser.add_argument('--until', type=datetime.datetime.fromisoformat, help='End Date in ISO format')
+        parser.add_argument('--since', type=datetime.datetime.fromisoformat, help='Start Date in ISO format YYYY-MM-DD')
+        parser.add_argument('--until', type=datetime.datetime.fromisoformat, help='End Date in ISO format YYYY-MM-DD')
         parser.add_argument('--json', action='store_true', help='Select output as JSON')
 
     def handle(self, *args, **options):
