@@ -9,7 +9,6 @@ import {
   oneOfType,
 } from 'prop-types';
 import styled from 'styled-components';
-
 import { t } from '@lingui/macro';
 import SelectedList from '../SelectedList';
 import CheckboxListItem from '../CheckboxListItem';
@@ -41,7 +40,6 @@ function OptionsList({
   deselectItem,
   renderItemChip,
   isLoading,
-
   displayKey,
 }) {
   return (

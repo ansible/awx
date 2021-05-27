@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import useRequest from '../../util/useRequest';
-
 import { SearchColumns, SortColumns } from '../../types';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';

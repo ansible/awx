@@ -4,7 +4,6 @@ import { t } from '@lingui/macro';
 import { Td, Tr } from '@patternfly/react-table';
 
 const CheckboxListItem = ({
-  isDisabled = false,
   isRadio = false,
   isSelected = false,
   itemId,
@@ -16,15 +15,26 @@ const CheckboxListItem = ({
   columns,
   item,
 }) => {
+  const handleRowClick = () => {
+    if (isSelected && !isRadio) {
+      onDeselect(itemId);
+    } else {
+      onSelect(itemId);
+    }
+  };
+
   return (
-    <Tr ouiaId={`list-item-${itemId}`} id={`list-item-${itemId}`}>
+    <Tr
+      ouiaId={`list-item-${itemId}`}
+      id={`list-item-${itemId}`}
+      onClick={handleRowClick}
+    >
       <Td
         id={`check-action-item-${itemId}`}
         select={{
           rowIndex,
           isSelected,
           onSelect: isSelected ? onDeselect : onSelect,
-          disable: isDisabled,
           variant: isRadio ? 'radio' : 'checkbox',
         }}
         name={name}
