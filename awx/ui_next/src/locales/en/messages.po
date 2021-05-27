@@ -23,7 +23,7 @@ msgstr "(Limited to first 10)"
 
 #: components/TemplateList/TemplateListItem.jsx:90
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:153
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:92
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:93
 msgid "(Prompt on launch)"
 msgstr "(Prompt on launch)"
 
@@ -31,11 +31,11 @@ msgstr "(Prompt on launch)"
 msgid "* This field will be retrieved from an external secret management system using the specified credential."
 msgstr "* This field will be retrieved from an external secret management system using the specified credential."
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:60
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:61
 msgid "- Enable Concurrent Jobs"
 msgstr "- Enable Concurrent Jobs"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:65
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:66
 msgid "- Enable Webhooks"
 msgstr "- Enable Webhooks"
 
@@ -44,7 +44,7 @@ msgid "/ (project root)"
 msgstr "/ (project root)"
 
 #: components/AdHocCommands/AdHocCommands.jsx:25
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:132
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:134
 #: components/PromptDetail/PromptDetail.jsx:95
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:32
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:42
@@ -65,7 +65,7 @@ msgid "1 (Info)"
 msgstr "1 (Info)"
 
 #: components/AdHocCommands/AdHocCommands.jsx:26
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:133
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:135
 #: components/PromptDetail/PromptDetail.jsx:96
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:33
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:43
@@ -81,7 +81,7 @@ msgid "2 (Debug)"
 msgstr "2 (Debug)"
 
 #: components/AdHocCommands/AdHocCommands.jsx:27
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:134
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:136
 #: components/PromptDetail/PromptDetail.jsx:97
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:34
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:44
@@ -92,7 +92,7 @@ msgid "2 (More Verbose)"
 msgstr "2 (More Verbose)"
 
 #: components/AdHocCommands/AdHocCommands.jsx:28
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:135
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:137
 #: components/PromptDetail/PromptDetail.jsx:98
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:35
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:45
@@ -103,7 +103,7 @@ msgid "3 (Debug)"
 msgstr "3 (Debug)"
 
 #: components/AdHocCommands/AdHocCommands.jsx:29
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:136
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:138
 #: components/PromptDetail/PromptDetail.jsx:99
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:36
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:46
@@ -229,6 +229,8 @@ msgstr "Action"
 #: screens/Host/HostList/HostListItem.jsx:42
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:244
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:77
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:213
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:48
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.jsx:39
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:144
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupItem.jsx:38
@@ -237,6 +239,8 @@ msgstr "Action"
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:123
 #: screens/Inventory/InventoryList/InventoryList.jsx:206
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:108
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:220
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:40
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:220
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:94
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:104
@@ -258,10 +262,12 @@ msgstr "Actions"
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:49
 #: components/TemplateList/TemplateListItem.jsx:233
 #: screens/Host/HostDetail/HostDetail.jsx:77
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:212
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:45
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:78
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:100
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:34
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:119
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:120
 msgid "Activity"
 msgstr "Activity"
 
@@ -329,11 +335,11 @@ msgstr "Add a new node between these two nodes"
 msgid "Add container group"
 msgstr "Add container group"
 
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:129
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:132
 msgid "Add existing group"
 msgstr "Add existing group"
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:147
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:150
 msgid "Add existing host"
 msgstr "Add existing host"
 
@@ -349,11 +355,11 @@ msgstr "Add inventory"
 msgid "Add job template"
 msgstr "Add job template"
 
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:130
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:133
 msgid "Add new group"
 msgstr "Add new group"
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:148
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:151
 msgid "Add new host"
 msgstr "Add new host"
 
@@ -395,11 +401,11 @@ msgstr ""
 msgid "Advanced"
 msgstr "Advanced"
 
-#: components/Search/AdvancedSearch.jsx:254
+#: components/Search/AdvancedSearch.jsx:282
 msgid "Advanced search documentation"
 msgstr "Advanced search documentation"
 
-#: components/Search/AdvancedSearch.jsx:237
+#: components/Search/AdvancedSearch.jsx:264
 msgid "Advanced search value input"
 msgstr "Advanced search value input"
 
@@ -480,7 +486,7 @@ msgstr "Allowed URIs list, space separated"
 msgid "Always"
 msgstr "Always"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:91
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:99
 msgid "Amazon EC2"
 msgstr "Amazon EC2"
 
@@ -488,7 +494,7 @@ msgstr "Amazon EC2"
 msgid "An error occurred"
 msgstr "An error occurred"
 
-#: components/LaunchPrompt/steps/useInventoryStep.jsx:40
+#: components/LaunchPrompt/steps/useInventoryStep.jsx:35
 msgid "An inventory must be selected"
 msgstr "An inventory must be selected"
 
@@ -502,7 +508,7 @@ msgstr "An inventory must be selected"
 #~ msgid "Ansible Environment"
 #~ msgstr ""
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:98
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:106
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
@@ -716,10 +722,10 @@ msgstr "Azure AD settings"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:125
 #: components/AddRole/AddResourceRole.jsx:285
-#: components/LaunchPrompt/LaunchPrompt.jsx:118
-#: components/Schedule/shared/SchedulePromptableFields.jsx:121
+#: components/LaunchPrompt/LaunchPrompt.jsx:133
+#: components/Schedule/shared/SchedulePromptableFields.jsx:136
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:91
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:73
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:72
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:141
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:144
 msgid "Back"
@@ -781,7 +787,7 @@ msgstr "Back to Schedules"
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:40
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:29
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.jsx:39
-#: screens/Setting/UI/UIDetail/UIDetail.jsx:48
+#: screens/Setting/UI/UIDetail/UIDetail.jsx:54
 msgid "Back to Settings"
 msgstr "Back to Settings"
 
@@ -912,14 +918,14 @@ msgstr "Cache timeout (seconds)"
 #: components/DisassociateButton/DisassociateButton.jsx:125
 #: components/FormActionGroup/FormActionGroup.jsx:24
 #: components/FormActionGroup/FormActionGroup.jsx:29
-#: components/LaunchPrompt/LaunchPrompt.jsx:119
+#: components/LaunchPrompt/LaunchPrompt.jsx:134
 #: components/Lookup/HostFilterLookup.jsx:326
 #: components/Lookup/Lookup.jsx:150
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:281
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.jsx:38
 #: components/Schedule/shared/ScheduleForm.jsx:633
 #: components/Schedule/shared/ScheduleForm.jsx:638
-#: components/Schedule/shared/SchedulePromptableFields.jsx:122
+#: components/Schedule/shared/SchedulePromptableFields.jsx:137
 #: screens/Credential/shared/CredentialForm.jsx:341
 #: screens/Credential/shared/CredentialForm.jsx:346
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:101
@@ -927,7 +933,7 @@ msgstr "Cache timeout (seconds)"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:107
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:63
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:66
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:83
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:82
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:98
 #: screens/Setting/shared/RevertAllAlert.jsx:32
@@ -1000,7 +1006,7 @@ msgstr "Cancel selected job"
 msgid "Cancel selected jobs"
 msgstr "Cancel selected jobs"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:80
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:79
 msgid "Cancel subscription edit"
 msgstr "Cancel subscription edit"
 
@@ -1058,23 +1064,23 @@ msgstr ""
 msgid "Capacity"
 msgstr "Capacity"
 
-#: components/Search/AdvancedSearch.jsx:171
+#: components/Search/AdvancedSearch.jsx:185
 msgid "Case-insensitive version of contains"
 msgstr "Case-insensitive version of contains"
 
-#: components/Search/AdvancedSearch.jsx:191
+#: components/Search/AdvancedSearch.jsx:209
 msgid "Case-insensitive version of endswith."
 msgstr "Case-insensitive version of endswith."
 
-#: components/Search/AdvancedSearch.jsx:161
+#: components/Search/AdvancedSearch.jsx:173
 msgid "Case-insensitive version of exact."
 msgstr "Case-insensitive version of exact."
 
-#: components/Search/AdvancedSearch.jsx:201
+#: components/Search/AdvancedSearch.jsx:221
 msgid "Case-insensitive version of regex."
 msgstr "Case-insensitive version of regex."
 
-#: components/Search/AdvancedSearch.jsx:181
+#: components/Search/AdvancedSearch.jsx:197
 msgid "Case-insensitive version of startswith."
 msgstr "Case-insensitive version of startswith."
 
@@ -1103,16 +1109,16 @@ msgstr "Changes"
 msgid "Channel"
 msgstr "Channel"
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:100
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:102
 #: screens/Template/shared/JobTemplateForm.jsx:181
 msgid "Check"
 msgstr "Check"
 
-#: components/Search/AdvancedSearch.jsx:226
+#: components/Search/AdvancedSearch.jsx:251
 msgid "Check whether the given field or related object is null; expects a boolean value."
 msgstr "Check whether the given field or related object is null; expects a boolean value."
 
-#: components/Search/AdvancedSearch.jsx:231
+#: components/Search/AdvancedSearch.jsx:257
 msgid "Check whether the given field's value is present in the list provided; expects a comma-separated list of items."
 msgstr "Check whether the given field's value is present in the list provided; expects a comma-separated list of items."
 
@@ -1136,7 +1142,7 @@ msgstr "Choose a Source Control Type"
 msgid "Choose a Webhook Service"
 msgstr "Choose a Webhook Service"
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:93
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:95
 #: screens/Template/shared/JobTemplateForm.jsx:174
 msgid "Choose a job type"
 msgstr "Choose a job type"
@@ -1365,12 +1371,12 @@ msgstr "Container group"
 msgid "Container group not found."
 msgstr "Container group not found."
 
-#: components/LaunchPrompt/LaunchPrompt.jsx:113
-#: components/Schedule/shared/SchedulePromptableFields.jsx:116
+#: components/LaunchPrompt/LaunchPrompt.jsx:128
+#: components/Schedule/shared/SchedulePromptableFields.jsx:131
 msgid "Content Loading"
 msgstr "Content Loading"
 
-#: components/AppContainer/AppContainer.jsx:225
+#: components/AppContainer/AppContainer.jsx:233
 msgid "Continue"
 msgstr "Continue"
 
@@ -1386,7 +1392,7 @@ msgstr ""
 #~ msgid "Control the level of output Ansible will produce for inventory source update jobs."
 #~ msgstr "Control the level of output Ansible will produce for inventory source update jobs."
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:148
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:150
 msgid ""
 "Control the level of output ansible\n"
 "will produce as the playbook executes."
@@ -1470,7 +1476,7 @@ msgstr "Copyright"
 #~ msgstr ""
 
 #: screens/Template/shared/JobTemplateForm.jsx:382
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:225
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:224
 msgid "Create"
 msgstr "Create"
 
@@ -1624,7 +1630,7 @@ msgstr "Create user token"
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:182
 #: screens/Team/TeamDetail/TeamDetail.jsx:43
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:263
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:191
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:193
 #: screens/User/UserDetail/UserDetail.jsx:77
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:63
 #: screens/User/UserTokenList/UserTokenList.jsx:134
@@ -1654,24 +1660,24 @@ msgstr ""
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:173
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:196
 #: screens/Credential/CredentialList/CredentialList.jsx:132
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:90
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:98
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:136
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:101
 #: screens/Host/HostGroups/HostGroupsList.jsx:163
 #: screens/Host/HostList/HostList.jsx:156
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:192
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:195
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:131
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:167
 #: screens/Inventory/InventoryList/InventoryList.jsx:184
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:171
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:176
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:93
 #: screens/Organization/OrganizationList/OrganizationList.jsx:145
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:125
 #: screens/Project/ProjectList/ProjectList.jsx:165
 #: screens/Team/TeamList/TeamList.jsx:142
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:92
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:105
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:101
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:100
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:113
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:109
 msgid "Created By (Username)"
 msgstr "Created By (Username)"
 
@@ -1773,7 +1779,7 @@ msgstr ""
 msgid "Credentials that require passwords on launch are not permitted.  Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
 msgstr "Credentials that require passwords on launch are not permitted.  Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
 
-#: components/Pagination/Pagination.jsx:33
+#: components/Pagination/Pagination.jsx:34
 msgid "Current page"
 msgstr ""
 
@@ -1903,7 +1909,7 @@ msgstr "Define system-level features and functions"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:396
 #: screens/Template/Survey/SurveyList.jsx:104
 #: screens/Template/Survey/SurveyToolbar.jsx:73
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:257
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:259
 #: screens/User/UserDetail/UserDetail.jsx:99
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:82
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:218
@@ -1989,7 +1995,7 @@ msgstr "Delete User Token"
 msgid "Delete Workflow Approval"
 msgstr "Delete Workflow Approval"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:251
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:253
 msgid "Delete Workflow Job Template"
 msgstr "Delete Workflow Job Template"
 
@@ -2160,10 +2166,10 @@ msgstr "Deprecated"
 #: screens/Team/shared/TeamForm.jsx:43
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:174
 #: screens/Template/Survey/SurveyQuestionForm.jsx:166
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:115
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:116
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:166
 #: screens/Template/shared/JobTemplateForm.jsx:221
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:120
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:119
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:65
 #: screens/User/UserOrganizations/UserOrganizationListItem.jsx:15
 #: screens/User/UserTeams/UserTeamList.jsx:184
@@ -2272,7 +2278,7 @@ msgstr "Destination channels or users"
 #: screens/Setting/Settings.jsx:110
 #: screens/Setting/Settings.jsx:113
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.jsx:46
-#: screens/Setting/UI/UIDetail/UIDetail.jsx:55
+#: screens/Setting/UI/UIDetail/UIDetail.jsx:61
 #: screens/Team/Team.jsx:55
 #: screens/Team/Teams.jsx:28
 #: screens/Template/Template.jsx:144
@@ -2321,7 +2327,7 @@ msgstr "Disassociate"
 msgid "Disassociate group from host?"
 msgstr "Disassociate group from host?"
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:228
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:238
 msgid "Disassociate host from group?"
 msgstr "Disassociate host from group?"
 
@@ -2329,7 +2335,7 @@ msgstr "Disassociate host from group?"
 msgid "Disassociate instance from instance group?"
 msgstr "Disassociate instance from instance group?"
 
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:207
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:212
 msgid "Disassociate related group(s)?"
 msgstr "Disassociate related group(s)?"
 
@@ -2371,8 +2377,8 @@ msgstr "Documentation."
 
 #: components/CodeEditor/VariablesDetail.jsx:112
 #: components/CodeEditor/VariablesDetail.jsx:118
-#: components/CodeEditor/VariablesField.jsx:126
-#: components/CodeEditor/VariablesField.jsx:132
+#: components/CodeEditor/VariablesField.jsx:138
+#: components/CodeEditor/VariablesField.jsx:144
 msgid "Done"
 msgstr "Done"
 
@@ -2467,14 +2473,14 @@ msgstr ""
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:158
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.jsx:79
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.jsx:84
-#: screens/Setting/UI/UIDetail/UIDetail.jsx:94
-#: screens/Setting/UI/UIDetail/UIDetail.jsx:99
+#: screens/Setting/UI/UIDetail/UIDetail.jsx:100
+#: screens/Setting/UI/UIDetail/UIDetail.jsx:105
 #: screens/Team/TeamDetail/TeamDetail.jsx:51
 #: screens/Team/TeamDetail/TeamDetail.jsx:55
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:365
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:367
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:227
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:229
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:231
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.jsx:208
 #: screens/User/UserDetail/UserDetail.jsx:88
 msgid "Edit"
@@ -2534,15 +2540,16 @@ msgstr "Edit Execution Environment"
 
 #: screens/Host/HostGroups/HostGroupItem.jsx:50
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.jsx:46
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:63
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:66
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:42
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:47
 msgid "Edit Group"
 msgstr "Edit Group"
 
 #: screens/Host/HostList/HostListItem.jsx:46
 #: screens/Host/HostList/HostListItem.jsx:50
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:74
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:77
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:56
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:59
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:62
 msgid "Edit Host"
 msgstr "Edit Host"
 
@@ -2681,7 +2688,7 @@ msgstr "Email Options"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:64
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:30
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:134
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:261
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:260
 msgid "Enable Concurrent Jobs"
 msgstr "Enable Concurrent Jobs"
 
@@ -2700,12 +2707,12 @@ msgstr "Enable Privilege Escalation"
 
 #: screens/Template/shared/JobTemplateForm.jsx:558
 #: screens/Template/shared/JobTemplateForm.jsx:561
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:241
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:244
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:240
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:243
 msgid "Enable Webhook"
 msgstr "Enable Webhook"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:247
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:246
 msgid "Enable Webhook for this workflow job template."
 msgstr "Enable Webhook for this workflow job template."
 
@@ -2814,7 +2821,7 @@ msgstr "End date/time"
 msgid "End did not match an expected value"
 msgstr "End did not match an expected value"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:227
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:215
 msgid "End user license agreement"
 msgstr "End user license agreement"
 
@@ -3013,7 +3020,7 @@ msgstr "Error saving the workflow!"
 #: components/JobList/JobList.jsx:281
 #: components/JobList/JobList.jsx:292
 #: components/LaunchButton/LaunchButton.jsx:173
-#: components/LaunchPrompt/LaunchPrompt.jsx:73
+#: components/LaunchPrompt/LaunchPrompt.jsx:71
 #: components/NotificationList/NotificationList.jsx:246
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:205
 #: components/ResourceAccessList/ResourceAccessList.jsx:231
@@ -3021,10 +3028,10 @@ msgstr "Error saving the workflow!"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:403
 #: components/Schedule/ScheduleList/ScheduleList.jsx:239
 #: components/Schedule/ScheduleToggle/ScheduleToggle.jsx:67
-#: components/Schedule/shared/SchedulePromptableFields.jsx:76
+#: components/Schedule/shared/SchedulePromptableFields.jsx:74
 #: components/TemplateList/TemplateList.jsx:278
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:137
-#: contexts/Config.jsx:74
+#: contexts/Config.jsx:64
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:135
 #: screens/Application/ApplicationTokens/ApplicationTokenList.jsx:170
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:191
@@ -3038,14 +3045,14 @@ msgstr "Error saving the workflow!"
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:229
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:146
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:76
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:265
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:276
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:287
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:60
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:114
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:252
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:180
 #: screens/Inventory/InventoryList/InventoryList.jsx:265
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:239
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:251
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:290
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:245
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:258
@@ -3068,7 +3075,7 @@ msgstr "Error saving the workflow!"
 #: screens/Team/TeamRoles/TeamRolesList.jsx:235
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:405
 #: screens/Template/TemplateSurvey.jsx:130
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:265
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:267
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:167
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:182
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:307
@@ -3114,7 +3121,7 @@ msgstr "Event summary not available"
 msgid "Events"
 msgstr "Events"
 
-#: components/Search/AdvancedSearch.jsx:156
+#: components/Search/AdvancedSearch.jsx:167
 msgid "Exact match (default lookup if not specified)."
 msgstr "Exact match (default lookup if not specified)."
 
@@ -3154,7 +3161,7 @@ msgstr "Execute when the parent node results in a successful state."
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:26
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:152
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:174
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:143
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:144
 msgid "Execution Environment"
 msgstr "Execution Environment"
 
@@ -3207,7 +3214,7 @@ msgid "Expand"
 msgstr ""
 
 #: components/CodeEditor/VariablesDetail.jsx:195
-#: components/CodeEditor/VariablesField.jsx:226
+#: components/CodeEditor/VariablesField.jsx:246
 msgid "Expand input"
 msgstr "Expand input"
 
@@ -3313,9 +3320,9 @@ msgstr "Failed to associate role"
 
 #: screens/Host/HostGroups/HostGroupsList.jsx:249
 #: screens/InstanceGroup/Instances/InstanceList.jsx:234
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:268
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:279
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:256
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:243
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:255
 #: screens/User/UserTeams/UserTeamList.jsx:268
 msgid "Failed to associate."
 msgstr "Failed to associate."
@@ -3519,7 +3526,7 @@ msgstr "Failed to delete user."
 msgid "Failed to delete workflow approval."
 msgstr "Failed to delete workflow approval."
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:268
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:270
 msgid "Failed to delete workflow job template."
 msgstr "Failed to delete workflow job template."
 
@@ -3538,11 +3545,11 @@ msgstr "Failed to deny workflow approval."
 
 #: screens/Host/HostGroups/HostGroupsList.jsx:250
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:257
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:244
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:256
 msgid "Failed to disassociate one or more groups."
 msgstr "Failed to disassociate one or more groups."
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:279
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:290
 msgid "Failed to disassociate one or more hosts."
 msgstr "Failed to disassociate one or more hosts."
 
@@ -3564,7 +3571,7 @@ msgstr "Failed to fetch custom login configuration settings.  System defaults wi
 msgid "Failed to launch job."
 msgstr "Failed to launch job."
 
-#: contexts/Config.jsx:78
+#: contexts/Config.jsx:68
 msgid "Failed to retrieve configuration."
 msgstr "Failed to retrieve configuration."
 
@@ -3639,11 +3646,11 @@ msgstr "False"
 msgid "February"
 msgstr "February"
 
-#: components/Search/AdvancedSearch.jsx:166
+#: components/Search/AdvancedSearch.jsx:179
 msgid "Field contains value."
 msgstr "Field contains value."
 
-#: components/Search/AdvancedSearch.jsx:186
+#: components/Search/AdvancedSearch.jsx:203
 msgid "Field ends with value."
 msgstr "Field ends with value."
 
@@ -3651,11 +3658,11 @@ msgstr "Field ends with value."
 msgid "Field for passing a custom Kubernetes or OpenShift Pod specification."
 msgstr "Field for passing a custom Kubernetes or OpenShift Pod specification."
 
-#: components/Search/AdvancedSearch.jsx:196
+#: components/Search/AdvancedSearch.jsx:215
 msgid "Field matches the given regular expression."
 msgstr "Field matches the given regular expression."
 
-#: components/Search/AdvancedSearch.jsx:176
+#: components/Search/AdvancedSearch.jsx:191
 msgid "Field starts with value."
 msgstr "Field starts with value."
 
@@ -3671,7 +3678,7 @@ msgstr "File Difference"
 msgid "File upload rejected. Please select a single .json file."
 msgstr "File upload rejected. Please select a single .json file."
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:89
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:97
 msgid "File, directory or script"
 msgstr "File, directory or script"
 
@@ -3710,7 +3717,7 @@ msgstr "First Run"
 msgid "First name"
 msgstr "First name"
 
-#: components/Search/AdvancedSearch.jsx:239
+#: components/Search/AdvancedSearch.jsx:266
 msgid "First, select a key"
 msgstr "First, select a key"
 
@@ -3734,7 +3741,7 @@ msgstr ""
 "test environment setup, and report problems without\n"
 "executing the playbook."
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:111
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:113
 msgid ""
 "For job templates, select run to execute the playbook.\n"
 "Select check to only check playbook syntax, test environment setup,\n"
@@ -3808,7 +3815,7 @@ msgstr "Get subscriptions"
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:89
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:158
 #: screens/Project/ProjectList/ProjectList.jsx:150
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:90
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:98
 msgid "Git"
 msgstr "Git"
 
@@ -3869,23 +3876,23 @@ msgstr "Globally Available"
 msgid "Globally available execution environment can not be reassigned to a specific Organization"
 msgstr "Globally available execution environment can not be reassigned to a specific Organization"
 
-#: components/Pagination/Pagination.jsx:28
+#: components/Pagination/Pagination.jsx:29
 msgid "Go to first page"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:30
+#: components/Pagination/Pagination.jsx:31
 msgid "Go to last page"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:31
+#: components/Pagination/Pagination.jsx:32
 msgid "Go to next page"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:29
+#: components/Pagination/Pagination.jsx:30
 msgid "Go to previous page"
 msgstr ""
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:92
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:100
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
@@ -3911,11 +3918,11 @@ msgstr "Grafana API key"
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
-#: components/Search/AdvancedSearch.jsx:206
+#: components/Search/AdvancedSearch.jsx:227
 msgid "Greater than comparison."
 msgstr "Greater than comparison."
 
-#: components/Search/AdvancedSearch.jsx:211
+#: components/Search/AdvancedSearch.jsx:233
 msgid "Greater than or equal to comparison."
 msgstr "Greater than or equal to comparison."
 
@@ -3940,7 +3947,7 @@ msgstr "Group type"
 #: screens/Inventory/InventoryHost/InventoryHost.jsx:83
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:239
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:104
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:226
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:238
 #: util/getRelatedResourceDeleteDetails.js:125
 msgid "Groups"
 msgstr "Groups"
@@ -3962,6 +3969,11 @@ msgstr ""
 #: components/FormField/PasswordInput.jsx:27
 msgid "Hide"
 msgstr "Hide"
+
+#: components/LaunchPrompt/LaunchPrompt.jsx:110
+#: components/Schedule/shared/SchedulePromptableFields.jsx:113
+msgid "Hide description"
+msgstr "Hide description"
 
 #: components/NotificationList/NotificationList.jsx:195
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:153
@@ -4064,8 +4076,8 @@ msgstr "Host status information for this job is unavailable."
 #: screens/Inventory/Inventories.jsx:77
 #: screens/Inventory/Inventory.jsx:65
 #: screens/Inventory/InventoryGroup/InventoryGroup.jsx:68
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:182
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:252
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:185
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:263
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:116
 #: screens/Inventory/InventoryHosts/InventoryHostList.jsx:151
 #: screens/Inventory/SmartInventory.jsx:71
@@ -4229,7 +4241,7 @@ msgstr ""
 #~ msgid "If enabled, run this playbook as an administrator."
 #~ msgstr "If enabled, run this playbook as an administrator."
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:173
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:175
 msgid ""
 "If enabled, show the changes made\n"
 "by Ansible tasks, where supported. This is equivalent to Ansible’s\n"
@@ -4269,7 +4281,7 @@ msgstr ""
 #~ msgid "If enabled, simultaneous runs of this job template will be allowed."
 #~ msgstr "If enabled, simultaneous runs of this job template will be allowed."
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:260
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:259
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
 msgstr "If enabled, simultaneous runs of this workflow job template will be allowed."
 
@@ -4396,12 +4408,21 @@ msgstr "Insights Credential"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:82
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:83
-msgid "Insights for Ansible"
-msgstr "Insights for Ansible"
+#~ msgid "Insights for Ansible"
+#~ msgstr "Insights for Ansible"
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:82
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:83
+msgid "Insights for Ansible Automation Platform"
+msgstr "Insights for Ansible Automation Platform"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:122
-msgid "Insights for Ansible dashboard"
-msgstr "Insights for Ansible dashboard"
+msgid "Insights for Ansible Automation Platform dashboard"
+msgstr "Insights for Ansible Automation Platform dashboard"
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:122
+#~ msgid "Insights for Ansible dashboard"
+#~ msgstr "Insights for Ansible dashboard"
 
 #: components/Lookup/HostFilterLookup.jsx:107
 msgid "Insights system ID"
@@ -4505,7 +4526,7 @@ msgstr "Inventories with sources cannot be copied"
 #: components/HostForm/HostForm.jsx:28
 #: components/JobList/JobListItem.jsx:180
 #: components/LaunchPrompt/steps/InventoryStep.jsx:107
-#: components/LaunchPrompt/steps/useInventoryStep.jsx:53
+#: components/LaunchPrompt/steps/useInventoryStep.jsx:48
 #: components/Lookup/InventoryLookup.jsx:85
 #: components/Lookup/InventoryLookup.jsx:94
 #: components/Lookup/InventoryLookup.jsx:131
@@ -4530,11 +4551,11 @@ msgstr "Inventories with sources cannot be copied"
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:135
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:192
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:199
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:156
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:157
 msgid "Inventory"
 msgstr "Inventory"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:97
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:105
 msgid "Inventory (Name)"
 msgstr "Inventory (Name)"
 
@@ -4625,7 +4646,7 @@ msgstr "Items"
 #~ msgid "Items Per Page"
 #~ msgstr ""
 
-#: components/Pagination/Pagination.jsx:26
+#: components/Pagination/Pagination.jsx:27
 msgid "Items per page"
 msgstr ""
 
@@ -4732,13 +4753,13 @@ msgid "Job Templates with credentials that prompt for passwords cannot be select
 msgstr "Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes"
 
 #: components/JobList/JobList.jsx:185
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:108
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:110
 #: components/PromptDetail/PromptDetail.jsx:151
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:85
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:283
 #: screens/Job/JobDetail/JobDetail.jsx:156
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:175
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:153
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:154
 #: screens/Template/shared/JobTemplateForm.jsx:226
 msgid "Job Type"
 msgstr "Job Type"
@@ -4799,15 +4820,15 @@ msgstr "July"
 msgid "June"
 msgstr "June"
 
-#: components/Search/AdvancedSearch.jsx:127
+#: components/Search/AdvancedSearch.jsx:132
 msgid "Key"
 msgstr "Key"
 
-#: components/Search/AdvancedSearch.jsx:118
+#: components/Search/AdvancedSearch.jsx:123
 msgid "Key select"
 msgstr "Key select"
 
-#: components/Search/AdvancedSearch.jsx:121
+#: components/Search/AdvancedSearch.jsx:126
 msgid "Key typeahead"
 msgstr "Key typeahead"
 
@@ -4878,9 +4899,9 @@ msgstr "Label Name"
 #: components/TemplateList/TemplateListItem.jsx:306
 #: screens/Job/JobDetail/JobDetail.jsx:277
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:291
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:203
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:205
 #: screens/Template/shared/JobTemplateForm.jsx:368
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:211
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:210
 msgid "Labels"
 msgstr "Labels"
 
@@ -4973,8 +4994,8 @@ msgstr "Last used"
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:57
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:371
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:380
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:233
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:242
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:235
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:244
 msgid "Launch"
 msgstr "Launch"
 
@@ -5005,6 +5026,10 @@ msgstr "Launch template"
 msgid "Launch workflow"
 msgstr "Launch workflow"
 
+#: components/LaunchPrompt/LaunchPrompt.jsx:105
+msgid "Launch | {0}"
+msgstr "Launch | {0}"
+
 #: components/DetailList/LaunchedByDetail.jsx:41
 msgid "Launched By"
 msgstr "Launched By"
@@ -5018,8 +5043,12 @@ msgstr "Launched By (Username)"
 #~ msgstr "Learn more about Insights Analytics"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:131
-msgid "Learn more about Insights for Ansible"
-msgstr "Learn more about Insights for Ansible"
+#~ msgid "Learn more about Insights for Ansible"
+#~ msgstr "Learn more about Insights for Ansible"
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:131
+msgid "Learn more about Insights for Ansible Automation Platform"
+msgstr "Learn more about Insights for Ansible Automation Platform"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:77
 msgid "Leave this field blank to make the execution environment globally available."
@@ -5029,11 +5058,11 @@ msgstr "Leave this field blank to make the execution environment globally availa
 msgid "Legend"
 msgstr "Legend"
 
-#: components/Search/AdvancedSearch.jsx:216
+#: components/Search/AdvancedSearch.jsx:239
 msgid "Less than comparison."
 msgstr "Less than comparison."
 
-#: components/Search/AdvancedSearch.jsx:221
+#: components/Search/AdvancedSearch.jsx:245
 msgid "Less than or equal to comparison."
 msgstr "Less than or equal to comparison."
 
@@ -5057,8 +5086,9 @@ msgstr "Less than or equal to comparison."
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:311
 #: screens/Job/JobDetail/JobDetail.jsx:221
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:220
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:164
 #: screens/Template/shared/JobTemplateForm.jsx:417
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:160
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:159
 msgid "Limit"
 msgstr "Limit"
 
@@ -5098,8 +5128,8 @@ msgstr "Logging"
 msgid "Logging settings"
 msgstr "Logging settings"
 
-#: components/AppContainer/AppContainer.jsx:168
-#: components/AppContainer/AppContainer.jsx:233
+#: components/AppContainer/AppContainer.jsx:176
+#: components/AppContainer/AppContainer.jsx:241
 #: components/AppContainer/PageHeaderToolbar.jsx:166
 msgid "Logout"
 msgstr ""
@@ -5109,15 +5139,15 @@ msgstr ""
 msgid "Lookup modal"
 msgstr "Lookup modal"
 
-#: components/Search/AdvancedSearch.jsx:140
+#: components/Search/AdvancedSearch.jsx:150
 msgid "Lookup select"
 msgstr "Lookup select"
 
-#: components/Search/AdvancedSearch.jsx:149
+#: components/Search/AdvancedSearch.jsx:159
 msgid "Lookup type"
 msgstr "Lookup type"
 
-#: components/Search/AdvancedSearch.jsx:143
+#: components/Search/AdvancedSearch.jsx:153
 msgid "Lookup typeahead"
 msgstr "Lookup typeahead"
 
@@ -5184,7 +5214,7 @@ msgstr "Management jobs"
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:147
 #: screens/Project/ProjectList/ProjectList.jsx:149
 #: screens/Project/ProjectList/ProjectListItem.jsx:154
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:89
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:97
 msgid "Manual"
 msgstr "Manual"
 
@@ -5231,7 +5261,7 @@ msgstr "Metric"
 msgid "Metrics"
 msgstr "Metrics"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:93
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:101
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
@@ -5293,7 +5323,7 @@ msgstr "Missing resource"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:119
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:115
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:143
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:196
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:198
 #: screens/User/UserTokenList/UserTokenList.jsx:138
 msgid "Modified"
 msgstr ""
@@ -5320,24 +5350,24 @@ msgstr ""
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:169
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:200
 #: screens/Credential/CredentialList/CredentialList.jsx:136
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:94
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:102
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:140
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:105
 #: screens/Host/HostGroups/HostGroupsList.jsx:167
 #: screens/Host/HostList/HostList.jsx:160
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:196
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:199
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:135
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:171
 #: screens/Inventory/InventoryList/InventoryList.jsx:188
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:175
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:180
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:97
 #: screens/Organization/OrganizationList/OrganizationList.jsx:149
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:129
 #: screens/Project/ProjectList/ProjectList.jsx:161
 #: screens/Team/TeamList/TeamList.jsx:146
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:96
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:101
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:105
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:104
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:109
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:113
 msgid "Modified By (Username)"
 msgstr "Modified By (Username)"
 
@@ -5439,9 +5469,10 @@ msgstr "Multiple Choice Options"
 #: components/NotificationList/NotificationList.jsx:181
 #: components/NotificationList/NotificationList.jsx:218
 #: components/NotificationList/NotificationListItem.jsx:25
+#: components/OptionsList/OptionsList.jsx:72
 #: components/PaginatedDataList/PaginatedDataList.jsx:77
 #: components/PaginatedDataList/PaginatedDataList.jsx:86
-#: components/PaginatedTable/PaginatedTable.jsx:70
+#: components/PaginatedTable/PaginatedTable.jsx:69
 #: components/PromptDetail/PromptDetail.jsx:109
 #: components/ResourceAccessList/ResourceAccessListItem.jsx:57
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:255
@@ -5479,8 +5510,8 @@ msgstr "Multiple Choice Options"
 #: screens/Credential/CredentialList/CredentialList.jsx:142
 #: screens/Credential/CredentialList/CredentialListItem.jsx:55
 #: screens/Credential/shared/CredentialForm.jsx:169
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:85
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:100
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:73
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:93
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:74
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:127
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:183
@@ -5510,8 +5541,9 @@ msgstr "Multiple Choice Options"
 #: screens/InstanceGroup/shared/InstanceGroupForm.jsx:20
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:74
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:35
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:187
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:202
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:190
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:205
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:211
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.jsx:34
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:117
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:143
@@ -5525,8 +5557,9 @@ msgstr "Multiple Choice Options"
 #: screens/Inventory/InventoryList/InventoryList.jsx:194
 #: screens/Inventory/InventoryList/InventoryList.jsx:202
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:79
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:166
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:181
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:171
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:186
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:219
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:194
 #: screens/Inventory/InventorySources/InventorySourceList.jsx:217
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:64
@@ -5569,18 +5602,18 @@ msgstr "Multiple Choice Options"
 #: screens/Team/TeamList/TeamListItem.jsx:33
 #: screens/Team/shared/TeamForm.jsx:35
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:173
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:114
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:81
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:104
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:83
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:102
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:115
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:70
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:89
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:71
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:91
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:161
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:81
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:111
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:88
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:111
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:69
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:89
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:76
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:96
 #: screens/Template/shared/JobTemplateForm.jsx:213
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:112
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:111
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:60
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:64
 #: screens/User/UserOrganizations/UserOrganizationListItem.jsx:10
@@ -5596,7 +5629,7 @@ msgstr "Multiple Choice Options"
 msgid "Name"
 msgstr ""
 
-#: components/AppContainer/AppContainer.jsx:181
+#: components/AppContainer/AppContainer.jsx:189
 msgid "Navigation"
 msgstr "Navigation"
 
@@ -5622,10 +5655,10 @@ msgstr "New"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:80
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:92
-#: components/LaunchPrompt/LaunchPrompt.jsx:120
-#: components/Schedule/shared/SchedulePromptableFields.jsx:123
+#: components/LaunchPrompt/LaunchPrompt.jsx:135
+#: components/Schedule/shared/SchedulePromptableFields.jsx:138
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:67
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:62
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:61
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:120
 msgid "Next"
 msgstr ""
@@ -5678,9 +5711,9 @@ msgstr "No items found."
 msgid "No result found"
 msgstr "No result found"
 
-#: components/Search/AdvancedSearch.jsx:99
-#: components/Search/AdvancedSearch.jsx:131
-#: components/Search/AdvancedSearch.jsx:151
+#: components/Search/AdvancedSearch.jsx:100
+#: components/Search/AdvancedSearch.jsx:136
+#: components/Search/AdvancedSearch.jsx:161
 msgid "No results found"
 msgstr "No results found"
 
@@ -5698,7 +5731,7 @@ msgstr "No survey questions found."
 #~ msgstr ""
 
 #: components/PaginatedDataList/PaginatedDataList.jsx:94
-#: components/PaginatedTable/PaginatedTable.jsx:78
+#: components/PaginatedTable/PaginatedTable.jsx:77
 msgid "No {pluralizedItemName} Found"
 msgstr "No {pluralizedItemName} Found"
 
@@ -5741,7 +5774,7 @@ msgstr "Not configured"
 msgid "Not configured for inventory sync."
 msgstr "Not configured for inventory sync."
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:229
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:239
 msgid ""
 "Note that only hosts directly in this group can\n"
 "be disassociated. Hosts in sub-groups must be disassociated\n"
@@ -5893,8 +5926,8 @@ msgstr "October"
 #: components/AdHocCommands/AdHocDetailsStep.jsx:213
 #: components/HostToggle/HostToggle.jsx:56
 #: components/InstanceToggle/InstanceToggle.jsx:51
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:181
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:184
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:183
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:186
 #: components/PromptDetail/PromptDetail.jsx:244
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:136
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:315
@@ -5911,8 +5944,8 @@ msgstr "Off"
 #: components/AdHocCommands/AdHocDetailsStep.jsx:212
 #: components/HostToggle/HostToggle.jsx:55
 #: components/InstanceToggle/InstanceToggle.jsx:50
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:181
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:183
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:185
 #: components/PromptDetail/PromptDetail.jsx:244
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:136
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:315
@@ -5952,7 +5985,7 @@ msgstr "On days"
 msgid "Only Group By"
 msgstr "Only Group By"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:96
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:104
 msgid "OpenStack"
 msgstr "OpenStack"
 
@@ -5961,7 +5994,7 @@ msgid "Option Details"
 msgstr "Option Details"
 
 #: screens/Template/shared/JobTemplateForm.jsx:371
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:214
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:213
 msgid ""
 "Optional labels that describe this job template,\n"
 "such as 'dev' or 'test'. Labels can be used to group and filter\n"
@@ -5993,9 +6026,9 @@ msgstr "Optionally select the credential to use to send status updates back to t
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:164
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:66
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:260
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:188
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:190
 #: screens/Template/shared/JobTemplateForm.jsx:527
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:238
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:237
 msgid "Options"
 msgstr "Options"
 
@@ -6034,14 +6067,14 @@ msgstr "Options"
 #: screens/Team/TeamList/TeamListItem.jsx:38
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:178
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:188
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:124
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:125
 #: screens/User/UserTeams/UserTeamList.jsx:183
 #: screens/User/UserTeams/UserTeamList.jsx:242
 #: screens/User/UserTeams/UserTeamListItem.jsx:23
 msgid "Organization"
 msgstr "Organization"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:93
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:101
 msgid "Organization (Name)"
 msgstr "Organization (Name)"
 
@@ -6080,7 +6113,7 @@ msgstr ""
 #~ msgid "Organizations List"
 #~ msgstr ""
 
-#: components/LaunchPrompt/steps/useOtherPromptsStep.jsx:50
+#: components/LaunchPrompt/steps/useOtherPromptsStep.jsx:83
 msgid "Other prompts"
 msgstr "Other prompts"
 
@@ -6141,7 +6174,7 @@ msgstr "Pagerduty Subdomain"
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty subdomain"
 
-#: components/Pagination/Pagination.jsx:34
+#: components/Pagination/Pagination.jsx:35
 msgid "Pagination"
 msgstr ""
 
@@ -6189,7 +6222,7 @@ msgstr ""
 "Provide key/value pairs using either YAML or JSON. Refer to the\n"
 "documentation for example syntax."
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:235
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:234
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 
@@ -6290,7 +6323,7 @@ msgstr "Playbook Started"
 #: components/TemplateList/TemplateList.jsx:211
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:23
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:54
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:88
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:96
 msgid "Playbook name"
 msgstr "Playbook name"
 
@@ -6316,7 +6349,7 @@ msgstr "Please add survey questions."
 #~ msgstr ""
 
 #: components/PaginatedDataList/PaginatedDataList.jsx:93
-#: components/PaginatedTable/PaginatedTable.jsx:91
+#: components/PaginatedTable/PaginatedTable.jsx:90
 msgid "Please add {pluralizedItemName} to populate this list"
 msgstr "Please add {pluralizedItemName} to populate this list"
 
@@ -6370,8 +6403,8 @@ msgstr "Policy instance minimum"
 msgid "Policy instance percentage"
 msgstr "Policy instance percentage"
 
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:64
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:70
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:56
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:62
 msgid "Populate field from an external secret management system"
 msgstr "Populate field from an external secret management system"
 
@@ -6536,11 +6569,15 @@ msgstr "Prompt"
 msgid "Prompt Overrides"
 msgstr "Prompt Overrides"
 
-#: components/CodeEditor/VariablesField.jsx:219
-#: components/FieldWithPrompt/FieldWithPrompt.jsx:47
+#: components/CodeEditor/VariablesField.jsx:239
+#: components/FieldWithPrompt/FieldWithPrompt.jsx:46
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:168
 msgid "Prompt on launch"
 msgstr "Prompt on launch"
+
+#: components/Schedule/shared/SchedulePromptableFields.jsx:108
+msgid "Prompt | {0}"
+msgstr "Prompt | {0}"
 
 #: components/PromptDetail/PromptDetail.jsx:146
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:279
@@ -6549,11 +6586,11 @@ msgstr "Prompted Values"
 
 #: components/LaunchPrompt/LaunchPrompt.jsx:107
 #: components/Schedule/shared/SchedulePromptableFields.jsx:110
-msgid "Prompts"
-msgstr "Prompts"
+#~ msgid "Prompts"
+#~ msgstr "Prompts"
 
 #: screens/Template/shared/JobTemplateForm.jsx:420
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:163
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:162
 msgid ""
 "Provide a host pattern to further constrain\n"
 "the list of hosts that will be managed or affected by the\n"
@@ -6616,8 +6653,12 @@ msgstr ""
 #~ msgstr "Provide your Red Hat or Red Hat Satellite credentials to enable Insights Analytics."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:94
-msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible."
-msgstr "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible."
+msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
+msgstr "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:94
+#~ msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible."
+#~ msgstr "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible."
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:142
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:229
@@ -6687,15 +6728,15 @@ msgstr "Recipient list"
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:161
 #: screens/Project/ProjectList/ProjectList.jsx:153
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:93
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:101
 msgid "Red Hat Insights"
 msgstr "Red Hat Insights"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:95
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:103
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:97
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:105
 msgid "Red Hat Virtualization"
 msgstr "Red Hat Virtualization"
 
@@ -6715,11 +6756,11 @@ msgstr "Redirect URIs"
 msgid "Redirect uris"
 msgstr "Redirect uris"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:278
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:266
 msgid "Redirecting to dashboard"
 msgstr "Redirecting to dashboard"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:282
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:270
 msgid "Redirecting to subscription detail"
 msgstr "Redirecting to subscription detail"
 
@@ -6762,7 +6803,7 @@ msgstr "Regular expression where only matching host names will be imported. The 
 
 #: screens/Inventory/Inventories.jsx:79
 #: screens/Inventory/InventoryGroup/InventoryGroup.jsx:63
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:161
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:166
 msgid "Related Groups"
 msgstr "Related Groups"
 
@@ -6801,7 +6842,7 @@ msgstr "Relaunch using host parameters"
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:91
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:160
 #: screens/Project/ProjectList/ProjectList.jsx:152
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:92
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:100
 msgid "Remote Archive"
 msgstr "Remote Archive"
 
@@ -6921,15 +6962,15 @@ msgstr "Return"
 msgid "Return to subscription management."
 msgstr "Return to subscription management."
 
-#: components/Search/AdvancedSearch.jsx:114
+#: components/Search/AdvancedSearch.jsx:118
 msgid "Returns results that have values other than this one as well as other filters."
 msgstr "Returns results that have values other than this one as well as other filters."
 
-#: components/Search/AdvancedSearch.jsx:104
+#: components/Search/AdvancedSearch.jsx:106
 msgid "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
 msgstr "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
 
-#: components/Search/AdvancedSearch.jsx:109
+#: components/Search/AdvancedSearch.jsx:112
 msgid "Returns results that satisfy this one or any other filters."
 msgstr "Returns results that satisfy this one or any other filters."
 
@@ -6997,7 +7038,7 @@ msgstr "Role"
 msgid "Roles"
 msgstr "Roles"
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:96
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:98
 #: components/Workflow/WorkflowLinkHelp.jsx:39
 #: screens/Credential/shared/ExternalTestModal.jsx:89
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkModal.jsx:49
@@ -7131,7 +7172,7 @@ msgstr "Save and enable log aggregation before testing the log aggregator."
 msgid "Save link changes"
 msgstr "Save link changes"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:273
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:261
 msgid "Save successful!"
 msgstr "Save successful!"
 
@@ -7207,12 +7248,12 @@ msgstr ""
 msgid "Search is disabled while the job is running"
 msgstr "Search is disabled while the job is running"
 
-#: components/Search/AdvancedSearch.jsx:247
-#: components/Search/Search.jsx:284
+#: components/Search/AdvancedSearch.jsx:275
+#: components/Search/Search.jsx:286
 msgid "Search submit button"
 msgstr "Search submit button"
 
-#: components/Search/Search.jsx:274
+#: components/Search/Search.jsx:275
 msgid "Search text input"
 msgstr ""
 
@@ -7226,14 +7267,14 @@ msgstr "Second"
 msgid "Seconds"
 msgstr "Seconds"
 
-#: components/LaunchPrompt/steps/PreviewStep.jsx:61
+#: components/LaunchPrompt/steps/PreviewStep.jsx:65
 msgid "See errors on the left"
 msgstr "See errors on the left"
 
 #: components/JobList/JobListItem.jsx:68
 #: components/Lookup/HostFilterLookup.jsx:318
 #: components/Lookup/Lookup.jsx:141
-#: components/Pagination/Pagination.jsx:32
+#: components/Pagination/Pagination.jsx:33
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:89
 msgid "Select"
 msgstr ""
@@ -7244,11 +7285,11 @@ msgstr "Select Credential Type"
 
 #: screens/Host/HostGroups/HostGroupsList.jsx:238
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:245
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:232
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:244
 msgid "Select Groups"
 msgstr "Select Groups"
 
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:258
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:269
 msgid "Select Hosts"
 msgstr "Select Hosts"
 
@@ -7312,7 +7353,7 @@ msgstr ""
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch"
 msgstr "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:185
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:184
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch."
 msgstr "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch."
 
@@ -7422,7 +7463,7 @@ msgstr "Select an activity type"
 msgid "Select an instance and a metric to show chart"
 msgstr "Select an instance and a metric to show chart"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:137
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:136
 msgid "Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory."
 msgstr "Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory."
 
@@ -7537,17 +7578,17 @@ msgstr "Select the credential you want to use when accessing the remote hosts to
 #~ msgid "Select the custom Python virtual environment for this inventory source sync to run on."
 #~ msgstr "Select the custom Python virtual environment for this inventory source sync to run on."
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:204
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:203
 msgid "Select the default execution environment for this organization to run on."
 msgstr "Select the default execution environment for this organization to run on."
 
 #: screens/Organization/shared/OrganizationForm.jsx:96
-msgid "Select the default execution environment for this organization."
-msgstr "Select the default execution environment for this organization."
+#~ msgid "Select the default execution environment for this organization."
+#~ msgstr "Select the default execution environment for this organization."
 
 #: screens/Project/shared/ProjectForm.jsx:196
-msgid "Select the default execution environment for this project."
-msgstr "Select the default execution environment for this project."
+#~ msgid "Select the default execution environment for this project."
+#~ msgstr "Select the default execution environment for this project."
 
 #: screens/Template/shared/JobTemplateForm.jsx:298
 msgid "Select the execution environment for this job template."
@@ -7618,6 +7659,7 @@ msgstr "Select {0}"
 #: components/AddRole/AddResourceRole.jsx:243
 #: components/AddRole/AddResourceRole.jsx:260
 #: components/AddRole/SelectRoleStep.jsx:27
+#: components/CheckboxListItem/CheckboxListItem.jsx:31
 #: components/OptionsList/OptionsList.jsx:51
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:75
 #: components/TemplateList/TemplateListItem.jsx:124
@@ -7629,7 +7671,9 @@ msgstr "Select {0}"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:55
 #: screens/Host/HostList/HostListItem.jsx:26
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:61
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:38
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:77
+#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:33
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:104
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:42
 #: screens/Project/ProjectList/ProjectListItem.jsx:120
@@ -7691,15 +7735,15 @@ msgstr "Set the instance online or offline. If offline, jobs will not be assigne
 msgid "Set to Public or Confidential depending on how secure the client device is."
 msgstr "Set to Public or Confidential depending on how secure the client device is."
 
-#: components/Search/AdvancedSearch.jsx:97
+#: components/Search/AdvancedSearch.jsx:98
 msgid "Set type"
 msgstr "Set type"
 
-#: components/Search/AdvancedSearch.jsx:88
+#: components/Search/AdvancedSearch.jsx:89
 msgid "Set type select"
 msgstr "Set type select"
 
-#: components/Search/AdvancedSearch.jsx:91
+#: components/Search/AdvancedSearch.jsx:92
 msgid "Set type typeahead"
 msgstr "Set type typeahead"
 
@@ -7731,7 +7775,7 @@ msgstr ""
 msgid "Show"
 msgstr "Show"
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:171
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:173
 #: components/PromptDetail/PromptDetail.jsx:243
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:136
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:314
@@ -7748,6 +7792,10 @@ msgstr "Show all groups"
 #: components/AdHocCommands/AdHocDetailsStep.jsx:202
 msgid "Show changes"
 msgstr "Show changes"
+
+#: components/Schedule/shared/SchedulePromptableFields.jsx:113
+msgid "Show description"
+msgstr "Show description"
 
 #: components/ChipGroup/ChipGroup.jsx:12
 msgid "Show less"
@@ -7887,7 +7935,7 @@ msgstr "Smart host filter"
 msgid "Smart inventory"
 msgstr "Smart inventory"
 
-#: components/LaunchPrompt/steps/PreviewStep.jsx:58
+#: components/LaunchPrompt/steps/PreviewStep.jsx:62
 msgid "Some of the previous step(s) have errors"
 msgstr "Some of the previous step(s) have errors"
 
@@ -7911,7 +7959,7 @@ msgstr "Sort question order"
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:84
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:196
 #: screens/Inventory/shared/InventorySourceForm.jsx:134
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:86
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:94
 msgid "Source"
 msgstr "Source"
 
@@ -7924,7 +7972,7 @@ msgstr "Source"
 #: screens/Job/JobDetail/JobDetail.jsx:215
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:150
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:217
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:137
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:138
 #: screens/Template/shared/JobTemplateForm.jsx:308
 msgid "Source Control Branch"
 msgstr "Source Control Branch"
@@ -7961,7 +8009,7 @@ msgstr "Source Control Type"
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:149
 #: screens/Project/ProjectList/ProjectList.jsx:157
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:18
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:97
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:105
 msgid "Source Control URL"
 msgstr "Source Control URL"
 
@@ -7985,7 +8033,7 @@ msgstr "Source Variables"
 msgid "Source Workflow Job"
 msgstr "Source Workflow Job"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:182
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:181
 msgid "Source control branch"
 msgstr "Source control branch"
 
@@ -8002,7 +8050,7 @@ msgstr "Source phone number"
 msgid "Source variables"
 msgstr "Source variables"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:90
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:98
 msgid "Sourced from a project"
 msgstr "Sourced from a project"
 
@@ -8130,9 +8178,9 @@ msgstr "Status"
 msgid "Stdout"
 msgstr "Stdout"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:39
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:52
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:230
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:38
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:51
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:218
 msgid "Submit"
 msgstr "Submit"
 
@@ -8155,7 +8203,7 @@ msgstr ""
 #: screens/Setting/SettingList.jsx:131
 #: screens/Setting/Settings.jsx:106
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:78
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:213
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:201
 msgid "Subscription"
 msgstr "Subscription"
 
@@ -8163,7 +8211,7 @@ msgstr "Subscription"
 msgid "Subscription Details"
 msgstr "Subscription Details"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:212
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:200
 msgid "Subscription Management"
 msgstr "Subscription Management"
 
@@ -8191,7 +8239,7 @@ msgstr "Subscriptions table"
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:90
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:159
 #: screens/Project/ProjectList/ProjectList.jsx:151
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:91
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:99
 msgid "Subversion"
 msgstr "Subversion"
 
@@ -8559,6 +8607,14 @@ msgstr ""
 #~ msgid "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
 #~ msgstr "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
 
+#: screens/Organization/shared/OrganizationForm.jsx:96
+msgid "The execution environment that will be used for jobs inside of this organization. This will be used a fallback when an execution environment has not been explicitly assigned at the project, job template or workflow level."
+msgstr "The execution environment that will be used for jobs inside of this organization. This will be used a fallback when an execution environment has not been explicitly assigned at the project, job template or workflow level."
+
+#: screens/Project/shared/ProjectForm.jsx:196
+msgid "The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level."
+msgstr "The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level."
+
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:73
 msgid ""
 "The first fetches all references. The second\n"
@@ -8775,11 +8831,21 @@ msgstr "This credential type is currently being used by some credentials and can
 msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
-"Red Hat Insights for Ansible."
+"Insights for Ansible Automation Platform."
 msgstr ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
-"Red Hat Insights for Ansible."
+"Insights for Ansible Automation Platform."
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:85
+#~ msgid ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and to provide\n"
+#~ "Red Hat Insights for Ansible."
+#~ msgstr ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and to provide\n"
+#~ "Red Hat Insights for Ansible."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:73
 msgid ""
@@ -8874,7 +8940,7 @@ msgstr "This field will be retrieved from an external secret management system u
 msgid "This instance group is currently being by other resources. Are you sure you want to delete it?"
 msgstr "This instance group is currently being by other resources. Are you sure you want to delete it?"
 
-#: components/LaunchPrompt/steps/useInventoryStep.jsx:64
+#: components/LaunchPrompt/steps/useInventoryStep.jsx:59
 msgid "This inventory is applied to all job template nodes within this workflow ({0}) that prompt for an inventory."
 msgstr "This inventory is applied to all job template nodes within this workflow ({0}) that prompt for an inventory."
 
@@ -8947,7 +9013,7 @@ msgstr ""
 msgid "This workflow does not have any nodes configured."
 msgstr "This workflow does not have any nodes configured."
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:255
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:257
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 
@@ -9043,6 +9109,7 @@ msgid "Toggle expand/collapse event lines"
 msgstr "Toggle expand/collapse event lines"
 
 #: components/HostToggle/HostToggle.jsx:64
+#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:51
 msgid "Toggle host"
 msgstr "Toggle host"
 
@@ -9112,7 +9179,7 @@ msgstr "Tokens"
 msgid "Tools"
 msgstr "Tools"
 
-#: components/PaginatedTable/PaginatedTable.jsx:130
+#: components/PaginatedTable/PaginatedTable.jsx:129
 msgid "Top Pagination"
 msgstr "Top Pagination"
 
@@ -9207,7 +9274,7 @@ msgstr "Twilio"
 #: screens/Team/TeamRoles/TeamRoleListItem.jsx:17
 #: screens/Team/TeamRoles/TeamRolesList.jsx:181
 #: screens/Template/Survey/SurveyListItem.jsx:117
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:86
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:94
 #: screens/User/UserDetail/UserDetail.jsx:70
 #: screens/User/UserRoles/UserRolesList.jsx:155
 #: screens/User/UserRoles/UserRolesListItem.jsx:21
@@ -9392,7 +9459,7 @@ msgid "User analytics"
 msgstr "User analytics"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:45
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:220
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:208
 msgid "User and Insights analytics"
 msgstr "User and Insights analytics"
 
@@ -9447,7 +9514,7 @@ msgstr "Username / password"
 msgid "Users"
 msgstr ""
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:94
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:102
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
@@ -9468,9 +9535,9 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/SmartInventoryForm.jsx:96
 #: screens/Job/JobDetail/JobDetail.jsx:339
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:354
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:218
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:220
 #: screens/Template/shared/JobTemplateForm.jsx:388
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:233
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:232
 msgid "Variables"
 msgstr "Variables"
 
@@ -9491,7 +9558,7 @@ msgid "Verbose"
 msgstr "Verbose"
 
 #: components/AdHocCommands/AdHocDetailsStep.jsx:136
-#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:145
+#: components/LaunchPrompt/steps/OtherPromptsStep.jsx:147
 #: components/PromptDetail/PromptDetail.jsx:191
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:100
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:134
@@ -9804,14 +9871,14 @@ msgstr "Webhook"
 msgid "Webhook Credential"
 msgstr "Webhook Credential"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:177
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:179
 msgid "Webhook Credentials"
 msgstr "Webhook Credentials"
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:153
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:78
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:246
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:173
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:175
 #: screens/Template/shared/WebhookSubForm.jsx:179
 msgid "Webhook Key"
 msgstr "Webhook Key"
@@ -9819,7 +9886,7 @@ msgstr "Webhook Key"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:146
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:77
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:236
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:164
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:166
 #: screens/Template/shared/WebhookSubForm.jsx:131
 msgid "Webhook Service"
 msgstr "Webhook Service"
@@ -9827,14 +9894,14 @@ msgstr "Webhook Service"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:149
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:81
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:242
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:169
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:171
 #: screens/Template/shared/WebhookSubForm.jsx:163
 #: screens/Template/shared/WebhookSubForm.jsx:173
 msgid "Webhook URL"
 msgstr "Webhook URL"
 
 #: screens/Template/shared/JobTemplateForm.jsx:630
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:269
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:268
 msgid "Webhook details"
 msgstr "Webhook details"
 
@@ -10098,11 +10165,11 @@ msgstr ""
 #~ msgid "You may apply a number of possible variables in the message. Refer to the"
 #~ msgstr "You may apply a number of possible variables in the message. Refer to the"
 
-#: components/AppContainer/AppContainer.jsx:237
+#: components/AppContainer/AppContainer.jsx:245
 msgid "You will be logged out in {0} seconds due to inactivity."
 msgstr "You will be logged out in {0} seconds due to inactivity."
 
-#: components/AppContainer/AppContainer.jsx:213
+#: components/AppContainer/AppContainer.jsx:221
 msgid "Your session is about to expire"
 msgstr "Your session is about to expire"
 
@@ -10126,8 +10193,6 @@ msgstr "a new webhook url will be generated on save."
 
 #: screens/Host/HostGroups/HostGroupItem.jsx:45
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:214
-#: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:68
-#: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:58
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.jsx:35
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:107
 msgid "actions"
@@ -10150,7 +10215,7 @@ msgstr "and click on Update Revision on Launch"
 msgid "approved"
 msgstr "approved"
 
-#: components/AppContainer/AppContainer.jsx:142
+#: components/AppContainer/AppContainer.jsx:150
 msgid "brand logo"
 msgstr "brand logo"
 
@@ -10300,7 +10365,7 @@ msgstr "inventory"
 #~ msgid "isolated instance"
 #~ msgstr "isolated instance"
 
-#: components/Pagination/Pagination.jsx:23
+#: components/Pagination/Pagination.jsx:24
 msgid "items"
 msgstr ""
 
@@ -10348,15 +10413,15 @@ msgstr "option to the"
 #~ msgid "or attributes of the job such as"
 #~ msgstr "or attributes of the job such as"
 
-#: components/Pagination/Pagination.jsx:24
+#: components/Pagination/Pagination.jsx:25
 msgid "page"
 msgstr "page"
 
-#: components/Pagination/Pagination.jsx:25
+#: components/Pagination/Pagination.jsx:26
 msgid "pages"
 msgstr ""
 
-#: components/Pagination/Pagination.jsx:27
+#: components/Pagination/Pagination.jsx:28
 msgid "per page"
 msgstr ""
 
@@ -10414,7 +10479,7 @@ msgid "social login"
 msgstr "social login"
 
 #: screens/Template/shared/JobTemplateForm.jsx:320
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:193
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:192
 msgid "source control branch"
 msgstr "source control branch"
 
@@ -10550,7 +10615,7 @@ msgstr "{0} sources with sync failures."
 msgid "{0}: {1}"
 msgstr "{0}: {1}"
 
-#: components/AppContainer/AppContainer.jsx:142
+#: components/AppContainer/AppContainer.jsx:150
 msgid "{brandName} logo"
 msgstr "{brandName} logo"
 
@@ -10627,7 +10692,7 @@ msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 #~ msgstr "{numJobsUnableToCancel, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
 
 #: components/PaginatedDataList/PaginatedDataList.jsx:92
-#: components/PaginatedTable/PaginatedTable.jsx:77
+#: components/PaginatedTable/PaginatedTable.jsx:76
 msgid "{pluralizedItemName} List"
 msgstr "{pluralizedItemName} List"
 
