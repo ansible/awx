@@ -250,3 +250,14 @@
 - assert:
     that:
       - result is changed
+
+- name: Delete IRC notification using redirected module name
+  tower_notification:
+    name: "{{ irc_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is not changed
