@@ -33,7 +33,7 @@ class HostManager(models.Manager):
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(inventory_sources__source=settings.DEFAULT_QUEUE_NAME).values('name').distinct().count()
+        return self.order_by().exclude(inventory_sources__source='tower').values('name').distinct().count()
 
     def org_active_count(self, org_id):
         """Return count of active, unique hosts used by an organization.
@@ -146,8 +146,8 @@ class InstanceManager(models.Manager):
 
             pod_ip = os.environ.get('MY_POD_IP')
             registered = self.register(ip_address=pod_ip)
-            is_container_group = settings.IS_K8S
-            RegisterQueue('tower', 100, 0, [], is_container_group).register()
+            RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
+            RegisterQueue(settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True).register()
             return registered
         else:
             return (False, self.me())
@@ -155,10 +155,6 @@ class InstanceManager(models.Manager):
     def active_count(self):
         """Return count of active Tower nodes for licensing."""
         return self.all().count()
-
-    def my_role(self):
-        # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
-        return "tower"
 
 
 class InstanceGroupManager(models.Manager):

@@ -104,7 +104,7 @@ class TestActiveCount:
 
     def test_active_count_minus_tower(self, inventory):
         inventory.hosts.create(name='locally-managed-host')
-        source = inventory.inventory_sources.create(name='tower-source', source='default')
+        source = inventory.inventory_sources.create(name='tower-source', source='tower')
         source.hosts.create(name='remotely-managed-host', inventory=inventory)
         assert Host.objects.active_count() == 1
 

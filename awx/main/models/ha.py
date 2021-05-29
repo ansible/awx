@@ -130,12 +130,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.modified < ref_time - timedelta(seconds=grace_period)
 
     def refresh_capacity(self):
-        if settings.IS_K8S:
-            self.capacity = self.cpu = self.memory = self.cpu_capacity = self.mem_capacity = 0  # noqa
-            self.version = awx_application_version
-            self.save(update_fields=['capacity', 'version', 'modified', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
-            return
-
         cpu = get_cpu_capacity()
         mem = get_mem_capacity()
         if self.enabled:

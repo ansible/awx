@@ -946,5 +946,7 @@ BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
-# Default name of the task queue
-DEFAULT_QUEUE_NAME = 'default'
+# Name of the default task queue
+DEFAULT_EXECUTION_QUEUE_NAME = 'default'
+# Name of the default controlplane queue
+DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'

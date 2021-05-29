@@ -554,6 +554,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         return websocket_data
 
     @property
+    def can_run_on_control_plane(self):
+        return True
+
+    @property
     def event_class(self):
         if self.has_unpartitioned_events:
             return UnpartitionedProjectUpdateEvent
@@ -561,8 +565,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def task_impact(self):
-        if settings.IS_K8S:
-            return 0
         return 0 if self.job_type == 'run' else 1
 
     @property
@@ -623,6 +625,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
             organization_groups = []
         template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]
         selected_groups = template_groups + organization_groups
+        if not any([not group.is_container_group for group in selected_groups]):
+            selected_groups = selected_groups + list(self.control_plane_instance_group)
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
