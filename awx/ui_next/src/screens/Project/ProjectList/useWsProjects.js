@@ -33,6 +33,11 @@ export default function useWsProjects(initialProjects) {
         },
       },
     };
+
+    if (lastMessage.finished) {
+      updatedProject.scm_revision = null;
+    }
+
     setProjects([
       ...projects.slice(0, index),
       updatedProject,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useWebsocket from '../../../util/useWebsocket';
+import { ProjectsAPI } from '../../../api';
 
 export default function useWsProjects(initialProject) {
   const [project, setProject] = useState(initialProject);
@@ -7,6 +8,11 @@ export default function useWsProjects(initialProject) {
     jobs: ['status_changed'],
     control: ['limit_reached_1'],
   });
+
+  const refreshProject = async () => {
+    const { data } = await ProjectsAPI.readDetail(project.id);
+    setProject(data);
+  };
 
   useEffect(() => {
     setProject(initialProject);
@@ -19,6 +25,11 @@ export default function useWsProjects(initialProject) {
         !lastMessage?.unified_job_id ||
         lastMessage.type !== 'project_update'
       ) {
+        return;
+      }
+
+      if (lastMessage.finished) {
+        refreshProject();
         return;
       }
 

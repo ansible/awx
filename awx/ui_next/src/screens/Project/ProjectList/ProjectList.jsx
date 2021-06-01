@@ -2,9 +2,11 @@ import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-
 import { ProjectsAPI } from '../../../api';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -34,6 +36,21 @@ function ProjectList() {
   const match = useRouteMatch();
 
   const {
+    request: fetchUpdatedProject,
+    error: fetchUpdatedProjectError,
+    result: updatedProject,
+  } = useRequest(
+    useCallback(async projectId => {
+      if (!projectId) {
+        return {};
+      }
+      const { data } = await ProjectsAPI.readDetail(projectId);
+      return data;
+    }, []),
+    null
+  );
+
+  const {
     result: {
       results,
       itemCount,
@@ -43,7 +60,8 @@ function ProjectList() {
     },
     error: contentError,
     isLoading,
-    request: fetchProjects,
+    request: fetchUpdatedProjects,
+    setValue: setProjects,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
@@ -73,8 +91,8 @@ function ProjectList() {
   );
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    fetchUpdatedProjects();
+  }, [fetchUpdatedProjects]);
 
   const projects = useWsProjects(results);
 
@@ -99,7 +117,7 @@ function ProjectList() {
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
-      fetchItems: fetchProjects,
+      fetchItems: fetchUpdatedProjects,
     }
   );
 
@@ -114,6 +132,27 @@ function ProjectList() {
   const deleteDetailsRequests = relatedResourceDeleteRequests.project(
     selected[0]
   );
+
+  useEffect(() => {
+    if (updatedProject) {
+      const updatedProjects = projects.map(project =>
+        project.id === updatedProject.id ? updatedProject : project
+      );
+      setProjects({
+        results: updatedProjects,
+        itemCount,
+        actions,
+        relatedSearchableKeys,
+        searchableKeys,
+      });
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [updatedProject]);
+
+  const {
+    error: projectError,
+    dismissError: dismissProjectError,
+  } = useDismissableError(fetchUpdatedProjectError);
 
   return (
     <>
@@ -207,13 +246,14 @@ function ProjectList() {
             )}
             renderRow={(project, index) => (
               <ProjectListItem
-                fetchProjects={fetchProjects}
+                fetchUpdatedProjects={fetchUpdatedProjects}
                 key={project.id}
                 project={project}
                 detailUrl={`${match.url}/${project.id}`}
                 isSelected={selected.some(row => row.id === project.id)}
                 onSelect={() => handleSelect(project)}
                 rowIndex={index}
+                onRefreshRow={projectId => fetchUpdatedProject(projectId)}
               />
             )}
             emptyStateControls={
@@ -224,16 +264,30 @@ function ProjectList() {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        aria-label={t`Deletion Error`}
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more projects.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          aria-label={t`Deletion Error`}
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more projects.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
+      {projectError && (
+        <AlertModal
+          isOpen={projectError}
+          variant="error"
+          aria-label={t`Error fetching updated project`}
+          title={t`Error!`}
+          onClose={dismissProjectError}
+        >
+          {t`Failed to fetch the updated project data.`}
+          <ErrorDetail error={projectError} />
+        </AlertModal>
+      )}
     </>
   );
 }
