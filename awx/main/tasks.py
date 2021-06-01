@@ -855,7 +855,9 @@ class BaseTask(object):
         if settings.AWX_ISOLATION_SHOW_PATHS:
             params['container_volume_mounts'] = []
             for this_path in settings.AWX_ISOLATION_SHOW_PATHS:
-                params['container_volume_mounts'].append(f'{this_path}:{this_path}:Z')
+                # Using z allows the dir to mounted by multiple containers
+                # Uppercase Z restricts access (in weird ways) to 1 container at a time
+                params['container_volume_mounts'].append(f'{this_path}:{this_path}:z')
         return params
 
     def build_private_data(self, instance, private_data_dir):
