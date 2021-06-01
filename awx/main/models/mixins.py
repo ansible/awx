@@ -477,11 +477,11 @@ class ExecutionEnvironmentMixin(models.Model):
             if wf_template.execution_environment is not None:
                 return wf_template.execution_environment
             wf_node = getattr(wf_node.workflow_job, 'unified_job_node', None)
-        if getattr(self, 'project', None) and self.project.default_environment is not None:
+        if getattr(self, 'project_id', None) and self.project.default_environment is not None:
             return self.project.default_environment
-        if getattr(self, 'organization', None) and self.organization.default_environment is not None:
+        if getattr(self, 'organization_id', None) and self.organization.default_environment is not None:
             return self.organization.default_environment
-        if getattr(self, 'inventory', None) and self.inventory.organization is not None:
+        if getattr(self, 'inventory_id', None) and self.inventory.organization is not None:
             if self.inventory.organization.default_environment is not None:
                 return self.inventory.organization.default_environment
 
