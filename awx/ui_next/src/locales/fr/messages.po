@@ -167,8 +167,8 @@ msgstr "À propos de "
 msgid "Access"
 msgstr "Accès"
 
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:78
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:80
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:79
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:81
 msgid "Access Token Expiration"
 msgstr "Expiration du jeton d'accès"
 
@@ -400,12 +400,12 @@ msgid "After number of occurrences"
 msgstr "Après le nombre d'occurrences"
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:39
-msgid "Agree to end user license agreement"
-msgstr ""
+#~ msgid "Agree to end user license agreement"
+#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:20
-msgid "Agree to the end user license agreement and click submit."
-msgstr ""
+#~ msgid "Agree to the end user license agreement and click submit."
+#~ msgstr ""
 
 #: components/AlertModal/AlertModal.jsx:75
 msgid "Alert modal"
@@ -590,6 +590,10 @@ msgstr ""
 msgid "Are you sure you want to delete:"
 msgstr "Êtes-vous sûr de vouloir supprimer :"
 
+#: screens/Setting/shared/SharedFields.jsx:125
+msgid "Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
+msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
 msgstr "Voulez-vous vraiment quitter le flux de travail Creator sans enregistrer vos modifications ?"
@@ -656,8 +660,8 @@ msgstr "Août"
 msgid "Authentication"
 msgstr "Authentification"
 
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:88
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:93
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:89
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:94
 msgid "Authorization Code Expiration"
 msgstr "Expiration du code d'autorisation"
 
@@ -683,7 +687,7 @@ msgstr "Paramètres AD Azure"
 #: components/LaunchPrompt/LaunchPrompt.jsx:133
 #: components/Schedule/shared/SchedulePromptableFields.jsx:136
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:91
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:72
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:70
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:141
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:144
 msgid "Back"
@@ -693,7 +697,7 @@ msgstr "Retour"
 msgid "Back to Credentials"
 msgstr "Retour à Références"
 
-#: components/ContentError/ContentError.jsx:45
+#: components/ContentError/ContentError.jsx:42
 msgid "Back to Dashboard."
 msgstr "Naviguer vers le tableau de bord"
 
@@ -740,7 +744,7 @@ msgstr "Retour aux horaires"
 #: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:54
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:90
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:63
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:110
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:111
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:39
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:40
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:29
@@ -883,12 +887,14 @@ msgstr "Expiration du délai d’attente du cache (secondes)"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:107
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:63
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:66
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:82
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:80
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:98
 #: screens/Setting/shared/RevertAllAlert.jsx:32
 #: screens/Setting/shared/RevertFormActionGroup.jsx:32
 #: screens/Setting/shared/RevertFormActionGroup.jsx:38
+#: screens/Setting/shared/SharedFields.jsx:116
+#: screens/Setting/shared/SharedFields.jsx:122
 #: screens/Team/TeamRoles/TeamRolesList.jsx:217
 #: screens/Team/TeamRoles/TeamRolesList.jsx:220
 #: screens/Template/Survey/SurveyList.jsx:116
@@ -956,7 +962,7 @@ msgstr ""
 msgid "Cancel selected jobs"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:79
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:77
 msgid "Cancel subscription edit"
 msgstr ""
 
@@ -1119,7 +1125,7 @@ msgstr "Choisir une option d'email"
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
 msgstr "Choisissez les rôles à appliquer aux ressources sélectionnées.  Notez que tous les rôles sélectionnés seront appliqués à toutes les ressources sélectionnées."
 
-#: components/AddRole/SelectResourceStep.jsx:79
+#: components/AddRole/SelectResourceStep.jsx:78
 msgid "Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step."
 msgstr "Choisissez les ressources qui recevront de nouveaux rôles.  Vous pourrez sélectionner les rôles à postuler lors de l'étape suivante.  Notez que les ressources choisies ici recevront tous les rôles choisis à l'étape suivante."
 
@@ -1240,10 +1246,19 @@ msgstr ""
 msgid "Concurrent Jobs"
 msgstr "Jobs parallèles"
 
+#: screens/Setting/shared/SharedFields.jsx:104
+#: screens/Setting/shared/SharedFields.jsx:110
+msgid "Confirm"
+msgstr ""
+
 #: components/DeleteButton/DeleteButton.jsx:108
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:93
 msgid "Confirm Delete"
 msgstr "Confirmer Effacer"
+
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:268
+msgid "Confirm Disable Local Authorization"
+msgstr ""
 
 #: screens/User/shared/UserForm.jsx:91
 msgid "Confirm Password"
@@ -1304,7 +1319,7 @@ msgstr "Groupe de conteneurs non trouvé."
 msgid "Content Loading"
 msgstr "Chargement du contenu"
 
-#: components/AppContainer/AppContainer.jsx:233
+#: components/AppContainer/AppContainer.jsx:138
 msgid "Continue"
 msgstr "Continuer"
 
@@ -2157,7 +2172,7 @@ msgstr "Canaux ou utilisateurs de destination"
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:46
 #: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:61
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:70
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:117
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:118
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:46
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:47
 #: screens/Setting/Settings.jsx:45
@@ -2362,8 +2377,8 @@ msgstr ""
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:165
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:101
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:105
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:148
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:152
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:149
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:153
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:80
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:84
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:81
@@ -2691,7 +2706,7 @@ msgstr "Crypté"
 msgid "End"
 msgstr "Fin"
 
-#: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:24
+#: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:14
 msgid "End User License Agreement"
 msgstr ""
 
@@ -2703,7 +2718,7 @@ msgstr "Date/Heure de fin"
 msgid "End did not match an expected value"
 msgstr "La fin ne correspondait pas à une valeur attendue"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:215
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:209
 msgid "End user license agreement"
 msgstr ""
 
@@ -2896,7 +2911,7 @@ msgstr ""
 #: components/Schedule/shared/SchedulePromptableFields.jsx:74
 #: components/TemplateList/TemplateList.jsx:278
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:137
-#: contexts/Config.jsx:64
+#: contexts/Config.jsx:67
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:135
 #: screens/Application/ApplicationTokens/ApplicationTokenList.jsx:170
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:191
@@ -2924,7 +2939,7 @@ msgstr ""
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:169
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:146
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:51
-#: screens/Login/Login.jsx:191
+#: screens/Login/Login.jsx:209
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:127
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:360
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:223
@@ -3426,7 +3441,7 @@ msgstr "N'a pas réussi à dissocier une ou plusieurs instances."
 msgid "Failed to disassociate one or more teams."
 msgstr "N'a pas réussi à dissocier une ou plusieurs équipes."
 
-#: screens/Login/Login.jsx:195
+#: screens/Login/Login.jsx:213
 msgid "Failed to fetch custom login configuration settings.  System defaults will be shown instead."
 msgstr "Impossible de récupérer les paramètres de configuration de connexion personnalisés.  Les paramètres par défaut du système seront affichés à la place."
 
@@ -3436,7 +3451,7 @@ msgstr "Impossible de récupérer les paramètres de configuration de connexion 
 msgid "Failed to launch job."
 msgstr "Echec du lancement du Job."
 
-#: contexts/Config.jsx:68
+#: contexts/Config.jsx:71
 msgid "Failed to retrieve configuration."
 msgstr "Impossible de récupérer la configuration."
 
@@ -3963,8 +3978,8 @@ msgid "Hour"
 msgstr "Heure"
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:40
-msgid "I agree to the End User License Agreement"
-msgstr ""
+#~ msgid "I agree to the End User License Agreement"
+#~ msgstr ""
 
 #: components/JobList/JobList.jsx:177
 #: components/Lookup/HostFilterLookup.jsx:82
@@ -4315,7 +4330,7 @@ msgstr ""
 msgid "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
 msgstr "Cible de lien invalide.  Impossible d'établir un lien avec les dépendants ou les nœuds des ancêtres.  Les cycles de graphiques ne sont pas pris en charge."
 
-#: screens/Login/Login.jsx:128
+#: screens/Login/Login.jsx:135
 msgid "Invalid username or password. Please try again."
 msgstr "Nom d’utilisateur et/ou mot de passe non valide. Veuillez réessayer."
 
@@ -4904,7 +4919,7 @@ msgstr "Fuseau horaire local"
 msgid "Local time zone"
 msgstr "Fuseau horaire local"
 
-#: screens/Login/Login.jsx:169
+#: screens/Login/Login.jsx:187
 msgid "Log In"
 msgstr "Connexion"
 
@@ -4920,8 +4935,8 @@ msgstr "Journalisation"
 msgid "Logging settings"
 msgstr "Paramètres de journalisation"
 
-#: components/AppContainer/AppContainer.jsx:176
-#: components/AppContainer/AppContainer.jsx:241
+#: components/AppContainer/AppContainer.jsx:81
+#: components/AppContainer/AppContainer.jsx:146
 #: components/AppContainer/PageHeaderToolbar.jsx:166
 msgid "Logout"
 msgstr "Déconnexion"
@@ -5187,7 +5202,7 @@ msgstr "Mois"
 msgid "More information"
 msgstr "Plus d'informations"
 
-#: screens/Setting/shared/SharedFields.jsx:61
+#: screens/Setting/shared/SharedFields.jsx:63
 msgid "More information for"
 msgstr "Plus d'informations pour"
 
@@ -5252,7 +5267,7 @@ msgstr "Options à choix multiples."
 #: components/NotificationList/NotificationList.jsx:181
 #: components/NotificationList/NotificationList.jsx:218
 #: components/NotificationList/NotificationListItem.jsx:25
-#: components/OptionsList/OptionsList.jsx:72
+#: components/OptionsList/OptionsList.jsx:70
 #: components/PaginatedDataList/PaginatedDataList.jsx:77
 #: components/PaginatedDataList/PaginatedDataList.jsx:86
 #: components/PaginatedTable/PaginatedTable.jsx:69
@@ -5412,7 +5427,7 @@ msgstr "Options à choix multiples."
 msgid "Name"
 msgstr "Nom"
 
-#: components/AppContainer/AppContainer.jsx:189
+#: components/AppContainer/AppContainer.jsx:94
 msgid "Navigation"
 msgstr "Navigation"
 
@@ -5441,7 +5456,7 @@ msgstr "Nouveau"
 #: components/LaunchPrompt/LaunchPrompt.jsx:135
 #: components/Schedule/shared/SchedulePromptableFields.jsx:138
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:67
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:61
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:59
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:120
 msgid "Next"
 msgstr "Suivant"
@@ -5540,7 +5555,7 @@ msgstr "Aucune (éxecution unique)"
 msgid "Normal User"
 msgstr "Utilisateur normal"
 
-#: components/ContentError/ContentError.jsx:39
+#: components/ContentError/ContentError.jsx:36
 msgid "Not Found"
 msgstr "Introuvable"
 
@@ -5696,7 +5711,7 @@ msgstr "Octobre"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.jsx:53
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:47
 #: screens/Setting/shared/SettingDetail.jsx:85
-#: screens/Setting/shared/SharedFields.jsx:94
+#: screens/Setting/shared/SharedFields.jsx:144
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:223
 #: screens/Template/Survey/SurveyToolbar.jsx:53
 #: screens/Template/shared/JobTemplateForm.jsx:481
@@ -5714,7 +5729,7 @@ msgstr "Désactivé"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.jsx:52
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:47
 #: screens/Setting/shared/SettingDetail.jsx:85
-#: screens/Setting/shared/SharedFields.jsx:93
+#: screens/Setting/shared/SharedFields.jsx:143
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:223
 #: screens/Template/Survey/SurveyToolbar.jsx:52
 #: screens/Template/shared/JobTemplateForm.jsx:481
@@ -5957,7 +5972,7 @@ msgstr "Transmettez des variables de ligne de commandes supplémentaires au play
 #~ msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the documentation for example syntax."
 #~ msgstr ""
 
-#: screens/Login/Login.jsx:179
+#: screens/Login/Login.jsx:197
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:112
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:223
@@ -6068,8 +6083,8 @@ msgid "Please add {pluralizedItemName} to populate this list"
 msgstr "Veuillez ajouter {brandName} pour remplir cette liste"
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:44
-msgid "Please agree to End User License Agreement before proceeding."
-msgstr ""
+#~ msgid "Please agree to End User License Agreement before proceeding."
+#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.jsx:43
 msgid "Please click the Start button to begin."
@@ -6083,7 +6098,7 @@ msgstr "Veuillez entrer une URL valide"
 msgid "Please enter a value."
 msgstr "Entrez une valeur."
 
-#: screens/Login/Login.jsx:151
+#: screens/Login/Login.jsx:162
 msgid "Please log in"
 msgstr ""
 
@@ -6431,11 +6446,11 @@ msgstr "Redirection d'URIs."
 msgid "Redirect uris"
 msgstr "Redirection d'urs."
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:266
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:259
 msgid "Redirecting to dashboard"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:270
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:263
 msgid "Redirecting to subscription detail"
 msgstr ""
 
@@ -6457,8 +6472,8 @@ msgstr ""
 msgid "Refresh Token"
 msgstr "Actualiser Jeton"
 
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:83
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:86
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:84
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:87
 msgid "Refresh Token Expiration"
 msgstr "Actualiser l’expiration du jeton"
 
@@ -6843,7 +6858,7 @@ msgstr "Enregistrez et activez l'agrégation de journalisation avant de tester l
 msgid "Save link changes"
 msgstr "Enregistrer les changements de liens"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:261
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:254
 msgid "Save successful!"
 msgstr ""
 
@@ -7298,8 +7313,8 @@ msgstr "Sélectionnez {0}"
 #: components/AddRole/AddResourceRole.jsx:243
 #: components/AddRole/AddResourceRole.jsx:260
 #: components/AddRole/SelectRoleStep.jsx:27
-#: components/CheckboxListItem/CheckboxListItem.jsx:31
-#: components/OptionsList/OptionsList.jsx:51
+#: components/CheckboxListItem/CheckboxListItem.jsx:41
+#: components/OptionsList/OptionsList.jsx:49
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:75
 #: components/TemplateList/TemplateListItem.jsx:124
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:103
@@ -7432,6 +7447,7 @@ msgstr "Afficher tous les groupes"
 msgid "Show changes"
 msgstr "Afficher les modifications"
 
+#: components/LaunchPrompt/LaunchPrompt.jsx:110
 #: components/Schedule/shared/SchedulePromptableFields.jsx:113
 msgid "Show description"
 msgstr ""
@@ -7444,43 +7460,43 @@ msgstr "Afficher moins de détails"
 msgid "Show only root groups"
 msgstr "Afficher uniquement les groupes racines"
 
-#: screens/Login/Login.jsx:213
+#: screens/Login/Login.jsx:232
 msgid "Sign in with Azure AD"
 msgstr "Connectez-vous avec Azure AD"
 
-#: screens/Login/Login.jsx:226
+#: screens/Login/Login.jsx:246
 msgid "Sign in with GitHub"
 msgstr "Connectez-vous à GitHub"
 
-#: screens/Login/Login.jsx:265
+#: screens/Login/Login.jsx:288
 msgid "Sign in with GitHub Enterprise"
 msgstr "Connectez-vous à GitHub Enterprise"
 
-#: screens/Login/Login.jsx:279
+#: screens/Login/Login.jsx:303
 msgid "Sign in with GitHub Enterprise Organizations"
 msgstr "Connectez-vous avec GitHub Enterprise Organizations"
 
-#: screens/Login/Login.jsx:294
+#: screens/Login/Login.jsx:319
 msgid "Sign in with GitHub Enterprise Teams"
 msgstr "Connectez-vous avec GitHub Enterprise Teams"
 
-#: screens/Login/Login.jsx:239
+#: screens/Login/Login.jsx:260
 msgid "Sign in with GitHub Organizations"
 msgstr "Connectez-vous avec GitHub Organizations"
 
-#: screens/Login/Login.jsx:252
+#: screens/Login/Login.jsx:274
 msgid "Sign in with GitHub Teams"
 msgstr "Connectez-vous avec GitHub Teams"
 
-#: screens/Login/Login.jsx:308
+#: screens/Login/Login.jsx:334
 msgid "Sign in with Google"
 msgstr "Connectez-vous avec Google"
 
-#: screens/Login/Login.jsx:326
+#: screens/Login/Login.jsx:353
 msgid "Sign in with SAML"
 msgstr "Connectez-vous avec SAML"
 
-#: screens/Login/Login.jsx:325
+#: screens/Login/Login.jsx:352
 msgid "Sign in with SAML {samlIDP}"
 msgstr "Connectez-vous avec SAML {samlIDP}"
 
@@ -7568,7 +7584,7 @@ msgstr "Certaines des étapes précédentes comportent des erreurs"
 msgid "Something went wrong with the request to test this credential and metadata."
 msgstr "Quelque chose s'est mal passé avec la demande de tester cet identifiant et ses métadonnées."
 
-#: components/ContentError/ContentError.jsx:39
+#: components/ContentError/ContentError.jsx:36
 msgid "Something went wrong..."
 msgstr "Quelque chose a mal tourné..."
 
@@ -7797,9 +7813,9 @@ msgstr "État"
 msgid "Stdout"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:38
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:51
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:218
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:37
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:49
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:212
 msgid "Submit"
 msgstr ""
 
@@ -7816,7 +7832,7 @@ msgstr ""
 #: screens/Setting/SettingList.jsx:131
 #: screens/Setting/Settings.jsx:106
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:78
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:201
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:195
 msgid "Subscription"
 msgstr ""
 
@@ -7824,7 +7840,7 @@ msgstr ""
 msgid "Subscription Details"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:200
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:194
 msgid "Subscription Management"
 msgstr ""
 
@@ -8152,7 +8168,7 @@ msgstr "Zone de texte"
 msgid "The"
 msgstr "Le"
 
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:247
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:248
 msgid "The Execution Environment to be used when one has not been configured for a job template."
 msgstr ""
 
@@ -8244,7 +8260,7 @@ msgstr ""
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
 msgstr "Nombre de processus parallèles ou simultanés à utiliser lors de l'exécution du playbook. La saisie d'aucune valeur entraînera l'utilisation de la valeur par défaut du fichier de configuration ansible. Vous pourrez trouver plus d’informations."
 
-#: components/ContentError/ContentError.jsx:43
+#: components/ContentError/ContentError.jsx:40
 #: screens/Job/Job.jsx:124
 msgid "The page you requested could not be found."
 msgstr "La page que vous avez demandée n'a pas été trouvée."
@@ -8295,7 +8311,7 @@ msgstr ""
 msgid "There must be a value in at least one input"
 msgstr ""
 
-#: screens/Login/Login.jsx:130
+#: screens/Login/Login.jsx:137
 msgid "There was a problem logging in. Please try again."
 msgstr ""
 
@@ -8303,7 +8319,7 @@ msgstr ""
 #~ msgid "There was a problem signing in. Please try again."
 #~ msgstr "Il y a eu un problème d'enregistrement. Veuillez réessayer."
 
-#: components/ContentError/ContentError.jsx:44
+#: components/ContentError/ContentError.jsx:41
 msgid "There was an error loading this content. Please reload the page."
 msgstr "Il y a eu une erreur lors du chargement de ce contenu. Veuillez recharger la page."
 
@@ -8983,7 +8999,7 @@ msgid "User analytics"
 msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:45
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:208
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:202
 msgid "User and Insights analytics"
 msgstr ""
 
@@ -9003,7 +9019,7 @@ msgstr "Jetons d'utilisateur"
 #: components/AddRole/AddResourceRole.jsx:139
 #: components/ResourceAccessList/ResourceAccessList.jsx:127
 #: components/ResourceAccessList/ResourceAccessList.jsx:180
-#: screens/Login/Login.jsx:182
+#: screens/Login/Login.jsx:200
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:78
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:180
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:230
@@ -9472,7 +9488,7 @@ msgid ""
 "Please complete the steps below to activate your subscription."
 msgstr ""
 
-#: screens/Login/Login.jsx:150
+#: screens/Login/Login.jsx:161
 msgid "Welcome to {brandName}!"
 msgstr ""
 
@@ -9672,10 +9688,14 @@ msgstr ""
 #~ msgstr ""
 
 #: components/AppContainer/AppContainer.jsx:245
-msgid "You will be logged out in {0} seconds due to inactivity."
-msgstr "Vous serez déconnecté dans {itemsUnableToDisassociate} secondes pour cause d'inactivité."
+#~ msgid "You will be logged out in {0} seconds due to inactivity."
+#~ msgstr "Vous serez déconnecté dans {itemsUnableToDisassociate} secondes pour cause d'inactivité."
 
-#: components/AppContainer/AppContainer.jsx:221
+#: screens/Login/Login.jsx:169
+msgid "Your session has expired. Please log in to continue where you left off."
+msgstr ""
+
+#: components/AppContainer/AppContainer.jsx:126
 msgid "Your session is about to expire"
 msgstr "Votre session est sur le point d'expirer"
 
@@ -9713,7 +9733,7 @@ msgstr ""
 msgid "approved"
 msgstr "approuvé"
 
-#: components/AppContainer/AppContainer.jsx:150
+#: components/AppContainer/AppContainer.jsx:55
 msgid "brand logo"
 msgstr ""
 
@@ -10069,7 +10089,7 @@ msgstr "{0} des sources avec des défaillances de synchronisation."
 msgid "{0}: {1}"
 msgstr "{0}: {1}"
 
-#: components/AppContainer/AppContainer.jsx:150
+#: components/AppContainer/AppContainer.jsx:55
 msgid "{brandName} logo"
 msgstr ""
 
@@ -10124,4 +10144,8 @@ msgstr ""
 #: components/PaginatedDataList/PaginatedDataList.jsx:92
 #: components/PaginatedTable/PaginatedTable.jsx:76
 msgid "{pluralizedItemName} List"
+msgstr ""
+
+#: components/AppContainer/AppContainer.jsx:150
+msgid "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
 msgstr ""
