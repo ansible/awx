@@ -14,8 +14,6 @@ STATIC_ROOT = '/var/lib/awx/public/static'
 
 PROJECTS_ROOT = '/var/lib/awx/projects'
 
-AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
-
 JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
 
 SECRET_KEY = get_secret()

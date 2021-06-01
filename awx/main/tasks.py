@@ -1062,9 +1062,6 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR)
         return path
 
-    def build_cwd(self, instance, private_data_dir):
-        raise NotImplementedError
-
     def build_credentials_list(self, instance):
         return []
 
@@ -1372,9 +1369,12 @@ class BaseTask(object):
 
             self.instance.log_lifecycle("running_playbook")
             if isinstance(self.instance, SystemJob):
-                cwd = self.build_cwd(self.instance, private_data_dir)
                 res = ansible_runner.interface.run(
-                    project_dir=cwd, event_handler=self.event_handler, finished_callback=self.finished_callback, status_handler=self.status_handler, **params
+                    project_dir=settings.BASE_DIR,
+                    event_handler=self.event_handler,
+                    finished_callback=self.finished_callback,
+                    status_handler=self.status_handler,
+                    **params,
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
@@ -1639,9 +1639,6 @@ class RunJob(BaseTask):
             args.append('--start-at-task=%s' % job.start_at_task)
 
         return args
-
-    def build_cwd(self, job, private_data_dir):
-        return os.path.join(private_data_dir, 'project')
 
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return job.playbook
@@ -2020,9 +2017,6 @@ class RunProjectUpdate(BaseTask):
             extra_vars['ansible_remote_tmp'] = os.path.join(project_update.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
 
         self._write_extra_vars_file(private_data_dir, extra_vars)
-
-    def build_cwd(self, project_update, private_data_dir):
-        return os.path.join(private_data_dir, 'project')
 
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
         return os.path.join('project_update.yml')
@@ -2472,17 +2466,6 @@ class RunInventoryUpdate(BaseTask):
 
         return rel_path
 
-    def build_cwd(self, inventory_update, private_data_dir):
-        """
-        There is one case where the inventory "source" is in a different
-        location from the private data:
-         - SCM, where source needs to live in the project folder
-        """
-        src = inventory_update.source
-        if src == 'scm' and inventory_update.source_project_update:
-            return os.path.join(CONTAINER_ROOT, 'project')
-        return CONTAINER_ROOT
-
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
         return None
 
@@ -2758,9 +2741,6 @@ class RunAdHocCommand(BaseTask):
             module_args = sanitize_jinja(module_args)
         return module_args
 
-    def build_cwd(self, ad_hoc_command, private_data_dir):
-        return private_data_dir
-
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return None
 
@@ -2824,9 +2804,6 @@ class RunSystemJob(BaseTask):
         env = dict(os.environ.items())
         env.update(base_env)
         return env
-
-    def build_cwd(self, instance, private_data_dir):
-        return settings.BASE_DIR
 
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return None
