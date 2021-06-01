@@ -142,6 +142,8 @@ describe('<ScheduleEdit />', () => {
                 { name: 'job template credential', id: 75, kind: 'ssh' },
               ],
             },
+            name: 'Foo Job Template',
+            description: '',
           }}
           resourceDefaultCredentials={[]}
           launchConfig={{
@@ -654,6 +656,8 @@ describe('<ScheduleEdit />', () => {
                 { name: 'job template credential', id: 75, kind: 'ssh' },
               ],
             },
+            name: 'Foo Job Template',
+            description: '',
           }}
           resourceDefaultCredentials={[]}
           launchConfig={{

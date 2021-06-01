@@ -1,6 +1,5 @@
-import React from 'react';
-import { Wizard } from '@patternfly/react-core';
-
+import React, { useState } from 'react';
+import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import AlertModal from '../../AlertModal';
@@ -37,11 +36,10 @@ function SchedulePromptableFields({
     launchConfig,
     schedule,
     resource,
-
     credentials,
     resourceDefaultCredentials
   );
-
+  const [showDescription, setShowDescription] = useState(false);
   const { error, dismissError } = useDismissableError(contentError);
   const cancelPromptableValues = async () => {
     resetForm({
@@ -107,7 +105,24 @@ function SchedulePromptableFields({
           validateStep(nextStep.id);
         }
       }}
-      title={t`Prompts`}
+      title={t`Prompt | ${resource.name}`}
+      description={
+        resource.description.length > 512 ? (
+          <ExpandableSection
+            toggleText={
+              showDescription ? t`Hide description` : t`Show description`
+            }
+            onToggle={() => {
+              setShowDescription(!showDescription);
+            }}
+            isExpanded={showDescription}
+          >
+            {resource.description}
+          </ExpandableSection>
+        ) : (
+          resource.description
+        )
+      }
       steps={
         isReady
           ? steps

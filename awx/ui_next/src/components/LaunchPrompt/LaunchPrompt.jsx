@@ -1,6 +1,5 @@
-import React from 'react';
-import { Wizard } from '@patternfly/react-core';
-
+import React, { useState } from 'react';
+import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import ContentError from '../ContentError';
@@ -20,6 +19,7 @@ function PromptModalForm({
   resourceDefaultCredentials,
 }) {
   const { setFieldTouched, values } = useFormikContext();
+  const [showDescription, setShowDescription] = useState(false);
 
   const {
     steps,
@@ -102,7 +102,24 @@ function PromptModalForm({
           validateStep(nextStep.id);
         }
       }}
-      title={t`Prompts`}
+      title={t`Launch | ${resource.name}`}
+      description={
+        resource.description.length > 512 ? (
+          <ExpandableSection
+            toggleText={
+              showDescription ? t`Hide description` : t`Show description`
+            }
+            onToggle={() => {
+              setShowDescription(!showDescription);
+            }}
+            isExpanded={showDescription}
+          >
+            {resource.description}
+          </ExpandableSection>
+        ) : (
+          resource.description
+        )
+      }
       steps={
         isReady
           ? steps
