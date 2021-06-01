@@ -35,7 +35,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
-from awx.main.models import Host
+from awx.main.models import Host, HostMetric, Instance
 
 MAX_INSTANCES = 9999999
 
@@ -383,12 +383,20 @@ class Licenser(object):
             current_instances = Host.objects.active_count()
         else:
             current_instances = 0
+        license_date = int(attrs.get('license_date', 0) or 0)
+        automated_instances = HostMetric.objects.count()
+        first_host = HostMetric.objects.only('first_automation').order_by('first_automation').first()
+        if first_host:
+            automated_since = int(first_host.first_automation.timestamp())
+        else:
+            automated_since = int(Instance.objects.order_by('id').first().created.timestamp())
         instance_count = int(attrs.get('instance_count', 0))
         attrs['current_instances'] = current_instances
-        free_instances = instance_count - current_instances
+        attrs['automated_instances'] = automated_instances
+        attrs['automated_since'] = automated_since
+        free_instances = instance_count - automated_instances
         attrs['free_instances'] = max(0, free_instances)
 
-        license_date = int(attrs.get('license_date', 0) or 0)
         current_date = int(time.time())
         time_remaining = license_date - current_date
         attrs['time_remaining'] = time_remaining

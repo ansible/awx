@@ -552,7 +552,7 @@ class JobEvent(BasePlaybookEvent):
             summaries = dict()
             updated_hosts_list = list()
             for host in hostnames:
-                updated_hosts_list.append(host)
+                updated_hosts_list.append(host.lower())
                 host_id = self.host_map.get(host, None)
                 if host_id not in existing_host_ids:
                     host_id = None

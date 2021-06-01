@@ -36,20 +36,20 @@ from awx.main.utils.pglock import advisory_lock
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
 LICENSE_EXPIRED_MESSAGE = '''\
-License expired.
-See http://www.ansible.com/renew for license extension information.'''
+Subscription expired.
+Contact us (https://www.redhat.com/contact) for subscription extension information.'''
 
 LICENSE_NON_EXISTANT_MESSAGE = '''\
-No license.
-See http://www.ansible.com/renew for license information.'''
+No subscription.
+Contact us (https://www.redhat.com/contact) for subscription information.'''
 
 LICENSE_MESSAGE = '''\
-Number of licensed instances exceeded, would bring available instances to %(new_count)d, system is licensed for %(instance_count)d.
-See http://www.ansible.com/renew for license extension information.'''
+%(new_count)d instances have been automated, system is subscribed for %(instance_count)d.
+Contact us (https://www.redhat.com/contact) for upgrade information.'''
 
 DEMO_LICENSE_MESSAGE = '''\
-Demo mode free license count exceeded, would bring available instances to %(new_count)d, demo mode allows %(instance_count)d.
-See http://www.ansible.com/renew for licensing information.'''
+Demo mode free subscription count exceeded. Current automated instances are %(new_count)d, demo mode allows %(instance_count)d.
+Contact us (https://www.redhat.com/contact) for subscription information.'''
 
 
 def functioning_dir(path):
@@ -761,29 +761,22 @@ class Command(BaseCommand):
         instance_count = license_info.get('instance_count', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)
+        automated_count = license_info.get('automated_instances', 0)
         hard_error = license_info.get('trial', False) is True or license_info['instance_count'] == 10
-        new_count = Host.objects.active_count()
         if time_remaining <= 0:
             if hard_error:
                 logger.error(LICENSE_EXPIRED_MESSAGE)
-                raise PermissionDenied("License has expired!")
+                raise PermissionDenied("Subscription has expired!")
             else:
                 logger.warning(LICENSE_EXPIRED_MESSAGE)
-        # special check for tower-type inventory sources
-        # but only if running the plugin
-        TOWER_SOURCE_FILES = ['tower.yml', 'tower.yaml']
-        if self.inventory_source.source == 'tower' and any(f in self.inventory_source.source_path for f in TOWER_SOURCE_FILES):
-            # only if this is the 2nd call to license check, we cannot compare before running plugin
-            if hasattr(self, 'all_group'):
-                self.remote_tower_license_compare(local_license_type)
         if free_instances < 0:
             d = {
-                'new_count': new_count,
+                'new_count': automated_count,
                 'instance_count': instance_count,
             }
             if hard_error:
                 logger.error(LICENSE_MESSAGE % d)
-                raise PermissionDenied('License count exceeded!')
+                raise PermissionDenied('Subscription count exceeded!')
             else:
                 logger.warning(LICENSE_MESSAGE % d)
 
