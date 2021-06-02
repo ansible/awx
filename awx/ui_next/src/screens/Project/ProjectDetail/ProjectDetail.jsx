@@ -161,7 +161,7 @@ function ProjectDetail({ project }) {
           value={
             scm_revision ? (
               <ClipboardCopy
-                dataCy="project-copy-revision"
+                data-cy="project-copy-revision"
                 variant="inline-compact"
                 clickTip={t`Successfully copied to clipboard!`}
                 hoverTip={t`Copy full revision to clipboard.`}

@@ -93,7 +93,7 @@ function ProjectListItem({
     if (!project.summary_fields?.current_job || project.scm_revision) {
       return project.scm_revision ? (
         <ClipboardCopy
-          dataCy={`project-copy-revision-${project.id}`}
+          data-cy={`project-copy-revision-${project.id}`}
           variant="inline-compact"
           clickTip={t`Successfully copied to clipboard!`}
           hoverTip={t`Copy full revision to clipboard.`}
