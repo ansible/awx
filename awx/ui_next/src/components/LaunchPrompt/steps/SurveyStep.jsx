@@ -92,7 +92,10 @@ function NumberField({ question }) {
 }
 
 function MultipleChoiceField({ question }) {
-  const [field, meta] = useField(`survey_${question.variable}`);
+  const [field, meta] = useField({
+    name: `survey_${question.variable}`,
+    validate: question.required ? required(null) : null,
+  });
   const id = `survey-question-${question.variable}`;
   const isValid = !(meta.touched && meta.error);
   return (

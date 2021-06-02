@@ -10,7 +10,6 @@ export default function useSurveyStep(
   launchConfig,
   surveyConfig,
   resource,
-
   visitedSteps
 ) {
   const { setFieldError, values } = useFormikContext();
@@ -137,7 +136,7 @@ function checkForError(launchConfig, surveyConfig, values) {
           hasError = true;
         }
       }
-      if (question.required && !value && value !== 0) {
+      if (question.required && (!value || value.length === 0)) {
         hasError = true;
       }
     });
