@@ -37,7 +37,6 @@ function DataListToolbar({
   onExpand,
   onSelectAll,
   additionalControls,
-
   qsConfig,
   pagination,
 }) {

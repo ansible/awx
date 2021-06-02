@@ -77,9 +77,13 @@ function ApplicationsList() {
     fetchApplications();
   }, [fetchApplications]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    applications
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(applications);
 
   const {
     isLoading: deleteLoading,
@@ -99,7 +103,7 @@ function ApplicationsList() {
 
   const handleDeleteApplications = async () => {
     await deleteApplications();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd = actions && actions.POST;
@@ -115,7 +119,7 @@ function ApplicationsList() {
             itemCount={itemCount}
             pluralizedItemName={t`Applications`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Name`,
@@ -134,9 +138,7 @@ function ApplicationsList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={isSelected =>
-                  setSelected(isSelected ? [...applications] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd

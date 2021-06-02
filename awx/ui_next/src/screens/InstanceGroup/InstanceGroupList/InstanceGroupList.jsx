@@ -92,9 +92,13 @@ function InstanceGroupList() {
     fetchInstanceGroups();
   }, [fetchInstanceGroups]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    instanceGroups
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(instanceGroups);
 
   const modifiedSelected = modifyInstanceGroups(selected);
 
@@ -118,7 +122,7 @@ function InstanceGroupList() {
 
   const handleDelete = async () => {
     await deleteInstanceGroups();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd = actions && actions.POST;
@@ -201,7 +205,7 @@ function InstanceGroupList() {
             itemCount={instanceGroupsCount}
             pluralizedItemName={pluralizedItemName}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
@@ -209,9 +213,7 @@ function InstanceGroupList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={isSelected =>
-                  setSelected(isSelected ? [...instanceGroups] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd ? [addButton] : []),

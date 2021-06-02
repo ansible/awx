@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -17,6 +17,7 @@ import PaginatedTable, {
   HeaderCell,
 } from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
 import {
   encodeQueryString,
   getQSConfig,
@@ -36,7 +37,6 @@ function HostList() {
   const history = useHistory();
   const location = useLocation();
   const match = useRouteMatch();
-  const [selected, setSelected] = useState([]);
   const parsedQueryStrings = parseQueryString(QS_CONFIG, location.search);
   const nonDefaultSearchParams = {};
 
@@ -86,7 +86,14 @@ function HostList() {
     fetchHosts();
   }, [fetchHosts]);
 
-  const isAllSelected = selected.length === hosts.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(hosts);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteHosts,
@@ -105,19 +112,7 @@ function HostList() {
 
   const handleHostDelete = async () => {
     await deleteHosts();
-    setSelected([]);
-  };
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...hosts] : []);
-  };
-
-  const handleSelect = host => {
-    if (selected.some(h => h.id === host.id)) {
-      setSelected(selected.filter(h => h.id !== host.id));
-    } else {
-      setSelected(selected.concat(host));
-    }
+    clearSelected();
   };
 
   const handleSmartInventoryClick = () => {
@@ -141,7 +136,7 @@ function HostList() {
           itemCount={count}
           pluralizedItemName={t`Hosts`}
           qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
+          clearSelected={clearSelected}
           toolbarSearchColumns={[
             {
               name: t`Name`,
@@ -175,7 +170,7 @@ function HostList() {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={selectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAdd

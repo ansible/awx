@@ -52,7 +52,7 @@ function SubscriptionModal({
     []
   );
 
-  const { selected, handleSelect } = useSelected(subscriptions);
+  const { selected, setSelected } = useSelected(subscriptions);
 
   function handleConfirm() {
     const [subscription] = selected;
@@ -63,6 +63,14 @@ function SubscriptionModal({
   useEffect(() => {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
+
+  const handleSelect = item => {
+    if (selected.some(s => s.pool_id === item.pool_id)) {
+      setSelected(selected.filter(s => s.pool_id !== item.pool_id));
+    } else {
+      setSelected(selected.concat(item));
+    }
+  };
 
   useEffect(() => {
     if (selectedSubscription?.pool_id) {

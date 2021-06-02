@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { bool, func } from 'prop-types';
 
@@ -10,6 +10,7 @@ import PaginatedTable, { HeaderRow, HeaderCell } from '../../PaginatedTable';
 import DataListToolbar from '../../DataListToolbar';
 import { ToolbarAddButton, ToolbarDeleteButton } from '../../PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ScheduleListItem from './ScheduleListItem';
 
@@ -27,8 +28,6 @@ function ScheduleList({
   launchConfig,
   surveyConfig,
 }) {
-  const [selected, setSelected] = useState([]);
-
   const location = useLocation();
 
   const {
@@ -76,8 +75,13 @@ function ScheduleList({
     fetchSchedules();
   }, [fetchSchedules]);
 
-  const isAllSelected =
-    selected.length === schedules.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(schedules);
 
   const {
     isLoading: isDeleteLoading,
@@ -95,21 +99,9 @@ function ScheduleList({
     }
   );
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...schedules] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
-
   const handleDelete = async () => {
     await deleteJobs();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd =
@@ -183,6 +175,7 @@ function ScheduleList({
             isMissingSurvey={isTemplate && hasMissingSurveyValue(item)}
           />
         )}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
             name: t`Name`,
@@ -209,7 +202,7 @@ function ScheduleList({
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={handleSelectAll}
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd

@@ -77,9 +77,13 @@ function CredentialTypeList() {
     fetchCredentialTypes();
   }, [fetchCredentialTypes]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    credentialTypes
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(credentialTypes);
 
   const {
     isLoading: deleteLoading,
@@ -101,7 +105,7 @@ function CredentialTypeList() {
 
   const handleDelete = async () => {
     await deleteCredentialTypes();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd = actions && actions.POST;
@@ -121,7 +125,7 @@ function CredentialTypeList() {
             itemCount={credentialTypesCount}
             pluralizedItemName={t`Credential Types`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Name`,
@@ -148,9 +152,7 @@ function CredentialTypeList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={isSelected =>
-                  setSelected(isSelected ? [...credentialTypes] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd

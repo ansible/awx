@@ -82,9 +82,13 @@ function NotificationTemplatesList() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    templates
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(templates);
 
   const {
     isLoading: isDeleteLoading,
@@ -106,7 +110,7 @@ function NotificationTemplatesList() {
 
   const handleDelete = async () => {
     await deleteTemplates();
-    setSelected([]);
+    clearSelected();
   };
 
   const addTestToast = useCallback(notification => {
@@ -133,7 +137,7 @@ function NotificationTemplatesList() {
             itemCount={count}
             pluralizedItemName={t`Notification Templates`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Name`,
@@ -176,7 +180,7 @@ function NotificationTemplatesList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={set => setSelected(set ? [...templates] : [])}
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd

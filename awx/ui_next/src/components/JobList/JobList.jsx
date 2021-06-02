@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 
@@ -13,7 +13,7 @@ import useRequest, {
   useDismissableError,
 } from '../../util/useRequest';
 import { useConfig } from '../../contexts/Config';
-
+import useSelected from '../../util/useSelected';
 import { isJobRunning, getJobModel } from '../../util/jobs';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
@@ -35,8 +35,6 @@ function JobList({ defaultParams, showTypeColumn = false }) {
   );
 
   const { me } = useConfig();
-
-  const [selected, setSelected] = useState([]);
   const location = useLocation();
   const {
     result: { results, count, relatedSearchableKeys, searchableKeys },
@@ -88,7 +86,13 @@ function JobList({ defaultParams, showTypeColumn = false }) {
 
   const jobs = useWsJobs(results, fetchJobsById, qsConfig);
 
-  const isAllSelected = selected.length === jobs.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(jobs);
 
   const {
     error: cancelJobsError,
@@ -135,24 +139,12 @@ function JobList({ defaultParams, showTypeColumn = false }) {
 
   const handleJobCancel = async () => {
     await cancelJobs();
-    setSelected([]);
+    clearSelected();
   };
 
   const handleJobDelete = async () => {
     await deleteJobs();
-    setSelected([]);
-  };
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...jobs] : []);
-  };
-
-  const handleSelect = item => {
-    if (selected.some(s => s.id === item.id)) {
-      setSelected(selected.filter(s => s.id !== item.id));
-    } else {
-      setSelected(selected.concat(item));
-    }
+    clearSelected();
   };
 
   const cannotDeleteItems = selected.filter(job => isJobRunning(job.status));
@@ -226,6 +218,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
+          clearSelected={clearSelected}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
@@ -233,7 +226,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={selectAll}
               qsConfig={qsConfig}
               additionalControls={[
                 <ToolbarDeleteButton
