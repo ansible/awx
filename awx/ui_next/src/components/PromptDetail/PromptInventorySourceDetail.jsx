@@ -168,6 +168,7 @@ function PromptInventorySourceDetail({ resource }) {
           label={t`Source Variables`}
           rows={4}
           value={source_vars}
+          name="source_vars"
         />
       )}
     </>

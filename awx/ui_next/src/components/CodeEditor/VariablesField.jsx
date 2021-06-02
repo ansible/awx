@@ -230,6 +230,7 @@ function VariablesFieldInternals({
               ]}
               value={mode}
               onChange={setMode}
+              name={name}
             />
           </SplitItem>
         </Split>

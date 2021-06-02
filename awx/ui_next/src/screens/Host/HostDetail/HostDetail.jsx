@@ -100,7 +100,12 @@ function HostDetail({ host }) {
           user={modified_by}
           dataCy="host-last-modified-by"
         />
-        <VariablesDetail label={t`Variables`} rows={4} value={variables} />
+        <VariablesDetail
+          label={t`Variables`}
+          rows={4}
+          value={variables}
+          name="variables"
+        />
       </DetailList>
       <CardActionsRow>
         {user_capabilities?.edit && (

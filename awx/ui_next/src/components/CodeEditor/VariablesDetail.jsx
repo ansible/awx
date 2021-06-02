@@ -23,7 +23,15 @@ import {
 import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 
-function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
+function VariablesDetail({
+  dataCy,
+  helpText,
+  value,
+  label,
+  rows,
+  fullHeight,
+  name,
+}) {
   const [mode, setMode] = useState(
     isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
   );
@@ -76,6 +84,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
           setMode={setMode}
           currentValue={currentValue}
           onExpand={() => setIsExpanded(true)}
+          name={name}
         />
       </DetailName>
       <DetailValue
@@ -128,6 +137,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
             mode={mode}
             setMode={setMode}
             currentValue={currentValue}
+            name={name}
           />
           <CodeEditor
             id={`${dataCy}-preview-expanded`}
@@ -149,6 +159,7 @@ VariablesDetail.propTypes = {
   rows: oneOfType([number, string]),
   dataCy: string,
   helpText: string,
+  name: string.isRequired,
 };
 VariablesDetail.defaultProps = {
   rows: null,
@@ -156,7 +167,16 @@ VariablesDetail.defaultProps = {
   helpText: '',
 };
 
-function ModeToggle({ id, label, helpText, dataCy, mode, setMode, onExpand }) {
+function ModeToggle({
+  id,
+  label,
+  helpText,
+  dataCy,
+  mode,
+  setMode,
+  onExpand,
+  name,
+}) {
   return (
     <Split hasGutter>
       <SplitItem isFilled>
@@ -184,6 +204,7 @@ function ModeToggle({ id, label, helpText, dataCy, mode, setMode, onExpand }) {
               onChange={newMode => {
                 setMode(newMode);
               }}
+              name={name}
             />
           </SplitItem>
         </Split>

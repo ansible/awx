@@ -51,7 +51,12 @@ function SmartInventoryHostDetail({ host }) {
           label={t`Last modified`}
           user={modified_by}
         />
-        <VariablesDetail label={t`Variables`} rows={4} value={variables} />
+        <VariablesDetail
+          label={t`Variables`}
+          rows={4}
+          value={variables}
+          name="variables"
+        />
       </DetailList>
     </CardBody>
   );

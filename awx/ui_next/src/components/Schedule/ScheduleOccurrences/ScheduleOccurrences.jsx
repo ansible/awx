@@ -51,6 +51,7 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
               ]}
               value={mode}
               onChange={newMode => setMode(newMode)}
+              name="timezone"
             />
           </SplitItem>
         </Split>

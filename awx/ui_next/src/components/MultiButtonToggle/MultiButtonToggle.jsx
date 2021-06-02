@@ -11,7 +11,7 @@ const SmallButton = styled(Button)`
   }
 `;
 
-function MultiButtonToggle({ buttons, value, onChange }) {
+function MultiButtonToggle({ buttons, value, onChange, name }) {
   const setValue = newValue => {
     if (value !== newValue) {
       onChange(newValue);
@@ -24,7 +24,7 @@ function MultiButtonToggle({ buttons, value, onChange }) {
         buttons.map(([buttonValue, buttonLabel]) => (
           <SmallButton
             aria-label={buttonLabel}
-            ouiaId={`button-label-${buttonLabel}`}
+            ouiaId={`${name}-${buttonLabel}-button`}
             key={buttonLabel}
             className={`toggle-button-${buttonValue}`}
             onClick={() => setValue(buttonValue)}
@@ -67,6 +67,7 @@ MultiButtonToggle.propTypes = {
   buttons: buttonsPropType.isRequired,
   value: string.isRequired,
   onChange: func.isRequired,
+  name: string.isRequired,
 };
 
 export default MultiButtonToggle;

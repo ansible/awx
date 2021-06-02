@@ -35,7 +35,12 @@ function InventoryHostFacts({ host }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <VariablesDetail label={t`Facts`} rows="auto" value={result} />
+        <VariablesDetail
+          label={t`Facts`}
+          rows="auto"
+          value={result}
+          name="facts"
+        />
       </DetailList>
     </CardBody>
   );

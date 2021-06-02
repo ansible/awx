@@ -86,7 +86,12 @@ function InventoryHostDetail({ host }) {
           label={t`Last Modified`}
           user={modified_by}
         />
-        <VariablesDetail label={t`Variables`} rows={4} value={variables} />
+        <VariablesDetail
+          label={t`Variables`}
+          rows={4}
+          value={variables}
+          name="variables"
+        />
       </DetailList>
       <CardActionsRow>
         {user_capabilities?.edit && (

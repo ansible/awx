@@ -104,6 +104,7 @@ function InventoryDetail({ inventory }) {
           label={t`Variables`}
           value={inventory.variables}
           rows={4}
+          name="variables"
         />
         <UserDateDetail
           label={t`Created`}

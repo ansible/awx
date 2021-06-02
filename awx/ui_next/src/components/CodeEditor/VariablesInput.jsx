@@ -16,7 +16,7 @@ const SplitItemRight = styled(SplitItem)`
 `;
 
 function VariablesInput(props) {
-  const { id, label, readOnly, rows, error, onError, className } = props;
+  const { id, label, readOnly, rows, error, onError, className, name } = props;
   /* eslint-disable react/destructuring-assignment */
   const defaultValue = isJsonString(props.value)
     ? formatJson(props.value)
@@ -60,6 +60,7 @@ function VariablesInput(props) {
                 onError(err.message);
               }
             }}
+            name={name}
           />
         </SplitItemRight>
       </Split>
@@ -88,6 +89,7 @@ VariablesInput.propTypes = {
   rows: number,
   onChange: func,
   onError: func,
+  name: string.isRequired,
 };
 VariablesInput.defaultProps = {
   readOnly: false,
