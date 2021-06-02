@@ -77,9 +77,13 @@ function InventoryGroupsList() {
     fetchData();
   }, [fetchData]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    groups
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(groups);
 
   const renderTooltip = () => {
     const itemsUnableToDelete = selected
@@ -111,7 +115,7 @@ function InventoryGroupsList() {
         items={groups}
         itemCount={groupCount}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
             name: t`Name`,
@@ -159,9 +163,7 @@ function InventoryGroupsList() {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...groups] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -185,7 +187,7 @@ function InventoryGroupsList() {
                   }
                   onAfterDelete={() => {
                     fetchData();
-                    setSelected([]);
+                    clearSelected();
                   }}
                 />
               </Tooltip>,

@@ -84,9 +84,13 @@ function InventoryHostGroupsList() {
     fetchGroups();
   }, [fetchGroups]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    groups
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(groups);
 
   const {
     isLoading: isDisassociateLoading,
@@ -107,7 +111,7 @@ function InventoryHostGroupsList() {
 
   const handleDisassociate = async () => {
     await disassociateHosts();
-    setSelected([]);
+    clearSelected();
   };
 
   const fetchGroupsToAssociate = useCallback(
@@ -156,7 +160,7 @@ function InventoryHostGroupsList() {
         items={groups}
         itemCount={itemCount}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
             name: t`Name`,
@@ -195,9 +199,7 @@ function InventoryHostGroupsList() {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...groups] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd

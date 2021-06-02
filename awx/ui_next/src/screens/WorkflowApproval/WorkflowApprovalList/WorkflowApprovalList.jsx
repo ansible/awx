@@ -84,9 +84,13 @@ function WorkflowApprovalsList() {
     QS_CONFIG
   );
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    workflowApprovals
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(workflowApprovals);
 
   const {
     isLoading: isDeleteLoading,
@@ -108,7 +112,7 @@ function WorkflowApprovalsList() {
 
   const handleDelete = async () => {
     await deleteWorkflowApprovals();
-    setSelected([]);
+    clearSelected();
   };
 
   const {
@@ -126,7 +130,7 @@ function WorkflowApprovalsList() {
 
   const handleApprove = async () => {
     await approveWorkflowApprovals();
-    setSelected([]);
+    clearSelected();
   };
 
   const {
@@ -144,7 +148,7 @@ function WorkflowApprovalsList() {
 
   const handleDeny = async () => {
     await denyWorkflowApprovals();
-    setSelected([]);
+    clearSelected();
   };
 
   const {
@@ -168,7 +172,7 @@ function WorkflowApprovalsList() {
             itemCount={count}
             pluralizedItemName={t`Workflow Approvals`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Name`,
@@ -187,9 +191,7 @@ function WorkflowApprovalsList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={set =>
-                  setSelected(set ? [...workflowApprovals] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   <WorkflowApprovalListApproveButton

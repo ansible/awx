@@ -83,9 +83,13 @@ function InventorySourceList() {
     fetchSources();
   }, [fetchSources]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    sources
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(sources);
 
   const {
     isLoading: isDeleteLoading,
@@ -140,7 +144,7 @@ function InventorySourceList() {
     if (!deleteRelatedResourcesError) {
       await handleDeleteSources();
     }
-    setSelected([]);
+    clearSelected();
   };
   const canAdd =
     sourceChoicesOptions &&
@@ -164,14 +168,13 @@ function InventorySourceList() {
         itemCount={sourceCount}
         pluralizedItemName={t`Inventory Sources`}
         qsConfig={QS_CONFIG}
+        clearSelected={clearSelected}
         renderToolbar={props => (
           <DatalistToolbar
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...sources] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd

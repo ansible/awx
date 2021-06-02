@@ -85,9 +85,13 @@ function UserTeamList() {
     fetchTeams();
   }, [fetchTeams]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    teams
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(teams);
 
   const disassociateUserRoles = team => {
     return [
@@ -141,7 +145,7 @@ function UserTeamList() {
 
   const handleDisassociate = async () => {
     await disassociateTeams();
-    setSelected([]);
+    clearSelected();
   };
 
   const { error, dismissError } = useDismissableError(
@@ -176,7 +180,7 @@ function UserTeamList() {
         itemCount={count}
         pluralizedItemName={t`Teams`}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
@@ -200,9 +204,7 @@ function UserTeamList() {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...teams] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd

@@ -90,7 +90,6 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     selected,
     isAllSelected,
     handleSelect,
-    setSelected,
     selectAll,
     clearSelected,
   } = useSelected(jobs);
@@ -140,12 +139,12 @@ function JobList({ defaultParams, showTypeColumn = false }) {
 
   const handleJobCancel = async () => {
     await cancelJobs();
-    setSelected([]);
+    clearSelected();
   };
 
   const handleJobDelete = async () => {
     await deleteJobs();
-    setSelected([]);
+    clearSelected();
   };
 
   const cannotDeleteItems = selected.filter(job => isJobRunning(job.status));

@@ -73,9 +73,13 @@ function UserList() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    users
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(users);
 
   const {
     isLoading: isDeleteLoading,
@@ -95,7 +99,7 @@ function UserList() {
 
   const handleUserDelete = async () => {
     await deleteUsers();
-    setSelected([]);
+    clearSelected();
   };
 
   const hasContentLoading = isDeleteLoading || isLoading;
@@ -112,7 +116,7 @@ function UserList() {
             itemCount={itemCount}
             pluralizedItemName={t`Users`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Username`,
@@ -135,9 +139,7 @@ function UserList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={isSelected =>
-                  setSelected(isSelected ? [...users] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
