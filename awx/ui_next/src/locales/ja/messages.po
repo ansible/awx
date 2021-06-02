@@ -167,8 +167,8 @@ msgstr "情報"
 msgid "Access"
 msgstr "アクセス"
 
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:78
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:80
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:79
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:81
 msgid "Access Token Expiration"
 msgstr "アクセストークンの有効期限"
 
@@ -400,12 +400,12 @@ msgid "After number of occurrences"
 msgstr "指定した実行回数後"
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:39
-msgid "Agree to end user license agreement"
-msgstr ""
+#~ msgid "Agree to end user license agreement"
+#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:20
-msgid "Agree to the end user license agreement and click submit."
-msgstr ""
+#~ msgid "Agree to the end user license agreement and click submit."
+#~ msgstr ""
 
 #: components/AlertModal/AlertModal.jsx:75
 msgid "Alert modal"
@@ -590,6 +590,10 @@ msgstr ""
 msgid "Are you sure you want to delete:"
 msgstr "次を削除してもよろしいですか:"
 
+#: screens/Setting/shared/SharedFields.jsx:125
+msgid "Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
+msgstr ""
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
 msgstr "変更を保存せずにワークフロークリエーターを終了してもよろしいですか?"
@@ -656,8 +660,8 @@ msgstr "8 月"
 msgid "Authentication"
 msgstr "認証"
 
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:88
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:93
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:89
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:94
 msgid "Authorization Code Expiration"
 msgstr "認証コードの有効期限"
 
@@ -683,7 +687,7 @@ msgstr "Azure AD の設定"
 #: components/LaunchPrompt/LaunchPrompt.jsx:133
 #: components/Schedule/shared/SchedulePromptableFields.jsx:136
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:91
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:72
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:70
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:141
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:144
 msgid "Back"
@@ -693,7 +697,7 @@ msgstr "戻る"
 msgid "Back to Credentials"
 msgstr "認証情報に戻る"
 
-#: components/ContentError/ContentError.jsx:45
+#: components/ContentError/ContentError.jsx:42
 msgid "Back to Dashboard."
 msgstr "ダッシュボードに戻る"
 
@@ -740,7 +744,7 @@ msgstr "スケジュールに戻る"
 #: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:54
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:90
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:63
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:110
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:111
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:39
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:40
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:29
@@ -883,12 +887,14 @@ msgstr "キャッシュのタイムアウト (秒)"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:107
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:63
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:66
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:82
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:80
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:98
 #: screens/Setting/shared/RevertAllAlert.jsx:32
 #: screens/Setting/shared/RevertFormActionGroup.jsx:32
 #: screens/Setting/shared/RevertFormActionGroup.jsx:38
+#: screens/Setting/shared/SharedFields.jsx:116
+#: screens/Setting/shared/SharedFields.jsx:122
 #: screens/Team/TeamRoles/TeamRolesList.jsx:217
 #: screens/Team/TeamRoles/TeamRolesList.jsx:220
 #: screens/Template/Survey/SurveyList.jsx:116
@@ -956,7 +962,7 @@ msgstr ""
 msgid "Cancel selected jobs"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:79
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:77
 msgid "Cancel subscription edit"
 msgstr ""
 
@@ -1119,7 +1125,7 @@ msgstr "メールオプションの選択"
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
 msgstr "選択したリソースに適用するロールを選択します。選択したすべてのロールが、選択したすべてのリソースに適用されることに注意してください。"
 
-#: components/AddRole/SelectResourceStep.jsx:79
+#: components/AddRole/SelectResourceStep.jsx:78
 msgid "Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step."
 msgstr "新しいロールを受け取るリソースを選択します。次のステップで適用するロールを選択できます。ここで選択したリソースは、次のステップで選択したすべてのロールを受け取ることに注意してください。"
 
@@ -1240,10 +1246,19 @@ msgstr ""
 msgid "Concurrent Jobs"
 msgstr "同時実行ジョブ"
 
+#: screens/Setting/shared/SharedFields.jsx:104
+#: screens/Setting/shared/SharedFields.jsx:110
+msgid "Confirm"
+msgstr ""
+
 #: components/DeleteButton/DeleteButton.jsx:108
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:93
 msgid "Confirm Delete"
 msgstr "削除の確認"
+
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:268
+msgid "Confirm Disable Local Authorization"
+msgstr ""
 
 #: screens/User/shared/UserForm.jsx:91
 msgid "Confirm Password"
@@ -1304,7 +1319,7 @@ msgstr "コンテナーグループが見つかりません。"
 msgid "Content Loading"
 msgstr "コンテンツの読み込み"
 
-#: components/AppContainer/AppContainer.jsx:233
+#: components/AppContainer/AppContainer.jsx:138
 msgid "Continue"
 msgstr "続行"
 
@@ -2157,7 +2172,7 @@ msgstr "送信先チャネルまたはユーザー"
 #: screens/Setting/GoogleOAuth2/GoogleOAuth2Detail/GoogleOAuth2Detail.jsx:46
 #: screens/Setting/Jobs/JobsDetail/JobsDetail.jsx:61
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:70
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:117
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:118
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:46
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:47
 #: screens/Setting/Settings.jsx:45
@@ -2362,8 +2377,8 @@ msgstr ""
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.jsx:165
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:101
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.jsx:105
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:148
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:152
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:149
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:153
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:80
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.jsx:84
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.jsx:81
@@ -2687,7 +2702,7 @@ msgstr "暗号化"
 msgid "End"
 msgstr "終了"
 
-#: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:24
+#: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:14
 msgid "End User License Agreement"
 msgstr ""
 
@@ -2699,7 +2714,7 @@ msgstr "終了日時"
 msgid "End did not match an expected value"
 msgstr "終了が期待値と一致しませんでした"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:215
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:209
 msgid "End user license agreement"
 msgstr ""
 
@@ -2892,7 +2907,7 @@ msgstr ""
 #: components/Schedule/shared/SchedulePromptableFields.jsx:74
 #: components/TemplateList/TemplateList.jsx:278
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:137
-#: contexts/Config.jsx:64
+#: contexts/Config.jsx:67
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:135
 #: screens/Application/ApplicationTokens/ApplicationTokenList.jsx:170
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:191
@@ -2920,7 +2935,7 @@ msgstr ""
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:169
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:146
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:51
-#: screens/Login/Login.jsx:191
+#: screens/Login/Login.jsx:209
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:127
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:360
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:223
@@ -3422,7 +3437,7 @@ msgstr "1 つ以上のインスタンスの関連付けを解除できません�
 msgid "Failed to disassociate one or more teams."
 msgstr "1 つ以上のチームの関連付けを解除できませんでした。"
 
-#: screens/Login/Login.jsx:195
+#: screens/Login/Login.jsx:213
 msgid "Failed to fetch custom login configuration settings.  System defaults will be shown instead."
 msgstr "カスタムログイン構成設定を取得できません。代わりに、システムのデフォルトが表示されます。"
 
@@ -3432,7 +3447,7 @@ msgstr "カスタムログイン構成設定を取得できません。代わり
 msgid "Failed to launch job."
 msgstr "ジョブを起動できませんでした。"
 
-#: contexts/Config.jsx:68
+#: contexts/Config.jsx:71
 msgid "Failed to retrieve configuration."
 msgstr "構成を取得できませんでした。"
 
@@ -3959,8 +3974,8 @@ msgid "Hour"
 msgstr "時間"
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:40
-msgid "I agree to the End User License Agreement"
-msgstr ""
+#~ msgid "I agree to the End User License Agreement"
+#~ msgstr ""
 
 #: components/JobList/JobList.jsx:177
 #: components/Lookup/HostFilterLookup.jsx:82
@@ -4311,7 +4326,7 @@ msgstr ""
 msgid "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
 msgstr "無効なリンクターゲットです。子ノードまたは祖先ノードにリンクできません。グラフサイクルはサポートされていません。"
 
-#: screens/Login/Login.jsx:128
+#: screens/Login/Login.jsx:135
 msgid "Invalid username or password. Please try again."
 msgstr "無効なユーザー名またはパスワードです。やり直してください。"
 
@@ -4900,7 +4915,7 @@ msgstr "ローカルタイムゾーン"
 msgid "Local time zone"
 msgstr "ローカルタイムゾーン"
 
-#: screens/Login/Login.jsx:169
+#: screens/Login/Login.jsx:187
 msgid "Log In"
 msgstr "ログイン"
 
@@ -4916,8 +4931,8 @@ msgstr "ロギング"
 msgid "Logging settings"
 msgstr "ロギング設定"
 
-#: components/AppContainer/AppContainer.jsx:176
-#: components/AppContainer/AppContainer.jsx:241
+#: components/AppContainer/AppContainer.jsx:81
+#: components/AppContainer/AppContainer.jsx:146
 #: components/AppContainer/PageHeaderToolbar.jsx:166
 msgid "Logout"
 msgstr "ログアウト"
@@ -5183,7 +5198,7 @@ msgstr "月"
 msgid "More information"
 msgstr "詳細情報"
 
-#: screens/Setting/shared/SharedFields.jsx:61
+#: screens/Setting/shared/SharedFields.jsx:63
 msgid "More information for"
 msgstr "詳細情報: "
 
@@ -5248,7 +5263,7 @@ msgstr "複数の選択オプション"
 #: components/NotificationList/NotificationList.jsx:181
 #: components/NotificationList/NotificationList.jsx:218
 #: components/NotificationList/NotificationListItem.jsx:25
-#: components/OptionsList/OptionsList.jsx:72
+#: components/OptionsList/OptionsList.jsx:70
 #: components/PaginatedDataList/PaginatedDataList.jsx:77
 #: components/PaginatedDataList/PaginatedDataList.jsx:86
 #: components/PaginatedTable/PaginatedTable.jsx:69
@@ -5408,7 +5423,7 @@ msgstr "複数の選択オプション"
 msgid "Name"
 msgstr "名前"
 
-#: components/AppContainer/AppContainer.jsx:189
+#: components/AppContainer/AppContainer.jsx:94
 msgid "Navigation"
 msgstr "ナビゲーション"
 
@@ -5437,7 +5452,7 @@ msgstr "新規"
 #: components/LaunchPrompt/LaunchPrompt.jsx:135
 #: components/Schedule/shared/SchedulePromptableFields.jsx:138
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:67
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:61
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:59
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:120
 msgid "Next"
 msgstr "次へ"
@@ -5536,7 +5551,7 @@ msgstr "なし (1回実行)"
 msgid "Normal User"
 msgstr "標準ユーザー"
 
-#: components/ContentError/ContentError.jsx:39
+#: components/ContentError/ContentError.jsx:36
 msgid "Not Found"
 msgstr "見つかりません"
 
@@ -5692,7 +5707,7 @@ msgstr "10 月"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.jsx:53
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:47
 #: screens/Setting/shared/SettingDetail.jsx:85
-#: screens/Setting/shared/SharedFields.jsx:94
+#: screens/Setting/shared/SharedFields.jsx:144
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:223
 #: screens/Template/Survey/SurveyToolbar.jsx:53
 #: screens/Template/shared/JobTemplateForm.jsx:481
@@ -5710,7 +5725,7 @@ msgstr "オフ"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.jsx:52
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:47
 #: screens/Setting/shared/SettingDetail.jsx:85
-#: screens/Setting/shared/SharedFields.jsx:93
+#: screens/Setting/shared/SharedFields.jsx:143
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:223
 #: screens/Template/Survey/SurveyToolbar.jsx:52
 #: screens/Template/shared/JobTemplateForm.jsx:481
@@ -5953,7 +5968,7 @@ msgstr "追加のコマンドライン変数を Playbook に渡します。こ�
 #~ msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the documentation for example syntax."
 #~ msgstr ""
 
-#: screens/Login/Login.jsx:179
+#: screens/Login/Login.jsx:197
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:112
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:223
@@ -6064,8 +6079,8 @@ msgid "Please add {pluralizedItemName} to populate this list"
 msgstr "{pluralizedItemName} を追加してこのリストに入力してください。"
 
 #: screens/Setting/Subscription/SubscriptionEdit/EulaStep.jsx:44
-msgid "Please agree to End User License Agreement before proceeding."
-msgstr ""
+#~ msgid "Please agree to End User License Agreement before proceeding."
+#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.jsx:43
 msgid "Please click the Start button to begin."
@@ -6079,7 +6094,7 @@ msgstr "有効な URL を入力してください。"
 msgid "Please enter a value."
 msgstr "値を入力してください。"
 
-#: screens/Login/Login.jsx:151
+#: screens/Login/Login.jsx:162
 msgid "Please log in"
 msgstr ""
 
@@ -6427,11 +6442,11 @@ msgstr "リダイレクト URI"
 msgid "Redirect uris"
 msgstr "リダイレクト URI"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:266
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:259
 msgid "Redirecting to dashboard"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:270
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:263
 msgid "Redirecting to subscription detail"
 msgstr ""
 
@@ -6453,8 +6468,8 @@ msgstr ""
 msgid "Refresh Token"
 msgstr "トークンの更新"
 
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:83
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:86
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.jsx:84
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:87
 msgid "Refresh Token Expiration"
 msgstr "トークンの有効期限の更新"
 
@@ -6839,7 +6854,7 @@ msgstr "ログ集計機能をテストする前に、ログ集計を保存して
 msgid "Save link changes"
 msgstr "リンクの変更の保存"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:261
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:254
 msgid "Save successful!"
 msgstr ""
 
@@ -7294,8 +7309,8 @@ msgstr "{0} の選択"
 #: components/AddRole/AddResourceRole.jsx:243
 #: components/AddRole/AddResourceRole.jsx:260
 #: components/AddRole/SelectRoleStep.jsx:27
-#: components/CheckboxListItem/CheckboxListItem.jsx:31
-#: components/OptionsList/OptionsList.jsx:51
+#: components/CheckboxListItem/CheckboxListItem.jsx:41
+#: components/OptionsList/OptionsList.jsx:49
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:75
 #: components/TemplateList/TemplateListItem.jsx:124
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:103
@@ -7428,6 +7443,7 @@ msgstr "すべてのグループの表示"
 msgid "Show changes"
 msgstr "変更の表示"
 
+#: components/LaunchPrompt/LaunchPrompt.jsx:110
 #: components/Schedule/shared/SchedulePromptableFields.jsx:113
 msgid "Show description"
 msgstr ""
@@ -7440,43 +7456,43 @@ msgstr "簡易表示"
 msgid "Show only root groups"
 msgstr "root グループのみを表示"
 
-#: screens/Login/Login.jsx:213
+#: screens/Login/Login.jsx:232
 msgid "Sign in with Azure AD"
 msgstr "Azure AD でサインイン"
 
-#: screens/Login/Login.jsx:226
+#: screens/Login/Login.jsx:246
 msgid "Sign in with GitHub"
 msgstr "GitHub でサインイン"
 
-#: screens/Login/Login.jsx:265
+#: screens/Login/Login.jsx:288
 msgid "Sign in with GitHub Enterprise"
 msgstr "GitHub Enterprise でサインイン"
 
-#: screens/Login/Login.jsx:279
+#: screens/Login/Login.jsx:303
 msgid "Sign in with GitHub Enterprise Organizations"
 msgstr "GitHub Enterprise 組織でサインイン"
 
-#: screens/Login/Login.jsx:294
+#: screens/Login/Login.jsx:319
 msgid "Sign in with GitHub Enterprise Teams"
 msgstr "GitHub Enterprise チームでサインイン"
 
-#: screens/Login/Login.jsx:239
+#: screens/Login/Login.jsx:260
 msgid "Sign in with GitHub Organizations"
 msgstr "GitHub 組織でサインイン"
 
-#: screens/Login/Login.jsx:252
+#: screens/Login/Login.jsx:274
 msgid "Sign in with GitHub Teams"
 msgstr "GitHub チームでサインイン"
 
-#: screens/Login/Login.jsx:308
+#: screens/Login/Login.jsx:334
 msgid "Sign in with Google"
 msgstr "Google でサインイン"
 
-#: screens/Login/Login.jsx:326
+#: screens/Login/Login.jsx:353
 msgid "Sign in with SAML"
 msgstr "SAML でサインイン"
 
-#: screens/Login/Login.jsx:325
+#: screens/Login/Login.jsx:352
 msgid "Sign in with SAML {samlIDP}"
 msgstr "SAML {samlIDP} でサインイン"
 
@@ -7564,7 +7580,7 @@ msgstr "前のステップのいくつかにエラーがあります"
 msgid "Something went wrong with the request to test this credential and metadata."
 msgstr "この認証情報およびメタデータをテストする要求で問題が発生しました。"
 
-#: components/ContentError/ContentError.jsx:39
+#: components/ContentError/ContentError.jsx:36
 msgid "Something went wrong..."
 msgstr "問題が発生しました..."
 
@@ -7793,9 +7809,9 @@ msgstr "ステータス"
 msgid "Stdout"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:38
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:51
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:218
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:37
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:49
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:212
 msgid "Submit"
 msgstr ""
 
@@ -7812,7 +7828,7 @@ msgstr ""
 #: screens/Setting/SettingList.jsx:131
 #: screens/Setting/Settings.jsx:106
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:78
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:201
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:195
 msgid "Subscription"
 msgstr ""
 
@@ -7820,7 +7836,7 @@ msgstr ""
 msgid "Subscription Details"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:200
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:194
 msgid "Subscription Management"
 msgstr ""
 
@@ -8148,7 +8164,7 @@ msgstr "Textarea"
 msgid "The"
 msgstr "The"
 
-#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:247
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.jsx:248
 msgid "The Execution Environment to be used when one has not been configured for a job template."
 msgstr ""
 
@@ -8240,7 +8256,7 @@ msgstr ""
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
 msgstr "Playbook の実行中に使用する並列または同時プロセスの数。いずれの値も入力しないと、Ansible 設定ファイルのデフォルト値が使用されます。より多くの情報を確認できます。"
 
-#: components/ContentError/ContentError.jsx:43
+#: components/ContentError/ContentError.jsx:40
 #: screens/Job/Job.jsx:124
 msgid "The page you requested could not be found."
 msgstr "要求したページが見つかりませんでした。"
@@ -8291,7 +8307,7 @@ msgstr ""
 msgid "There must be a value in at least one input"
 msgstr ""
 
-#: screens/Login/Login.jsx:130
+#: screens/Login/Login.jsx:137
 msgid "There was a problem logging in. Please try again."
 msgstr ""
 
@@ -8299,7 +8315,7 @@ msgstr ""
 #~ msgid "There was a problem signing in. Please try again."
 #~ msgstr "サインインに問題がありました。もう一度やり直してください。"
 
-#: components/ContentError/ContentError.jsx:44
+#: components/ContentError/ContentError.jsx:41
 msgid "There was an error loading this content. Please reload the page."
 msgstr "このコンテンツの読み込み中にエラーが発生しました。ページを再読み込みしてください。"
 
@@ -8979,7 +8995,7 @@ msgid "User analytics"
 msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:45
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:208
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:202
 msgid "User and Insights analytics"
 msgstr ""
 
@@ -8999,7 +9015,7 @@ msgstr "ユーザートークン"
 #: components/AddRole/AddResourceRole.jsx:139
 #: components/ResourceAccessList/ResourceAccessList.jsx:127
 #: components/ResourceAccessList/ResourceAccessList.jsx:180
-#: screens/Login/Login.jsx:182
+#: screens/Login/Login.jsx:200
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:78
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:180
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:230
@@ -9468,7 +9484,7 @@ msgid ""
 "Please complete the steps below to activate your subscription."
 msgstr ""
 
-#: screens/Login/Login.jsx:150
+#: screens/Login/Login.jsx:161
 msgid "Welcome to {brandName}!"
 msgstr ""
 
@@ -9668,10 +9684,14 @@ msgstr ""
 #~ msgstr ""
 
 #: components/AppContainer/AppContainer.jsx:245
-msgid "You will be logged out in {0} seconds due to inactivity."
-msgstr "非アクティブのため、{0} 秒でログアウトします。"
+#~ msgid "You will be logged out in {0} seconds due to inactivity."
+#~ msgstr "非アクティブのため、{0} 秒でログアウトします。"
 
-#: components/AppContainer/AppContainer.jsx:221
+#: screens/Login/Login.jsx:169
+msgid "Your session has expired. Please log in to continue where you left off."
+msgstr ""
+
+#: components/AppContainer/AppContainer.jsx:126
 msgid "Your session is about to expire"
 msgstr "セッションの有効期限が近づいています"
 
@@ -9709,7 +9729,7 @@ msgstr ""
 msgid "approved"
 msgstr "承認"
 
-#: components/AppContainer/AppContainer.jsx:150
+#: components/AppContainer/AppContainer.jsx:55
 msgid "brand logo"
 msgstr ""
 
@@ -10065,7 +10085,7 @@ msgstr "{0} ソースが同期に失敗しました。"
 msgid "{0}: {1}"
 msgstr "{0}: {1}"
 
-#: components/AppContainer/AppContainer.jsx:150
+#: components/AppContainer/AppContainer.jsx:55
 msgid "{brandName} logo"
 msgstr ""
 
@@ -10120,4 +10140,8 @@ msgstr ""
 #: components/PaginatedDataList/PaginatedDataList.jsx:92
 #: components/PaginatedTable/PaginatedTable.jsx:76
 msgid "{pluralizedItemName} List"
+msgstr ""
+
+#: components/AppContainer/AppContainer.jsx:150
+msgid "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
 msgstr ""

@@ -10,15 +10,12 @@ import {
   EmptyStateBody,
 } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
-import { RootAPI } from '../../api';
+import { useSession } from '../../contexts/Session';
 import ErrorDetail from '../ErrorDetail';
 
-async function logout() {
-  await RootAPI.logout();
-  window.location.replace('#/login');
-}
-
 function ContentError({ error, children, isNotFound }) {
+  const { logout } = useSession();
+
   if (error && error.response && error.response.status === 401) {
     if (!error.response.headers['session-timeout']) {
       logout();

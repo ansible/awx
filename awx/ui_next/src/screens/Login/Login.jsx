@@ -6,6 +6,7 @@ import { Formik } from 'formik';
 import styled from 'styled-components';
 import sanitizeHtml from 'sanitize-html';
 import {
+  Alert,
   Brand,
   LoginMainFooterLinksItem,
   LoginForm,
@@ -28,6 +29,8 @@ import useRequest, { useDismissableError } from '../../util/useRequest';
 import { AuthAPI, RootAPI } from '../../api';
 import AlertModal from '../../components/AlertModal';
 import ErrorDetail from '../../components/ErrorDetail';
+import { useSession } from '../../contexts/Session';
+import { SESSION_REDIRECT_URL } from '../../constants';
 
 const loginLogoSrc = '/static/media/logo-login.svg';
 
@@ -38,6 +41,8 @@ const Login = styled(PFLogin)`
 `;
 
 function AWXLogin({ alt, isAuthenticated }) {
+  const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
+
   const {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
@@ -92,6 +97,7 @@ function AWXLogin({ alt, isAuthenticated }) {
   useEffect(() => {
     fetchCustomLoginInfo();
   }, [fetchCustomLoginInfo]);
+
   const {
     isLoading: isAuthenticating,
     error: authenticationError,
@@ -110,6 +116,7 @@ function AWXLogin({ alt, isAuthenticated }) {
   const handleSubmit = async values => {
     dismissAuthError();
     await authenticate(values);
+    setAuthRedirectTo('/home');
   };
 
   if (isCustomLoginInfoLoading) {
@@ -120,7 +127,7 @@ function AWXLogin({ alt, isAuthenticated }) {
     return null;
   }
   if (isAuthenticated(document.cookie)) {
-    return <Redirect to="/" />;
+    return <Redirect to={authRedirectTo || '/'} />;
   }
 
   let helperText;
@@ -143,6 +150,10 @@ function AWXLogin({ alt, isAuthenticated }) {
     />
   );
 
+  function setSessionRedirect() {
+    window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
+  }
+
   return (
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
@@ -151,6 +162,13 @@ function AWXLogin({ alt, isAuthenticated }) {
         subtitle={t`Please log in`}
       />
       <LoginMainBody>
+        {isSessionExpired.current ? (
+          <Alert
+            variant="warning"
+            isInline
+            title={t`Your session has expired. Please log in to continue where you left off.`}
+          />
+        ) : null}
         <Formik
           initialValues={{
             password: '',
@@ -209,6 +227,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-azure"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with Azure AD`}>
                         <AzureIcon />
@@ -222,6 +241,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub`}>
                         <GithubIcon />
@@ -235,6 +255,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-org"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Organizations`}>
                         <GithubIcon />
@@ -248,6 +269,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-team"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Teams`}>
                         <GithubIcon />
@@ -261,6 +283,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-enterprise"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Enterprise`}>
                         <GithubIcon />
@@ -274,6 +297,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-enterprise-org"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={t`Sign in with GitHub Enterprise Organizations`}
@@ -289,6 +313,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-github-enterprise-team"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={t`Sign in with GitHub Enterprise Teams`}
@@ -304,6 +329,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-google"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with Google`}>
                         <GoogleIcon />
@@ -318,6 +344,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       data-cy="social-auth-saml"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={

@@ -6,6 +6,7 @@ import {
   Route,
   Switch,
   Redirect,
+  useHistory,
 } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { I18nProvider } from '@lingui/react';
@@ -13,6 +14,7 @@ import { i18n } from '@lingui/core';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
+import { SessionProvider, useSession } from './contexts/Session';
 import AppContainer from './components/AppContainer';
 import Background from './components/Background';
 import ContentError from './components/ContentError';
@@ -26,6 +28,7 @@ import Metrics from './screens/Metrics';
 
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
+import { SESSION_REDIRECT_URL } from './constants';
 
 function ErrorFallback({ error }) {
   return (
@@ -82,18 +85,27 @@ const AuthorizedRoutes = ({ routeConfig }) => {
   );
 };
 
-const ProtectedRoute = ({ children, ...rest }) =>
-  isAuthenticated(document.cookie) ? (
-    <Route {...rest}>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        {children}
-      </ErrorBoundary>
-    </Route>
-  ) : (
-    <Redirect to="/login" />
-  );
+const ProtectedRoute = ({ children, ...rest }) => {
+  const { setAuthRedirectTo } = useSession();
+  const { pathname } = useLocation();
+
+  if (isAuthenticated(document.cookie)) {
+    return (
+      <Route {...rest}>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          {children}
+        </ErrorBoundary>
+      </Route>
+    );
+  }
+
+  setAuthRedirectTo(pathname);
+  return <Redirect to="/login" />;
+};
 
 function App() {
+  const history = useHistory();
+  const { hash, search, pathname } = useLocation();
   let language = getLanguageWithoutRegionCode(navigator);
   if (!Object.keys(locales).includes(language)) {
     // If there isn't a string catalog available for the browser's
@@ -104,29 +116,36 @@ function App() {
     dynamicActivate(language);
   }, [language]);
 
-  const { hash, search, pathname } = useLocation();
+  const redirectURL = window.sessionStorage.getItem(SESSION_REDIRECT_URL);
+  if (redirectURL) {
+    window.sessionStorage.removeItem(SESSION_REDIRECT_URL);
+    if (redirectURL !== '/' || redirectURL !== '/home')
+      history.replace(redirectURL);
+  }
 
   return (
     <I18nProvider i18n={i18n}>
       <Background>
-        <Switch>
-          <Route exact strict path="/*/">
-            <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
-          </Route>
-          <Route path="/login">
-            <Login isAuthenticated={isAuthenticated} />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/home" />
-          </Route>
-          <ProtectedRoute>
-            <ConfigProvider>
-              <AppContainer navRouteConfig={getRouteConfig()}>
-                <AuthorizedRoutes routeConfig={getRouteConfig()} />
-              </AppContainer>
-            </ConfigProvider>
-          </ProtectedRoute>
-        </Switch>
+        <SessionProvider>
+          <Switch>
+            <Route exact strict path="/*/">
+              <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
+            </Route>
+            <Route path="/login">
+              <Login isAuthenticated={isAuthenticated} />
+            </Route>
+            <Route exact path="/">
+              <Redirect to="/home" />
+            </Route>
+            <ProtectedRoute>
+              <ConfigProvider>
+                <AppContainer navRouteConfig={getRouteConfig()}>
+                  <AuthorizedRoutes routeConfig={getRouteConfig()} />
+                </AppContainer>
+              </ConfigProvider>
+            </ProtectedRoute>
+          </Switch>
+        </SessionProvider>
       </Background>
     </I18nProvider>
   );

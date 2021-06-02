@@ -10,6 +10,7 @@ import { I18nProvider } from '@lingui/react';
 import { i18n } from '@lingui/core';
 import { en } from 'make-plural/plurals';
 import english from '../src/locales/en/messages';
+import { SessionProvider } from '../src/contexts/Session';
 import { ConfigProvider } from '../src/contexts/Config';
 
 i18n.loadLocaleData({ en: { plurals: en } });
@@ -57,10 +58,14 @@ const defaultContexts = {
     },
     toJSON: () => '/router/',
   },
+  session: {
+    isSessionExpired: false,
+    logout: () => {},
+  },
 };
 
 function wrapContexts(node, context) {
-  const { config, router } = context;
+  const { config, router, session } = context;
   class Wrap extends React.Component {
     render() {
       // eslint-disable-next-line react/no-this-in-sfc
@@ -69,17 +74,21 @@ function wrapContexts(node, context) {
       if (router.history) {
         return (
           <I18nProvider i18n={i18n}>
-            <ConfigProvider value={config}>
-              <Router history={router.history}>{component}</Router>
-            </ConfigProvider>
+            <SessionProvider value={session}>
+              <ConfigProvider value={config}>
+                <Router history={router.history}>{component}</Router>
+              </ConfigProvider>
+            </SessionProvider>
           </I18nProvider>
         );
       }
       return (
         <I18nProvider i18n={i18n}>
-          <ConfigProvider value={config}>
-            <MemoryRouter>{component}</MemoryRouter>
-          </ConfigProvider>
+          <SessionProvider value={session}>
+            <ConfigProvider value={config}>
+              <MemoryRouter>{component}</MemoryRouter>
+            </ConfigProvider>
+          </SessionProvider>
         </I18nProvider>
       );
     }
@@ -122,6 +131,7 @@ export function mountWithContexts(node, options = {}) {
       }).isRequired,
       history: shape({}),
     }),
+    session: shape({}),
     ...options.childContextTypes,
   };
   return mount(wrapContexts(node, context), { context, childContextTypes });
