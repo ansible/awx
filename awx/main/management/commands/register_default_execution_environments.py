@@ -53,26 +53,30 @@ class Command(BaseCommand):
             if not options.get("registry_url"):
                 sys.stderr.write("Registry url must be provided when providing registry username\n")
                 sys.exit(1)
+            registry_cred_inputs = {
+                "host": options.get("registry_url"),
+                "password": options.get("registry_password"),
+                "username": options.get("registry_username"),
+                "verify_ssl": options.get("verify_ssl"),
+            }
             registry_cred_type = CredentialType.objects.filter(kind="registry")
             if not registry_cred_type.exists():
                 sys.stderr.write("No registry credential type found")
                 sys.exit(1)
-            registry_cred, created = Credential.objects.update_or_create(
+            registry_cred, created = Credential.objects.get_or_create(
                 name="Default Execution Environment Registry Credential",
                 managed_by_tower=True,
                 credential_type=registry_cred_type[0],
-                defaults={
-                    "inputs": {
-                        "host": options.get("registry_url"),
-                        "password": options.get("registry_password"),
-                        "username": options.get("registry_username"),
-                        "verify_ssl": options.get("verify_ssl"),
-                    },
-                },
+                defaults={"inputs": registry_cred_inputs},
             )
             if created:
                 changed = True
                 print("Default Execution Environment Credential registered.")
+            elif registry_cred.inputs != registry_cred_inputs:
+                registry_cred.inputs = registry_cred_inputs
+                registry_cred.save()
+                changed = True
+                print("Default Execution Environment Credential updated.")
 
         for ee in reversed(settings.DEFAULT_EXECUTION_ENVIRONMENTS):
             _, created = ExecutionEnvironment.objects.update_or_create(
