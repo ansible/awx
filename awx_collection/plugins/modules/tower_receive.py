@@ -169,7 +169,7 @@ def main():
     export_all = module.params.get('all')
     assets_to_export = {}
     for asset_type in SEND_ORDER:
-        assets_to_export[asset_type] = module.params.get(asset_type)
+        assets_to_export[asset_type] = module.params.get(asset_type, [])
 
     result = dict(
         assets=None,
