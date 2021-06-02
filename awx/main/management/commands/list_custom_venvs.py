@@ -18,21 +18,19 @@ class Command(BaseCommand):
         venvs = get_custom_venv_choices()
         if venvs:
             print('\n', '# {}'.format("Discovered virtual environments:"))
-            for venv in venvs:
-                print(venv)
+            print('\n'.join(venvs), '\n')
             if not options.get('q'):
                 msg = [
-                    '',
-                    'To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
+                    '- To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
                     'awx-manage export_custom_venv /path/to/venv',
                     '',
-                    'To view the connections a (deprecated) virtual environment had in the database, run the following command while supplying the path as an argument:',
+                    '- To view the connections a (deprecated) virtual environment had in the database, run the following command while supplying the path as an argument:',
                     'awx-manage custom_venv_associations /path/to/venv',
+                    '',
+                    '- Run these commands with `-q` to remove tool tips.',
                     '',
                 ]
                 print('\n'.join(msg))
-            else:
-                print('\n')
 
         else:
             msg = ["No custom virtual environments detected in:", settings.BASE_VENV_PATH]

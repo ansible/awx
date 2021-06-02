@@ -26,7 +26,8 @@ class Command(BaseCommand):
         results = {}
         path = options.get('path')
         if path:
-            if path[0] in get_custom_venv_choices():  # verify this is a valid path
+            all_venvs = get_custom_venv_choices()
+            if path[0] in all_venvs:  # verify this is a valid path
                 path = path[0]
                 orgs = [{"name": org.name, "id": org.id} for org in Organization.objects.filter(custom_virtualenv=path)]
                 jts = [{"name": jt.name, "id": jt.id} for jt in JobTemplate.objects.filter(custom_virtualenv=path)]
@@ -38,14 +39,21 @@ class Command(BaseCommand):
                 results["inventory_sources"] = invsrc
                 print('\n', '# {}'.format("Virtual environments associations:"))
                 print(yaml.dump(results))
-            if not options.get('q'):
-                msg = [
-                    '',
-                    'To list all (now deprecated) custom virtual environments run:',
-                    'awx-manage list_custom_venvs',
-                    '',
-                    'To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
-                    'awx-manage export_custom_venv /path/to/venv',
-                    '',
-                ]
-                print('\n'.join(msg))
+
+                if not options.get('q'):
+                    msg = [
+                        '',
+                        '- To list all (now deprecated) custom virtual environments run:',
+                        'awx-manage list_custom_venvs',
+                        '',
+                        '- To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
+                        'awx-manage export_custom_venv /path/to/venv',
+                        '',
+                        '- Run these commands with `-q` to remove tool tips.',
+                        '',
+                    ]
+                    print('\n'.join(msg))
+
+            else:
+                print('\n', '# Incorrect path, verify your path is from the following list:')
+                print('\n'.join(all_venvs), '\n')
