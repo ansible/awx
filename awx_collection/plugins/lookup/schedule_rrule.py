@@ -137,7 +137,7 @@ class LookupModule(LookupBase):
                 AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)),
                 LIBRARY_IMPORT_ERROR
             )
-        super().__init__(*args, *kwargs)
+        super(LookupModule, self).__init__(*args, **kwargs)
 
     @staticmethod
     def parse_date_time(date_string):
