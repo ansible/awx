@@ -19,6 +19,8 @@ describe('useSelected hook', () => {
   let isAllSelected;
   let handleSelect;
   let setSelected;
+  let selectAll;
+  let clearSelected;
 
   test('should return expected initial values', () => {
     testHook(() => {
@@ -71,5 +73,52 @@ describe('useSelected hook', () => {
     });
     expect(selected).toEqual([]);
     expect(isAllSelected).toEqual(false);
+  });
+
+  test('should return selectAll', () => {
+    testHook(() => {
+      ({
+        selected,
+        isAllSelected,
+        handleSelect,
+        setSelected,
+        selectAll,
+      } = useSelected(array));
+    });
+
+    act(() => {
+      selectAll(true);
+    });
+    expect(isAllSelected).toEqual(true);
+    expect(selected).toEqual(array);
+
+    act(() => {
+      selectAll(false);
+    });
+    expect(isAllSelected).toEqual(false);
+    expect(selected).toEqual([]);
+  });
+
+  test('should return clearSelected', () => {
+    testHook(() => {
+      ({
+        selected,
+        isAllSelected,
+        handleSelect,
+        setSelected,
+        selectAll,
+        clearSelected,
+      } = useSelected(array));
+    });
+
+    act(() => {
+      selectAll(true);
+    });
+
+    act(() => {
+      clearSelected();
+    });
+    expect(isAllSelected).toEqual(false);
+    expect(selected).toEqual([]);
   });
 });
