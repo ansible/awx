@@ -2603,8 +2603,6 @@ class CredentialSerializer(BaseSerializer):
         return summary_dict
 
     def validate(self, attrs):
-        if self.instance and self.instance.managed_by_tower:
-            raise PermissionDenied(detail=_("Modifications not allowed for managed credentials"))
         return super(CredentialSerializer, self).validate(attrs)
 
     def get_validation_exclusions(self, obj=None):
