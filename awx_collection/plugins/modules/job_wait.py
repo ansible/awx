@@ -132,9 +132,9 @@ def main():
                 max_interval = 30
             interval = abs((min_interval + max_interval) / 2)
         module.deprecate(
-            collection_name=DOCUMENTATION.module,
+            collection_name="awx.awx",
             msg="Min and max interval have been deprecated, please use interval instead; interval will be set to {0}".format(interval),
-            version="ansible.tower:4.0.0",
+            version="4.0.0",
         )
 
     # Attempt to look up job based on the provided id

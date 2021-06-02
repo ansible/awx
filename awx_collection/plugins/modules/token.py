@@ -136,7 +136,7 @@ def main():
         description=dict(),
         application=dict(),
         scope=dict(choices=['read', 'write'], default='write'),
-        existing_token=dict(type='dict', no_log=True),
+        existing_token=dict(type='dict', no_log=False),
         existing_token_id=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )

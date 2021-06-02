@@ -10,7 +10,7 @@ DOCUMENTATION = """
     short_description: Generate an rrule string which can be used for Schedules
     requirements:
       - pytz
-      - python.dateutil >= 2.7.0
+      - python-dateutil >= 2.7.0
     description:
       - Returns a string based on criteria which represents an rrule
     options:
@@ -131,12 +131,13 @@ class LookupModule(LookupBase):
     }
 
     # plugin constructor
-    def __init__(self):
-        if self.LIBRARY_IMPORT_ERROR:
+    def __init__(self, *args, **kwargs):
+        if LIBRARY_IMPORT_ERROR:
             raise_from(
                 AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)),
                 LIBRARY_IMPORT_ERROR
             )
+        super().__init__(*args, *kwargs)
 
     @staticmethod
     def parse_date_time(date_string):

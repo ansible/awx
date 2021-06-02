@@ -120,7 +120,6 @@ options:
         - Should use authorize for net type.
         - Deprecated, please use inputs
       type: bool
-      default: 'no'
     authorize_password:
       description:
         - Password for net credentials that require authorize.
@@ -360,7 +359,7 @@ def main():
         project=dict(),
         ssh_key_data=dict(no_log=True),
         ssh_key_unlock=dict(no_log=True),
-        authorize=dict(type='bool', default=False),
+        authorize=dict(type='bool'),
         authorize_password=dict(no_log=True),
         client=dict(),
         security_token=dict(no_log=True),
@@ -399,12 +398,12 @@ def main():
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
             module.deprecate(
-                collection_name=DOCUMENTATION.module,
+                collection_name="awx.awx",
                 msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input),
                 version="4.0.0")
     if kind:
         module.deprecate(
-            collection_name=DOCUMENTATION.module,
+            collection_name="awx.awx",
             msg='The kind parameter has been deprecated, please use credential_type instead',
             version="4.0.0")
 

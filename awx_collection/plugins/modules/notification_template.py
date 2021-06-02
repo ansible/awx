@@ -401,7 +401,7 @@ def main():
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
             module.deprecate(
-                collection_name=DOCUMENTATION.module,
+                collection_name="awx.awx",
                 msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input),
                 version="4.0.0"
             )
