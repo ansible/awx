@@ -33,9 +33,11 @@ export default function useWebsocket(subscribeGroups) {
     ws.current.onclose = e => {
       // eslint-disable-next-line no-console
       console.debug('Socket closed. Reconnecting...', e);
-      setTimeout(() => {
-        connect();
-      }, 1000);
+      if (e.code !== 1000) {
+        setTimeout(() => {
+          connect();
+        }, 1000);
+      }
     };
 
     ws.current.onerror = err => {
