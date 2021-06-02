@@ -217,7 +217,12 @@ function WorkflowJobTemplateDetail({ template }) {
             }
           />
         )}
-        <VariablesDetail label={t`Variables`} value={extra_vars} rows={4} />
+        <VariablesDetail
+          label={t`Variables`}
+          value={extra_vars}
+          rows={4}
+          name="extra_vars"
+        />
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities &&

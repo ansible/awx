@@ -337,6 +337,7 @@ function JobDetail({ job }) {
           value={job.extra_vars}
           rows={4}
           label={t`Variables`}
+          name="extra_vars"
         />
       )}
       {job.artifacts && (
@@ -347,6 +348,7 @@ function JobDetail({ job }) {
           value={JSON.stringify(job.artifacts)}
           rows={4}
           label={t`Artifacts`}
+          name="artifacts"
         />
       )}
       <CardActionsRow>

@@ -369,6 +369,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 value={jsonToYaml(JSON.stringify(extra_data))}
                 rows={4}
                 label={t`Variables`}
+                name="extra_vars"
               />
             )}
           </PromptDetailList>

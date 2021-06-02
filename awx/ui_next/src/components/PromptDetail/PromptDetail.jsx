@@ -250,6 +250,7 @@ function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
                 label={t`Variables`}
                 rows={4}
                 value={overrides.extra_vars}
+                name="extra_vars"
               />
             )}
           </PromptDetailList>

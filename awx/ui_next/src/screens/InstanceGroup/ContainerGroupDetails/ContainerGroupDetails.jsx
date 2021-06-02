@@ -81,6 +81,7 @@ function ContainerGroupDetails({ instanceGroup }) {
                 : instanceGroup.pod_spec_override
             }
             rows={6}
+            name="pod_spec_override"
           />
         )}
       </DetailList>

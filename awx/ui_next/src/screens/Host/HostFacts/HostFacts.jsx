@@ -36,7 +36,12 @@ function HostFacts({ host }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <VariablesDetail label={t`Facts`} rows="auto" value={facts} />
+        <VariablesDetail
+          label={t`Facts`}
+          rows="auto"
+          value={facts}
+          name="facts"
+        />
       </DetailList>
     </CardBody>
   );

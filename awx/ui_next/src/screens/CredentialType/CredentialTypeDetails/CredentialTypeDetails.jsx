@@ -80,11 +80,13 @@ function CredentialTypeDetails({ credentialType }) {
           label={t`Input configuration`}
           value={jsonToYaml(JSON.stringify(inputs))}
           rows={6}
+          name="input"
         />
         <VariablesDetail
           label={t`Injector configuration`}
           value={jsonToYaml(JSON.stringify(injectors))}
           rows={6}
+          name="injector"
         />
         <UserDateDetail
           label={t`Created`}

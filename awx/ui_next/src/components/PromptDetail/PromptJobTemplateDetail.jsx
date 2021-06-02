@@ -245,7 +245,12 @@ function PromptJobTemplateDetail({ resource }) {
         />
       )}
       {extra_vars && (
-        <VariablesDetail label={t`Variables`} rows={4} value={extra_vars} />
+        <VariablesDetail
+          label={t`Variables`}
+          rows={4}
+          value={extra_vars}
+          name="extra_vars"
+        />
       )}
     </>
   );
