@@ -77,6 +77,37 @@ describe('toHostFilter', () => {
       'isa=2 and tatlo=foo and tatlo=bar and tatlo=baz'
     );
   });
+  test('should return a host filter with mixed conditionals', () => {
+    const object = {
+      or__name__contains: 'bar',
+      or__name__iexact: 'foo',
+      enabled: 'true',
+      name__contains: 'x',
+      or__name: 'foo',
+    };
+    expect(toHostFilter(object)).toEqual(
+      'enabled=true and name__contains=x or name=foo or name__contains=bar or name__iexact=foo'
+    );
+  });
+
+  test('should return a host filter with and conditional', () => {
+    const object = {
+      enabled: 'true',
+      name__contains: 'x',
+    };
+    expect(toHostFilter(object)).toEqual('enabled=true and name__contains=x');
+  });
+
+  test('should return a host filter with or conditional', () => {
+    const object = {
+      or__name__contains: 'bar',
+      or__name__iexact: 'foo',
+      or__name: 'foo',
+    };
+    expect(toHostFilter(object)).toEqual(
+      'name=foo or name__contains=bar or name__iexact=foo'
+    );
+  });
 });
 
 describe('removeNamespacedKeys', () => {
