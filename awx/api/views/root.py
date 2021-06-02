@@ -24,7 +24,7 @@ from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
-from awx.main.utils import get_awx_version, to_python_boolean, get_custom_venv_choices
+from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS

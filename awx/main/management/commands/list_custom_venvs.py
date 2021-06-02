@@ -10,20 +10,30 @@ from django.conf import settings
 class Command(BaseCommand):
     """Returns a list of custom venv paths from the path passed in the argument"""
 
+    def add_arguments(self, parser):
+        parser.add_argument('-q', action='store_true', help='run with -q to output only the results of the query.')
+
     def handle(self, *args, **options):
         super(Command, self).__init__()
         venvs = get_custom_venv_choices()
         if venvs:
-            print('# {}'.format("Discovered virtual environments:"))
+            print('\n', '# {}'.format("Discovered virtual environments:"))
             for venv in venvs:
                 print(venv)
+            if not options.get('q'):
+                msg = [
+                    '',
+                    'To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
+                    'awx-manage export_custom_venv /path/to/venv',
+                    '',
+                    'To view the connections a (deprecated) virtual environment had in the database, run the following command while supplying the path as an argument:',
+                    'awx-manage custom_venv_associations /path/to/venv',
+                    '',
+                ]
+                print('\n'.join(msg))
+            else:
+                print('\n')
 
-            msg = [
-                '',
-                'To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
-                'awx-manage export_custom_venv /path/to/venv',
-            ]
-            print('\n'.join(msg))
         else:
             msg = ["No custom virtual environments detected in:", settings.BASE_VENV_PATH]
 
