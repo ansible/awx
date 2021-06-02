@@ -13,11 +13,7 @@ import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 
-import {
-  encodeNonDefaultQueryString,
-  parseQueryString,
-  replaceParams,
-} from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
@@ -40,7 +36,6 @@ function PaginatedDataList({
   pluralizedItemName,
   showPageSizeOptions,
   location,
-
   renderToolbar,
 }) {
   const { search, pathname } = useLocation();
@@ -51,23 +46,22 @@ function PaginatedDataList({
   };
 
   const handleSetPage = (event, pageNumber) => {
-    const oldParams = parseQueryString(qsConfig, search);
-    pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
+    const qs = updateQueryString(qsConfig, search, {
+      page: pageNumber,
+    });
+    pushHistoryState(qs);
   };
 
   const handleSetPageSize = (event, pageSize, page) => {
-    const oldParams = parseQueryString(qsConfig, search);
-    pushHistoryState(replaceParams(oldParams, { page_size: pageSize, page }));
+    const qs = updateQueryString(qsConfig, search, {
+      page_size: pageSize,
+      page,
+    });
+    pushHistoryState(qs);
   };
 
-  const pushHistoryState = params => {
-    const nonNamespacedParams = parseQueryString({}, history.location.search);
-    const encodedParams = encodeNonDefaultQueryString(
-      qsConfig,
-      params,
-      nonNamespacedParams
-    );
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  const pushHistoryState = qs => {
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const searchColumns = toolbarSearchColumns.length

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { TableComposable, Tbody } from '@patternfly/react-table';
 
 import { t } from '@lingui/macro';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import ListHeader from '../ListHeader';
 import ContentEmpty from '../ContentEmpty';
@@ -14,11 +14,7 @@ import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 import LoadingSpinner from '../LoadingSpinner';
 
-import {
-  encodeNonDefaultQueryString,
-  parseQueryString,
-  replaceParams,
-} from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 import { QSConfig, SearchColumns } from '../../types';
 
 function PaginatedTable({
@@ -39,27 +35,26 @@ function PaginatedTable({
   emptyContentMessage,
   ouiaId,
 }) {
+  const { search, pathname } = useLocation();
   const history = useHistory();
 
-  const pushHistoryState = params => {
-    const { pathname, search } = history.location;
-    const nonNamespacedParams = parseQueryString({}, search);
-    const encodedParams = encodeNonDefaultQueryString(
-      qsConfig,
-      params,
-      nonNamespacedParams
-    );
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  const pushHistoryState = qs => {
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const handleSetPage = (event, pageNumber) => {
-    const oldParams = parseQueryString(qsConfig, history.location.search);
-    pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
+    const qs = updateQueryString(qsConfig, search, {
+      page: pageNumber,
+    });
+    pushHistoryState(qs);
   };
 
   const handleSetPageSize = (event, pageSize, page) => {
-    const oldParams = parseQueryString(qsConfig, history.location.search);
-    pushHistoryState(replaceParams(oldParams, { page_size: pageSize, page }));
+    const qs = updateQueryString(qsConfig, search, {
+      page_size: pageSize,
+      page,
+    });
+    pushHistoryState(qs);
   };
 
   const searchColumns = toolbarSearchColumns.length

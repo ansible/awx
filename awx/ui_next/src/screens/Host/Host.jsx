@@ -35,7 +35,7 @@ function Host({ setBreadcrumb }) {
 
   useEffect(() => {
     fetchHost();
-  }, [fetchHost, location]);
+  }, [fetchHost, location.pathname]);
 
   const tabsArray = [
     {

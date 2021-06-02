@@ -3,11 +3,7 @@ import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Thead, Tr, Th as PFTh } from '@patternfly/react-table';
 import styled from 'styled-components';
-import {
-  encodeNonDefaultQueryString,
-  parseQueryString,
-  replaceParams,
-} from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 
 const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
@@ -25,21 +21,11 @@ export default function HeaderRow({
   const params = parseQueryString(qsConfig, location.search);
 
   const onSort = (key, order) => {
-    const newParams = replaceParams(params, {
+    const qs = updateQueryString(qsConfig, location.search, {
       order_by: order === 'asc' ? key : `-${key}`,
       page: null,
     });
-    const nonNamespacedParams = parseQueryString({}, history.location.search);
-    const encodedParams = encodeNonDefaultQueryString(
-      qsConfig,
-      newParams,
-      nonNamespacedParams
-    );
-    history.push(
-      encodedParams
-        ? `${location.pathname}?${encodedParams}`
-        : location.pathname
-    );
+    history.push(qs ? `${location.pathname}?${qs}` : location.pathname);
   };
 
   const sortKey = params.order_by?.replace('-', '');

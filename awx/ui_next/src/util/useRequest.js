@@ -1,10 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
-} from './qs';
+import { parseQueryString, updateQueryString } from './qs';
 import useIsMounted from './useIsMounted';
 
 /*
@@ -111,13 +107,10 @@ export function useDeleteItems(
     }
     const params = parseQueryString(qsConfig, location.search);
     if (params.page > 1 && allItemsSelected) {
-      const newParams = encodeNonDefaultQueryString(
-        qsConfig,
-        replaceParams(params, {
-          page: params.page - 1,
-        })
-      );
-      history.push(`${location.pathname}?${newParams}`);
+      const qs = updateQueryString(qsConfig, location.search, {
+        page: params.page - 1,
+      });
+      history.push(`${location.pathname}?${qs}`);
     } else {
       fetchItems();
     }
