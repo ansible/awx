@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { t } from '@lingui/macro';
+import { Plural, t } from '@lingui/macro';
+import { Button } from '@patternfly/react-core';
+import { Table, TableHeader, TableBody } from '@patternfly/react-table';
 import { RolesAPI, TeamsAPI, UsersAPI } from '../../api';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
@@ -26,6 +28,7 @@ function ResourceAccessList({ apiModel, resource }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const location = useLocation();
+  const [unassociatedRoles, setUnassociatedRoles] = useState([]);
 
   const {
     result: {
@@ -199,9 +202,12 @@ function ResourceAccessList({ apiModel, resource }) {
       {showAddModal && (
         <AddResourceRole
           onClose={() => setShowAddModal(false)}
-          onSave={() => {
+          onSave={rolesNotAssociated => {
             setShowAddModal(false);
-            fetchAccessRecords();
+            if (rolesNotAssociated.length === 0) {
+              fetchAccessRecords();
+            }
+            setUnassociatedRoles(rolesNotAssociated);
           }}
           onError={err => setSubmitError(err)}
           roles={resource.summary_fields.object_roles}
@@ -244,6 +250,46 @@ function ResourceAccessList({ apiModel, resource }) {
           onClose={clearDeletionError}
         >
           {t`Failed to delete role`}
+        </AlertModal>
+      )}
+      {unassociatedRoles.length > 0 && (
+        <AlertModal
+          isOpen={unassociatedRoles.length > 0}
+          variant="error"
+          title={t`Roles not Associated`}
+          actions={[
+            <Button
+              aria-label={t`Ok`}
+              isSmall
+              onClick={() => {
+                setUnassociatedRoles([]);
+                fetchAccessRecords();
+              }}
+              variant="primary"
+              key="delete"
+            >
+              {t`Ok`}
+            </Button>,
+          ]}
+          onClose={() => {
+            setUnassociatedRoles([]);
+            fetchAccessRecords();
+          }}
+        >
+          <Plural
+            value={unassociatedRoles.length}
+            one={t`The following role was not associated to this credental because the user and credential are not part of the same organization.`}
+            other={t`The following roles were not associated to this credental because the users and credential are not part of the same organization.`}
+          />
+          <Table
+            aria-label={t`Simple Table`}
+            cells={unassociatedRoles[0].headerRow}
+            variant="compact"
+            rows={unassociatedRoles.map(item => item.row)}
+          >
+            <TableHeader />
+            <TableBody />
+          </Table>
         </AlertModal>
       )}
     </>

@@ -127,22 +127,59 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
     setCurrentStepId(step.id);
   };
 
+  const userOrTeamAndCredentialShareOrg = async (userOrTeam, role) => {
+    let orgCredCheck;
+    if (selectedResource === 'users') {
+      const {
+        data: { results },
+      } = await UsersAPI.readOrganizations(userOrTeam.id);
+
+      if (results.some(r => r.id === resource.organization)) {
+        orgCredCheck = UsersAPI.associateRole(userOrTeam.id, role.id);
+      } else {
+        orgCredCheck = {
+          headerRow: [t`Username`, t`Frst name`, t`Last name`, t`Role`],
+          row: [
+            userOrTeam.username,
+            userOrTeam.first_name,
+            userOrTeam.last_name,
+            role.name,
+          ],
+        };
+      }
+    }
+    if (selectedResource === 'teams') {
+      if (userOrTeam.organization === resource.organization) {
+        orgCredCheck = TeamsAPI.associateRole(userOrTeam.id, role.id);
+      } else {
+        orgCredCheck = {
+          headerRow: [t`Team`, t`Role`],
+          row: [userOrTeam.name, role.name],
+        };
+      }
+    }
+    return orgCredCheck;
+  };
+
   const handleWizardSave = async () => {
     try {
       const roleRequests = [];
+      const unassociatedRoles = [];
+      const credentialChecks = [];
+      const apiModel = selectedResource === 'users' ? UsersAPI : TeamsAPI;
 
       for (let i = 0; i < selectedResourceRows.length; i++) {
         for (let j = 0; j < selectedRoleRows.length; j++) {
-          if (selectedResource === 'users') {
-            roleRequests.push(
-              UsersAPI.associateRole(
-                selectedResourceRows[i].id,
-                selectedRoleRows[j].id
+          if (resource.type === 'credential' && resource.organization) {
+            credentialChecks.push(
+              userOrTeamAndCredentialShareOrg(
+                selectedResourceRows[i],
+                selectedRoleRows[j]
               )
             );
-          } else if (selectedResource === 'teams') {
+          } else {
             roleRequests.push(
-              TeamsAPI.associateRole(
+              apiModel.associateRole(
                 selectedResourceRows[i].id,
                 selectedRoleRows[j].id
               )
@@ -151,8 +188,15 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
         }
       }
 
+      const checks = await Promise.all(credentialChecks);
+      checks.forEach(c =>
+        Object.prototype.hasOwnProperty.call(c, 'headerRow')
+          ? unassociatedRoles.push(c)
+          : roleRequests.push(c)
+      );
+
       await Promise.all(roleRequests);
-      onSave();
+      onSave(unassociatedRoles);
     } catch (err) {
       onError(err);
       onClose();
