@@ -26,10 +26,10 @@ class Command(BaseCommand):
             if path[0] in all_venvs:
                 pip_data = get_custom_venv_pip_freeze(options.get('path')[0])
                 if pip_data:
-                    print('\n', '# {}'.format("Virtual environment contents:"))
-                    print(pip_data)
                     if not options.get('q'):
                         msg = [
+                            '# Virtual environment contents:',
+                            pip_data,
                             '- To list all (now deprecated) custom virtual environments run:',
                             'awx-manage list_custom_venvs',
                             '',
@@ -40,6 +40,8 @@ class Command(BaseCommand):
                             '',
                         ]
                         print('\n'.join(msg))
+                    else:
+                        print(pip_data)
 
             else:
                 print('\n', '# Incorrect path, verify your path is from the following list:')

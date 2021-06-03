@@ -37,12 +37,10 @@ class Command(BaseCommand):
                 results["job_templates"] = jts
                 results["projects"] = proj
                 results["inventory_sources"] = invsrc
-                print('\n', '# {}'.format("Virtual environments associations:"))
-                print(yaml.dump(results))
-
                 if not options.get('q'):
                     msg = [
-                        '',
+                        '# Virtual Environments Associations:',
+                        yaml.dump(results),
                         '- To list all (now deprecated) custom virtual environments run:',
                         'awx-manage list_custom_venvs',
                         '',
@@ -53,6 +51,8 @@ class Command(BaseCommand):
                         '',
                     ]
                     print('\n'.join(msg))
+                else:
+                    print(yaml.dump(results))
 
             else:
                 print('\n', '# Incorrect path, verify your path is from the following list:')

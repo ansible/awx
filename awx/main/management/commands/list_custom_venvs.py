@@ -17,10 +17,11 @@ class Command(BaseCommand):
         super(Command, self).__init__()
         venvs = get_custom_venv_choices()
         if venvs:
-            print('\n', '# {}'.format("Discovered virtual environments:"))
-            print('\n'.join(venvs), '\n')
             if not options.get('q'):
                 msg = [
+                    '# Discovered Virtual Environments:',
+                    '\n'.join(venvs),
+                    '',
                     '- To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
                     'awx-manage export_custom_venv /path/to/venv',
                     '',
@@ -31,7 +32,8 @@ class Command(BaseCommand):
                     '',
                 ]
                 print('\n'.join(msg))
-
+            else:
+                print('\n'.join(venvs), '\n')
         else:
             msg = ["No custom virtual environments detected in:", settings.BASE_VENV_PATH]
 
