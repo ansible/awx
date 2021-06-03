@@ -22,7 +22,7 @@ class ControllerAWXKitModule(ControllerModule):
     def __init__(self, argument_spec, **kwargs):
         kwargs['supports_check_mode'] = False
 
-        super(ControllerAWXKitModule, self).__init__(argument_spec=argument_spec, **kwargs)
+        super().__init__(argument_spec=argument_spec, **kwargs)
 
         # Die if we don't have AWX_KIT installed
         if not HAS_AWX_KIT:

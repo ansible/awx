@@ -113,7 +113,7 @@ class TowerLegacyModule(AnsibleModule):
             )
         )
 
-        super(TowerLegacyModule, self).__init__(argument_spec=args, **kwargs)
+        super().__init__(argument_spec=args, **kwargs)
 
         if not HAS_TOWER_CLI:
             self.fail_json(msg=missing_required_lib('ansible-tower-cli'), exception=TOWER_CLI_IMP_ERR)

@@ -41,6 +41,7 @@ options:
         - Signifies that this InstanceGroup should act as a ContainerGroup. If no credential is specified, the underlying Pod's ServiceAccount will be used.
       required: False
       type: bool
+      default: False
     policy_instance_percentage:
       description:
         - Minimum percentage of all instances that will be automatically assigned to this group when new instances come online.
@@ -91,7 +92,7 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         credential=dict(),
-        is_container_group=dict(type='bool', default=None),
+        is_container_group=dict(type='bool', default=False),
         policy_instance_percentage=dict(type='int', default='0'),
         policy_instance_minimum=dict(type='int', default='0'),
         policy_instance_list=dict(type='list', elements='str'),

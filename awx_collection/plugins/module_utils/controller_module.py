@@ -95,7 +95,7 @@ class ControllerModule(AnsibleModule):
         if direct_params is not None:
             self.params = direct_params
         else:
-            super(ControllerModule, self).__init__(argument_spec=full_argspec, **kwargs)
+            super().__init__(argument_spec=full_argspec, **kwargs)
 
         self.load_config_files()
 
@@ -238,10 +238,10 @@ class ControllerModule(AnsibleModule):
                             pass
 
                 except Exception as e:
-                    raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
+                    raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e)) from e
 
         except Exception as e:
-            raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e))
+            raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)) from e
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
         for honorred_setting in self.short_params:
@@ -265,15 +265,15 @@ class ControllerModule(AnsibleModule):
         if self.error_callback:
             self.error_callback(**kwargs)
         else:
-            super(ControllerModule, self).fail_json(**kwargs)
+            super().fail_json(**kwargs)
 
     def exit_json(self, **kwargs):
         # Try to log out if we are authenticated
         self.logout()
-        super(ControllerModule, self).exit_json(**kwargs)
+        super().exit_json(**kwargs)
 
     def warn(self, warning):
         if self.warn_callback is not None:
             self.warn_callback(warning)
         else:
-            super(ControllerModule, self).warn(warning)
+            super().warn(warning)

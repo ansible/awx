@@ -164,7 +164,7 @@ def main():
         skip_tags=dict(type='list', elements='str'),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         diff_mode=dict(type='bool'),
-        credential_passwords=dict(type='dict', no_log=True),
+        credential_passwords=dict(type='dict', no_log=False),
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
         timeout=dict(default=None, type='int'),

@@ -362,7 +362,7 @@ def main():
         authorize=dict(type='bool'),
         authorize_password=dict(no_log=True),
         client=dict(),
-        security_token=dict(no_log=True),
+        security_token=dict(no_log=False),
         secret=dict(no_log=True),
         subscription=dict(),
         tenant=dict(),

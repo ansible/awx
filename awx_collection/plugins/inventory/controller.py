@@ -89,7 +89,7 @@ class InventoryModule(BaseInventoryPlugin):
         if path.endswith('@controller_inventory') or path.endswith('@tower_inventory'):
             self.no_config_file_supplied = True
             return True
-        elif super(InventoryModule, self).verify_file(path):
+        elif super().verify_file(path):
             return path.endswith(
                 (
                     'controller_inventory.yml',
@@ -109,7 +109,7 @@ class InventoryModule(BaseInventoryPlugin):
         self.display.warning(warning)
 
     def parse(self, inventory, loader, path, cache=True):
-        super(InventoryModule, self).parse(inventory, loader, path)
+        super().parse(inventory, loader, path)
         if not self.no_config_file_supplied and os.path.isfile(path):
             self._read_config_data(path)
 
@@ -132,7 +132,7 @@ class InventoryModule(BaseInventoryPlugin):
             except ValueError as e:
                 raise AnsibleOptionsError(
                     'Invalid type for configuration option inventory_id, ' 'not integer, and cannot convert to string: {err}'.format(err=to_native(e))
-                )
+                ) from e
         inventory_id = inventory_id.replace('/', '')
         inventory_url = '/api/v2/inventories/{inv_id}/script/'.format(inv_id=inventory_id)
 

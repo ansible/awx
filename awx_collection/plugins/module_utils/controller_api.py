@@ -30,7 +30,7 @@ class ControllerAPIModule(ControllerModule):
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
-        super(ControllerAPIModule, self).__init__(
+        super().__init__(
             argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs
         )
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)

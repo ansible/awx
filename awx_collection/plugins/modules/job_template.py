@@ -140,12 +140,10 @@ options:
       type: bool
       aliases:
         - diff_mode_enabled
-      default: 'no'
     use_fact_cache:
       description:
         - Enable use of fact caching for the job template.
       type: bool
-      default: 'no'
       aliases:
         - fact_caching_enabled
     host_config_key:
@@ -156,75 +154,64 @@ options:
       description:
         - Prompt user for (scm branch) on launch.
       type: bool
-      default: 'False'
     ask_diff_mode_on_launch:
       description:
         - Prompt user to enable diff mode (show changes) to files when supported by modules.
       type: bool
-      default: 'False'
       aliases:
         - ask_diff_mode
     ask_variables_on_launch:
       description:
         - Prompt user for (extra_vars) on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_extra_vars
     ask_limit_on_launch:
       description:
         - Prompt user for a limit on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_limit
     ask_tags_on_launch:
       description:
         - Prompt user for job tags on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_tags
     ask_skip_tags_on_launch:
       description:
         - Prompt user for job tags to skip on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_skip_tags
     ask_job_type_on_launch:
       description:
         - Prompt user for job type on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_job_type
     ask_verbosity_on_launch:
       description:
         - Prompt user to choose a verbosity level on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_verbosity
     ask_inventory_on_launch:
       description:
         - Prompt user for inventory on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_inventory
     ask_credential_on_launch:
       description:
         - Prompt user for credential on launch.
       type: bool
-      default: 'False'
       aliases:
         - ask_credential
     survey_enabled:
       description:
         - Enable a survey on the job template.
       type: bool
-      default: 'no'
     survey_spec:
       description:
         - JSON/YAML dict formatted survey definition.
@@ -233,12 +220,10 @@ options:
       description:
         - Activate privilege escalation.
       type: bool
-      default: 'no'
     allow_simultaneous:
       description:
         - Allow simultaneous runs of the job template.
       type: bool
-      default: 'no'
       aliases:
         - concurrent_jobs_enabled
     timeout:
@@ -388,24 +373,24 @@ def main():
         skip_tags=dict(),
         start_at_task=dict(),
         timeout=dict(type='int', default=0),
-        use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled'], default=False),
-        host_config_key=dict(no_log=True),
-        ask_diff_mode_on_launch=dict(type='bool', aliases=['ask_diff_mode'], default=False),
-        ask_variables_on_launch=dict(type='bool', aliases=['ask_extra_vars'], default=False),
-        ask_limit_on_launch=dict(type='bool', aliases=['ask_limit'], default=False),
-        ask_tags_on_launch=dict(type='bool', aliases=['ask_tags'], default=False),
-        ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags'], default=False),
-        ask_job_type_on_launch=dict(type='bool', aliases=['ask_job_type'], default=False),
-        ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity'], default=False),
-        ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory'], default=False),
-        ask_credential_on_launch=dict(type='bool', aliases=['ask_credential'], default=False),
-        survey_enabled=dict(type='bool', default=False),
+        use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
+        host_config_key=dict(no_log=False),
+        ask_diff_mode_on_launch=dict(type='bool', aliases=['ask_diff_mode']),
+        ask_variables_on_launch=dict(type='bool', aliases=['ask_extra_vars']),
+        ask_limit_on_launch=dict(type='bool', aliases=['ask_limit']),
+        ask_tags_on_launch=dict(type='bool', aliases=['ask_tags']),
+        ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
+        ask_job_type_on_launch=dict(type='bool', aliases=['ask_job_type']),
+        ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity']),
+        ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory']),
+        ask_credential_on_launch=dict(type='bool', aliases=['ask_credential']),
+        survey_enabled=dict(type='bool'),
         survey_spec=dict(type="dict"),
-        become_enabled=dict(type='bool', default=False),
-        diff_mode=dict(type='bool', aliases=['diff_mode_enabled'], default=False),
-        allow_simultaneous=dict(type='bool', aliases=['concurrent_jobs_enabled'], default=False),
+        become_enabled=dict(type='bool'),
+        diff_mode=dict(type='bool', aliases=['diff_mode_enabled']),
+        allow_simultaneous=dict(type='bool', aliases=['concurrent_jobs_enabled']),
         scm_branch=dict(),
-        ask_scm_branch_on_launch=dict(type='bool', default=False),
+        ask_scm_branch_on_launch=dict(type='bool'),
         job_slice_count=dict(type='int', default='1'),
         webhook_service=dict(choices=['github', 'gitlab', '']),
         webhook_credential=dict(),

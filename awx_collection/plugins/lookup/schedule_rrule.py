@@ -137,7 +137,7 @@ class LookupModule(LookupBase):
                 AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)),
                 LIBRARY_IMPORT_ERROR
             )
-        super(LookupModule, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def parse_date_time(date_string):
@@ -169,8 +169,8 @@ class LookupModule(LookupBase):
         if 'start_date' in kwargs:
             try:
                 rrule_kwargs['dtstart'] = LookupModule.parse_date_time(kwargs['start_date'])
-            except Exception:
-                raise AnsibleError('Parameter start_date must be in the format YYYY-MM-DD [HH:MM:SS]')
+            except Exception as e:
+                raise AnsibleError('Parameter start_date must be in the format YYYY-MM-DD [HH:MM:SS]') from e
 
         # If we are a none frequency we don't need anything else
         if frequency == 'none':
