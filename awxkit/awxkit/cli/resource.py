@@ -27,6 +27,7 @@ DEPRECATED_RESOURCES = {
     'inventory_updates': 'inventory_update',
     'jobs': 'job',
     'job_templates': 'job_template',
+    'execution_environments': 'execution_environment',
     'labels': 'label',
     'workflow_job_template_nodes': 'node',
     'notification_templates': 'notification_template',
