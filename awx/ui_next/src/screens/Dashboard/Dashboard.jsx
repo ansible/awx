@@ -25,6 +25,12 @@ import LineChart from './shared/LineChart';
 import Count from './shared/Count';
 import TemplateList from '../../components/TemplateList';
 
+const StatusSelect = styled(Select)`
+  && {
+    --pf-c-select__toggle--MinWidth: 165px;
+  }
+`;
+
 const Counts = styled.div`
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -57,8 +63,10 @@ const GraphCardActions = styled(CardActions)`
 function Dashboard() {
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isJobTypeDropdownOpen, setIsJobTypeDropdownOpen] = useState(false);
+  const [isJobStatusDropdownOpen, setIsJobStatusDropdownOpen] = useState(false);
   const [periodSelection, setPeriodSelection] = useState('month');
   const [jobTypeSelection, setJobTypeSelection] = useState('all');
+  const [jobStatusSelection, setJobStatusSelection] = useState('all');
   const [activeTabId, setActiveTabId] = useState(0);
 
   const {
@@ -196,6 +204,9 @@ function Dashboard() {
                         <SelectOption key="week" value="week">
                           {t`Past week`}
                         </SelectOption>
+                        <SelectOption key="day" value="day">
+                          {t`Past 24 hours`}
+                        </SelectOption>
                       </Select>
                       <Select
                         variant={SelectVariant.single}
@@ -222,10 +233,37 @@ function Dashboard() {
                           {t`Playbook run`}
                         </SelectOption>
                       </Select>
+                      <StatusSelect
+                        variant={SelectVariant.single}
+                        placeholderText={t`Select status`}
+                        aria-label={t`Select status`}
+                        className="jobStatusSelect"
+                        onToggle={setIsJobStatusDropdownOpen}
+                        onSelect={(event, selection) => {
+                          setIsJobStatusDropdownOpen(false);
+                          setJobStatusSelection(selection);
+                        }}
+                        selections={jobStatusSelection}
+                        isOpen={isJobStatusDropdownOpen}
+                      >
+                        <SelectOption
+                          key="all"
+                          value="all"
+                        >{t`All jobs`}</SelectOption>
+                        <SelectOption
+                          key="successful"
+                          value="successful"
+                        >{t`Successful jobs`}</SelectOption>
+                        <SelectOption
+                          key="failed"
+                          value="failed"
+                        >{t`Failed jobs`}</SelectOption>
+                      </StatusSelect>
                     </GraphCardActions>
                   </GraphCardHeader>
                   <CardBody>
                     <LineChart
+                      jobStatus={jobStatusSelection}
                       height={390}
                       id="d3-line-chart-root"
                       data={jobGraphData}

@@ -7,7 +7,7 @@ import { PageContextConsumer } from '@patternfly/react-core';
 
 import ChartTooltip from './ChartTooltip';
 
-function LineChart({ id, data, height, pageContext }) {
+function LineChart({ id, data, height, pageContext, jobStatus }) {
   const { isNavOpen } = pageContext;
 
   // Methods
@@ -197,61 +197,68 @@ function LineChart({ id, data, height, pageContext }) {
       vertical.transition().style('opacity', 0);
     };
 
-    // Add the successLine path.
-    svg
-      .append('path')
-      .data([formattedData])
-      .attr('class', 'line')
-      .style('fill', 'none')
-      .style('stroke', () => colors(1))
-      .attr('stroke-width', 2)
-      .attr('d', successLine)
-      .call(transition);
-
-    // Add the failLine path.
-    svg
-      .append('path')
-      .data([formattedData])
-      .attr('class', 'line')
-      .style('fill', 'none')
-      .style('stroke', () => colors(0))
-      .attr('stroke-width', 2)
-      .attr('d', failLine)
-      .call(transition);
-
     const dateFormat = d3.timeFormat('%-m-%-d');
 
-    // create our successLine circles
-    svg
-      .selectAll('dot')
-      .data(formattedData)
-      .enter()
-      .append('circle')
-      .attr('r', 3)
-      .style('stroke', () => colors(1))
-      .style('fill', () => colors(1))
-      .attr('cx', d => x(d.DATE))
-      .attr('cy', d => y(d.RAN))
-      .attr('id', d => `success-dot-${dateFormat(d.DATE)}`)
-      .on('mouseover', handleMouseOver)
-      .on('mousemove', handleMouseMove)
-      .on('mouseout', handleMouseOut);
-    // create our failLine circles
-    svg
-      .selectAll('dot')
-      .data(formattedData)
-      .enter()
-      .append('circle')
-      .attr('r', 3)
-      .style('stroke', () => colors(0))
-      .style('fill', () => colors(0))
-      .attr('cx', d => x(d.DATE))
-      .attr('cy', d => y(d.FAIL))
-      .attr('id', d => `fail-dot-${dateFormat(d.DATE)}`)
-      .on('mouseover', handleMouseOver)
-      .on('mousemove', handleMouseMove)
-      .on('mouseout', handleMouseOut);
-  }, [data, height, id]);
+    if (jobStatus !== 'failed') {
+      // Add the success line path.
+      svg
+        .append('path')
+        .data([formattedData])
+        .attr('class', 'line')
+        .style('fill', 'none')
+        .style('stroke', () => colors(1))
+        .attr('stroke-width', 2)
+        .attr('d', successLine)
+        .call(transition);
+
+      // create our success line circles
+
+      svg
+        .selectAll('dot')
+        .data(formattedData)
+        .enter()
+        .append('circle')
+        .attr('r', 3)
+        .style('stroke', () => colors(1))
+        .style('fill', () => colors(1))
+        .attr('cx', d => x(d.DATE))
+        .attr('cy', d => y(d.RAN))
+        .attr('id', d => `success-dot-${dateFormat(d.DATE)}`)
+        .on('mouseover', handleMouseOver)
+        .on('mousemove', handleMouseMove)
+        .on('mouseout', handleMouseOut);
+    }
+
+    if (jobStatus !== 'successful') {
+      // Add the failed line path.
+      svg
+        .append('path')
+        .data([formattedData])
+        .attr('class', 'line')
+        .style('fill', 'none')
+        .style('stroke', () => colors(0))
+        .attr('stroke-width', 2)
+        .attr('d', failLine)
+        .call(transition);
+
+      // create our failed line circles
+
+      svg
+        .selectAll('dot')
+        .data(formattedData)
+        .enter()
+        .append('circle')
+        .attr('r', 3)
+        .style('stroke', () => colors(0))
+        .style('fill', () => colors(0))
+        .attr('cx', d => x(d.DATE))
+        .attr('cy', d => y(d.FAIL))
+        .attr('id', d => `fail-dot-${dateFormat(d.DATE)}`)
+        .on('mouseover', handleMouseOver)
+        .on('mousemove', handleMouseMove)
+        .on('mouseout', handleMouseOut);
+    }
+  }, [data, height, id, jobStatus]);
 
   useEffect(() => {
     draw();
