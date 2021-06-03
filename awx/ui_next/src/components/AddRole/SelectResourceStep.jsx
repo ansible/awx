@@ -100,7 +100,9 @@ function SelectResourceStep({
         headerRow={
           <HeaderRow qsConfig={QS_Config(sortColumns)}>
             {sortColumns.map(({ name, key }) => (
-              <HeaderCell sortKey={key}>{name}</HeaderCell>
+              <HeaderCell sortKey={key} key={key}>
+                {name}
+              </HeaderCell>
             ))}
           </HeaderRow>
         }
