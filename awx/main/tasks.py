@@ -2391,6 +2391,12 @@ class RunInventoryUpdate(BaseTask):
                         paths = [config_values[config_setting]] + paths
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
+        if 'ANSIBLE_COLLECTIONS_PATHS' in env:
+            paths = env['ANSIBLE_COLLECTIONS_PATHS'].split(':')
+        else:
+            paths = ['~/.ansible/collections', '/usr/share/ansible/collections']
+        paths.append('/usr/share/automation-controller/collections')
+        env['ANSIBLE_COLLECTIONS_PATHS'] = os.pathsep.join(paths)
 
         return env
 
