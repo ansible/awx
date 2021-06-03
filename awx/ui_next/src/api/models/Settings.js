@@ -29,6 +29,10 @@ class Settings extends Base {
   createTest(category, data) {
     return this.http.post(`${this.baseUrl}${category}/test/`, data);
   }
+
+  revertCategory(category) {
+    return this.http.delete(`${this.baseUrl}${category}/`);
+  }
 }
 
 export default Settings;

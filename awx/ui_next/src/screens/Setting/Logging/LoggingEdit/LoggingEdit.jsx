@@ -75,14 +75,19 @@ function LoggingEdit() {
     });
   };
 
-  const handleRevertAll = async () => {
-    const defaultValues = {};
-    Object.entries(logging).forEach(([key, value]) => {
-      defaultValues[key] = value.default;
-    });
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('logging');
+    }, []),
+    null
+  );
 
-    await submitForm(defaultValues);
+  const handleRevertAll = async () => {
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/logging/details');
   };
 
   const {
@@ -221,6 +226,7 @@ function LoggingEdit() {
                     config={logging.LOG_AGGREGATOR_LOGGERS}
                   />
                   {submitError && <FormSubmitError error={submitError} />}
+                  {revertError && <FormSubmitError error={revertError} />}
                   <RevertFormActionGroup
                     onCancel={handleCancel}
                     onSubmit={formik.handleSubmit}

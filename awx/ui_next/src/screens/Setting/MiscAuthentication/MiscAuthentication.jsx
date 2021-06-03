@@ -1,15 +1,14 @@
 import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import { useConfig } from '../../../contexts/Config';
-import ActivityStreamDetail from './ActivityStreamDetail';
-import ActivityStreamEdit from './ActivityStreamEdit';
+import MiscAuthenticationDetail from './MiscAuthenticationDetail';
+import MiscAuthenticationEdit from './MiscAuthenticationEdit';
 
-function ActivityStream() {
-  const baseURL = '/settings/activity_stream';
+function MiscAuthentication() {
+  const baseURL = '/settings/miscellaneous_authentication';
   const { me } = useConfig();
 
   return (
@@ -18,11 +17,11 @@ function ActivityStream() {
         <Switch>
           <Redirect from={baseURL} to={`${baseURL}/details`} exact />
           <Route path={`${baseURL}/details`}>
-            <ActivityStreamDetail />
+            <MiscAuthenticationDetail />
           </Route>
           <Route path={`${baseURL}/edit`}>
             {me?.is_superuser ? (
-              <ActivityStreamEdit />
+              <MiscAuthenticationEdit />
             ) : (
               <Redirect to={`${baseURL}/details`} />
             )}
@@ -30,7 +29,7 @@ function ActivityStream() {
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
               <Link to={`${baseURL}/details`}>
-                {t`View Activity Stream settings`}
+                {t`View Miscellaneous Authentication settings`}
               </Link>
             </ContentError>
           </Route>
@@ -40,4 +39,4 @@ function ActivityStream() {
   );
 }
 
-export default ActivityStream;
+export default MiscAuthentication;

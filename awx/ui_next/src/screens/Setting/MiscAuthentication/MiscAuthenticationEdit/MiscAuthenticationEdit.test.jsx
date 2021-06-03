@@ -6,36 +6,55 @@ import {
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
+import mockAllSettings from '../../shared/data.allSettings.json';
 import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
-import ActivityStreamEdit from './ActivityStreamEdit';
+import MiscAuthenticationEdit from './MiscAuthenticationEdit';
 
 jest.mock('../../../../api');
 
-describe('<ActivityStreamEdit />', () => {
+const authenticationData = {
+  SESSION_COOKIE_AGE: 1800,
+  SESSIONS_PER_USER: -1,
+  DISABLE_LOCAL_AUTH: false,
+  AUTH_BASIC_ENABLED: true,
+  OAUTH2_PROVIDER: {
+    ACCESS_TOKEN_EXPIRE_SECONDS: 31536000000,
+    REFRESH_TOKEN_EXPIRE_SECONDS: 2628000,
+    AUTHORIZATION_CODE_EXPIRE_SECONDS: 600,
+  },
+  ALLOW_OAUTH2_FOR_EXTERNAL_USERS: false,
+  LOGIN_REDIRECT_OVERRIDE: '',
+  AUTHENTICATION_BACKENDS: [
+    'awx.sso.backends.TACACSPlusBackend',
+    'awx.main.backends.AWXModelBackend',
+  ],
+  SOCIAL_AUTH_ORGANIZATION_MAP: {},
+  SOCIAL_AUTH_TEAM_MAP: {},
+  SOCIAL_AUTH_USER_FIELDS: [],
+};
+
+describe('<MiscAuthenticationEdit />', () => {
   let wrapper;
   let history;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 
   beforeEach(async () => {
-    history = createMemoryHistory({
-      initialEntries: ['/settings/activity_stream/edit'],
-    });
-    SettingsAPI.readCategory.mockResolvedValue({
-      data: {
-        ACTIVITY_STREAM_ENABLED: false,
-        ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: true,
-      },
-    });
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: mockAllSettings,
+    });
+    history = createMemoryHistory({
+      initialEntries: ['/settings/miscellaneous_authentication/edit'],
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <ActivityStreamEdit />
+          <MiscAuthenticationEdit />
         </SettingsProvider>,
         {
           context: { router: { history } },
@@ -45,54 +64,23 @@ describe('<ActivityStreamEdit />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
-  test('initially renders without crashing', () => {
-    expect(wrapper.find('ActivityStreamEdit').length).toBe(1);
+  test('initially renders without crashing', async () => {
+    expect(wrapper.find('MiscAuthenticationEdit').length).toBe(1);
   });
 
-  test('should navigate to activity stream detail when cancel is clicked', async () => {
+  test('save button should call updateAll', async () => {
+    expect(wrapper.find('MiscAuthenticationEdit').length).toBe(1);
+    wrapper.update();
     await act(async () => {
-      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
-    });
-    expect(history.location.pathname).toEqual(
-      '/settings/activity_stream/details'
-    );
-  });
-
-  test('should navigate to activity stream detail on successful submission', async () => {
-    await act(async () => {
-      wrapper.find('Form').invoke('onSubmit')();
-    });
-    expect(history.location.pathname).toEqual(
-      '/settings/activity_stream/details'
-    );
-  });
-
-  test('should successfully send request to api on form submission', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
-    expect(
-      wrapper.find('Switch#ACTIVITY_STREAM_ENABLED').prop('isChecked')
-    ).toEqual(false);
-
-    await act(async () => {
-      wrapper.find('Switch#ACTIVITY_STREAM_ENABLED').invoke('onChange')(true);
+      wrapper.find('button[aria-label="Save"]').simulate('click');
     });
     wrapper.update();
-    expect(
-      wrapper.find('Switch#ACTIVITY_STREAM_ENABLED').prop('isChecked')
-    ).toEqual(true);
-
-    await act(async () => {
-      wrapper.find('Form').invoke('onSubmit')();
-    });
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      ACTIVITY_STREAM_ENABLED: true,
-      ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: true,
-    });
+    const { AUTHENTICATION_BACKENDS, ...rest } = authenticationData;
+    expect(SettingsAPI.updateAll).toHaveBeenCalledWith(rest);
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -107,11 +95,33 @@ describe('<ActivityStreamEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      ACTIVITY_STREAM_ENABLED: true,
-      ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('authentication');
+  });
+
+  test('should successfully send request to api on form submission', async () => {
+    await act(async () => {
+      wrapper.find('Form').invoke('onSubmit')();
     });
+    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
+  });
+
+  test('should navigate to miscellaneous detail on successful submission', async () => {
+    await act(async () => {
+      wrapper.find('Form').invoke('onSubmit')();
+    });
+    expect(history.location.pathname).toEqual(
+      '/settings/miscellaneous_authentication/details'
+    );
+  });
+
+  test('should navigate to miscellaneous detail when cancel is clicked', async () => {
+    await act(async () => {
+      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+    });
+    expect(history.location.pathname).toEqual(
+      '/settings/miscellaneous_authentication/details'
+    );
   });
 
   test('should display error message on unsuccessful submission', async () => {
@@ -138,7 +148,7 @@ describe('<ActivityStreamEdit />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <ActivityStreamEdit />
+          <MiscAuthenticationEdit />
         </SettingsProvider>
       );
     });

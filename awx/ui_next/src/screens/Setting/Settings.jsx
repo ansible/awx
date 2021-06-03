@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
 import { Link, Route, Switch, Redirect } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import ScreenHeader from '../../components/ScreenHeader';
-import ActivityStream from './ActivityStream';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
 import GoogleOAuth2 from './GoogleOAuth2';
@@ -14,6 +12,7 @@ import Jobs from './Jobs';
 import LDAP from './LDAP';
 import Subscription from './Subscription';
 import Logging from './Logging';
+import MiscAuthentication from './MiscAuthentication';
 import MiscSystem from './MiscSystem';
 import RADIUS from './RADIUS';
 import SAML from './SAML';
@@ -94,6 +93,9 @@ function Settings() {
     '/settings/logging': t`Logging`,
     '/settings/logging/details': t`Details`,
     '/settings/logging/edit': t`Edit Details`,
+    '/settings/miscellaneous_authentication': t`Miscellaneous Authentication`,
+    '/settings/miscellaneous_authentication/details': t`Details`,
+    '/settings/miscellaneous_authentication/edit': t`Edit Details`,
     '/settings/miscellaneous_system': t`Miscellaneous System`,
     '/settings/miscellaneous_system/details': t`Details`,
     '/settings/miscellaneous_system/edit': t`Edit Details`,
@@ -142,9 +144,6 @@ function Settings() {
     <SettingsProvider value={result}>
       <ScreenHeader streamType="setting" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
-        <Route path="/settings/activity_stream">
-          <ActivityStream />
-        </Route>
         <Route path="/settings/azure">
           <AzureAD />
         </Route>
@@ -169,6 +168,9 @@ function Settings() {
         </Route>
         <Route path="/settings/logging">
           <Logging />
+        </Route>
+        <Route path="/settings/miscellaneous_authentication">
+          <MiscAuthentication />
         </Route>
         <Route path="/settings/miscellaneous_system">
           <MiscSystem />

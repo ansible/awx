@@ -22,28 +22,26 @@ describe('<MiscSystemDetail />', () => {
     SettingsAPI.readCategory = jest.fn();
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
-        ALLOW_OAUTH2_FOR_EXTERNAL_USERS: false,
-        AUTH_BASIC_ENABLED: true,
-        AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
+        ACTIVITY_STREAM_ENABLED: true,
+        ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
+        ORG_ADMINS_CAN_SEE_ALL_USERS: true,
+        MANAGE_ORGANIZATION_AUTH: true,
+        TOWER_URL_BASE: 'https://towerhost',
+        REMOTE_HOST_HEADERS: [],
+        PROXY_IP_ALLOWED_LIST: [],
+        LICENSE: null,
+        REDHAT_USERNAME: 'name1',
+        REDHAT_PASSWORD: '$encrypted$',
+        SUBSCRIPTIONS_USERNAME: 'name2',
+        SUBSCRIPTIONS_PASSWORD: '$encrypted$',
         AUTOMATION_ANALYTICS_URL: 'https://example.com',
+        INSTALL_UUID: 'db39b9ec-0c6e-4554-987d-42aw9c732ed8',
+        DEFAULT_EXECUTION_ENVIRONMENT: 1,
         CUSTOM_VENV_PATHS: [],
         INSIGHTS_TRACKING_STATE: false,
-        LOGIN_REDIRECT_OVERRIDE: 'https://redirect.com',
-        MANAGE_ORGANIZATION_AUTH: true,
-        DISABLE_LOCAL_AUTH: false,
-        OAUTH2_PROVIDER: {
-          ACCESS_TOKEN_EXPIRE_SECONDS: 1,
-          AUTHORIZATION_CODE_EXPIRE_SECONDS: 2,
-          REFRESH_TOKEN_EXPIRE_SECONDS: 3,
-        },
-        ORG_ADMINS_CAN_SEE_ALL_USERS: true,
-        REDHAT_PASSWORD: '$encrypted$',
-        REDHAT_USERNAME: 'mock name',
-        REMOTE_HOST_HEADERS: [],
-        SESSIONS_PER_USER: -1,
-        SESSION_COOKIE_AGE: 30000000000,
-        TOWER_URL_BASE: 'https://towerhost',
-        DEFAULT_EXECUTION_ENVIRONMENT: 1,
+        AUTOMATION_ANALYTICS_LAST_GATHER: null,
+        AUTOMATION_ANALYTICS_LAST_ENTRIES: 'foo',
+        AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
       },
     });
     ExecutionEnvironmentsAPI.readDetail = jest.fn();
@@ -77,14 +75,17 @@ describe('<MiscSystemDetail />', () => {
   });
 
   test('should render expected details', () => {
-    assertDetail(wrapper, 'Access Token Expiration', '1 seconds');
-    assertDetail(wrapper, 'All Users Visible to Organization Admins', 'On');
     assertDetail(
       wrapper,
-      'Allow External Users to Create OAuth2 Tokens',
-      'Off'
+      'Unique identifier for an installation',
+      'db39b9ec-0c6e-4554-987d-42aw9c732ed8'
     );
-    assertDetail(wrapper, 'Authorization Code Expiration', '2 seconds');
+    assertDetail(
+      wrapper,
+      'Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.',
+      'foo'
+    );
+    assertDetail(wrapper, 'All Users Visible to Organization Admins', 'On');
     assertDetail(
       wrapper,
       'Insights for Ansible Automation Platform Gather Interval',
@@ -96,32 +97,24 @@ describe('<MiscSystemDetail />', () => {
       'https://example.com'
     );
     assertDetail(wrapper, 'Base URL of the service', 'https://towerhost');
-    assertDetail(wrapper, 'Enable HTTP Basic Auth', 'On');
     assertDetail(
       wrapper,
       'Gather data for Insights for Ansible Automation Platform',
       'Off'
-    );
-    assertDetail(wrapper, 'Idle Time Force Log Out', '30000000000 seconds');
-    assertDetail(
-      wrapper,
-      'Login redirect override URL',
-      'https://redirect.com'
-    );
-    assertDetail(
-      wrapper,
-      'Maximum number of simultaneous logged in sessions',
-      '-1'
     );
     assertDetail(
       wrapper,
       'Organization Admins Can Manage Users and Teams',
       'On'
     );
+    assertDetail(wrapper, 'Enable Activity Stream', 'On');
+    assertDetail(wrapper, 'Enable Activity Stream for Inventory Sync', 'Off');
     assertDetail(wrapper, 'Red Hat customer password', 'Encrypted');
-    assertDetail(wrapper, 'Red Hat customer username', 'mock name');
-    assertDetail(wrapper, 'Refresh Token Expiration', '3 seconds');
+    assertDetail(wrapper, 'Red Hat customer username', 'name1');
+    assertDetail(wrapper, 'Red Hat or Satellite password', 'Encrypted');
+    assertDetail(wrapper, 'Red Hat or Satellite username', 'name2');
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
+    assertVariableDetail(wrapper, 'Proxy IP Allowed List', '[]');
     assertDetail(wrapper, 'Global default execution environment', 'Foo');
   });
 

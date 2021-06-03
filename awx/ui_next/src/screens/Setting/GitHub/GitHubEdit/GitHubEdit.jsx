@@ -55,6 +55,13 @@ function GitHubEdit() {
     null
   );
 
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('github');
+    }, []),
+    null
+  );
+
   const handleSubmit = async form => {
     await submitForm({
       ...form,
@@ -66,13 +73,11 @@ function GitHubEdit() {
   };
 
   const handleRevertAll = async () => {
-    const defaultValues = Object.assign(
-      ...Object.entries(github).map(([key, value]) => ({
-        [key]: value.default,
-      }))
-    );
-    await submitForm(defaultValues);
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/github/details');
   };
 
   const handleCancel = () => {
@@ -118,6 +123,7 @@ function GitHubEdit() {
                   config={github.SOCIAL_AUTH_GITHUB_TEAM_MAP}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>
               <RevertFormActionGroup
                 onCancel={handleCancel}

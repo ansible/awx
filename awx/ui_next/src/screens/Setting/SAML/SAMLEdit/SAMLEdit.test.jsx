@@ -17,6 +17,7 @@ describe('<SAMLEdit />', () => {
   let history;
 
   beforeEach(() => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
@@ -131,7 +132,7 @@ describe('<SAMLEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -146,26 +147,8 @@ describe('<SAMLEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SAML_AUTO_CREATE_OBJECTS: true,
-      SOCIAL_AUTH_SAML_ENABLED_IDPS: {},
-      SOCIAL_AUTH_SAML_EXTRA_DATA: null,
-      SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
-      SOCIAL_AUTH_SAML_ORGANIZATION_MAP: null,
-      SOCIAL_AUTH_SAML_ORG_INFO: {},
-      SOCIAL_AUTH_SAML_SP_ENTITY_ID: '',
-      SOCIAL_AUTH_SAML_SP_EXTRA: null,
-      SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: '',
-      SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: '',
-      SOCIAL_AUTH_SAML_SUPPORT_CONTACT: {},
-      SOCIAL_AUTH_SAML_TEAM_ATTR: {},
-      SOCIAL_AUTH_SAML_TEAM_MAP: null,
-      SOCIAL_AUTH_SAML_TECHNICAL_CONTACT: {},
-      SOCIAL_AUTH_SAML_SECURITY_CONFIG: {
-        requestedAuthnContext: false,
-      },
-    });
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('saml');
   });
 
   test('should successfully send request to api on form submission', async () => {

@@ -63,6 +63,13 @@ function JobsEdit() {
     null
   );
 
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('jobs');
+    }, []),
+    null
+  );
+
   const handleSubmit = async form => {
     await submitForm({
       ...form,
@@ -76,12 +83,11 @@ function JobsEdit() {
   };
 
   const handleRevertAll = async () => {
-    const defaultValues = {};
-    Object.entries(jobs).forEach(([key, value]) => {
-      defaultValues[key] = value.default;
-    });
-    await submitForm(defaultValues);
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/jobs/details');
   };
 
   const handleCancel = () => {
@@ -181,6 +187,7 @@ function JobsEdit() {
                   />
                   <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
                   {submitError && <FormSubmitError error={submitError} />}
+                  {revertError && <FormSubmitError error={revertError} />}
                 </FormColumnLayout>
                 <RevertFormActionGroup
                   onCancel={handleCancel}

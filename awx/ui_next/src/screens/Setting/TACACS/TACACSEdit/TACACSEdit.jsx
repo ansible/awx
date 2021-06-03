@@ -51,18 +51,23 @@ function TACACSEdit() {
     null
   );
 
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('tacacsplus');
+    }, []),
+    null
+  );
+
   const handleSubmit = async form => {
     await submitForm(form);
   };
 
   const handleRevertAll = async () => {
-    const defaultValues = Object.assign(
-      ...Object.entries(tacacs).map(([key, value]) => ({
-        [key]: value.default,
-      }))
-    );
-    await submitForm(defaultValues);
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/tacacs/details');
   };
 
   const handleCancel = () => {
@@ -107,6 +112,7 @@ function TACACSEdit() {
                   config={tacacs.TACACSPLUS_AUTH_PROTOCOL}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>
               <RevertFormActionGroup
                 onCancel={handleCancel}
