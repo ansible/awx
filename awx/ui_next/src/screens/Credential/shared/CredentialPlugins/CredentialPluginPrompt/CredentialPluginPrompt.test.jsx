@@ -134,7 +134,7 @@ describe('<CredentialPluginPrompt />', () => {
         wrapper
           .find('td#check-action-item-1')
           .find('input')
-          .invoke('onChange')(true);
+          .simulate('click');
       });
       wrapper.update();
       expect(

@@ -150,7 +150,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
         .find('CheckboxListItem')
         .first()
         .find('input[type="checkbox"]')
-        .simulate('change', { target: { checked: true } })
+        .simulate('click')
     );
 
     wrapper.update();
@@ -231,7 +231,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
         .find('CheckboxListItem')
         .first()
         .find('input[type="checkbox"]')
-        .simulate('change', { target: { checked: true } })
+        .simulate('click')
     );
 
     wrapper.update();

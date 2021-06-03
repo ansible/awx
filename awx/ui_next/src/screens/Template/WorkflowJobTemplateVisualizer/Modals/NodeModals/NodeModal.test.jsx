@@ -267,7 +267,7 @@ describe('NodeModal', () => {
       wrapper
         .find('td#check-action-item-1')
         .find('input')
-        .prop('onChange')(true);
+        .simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -337,7 +337,7 @@ describe('NodeModal', () => {
       wrapper
         .find('td#check-action-item-1')
         .find('input')
-        .prop('onChange')(true);
+        .simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -376,7 +376,7 @@ describe('NodeModal', () => {
       wrapper
         .find('td#check-action-item-1')
         .find('input')
-        .prop('onChange')(true);
+        .simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -415,7 +415,7 @@ describe('NodeModal', () => {
       wrapper
         .find('td#check-action-item-1')
         .find('input')
-        .prop('onChange')(true)
+        .simulate('click')
     );
     wrapper.update();
 
@@ -673,7 +673,7 @@ describe('Edit existing node', () => {
       newWrapper
         .find('td#check-action-item-1')
         .find('input')
-        .prop('onChange')();
+        .simulate('click');
       newWrapper.update();
     });
     newWrapper.update();

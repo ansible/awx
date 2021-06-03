@@ -183,7 +183,7 @@ describe('CredentialsStep', () => {
       wrapper
         .find('td#check-action-item-2')
         .find('input')
-        .simulate('change', { target: { checked: true } });
+        .simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(1);
@@ -244,7 +244,7 @@ describe('CredentialsStep', () => {
       wrapper
         .find('td#check-action-item-5')
         .find('input')
-        .simulate('change', { target: { checked: true } });
+        .simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(0);
@@ -321,7 +321,7 @@ describe('CredentialsStep', () => {
       wrapper
         .find('td#check-action-item-33')
         .find('input')
-        .simulate('change', { target: { checked: true } });
+        .simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(0);

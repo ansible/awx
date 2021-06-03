@@ -34,7 +34,6 @@ const CheckboxListItem = ({
         select={{
           rowIndex,
           isSelected,
-          onSelect: isSelected ? onDeselect : onSelect,
           variant: isRadio ? 'radio' : 'checkbox',
         }}
         name={name}
