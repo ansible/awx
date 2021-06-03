@@ -122,7 +122,7 @@ describe('<SelectResourceStep />', () => {
     checkboxListItemWrapper
       .first()
       .find('input[type="checkbox"]')
-      .simulate('change', { target: { checked: true } });
+      .simulate('click');
     expect(handleRowClick).toHaveBeenCalledWith(data.results[0]);
   });
 });

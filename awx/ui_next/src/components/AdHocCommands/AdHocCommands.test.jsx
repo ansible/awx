@@ -208,7 +208,7 @@ describe('<AdHocCommands />', () => {
       wrapper
         .find('td#check-action-item-2')
         .find('input')
-        .simulate('change', { target: { checked: true } });
+        .simulate('click');
     });
 
     wrapper.update();
@@ -227,7 +227,7 @@ describe('<AdHocCommands />', () => {
       wrapper
         .find('td#check-action-item-4')
         .find('input')
-        .simulate('change', { target: { checked: true } });
+        .simulate('click');
     });
 
     wrapper.update();
@@ -377,11 +377,7 @@ describe('<AdHocCommands />', () => {
       wrapper
         .find('td#check-action-item-2')
         .find('input')
-        .simulate('change', {
-          target: {
-            checked: true,
-          },
-        });
+        .simulate('click');
     });
 
     wrapper.update();
@@ -400,11 +396,7 @@ describe('<AdHocCommands />', () => {
       wrapper
         .find('td#check-action-item-4')
         .find('input')
-        .simulate('change', {
-          target: {
-            checked: true,
-          },
-        });
+        .simulate('click');
     });
 
     wrapper.update();

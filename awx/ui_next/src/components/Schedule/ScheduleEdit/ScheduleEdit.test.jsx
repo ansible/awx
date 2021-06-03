@@ -475,11 +475,7 @@ describe('<ScheduleEdit />', () => {
       wrapper
         .find('td#check-action-item-1')
         .find('input')
-        .simulate('change', {
-          target: {
-            checked: true,
-          },
-        });
+        .simulate('click');
     });
     wrapper.update();
 
@@ -607,11 +603,7 @@ describe('<ScheduleEdit />', () => {
       wrapper
         .find('td#check-action-item-2')
         .find('input')
-        .simulate('change', {
-          target: {
-            checked: true,
-          },
-        });
+        .simulate('click');
     });
     wrapper.update();
 

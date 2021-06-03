@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { func, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
-
 import { t } from '@lingui/macro';
 import {
   Button,

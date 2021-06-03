@@ -345,11 +345,7 @@ describe('<ScheduleForm />', () => {
         promptWrapper
           .find('td#check-action-item-1')
           .find('input')
-          .simulate('change', {
-            target: {
-              checked: true,
-            },
-          });
+          .simulate('click');
       });
       promptWrapper.update();
       expect(
