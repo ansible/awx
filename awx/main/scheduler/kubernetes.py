@@ -96,7 +96,7 @@ class PodManager(object):
                 error_msg = _('Invalid openshift or k8s cluster credential')
                 if e.status == 403:
                     error_msg = _(
-                        'Failed to create secret for container group {} because the needed service account roles are needed.  Add get, create and delete roles for secret resources for your cluster credential.'.format(
+                        'Failed to create secret for container group {} because additional service account role rules are needed.  Add get, create and delete role rules for secret resources for your cluster credential.'.format(
                             job.instance_group.name
                         )
                     )
@@ -113,7 +113,7 @@ class PodManager(object):
                 error_msg = _('Invalid openshift or k8s cluster credential')
                 if e.status == 403:
                     error_msg = _(
-                        'Failed to delete secret for container group {} because the needed service account roles are needed.  Add create and delete roles for secret resources for your cluster credential.'.format(
+                        'Failed to delete secret for container group {} because additional service account role rules are needed.  Add create and delete role rules for secret resources for your cluster credential.'.format(
                             job.instance_group.name
                         )
                     )
