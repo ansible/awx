@@ -724,6 +724,19 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
 
+    def get_summary_fields(self, obj):
+        summary_fields = super().get_summary_fields(obj)
+
+        if self.is_detail_view:
+            resolved_ee = obj.resolve_execution_environment()
+            summary_fields['resolved_environment'] = {
+                field: getattr(resolved_ee, field, None)
+                for field in SUMMARIZABLE_FK_FIELDS['execution_environment']
+                if getattr(resolved_ee, field, None) is not None
+            }
+
+        return summary_fields
+
 
 class UnifiedJobSerializer(BaseSerializer):
     show_capabilities = ['start', 'delete']
