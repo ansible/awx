@@ -301,10 +301,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const isMounted = useIsMounted();
   const scrollTop = useRef(0);
   const scrollHeight = useRef(0);
-  const currentlyLoading = useRef([]);
   const history = useHistory();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
+  const [currentlyLoading, setCurrentlyLoading] = useState([]);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [hostEvent, setHostEvent] = useState({});
   const [isHostModalOpen, setIsHostModalOpen] = useState(false);
@@ -359,7 +359,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current?.recomputeRowHeights) {
       listRef.current.recomputeRowHeights();
     }
-  }, [cssMap, remoteRowCount]);
+  }, [currentlyLoading, cssMap, remoteRowCount]);
 
   useEffect(() => {
     if (jobStatus && !isJobRunning(jobStatus)) {
@@ -427,7 +427,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     if (isMounted.current) {
       setHasContentLoading(true);
-      currentlyLoading.current = currentlyLoading.current.concat(loadRange);
+      setCurrentlyLoading(prevCurrentlyLoading =>
+        prevCurrentlyLoading.concat(loadRange)
+      );
     }
 
     try {
@@ -493,8 +495,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     } finally {
       if (isMounted.current) {
         setHasContentLoading(false);
-        currentlyLoading.current = currentlyLoading.current.filter(
-          n => !loadRange.includes(n)
+        setCurrentlyLoading(prevCurrentlyLoading =>
+          prevCurrentlyLoading.filter(n => !loadRange.includes(n))
         );
         loadRange.forEach(n => {
           cache.clear(n);
@@ -507,7 +509,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (results[index]) {
       return true;
     }
-    return currentlyLoading.current.includes(index);
+    return currentlyLoading.includes(index);
   };
 
   const handleHostEventClick = hostEventToOpen => {
@@ -575,7 +577,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     );
 
     if (isMounted.current) {
-      currentlyLoading.current = currentlyLoading.current.concat(loadRange);
+      setCurrentlyLoading(prevCurrentlyLoading =>
+        prevCurrentlyLoading.concat(loadRange)
+      );
     }
 
     const params = {
@@ -602,8 +606,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             ...prevCssMap,
             ...newResultsCssMap,
           }));
-          currentlyLoading.current = currentlyLoading.current.filter(
-            n => !loadRange.includes(n)
+          setCurrentlyLoading(prevCurrentlyLoading =>
+            prevCurrentlyLoading.filter(n => !loadRange.includes(n))
           );
           loadRange.forEach(n => {
             cache.clear(n);
