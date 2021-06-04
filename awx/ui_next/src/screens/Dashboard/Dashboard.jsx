@@ -4,13 +4,7 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import {
   Card,
-  CardHeader,
-  CardActions,
-  CardBody,
   PageSection,
-  Select,
-  SelectVariant,
-  SelectOption,
   Tabs,
   Tab,
   TabTitleText,
@@ -21,15 +15,9 @@ import { DashboardAPI } from '../../api';
 import ScreenHeader from '../../components/ScreenHeader';
 import JobList from '../../components/JobList';
 import ContentLoading from '../../components/ContentLoading';
-import LineChart from './shared/LineChart';
 import Count from './shared/Count';
 import TemplateList from '../../components/TemplateList';
-
-const StatusSelect = styled(Select)`
-  && {
-    --pf-c-select__toggle--MinWidth: 165px;
-  }
-`;
+import DashboardGraph from './DashboardGraph';
 
 const Counts = styled.div`
   display: grid;
@@ -51,69 +39,25 @@ const MainPageSection = styled(PageSection)`
   }
 `;
 
-const GraphCardHeader = styled(CardHeader)`
-  margin-top: var(--pf-global--spacer--lg);
-`;
-
-const GraphCardActions = styled(CardActions)`
-  margin-left: initial;
-  padding-left: 0;
-`;
-
 function Dashboard() {
-  const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
-  const [isJobTypeDropdownOpen, setIsJobTypeDropdownOpen] = useState(false);
-  const [isJobStatusDropdownOpen, setIsJobStatusDropdownOpen] = useState(false);
-  const [periodSelection, setPeriodSelection] = useState('month');
-  const [jobTypeSelection, setJobTypeSelection] = useState('all');
-  const [jobStatusSelection, setJobStatusSelection] = useState('all');
   const [activeTabId, setActiveTabId] = useState(0);
 
   const {
     isLoading,
-    result: { jobGraphData, countData },
+    result: countData,
     request: fetchDashboardGraph,
   } = useRequest(
     useCallback(async () => {
-      const [{ data }, { data: dataFromCount }] = await Promise.all([
-        DashboardAPI.readJobGraph({
-          period: periodSelection,
-          job_type: jobTypeSelection,
-        }),
-        DashboardAPI.read(),
-      ]);
-      const newData = {};
-      data.jobs.successful.forEach(([dateSecs, count]) => {
-        if (!newData[dateSecs]) {
-          newData[dateSecs] = {};
-        }
-        newData[dateSecs].successful = count;
-      });
-      data.jobs.failed.forEach(([dateSecs, count]) => {
-        if (!newData[dateSecs]) {
-          newData[dateSecs] = {};
-        }
-        newData[dateSecs].failed = count;
-      });
-      const jobData = Object.keys(newData).map(dateSecs => {
-        const [created] = new Date(dateSecs * 1000).toISOString().split('T');
-        newData[dateSecs].created = created;
-        return newData[dateSecs];
-      });
-      return {
-        jobGraphData: jobData,
-        countData: dataFromCount,
-      };
-    }, [periodSelection, jobTypeSelection]),
-    {
-      jobGraphData: [],
-      countData: {},
-    }
+      const { data: dataFromCount } = await DashboardAPI.read();
+
+      return dataFromCount;
+    }, []),
+    {}
   );
 
   useEffect(() => {
     fetchDashboardGraph();
-  }, [fetchDashboardGraph, periodSelection, jobTypeSelection]);
+  }, [fetchDashboardGraph]);
   if (isLoading) {
     return (
       <PageSection>
@@ -179,97 +123,7 @@ function Dashboard() {
                 eventKey={0}
                 title={<TabTitleText>{t`Job status`}</TabTitleText>}
               >
-                <Fragment>
-                  <GraphCardHeader>
-                    <GraphCardActions>
-                      <Select
-                        variant={SelectVariant.single}
-                        placeholderText={t`Select period`}
-                        aria-label={t`Select period`}
-                        typeAheadAriaLabel={t`Select period`}
-                        className="periodSelect"
-                        onToggle={setIsPeriodDropdownOpen}
-                        onSelect={(event, selection) =>
-                          setPeriodSelection(selection)
-                        }
-                        selections={periodSelection}
-                        isOpen={isPeriodDropdownOpen}
-                      >
-                        <SelectOption key="month" value="month">
-                          {t`Past month`}
-                        </SelectOption>
-                        <SelectOption key="two_weeks" value="two_weeks">
-                          {t`Past two weeks`}
-                        </SelectOption>
-                        <SelectOption key="week" value="week">
-                          {t`Past week`}
-                        </SelectOption>
-                        <SelectOption key="day" value="day">
-                          {t`Past 24 hours`}
-                        </SelectOption>
-                      </Select>
-                      <Select
-                        variant={SelectVariant.single}
-                        placeholderText={t`Select job type`}
-                        aria-label={t`Select job type`}
-                        className="jobTypeSelect"
-                        onToggle={setIsJobTypeDropdownOpen}
-                        onSelect={(event, selection) =>
-                          setJobTypeSelection(selection)
-                        }
-                        selections={jobTypeSelection}
-                        isOpen={isJobTypeDropdownOpen}
-                      >
-                        <SelectOption key="all" value="all">
-                          {t`All job types`}
-                        </SelectOption>
-                        <SelectOption key="inv_sync" value="inv_sync">
-                          {t`Inventory sync`}
-                        </SelectOption>
-                        <SelectOption key="scm_update" value="scm_update">
-                          {t`SCM update`}
-                        </SelectOption>
-                        <SelectOption key="playbook_run" value="playbook_run">
-                          {t`Playbook run`}
-                        </SelectOption>
-                      </Select>
-                      <StatusSelect
-                        variant={SelectVariant.single}
-                        placeholderText={t`Select status`}
-                        aria-label={t`Select status`}
-                        className="jobStatusSelect"
-                        onToggle={setIsJobStatusDropdownOpen}
-                        onSelect={(event, selection) => {
-                          setIsJobStatusDropdownOpen(false);
-                          setJobStatusSelection(selection);
-                        }}
-                        selections={jobStatusSelection}
-                        isOpen={isJobStatusDropdownOpen}
-                      >
-                        <SelectOption
-                          key="all"
-                          value="all"
-                        >{t`All jobs`}</SelectOption>
-                        <SelectOption
-                          key="successful"
-                          value="successful"
-                        >{t`Successful jobs`}</SelectOption>
-                        <SelectOption
-                          key="failed"
-                          value="failed"
-                        >{t`Failed jobs`}</SelectOption>
-                      </StatusSelect>
-                    </GraphCardActions>
-                  </GraphCardHeader>
-                  <CardBody>
-                    <LineChart
-                      jobStatus={jobStatusSelection}
-                      height={390}
-                      id="d3-line-chart-root"
-                      data={jobGraphData}
-                    />
-                  </CardBody>
-                </Fragment>
+                <DashboardGraph />
               </Tab>
               <Tab
                 aria-label={t`Recent Jobs list tab`}
