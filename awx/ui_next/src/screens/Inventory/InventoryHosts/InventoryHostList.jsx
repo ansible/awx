@@ -114,6 +114,25 @@ function InventoryHostList() {
         clearSelected={clearSelected}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
+        toolbarSearchColumns={[
+          {
+            name: t`Name`,
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: t`Description`,
+            key: 'description__icontains',
+          },
+          {
+            name: t`Created By (Username)`,
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: t`Modified By (Username)`,
+            key: 'modified_by__username__icontains',
+          },
+        ]}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
