@@ -184,8 +184,8 @@ class LookupModule(LookupBase):
                 else:
                     try:
                         rrule_kwargs['until'] = LookupModule.parse_date_time(end_on)
-                    except Exception:
-                        raise AnsibleError('Parameter end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]')
+                    except Exception as e:
+                        raise AnsibleError('Parameter end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]') from e
 
             # A week-based frequency can also take the on_days parameter
             if frequency == 'week' and 'on_days' in kwargs:
@@ -208,16 +208,16 @@ class LookupModule(LookupBase):
                         my_month_day = int(kwargs['month_day_number'])
                         if my_month_day < 1 or my_month_day > 31:
                             raise Exception()
-                    except Exception:
-                        raise AnsibleError('month_day_number must be between 1 and 31')
+                    except Exception as e:
+                        raise AnsibleError('month_day_number must be between 1 and 31') from e
 
                     rrule_kwargs['bymonthday'] = my_month_day
 
                 if 'on_the' in kwargs:
                     try:
                         (occurance, weekday) = kwargs['on_the'].split(' ')
-                    except Exception:
-                        raise AnsibleError('on_the parameter must be two words separated by a space')
+                    except Exception as e:
+                        raise AnsibleError('on_the parameter must be two words separated by a space') from e
 
                     if weekday not in LookupModule.weekdays:
                         raise AnsibleError('Weekday portion of on_the parameter is not valid')
