@@ -66,13 +66,9 @@ class AnsibleInventoryLoader(object):
         /usr/bin/ansible/ansible-inventory -i hosts --list
     """
 
-    def __init__(self, source, venv_path=None, verbosity=0):
+    def __init__(self, source, verbosity=0):
         self.source = source
         self.verbosity = verbosity
-        if venv_path:
-            self.venv_path = venv_path
-        else:
-            self.venv_path = settings.ANSIBLE_VENV_PATH
 
     def get_base_args(self):
         bargs = ['podman', 'run', '--user=root', '--quiet']
@@ -131,7 +127,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--inventory-name', dest='inventory_name', type=str, default=None, metavar='n', help='name of inventory to sync')
         parser.add_argument('--inventory-id', dest='inventory_id', type=int, default=None, metavar='i', help='id of inventory to sync')
-        parser.add_argument('--venv', dest='venv', type=str, default=None, help='absolute path to the AWX custom virtualenv to use')
         parser.add_argument('--overwrite', dest='overwrite', action='store_true', default=False, help='overwrite the destination hosts and groups')
         parser.add_argument('--overwrite-vars', dest='overwrite_vars', action='store_true', default=False, help='overwrite (rather than merge) variables')
         parser.add_argument('--keep-vars', dest='keep_vars', action='store_true', default=False, help='DEPRECATED legacy option, has no effect')
@@ -824,7 +819,6 @@ class Command(BaseCommand):
                 raise CommandError('--source is required')
             verbosity = int(options.get('verbosity', 1))
             self.set_logging_level(verbosity)
-            venv_path = options.get('venv', None)
 
             # Load inventory object based on name or ID.
             if inventory_id:
@@ -854,7 +848,7 @@ class Command(BaseCommand):
                     _eager_fields=dict(job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd())
                 )
 
-            data = AnsibleInventoryLoader(source=source, venv_path=venv_path, verbosity=verbosity).load()
+            data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
 
             logger.debug('Finished loading from source: %s', source)
 
