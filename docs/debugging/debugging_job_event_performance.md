@@ -1,69 +1,37 @@
 # AWX Job Event Performance Debugging
 
-> Observed delay in UI job stdout.
+## The Job Event Critical Path
 
-The job event critical path. Job events starts their life in Ansible. Specifically, in the awx Ansible callback plugin. AWX creates JSON payloads out of function calls, and the parameters passed, to the registered callback plugin. The moment the JSON payload is created in the callback plugin is the `created` time on a job event record that is stored in the AWX database. The `modified` time on the job event record is the time the job event record was stored in the database. The difference in `modified - created` is the time it take for an event to go from Ansible and into the AWX database. The pieces in between that path are: (1) Ansible (2) the AWX callback plugin (inside of ansible-runner) (3) push to redis. This ends the processing that happens in the Ansible playbook process space. The work picks back up in the callback receiver process with a (4) pop from redis, (5) bulk insert to postgres, (6) emit event over websocket via redis. Again, the handling of the event changes process space here to (7) deliver over the websocket(s) via daphne to the other AWX nodes & to websocket browser clients. The (8) UI then gets the websocket event and displays it in the job details view. This is what we call the "critical path" for job events.
+> Observed delay in UI job `stdout`.
 
+Job events start their life in Ansible, specifically in the AWX Ansible callback plugin. AWX creates JSON payloads out of function calls and the parameters are passed to the registered callback plugin. The moment the JSON payload is created in the callback plugin is the `created` time on a job event record, which is then stored in the AWX database. The `modified` time is when the job event record was stored in the database. The difference in `modified - created` is the time it takes for an event to go from Ansible and into the AWX database. The pieces in between that path are:
 
-### Quickly Debugging the Path 4-8
+  1. Ansible
+  2. The AWX callback plugin (inside of `ansible-runner`)
+  3. A push to Redis; this ends the processing that happens in the Ansible playbook process space
+  4. The work then picks back up in the callback receiver process with a pop from Redis
+  5. A bulk insert to `postgres` occurs
+  6. Events are emitted over websocket via Redis
+  7. At this point, the handling of the event changes process space to deliver over the websocket(s) via `daphne` to the other AWX nodes & to websocket browser clients
+  8. The UI then gets the websocket event and displays it in the job details view
 
-* Login to an AWX instance and open chrome debug tools
+This is what we call the "critical path" for job events.
+
+### Quick Debugging
+
+* Log in to an AWX instance and open Chrome Debug Tools
 * Paste the above in
-* You will notice a blue square on the screen with a textbox and a button.
-* Launch a job and note the job id
-* Enter the job id into the textbox and click submit. This will subscribe to the job events for that job.
+* You will notice a blue square on the screen with a textbox and a button
+* Launch a job and note the job ID
+* Enter the job ID into the textbox and click Submit; this will subscribe to the job events for that job
 * The blue box should update with the current "lag" time in seconds. The lag time is the `now - created`. This represents the path from 4-8 listed above.
-* Note, use the debug tool while hanging out on something OTHER THAN the job details page (path steps 4-7). Then, hang out on the job details page with the debug page (path steps 4-8) . Note the difference.
-
-### Debugging the callback receiver + database performance
-
-```
-SELECT event, AVG(EXTRACT(EPOCH FROM (modified-created))) as avg_seconds, MAX(EXTRACT(EPOCH FROM (modified-created))) as max_seconds from main_jobevent group by event;
-
-         event          |    avg_seconds     | max_seconds
-------------------------+--------------------+-------------
- playbook_on_play_start | 0.0160689432989691 |     1.65832
- playbook_on_start      | 0.0163346391752577 |    1.663806
- playbook_on_stats      |   17.9721049948454 |   42.367662
- playbook_on_task_start | 0.0160336769230769 |    1.532999
- runner_item_on_ok      |  0.164467420394816 |   42.445095
- runner_on_ok           |  0.223340121179152 |   42.312954
- runner_on_start        |  0.151972167806445 |    7.748572
- verbose                |                  0 |           0
-(8 rows)
-```
-
-The above query is useful to get an idea of how fast events are being "put away" by AWX. You don't want to see 10's of second averages. The above times are "normal".
-
-```
-SELECT event, AVG(EXTRACT(EPOCH FROM (modified-created))) as avg_seconds, MAX(EXTRACT(EPOCH FROM (modified-created))) as max_seconds from main_jobevent where job_id >= (select max(job_id) from main_jobevent)-6 group by event;
-```
-
-Above is a modification of the previous query but limiting the set of job event that are considered for averaging to the last 6 jobs that where created. This is useful if you have a recreation scenario and you want to average the event processing time of the last X jobs without the noise of other jobs that have ran on the system in the past.
-
-```
-SELECT * FROM (
-SELECT to_char(start_time, 'YYYY-MM-DD HH24:MI'), count(e.modified) AS events, count(e.modified) / 1 as events_per_minute
-FROM   generate_series(date_trunc('day', localtimestamp - interval '1 hours')
-                     , localtimestamp
-                     , interval '1 min') g(start_time)
-LEFT   JOIN main_jobevent e ON e.modified >= g.start_time
-                   AND e.modified <  g.start_time + interval '1 min'
-GROUP  BY start_time
-ORDER  BY start_time ) as s WHERE events != 0;
-
-     to_char      | events | events_per_minute
-------------------+--------+-------------------
- 2021-04-28 13:06 |   2878 |              2878
- 2021-04-28 13:07 |    587 |               587
-(2 rows)
-```
-
-The above is basically a histogram view of the same data provided in `awx-manage callback_stats` . Which is a minute-by-minute history of the rate at which AWX has inserted events into the database. 
+* Note, use the debug tool while hanging out on something OTHER THAN the job details page (path steps 4-7). Then, hang out on the Job Details page with the debug page (path steps 4-8) . Note the difference.
 
 ### Debugging the Websockets
 
-AWX relies on Django channels and redis for websockets. `channels_redis`, the connection plugin for channels to use redis as the message backend, allows for setting per-group queue limits. By default, AWX sets this limit to 10,000. It can be tricky to know when this limit is exceeded due to the asynchronous nature of channels+asgi+websockets. One way to be notified of websocket queue reaching capacity is to hook into the `channels_redis.core` logger. Below is an example of how to enable the logging and an example of what capacity overflow messages look like.
+AWX relies on Django channels and Redis for websockets. `channels_redis`, the connection plugin for channels to use Redis as the message backend, allows for setting per-group queue limits. By default, AWX sets this limit to 10,000. It can be tricky to know when this limit is exceeded due to the asynchronous nature of Channels + ASGI + websockets.
+
+One way to be notified of websocket queue reaching capacity is to hook into the `channels_redis.core` logger. Below is an example of how to enable the logging and an example of what capacity overflow messages look like:
 
 ```
 LOGGING['loggers']['channels_redis.core'] = {
@@ -76,7 +44,9 @@ tail -f /var/log/tower/tower.log
 2021-04-28 20:53:51,231 INFO     channels_redis.core 1 of 1 channels over capacity in group job_events-49
 ```
 
-The two above log messages were not chosen randomly. They are representative of common groups that can overflow. Each AWX node sends all events it processes locally to all other AWX nodes. It does this via the `broadcast-group_send` group, all AWX nodes are subscribed to this group. Under high load, this queue can overflow. The other log message above is an overflow in the `job_events-49` group. Overflow in this queue can happen when either AWX or the websocket client can not keep up with the event websocket messages.
+The two above log messages were not chosen randomly. They are representative of common groups that can overflow. Each AWX node sends all events it processes locally to all other AWX nodes. It does this via the `broadcast-group_send` group; all AWX nodes are subscribed to this group. Under high load, this queue can overflow.
+
+The other log message above is an overflow in the `job_events-49` group. Overflow in this queue can happen when either AWX or the websocket client cannot keep up with the event websocket messages.
 
 ```
 redis-cli -s /var/run/redis/redis.sock
@@ -90,7 +60,7 @@ redis /var/run/redis/redis.sock> keys *
 6) "asgispecific.2061d193ea1c4dd487d8f455dfeabd6a!"
 ```
 
-Above is an example of all the keys in redis on an awx node. Let's focus on 3) and 6). 3) is the special group we mentioned above. The redis `ZSET` object is created by `channels_redis` to track django channel clients subscribed to the `broadcast-group_send` group. 6) is the queue that holds websocket messages.
+Above is an example of all of the keys in Redis on an AWX node. Let's focus on 3) and 6). 3) is the special group we mentioned above. The Redis `ZSET` object is created by `channels_redis` to track Django Channel clients subscribed to the `broadcast-group_send` group. 6) is the queue that holds websocket messages.
 
 ```
 redis /var/run/redis/redis.sock> zrange asgi:group:broadcast-group_send 0 -1
@@ -113,16 +83,14 @@ redis /var/run/redis/redis.sock> zcount asgispecific.2061d193ea1c4dd487d8f455dfe
 (integer) 15
 ```
 
-In the above example we show how to get the list of channels clients subscribed to the `broadcast-group_send` queue. We also show how to get the queue depth of a websocket message queue.
-
-
+In the above example we show how to get the list of Channels clients subscribed to the `broadcast-group_send` queue. We also show how to get the queue depth of a websocket message queue.
 
 <details><summary>debug.js</summary>
 <p>
 
 ```javascript
 
-// Copy paste the below script in the console to give a visual gauge of events per second received over the websocket
+// Copy paste the below script in the console to give a visual gauge of events per second that are received over the websocket
 
 var s;
 
