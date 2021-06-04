@@ -601,18 +601,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/playbook/{}".format(self.pk))
 
     @property
-    def ansible_virtualenv_path(self):
-        # the order here enforces precedence (it matters)
-        for virtualenv in (
-            self.job_template.custom_virtualenv if self.job_template else None,
-            self.project.custom_virtualenv,
-            self.organization.custom_virtualenv if self.organization else None,
-        ):
-            if virtualenv:
-                return virtualenv
-        return settings.ANSIBLE_VENV_PATH
-
-    @property
     def event_class(self):
         if self.has_unpartitioned_events:
             return UnpartitionedJobEvent
