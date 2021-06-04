@@ -7,6 +7,7 @@ import json
 import yaml
 import logging
 import os
+import subprocess
 import re
 import stat
 import subprocess
@@ -916,28 +917,33 @@ def get_current_apps():
     return current_apps
 
 
-def get_custom_venv_choices(custom_paths=None):
+def get_custom_venv_choices():
     from django.conf import settings
 
-    custom_paths = custom_paths or settings.CUSTOM_VENV_PATHS
-    all_venv_paths = [settings.BASE_VENV_PATH] + custom_paths
+    all_venv_paths = settings.CUSTOM_VENV_PATHS + [settings.BASE_VENV_PATH]
     custom_venv_choices = []
 
-    for custom_venv_path in all_venv_paths:
-        try:
-            if os.path.exists(custom_venv_path):
-                custom_venv_choices.extend(
-                    [
-                        os.path.join(custom_venv_path, x, '')
-                        for x in os.listdir(custom_venv_path)
-                        if x != 'awx'
-                        and os.path.isdir(os.path.join(custom_venv_path, x))
-                        and os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
-                    ]
-                )
-        except Exception:
-            logger.exception("Encountered an error while discovering custom virtual environments.")
+    for venv_path in all_venv_paths:
+        if os.path.exists(venv_path):
+            for d in os.listdir(venv_path):
+                if venv_path == settings.BASE_VENV_PATH and d == 'awx':
+                    continue
+
+                if os.path.exists(os.path.join(venv_path, d, 'bin', 'pip')):
+                    custom_venv_choices.append(os.path.join(venv_path, d))
+
     return custom_venv_choices
+
+
+def get_custom_venv_pip_freeze(venv_path):
+    pip_path = os.path.join(venv_path, 'bin', 'pip')
+
+    try:
+        freeze_data = subprocess.run([pip_path, "freeze"], capture_output=True)
+        pip_data = (freeze_data.stdout).decode('UTF-8')
+        return pip_data
+    except Exception:
+        logger.exception("Encountered an error while trying to run 'pip freeze' for custom virtual environments:")
 
 
 def is_ansible_variable(key):

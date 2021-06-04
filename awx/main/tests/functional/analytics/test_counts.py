@@ -12,7 +12,6 @@ def test_empty():
         "active_sessions": 0,
         "active_host_count": 0,
         "credential": 0,
-        "custom_virtualenvs": 0,  # dev env ansible3
         "host": 0,
         "inventory": 0,
         "inventories": {"normal": 0, "smart": 0},

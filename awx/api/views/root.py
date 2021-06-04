@@ -301,7 +301,9 @@ class ApiV2ConfigView(APIView):
         ):
             data.update(
                 dict(
-                    project_base_dir=settings.PROJECTS_ROOT, project_local_paths=Project.get_local_path_choices(), custom_virtualenvs=get_custom_venv_choices()
+                    project_base_dir=settings.PROJECTS_ROOT,
+                    project_local_paths=Project.get_local_path_choices(),
+                    custom_virtualenvs=get_custom_venv_choices(),
                 )
             )
         elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
