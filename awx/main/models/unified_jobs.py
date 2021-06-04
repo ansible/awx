@@ -49,6 +49,7 @@ from awx.main.utils import (
     getattr_dne,
     polymorphic,
     schedule_task_manager,
+    get_event_partition_epoch,
 )
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -990,8 +991,18 @@ class UnifiedJob(
             'main_systemjob': 'system_job_id',
         }[tablename]
 
+    @property
+    def has_unpartitioned_events(self):
+        applied = get_event_partition_epoch()
+        return applied and self.created and self.created < applied
+
     def get_event_queryset(self):
-        return self.event_class.objects.filter(**{self.event_parent_key: self.id})
+        kwargs = {
+            self.event_parent_key: self.id,
+        }
+        if not self.has_unpartitioned_events:
+            kwargs['job_created'] = self.created
+        return self.event_class.objects.filter(**kwargs)
 
     @property
     def event_processing_finished(self):
@@ -1077,13 +1088,15 @@ class UnifiedJob(
                 # .write() calls on the fly to maintain this interface
                 _write = fd.write
                 fd.write = lambda s: _write(smart_text(s))
+                tbl = self._meta.db_table + 'event'
+                created_by_cond = ''
+                if self.has_unpartitioned_events:
+                    tbl = f'_unpartitioned_{tbl}'
+                else:
+                    created_by_cond = f"job_created='{self.created.isoformat()}' AND "
 
-                cursor.copy_expert(
-                    "copy (select stdout from {} where {}={} and stdout != '' order by start_line) to stdout".format(
-                        self._meta.db_table + 'event', self.event_parent_key, self.id
-                    ),
-                    fd,
-                )
+                sql = f"copy (select stdout from {tbl} where {created_by_cond}{self.event_parent_key}={self.id} and stdout != '' order by start_line) to stdout"  # nosql
+                cursor.copy_expert(sql, fd)
 
                 if hasattr(fd, 'name'):
                     # If we're dealing with a physical file, use `sed` to clean

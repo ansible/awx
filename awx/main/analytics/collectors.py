@@ -6,7 +6,7 @@ import platform
 import distro
 
 from django.db import connection
-from django.db.models import Count, Max, Min
+from django.db.models import Count
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
@@ -58,7 +58,10 @@ def four_hour_slicing(key, since, until, last_gather):
         horizon = until - timedelta(weeks=4)
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
         last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
-        last_entry = max(last_entries.get(key) or last_gather, horizon)
+        try:
+            last_entry = max(last_entries.get(key) or last_gather, horizon)
+        except TypeError:  # last_entries has a stale non-datetime entry for this collector
+            last_entry = max(last_gather, horizon)
 
     start, end = last_entry, None
     while start < until:
@@ -67,7 +70,7 @@ def four_hour_slicing(key, since, until, last_gather):
         start = end
 
 
-def events_slicing(key, since, until, last_gather):
+def _identify_lower(key, since, until, last_gather):
     from awx.conf.models import Setting
 
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
@@ -77,16 +80,8 @@ def events_slicing(key, since, until, last_gather):
     lower = since or last_gather
     if not since and last_entries.get(key):
         lower = horizon
-    pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
 
-    previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
-    if not since and last_entries.get(key):
-        previous_pk = max(last_entries[key], previous_pk)
-    final_pk = pk_values['pk__max'] or 0
-
-    step = 100000
-    for start in range(previous_pk, final_pk + 1, step):
-        yield (start, min(start + step, final_pk))
+    return lower, last_entries
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
@@ -335,39 +330,49 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
-def events_table(since, full_path, until, **kwargs):
+def _events_table(since, full_path, until, tbl, where_column, project_job_created=False, **kwargs):
     def query(event_data):
-        return f'''COPY (SELECT main_jobevent.id,
-                         main_jobevent.created,
-                         main_jobevent.modified,
-                         main_jobevent.uuid,
-                         main_jobevent.parent_uuid,
-                         main_jobevent.event,
-                         {event_data}->'task_action' AS task_action,
-                         (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                         main_jobevent.failed,
-                         main_jobevent.changed,
-                         main_jobevent.playbook,
-                         main_jobevent.play,
-                         main_jobevent.task,
-                         main_jobevent.role,
-                         main_jobevent.job_id,
-                         main_jobevent.host_id,
-                         main_jobevent.host_name,
-                         CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
-                         CAST({event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
-                         {event_data}->'duration' AS duration,
-                         {event_data}->'res'->'warnings' AS warnings,
-                         {event_data}->'res'->'deprecations' AS deprecations
-                         FROM main_jobevent
-                         WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})
-                         ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''
+        query = f'''COPY (SELECT {tbl}.id,
+                          {tbl}.created,
+                          {tbl}.modified,
+                          {tbl + '.job_created' if project_job_created else 'NULL'} as job_created,
+                          {tbl}.uuid,
+                          {tbl}.parent_uuid,
+                          {tbl}.event,
+                          task_action,
+                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
+                          {tbl}.failed,
+                          {tbl}.changed,
+                          {tbl}.playbook,
+                          {tbl}.play,
+                          {tbl}.task,
+                          {tbl}.role,
+                          {tbl}.job_id,
+                          {tbl}.host_id,
+                          {tbl}.host_name,
+                          CAST(x.start AS TIMESTAMP WITH TIME ZONE) AS start,
+                          CAST(x.end AS TIMESTAMP WITH TIME ZONE) AS end,
+                          x.duration AS duration,
+                          x.res->'warnings' AS warnings,
+                          x.res->'deprecations' AS deprecations
+                          FROM {tbl}, json_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
+                          WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
+        return query
 
     try:
-        return _copy_table(table='events', query=query("main_jobevent.event_data::json"), path=full_path)
+        return _copy_table(table='events', query=query(f"{tbl}.event_data::json"), path=full_path)
     except UntranslatableCharacter:
-        return _copy_table(table='events', query=query("replace(main_jobevent.event_data::text, '\\u0000', '')::json"), path=full_path)
+        return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::json"), path=full_path)
+
+
+@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+def events_table_unpartitioned(since, full_path, until, **kwargs):
+    return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', 'created', **kwargs)
+
+
+@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+def events_table_partitioned_modified(since, full_path, until, **kwargs):
+    return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
 
 @register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)

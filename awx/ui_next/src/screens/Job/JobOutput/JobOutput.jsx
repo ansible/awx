@@ -48,7 +48,7 @@ import {
 import useIsMounted from '../../../util/useIsMounted';
 
 const QS_CONFIG = getQSConfig('job_output', {
-  order_by: 'start_line',
+  order_by: 'counter',
 });
 
 const EVENT_START_TASK = 'playbook_on_task_start';
@@ -271,6 +271,27 @@ const cache = new CellMeasurerCache({
   defaultHeight: 25,
 });
 
+const getEventRequestParams = (job, remoteRowCount, requestRange) => {
+  const [startIndex, stopIndex] = requestRange;
+  if (isJobRunning(job?.status)) {
+    return [
+      { counter__gte: startIndex, limit: stopIndex - startIndex + 1 },
+      range(startIndex, Math.min(stopIndex, remoteRowCount)),
+      startIndex,
+    ];
+  }
+  const { page, pageSize, firstIndex } = getRowRangePageSize(
+    startIndex,
+    stopIndex
+  );
+  const loadRange = range(
+    firstIndex,
+    Math.min(firstIndex + pageSize, remoteRowCount)
+  );
+
+  return [{ page, page_size: pageSize }, loadRange, firstIndex];
+};
+
 function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const location = useLocation();
   const listRef = useRef(null);
@@ -372,7 +393,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const loadJobEvents = async () => {
-    const loadRange = range(1, 50);
+    const [params, loadRange] = getEventRequestParams(job, 50, [1, 50]);
 
     if (isMounted.current) {
       setHasContentLoading(true);
@@ -382,13 +403,27 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
 
     try {
-      const {
-        data: { results: fetchedEvents = [], count },
-      } = await getJobModel(job.type).readEvents(job.id, {
-        page: 1,
-        page_size: 50,
-        ...parseQueryString(QS_CONFIG, location.search),
-      });
+      const [
+        {
+          data: { results: fetchedEvents = [] },
+        },
+        {
+          data: { results: lastEvents = [] },
+        },
+      ] = await Promise.all([
+        getJobModel(job.type).readEvents(job.id, {
+          ...params,
+          ...parseQueryString(QS_CONFIG, location.search),
+        }),
+        getJobModel(job.type).readEvents(job.id, {
+          order_by: '-counter',
+          limit: 1,
+        }),
+      ]);
+      let count = 0;
+      if (lastEvents.length >= 1 && lastEvents[0]?.counter) {
+        count = lastEvents[0]?.counter;
+      }
 
       if (isMounted.current) {
         let countOffset = 0;
@@ -502,14 +537,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       stopIndex = startIndex + 50;
     }
 
-    const { page, pageSize, firstIndex } = getRowRangePageSize(
-      startIndex,
-      stopIndex
-    );
-
-    const loadRange = range(
-      firstIndex,
-      Math.min(firstIndex + pageSize, remoteRowCount)
+    const [requestParams, loadRange, firstIndex] = getEventRequestParams(
+      job,
+      remoteRowCount,
+      [startIndex, stopIndex]
     );
 
     if (isMounted.current) {
@@ -519,8 +550,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
 
     const params = {
-      page,
-      page_size: pageSize,
+      ...requestParams,
       ...parseQueryString(QS_CONFIG, location.search),
     };
 

@@ -32,7 +32,7 @@ import sys
 
 # Django
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError, ProgrammingError, connection
+from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
@@ -683,48 +683,6 @@ def update_host_smart_inventory_memberships():
 
 
 @task(queue=get_local_queuename)
-def migrate_legacy_event_data(tblname):
-    #
-    # NOTE: this function is not actually in use anymore,
-    # but has been intentionally kept for historical purposes,
-    # and to serve as an illustration if we ever need to perform
-    # bulk modification/migration of event data in the future.
-    #
-    if 'event' not in tblname:
-        return
-    with advisory_lock(f'bigint_migration_{tblname}', wait=False) as acquired:
-        if acquired is False:
-            return
-        chunk = settings.JOB_EVENT_MIGRATION_CHUNK_SIZE
-
-        def _remaining():
-            try:
-                cursor.execute(f'SELECT MAX(id) FROM _old_{tblname};')
-                return cursor.fetchone()[0]
-            except ProgrammingError:
-                # the table is gone (migration is unnecessary)
-                return None
-
-        with connection.cursor() as cursor:
-            total_rows = _remaining()
-            while total_rows:
-                with transaction.atomic():
-                    cursor.execute(f'INSERT INTO {tblname} SELECT * FROM _old_{tblname} ORDER BY id DESC LIMIT {chunk} RETURNING id;')
-                    last_insert_pk = cursor.fetchone()
-                    if last_insert_pk is None:
-                        # this means that the SELECT from the old table was
-                        # empty, and there was nothing to insert (so we're done)
-                        break
-                    last_insert_pk = last_insert_pk[0]
-                    cursor.execute(f'DELETE FROM _old_{tblname} WHERE id IN (SELECT id FROM _old_{tblname} ORDER BY id DESC LIMIT {chunk});')
-                logger.warn(f'migrated int -> bigint rows to {tblname} from _old_{tblname}; # ({last_insert_pk} rows remaining)')
-
-            if _remaining() is None:
-                cursor.execute(f'DROP TABLE IF EXISTS _old_{tblname}')
-                logger.warn(f'{tblname} primary key migration to bigint has finished')
-
-
-@task(queue=get_local_queuename)
 def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
     if user_id is None:
@@ -781,6 +739,7 @@ class BaseTask(object):
         self.parent_workflow_job_id = None
         self.host_map = {}
         self.guid = GuidMiddleware.get_guid()
+        self.job_created = None
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -1158,6 +1117,7 @@ class BaseTask(object):
                 event_data.pop('parent_uuid', None)
         if self.parent_workflow_job_id:
             event_data['workflow_job_id'] = self.parent_workflow_job_id
+        event_data['job_created'] = self.job_created
         if self.host_map:
             host = event_data.get('event_data', {}).get('host', '').strip()
             if host:
@@ -1282,6 +1242,8 @@ class BaseTask(object):
         # it in event data JSON
         if self.instance.spawned_by_workflow:
             self.parent_workflow_job_id = self.instance.get_workflow_job().id
+
+        self.job_created = str(self.instance.created)
 
         try:
             self.instance.send_notification_templates("running")
