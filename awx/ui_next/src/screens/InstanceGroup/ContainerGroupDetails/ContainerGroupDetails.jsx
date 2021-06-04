@@ -55,9 +55,13 @@ function ContainerGroupDetails({ instanceGroup }) {
           <Detail
             label={t`Credential`}
             value={
-              <Label variant="outline" color="blue">
-                {instanceGroup.summary_fields.credential?.name}
-              </Label>
+              <Link
+                to={`/credentials/${instanceGroup?.summary_fields?.credential?.id}`}
+              >
+                <Label variant="outline" color="blue">
+                  {instanceGroup?.summary_fields?.credential?.name}
+                </Label>
+              </Link>
             }
             dataCy="container-group-credential"
           />
