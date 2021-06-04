@@ -46,11 +46,4 @@ describe('<Dashboard />', () => {
     pageWrapper.update();
     expect(pageWrapper.find('TemplateList').length).toBe(1);
   });
-
-  test('renders month-based/all job type chart by default', () => {
-    expect(graphRequest).toHaveBeenCalledWith({
-      job_type: 'all',
-      period: 'month',
-    });
-  });
 });
