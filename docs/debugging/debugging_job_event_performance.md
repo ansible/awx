@@ -20,7 +20,7 @@ This is what we call the "critical path" for job events.
 ### Quick Debugging
 
 * Log in to an AWX instance and open Chrome Debug Tools
-* Paste the above in
+* Paste in the contents of `debug.js` (found below) into the console
 * You will notice a blue square on the screen with a textbox and a button
 * Launch a job and note the job ID
 * Enter the job ID into the textbox and click Submit; this will subscribe to the job events for that job
