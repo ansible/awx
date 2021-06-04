@@ -71,12 +71,8 @@ describe('<JobDetail />', () => {
     assertDetail('Machine Credential', 'SSH: Machine cred');
     assertDetail('Source Control Branch', 'main');
 
-    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
-    expect(executionEnvironment).toHaveLength(1);
-    expect(executionEnvironment.find('dt').text()).toEqual(
-      'Execution Environment'
-    );
-    expect(executionEnvironment.find('dd').text()).toEqual(
+    assertDetail(
+      'Execution Environment',
       mockJobData.summary_fields.execution_environment.name
     );
 
