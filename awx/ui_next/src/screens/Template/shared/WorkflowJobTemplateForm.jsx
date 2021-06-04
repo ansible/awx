@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes, { shape } from 'prop-types';
-
 import { useField, useFormikContext, withFormik } from 'formik';
 import {
   Form,
@@ -11,7 +10,6 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { required } from '../../../util/validators';
-
 import FieldWithPrompt from '../../../components/FieldWithPrompt';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import {
@@ -43,7 +41,7 @@ function WorkflowJobTemplateForm({
   submitError,
   isOrgAdmin,
 }) {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [enableWebhooks, setEnableWebhooks] = useState(
     Boolean(template.webhook_service)
   );
@@ -71,9 +69,7 @@ function WorkflowJobTemplateForm({
     executionEnvironmentField,
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
-  ] = useField({
-    name: 'execution_environment',
-  });
+  ] = useField('execution_environment');
 
   useEffect(() => {
     if (enableWebhooks) {
@@ -90,11 +86,28 @@ function WorkflowJobTemplateForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableWebhooks]);
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationChange = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
+  );
+
+  const handleInventoryUpdate = useCallback(
+    value => {
+      setFieldValue('inventory', value);
+      setFieldTouched('inventory', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
+  const handleExecutionEnvironmentUpdate = useCallback(
+    value => {
+      setFieldValue('execution_environment', value);
+      setFieldTouched('execution_environment', true, false);
+    },
+    [setFieldValue, setFieldTouched]
   );
 
   if (hasContentError) {
@@ -122,14 +135,26 @@ function WorkflowJobTemplateForm({
           helperTextInvalid={organizationMeta.error}
           isValid={!organizationMeta.touched || !organizationMeta.error}
           onBlur={() => organizationHelpers.setTouched()}
-          onChange={onOrganizationChange}
+          onChange={handleOrganizationChange}
           value={organizationField.value}
           touched={organizationMeta.touched}
           error={organizationMeta.error}
           required={isOrgAdmin}
           autoPopulate={isOrgAdmin}
+          validate={
+            isOrgAdmin ? required(t`Select a value for this field`) : undefined
+          }
         />
-        <>
+        <FormGroup
+          fieldId="inventory-lookup"
+          validated={
+            !(inventoryMeta.touched || askInventoryOnLaunchField.value) ||
+            !inventoryMeta.error
+              ? 'default'
+              : 'error'
+          }
+          helperTextInvalid={inventoryMeta.error}
+        >
           <InventoryLookup
             promptId="wfjt-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
@@ -138,22 +163,11 @@ function WorkflowJobTemplateForm({
             isPromptableField
             value={inventoryField.value}
             onBlur={() => inventoryHelpers.setTouched()}
-            onChange={value => {
-              inventoryHelpers.setValue(value);
-            }}
+            onChange={handleInventoryUpdate}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
-          {(inventoryMeta.touched || askInventoryOnLaunchField.value) &&
-            inventoryMeta.error && (
-              <div
-                className="pf-c-form__helper-text pf-m-error"
-                aria-live="polite"
-              >
-                {inventoryMeta.error}
-              </div>
-            )}
-        </>
+        </FormGroup>
         <FieldWithPrompt
           fieldId="wfjt-limit"
           label={t`Limit`}
@@ -199,7 +213,7 @@ function WorkflowJobTemplateForm({
           }
           onBlur={() => executionEnvironmentHelpers.setTouched()}
           value={executionEnvironmentField.value}
-          onChange={value => executionEnvironmentHelpers.setValue(value)}
+          onChange={handleExecutionEnvironmentUpdate}
           tooltip={t`Select the default execution environment for this organization to run on.`}
           globallyAvailable
           organizationId={organizationField.value?.id}

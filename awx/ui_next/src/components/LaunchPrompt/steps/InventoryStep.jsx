@@ -23,9 +23,7 @@ const QS_CONFIG = getQSConfig('inventory', {
 });
 
 function InventoryStep({ warningMessage = null }) {
-  const [field, meta, helpers] = useField({
-    name: 'inventory',
-  });
+  const [field, meta, helpers] = useField('inventory');
 
   const history = useHistory();
 

@@ -17,18 +17,19 @@ import hasCustomMessages from './hasCustomMessages';
 import typeFieldNames, { initialConfigValues } from './typeFieldNames';
 
 function NotificationTemplateFormFields({ defaultMessages, template }) {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [typeField, typeMeta] = useField({
     name: 'notification_type',
     validate: required(t`Select a value for this field`),
   });
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -51,12 +52,13 @@ function NotificationTemplateFormFields({ defaultMessages, template }) {
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={orgField.value}
         touched={orgMeta.touched}
         error={orgMeta.error}
         required
         autoPopulate={!template?.id}
+        validate={required(t`Select a value for this field`)}
       />
       <FormGroup
         fieldId="notification-type"

@@ -13,10 +13,20 @@ import {
   ProjectsAPI,
   InventoriesAPI,
   ExecutionEnvironmentsAPI,
+  InstanceGroupsAPI,
 } from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
+import useDebounce from '../../../util/useDebounce';
 
-jest.mock('../../../api');
+jest.mock('../../../util/useDebounce');
+jest.mock('../../../api/models/Credentials');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/JobTemplates');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Projects');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/InstanceGroups');
 
 const mockJobTemplate = {
   allow_callbacks: false,
@@ -66,6 +76,7 @@ const mockJobTemplate = {
     },
     inventory: {
       id: 2,
+      name: 'Demo Inventory',
       organization_id: 1,
     },
     credentials: [
@@ -195,22 +206,55 @@ describe('<JobTemplateEdit />', () => {
     JobTemplatesAPI.readCredentials.mockResolvedValue({
       data: mockRelatedCredentials,
     });
-    ProjectsAPI.readPlaybooks.mockResolvedValue({
-      data: mockRelatedProjectPlaybooks,
+    JobTemplatesAPI.readInstanceGroups.mockReturnValue({
+      data: { results: mockInstanceGroups },
+    });
+
+    InventoriesAPI.read.mockResolvedValue({
+      data: {
+        results: [],
+        count: 0,
+      },
     });
     InventoriesAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
+
+    InstanceGroupsAPI.read.mockResolvedValue({
+      data: {
+        results: [],
+        count: 0,
+      },
+    });
+    InstanceGroupsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+
+    ProjectsAPI.read.mockResolvedValue({
+      data: {
+        results: [],
+        count: 0,
+      },
+    });
     ProjectsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
+    ProjectsAPI.readPlaybooks.mockResolvedValue({
+      data: mockRelatedProjectPlaybooks,
+    });
+
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+
     CredentialsAPI.read.mockResolvedValue({
       data: {
         results: [],
         count: 0,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+
     CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
 
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
@@ -219,18 +263,11 @@ describe('<JobTemplateEdit />', () => {
         count: 1,
       },
     });
-    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
-    JobTemplatesAPI.readCredentials.mockResolvedValue({
-      data: mockRelatedCredentials,
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
     });
-    JobTemplatesAPI.readInstanceGroups.mockReturnValue({
-      data: { results: mockInstanceGroups },
-    });
-    ProjectsAPI.readDetail.mockReturnValue({
-      id: 1,
-      allow_override: true,
-      name: 'foo',
-    });
+
+    useDebounce.mockImplementation(fn => fn);
   });
 
   afterEach(() => {
@@ -262,7 +299,10 @@ describe('<JobTemplateEdit />', () => {
     const updatedTemplateData = {
       job_type: 'check',
       name: 'new name',
-      inventory: 1,
+      inventory: {
+        id: 1,
+        name: 'Other Inventory',
+      },
     };
     const labels = [
       { id: 3, name: 'Foo' },
@@ -280,20 +320,24 @@ describe('<JobTemplateEdit />', () => {
         null,
         'check'
       );
-      wrapper.update();
     });
+    wrapper.update();
     act(() => {
       wrapper.find('InventoryLookup').invoke('onChange')({
         id: 1,
-        organization: 1,
+        name: 'Other Inventory',
       });
 
-      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
-      wrapper.update();
+      wrapper.find('TextInput#execution-environments-input').invoke('onChange')(
+        ''
+      );
     });
+    wrapper.update();
+
     wrapper.find('input#template-name').simulate('change', {
       target: { value: 'new name', name: 'name' },
     });
+
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
       wrapper.update();
@@ -301,8 +345,9 @@ describe('<JobTemplateEdit />', () => {
 
     const expected = {
       ...mockJobTemplate,
-      project: mockJobTemplate.project,
       ...updatedTemplateData,
+      inventory: 1,
+      project: 3,
       execution_environment: null,
     };
     delete expected.summary_fields;
@@ -372,6 +417,7 @@ describe('<JobTemplateEdit />', () => {
         },
         inventory: {
           id: 2,
+          name: 'Demo Inventory',
           organization_id: 1,
         },
         credentials: [

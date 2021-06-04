@@ -2,7 +2,6 @@ import 'styled-components/macro';
 import React, { Fragment, useState, useCallback, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from '../../api';
@@ -26,8 +25,14 @@ async function loadCredentials(params, selectedCredentialTypeId) {
   return data;
 }
 
-function MultiCredentialsLookup(props) {
-  const { value, onChange, onError, history } = props;
+function MultiCredentialsLookup({
+  value,
+  onChange,
+  onError,
+  history,
+  fieldName,
+  validate,
+}) {
   const [selectedType, setSelectedType] = useState(null);
   const isMounted = useIsMounted();
 
@@ -68,9 +73,12 @@ function MultiCredentialsLookup(props) {
       if (!selectedType) {
         return {
           credentials: [],
-          count: 0,
+          credentialsCount: 0,
+          relatedSearchableKeys: [],
+          searchableKeys: [],
         };
       }
+
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const [{ results, count }, actionsResponse] = await Promise.all([
         loadCredentials(params, selectedType.id),
@@ -130,6 +138,8 @@ function MultiCredentialsLookup(props) {
       id="multiCredential"
       header={t`Credentials`}
       value={value}
+      fieldName={fieldName}
+      validate={validate}
       multiple
       onChange={onChange}
       qsConfig={QS_CONFIG}
@@ -240,10 +250,14 @@ MultiCredentialsLookup.propTypes = {
   ),
   onChange: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
+  validate: PropTypes.func,
+  fieldName: PropTypes.string,
 };
 
 MultiCredentialsLookup.defaultProps = {
   value: [],
+  validate: () => undefined,
+  fieldName: 'credentials',
 };
 
 export { MultiCredentialsLookup as _MultiCredentialsLookup };

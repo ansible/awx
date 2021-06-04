@@ -22,8 +22,10 @@ describe('<TeamForm />', () => {
     description: 'Bar',
     organization: 1,
     summary_fields: {
-      id: 1,
-      name: 'Default',
+      organization: {
+        id: 1,
+        name: 'Default',
+      },
     },
   };
 

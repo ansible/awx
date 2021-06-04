@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
-
 import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
 import { func, shape, arrayOf } from 'prop-types';
@@ -27,23 +26,23 @@ import { required } from '../../../util/validators';
 import { InventoriesAPI } from '../../../api';
 
 const SmartInventoryFormFields = ({ inventory }) => {
-  const { setFieldValue } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: required(t`Select a value for this field`),
-  });
-  const [instanceGroupsField, , instanceGroupsHelpers] = useField({
-    name: 'instance_groups',
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
+  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
+    'instance_groups'
+  );
   const [hostFilterField, hostFilterMeta, hostFilterHelpers] = useField({
     name: 'host_filter',
     validate: required(null),
   });
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -66,10 +65,11 @@ const SmartInventoryFormFields = ({ inventory }) => {
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required
         autoPopulate={!inventory?.id}
+        validate={required(t`Select a value for this field`)}
       />
       <HostFilterLookup
         value={hostFilterField.value}

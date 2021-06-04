@@ -15,18 +15,10 @@ const ANALYTICSLINK = 'https://www.ansible.com/products/automation-analytics';
 
 function AnalyticsStep() {
   const config = useConfig();
-  const [manifest] = useField({
-    name: 'manifest_file',
-  });
-  const [insights] = useField({
-    name: 'insights',
-  });
-  const [, , usernameHelpers] = useField({
-    name: 'username',
-  });
-  const [, , passwordHelpers] = useField({
-    name: 'password',
-  });
+  const [manifest] = useField('manifest_file');
+  const [insights] = useField('insights');
+  const [, , usernameHelpers] = useField('username');
+  const [, , passwordHelpers] = useField('password');
   const requireCredentialFields = manifest.value && insights.value;
 
   useEffect(() => {

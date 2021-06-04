@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-
 import { t, Trans } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import {
@@ -16,18 +15,18 @@ import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 import { useConfig } from '../../../../contexts/Config';
 
 const VirtualizationSubForm = ({ autoPopulateCredential }) => {
-  const { setFieldValue } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField({
-    name: 'credential',
-    validate: required(t`Select a value for this field`),
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [credentialField, credentialMeta, credentialHelpers] = useField(
+    'credential'
+  );
   const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const pluginLink = `${getDocsBaseUrl(
@@ -48,6 +47,7 @@ const VirtualizationSubForm = ({ autoPopulateCredential }) => {
         value={credentialField.value}
         required
         autoPopulate={autoPopulateCredential}
+        validate={required(t`Select a value for this field`)}
       />
       <VerbosityField />
       <HostFilterField />

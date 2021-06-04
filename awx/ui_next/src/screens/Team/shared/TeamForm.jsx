@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -11,21 +11,15 @@ import { required } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 
 function TeamFormFields({ team }) {
-  const { setFieldValue } = useFormikContext();
-  const [organization, setOrganization] = useState(
-    team.summary_fields ? team.summary_fields.organization : null
-  );
-  const [, orgMeta, orgHelpers] = useField({
-    name: 'organization',
-    validate: required(t`Select a value for this field`),
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [orgField, orgMeta, orgHelpers] = useField('organization');
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
-      setFieldValue('organization', value.id);
-      setOrganization(value);
+      setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -48,10 +42,11 @@ function TeamFormFields({ team }) {
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched('organization')}
-        onChange={onOrganizationChange}
-        value={organization}
+        onChange={handleOrganizationUpdate}
+        value={orgField.value}
         required
         autoPopulate={!team?.id}
+        validate={required(t`Select a value for this field`)}
       />
     </>
   );
@@ -65,7 +60,7 @@ function TeamForm(props) {
       initialValues={{
         description: team.description || '',
         name: team.name || '',
-        organization: team.organization || '',
+        organization: team.summary_fields?.organization || null,
       }}
       onSubmit={handleSubmit}
     >

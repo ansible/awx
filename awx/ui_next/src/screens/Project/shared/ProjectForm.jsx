@@ -89,24 +89,21 @@ function ProjectFormFields({
     scm_update_cache_timeout: 0,
   };
 
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const [scmTypeField, scmTypeMeta, scmTypeHelpers] = useField({
     name: 'scm_type',
     validate: required(t`Set a value for this field`),
   });
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: required(t`Select a value for this field`),
-  });
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
 
   const [
     executionEnvironmentField,
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
-  ] = useField({
-    name: 'default_environment',
-  });
+  ] = useField('default_environment');
 
   /* Save current scm subform field values to state */
   const saveSubFormState = form => {
@@ -153,11 +150,20 @@ function ProjectFormFields({
     [credentials, setCredentials]
   );
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
+  );
+
+  const handleExecutionEnvironmentUpdate = useCallback(
+    value => {
+      setFieldValue('default_environment', value);
+      setFieldTouched('default_environment', true, false);
+    },
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -180,10 +186,11 @@ function ProjectFormFields({
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required
         autoPopulate={!project?.id}
+        validate={required(t`Select a value for this field`)}
       />
       <ExecutionEnvironmentLookup
         helperTextInvalid={executionEnvironmentMeta.error}
@@ -192,13 +199,14 @@ function ProjectFormFields({
         }
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
-        onChange={value => executionEnvironmentHelpers.setValue(value)}
         popoverContent={t`The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level.`}
+        onChange={handleExecutionEnvironmentUpdate}
         tooltip={t`Select an organization before editing the default execution environment.`}
         globallyAvailable
         isDisabled={!organizationField.value}
         organizationId={organizationField.value?.id}
         isDefaultEnvironment
+        fieldName="default_environment"
       />
       <FormGroup
         fieldId="project-scm-type"

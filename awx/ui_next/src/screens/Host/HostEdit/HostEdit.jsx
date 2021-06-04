@@ -12,7 +12,11 @@ function HostEdit({ host }) {
 
   const handleSubmit = async values => {
     try {
-      await HostsAPI.update(host.id, values);
+      const dataToSend = { ...values };
+      if (dataToSend.inventory) {
+        dataToSend.inventory = dataToSend.inventory.id;
+      }
+      await HostsAPI.update(host.id, dataToSend);
       history.push(detailsUrl);
     } catch (error) {
       setFormError(error);

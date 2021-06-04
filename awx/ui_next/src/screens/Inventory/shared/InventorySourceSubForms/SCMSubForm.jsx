@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useField, useFormikContext } from 'formik';
-
 import { t } from '@lingui/macro';
 import {
   FormGroup,
@@ -11,7 +10,6 @@ import {
 import { ProjectsAPI } from '../../../../api';
 import useRequest from '../../../../util/useRequest';
 import { required } from '../../../../util/validators';
-
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
 import Popover from '../../../../components/Popover';
@@ -29,10 +27,9 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
-  const [projectField, projectMeta, projectHelpers] = useField({
-    name: 'source_project',
-    validate: required(t`Select a value for this field`),
-  });
+  const [projectField, projectMeta, projectHelpers] = useField(
+    'source_project'
+  );
   const [sourcePathField, sourcePathMeta, sourcePathHelpers] = useField({
     name: 'source_path',
     validate: required(t`Select a value for this field`),
@@ -60,7 +57,10 @@ const SCMSubForm = ({ autoPopulateProject }) => {
       setFieldValue('source_project', value);
       setFieldValue('source_path', '');
       setFieldTouched('source_path', false);
-      fetchSourcePath(value.id);
+      setFieldTouched('source_project', true, false);
+      if (value) {
+        fetchSourcePath(value.id);
+      }
     },
     [fetchSourcePath, setFieldValue, setFieldTouched]
   );
@@ -68,8 +68,9 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
@@ -88,6 +89,8 @@ const SCMSubForm = ({ autoPopulateProject }) => {
         onChange={handleProjectUpdate}
         required
         autoPopulate={autoPopulateProject}
+        fieldName="source_project"
+        validate={required(t`Select a value for this field`)}
       />
       <FormGroup
         fieldId="source_path"

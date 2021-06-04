@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { func, node } from 'prop-types';
+import { func, node, string } from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ApplicationsAPI } from '../../api';
@@ -18,7 +17,7 @@ const QS_CONFIG = getQSConfig('applications', {
   order_by: 'name',
 });
 
-function ApplicationLookup({ onChange, value, label }) {
+function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
   const location = useLocation();
   const {
     error,
@@ -55,6 +54,26 @@ function ApplicationLookup({ onChange, value, label }) {
       searchableKeys: [],
     }
   );
+
+  const checkApplicationName = useCallback(
+    async name => {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await ApplicationsAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
@@ -65,6 +84,9 @@ function ApplicationLookup({ onChange, value, label }) {
         header={t`Application`}
         value={value}
         onChange={onChange}
+        onDebounce={checkApplicationName}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -119,10 +141,14 @@ ApplicationLookup.propTypes = {
   label: node.isRequired,
   onChange: func.isRequired,
   value: Application,
+  validate: func,
+  fieldName: string,
 };
 
 ApplicationLookup.defaultProps = {
   value: null,
+  validate: () => undefined,
+  fieldName: 'application',
 };
 
 export default withRouter(ApplicationLookup);

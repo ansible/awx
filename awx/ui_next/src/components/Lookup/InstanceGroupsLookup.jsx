@@ -19,9 +19,16 @@ const QS_CONFIG = getQSConfig('instance-groups', {
   order_by: 'name',
 });
 
-function InstanceGroupsLookup(props) {
-  const { value, onChange, tooltip, className, required, history } = props;
-
+function InstanceGroupsLookup({
+  value,
+  onChange,
+  tooltip,
+  className,
+  required,
+  history,
+  fieldName,
+  validate,
+}) {
   const {
     result: { instanceGroups, count, relatedSearchableKeys, searchableKeys },
     request: fetchInstanceGroups,
@@ -69,6 +76,8 @@ function InstanceGroupsLookup(props) {
         header={t`Instance Groups`}
         value={value}
         onChange={onChange}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         multiple
         required={required}
@@ -118,12 +127,16 @@ InstanceGroupsLookup.propTypes = {
   onChange: func.isRequired,
   className: string,
   required: bool,
+  validate: func,
+  fieldName: string,
 };
 
 InstanceGroupsLookup.defaultProps = {
   tooltip: '',
   className: '',
   required: false,
+  validate: () => undefined,
+  fieldName: 'instance_groups',
 };
 
 export default withRouter(InstanceGroupsLookup);

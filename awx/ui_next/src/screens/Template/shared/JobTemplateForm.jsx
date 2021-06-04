@@ -54,14 +54,12 @@ function JobTemplateForm({
   handleCancel,
   handleSubmit,
   setFieldValue,
+  setFieldTouched,
   submitError,
-
+  validateField,
   isOverrideDisabledLookup,
 }) {
   const [contentError, setContentError] = useState(false);
-  const [inventory, setInventory] = useState(
-    template?.summary_fields?.inventory
-  );
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
   );
@@ -75,15 +73,14 @@ function JobTemplateForm({
     name: 'job_type',
     validate: required(null),
   });
-  const [, inventoryMeta, inventoryHelpers] = useField('inventory');
-  const [projectField, projectMeta, projectHelpers] = useField({
-    name: 'project',
-    validate: project => handleProjectValidation(project),
-  });
+  const [inventoryField, inventoryMeta, inventoryHelpers] = useField(
+    'inventory'
+  );
+  const [projectField, projectMeta, projectHelpers] = useField('project');
   const [scmField, , scmHelpers] = useField('scm_branch');
   const [playbookField, playbookMeta, playbookHelpers] = useField({
     name: 'playbook',
-    validate: required(t`Select a value for this field`),
+    validate: required(null),
   });
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
@@ -109,7 +106,7 @@ function JobTemplateForm({
     executionEnvironmentField,
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
-  ] = useField({ name: 'execution_environment' });
+  ] = useField('execution_environment');
 
   const {
     request: loadRelatedInstanceGroups,
@@ -149,23 +146,51 @@ function JobTemplateForm({
   }, [enableWebhooks]);
 
   const handleProjectValidation = project => {
-    if (!project && projectMeta.touched) {
-      return t`Select a value for this field`;
+    if (!project) {
+      return t`This field must not be blank`;
     }
-    if (project?.value?.status === 'never updated') {
-      return t`This project needs to be updated`;
+    if (project?.status === 'never updated') {
+      return t`This Project needs to be updated`;
     }
     return undefined;
   };
 
   const handleProjectUpdate = useCallback(
     value => {
-      setFieldValue('playbook', '');
-      setFieldValue('scm_branch', '');
       setFieldValue('project', value);
+      setFieldValue('playbook', '', false);
+      setFieldValue('scm_branch', '', false);
+      setFieldTouched('project', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
+
+  const handleInventoryValidation = inventory => {
+    if (!inventory && !askInventoryOnLaunchField.value) {
+      return t`Please select an Inventory or check the Prompt on Launch option`;
+    }
+    return undefined;
+  };
+
+  const handleInventoryUpdate = useCallback(
+    value => {
+      setFieldValue('inventory', value);
+      setFieldTouched('inventory', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
+  const handleExecutionEnvironmentUpdate = useCallback(
+    value => {
+      setFieldValue('execution_environment', value);
+      setFieldTouched('execution_environment', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
+  useEffect(() => {
+    validateField('inventory');
+  }, [askInventoryOnLaunchField.value, validateField]);
 
   const jobTypeOptions = [
     {
@@ -254,21 +279,19 @@ function JobTemplateForm({
         >
           <InventoryLookup
             fieldId="template-inventory"
-            value={inventory}
+            value={inventoryField.value}
             promptId="template-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
             isPromptableField
             tooltip={t`Select the inventory containing the hosts
             you want this job to manage.`}
             onBlur={() => inventoryHelpers.setTouched()}
-            onChange={value => {
-              inventoryHelpers.setValue(value ? value.id : null);
-              setInventory(value);
-            }}
+            onChange={handleInventoryUpdate}
             required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
             isOverrideDisabled={isOverrideDisabledLookup}
+            validate={handleInventoryValidation}
           />
         </FormGroup>
 
@@ -277,14 +300,15 @@ function JobTemplateForm({
           onBlur={() => projectHelpers.setTouched()}
           tooltip={t`Select the project containing the playbook
                   you want this job to execute.`}
-          isValid={
-            !projectMeta.touched || !projectMeta.error || projectField.value
-          }
+          isValid={Boolean(
+            !projectMeta.touched || (!projectMeta.error && projectField.value)
+          )}
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
           required
           autoPopulate={!template?.id}
           isOverrideDisabled={isOverrideDisabledLookup}
+          validate={handleProjectValidation}
         />
 
         <ExecutionEnvironmentLookup
@@ -294,7 +318,7 @@ function JobTemplateForm({
           }
           onBlur={() => executionEnvironmentHelpers.setTouched()}
           value={executionEnvironmentField.value}
-          onChange={value => executionEnvironmentHelpers.setValue(value)}
+          onChange={handleExecutionEnvironmentUpdate}
           popoverContent={t`Select the execution environment for this job template.`}
           tooltip={t`Select a project before editing the execution environment.`}
           globallyAvailable
@@ -489,6 +513,7 @@ function JobTemplateForm({
                 onChange={value => instanceGroupsHelpers.setValue(value)}
                 tooltip={t`Select the Instance Groups for this Organization
                         to run on.`}
+                fieldName="instanceGroups"
               />
               <FieldWithPrompt
                 fieldId="template-tags"
@@ -679,7 +704,7 @@ const FormikApp = withFormik({
     const {
       summary_fields = {
         labels: { results: [] },
-        inventory: { organization: null },
+        inventory: null,
       },
     } = template;
 
@@ -705,7 +730,7 @@ const FormikApp = withFormik({
       host_config_key: template.host_config_key || '',
       initialInstanceGroups: [],
       instanceGroups: [],
-      inventory: template.inventory || null,
+      inventory: summary_fields?.inventory || null,
       job_slice_count: template.job_slice_count || 1,
       job_tags: template.job_tags || '',
       job_type: template.job_type || 'run',
@@ -737,18 +762,6 @@ const FormikApp = withFormik({
     } catch (errors) {
       setErrors(errors);
     }
-  },
-  validate: values => {
-    const errors = {};
-
-    if (
-      (!values.inventory || values.inventory === '') &&
-      !values.ask_inventory_on_launch
-    ) {
-      errors.inventory = t`Please select an Inventory or check the Prompt on Launch option.`;
-    }
-
-    return errors;
   },
 })(JobTemplateForm);
 
