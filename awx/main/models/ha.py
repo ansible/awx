@@ -187,6 +187,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
             default='',
         )
     )
+    receptor_node = models.TextField(
+        blank=True,
+        default=None,
+    )
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
     policy_instance_list = JSONField(

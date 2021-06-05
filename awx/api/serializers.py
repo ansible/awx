@@ -4885,6 +4885,7 @@ class InstanceGroupSerializer(BaseSerializer):
             "policy_instance_minimum",
             "policy_instance_list",
             "pod_spec_override",
+            "receptor_node",
             "summary_fields",
         )
 

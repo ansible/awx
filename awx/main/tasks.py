@@ -1341,7 +1341,14 @@ class BaseTask(object):
                     **params,
                 )
             else:
-                receptor_job = AWXReceptorJob(self, params)
+                if hasattr(self.instance, "instance_group"):
+                    receptor_node = getattr(self.instance.instance_group, "receptor_node", None)
+                    if receptor_node == '':
+                        receptor_node = None
+                else:
+                    receptor_node = None
+
+                receptor_job = AWXReceptorJob(self, params, receptor_node=receptor_node)
                 self.unit_id = receptor_job.unit_id
                 res = receptor_job.run()
 
@@ -2851,8 +2858,9 @@ class TransmitterThread(threading.Thread):
 
 
 class AWXReceptorJob:
-    def __init__(self, task=None, runner_params=None):
+    def __init__(self, task=None, runner_params=None, receptor_node=None):
         self.task = task
+        self.receptor_node = receptor_node
         self.runner_params = runner_params
         self.unit_id = None
 
@@ -2882,7 +2890,7 @@ class AWXReceptorJob:
 
         # submit our work, passing
         # in the right side of our socketpair for reading.
-        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params)
+        result = receptor_ctl.submit_work(worktype=self.work_type, node=self.receptor_node, payload=sockout.makefile('rb'), params=self.receptor_params)
         self.unit_id = result['unitid']
 
         sockin.close()
@@ -2936,7 +2944,7 @@ class AWXReceptorJob:
     # write our payload to the left side of our socketpair.
     @cleanup_new_process
     def transmit(self, _socket):
-        if not settings.IS_K8S and self.work_type == 'local':
+        if not settings.IS_K8S and self.work_type == 'local' and (self.receptor_node is None or self.receptor_node == "localhost"):
             self.runner_params['only_transmit_kwargs'] = True
 
         try:
