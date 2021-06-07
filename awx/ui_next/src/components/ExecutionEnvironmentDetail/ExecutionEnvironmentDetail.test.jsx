@@ -61,4 +61,19 @@ describe('<ExecutionEnvironmentDetail/>', () => {
       `Custom virtual environment ${virtualEnvironment} must be replaced by an execution environment.`
     );
   });
+
+  test('should display warning deleted execution environment', async () => {
+    const wrapper = mountWithContexts(
+      <ExecutionEnvironmentDetail verifyMissingVirtualEnv={false} />
+    );
+    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
+    expect(executionEnvironment).toHaveLength(1);
+    expect(executionEnvironment.find('dt').text()).toEqual(
+      'Execution Environment'
+    );
+    expect(executionEnvironment.find('dd').text()).toEqual('Missing resource');
+    expect(wrapper.find('Tooltip').prop('content')).toEqual(
+      `Execution environment is missing or deleted.`
+    );
+  });
 });

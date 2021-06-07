@@ -221,8 +221,8 @@ function JobDetail({ job }) {
         <Detail label={t`Limit`} value={job.limit} />
         <Detail label={t`Verbosity`} value={VERBOSITY[job.verbosity]} />
         <ExecutionEnvironmentDetail
-          virtualEnvironment={job.custom_virtualenv}
           executionEnvironment={executionEnvironment}
+          verifyMissingVirtualEnv={false}
         />
         <Detail label={t`Execution Node`} value={job.execution_node} />
         {instanceGroup && !instanceGroup?.is_container_group && (

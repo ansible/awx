@@ -203,8 +203,8 @@ function JobListItem({
                 />
               )}
               <ExecutionEnvironmentDetail
-                virtualEnvironment={job.custom_virtualenv}
                 executionEnvironment={execution_environment}
+                verifyMissingVirtualEnv={false}
               />
               {credentials && credentials.length > 0 && (
                 <Detail

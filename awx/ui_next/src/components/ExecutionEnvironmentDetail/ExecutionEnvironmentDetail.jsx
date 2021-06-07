@@ -17,9 +17,10 @@ const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
 `;
 
 function ExecutionEnvironmentDetail({
-  virtualEnvironment,
   executionEnvironment,
   isDefaultEnvironment,
+  virtualEnvironment,
+  verifyMissingVirtualEnv,
 }) {
   const label = isDefaultEnvironment
     ? t`Default Execution Environment`
@@ -40,7 +41,7 @@ function ExecutionEnvironmentDetail({
       />
     );
   }
-  if (virtualEnvironment && !executionEnvironment) {
+  if (verifyMissingVirtualEnv && virtualEnvironment && !executionEnvironment) {
     return (
       <Detail
         label={label}
@@ -61,6 +62,31 @@ function ExecutionEnvironmentDetail({
       />
     );
   }
+  if (
+    !verifyMissingVirtualEnv &&
+    !virtualEnvironment &&
+    !executionEnvironment
+  ) {
+    return (
+      <Detail
+        label={t`Execution Environment`}
+        value={
+          <>
+            {t`Missing resource`}
+            <span>
+              <Tooltip
+                content={t`Execution environment is missing or deleted.`}
+              >
+                <ExclamationTriangleIcon />
+              </Tooltip>
+            </span>
+          </>
+        }
+        dataCy="execution-environment-detail"
+      />
+    );
+  }
+
   return null;
 }
 
@@ -68,12 +94,14 @@ ExecutionEnvironmentDetail.propTypes = {
   executionEnvironment: ExecutionEnvironment,
   isDefaultEnvironment: bool,
   virtualEnvironment: string,
+  verifyMissingVirtualEnv: bool,
 };
 
 ExecutionEnvironmentDetail.defaultProps = {
   isDefaultEnvironment: false,
   executionEnvironment: null,
   virtualEnvironment: '',
+  verifyMissingVirtualEnv: true,
 };
 
 export default ExecutionEnvironmentDetail;
