@@ -339,4 +339,28 @@ describe('<AdvancedSearch />', () => {
     wrapper.update();
     expect(advancedSearchMock).toBeCalledWith('', 'baz');
   });
+
+  test('Remove not operator from set type', () => {
+    wrapper = mountWithContexts(
+      <AdvancedSearch
+        onSearch={jest.fn}
+        searchableKeys={['foo', 'bar']}
+        relatedSearchableKeys={['bar', 'baz']}
+        enableNegativeFiltering={false}
+      />
+    );
+    wrapper
+      .find('Select[aria-label="Set type select"] SelectToggle')
+      .simulate('click');
+    const selectOptions = wrapper.find(
+      'Select[aria-label="Set type select"] SelectOption'
+    );
+    expect(selectOptions).toHaveLength(2);
+    expect(
+      selectOptions.find('SelectOption[id="or-option-select"]').prop('value')
+    ).toBe('or');
+    expect(
+      selectOptions.find('SelectOption[id="and-option-select"]').prop('value')
+    ).toBe('and');
+  });
 });

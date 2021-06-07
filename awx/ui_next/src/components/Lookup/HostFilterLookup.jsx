@@ -111,13 +111,13 @@ const buildSearchColumns = () => [
 
 function HostFilterLookup({
   helperTextInvalid,
-
   isValid,
   isDisabled,
   onBlur,
   onChange,
   organizationId,
   value,
+  enableNegativeFiltering,
 }) {
   const history = useHistory();
   const location = useLocation();
@@ -342,7 +342,13 @@ function HostFilterLookup({
                 item={{ ...item, url: `/hosts/${item.id}/details` }}
               />
             )}
-            renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+            renderToolbar={props => (
+              <DataListToolbar
+                {...props}
+                fillWidth
+                enableNegativeFiltering={enableNegativeFiltering}
+              />
+            )}
             toolbarSearchColumns={searchColumns}
             toolbarSortColumns={[
               {
@@ -374,6 +380,7 @@ HostFilterLookup.propTypes = {
   onChange: func,
   organizationId: number,
   value: string,
+  enableNegativeFiltering: bool,
 };
 HostFilterLookup.defaultProps = {
   isValid: true,
@@ -381,6 +388,7 @@ HostFilterLookup.defaultProps = {
   onChange: () => {},
   organizationId: null,
   value: '',
+  enableNegativeFiltering: true,
 };
 
 export default withRouter(HostFilterLookup);

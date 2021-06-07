@@ -32,6 +32,7 @@ function AdvancedSearch({
   searchableKeys,
   relatedSearchableKeys,
   maxSelectHeight,
+  enableNegativeFiltering,
 }) {
   // TODO: blocked by pf bug, eventually separate these into two groups in the select
   // for now, I'm spreading set to get rid of duplicate keys...when they are grouped
@@ -111,12 +112,14 @@ function AdvancedSearch({
           value="or"
           description={t`Returns results that satisfy this one or any other filters.`}
         />
-        <SelectOption
-          id="not-option-select"
-          key="not"
-          value="not"
-          description={t`Returns results that have values other than this one as well as other filters.`}
-        />
+        {enableNegativeFiltering && (
+          <SelectOption
+            id="not-option-select"
+            key="not"
+            value="not"
+            description={t`Returns results that have values other than this one as well as other filters.`}
+          />
+        )}
       </Select>
       <Select
         ouiaId="set-key-typeahead"
@@ -299,12 +302,14 @@ AdvancedSearch.propTypes = {
   searchableKeys: PropTypes.arrayOf(PropTypes.string),
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   maxSelectHeight: PropTypes.string,
+  enableNegativeFiltering: PropTypes.bool,
 };
 
 AdvancedSearch.defaultProps = {
   searchableKeys: [],
   relatedSearchableKeys: [],
   maxSelectHeight: '300px',
+  enableNegativeFiltering: true,
 };
 
 export default AdvancedSearch;
