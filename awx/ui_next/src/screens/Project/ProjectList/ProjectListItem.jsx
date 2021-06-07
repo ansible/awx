@@ -97,15 +97,9 @@ function ProjectListItem({
           variant="inline-compact"
           clickTip={t`Successfully copied to clipboard!`}
           hoverTip={t`Copy full revision to clipboard.`}
-          onCopy={event => {
-            const clipboard = event.currentTarget.parentElement;
-            const el = document.createElement('textarea');
-            el.value = project.scm_revision.toString();
-            clipboard.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            clipboard.removeChild(el);
-          }}
+          onCopy={() =>
+            navigator.clipboard.writeText(project.scm_revision.toString())
+          }
         >
           {project.scm_revision.substring(0, 7)}
         </ClipboardCopy>
