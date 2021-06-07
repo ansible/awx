@@ -12,7 +12,8 @@ The unit tests are stored in the `test/awx` directory and, where possible, test 
 Let's take a closer look at the `test_token.py` file (which tests the `token` module):
 
 ```
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import pytest
@@ -27,12 +28,12 @@ def test_create_token(run_module, admin_user):
         'description': 'barfoo',
         'state': 'present',
         'scope': 'read',
-        'tower_host': None,
-        'tower_username': None,
-        'tower_password': None,
+        'controller_host': None,
+        'controller_username': None,
+        'controller_password': None,
         'validate_certs': None,
-        'tower_oauthtoken': None,
-        'tower_config_file': None,
+        'controller_oauthtoken': None,
+        'controller_config_file': None,
     }
 
     result = run_module('token', module_args, admin_user)
@@ -97,7 +98,7 @@ While not strictly followed, the general flow of a test should be:
 ```
 - name: Try to use a token as a dict which is missing the token parameter
   job_list:
-    tower_oauthtoken:
+    controller_oauthtoken:
       not_token: "This has no token entry"
   register: results
   ignore_errors: true
@@ -105,7 +106,7 @@ While not strictly followed, the general flow of a test should be:
 - assert:
     that:
       - results is failed
-      - '"The provided dict in tower_oauthtoken did not properly contain the token entry" == results.msg'
+      - '"The provided dict in controller_oauthtoken did not properly contain the token entry" == results.msg'
 ```
 
 - **`Block:`**

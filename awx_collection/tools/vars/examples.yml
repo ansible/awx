@@ -9,7 +9,7 @@ examples:
         first_name: John
         last_name: Doe
         state: present
-        tower_config_file: "~/tower_cli.cfg"
+        controller_config_file: "~/tower_cli.cfg"
 
     - name: Add user as a system administrator
       user:
@@ -18,7 +18,7 @@ examples:
         email: jdoe@example.org
         superuser: yes
         state: present
-        tower_config_file: "~/tower_cli.cfg"
+        controller_config_file: "~/tower_cli.cfg"
 
     - name: Add user as a system auditor
       user:
@@ -27,14 +27,14 @@ examples:
         email: jdoe@example.org
         auditor: yes
         state: present
-        tower_config_file: "~/tower_cli.cfg"
+        controller_config_file: "~/tower_cli.cfg"
 
     - name: Delete user
       user:
         username: jdoe
         email: jdoe@example.org
         state: absent
-        tower_config_file: "~/tower_cli.cfg"
+        controller_config_file: "~/tower_cli.cfg"
 
   job_templates: |
     - name: Create Ping job template
@@ -46,6 +46,6 @@ examples:
         playbook: "ping.yml"
         credential: "Local"
         state: "present"
-        tower_config_file: "~/tower_cli.cfg"
+        controller_config_file: "~/tower_cli.cfg"
         survey_enabled: yes
         survey_spec: "{{ '{{' }} lookup('file', 'my_survey.json') {{ '}}' }}"

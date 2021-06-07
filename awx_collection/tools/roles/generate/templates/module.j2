@@ -22,12 +22,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: tower_{{ singular_item_type }}
+module: {{ singular_item_type }}
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "4.0.0"
-short_description: create, update, or destroy Ansible Tower {{ human_readable }}.
+short_description: create, update, or destroy Automation Platform Controller {{ human_readable }}.
 description:
-    - Create, update, or destroy Ansible Tower {{ human_readable }}. See
+    - Create, update, or destroy Automation Platform Controller {{ human_readable }}. See
       U(https://www.ansible.com/tower) for an overview.
 options:
 {% for option in item['json']['actions']['POST'] %}
@@ -37,12 +37,12 @@ options:
 {% if 'help_text' in item['json']['actions']['POST'][option] %}
         - {{ item['json']['actions']['POST'][option]['help_text'] }}
 {% else %}
-        - NO DESCRIPTION GIVEN IN THE TOWER API
+        - NO DESCRIPTION GIVEN IN THE API
 {% endif %}
       required: {{ item['json']['actions']['POST'][option]['required'] }}
       type: {{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}
 {% if 'default' in item['json']['actions']['POST'][option] %}
-{# for tower_job_template/extra vars, its type is dict but its default is '', so we want to make that {} #}
+{# for job_template/extra vars, its type is dict but its default is '', so we want to make that {} #}
 {%   if item['json']['actions']['POST'][option]['default'] == '' and type_map[ item['json']['actions']['POST'][option]['type'] ] == 'dict' %}
       default: {}
 {%   else %}
@@ -82,9 +82,9 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
-    tower_oauthtoken:
+    controller_oauthtoken:
       description:
-        - The Tower OAuth token to use.
+        - The OAuth token to use.
       required: False
       type: str
 extends_documentation_fragment: awx.awx.auth

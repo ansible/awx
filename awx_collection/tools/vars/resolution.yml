@@ -1,7 +1,14 @@
 ---
 name_to_id_endpoint_resolution:
   webhook_credential: credentials
-  project: projects
+  credential: credentials
+  credential_type: credential_types
+  default_environment: execution_environments
+  execution_environment: execution_environments
   inventory: inventories
   organization: organizations
-  credential: credentials
+  project: projects
+  source_project: projects
+  team: teams
+  unified_job_template: unified_job_templates
+  user: users
