@@ -1,7 +1,7 @@
 from .plugin import CredentialPlugin
 
 from django.conf import settings
-from django.utils.translation import get_language, to_locale, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from thycotic.secrets.vault import SecretsVault
 
 
