@@ -81,13 +81,13 @@ class Command(BaseCommand):
                 "username": options.get("registry_username"),
                 "verify_ssl": options.get("verify_ssl"),
             }
-
-            registry_cred.inputs = inputs
-            registry_cred.save()
-            changed = True
-
-            if not cred_created:
-                print("Updated 'Default Execution Environment Credential'")
+            for key, value in inputs.items():
+                if registry_cred.get_input(key) != value:
+                    registry_cred.inputs[key] = value
+                    changed = True
+            if changed:
+                registry_cred.save()
+                print("'Default Execution Environment Credential' updated.")
 
         # Create default globally available Execution Environments
         for ee in reversed(settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS):
