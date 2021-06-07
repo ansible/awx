@@ -2,7 +2,6 @@ import 'styled-components/macro';
 import React, { Fragment, useState, useCallback, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from '../../api';
@@ -12,6 +11,7 @@ import OptionsList from '../OptionsList';
 import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
+import useIsMounted from '../../util/useIsMounted';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,
@@ -25,9 +25,16 @@ async function loadCredentials(params, selectedCredentialTypeId) {
   return data;
 }
 
-function MultiCredentialsLookup(props) {
-  const { value, onChange, onError, history, i18n } = props;
+function MultiCredentialsLookup({
+  value,
+  onChange,
+  onError,
+  history,
+  fieldName,
+  validate,
+}) {
   const [selectedType, setSelectedType] = useState(null);
+  const isMounted = useIsMounted();
 
   const {
     result: credentialTypes,
@@ -38,8 +45,11 @@ function MultiCredentialsLookup(props) {
     useCallback(async () => {
       const types = await CredentialTypesAPI.loadAllTypes();
       const match = types.find(type => type.kind === 'ssh') || types[0];
-      setSelectedType(match);
+      if (isMounted.current) {
+        setSelectedType(match);
+      }
       return types;
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, []),
     []
   );
@@ -63,9 +73,12 @@ function MultiCredentialsLookup(props) {
       if (!selectedType) {
         return {
           credentials: [],
-          count: 0,
+          credentialsCount: 0,
+          relatedSearchableKeys: [],
+          searchableKeys: [],
         };
       }
+
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const [{ results, count }, actionsResponse] = await Promise.all([
         loadCredentials(params, selectedType.id),
@@ -123,8 +136,10 @@ function MultiCredentialsLookup(props) {
   return (
     <Lookup
       id="multiCredential"
-      header={i18n._(t`Credentials`)}
+      header={t`Credentials`}
       value={value}
+      fieldName={fieldName}
+      validate={validate}
       multiple
       onChange={onChange}
       qsConfig={QS_CONFIG}
@@ -138,20 +153,18 @@ function MultiCredentialsLookup(props) {
                 variant="info"
                 isInline
                 css="margin-bottom: 20px;"
-                title={i18n._(
-                  t`You cannot select multiple vault credentials with the same vault ID. Doing so will automatically deselect the other with the same vault ID.`
-                )}
+                title={t`You cannot select multiple vault credentials with the same vault ID. Doing so will automatically deselect the other with the same vault ID.`}
               />
             )}
             {credentialTypes && credentialTypes.length > 0 && (
               <ToolbarItem css=" display: flex; align-items: center;">
                 <div css="flex: 0 0 25%; margin-right: 32px">
-                  {i18n._(t`Selected Category`)}
+                  {t`Selected Category`}
                 </div>
                 <AnsibleSelect
                   css="flex: 1 1 75%;"
                   id="multiCredentialsLookUp-select"
-                  label={i18n._(t`Selected Category`)}
+                  label={t`Selected Category`}
                   data={credentialTypes.map(type => ({
                     key: type.id,
                     value: type.id,
@@ -173,29 +186,29 @@ function MultiCredentialsLookup(props) {
               optionCount={credentialsCount}
               searchColumns={[
                 {
-                  name: i18n._(t`Name`),
+                  name: t`Name`,
                   key: 'name__icontains',
                   isDefault: true,
                 },
                 {
-                  name: i18n._(t`Created By (Username)`),
+                  name: t`Created By (Username)`,
                   key: 'created_by__username__icontains',
                 },
                 {
-                  name: i18n._(t`Modified By (Username)`),
+                  name: t`Modified By (Username)`,
                   key: 'modified_by__username__icontains',
                 },
               ]}
               sortColumns={[
                 {
-                  name: i18n._(t`Name`),
+                  name: t`Name`,
                   key: 'name',
                 },
               ]}
               searchableKeys={searchableKeys}
               relatedSearchableKeys={relatedSearchableKeys}
               multiple={isVault}
-              header={i18n._(t`Credentials`)}
+              header={t`Credentials`}
               displayKey={isVault ? 'label' : 'name'}
               name="credentials"
               qsConfig={QS_CONFIG}
@@ -237,11 +250,15 @@ MultiCredentialsLookup.propTypes = {
   ),
   onChange: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
+  validate: PropTypes.func,
+  fieldName: PropTypes.string,
 };
 
 MultiCredentialsLookup.defaultProps = {
   value: [],
+  validate: () => undefined,
+  fieldName: 'credentials',
 };
 
 export { MultiCredentialsLookup as _MultiCredentialsLookup };
-export default withI18n()(withRouter(MultiCredentialsLookup));
+export default withRouter(MultiCredentialsLookup);

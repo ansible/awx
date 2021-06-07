@@ -34,10 +34,18 @@
               "category_slug": "system",
               "defined_in_file": false
           },
+          "DISABLE_LOCAL_AUTH": {
+              "type": "boolean",
+              "label": "Disable the built-in authentication system",
+              "help_text": "Controls whether users are prevented from using the built-in authentication system. You probably want to do this if you are using an LDAP or SAML integration.",
+              "category": "Authentication",
+              "category_slug": "authentication",
+              "defined_in_file": false
+          },
           "TOWER_URL_BASE": {
               "type": "string",
-              "label": "Base URL of the Tower host",
-              "help_text": "This setting is used by services like notifications to render a valid url to the Tower host.",
+              "label": "Base URL of the service",
+              "help_text": "This setting is used by services like notifications to render a valid url to the service.",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -56,7 +64,7 @@
           "PROXY_IP_ALLOWED_LIST": {
               "type": "list",
               "label": "Proxy IP Allowed List",
-              "help_text": "If Tower is behind a reverse proxy/load balancer, use this setting to configure the proxy IP addresses from which Tower should trust custom REMOTE_HOST_HEADERS header values. If this setting is an empty list (the default), the headers specified by REMOTE_HOST_HEADERS will be trusted unconditionally')",
+              "help_text": "If the service is behind a reverse proxy/load balancer, use this setting to configure the proxy IP addresses from which the service should trust custom REMOTE_HOST_HEADERS header values. If this setting is an empty list (the default), the headers specified by REMOTE_HOST_HEADERS will be trusted unconditionally')",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false,
@@ -78,7 +86,7 @@
           "REDHAT_USERNAME": {
               "type": "string",
               "label": "Red Hat customer username",
-              "help_text": "This username is used to send data to Automation Analytics",
+              "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -86,7 +94,7 @@
           "REDHAT_PASSWORD": {
               "type": "string",
               "label": "Red Hat customer password",
-              "help_text": "This password is used to send data to Automation Analytics",
+              "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -109,15 +117,15 @@
           },
           "AUTOMATION_ANALYTICS_URL": {
               "type": "string",
-              "label": "Automation Analytics upload URL",
-              "help_text": "This setting is used to to configure data collection for the Automation Analytics dashboard",
+              "label": "Insights for Ansible Automation Platform upload URL",
+              "help_text": "This setting is used to to configure data collection for the Insights for Ansible Automation Platform dashboard",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
           },
           "INSTALL_UUID": {
               "type": "string",
-              "label": "Unique identifier for an AWX/Tower installation",
+              "label": "Unique identifier for an installation",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -147,7 +155,7 @@
           "ALLOW_JINJA_IN_EXTRA_VARS": {
               "type": "choice",
               "label": "When can extra variables contain Jinja templates?",
-              "help_text": "Ansible allows variable substitution via the Jinja2 templating language for --extra-vars. This poses a potential security risk where Tower users with the ability to specify extra vars at job launch time can use Jinja2 templates to run arbitrary Python.  It is recommended that this value be set to \"template\" or \"never\".",
+              "help_text": "Ansible allows variable substitution via the Jinja2 templating language for --extra-vars. This poses a potential security risk where users with the ability to specify extra vars at job launch time can use Jinja2 templates to run arbitrary Python.  It is recommended that this value be set to \"template\" or \"never\".",
               "category": "Jobs",
               "category_slug": "jobs",
               "defined_in_file": false,
@@ -169,7 +177,7 @@
           "AWX_ISOLATION_BASE_PATH": {
               "type": "string",
               "label": "Job execution path",
-              "help_text": "The directory in which Tower will create new temporary directories for job execution and isolation (such as credential files and custom inventory scripts).",
+              "help_text": "The directory where the service will create new temporary directories for job execution and isolation (such as credential files and custom inventory scripts).",
               "category": "Jobs",
               "category_slug": "jobs",
               "defined_in_file": false
@@ -185,68 +193,6 @@
                   "type": "string"
               }
           },
-          "AWX_ISOLATED_CHECK_INTERVAL": {
-              "type": "integer",
-              "label": "Isolated status check interval",
-              "help_text": "The number of seconds to sleep between status checks for jobs running on isolated instances.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "unit": "seconds"
-          },
-          "AWX_ISOLATED_LAUNCH_TIMEOUT": {
-              "type": "integer",
-              "label": "Isolated launch timeout",
-              "help_text": "The timeout (in seconds) for launching jobs on isolated instances.  This includes the time needed to copy source control files (playbooks) to the isolated instance.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "unit": "seconds"
-          },
-          "AWX_ISOLATED_CONNECTION_TIMEOUT": {
-              "type": "integer",
-              "label": "Isolated connection timeout",
-              "help_text": "Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. Value should be substantially greater than expected network latency.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "unit": "seconds"
-          },
-          "AWX_ISOLATED_HOST_KEY_CHECKING": {
-              "type": "boolean",
-              "label": "Isolated host key checking",
-              "help_text": "When set to True, AWX will enforce strict host key checking for communication with isolated nodes.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_ISOLATED_KEY_GENERATION": {
-              "type": "boolean",
-              "label": "Generate RSA keys for isolated instances",
-              "help_text": "If set, a random RSA key will be generated and distributed to isolated instances.  To disable this behavior and manage authentication for isolated instances outside of Tower, disable this setting.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_ISOLATED_PRIVATE_KEY": {
-              "type": "string",
-              "label": "The RSA private key for SSH traffic to isolated instances",
-              "help_text": "The RSA private key for SSH traffic to isolated instances",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_ISOLATED_PUBLIC_KEY": {
-              "type": "string",
-              "label": "The RSA public key for SSH traffic to isolated instances",
-              "help_text": "The RSA public key for SSH traffic to isolated instances",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
           "AWX_TASK_ENV": {
               "type": "nested object",
               "label": "Extra Environment Variables",
@@ -260,8 +206,8 @@
           },
           "INSIGHTS_TRACKING_STATE": {
               "type": "boolean",
-              "label": "Gather data for Automation Analytics",
-              "help_text": "Enables Tower to gather data on automation and send it to Red Hat.",
+              "label": "Gather data for Insights for Ansible Automation Platform",
+              "help_text": "Enables gathering of data on automation for Red Hat Insights.",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -487,8 +433,8 @@
           },
           "LOG_AGGREGATOR_TOWER_UUID": {
               "type": "string",
-              "label": "Cluster-wide Tower unique identifier.",
-              "help_text": "Useful to uniquely identify Tower instances.",
+              "label": "Cluster-wide unique identifier.",
+              "help_text": "Useful to uniquely identify instances.",
               "category": "Logging",
               "category_slug": "logging",
               "defined_in_file": false
@@ -527,7 +473,7 @@
           "LOG_AGGREGATOR_VERIFY_CERT": {
               "type": "boolean",
               "label": "Enable/disable HTTPS certificate verification",
-              "help_text": "Flag to control enable/disable of certificate verification when LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, Tower's log handler will verify certificate sent by external log aggregator before establishing connection.",
+              "help_text": "Flag to control enable/disable of certificate verification when LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, the log handler will verify certificate sent by external log aggregator before establishing connection.",
               "category": "Logging",
               "category_slug": "logging",
               "defined_in_file": false
@@ -589,14 +535,14 @@
           },
           "AUTOMATION_ANALYTICS_LAST_GATHER": {
               "type": "datetime",
-              "label": "Last gather date for Automation Analytics.",
+              "label": "Last gather date for Insights for Ansible Automation Platform.",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
           },
           "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
               "type": "integer",
-              "label": "Automation Analytics Gather Interval",
+              "label": "Insights for Ansible Automation Platform Gather Interval",
               "help_text": "Interval (in seconds) between data gathering.",
               "min_value": 1800,
               "category": "System",
@@ -656,7 +602,7 @@
           "LOGIN_REDIRECT_OVERRIDE": {
               "type": "string",
               "label": "Login redirect override URL",
-              "help_text": "URL to which unauthorized users will be redirected to log in. If blank, users will be sent to the Tower login page.",
+              "help_text": "URL to which unauthorized users will be redirected to log in. If blank, users will be sent to the login page.",
               "category": "Authentication",
               "category_slug": "authentication",
               "defined_in_file": false
@@ -730,7 +676,7 @@
           "SOCIAL_AUTH_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "Social Auth Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "Authentication",
               "category_slug": "authentication",
               "defined_in_file": false,
@@ -746,7 +692,7 @@
           "SOCIAL_AUTH_TEAM_MAP": {
               "type": "nested object",
               "label": "Social Auth Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in documentation.",
               "category": "Authentication",
               "category_slug": "authentication",
               "defined_in_file": false,
@@ -781,7 +727,7 @@
           "AUTH_LDAP_BIND_DN": {
               "type": "string",
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -816,7 +762,7 @@
           "AUTH_LDAP_USER_SEARCH": {
               "type": "list",
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -835,7 +781,7 @@
           "AUTH_LDAP_USER_ATTR_MAP": {
               "type": "nested object",
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -926,7 +872,7 @@
           "AUTH_LDAP_REQUIRE_GROUP": {
               "type": "string",
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -942,7 +888,7 @@
           "AUTH_LDAP_USER_FLAGS_BY_GROUP": {
               "type": "nested object",
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -958,7 +904,7 @@
           "AUTH_LDAP_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -974,7 +920,7 @@
           "AUTH_LDAP_TEAM_MAP": {
               "type": "nested object",
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -998,7 +944,7 @@
           "AUTH_LDAP_1_BIND_DN": {
               "type": "string",
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1033,7 +979,7 @@
           "AUTH_LDAP_1_USER_SEARCH": {
               "type": "list",
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1052,7 +998,7 @@
           "AUTH_LDAP_1_USER_ATTR_MAP": {
               "type": "nested object",
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1143,7 +1089,7 @@
           "AUTH_LDAP_1_REQUIRE_GROUP": {
               "type": "string",
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1159,7 +1105,7 @@
           "AUTH_LDAP_1_USER_FLAGS_BY_GROUP": {
               "type": "nested object",
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1175,7 +1121,7 @@
           "AUTH_LDAP_1_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1191,7 +1137,7 @@
           "AUTH_LDAP_1_TEAM_MAP": {
               "type": "nested object",
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1215,7 +1161,7 @@
           "AUTH_LDAP_2_BIND_DN": {
               "type": "string",
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1250,7 +1196,7 @@
           "AUTH_LDAP_2_USER_SEARCH": {
               "type": "list",
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1269,7 +1215,7 @@
           "AUTH_LDAP_2_USER_ATTR_MAP": {
               "type": "nested object",
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1360,7 +1306,7 @@
           "AUTH_LDAP_2_REQUIRE_GROUP": {
               "type": "string",
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1376,7 +1322,7 @@
           "AUTH_LDAP_2_USER_FLAGS_BY_GROUP": {
               "type": "nested object",
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1392,7 +1338,7 @@
           "AUTH_LDAP_2_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1408,7 +1354,7 @@
           "AUTH_LDAP_2_TEAM_MAP": {
               "type": "nested object",
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1432,7 +1378,7 @@
           "AUTH_LDAP_3_BIND_DN": {
               "type": "string",
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1467,7 +1413,7 @@
           "AUTH_LDAP_3_USER_SEARCH": {
               "type": "list",
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1486,7 +1432,7 @@
           "AUTH_LDAP_3_USER_ATTR_MAP": {
               "type": "nested object",
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1577,7 +1523,7 @@
           "AUTH_LDAP_3_REQUIRE_GROUP": {
               "type": "string",
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1593,7 +1539,7 @@
           "AUTH_LDAP_3_USER_FLAGS_BY_GROUP": {
               "type": "nested object",
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1609,7 +1555,7 @@
           "AUTH_LDAP_3_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1625,7 +1571,7 @@
           "AUTH_LDAP_3_TEAM_MAP": {
               "type": "nested object",
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1649,7 +1595,7 @@
           "AUTH_LDAP_4_BIND_DN": {
               "type": "string",
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1684,7 +1630,7 @@
           "AUTH_LDAP_4_USER_SEARCH": {
               "type": "list",
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1703,7 +1649,7 @@
           "AUTH_LDAP_4_USER_ATTR_MAP": {
               "type": "nested object",
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1794,7 +1740,7 @@
           "AUTH_LDAP_4_REQUIRE_GROUP": {
               "type": "string",
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1810,7 +1756,7 @@
           "AUTH_LDAP_4_USER_FLAGS_BY_GROUP": {
               "type": "nested object",
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1826,7 +1772,7 @@
           "AUTH_LDAP_4_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1842,7 +1788,7 @@
           "AUTH_LDAP_4_TEAM_MAP": {
               "type": "nested object",
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1866,7 +1812,7 @@
           "AUTH_LDAP_5_BIND_DN": {
               "type": "string",
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -1901,7 +1847,7 @@
           "AUTH_LDAP_5_USER_SEARCH": {
               "type": "list",
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -1920,7 +1866,7 @@
           "AUTH_LDAP_5_USER_ATTR_MAP": {
               "type": "nested object",
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -2011,7 +1957,7 @@
           "AUTH_LDAP_5_REQUIRE_GROUP": {
               "type": "string",
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false
@@ -2027,7 +1973,7 @@
           "AUTH_LDAP_5_USER_FLAGS_BY_GROUP": {
               "type": "nested object",
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -2043,7 +1989,7 @@
           "AUTH_LDAP_5_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -2059,7 +2005,7 @@
           "AUTH_LDAP_5_TEAM_MAP": {
               "type": "nested object",
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "defined_in_file": false,
@@ -2155,7 +2101,7 @@
           "SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL": {
               "type": "string",
               "label": "Google OAuth2 Callback URL",
-              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "defined_in_file": false
@@ -2190,7 +2136,7 @@
           "SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS": {
               "type": "nested object",
               "label": "Google OAuth2 Extra Arguments",
-              "help_text": "Extra arguments for Google OAuth2 login. You can restrict it to only allow a single domain to authenticate, even if the user is logged in with multple Google accounts. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Extra arguments for Google OAuth2 login. You can restrict it to only allow a single domain to authenticate, even if the user is logged in with multple Google accounts. Refer to the documentation for more detail.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "defined_in_file": false,
@@ -2201,7 +2147,7 @@
           "SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "Google OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "defined_in_file": false,
@@ -2217,7 +2163,7 @@
           "SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP": {
               "type": "nested object",
               "label": "Google OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "defined_in_file": false,
@@ -2233,7 +2179,7 @@
           "SOCIAL_AUTH_GITHUB_CALLBACK_URL": {
               "type": "string",
               "label": "GitHub OAuth2 Callback URL",
-              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.",
               "category": "GitHub OAuth2",
               "category_slug": "github",
               "defined_in_file": false
@@ -2257,7 +2203,7 @@
           "SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "GitHub OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub OAuth2",
               "category_slug": "github",
               "defined_in_file": false,
@@ -2273,7 +2219,7 @@
           "SOCIAL_AUTH_GITHUB_TEAM_MAP": {
               "type": "nested object",
               "label": "GitHub OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub OAuth2",
               "category_slug": "github",
               "defined_in_file": false,
@@ -2289,7 +2235,7 @@
           "SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL": {
               "type": "string",
               "label": "GitHub Organization OAuth2 Callback URL",
-              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.",
               "category": "GitHub Organization OAuth2",
               "category_slug": "github-org",
               "defined_in_file": false
@@ -2321,7 +2267,7 @@
           "SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "GitHub Organization OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Organization OAuth2",
               "category_slug": "github-org",
               "defined_in_file": false,
@@ -2337,7 +2283,7 @@
           "SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP": {
               "type": "nested object",
               "label": "GitHub Organization OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Organization OAuth2",
               "category_slug": "github-org",
               "defined_in_file": false,
@@ -2385,7 +2331,7 @@
           "SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "GitHub Team OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Team OAuth2",
               "category_slug": "github-team",
               "defined_in_file": false,
@@ -2401,7 +2347,7 @@
           "SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP": {
               "type": "nested object",
               "label": "GitHub Team OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Team OAuth2",
               "category_slug": "github-team",
               "defined_in_file": false,
@@ -2417,7 +2363,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL": {
               "type": "string",
               "label": "GitHub Enterprise OAuth2 Callback URL",
-              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.",
               "category": "GitHub Enterprise OAuth2",
               "category_slug": "github-enterprise",
               "defined_in_file": false
@@ -2457,7 +2403,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "GitHub Enterprise OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Enterprise OAuth2",
               "category_slug": "github-enterprise",
               "defined_in_file": false,
@@ -2473,7 +2419,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_MAP": {
               "type": "nested object",
               "label": "GitHub Enterprise OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Enterprise OAuth2",
               "category_slug": "github-enterprise",
               "defined_in_file": false,
@@ -2489,7 +2435,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL": {
               "type": "string",
               "label": "GitHub Enterprise Organization OAuth2 Callback URL",
-              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.",
               "category": "GitHub Enterprise Organization OAuth2",
               "category_slug": "github-enterprise-org",
               "defined_in_file": false
@@ -2537,7 +2483,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "GitHub Enterprise Organization OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Enterprise Organization OAuth2",
               "category_slug": "github-enterprise-org",
               "defined_in_file": false,
@@ -2553,7 +2499,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_TEAM_MAP": {
               "type": "nested object",
               "label": "GitHub Enterprise Organization OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Enterprise Organization OAuth2",
               "category_slug": "github-enterprise-org",
               "defined_in_file": false,
@@ -2617,7 +2563,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "GitHub Enterprise Team OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Enterprise Team OAuth2",
               "category_slug": "github-enterprise-team",
               "defined_in_file": false,
@@ -2633,7 +2579,7 @@
           "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP": {
               "type": "nested object",
               "label": "GitHub Enterprise Team OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Enterprise Team OAuth2",
               "category_slug": "github-enterprise-team",
               "defined_in_file": false,
@@ -2649,7 +2595,7 @@
           "SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL": {
               "type": "string",
               "label": "Azure AD OAuth2 Callback URL",
-              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail. ",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail. ",
               "category": "Azure AD OAuth2",
               "category_slug": "azuread-oauth2",
               "defined_in_file": false
@@ -2673,7 +2619,7 @@
           "SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "Azure AD OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "Azure AD OAuth2",
               "category_slug": "azuread-oauth2",
               "defined_in_file": false,
@@ -2689,7 +2635,7 @@
           "SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP": {
               "type": "nested object",
               "label": "Azure AD OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "Azure AD OAuth2",
               "category_slug": "azuread-oauth2",
               "defined_in_file": false,
@@ -2713,7 +2659,7 @@
           "SOCIAL_AUTH_SAML_CALLBACK_URL": {
               "type": "string",
               "label": "SAML Assertion Consumer Service (ACS) URL",
-              "help_text": "Register Tower as a service provider (SP) with each identity provider (IdP) you have configured. Provide your SP Entity ID and this ACS URL for your application.",
+              "help_text": "Register the application as a service provider (SP) with each identity provider (IdP) you have configured. Provide your SP Entity ID and this ACS URL for your application.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false
@@ -2729,7 +2675,7 @@
           "SOCIAL_AUTH_SAML_SP_ENTITY_ID": {
               "type": "string",
               "label": "SAML Service Provider Entity ID",
-              "help_text": "The application-defined unique identifier used as the audience of the SAML service provider (SP) configuration. This is usually the URL for Tower.",
+              "help_text": "The application-defined unique identifier used as the audience of the SAML service provider (SP) configuration. This is usually the URL for the service.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false
@@ -2737,7 +2683,7 @@
           "SOCIAL_AUTH_SAML_SP_PUBLIC_CERT": {
               "type": "string",
               "label": "SAML Service Provider Public Certificate",
-              "help_text": "Create a keypair for Tower to use as a service provider (SP) and include the certificate content here.",
+              "help_text": "Create a keypair to use as a service provider (SP) and include the certificate content here.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false
@@ -2745,7 +2691,7 @@
           "SOCIAL_AUTH_SAML_SP_PRIVATE_KEY": {
               "type": "string",
               "label": "SAML Service Provider Private Key",
-              "help_text": "Create a keypair for Tower to use as a service provider (SP) and include the private key content here.",
+              "help_text": "Create a keypair to use as a service provider (SP) and include the private key content here.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false
@@ -2753,7 +2699,7 @@
           "SOCIAL_AUTH_SAML_ORG_INFO": {
               "type": "nested object",
               "label": "SAML Service Provider Organization Info",
-              "help_text": "Provide the URL, display name, and the name of your app. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "Provide the URL, display name, and the name of your app. Refer to the documentation for example syntax.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2769,7 +2715,7 @@
           "SOCIAL_AUTH_SAML_TECHNICAL_CONTACT": {
               "type": "nested object",
               "label": "SAML Service Provider Technical Contact",
-              "help_text": "Provide the name and email address of the technical contact for your service provider. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "Provide the name and email address of the technical contact for your service provider. Refer to the documentation for example syntax.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2780,7 +2726,7 @@
           "SOCIAL_AUTH_SAML_SUPPORT_CONTACT": {
               "type": "nested object",
               "label": "SAML Service Provider Support Contact",
-              "help_text": "Provide the name and email address of the support contact for your service provider. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "Provide the name and email address of the support contact for your service provider. Refer to the documentation for example syntax.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2840,7 +2786,7 @@
           "SOCIAL_AUTH_SAML_ORGANIZATION_MAP": {
               "type": "nested object",
               "label": "SAML Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2856,7 +2802,7 @@
           "SOCIAL_AUTH_SAML_TEAM_MAP": {
               "type": "nested object",
               "label": "SAML Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2872,7 +2818,7 @@
           "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR": {
               "type": "nested object",
               "label": "SAML Organization Attribute Mapping",
-              "help_text": "Used to translate user organization membership into Tower.",
+              "help_text": "Used to translate user organization membership.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2883,7 +2829,7 @@
           "SOCIAL_AUTH_SAML_TEAM_ATTR": {
               "type": "nested object",
               "label": "SAML Team Attribute Mapping",
-              "help_text": "Used to translate user team membership into Tower.",
+              "help_text": "Used to translate user team membership.",
               "category": "SAML",
               "category_slug": "saml",
               "defined_in_file": false,
@@ -2959,11 +2905,20 @@
               "category_slug": "system",
               "default": true
           },
+          "DISABLE_LOCAL_AUTH": {
+              "type": "boolean",
+              "required": true,
+              "label": "Disable the built-in authentication system",
+              "help_text": "Controls whether users are prevented from using the built-in authentication system. You probably want to do this if you are using an LDAP or SAML integration.",
+              "category": "Authentication",
+              "category_slug": "authentication",
+              "default": false
+          },
           "TOWER_URL_BASE": {
               "type": "string",
               "required": true,
-              "label": "Base URL of the Tower host",
-              "help_text": "This setting is used by services like notifications to render a valid url to the Tower host.",
+              "label": "Base URL of the service",
+              "help_text": "This setting is used by services like notifications to render a valid url to the service.",
               "category": "System",
               "category_slug": "system",
               "default": "https://localhost:8043"
@@ -2989,7 +2944,7 @@
               "type": "list",
               "required": true,
               "label": "Proxy IP Allowed List",
-              "help_text": "If Tower is behind a reverse proxy/load balancer, use this setting to configure the proxy IP addresses from which Tower should trust custom REMOTE_HOST_HEADERS header values. If this setting is an empty list (the default), the headers specified by REMOTE_HOST_HEADERS will be trusted unconditionally')",
+              "help_text": "If the service is behind a reverse proxy/load balancer, use this setting to configure the proxy IP addresses from which the service should trust custom REMOTE_HOST_HEADERS header values. If this setting is an empty list (the default), the headers specified by REMOTE_HOST_HEADERS will be trusted unconditionally')",
               "category": "System",
               "category_slug": "system",
               "default": [],
@@ -3003,7 +2958,7 @@
               "type": "string",
               "required": false,
               "label": "Red Hat customer username",
-              "help_text": "This username is used to send data to Automation Analytics",
+              "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
               "category": "System",
               "category_slug": "system",
               "default": ""
@@ -3012,7 +2967,7 @@
               "type": "string",
               "required": false,
               "label": "Red Hat customer password",
-              "help_text": "This password is used to send data to Automation Analytics",
+              "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
               "category": "System",
               "category_slug": "system",
               "default": ""
@@ -3038,8 +2993,8 @@
           "AUTOMATION_ANALYTICS_URL": {
               "type": "string",
               "required": false,
-              "label": "Automation Analytics upload URL",
-              "help_text": "This setting is used to to configure data collection for the Automation Analytics dashboard",
+              "label": "Insights for Ansible Automation Platform upload URL",
+              "help_text": "This setting is used to to configure data collection for the Insights for Ansible Automation Platform dashboard",
               "category": "System",
               "category_slug": "system",
               "default": "https://example.com"
@@ -3096,7 +3051,7 @@
               "type": "choice",
               "required": true,
               "label": "When can extra variables contain Jinja templates?",
-              "help_text": "Ansible allows variable substitution via the Jinja2 templating language for --extra-vars. This poses a potential security risk where Tower users with the ability to specify extra vars at job launch time can use Jinja2 templates to run arbitrary Python.  It is recommended that this value be set to \"template\" or \"never\".",
+              "help_text": "Ansible allows variable substitution via the Jinja2 templating language for --extra-vars. This poses a potential security risk where users with the ability to specify extra vars at job launch time can use Jinja2 templates to run arbitrary Python.  It is recommended that this value be set to \"template\" or \"never\".",
               "category": "Jobs",
               "category_slug": "jobs",
               "default": "template",
@@ -3119,7 +3074,7 @@
               "type": "string",
               "required": true,
               "label": "Job execution path",
-              "help_text": "The directory in which Tower will create new temporary directories for job execution and isolation (such as credential files and custom inventory scripts).",
+              "help_text": "The directory in which the service will create new temporary directories for job execution and isolation (such as credential files and custom inventory scripts).",
               "category": "Jobs",
               "category_slug": "jobs",
               "default": "/tmp"
@@ -3137,48 +3092,6 @@
                   "required": true,
                   "read_only": false
               }
-          },
-          "AWX_ISOLATED_CHECK_INTERVAL": {
-              "type": "integer",
-              "required": true,
-              "label": "Isolated status check interval",
-              "help_text": "The number of seconds to sleep between status checks for jobs running on isolated instances.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "unit": "seconds",
-              "default": 1
-          },
-          "AWX_ISOLATED_LAUNCH_TIMEOUT": {
-              "type": "integer",
-              "required": true,
-              "label": "Isolated launch timeout",
-              "help_text": "The timeout (in seconds) for launching jobs on isolated instances.  This includes the time needed to copy source control files (playbooks) to the isolated instance.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "unit": "seconds",
-              "default": 600
-          },
-          "AWX_ISOLATED_CONNECTION_TIMEOUT": {
-              "type": "integer",
-              "required": false,
-              "label": "Isolated connection timeout",
-              "help_text": "Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. Value should be substantially greater than expected network latency.",
-              "min_value": 0,
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "unit": "seconds",
-              "default": 10
-          },
-          "AWX_ISOLATED_HOST_KEY_CHECKING": {
-              "type": "boolean",
-              "required": false,
-              "label": "Isolated host key checking",
-              "help_text": "When set to True, AWX will enforce strict host key checking for communication with isolated nodes.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": false
           },
           "AWX_TASK_ENV": {
               "type": "nested object",
@@ -3200,8 +3113,8 @@
           "INSIGHTS_TRACKING_STATE": {
               "type": "boolean",
               "required": false,
-              "label": "Gather data for Automation Analytics",
-              "help_text": "Enables Tower to gather data on automation and send it to Red Hat.",
+              "label": "Gather data for Insights for Ansible Automation Platform",
+              "help_text": "Enables the service to gather data on automation for Red Hat Insights.",
               "category": "System",
               "category_slug": "system",
               "default": false
@@ -3459,8 +3372,8 @@
           "LOG_AGGREGATOR_TOWER_UUID": {
               "type": "string",
               "required": false,
-              "label": "Cluster-wide Tower unique identifier.",
-              "help_text": "Useful to uniquely identify Tower instances.",
+              "label": "Cluster-wide unique identifier.",
+              "help_text": "Useful to uniquely identify instances.",
               "category": "Logging",
               "category_slug": "logging",
               "default": ""
@@ -3502,7 +3415,7 @@
               "type": "boolean",
               "required": false,
               "label": "Enable/disable HTTPS certificate verification",
-              "help_text": "Flag to control enable/disable of certificate verification when LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, Tower's log handler will verify certificate sent by external log aggregator before establishing connection.",
+              "help_text": "Flag to control enable/disable of certificate verification when LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, the log handler will verify certificate sent by external log aggregator before establishing connection.",
               "category": "Logging",
               "category_slug": "logging",
               "default": true
@@ -3569,7 +3482,7 @@
           "AUTOMATION_ANALYTICS_LAST_GATHER": {
               "type": "datetime",
               "required": true,
-              "label": "Last gather date for Automation Analytics.",
+              "label": "Last gather date for Insights for Ansible Automation Platform.",
               "category": "System",
               "category_slug": "system",
               "default": null
@@ -3577,7 +3490,7 @@
           "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
               "type": "integer",
               "required": false,
-              "label": "Automation Analytics Gather Interval",
+              "label": "Insights for Ansible Automation Platform Gather Interval",
               "help_text": "Interval (in seconds) between data gathering.",
               "min_value": 1800,
               "category": "System",
@@ -3649,7 +3562,7 @@
               "type": "string",
               "required": false,
               "label": "Login redirect override URL",
-              "help_text": "URL to which unauthorized users will be redirected to log in. If blank, users will be sent to the Tower login page.",
+              "help_text": "URL to which unauthorized users will be redirected to log in. If blank, users will be sent to the login page.",
               "category": "Authentication",
               "category_slug": "authentication",
               "default": ""
@@ -3719,7 +3632,7 @@
               "type": "nested object",
               "required": false,
               "label": "Social Auth Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "Authentication",
               "category_slug": "authentication",
               "placeholder": {
@@ -3761,7 +3674,7 @@
               "type": "nested object",
               "required": false,
               "label": "Social Auth Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "Authentication",
               "category_slug": "authentication",
               "placeholder": {
@@ -3822,7 +3735,7 @@
               "type": "string",
               "required": false,
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "default": ""
@@ -3870,7 +3783,7 @@
               "type": "list",
               "required": false,
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": [
@@ -3899,7 +3812,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4018,10 +3931,10 @@
               "type": "string",
               "required": false,
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
-              "placeholder": "CN=Tower Users,OU=Users,DC=example,DC=com",
+              "placeholder": "CN=Service Users,OU=Users,DC=example,DC=com",
               "default": null
           },
           "AUTH_LDAP_DENY_GROUP": {
@@ -4038,7 +3951,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4061,7 +3974,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4097,7 +4010,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4140,7 +4053,7 @@
               "type": "string",
               "required": false,
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "default": ""
@@ -4188,7 +4101,7 @@
               "type": "list",
               "required": false,
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to the service.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": [
@@ -4217,7 +4130,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4336,10 +4249,10 @@
               "type": "string",
               "required": false,
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
-              "placeholder": "CN=Tower Users,OU=Users,DC=example,DC=com",
+              "placeholder": "CN=Service Users,OU=Users,DC=example,DC=com",
               "default": null
           },
           "AUTH_LDAP_1_DENY_GROUP": {
@@ -4356,7 +4269,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4379,7 +4292,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4415,7 +4328,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4458,7 +4371,7 @@
               "type": "string",
               "required": false,
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "default": ""
@@ -4506,7 +4419,7 @@
               "type": "list",
               "required": false,
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": [
@@ -4535,7 +4448,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4654,10 +4567,10 @@
               "type": "string",
               "required": false,
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
-              "placeholder": "CN=Tower Users,OU=Users,DC=example,DC=com",
+              "placeholder": "CN=Service Users,OU=Users,DC=example,DC=com",
               "default": null
           },
           "AUTH_LDAP_2_DENY_GROUP": {
@@ -4674,7 +4587,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4697,7 +4610,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4733,7 +4646,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4776,7 +4689,7 @@
               "type": "string",
               "required": false,
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "default": ""
@@ -4824,7 +4737,7 @@
               "type": "list",
               "required": false,
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": [
@@ -4853,7 +4766,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -4972,10 +4885,10 @@
               "type": "string",
               "required": false,
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
-              "placeholder": "CN=Tower Users,OU=Users,DC=example,DC=com",
+              "placeholder": "CN=Service Users,OU=Users,DC=example,DC=com",
               "default": null
           },
           "AUTH_LDAP_3_DENY_GROUP": {
@@ -4992,7 +4905,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5015,7 +4928,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5051,7 +4964,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5094,7 +5007,7 @@
               "type": "string",
               "required": false,
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "default": ""
@@ -5142,7 +5055,7 @@
               "type": "list",
               "required": false,
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": [
@@ -5171,7 +5084,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5290,10 +5203,10 @@
               "type": "string",
               "required": false,
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
-              "placeholder": "CN=Tower Users,OU=Users,DC=example,DC=com",
+              "placeholder": "CN=Service Users,OU=Users,DC=example,DC=com",
               "default": null
           },
           "AUTH_LDAP_4_DENY_GROUP": {
@@ -5310,7 +5223,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5333,7 +5246,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5369,7 +5282,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5412,7 +5325,7 @@
               "type": "string",
               "required": false,
               "label": "LDAP Bind DN",
-              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "DN (Distinguished Name) of user to bind for all search queries. This is the system user account we will use to login to query LDAP for other user information. Refer to the documentation for example syntax.",
               "category": "LDAP",
               "category_slug": "ldap",
               "default": ""
@@ -5460,7 +5373,7 @@
               "type": "list",
               "required": false,
               "label": "LDAP User Search",
-              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into a Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See Tower documentation for details.",
+              "help_text": "LDAP search query to find users.  Any user that matches the given pattern will be able to login to Tower.  The user should also be mapped into an organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries need to be supported use of \"LDAPUnion\" is possible. See the documentation for details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": [
@@ -5489,7 +5402,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Attribute Map",
-              "help_text": "Mapping of LDAP user schema to Tower API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the Ansible Tower documentation for additional details.",
+              "help_text": "Mapping of LDAP user schema to API user attributes. The default setting is valid for ActiveDirectory but users with other LDAP configurations may need to change the values. Refer to the documentation for additional details.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5608,10 +5521,10 @@
               "type": "string",
               "required": false,
               "label": "LDAP Require Group",
-              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login via Tower. Only one require group is supported.",
+              "help_text": "Group DN required to login. If specified, user must be a member of this group to login via LDAP. If not set, everyone in LDAP that matches the user search will be able to login to the service. Only one require group is supported.",
               "category": "LDAP",
               "category_slug": "ldap",
-              "placeholder": "CN=Tower Users,OU=Users,DC=example,DC=com",
+              "placeholder": "CN=Service Users,OU=Users,DC=example,DC=com",
               "default": null
           },
           "AUTH_LDAP_5_DENY_GROUP": {
@@ -5628,7 +5541,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP User Flags By Group",
-              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Retrieve users from a given group. At this time, superuser and system auditors are the only groups supported. Refer to the documentation for more detail.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5651,7 +5564,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Organization Map",
-              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which Tower organizations relative to their LDAP group memberships. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between organization admins/users and LDAP groups. This controls which users are placed into which organizations relative to their LDAP group memberships. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5687,7 +5600,7 @@
               "type": "nested object",
               "required": false,
               "label": "LDAP Team Map",
-              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the Ansible Tower documentation.",
+              "help_text": "Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.",
               "category": "LDAP",
               "category_slug": "ldap",
               "placeholder": {
@@ -5846,7 +5759,7 @@
               "type": "nested object",
               "required": false,
               "label": "Google OAuth2 Extra Arguments",
-              "help_text": "Extra arguments for Google OAuth2 login. You can restrict it to only allow a single domain to authenticate, even if the user is logged in with multple Google accounts. Refer to the Ansible Tower documentation for more detail.",
+              "help_text": "Extra arguments for Google OAuth2 login. You can restrict it to only allow a single domain to authenticate, even if the user is logged in with multple Google accounts. Refer to the documentation for more detail.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "placeholder": {
@@ -5863,7 +5776,7 @@
               "type": "nested object",
               "required": false,
               "label": "Google OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "placeholder": {
@@ -5905,7 +5818,7 @@
               "type": "nested object",
               "required": false,
               "label": "Google OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
               "placeholder": {
@@ -5956,7 +5869,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub OAuth2",
               "category_slug": "github",
               "placeholder": {
@@ -5998,7 +5911,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub OAuth2",
               "category_slug": "github",
               "placeholder": {
@@ -6058,7 +5971,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Organization OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Organization OAuth2",
               "category_slug": "github-org",
               "placeholder": {
@@ -6100,7 +6013,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Organization OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Organization OAuth2",
               "category_slug": "github-org",
               "placeholder": {
@@ -6160,7 +6073,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Team OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Team OAuth2",
               "category_slug": "github-team",
               "placeholder": {
@@ -6202,7 +6115,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Team OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Team OAuth2",
               "category_slug": "github-team",
               "placeholder": {
@@ -6271,7 +6184,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Enterprise OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Enterprise OAuth2",
               "category_slug": "github-enterprise",
               "placeholder": {
@@ -6313,7 +6226,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Enterprise OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Enterprise OAuth2",
               "category_slug": "github-enterprise",
               "placeholder": {
@@ -6391,7 +6304,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Enterprise Organization OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Enterprise Organization OAuth2",
               "category_slug": "github-enterprise-org",
               "placeholder": {
@@ -6433,7 +6346,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Enterprise Organization OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Enterprise Organization OAuth2",
               "category_slug": "github-enterprise-org",
               "placeholder": {
@@ -6511,7 +6424,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Enterprise Team OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "GitHub Enterprise Team OAuth2",
               "category_slug": "github-enterprise-team",
               "placeholder": {
@@ -6553,7 +6466,7 @@
               "type": "nested object",
               "required": false,
               "label": "GitHub Enterprise Team OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "GitHub Enterprise Team OAuth2",
               "category_slug": "github-enterprise-team",
               "placeholder": {
@@ -6604,7 +6517,7 @@
               "type": "nested object",
               "required": false,
               "label": "Azure AD OAuth2 Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "Azure AD OAuth2",
               "category_slug": "azuread-oauth2",
               "placeholder": {
@@ -6646,7 +6559,7 @@
               "type": "nested object",
               "required": false,
               "label": "Azure AD OAuth2 Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "Azure AD OAuth2",
               "category_slug": "azuread-oauth2",
               "placeholder": {
@@ -6697,7 +6610,7 @@
               "type": "string",
               "required": true,
               "label": "SAML Service Provider Public Certificate",
-              "help_text": "Create a keypair for Tower to use as a service provider (SP) and include the certificate content here.",
+              "help_text": "Create a keypair to use as a service provider (SP) and include the certificate content here.",
               "category": "SAML",
               "category_slug": "saml",
               "default": ""
@@ -6706,7 +6619,7 @@
               "type": "string",
               "required": true,
               "label": "SAML Service Provider Private Key",
-              "help_text": "Create a keypair for Tower to use as a service provider (SP) and include the private key content here.",
+              "help_text": "Create a keypair to use as a service provider (SP) and include the private key content here.",
               "category": "SAML",
               "category_slug": "saml",
               "default": ""
@@ -6715,7 +6628,7 @@
               "type": "nested object",
               "required": true,
               "label": "SAML Service Provider Organization Info",
-              "help_text": "Provide the URL, display name, and the name of your app. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "Provide the URL, display name, and the name of your app. Refer to the documentation for example syntax.",
               "category": "SAML",
               "category_slug": "saml",
               "placeholder": {
@@ -6741,7 +6654,7 @@
               "type": "nested object",
               "required": true,
               "label": "SAML Service Provider Technical Contact",
-              "help_text": "Provide the name and email address of the technical contact for your service provider. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "Provide the name and email address of the technical contact for your service provider. Refer to the documentation for example syntax.",
               "category": "SAML",
               "category_slug": "saml",
               "placeholder": {
@@ -6759,7 +6672,7 @@
               "type": "nested object",
               "required": true,
               "label": "SAML Service Provider Support Contact",
-              "help_text": "Provide the name and email address of the support contact for your service provider. Refer to the Ansible Tower documentation for example syntax.",
+              "help_text": "Provide the name and email address of the support contact for your service provider. Refer to the documentation for example syntax.",
               "category": "SAML",
               "category_slug": "saml",
               "placeholder": {
@@ -6896,7 +6809,7 @@
               "type": "nested object",
               "required": false,
               "label": "SAML Organization Map",
-              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
               "category": "SAML",
               "category_slug": "saml",
               "placeholder": {
@@ -6938,7 +6851,7 @@
               "type": "nested object",
               "required": false,
               "label": "SAML Team Map",
-              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in the documentation.",
               "category": "SAML",
               "category_slug": "saml",
               "placeholder": {

@@ -1,7 +1,7 @@
 # Django REST Framework
 from rest_framework import serializers
 
-# Tower
+# AWX
 from awx.api.fields import VerbatimField
 from awx.api.serializers import BaseSerializer
 from awx.conf.models import Setting
@@ -81,10 +81,8 @@ class SettingSingletonSerializer(serializers.Serializer):
             if self.instance and not hasattr(self.instance, key):
                 continue
             extra_kwargs = {}
-            # Make LICENSE and AWX_ISOLATED_KEY_GENERATION read-only here;
-            # LICENSE is only updated via /api/v2/config/
-            # AWX_ISOLATED_KEY_GENERATION is only set/unset via the setup playbook
-            if key in ('LICENSE', 'AWX_ISOLATED_KEY_GENERATION'):
+            # Make LICENSE read-only here; LICENSE is only updated via /api/v2/config/
+            if key == 'LICENSE':
                 extra_kwargs['read_only'] = True
             field = settings_registry.get_setting_field(key, mixin_class=SettingFieldMixin, for_user=bool(category_slug == 'user'), **extra_kwargs)
             fields[key] = field

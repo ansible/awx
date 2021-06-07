@@ -5,6 +5,7 @@
 
 - name: Generate random names for test objects
   set_fact:
+    org_name: "AWX-Collection-tests-tower_organization-org-{{ test_id }}"
     scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template-scm-cred-{{ test_id }}"
     demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ test_id }}"
     jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ test_id }}"
@@ -16,6 +17,13 @@
     webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
     project_inv: "AWX-Collection-tests-tower_inventory_source-inv-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     project_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: "Create a new organization"
+  tower_organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+  register: result
 
 - name: Create an SCM Credential
   tower_credential:
@@ -55,10 +63,13 @@
     state: present
   register: result
 
-- name: Create Label
+- name: Create Labels
   tower_label:
     name: "{{ lab1 }}"
-    organization: Default
+    organization: "{{ item }}"
+  loop:
+    - Default
+    - "{{ org_name }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -126,6 +137,7 @@
 - name: Add a Survey to second Job Template
   tower_job_template:
     name: "{{ jt2_name }}"
+    organization: Default
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
@@ -142,6 +154,7 @@
 - name: Create a workflow job template
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
+    organization: Default
     inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
     labels:
@@ -299,6 +312,124 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Add Survey to Copied workflow job template
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    organization: Default
+    survey_spec:
+      name: Basic Survey
+      description: Basic Survey
+      spec:
+        - question_description: Name
+          min: 0
+          default: ''
+          max: 128
+          required: true
+          choices: ''
+          new_question: true
+          variable: basic_name
+          question_name: Basic Name
+          type: text
+        - question_description: Choosing yes or no.
+          min: 0
+          default: 'yes'
+          max: 0
+          required: true
+          choices: |-
+            yes
+            no
+          new_question: true
+          variable: option_true_false
+          question_name: Choose yes or no?
+          type: multiplechoice
+        - question_description: ''
+          min: 0
+          default: ''
+          max: 0
+          required: true
+          choices: |-
+            group1
+            group2
+            group3
+          new_question: true
+          variable: target_groups
+          question_name: 'Select Group:'
+          type: multiselect
+        - question_name: password
+          question_description: ''
+          required: true
+          type: password
+          variable: password
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re add survey to workflow job template expected not changed.
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    organization: Default
+    survey_spec:
+      name: Basic Survey
+      description: Basic Survey
+      spec:
+        - question_description: Name
+          min: 0
+          default: ''
+          max: 128
+          required: true
+          choices: ''
+          new_question: true
+          variable: basic_name
+          question_name: Basic Name
+          type: text
+        - question_description: Choosing yes or no.
+          min: 0
+          default: 'yes'
+          max: 0
+          required: true
+          choices: |-
+            yes
+            no
+          new_question: true
+          variable: option_true_false
+          question_name: Choose yes or no?
+          type: multiplechoice
+        - question_description: ''
+          min: 0
+          default: ''
+          max: 0
+          required: true
+          choices: |-
+            group1
+            group2
+            group3
+          new_question: true
+          variable: target_groups
+          question_name: 'Select Group:'
+          type: multiselect
+        - question_name: password
+          question_description: ''
+          required: true
+          type: password
+          variable: password
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
 
 - name: Delete copied workflow job template
   tower_workflow_job_template:
@@ -534,3 +665,9 @@
     name: "{{ webhook_not }}"
     organization: Default
     state: absent
+
+- name: "Remove the organization"
+  tower_organization:
+    name: "{{ org_name }}"
+    state: absent
+  register: result

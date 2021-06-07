@@ -62,7 +62,7 @@ class SwaggerSchemaView(APIView):
     renderer_classes = [CoreJSONRenderer, renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer]
 
     def get(self, request):
-        generator = SuperUserSchemaGenerator(title='Ansible Tower API', patterns=None, urlconf=None)
+        generator = SuperUserSchemaGenerator(title='Ansible Automation Platform controller API', patterns=None, urlconf=None)
         schema = generator.get_schema(request=request)
         # python core-api doesn't support the deprecation yet, so track it
         # ourselves and return it in a response header

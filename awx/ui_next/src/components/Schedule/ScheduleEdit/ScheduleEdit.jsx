@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { shape } from 'prop-types';
@@ -16,7 +16,6 @@ import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
 import getSurveyValues from '../../../util/prompt/getSurveyValues';
 
 function ScheduleEdit({
-  i18n,
   hasDaysToKeepField,
   schedule,
   resource,
@@ -62,6 +61,16 @@ function ScheduleEdit({
 
     let extraVars;
     const surveyValues = getSurveyValues(values);
+
+    if (
+      !Object.values(surveyValues).length &&
+      surveyConfiguration?.spec?.length
+    ) {
+      surveyConfiguration.spec.forEach(q => {
+        surveyValues[q.variable] = q.default;
+      });
+    }
+
     const initialExtraVars =
       launchConfiguration?.ask_variables_on_launch &&
       (values.extra_vars || '---');
@@ -84,7 +93,7 @@ function ScheduleEdit({
     }
 
     try {
-      const rule = new RRule(buildRuleObj(values, i18n));
+      const rule = new RRule(buildRuleObj(values));
       const requestData = {
         ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
@@ -92,7 +101,9 @@ function ScheduleEdit({
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (!requestData.extra_data) {
-          requestData.extra_data = JSON.stringify({ days: values.daysToKeep });
+          requestData.extra_data = JSON.stringify({
+            days: values.daysToKeep,
+          });
         } else {
           requestData.extra_data.days = values.daysToKeep;
         }
@@ -145,4 +156,4 @@ ScheduleEdit.propTypes = {
 
 ScheduleEdit.defaultProps = {};
 
-export default withI18n()(ScheduleEdit);
+export default ScheduleEdit;

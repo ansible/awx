@@ -114,7 +114,7 @@ describe('<CredentialPluginPrompt />', () => {
 
     test('credentials step renders correctly', () => {
       expect(wrapper.find('CredentialsStep').length).toBe(1);
-      expect(wrapper.find('DataListItem').length).toBe(3);
+      expect(wrapper.find('CheckboxListItem').length).toBe(3);
       expect(
         wrapper.find('Radio').filterWhere(radio => radio.isChecked).length
       ).toBe(0);
@@ -129,18 +129,19 @@ describe('<CredentialPluginPrompt />', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
     test('clicking credential row enables next button', async () => {
+      await waitForElement(wrapper, 'CheckboxListItem', el => el.length > 0);
       await act(async () => {
         wrapper
-          .find('Radio')
-          .at(0)
-          .invoke('onChange')(true);
+          .find('td#check-action-item-1')
+          .find('input')
+          .simulate('click');
       });
       wrapper.update();
       expect(
         wrapper
-          .find('Radio')
-          .at(0)
-          .prop('isChecked')
+          .find('td#check-action-item-1')
+          .find('input')
+          .prop('checked')
       ).toBe(true);
       expect(wrapper.find('Button[children="Next"]').prop('isDisabled')).toBe(
         false
@@ -168,8 +169,7 @@ describe('<CredentialPluginPrompt />', () => {
       await act(async () => {
         wrapper.find('Button[children="OK"]').simulate('click');
       });
-      // expect(wrapper.debug()).toBe(false);
-      // wrapper.find('Button[children="OK"]').simulate('click');
+
       expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
           credential: selectedCredential,
@@ -218,14 +218,16 @@ describe('<CredentialPluginPrompt />', () => {
       expect(steps[0].name).toEqual('Credential');
       expect(steps[1].name).toEqual('Metadata');
     });
-    test('credentials step renders correctly', () => {
+    test('credentials step renders correctly', async () => {
+      await waitForElement(wrapper, 'CheckboxListItem', el => el.length > 0);
+
       expect(wrapper.find('CredentialsStep').length).toBe(1);
-      expect(wrapper.find('DataListItem').length).toBe(3);
+      expect(wrapper.find('CheckboxListItem').length).toBe(3);
       expect(
         wrapper
-          .find('Radio')
-          .at(0)
-          .prop('isChecked')
+          .find('td#check-action-item-1')
+          .find('input')
+          .prop('checked')
       ).toBe(true);
       expect(wrapper.find('Button[children="Next"]').prop('isDisabled')).toBe(
         false

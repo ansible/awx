@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ExecutionEnvironmentLookup from './ExecutionEnvironmentLookup';
 import { ExecutionEnvironmentsAPI, ProjectsAPI } from '../../api';
@@ -52,11 +53,13 @@ describe('ExecutionEnvironmentLookup', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentLookup
-          isDefaultEnvironment
-          value={executionEnvironment}
-          onChange={() => {}}
-        />
+        <Formik>
+          <ExecutionEnvironmentLookup
+            isDefaultEnvironment
+            value={executionEnvironment}
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     wrapper.update();
@@ -73,10 +76,12 @@ describe('ExecutionEnvironmentLookup', () => {
   test('should fetch execution environments', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentLookup
-          value={executionEnvironment}
-          onChange={() => {}}
-        />
+        <Formik>
+          <ExecutionEnvironmentLookup
+            value={executionEnvironment}
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledTimes(2);
@@ -91,12 +96,14 @@ describe('ExecutionEnvironmentLookup', () => {
   test('should call api with organization id', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentLookup
-          value={executionEnvironment}
-          onChange={() => {}}
-          organizationId={1}
-          globallyAvailable
-        />
+        <Formik>
+          <ExecutionEnvironmentLookup
+            value={executionEnvironment}
+            onChange={() => {}}
+            organizationId={1}
+            globallyAvailable
+          />
+        </Formik>
       );
     });
     expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledWith({
@@ -111,12 +118,14 @@ describe('ExecutionEnvironmentLookup', () => {
   test('should call api with organization id from the related project', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentLookup
-          value={executionEnvironment}
-          onChange={() => {}}
-          projectId={12}
-          globallyAvailable
-        />
+        <Formik>
+          <ExecutionEnvironmentLookup
+            value={executionEnvironment}
+            onChange={() => {}}
+            projectId={12}
+            globallyAvailable
+          />
+        </Formik>
       );
     });
     expect(ProjectsAPI.readDetail).toHaveBeenCalledWith(12);

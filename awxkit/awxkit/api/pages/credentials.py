@@ -287,7 +287,10 @@ class Credential(HasCopy, HasCreate, base.Base):
         return passwords
 
 
-page.register_page([resources.credential, (resources.credentials, 'post'), (resources.credential_copy, 'post')], Credential)
+page.register_page(
+    [resources.credential, (resources.credentials, 'post'), (resources.credential_copy, 'post'), (resources.organization_galaxy_credentials, 'post')],
+    Credential,
+)
 
 
 class Credentials(page.PageList, Credential):
@@ -295,7 +298,7 @@ class Credentials(page.PageList, Credential):
     pass
 
 
-page.register_page([resources.credentials, resources.related_credentials], Credentials)
+page.register_page([resources.credentials, resources.related_credentials, resources.organization_galaxy_credentials], Credentials)
 
 
 class CredentialCopy(base.Base):

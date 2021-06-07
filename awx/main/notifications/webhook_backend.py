@@ -9,7 +9,7 @@ from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
 from awx.main.notifications.base import AWXBaseEmailBackend
-from awx.main.utils import get_awx_version
+from awx.main.utils import get_awx_http_client_headers
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
 logger = logging.getLogger('awx.main.notifications.webhook_backend')
@@ -61,9 +61,6 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     def send_messages(self, messages):
         sent_messages = 0
-        self.headers['Content-Type'] = 'application/json'
-        if 'User-Agent' not in self.headers:
-            self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
         if self.http_method.lower() not in ['put', 'post']:
             raise ValueError("HTTP method must be either 'POST' or 'PUT'.")
         chosen_method = getattr(requests, self.http_method.lower(), None)
@@ -75,7 +72,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 "{}".format(m.recipients()[0]),
                 auth=auth,
                 data=json.dumps(m.body, ensure_ascii=False).encode('utf-8'),
-                headers=self.headers,
+                headers=get_awx_http_client_headers(),
                 verify=(not self.disable_ssl_verification),
             )
             if r.status_code >= 400:

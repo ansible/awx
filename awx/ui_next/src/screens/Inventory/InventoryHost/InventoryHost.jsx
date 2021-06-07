@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Switch,
@@ -23,7 +23,7 @@ import InventoryHostEdit from '../InventoryHostEdit';
 import InventoryHostFacts from '../InventoryHostFacts';
 import InventoryHostGroups from '../InventoryHostGroups';
 
-function InventoryHost({ i18n, setBreadcrumb, inventory }) {
+function InventoryHost({ setBreadcrumb, inventory }) {
   const location = useLocation();
   const match = useRouteMatch('/inventories/inventory/:id/hosts/:hostId');
   const hostListUrl = `/inventories/inventory/${inventory.id}/hosts`;
@@ -63,29 +63,29 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Hosts`)}
+          {t`Back to Hosts`}
         </>
       ),
       link: `${hostListUrl}`,
       id: 0,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `${match.url}/details`,
       id: 1,
     },
     {
-      name: i18n._(t`Facts`),
+      name: t`Facts`,
       link: `${match.url}/facts`,
       id: 2,
     },
     {
-      name: i18n._(t`Groups`),
+      name: t`Groups`,
       link: `${match.url}/groups`,
       id: 3,
     },
     {
-      name: i18n._(t`Jobs`),
+      name: t`Jobs`,
       link: `${match.url}/jobs`,
       id: 4,
     },
@@ -97,10 +97,8 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
         <ContentError error={contentError}>
           {contentError.response && contentError.response.status === 404 && (
             <span>
-              {i18n._(t`Host not found.`)}{' '}
-              <Link to={hostListUrl}>
-                {i18n._(t`View all Inventory Hosts.`)}
-              </Link>
+              {t`Host not found.`}{' '}
+              <Link to={hostListUrl}>{t`View all Inventory Hosts.`}</Link>
             </span>
           )}
         </ContentError>
@@ -159,7 +157,7 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(t`View Inventory Host Details`)}
+                {t`View Inventory Host Details`}
               </Link>
             </ContentError>
           </Route>
@@ -169,4 +167,4 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
   );
 }
 
-export default withI18n()(InventoryHost);
+export default InventoryHost;

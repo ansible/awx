@@ -18,9 +18,6 @@
 # INTERNAL_IPS = ('172.19.0.1', '172.18.0.1', '192.168.100.1')
 # ALLOWED_HOSTS = ['*']
 
-# Location for cross-development of inventory plugins
-AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
-
 # The UUID of the system, for HA.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
@@ -35,16 +32,16 @@ SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 # WARNING also logs 4xx responses.
 
 # Enable the following lines to turn on lots of permissions-related logging.
-#LOGGING['loggers']['awx.main.access']['level'] = 'DEBUG'
-#LOGGING['loggers']['awx.main.signals']['level'] = 'DEBUG'
-#LOGGING['loggers']['awx.main.permissions']['level'] = 'DEBUG'
+# LOGGING['loggers']['awx.main.access']['level'] = 'DEBUG'
+# LOGGING['loggers']['awx.main.signals']['level'] = 'DEBUG'
+# LOGGING['loggers']['awx.main.permissions']['level'] = 'DEBUG'
 
 # Enable the following line to turn on database settings logging.
-#LOGGING['loggers']['awx.conf']['level'] = 'DEBUG'
+# LOGGING['loggers']['awx.conf']['level'] = 'DEBUG'
 
 # Enable the following lines to turn on LDAP auth logging.
-#LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
-#LOGGING['loggers']['django_auth_ldap']['level'] = 'DEBUG'
+# LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
+# LOGGING['loggers']['django_auth_ldap']['level'] = 'DEBUG'
 
 BROADCAST_WEBSOCKET_PORT = 8013
 BROADCAST_WEBSOCKET_VERIFY_CERT = False

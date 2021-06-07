@@ -1,7 +1,7 @@
 # Role-Based Access Control (RBAC)
 
-This document describes the RBAC implementation of the Ansible Tower Software.
-The intended audience of this document is the Ansible Tower developer.
+This document describes the RBAC implementation of the AWX Software.
+The intended audience of this document is the AWX developer.
 
 ## Overview
 

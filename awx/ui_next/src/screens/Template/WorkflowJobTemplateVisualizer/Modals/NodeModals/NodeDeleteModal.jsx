@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { Fragment, useContext } from 'react';
 import { Button } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
@@ -9,13 +9,13 @@ import {
 } from '../../../../../contexts/Workflow';
 import AlertModal from '../../../../../components/AlertModal';
 
-function NodeDeleteModal({ i18n }) {
+function NodeDeleteModal() {
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToDelete } = useContext(WorkflowStateContext);
   return (
     <AlertModal
       variant="danger"
-      title={i18n._(t`Remove Node`)}
+      title={t`Remove Node`}
       isOpen={nodeToDelete}
       onClose={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
       actions={[
@@ -24,36 +24,36 @@ function NodeDeleteModal({ i18n }) {
           id="confirm-node-removal"
           key="remove"
           variant="danger"
-          aria-label={i18n._(t`Confirm node removal`)}
+          aria-label={t`Confirm node removal`}
           onClick={() => dispatch({ type: 'DELETE_NODE' })}
         >
-          {i18n._(t`Remove`)}
+          {t`Remove`}
         </Button>,
         <Button
           ouiaId="node-removal-cancel-button"
           id="cancel-node-removal"
           key="cancel"
           variant="link"
-          aria-label={i18n._(t`Cancel node removal`)}
+          aria-label={t`Cancel node removal`}
           onClick={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
         >
-          {i18n._(t`Cancel`)}
+          {t`Cancel`}
         </Button>,
       ]}
     >
       {nodeToDelete && nodeToDelete.unifiedJobTemplate ? (
         <Fragment>
-          <p>{i18n._(t`Are you sure you want to remove the node below:`)}</p>
+          <p>{t`Are you sure you want to remove the node below:`}</p>
           <br />
           <strong css="color: var(--pf-global--danger-color--100)">
             {nodeToDelete.unifiedJobTemplate.name}
           </strong>
         </Fragment>
       ) : (
-        <p>{i18n._(t`Are you sure you want to remove this node?`)}</p>
+        <p>{t`Are you sure you want to remove this node?`}</p>
       )}
     </AlertModal>
   );
 }
 
-export default withI18n()(NodeDeleteModal);
+export default NodeDeleteModal;

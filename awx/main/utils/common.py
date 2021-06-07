@@ -2,12 +2,15 @@
 # All Rights Reserved.
 
 # Python
+from datetime import timedelta
 import json
 import yaml
 import logging
 import os
+import subprocess
 import re
 import stat
+import subprocess
 import urllib.parse
 import threading
 import contextlib
@@ -22,15 +25,19 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
+from django.db import connection
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
 from django.db.models import Q
+from django.db import connection as django_connection
+from django.core.cache import cache as django_cache
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError
 from django.utils.encoding import smart_str
 from django.utils.text import slugify
+from django.utils.timezone import now
 from django.apps import apps
 
 # AWX
@@ -85,6 +92,8 @@ __all__ = [
     'create_temporary_fifo',
     'truncate_stdout',
     'deepmerge',
+    'get_event_partition_epoch',
+    'cleanup_new_process',
 ]
 
 
@@ -202,6 +211,27 @@ def memoize_delete(function_name):
     return cache.delete(function_name)
 
 
+@memoize(ttl=3600 * 24)  # in practice, we only need this to load once at process startup time
+def get_event_partition_epoch():
+    from django.db.migrations.recorder import MigrationRecorder
+
+    return MigrationRecorder.Migration.objects.filter(app='main', name='0144_event_partitions').first().applied
+
+
+@memoize()
+def get_ansible_version():
+    """
+    Return Ansible version installed.
+    Ansible path needs to be provided to account for custom virtual environments
+    """
+    try:
+        proc = subprocess.Popen(['ansible', '--version'], stdout=subprocess.PIPE)
+        result = smart_str(proc.communicate()[0])
+        return result.split('\n')[0].replace('ansible', '').strip()
+    except Exception:
+        return 'unknown'
+
+
 def get_awx_version():
     """
     Return AWX version as reported by setuptools.
@@ -220,7 +250,7 @@ def get_awx_http_client_headers():
     license = get_license().get('license_type', 'UNLICENSED')
     headers = {
         'Content-Type': 'application/json',
-        'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Tower', get_awx_version(), license),
+        'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Automation Platform', get_awx_version(), license),
     }
     return headers
 
@@ -234,7 +264,7 @@ def get_licenser(*args, **kwargs):
         else:
             return OpenLicense()
     except Exception as e:
-        raise ValueError(_('Error importing Tower License: %s') % e)
+        raise ValueError(_('Error importing License: %s') % e)
 
 
 def update_scm_url(scm_type, url, username=True, password=True, check_special_cases=True, scp_format=False):
@@ -887,28 +917,33 @@ def get_current_apps():
     return current_apps
 
 
-def get_custom_venv_choices(custom_paths=None):
+def get_custom_venv_choices():
     from django.conf import settings
 
-    custom_paths = custom_paths or settings.CUSTOM_VENV_PATHS
-    all_venv_paths = [settings.BASE_VENV_PATH] + custom_paths
+    all_venv_paths = settings.CUSTOM_VENV_PATHS + [settings.BASE_VENV_PATH]
     custom_venv_choices = []
 
-    for custom_venv_path in all_venv_paths:
-        try:
-            if os.path.exists(custom_venv_path):
-                custom_venv_choices.extend(
-                    [
-                        os.path.join(custom_venv_path, x, '')
-                        for x in os.listdir(custom_venv_path)
-                        if x != 'awx'
-                        and os.path.isdir(os.path.join(custom_venv_path, x))
-                        and os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
-                    ]
-                )
-        except Exception:
-            logger.exception("Encountered an error while discovering custom virtual environments.")
+    for venv_path in all_venv_paths:
+        if os.path.exists(venv_path):
+            for d in os.listdir(venv_path):
+                if venv_path == settings.BASE_VENV_PATH and d == 'awx':
+                    continue
+
+                if os.path.exists(os.path.join(venv_path, d, 'bin', 'pip')):
+                    custom_venv_choices.append(os.path.join(venv_path, d))
+
     return custom_venv_choices
+
+
+def get_custom_venv_pip_freeze(venv_path):
+    pip_path = os.path.join(venv_path, 'bin', 'pip')
+
+    try:
+        freeze_data = subprocess.run([pip_path, "freeze"], capture_output=True)
+        pip_data = (freeze_data.stdout).decode('UTF-8')
+        return pip_data
+    except Exception:
+        logger.exception("Encountered an error while trying to run 'pip freeze' for custom virtual environments:")
 
 
 def is_ansible_variable(key):
@@ -1019,3 +1054,53 @@ def deepmerge(a, b):
         return a
     else:
         return b
+
+
+def create_partition(tblname, start=None, end=None, partition_label=None, minutely=False):
+    """Creates new partition table for events.
+    - start defaults to beginning of current hour
+    - end defaults to end of current hour
+    - partition_label defaults to YYYYMMDD_HH
+
+    - minutely will create partitions that span _a single minute_ for testing purposes
+    """
+    current_time = now()
+    if not start:
+        if minutely:
+            start = current_time.replace(microsecond=0, second=0)
+        else:
+            start = current_time.replace(microsecond=0, second=0, minute=0)
+    if not end:
+        if minutely:
+            end = start.replace(microsecond=0, second=0) + timedelta(minutes=1)
+        else:
+            end = start.replace(microsecond=0, second=0, minute=0) + timedelta(hours=1)
+    start_timestamp = str(start)
+    end_timestamp = str(end)
+
+    if not partition_label:
+        if minutely:
+            partition_label = start.strftime('%Y%m%d_%H%M')
+        else:
+            partition_label = start.strftime('%Y%m%d_%H')
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
+            f'PARTITION OF {tblname} '
+            f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+        )
+
+
+def cleanup_new_process(func):
+    """
+    Cleanup django connection, cache connection, before executing new thread or processes entry point, func.
+    """
+
+    @wraps(func)
+    def wrapper_cleanup_new_process(*args, **kwargs):
+        django_connection.close()
+        django_cache.close()
+        return func(*args, **kwargs)
+
+    return wrapper_cleanup_new_process

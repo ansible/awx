@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -15,51 +15,50 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 import Popover from '../../../components/Popover';
 
 function ApplicationFormFields({
-  i18n,
   application,
   authorizationOptions,
   clientTypeOptions,
 }) {
   const match = useRouteMatch();
-  const { setFieldValue } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: required(null, i18n),
-  });
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
   const [
     authorizationTypeField,
     authorizationTypeMeta,
     authorizationTypeHelpers,
   ] = useField({
     name: 'authorization_grant_type',
-    validate: required(null, i18n),
+    validate: required(null),
   });
 
   const [clientTypeField, clientTypeMeta, clientTypeHelpers] = useField({
     name: 'client_type',
-    validate: required(null, i18n),
+    validate: required(null),
   });
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
     <>
       <FormField
         id="name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -67,10 +66,11 @@ function ApplicationFormFields({
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required
         autoPopulate={!application?.id}
+        validate={required(null)}
       />
       <FormGroup
         fieldId="authType"
@@ -81,12 +81,10 @@ function ApplicationFormFields({
             : 'error'
         }
         isRequired
-        label={i18n._(t`Authorization grant type`)}
+        label={t`Authorization grant type`}
         labelIcon={
           <Popover
-            content={i18n._(
-              t`The Grant type the user must use for acquire tokens for this application`
-            )}
+            content={t`The Grant type the user must use for acquire tokens for this application`}
           />
         }
       >
@@ -105,7 +103,7 @@ function ApplicationFormFields({
       </FormGroup>
       <FormField
         id="redirect_uris"
-        label={i18n._(t`Redirect URIs`)}
+        label={t`Redirect URIs`}
         name="redirect_uris"
         type="text"
         isRequired={Boolean(
@@ -113,10 +111,10 @@ function ApplicationFormFields({
         )}
         validate={
           authorizationTypeField.value === 'authorization-code'
-            ? required(null, i18n)
+            ? required(null)
             : null
         }
-        tooltip={i18n._(t`Allowed URIs list, space separated`)}
+        tooltip={t`Allowed URIs list, space separated`}
       />
       <FormGroup
         fieldId="clientType"
@@ -125,12 +123,10 @@ function ApplicationFormFields({
           !clientTypeMeta.touched || !clientTypeMeta.error ? 'default' : 'error'
         }
         isRequired
-        label={i18n._(t`Client type`)}
+        label={t`Client type`}
         labelIcon={
           <Popover
-            content={i18n._(
-              t`Set to Public or Confidential depending on how secure the client device is.`
-            )}
+            content={t`Set to Public or Confidential depending on how secure the client device is.`}
           />
         }
       >
@@ -150,7 +146,7 @@ function ApplicationFormFields({
 function ApplicationForm({
   onCancel,
   onSubmit,
-  i18n,
+
   submitError,
   application,
   authorizationOptions,
@@ -175,7 +171,6 @@ function ApplicationForm({
               application={application}
               authorizationOptions={authorizationOptions}
               clientTypeOptions={clientTypeOptions}
-              i18n={i18n}
             />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
@@ -196,4 +191,4 @@ ApplicationForm.propTypes = {
   clientTypeOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-export default withI18n()(ApplicationForm);
+export default ApplicationForm;

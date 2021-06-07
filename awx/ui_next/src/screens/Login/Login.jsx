@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import styled from 'styled-components';
 import sanitizeHtml from 'sanitize-html';
 import {
+  Alert,
   Brand,
   LoginMainFooterLinksItem,
   LoginForm,
@@ -28,6 +29,8 @@ import useRequest, { useDismissableError } from '../../util/useRequest';
 import { AuthAPI, RootAPI } from '../../api';
 import AlertModal from '../../components/AlertModal';
 import ErrorDetail from '../../components/ErrorDetail';
+import { useSession } from '../../contexts/Session';
+import { SESSION_REDIRECT_URL } from '../../constants';
 
 const loginLogoSrc = '/static/media/logo-login.svg';
 
@@ -37,7 +40,9 @@ const Login = styled(PFLogin)`
   }
 `;
 
-function AWXLogin({ alt, i18n, isAuthenticated }) {
+function AWXLogin({ alt, isAuthenticated }) {
+  const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
+
   const {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
@@ -92,6 +97,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   useEffect(() => {
     fetchCustomLoginInfo();
   }, [fetchCustomLoginInfo]);
+
   const {
     isLoading: isAuthenticating,
     error: authenticationError,
@@ -110,6 +116,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   const handleSubmit = async values => {
     dismissAuthError();
     await authenticate(values);
+    setAuthRedirectTo('/home');
   };
 
   if (isCustomLoginInfoLoading) {
@@ -120,40 +127,48 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
     return null;
   }
   if (isAuthenticated(document.cookie)) {
-    return <Redirect to="/" />;
+    return <Redirect to={authRedirectTo || '/'} />;
   }
 
   let helperText;
   if (authError?.response?.status === 401) {
-    helperText = i18n._(t`Invalid username or password. Please try again.`);
+    helperText = t`Invalid username or password. Please try again.`;
   } else {
-    helperText = i18n._(t`There was a problem signing in. Please try again.`);
+    helperText = t`There was a problem logging in. Please try again.`;
   }
 
   const HeaderBrand = (
-    <Brand dataCy="brand-logo" src={logo} alt={alt || brandName} />
+    <Brand data-cy="brand-logo" src={logo} alt={alt || brandName} />
   );
   const Header = <LoginHeader headerBrand={HeaderBrand} />;
   const Footer = (
     <LoginFooter
-      dataCy="login-footer"
+      data-cy="login-footer"
       dangerouslySetInnerHTML={{
         __html: sanitizeHtml(loginInfo),
       }}
     />
   );
 
+  function setSessionRedirect() {
+    window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
+  }
+
   return (
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
-        dataCy="login-header"
-        title={
-          brandName
-            ? i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)
-            : ''
-        }
+        data-cy="login-header"
+        title={brandName ? t`Welcome to ${brandName}!` : ''}
+        subtitle={t`Please log in`}
       />
       <LoginMainBody>
+        {isSessionExpired.current ? (
+          <Alert
+            variant="warning"
+            isInline
+            title={t`Your session has expired. Please log in to continue where you left off.`}
+          />
+        ) : null}
         <Formik
           initialValues={{
             password: '',
@@ -163,13 +178,13 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
         >
           {formik => (
             <LoginForm
-              dataCy="login-form"
+              data-cy="login-form"
               className={authError ? 'pf-m-error' : ''}
               helperText={helperText}
               isLoginButtonDisabled={isAuthenticating}
               isValidPassword={!authError}
               isValidUsername={!authError}
-              loginButtonLabel={i18n._(t`Log In`)}
+              loginButtonLabel={t`Log In`}
               onChangePassword={val => {
                 formik.setFieldValue('password', val);
                 dismissAuthError();
@@ -179,10 +194,10 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 dismissAuthError();
               }}
               onLoginButtonClick={formik.handleSubmit}
-              passwordLabel={i18n._(t`Password`)}
+              passwordLabel={t`Password`}
               passwordValue={formik.values.password}
               showHelperText={authError}
-              usernameLabel={i18n._(t`Username`)}
+              usernameLabel={t`Username`}
               usernameValue={formik.values.username}
             />
           )}
@@ -191,13 +206,11 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
           <AlertModal
             isOpen={loginInfoError}
             variant="error"
-            title={i18n._(t`Error!`)}
+            title={t`Error!`}
             onClose={dismissLoginInfoError}
-            dataCy="login-info-error"
+            data-cy="login-info-error"
           >
-            {i18n._(
-              t`Failed to fetch custom login configuration settings.  System defaults will be shown instead.`
-            )}
+            {t`Failed to fetch custom login configuration settings.  System defaults will be shown instead.`}
             <ErrorDetail error={loginInfoError} />
           </AlertModal>
         )}
@@ -211,11 +224,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'azuread-oauth2') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-azure"
+                      data-cy="social-auth-azure"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
-                      <Tooltip content={i18n._(t`Sign in with Azure AD`)}>
+                      <Tooltip content={t`Sign in with Azure AD`}>
                         <AzureIcon />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
@@ -224,11 +238,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github"
+                      data-cy="social-auth-github"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
-                      <Tooltip content={i18n._(t`Sign in with GitHub`)}>
+                      <Tooltip content={t`Sign in with GitHub`}>
                         <GithubIcon />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
@@ -237,13 +252,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-org') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-org"
+                      data-cy="social-auth-github-org"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
-                      <Tooltip
-                        content={i18n._(t`Sign in with GitHub Organizations`)}
-                      >
+                      <Tooltip content={t`Sign in with GitHub Organizations`}>
                         <GithubIcon />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
@@ -252,11 +266,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-team') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-team"
+                      data-cy="social-auth-github-team"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
-                      <Tooltip content={i18n._(t`Sign in with GitHub Teams`)}>
+                      <Tooltip content={t`Sign in with GitHub Teams`}>
                         <GithubIcon />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
@@ -265,13 +280,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-enterprise') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-enterprise"
+                      data-cy="social-auth-github-enterprise"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
-                      <Tooltip
-                        content={i18n._(t`Sign in with GitHub Enterprise`)}
-                      >
+                      <Tooltip content={t`Sign in with GitHub Enterprise`}>
                         <GithubIcon />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
@@ -280,14 +294,13 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-enterprise-org') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-enterprise-org"
+                      data-cy="social-auth-github-enterprise-org"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
-                        content={i18n._(
-                          t`Sign in with GitHub Enterprise Organizations`
-                        )}
+                        content={t`Sign in with GitHub Enterprise Organizations`}
                       >
                         <GithubIcon />
                       </Tooltip>
@@ -297,14 +310,13 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-enterprise-team') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-enterprise-team"
+                      data-cy="social-auth-github-enterprise-team"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
-                        content={i18n._(
-                          t`Sign in with GitHub Enterprise Teams`
-                        )}
+                        content={t`Sign in with GitHub Enterprise Teams`}
                       >
                         <GithubIcon />
                       </Tooltip>
@@ -314,11 +326,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'google-oauth2') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-google"
+                      data-cy="social-auth-google"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
-                      <Tooltip content={i18n._(t`Sign in with Google`)}>
+                      <Tooltip content={t`Sign in with Google`}>
                         <GoogleIcon />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
@@ -328,15 +341,16 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                   const samlIDP = authKey.split(':')[1] || null;
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-saml"
+                      data-cy="social-auth-saml"
                       href={loginUrl}
                       key={authKey}
+                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={
                           samlIDP
-                            ? i18n._(t`Sign in with SAML ${samlIDP}`)
-                            : i18n._(t`Sign in with SAML`)
+                            ? t`Sign in with SAML ${samlIDP}`
+                            : t`Sign in with SAML`
                         }
                       >
                         <UserCircleIcon />
@@ -354,5 +368,5 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   );
 }
 
-export default withI18n()(withRouter(AWXLogin));
+export default withRouter(AWXLogin);
 export { AWXLogin as _AWXLogin };

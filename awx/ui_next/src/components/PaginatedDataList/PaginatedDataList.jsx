@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 
 import PropTypes from 'prop-types';
 import { DataList } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { withRouter, useHistory, useLocation } from 'react-router-dom';
 
@@ -13,11 +13,7 @@ import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 
-import {
-  encodeNonDefaultQueryString,
-  parseQueryString,
-  replaceParams,
-} from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
@@ -40,7 +36,6 @@ function PaginatedDataList({
   pluralizedItemName,
   showPageSizeOptions,
   location,
-  i18n,
   renderToolbar,
 }) {
   const { search, pathname } = useLocation();
@@ -51,30 +46,29 @@ function PaginatedDataList({
   };
 
   const handleSetPage = (event, pageNumber) => {
-    const oldParams = parseQueryString(qsConfig, search);
-    pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
+    const qs = updateQueryString(qsConfig, search, {
+      page: pageNumber,
+    });
+    pushHistoryState(qs);
   };
 
   const handleSetPageSize = (event, pageSize, page) => {
-    const oldParams = parseQueryString(qsConfig, search);
-    pushHistoryState(replaceParams(oldParams, { page_size: pageSize, page }));
+    const qs = updateQueryString(qsConfig, search, {
+      page_size: pageSize,
+      page,
+    });
+    pushHistoryState(qs);
   };
 
-  const pushHistoryState = params => {
-    const nonNamespacedParams = parseQueryString({}, history.location.search);
-    const encodedParams = encodeNonDefaultQueryString(
-      qsConfig,
-      params,
-      nonNamespacedParams
-    );
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  const pushHistoryState = qs => {
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const searchColumns = toolbarSearchColumns.length
     ? toolbarSearchColumns
     : [
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
           isDefault: true,
         },
@@ -83,17 +77,15 @@ function PaginatedDataList({
     ? toolbarSortColumns
     : [
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
         },
       ];
   const queryParams = parseQueryString(qsConfig, location.search);
 
-  const dataListLabel = i18n._(t`${pluralizedItemName} List`);
-  const emptyContentMessage = i18n._(
-    t`Please add ${pluralizedItemName} to populate this list `
-  );
-  const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
+  const dataListLabel = t`${pluralizedItemName} List`;
+  const emptyContentMessage = t`Please add ${pluralizedItemName} to populate this list `;
+  const emptyContentTitle = t`No ${pluralizedItemName} Found `;
 
   let Content;
   if (hasContentLoading && items.length <= 0) {
@@ -218,4 +210,4 @@ PaginatedDataList.defaultProps = {
 };
 
 export { PaginatedDataList as _PaginatedDataList };
-export default withI18n()(withRouter(PaginatedDataList));
+export default withRouter(PaginatedDataList);

@@ -134,7 +134,8 @@ class TestJobDetailSerializerGetHostStatusCountFields(object):
         )
 
         mock_qs = namedtuple('mock_qs', ['get'])(mocker.MagicMock(return_value=mock_event))
-        job.job_events.only = mocker.MagicMock(return_value=mock_qs)
+        only = mocker.MagicMock(return_value=mock_qs)
+        job.get_event_queryset = lambda *args, **kwargs: mocker.MagicMock(only=only)
 
         serializer = JobDetailSerializer()
         host_status_counts = serializer.get_host_status_counts(job)
@@ -142,7 +143,7 @@ class TestJobDetailSerializerGetHostStatusCountFields(object):
         assert host_status_counts == {'ok': 1, 'changed': 1, 'dark': 2}
 
     def test_host_status_counts_is_empty_dict_without_stats_event(self, job):
-        job.job_events = JobEvent.objects.none()
+        job.get_event_queryset = lambda *args, **kwargs: JobEvent.objects.none()
 
         serializer = JobDetailSerializer()
         host_status_counts = serializer.get_host_status_counts(job)

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t, Trans } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import {
@@ -15,19 +15,19 @@ import { required } from '../../../../util/validators';
 import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 import { useConfig } from '../../../../contexts/Config';
 
-const TowerSubForm = ({ autoPopulateCredential, i18n }) => {
-  const { setFieldValue } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField({
-    name: 'credential',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
-  });
+const TowerSubForm = ({ autoPopulateCredential }) => {
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [credentialField, credentialMeta, credentialHelpers] = useField(
+    'credential'
+  );
   const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const pluginLink = `${getDocsBaseUrl(
@@ -40,7 +40,7 @@ const TowerSubForm = ({ autoPopulateCredential, i18n }) => {
     <>
       <CredentialLookup
         credentialTypeNamespace="tower"
-        label={i18n._(t`Credential`)}
+        label={t`Credential`}
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
@@ -48,6 +48,7 @@ const TowerSubForm = ({ autoPopulateCredential, i18n }) => {
         value={credentialField.value}
         required
         autoPopulate={autoPopulateCredential}
+        validate={required(t`Select a value for this field`)}
       />
       <VerbosityField />
       <HostFilterField />
@@ -78,4 +79,4 @@ const TowerSubForm = ({ autoPopulateCredential, i18n }) => {
   );
 };
 
-export default withI18n()(TowerSubForm);
+export default TowerSubForm;

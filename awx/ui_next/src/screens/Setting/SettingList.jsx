@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Card as _Card,
@@ -48,98 +48,92 @@ const CardDescription = styled.div`
   font-size: var(--pf-global--FontSize--xs);
 `;
 
-function SettingList({ i18n }) {
+function SettingList() {
   const config = useConfig();
   const settingRoutes = [
     {
-      header: i18n._(t`Authentication`),
-      description: i18n._(
-        t`Enable simplified login for your ${brandName} applications`
-      ),
+      header: t`Authentication`,
+      description: t`Enable simplified login for your ${brandName} applications`,
       id: 'authentication',
       routes: [
         {
-          title: i18n._(t`Azure AD settings`),
+          title: t`Azure AD settings`,
           path: '/settings/azure',
         },
         {
-          title: i18n._(t`GitHub settings`),
+          title: t`GitHub settings`,
           path: '/settings/github',
         },
         {
-          title: i18n._(t`Google OAuth 2 settings`),
+          title: t`Google OAuth 2 settings`,
           path: '/settings/google_oauth2',
         },
         {
-          title: i18n._(t`LDAP settings`),
+          title: t`LDAP settings`,
           path: '/settings/ldap',
         },
         {
-          title: i18n._(t`RADIUS settings`),
+          title: t`RADIUS settings`,
           path: '/settings/radius',
         },
         {
-          title: i18n._(t`SAML settings`),
+          title: t`SAML settings`,
           path: '/settings/saml',
         },
         {
-          title: i18n._(t`TACACS+ settings`),
+          title: t`TACACS+ settings`,
           path: '/settings/tacacs',
         },
       ],
     },
     {
-      header: i18n._(t`Jobs`),
-      description: i18n._(
-        t`Update settings pertaining to Jobs within ${brandName}`
-      ),
+      header: t`Jobs`,
+      description: t`Update settings pertaining to Jobs within ${brandName}`,
       id: 'jobs',
       routes: [
         {
-          title: i18n._(t`Jobs settings`),
+          title: t`Jobs settings`,
           path: '/settings/jobs',
         },
       ],
     },
     {
-      header: i18n._(t`System`),
-      description: i18n._(t`Define system-level features and functions`),
+      header: t`System`,
+      description: t`Define system-level features and functions`,
       id: 'system',
       routes: [
         {
-          title: i18n._(t`Miscellaneous System settings`),
+          title: t`Miscellaneous System settings`,
           path: '/settings/miscellaneous_system',
         },
         {
-          title: i18n._(t`Activity Stream settings`),
+          title: t`Activity Stream settings`,
           path: '/settings/activity_stream',
         },
         {
-          title: i18n._(t`Logging settings`),
+          title: t`Logging settings`,
           path: '/settings/logging',
         },
       ],
     },
     {
-      header: i18n._(t`User Interface`),
-      description: i18n._(
-        t`Set preferences for data collection, logos, and logins`
-      ),
+      header: t`User Interface`,
+      description: t`Set preferences for data collection, logos, and logins`,
       id: 'ui',
       routes: [
         {
-          title: i18n._(t`User Interface settings`),
+          title: t`User Interface settings`,
           path: '/settings/ui',
         },
       ],
     },
     {
-      header: i18n._(t`Subscription`),
-      description: i18n._(t`View and edit your subscription information`),
+      header: t`Subscription`,
+      description: t`View and edit your subscription information`,
       id: 'subscription',
       routes: [
         {
-          title: i18n._(t`Subscription settings`),
+          title: t`Subscription settings`,
           path: '/settings/subscription',
         },
       ],
@@ -193,4 +187,4 @@ function SettingList({ i18n }) {
   );
 }
 
-export default withI18n()(SettingList);
+export default SettingList;

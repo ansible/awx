@@ -1,13 +1,12 @@
 import {
   encodeQueryString,
-  encodeNonDefaultQueryString,
   parseQueryString,
   getQSConfig,
   removeParams,
   _stringToObject,
   _addDefaultsToObject,
   mergeParams,
-  replaceParams,
+  updateQueryString,
 } from './qs';
 
 describe('qs (qs.js)', () => {
@@ -44,70 +43,6 @@ describe('qs (qs.js)', () => {
         foo: ['one', 'two', 'three'],
       };
       expect(encodeQueryString(vals)).toEqual('foo=one&foo=two&foo=three');
-    });
-  });
-
-  describe('encodeNonDefaultQueryString', () => {
-    const config = {
-      namespace: null,
-      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
-      integerFields: ['page'],
-    };
-
-    test('should return the expected queryString', () => {
-      [
-        [null, ''],
-        [{}, ''],
-        [{ order_by: 'name', page: 1, page_size: 5 }, ''],
-        [{ order_by: '-name', page: 1, page_size: 5 }, 'order_by=-name'],
-        [
-          { order_by: '-name', page: 3, page_size: 10 },
-          'order_by=-name&page=3&page_size=10',
-        ],
-        [
-          { order_by: '-name', page: 3, page_size: 10, foo: 'bar' },
-          'foo=bar&order_by=-name&page=3&page_size=10',
-        ],
-      ].forEach(([params, expectedQueryString]) => {
-        const actualQueryString = encodeNonDefaultQueryString(config, params);
-
-        expect(actualQueryString).toEqual(expectedQueryString);
-      });
-    });
-
-    test('should omit null values', () => {
-      const vals = {
-        order_by: 'foo',
-        page: null,
-      };
-      expect(encodeNonDefaultQueryString(config, vals)).toEqual('order_by=foo');
-    });
-
-    test('should namespace encoded params', () => {
-      const conf = {
-        namespace: 'item',
-        defaultParams: { page: 1 },
-      };
-      const params = {
-        page: 1,
-        foo: 'bar',
-      };
-      expect(encodeNonDefaultQueryString(conf, params)).toEqual('item.foo=bar');
-    });
-
-    test('should handle array values', () => {
-      const vals = {
-        foo: ['one', 'two'],
-        bar: ['alpha', 'beta'],
-      };
-      const conf = {
-        defaultParams: {
-          foo: ['one', 'two'],
-        },
-      };
-      expect(encodeNonDefaultQueryString(conf, vals)).toEqual(
-        'bar=alpha&bar=beta'
-      );
     });
   });
 
@@ -340,6 +275,7 @@ describe('qs (qs.js)', () => {
         baz: 'bar',
         page: 3,
         page_size: 15,
+        bag: null,
       });
     });
 
@@ -428,6 +364,7 @@ describe('qs (qs.js)', () => {
         baz: ['bar', 'bang'],
         page: 3,
         page_size: 15,
+        pat: null,
       });
     });
 
@@ -442,6 +379,7 @@ describe('qs (qs.js)', () => {
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         page: 3,
         page_size: 15,
+        baz: null,
       });
     });
 
@@ -456,6 +394,7 @@ describe('qs (qs.js)', () => {
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         page: 1,
         page_size: 15,
+        baz: null,
       });
     });
 
@@ -525,6 +464,7 @@ describe('qs (qs.js)', () => {
         baz: ['one', 'two', 'three'],
         page: 3,
         page_size: 15,
+        bag: null,
       });
     });
 
@@ -545,6 +485,7 @@ describe('qs (qs.js)', () => {
         baz: ['bar', 'bang'],
         page: 3,
         page_size: 15,
+        pat: null,
       });
     });
 
@@ -558,7 +499,40 @@ describe('qs (qs.js)', () => {
       const toRemove = { bag: 'boom' };
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: '',
+        bag: null,
         page: 3,
+        page_size: 15,
+      });
+    });
+
+    test('should remove integer fields when given string value', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['id', 'page', 'page_size'],
+      };
+      const oldParams = { id: 199, foo: 'bar', page: 1, page_size: 15 };
+      const toRemove = { id: '199' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        foo: 'bar',
+        id: null,
+        page: 1,
+        page_size: 15,
+      });
+    });
+
+    test('should remove integer fields from array when given string value', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['id', 'page', 'page_size'],
+      };
+      const oldParams = { id: [199, 200], foo: 'bar', page: 1, page_size: 15 };
+      const toRemove = { id: '199' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        foo: 'bar',
+        id: 200,
+        page: 1,
         page_size: 15,
       });
     });
@@ -763,51 +737,94 @@ describe('qs (qs.js)', () => {
     });
   });
 
-  describe('replaceParams', () => {
-    it('should collect params into one object', () => {
-      const oldParams = { foo: 'one' };
-      const newParams = { bar: 'two' };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'one',
-        bar: 'two',
-      });
-    });
+  describe('updateQueryString', () => {
+    const config = {
+      namespace: 'template',
+      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+      integerFields: ['page'],
+    };
 
-    it('should retain unaltered params', () => {
-      const oldParams = {
-        foo: 'one',
-        bar: 'baz',
-      };
-      const newParams = { foo: 'two' };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'two',
-        bar: 'baz',
-      });
-    });
-
-    it('should override old values with new ones', () => {
-      const oldParams = {
-        foo: 'one',
-        bar: 'three',
-      };
+    test('should add param to empty query string', () => {
       const newParams = {
-        foo: 'two',
-        baz: 'four',
+        page: 3,
       };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'two',
-        bar: 'three',
-        baz: 'four',
-      });
+      expect(updateQueryString(config, '', newParams)).toEqual(
+        'template.page=3'
+      );
     });
 
-    it('should handle exact duplicates', () => {
-      const oldParams = { foo: 'one' };
-      const newParams = { foo: 'one', bar: 'two' };
-      expect(replaceParams(oldParams, newParams)).toEqual({
-        foo: 'one',
-        bar: 'two',
-      });
+    test('should update namespaced param', () => {
+      const query = 'template.name__icontains=workflow&template.page=2';
+      const newParams = {
+        page: 3,
+      };
+      expect(updateQueryString(config, query, newParams)).toEqual(
+        'template.name__icontains=workflow&template.page=3'
+      );
+    });
+
+    test('should add new namespaced param', () => {
+      const query = 'template.name__icontains=workflow&template.page=2';
+      const newParams = {
+        or__type: 'job_template',
+      };
+      expect(updateQueryString(config, query, newParams)).toEqual(
+        'template.name__icontains=workflow&template.or__type=job_template&template.page=2'
+      );
+    });
+
+    test('should maintain non-namespaced param', () => {
+      const query = 'foo=bar&template.page=2&template.name__icontains=workflow';
+      const newParams = {
+        page: 3,
+      };
+      expect(updateQueryString(config, query, newParams)).toEqual(
+        'foo=bar&template.name__icontains=workflow&template.page=3'
+      );
+    });
+
+    test('should omit null values', () => {
+      const query = 'template.name__icontains=workflow&template.page=2';
+      const newParams = {
+        page: 3,
+        name__icontains: null,
+      };
+      expect(updateQueryString(config, query, newParams)).toEqual(
+        'template.page=3'
+      );
+    });
+
+    test('should omit default values', () => {
+      const query = 'template.page=2';
+      const newParams = {
+        page: 3,
+        page_size: 5,
+      };
+      expect(updateQueryString(config, query, newParams)).toEqual(
+        'template.page=3'
+      );
+    });
+
+    test('should update non-namespaced param', () => {
+      const query =
+        'activity_stream.name__icontains=workflow&activity_stream.page=2';
+      const newParams = {
+        type: 'job',
+      };
+      expect(updateQueryString(null, query, newParams)).toEqual(
+        'activity_stream.name__icontains=workflow&activity_stream.page=2&type=job'
+      );
+    });
+
+    test('should not alter params of other namespaces', () => {
+      const query =
+        'template.name__icontains=workflow&template.page=2&credential.page=3';
+      const newParams = {
+        page: 3,
+      };
+      expect(updateQueryString(config, query, newParams)).toEqual(
+        'credential.page=3&template.name__icontains=workflow&template.page=3'
+      );
     });
   });
 });

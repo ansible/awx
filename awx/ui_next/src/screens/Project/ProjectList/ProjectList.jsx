@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -17,6 +17,7 @@ import PaginatedTable, {
   HeaderCell,
 } from '../../../components/PaginatedTable';
 import useWsProjects from './useWsProjects';
+import useSelected from '../../../util/useSelected';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 
@@ -31,7 +32,6 @@ const QS_CONFIG = getQSConfig('project', {
 function ProjectList() {
   const location = useLocation();
   const match = useRouteMatch();
-  const [selected, setSelected] = useState([]);
 
   const {
     result: {
@@ -78,8 +78,15 @@ function ProjectList() {
 
   const projects = useWsProjects(results);
 
-  const isAllSelected =
-    selected.length === projects.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    setSelected,
+    selectAll,
+    clearSelected,
+  } = useSelected(projects);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteProjects,
@@ -104,24 +111,12 @@ function ProjectList() {
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...projects] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
-
   const deleteDetailsRequests = relatedResourceDeleteRequests.project(
     selected[0]
   );
 
   return (
-    <Fragment>
+    <>
       <PageSection>
         <Card>
           <PaginatedTable
@@ -131,7 +126,7 @@ function ProjectList() {
             itemCount={itemCount}
             pluralizedItemName={t`Projects`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Name`,
@@ -169,7 +164,7 @@ function ProjectList() {
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
-              <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderRow qsConfig={QS_CONFIG} isExpandable>
                 <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
                 <HeaderCell>{t`Status`}</HeaderCell>
                 <HeaderCell>{t`Type`}</HeaderCell>
@@ -182,7 +177,7 @@ function ProjectList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
@@ -239,7 +234,7 @@ function ProjectList() {
         {t`Failed to delete one or more projects.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-    </Fragment>
+    </>
   );
 }
 

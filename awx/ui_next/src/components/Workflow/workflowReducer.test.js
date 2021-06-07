@@ -962,7 +962,7 @@ describe('Workflow reducer', () => {
             source: {
               id: 1,
               fullUnifiedJobTemplate: {
-                name: undefined,
+                name: 'START',
               },
             },
             target: {
@@ -987,7 +987,7 @@ describe('Workflow reducer', () => {
             source: {
               id: 1,
               fullUnifiedJobTemplate: {
-                name: undefined,
+                name: 'START',
               },
             },
             target: {
@@ -1013,7 +1013,7 @@ describe('Workflow reducer', () => {
           {
             id: 1,
             fullUnifiedJobTemplate: {
-              name: undefined,
+              name: 'START',
             },
           },
           {

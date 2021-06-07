@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -13,10 +12,13 @@ import { CubesIcon } from '@patternfly/react-icons';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { UsersAPI, RolesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
-
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import UserRolesListItem from './UserRolesListItem';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
@@ -29,9 +31,11 @@ const QS_CONFIG = getQSConfig('roles', {
 // TODO Figure out how to best conduct a search of this list.
 // Since we only have a role ID in the top level of each role object
 // we can't really search using the normal search parameters.
-function UserRolesList({ i18n, user }) {
+function UserRolesList({ user }) {
   const { search } = useLocation();
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [associateError, setAssociateError] = useState(null);
 
   const {
     isLoading,
@@ -121,41 +125,40 @@ function UserRolesList({ i18n, user }) {
       <EmptyState variant="full">
         <EmptyStateIcon icon={CubesIcon} />
         <Title headingLevel="h5" size="lg">
-          {i18n._(t`System Administrator`)}
+          {t`System Administrator`}
         </Title>
         <EmptyStateBody>
-          {i18n._(
-            t`System administrators have unrestricted access to all resources.`
-          )}
+          {t`System administrators have unrestricted access to all resources.`}
         </EmptyStateBody>
       </EmptyState>
     );
   }
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={error}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={roles}
         itemCount={roleCount}
-        pluralizedItemName={i18n._(t`User Roles`)}
+        pluralizedItemName={t`User Roles`}
         qsConfig={QS_CONFIG}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Role`),
+            name: t`Role`,
             key: 'role_field__icontains',
             isDefault: true,
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: i18n._(t`ID`),
-            key: 'id',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={role => {
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell>{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell>{t`Role`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(role, index) => {
           return (
             <UserRolesListItem
               key={role.id}
@@ -166,6 +169,7 @@ function UserRolesList({ i18n, user }) {
               onSelect={item => {
                 setRoleToDisassociate(item);
               }}
+              rowIndex={index}
             />
           );
         }}
@@ -176,10 +180,10 @@ function UserRolesList({ i18n, user }) {
             additionalControls={[
               ...(canAdd
                 ? [
-                    <UserAndTeamAccessAdd
-                      apiModel={UsersAPI}
-                      onFetchData={fetchRoles}
-                      title={i18n._(t`Add user permissions`)}
+                    <ToolbarAddButton
+                      ouiaId="role-add-button"
+                      key="add"
+                      onClick={() => setShowAddModal(true)}
                     />,
                   ]
                 : []),
@@ -187,55 +191,77 @@ function UserRolesList({ i18n, user }) {
           />
         )}
       />
+      {showAddModal && (
+        <UserAndTeamAccessAdd
+          apiModel={UsersAPI}
+          onFetchData={() => {
+            setShowAddModal(false);
+            fetchRoles();
+          }}
+          title={t`Add user permissions`}
+          onClose={() => setShowAddModal(false)}
+          onError={err => setAssociateError(err)}
+        />
+      )}
       {roleToDisassociate && (
         <AlertModal
-          aria-label={i18n._(t`Disassociate role`)}
+          aria-label={t`Disassociate role`}
           isOpen={roleToDisassociate}
           variant="error"
-          title={i18n._(t`Disassociate role!`)}
+          title={t`Disassociate role!`}
           onClose={() => setRoleToDisassociate(null)}
           actions={[
             <Button
               ouiaId="disassociate-confirm-button"
               key="disassociate"
               variant="danger"
-              aria-label={i18n._(t`Confirm disassociate`)}
+              aria-label={t`Confirm disassociate`}
               onClick={() => disassociateRole()}
             >
-              {i18n._(t`Disassociate`)}
+              {t`Disassociate`}
             </Button>,
             <Button
               ouiaId="disassociate-cancel-button"
               key="cancel"
               variant="link"
-              aria-label={i18n._(t`Cancel`)}
+              aria-label={t`Cancel`}
               onClick={() => setRoleToDisassociate(null)}
             >
-              {i18n._(t`Cancel`)}
+              {t`Cancel`}
             </Button>,
           ]}
         >
           <div>
-            {i18n._(
-              t`This action will disassociate the following role from ${roleToDisassociate.summary_fields.resource_name}:`
-            )}
+            {t`This action will disassociate the following role from ${roleToDisassociate.summary_fields.resource_name}:`}
             <br />
             <strong>{roleToDisassociate.name}</strong>
           </div>
+        </AlertModal>
+      )}
+      {associateError && (
+        <AlertModal
+          aria-label={t`Associate role error`}
+          isOpen={associateError}
+          variant="error"
+          title={t`Error!`}
+          onClose={() => setAssociateError(null)}
+        >
+          {t`Failed to associate role`}
+          <ErrorDetail error={associateError} />
         </AlertModal>
       )}
       {disassociationError && (
         <AlertModal
           isOpen={disassociationError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDisassociationError}
         >
-          {i18n._(t`Failed to delete role.`)}
+          {t`Failed to delete role.`}
           <ErrorDetail error={disassociationError} />
         </AlertModal>
       )}
     </>
   );
 }
-export default withI18n()(UserRolesList);
+export default UserRolesList;

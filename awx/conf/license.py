@@ -11,5 +11,5 @@ def _get_validated_license_data():
 
 
 def get_license():
-    """Return a dictionary representing the active license on this Tower instance."""
+    """Return a dictionary representing the active license on this instance."""
     return _get_validated_license_data()

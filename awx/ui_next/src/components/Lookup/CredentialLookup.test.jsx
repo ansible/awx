@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import CredentialLookup, { _CredentialLookup } from './CredentialLookup';
 import { CredentialsAPI } from '../../api';
@@ -31,11 +32,13 @@ describe('CredentialLookup', () => {
   test('should render successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <CredentialLookup
-          credentialTypeId={1}
-          label="Foo"
-          onChange={() => {}}
-        />
+        <Formik>
+          <CredentialLookup
+            credentialTypeId={1}
+            label="Foo"
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     expect(wrapper.find('CredentialLookup')).toHaveLength(1);
@@ -44,11 +47,13 @@ describe('CredentialLookup', () => {
   test('should fetch credentials', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <CredentialLookup
-          credentialTypeId={1}
-          label="Foo"
-          onChange={() => {}}
-        />
+        <Formik>
+          <CredentialLookup
+            credentialTypeId={1}
+            label="Foo"
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     expect(CredentialsAPI.read).toHaveBeenCalledTimes(1);
@@ -63,11 +68,13 @@ describe('CredentialLookup', () => {
   test('should display label', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <CredentialLookup
-          credentialTypeId={1}
-          label="Foo"
-          onChange={() => {}}
-        />
+        <Formik>
+          <CredentialLookup
+            credentialTypeId={1}
+            label="Foo"
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     const title = wrapper.find('FormGroup .pf-c-form__label-text');
@@ -77,11 +84,13 @@ describe('CredentialLookup', () => {
   test('should define default value for function props', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <CredentialLookup
-          credentialTypeId={1}
-          label="Foo"
-          onChange={() => {}}
-        />
+        <Formik>
+          <CredentialLookup
+            credentialTypeId={1}
+            label="Foo"
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     expect(_CredentialLookup.defaultProps.onBlur).toBeInstanceOf(Function);
@@ -98,11 +107,13 @@ describe('CredentialLookup', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <CredentialLookup
-          credentialTypeId={1}
-          label="Foo"
-          onChange={onChange}
-        />
+        <Formik>
+          <CredentialLookup
+            credentialTypeId={1}
+            label="Foo"
+            onChange={onChange}
+          />
+        </Formik>
       );
     });
     expect(onChange).not.toHaveBeenCalled();
@@ -118,12 +129,14 @@ describe('CredentialLookup', () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <CredentialLookup
-          credentialTypeId={1}
-          label="Foo"
-          autoPopulate
-          onChange={onChange}
-        />
+        <Formik>
+          <CredentialLookup
+            credentialTypeId={1}
+            label="Foo"
+            autoPopulate
+            onChange={onChange}
+          />
+        </Formik>
       );
     });
     expect(onChange).not.toHaveBeenCalled();
@@ -141,12 +154,14 @@ describe('CredentialLookup auto select', () => {
     const onChange = jest.fn();
     await act(async () => {
       mountWithContexts(
-        <CredentialLookup
-          autoPopulate
-          credentialTypeId={1}
-          label="Foo"
-          onChange={onChange}
-        />
+        <Formik>
+          <CredentialLookup
+            autoPopulate
+            credentialTypeId={1}
+            label="Foo"
+            onChange={onChange}
+          />
+        </Formik>
       );
     });
     expect(onChange).toHaveBeenCalledWith({ id: 1 });

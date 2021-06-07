@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import random
 from decimal import Decimal
 
 from django.core.validators import MinValueValidator
@@ -63,10 +62,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    last_isolated_check = models.DateTimeField(
-        null=True,
-        editable=False,
-    )
     version = models.CharField(max_length=120, blank=True)
     capacity = models.PositiveIntegerField(
         default=100,
@@ -128,19 +123,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
-    def is_lost(self, ref_time=None, isolated=False):
+    def is_lost(self, ref_time=None):
         if ref_time is None:
             ref_time = now()
         grace_period = 120
-        if isolated:
-            grace_period = settings.AWX_ISOLATED_PERIODIC_CHECK * 2
         return self.modified < ref_time - timedelta(seconds=grace_period)
-
-    def is_controller(self):
-        return Instance.objects.filter(rampart_groups__controller__instances=self).exists()
-
-    def is_isolated(self):
-        return self.rampart_groups.filter(controller__isnull=False).exists()
 
     def refresh_capacity(self):
         if settings.IS_K8S:
@@ -185,15 +172,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         editable=False,
         help_text=_('Instances that are members of this InstanceGroup'),
     )
-    controller = models.ForeignKey(
-        'InstanceGroup',
-        related_name='controlled_groups',
-        help_text=_('Instance Group to remotely control this group.'),
-        editable=False,
-        default=None,
-        null=True,
-        on_delete=models.CASCADE,
-    )
     is_container_group = models.BooleanField(default=False)
     credential = models.ForeignKey(
         'Credential',
@@ -215,7 +193,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         default=[], blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 
-    POLICY_FIELDS = frozenset(('policy_instance_list', 'policy_instance_minimum', 'policy_instance_percentage', 'controller'))
+    POLICY_FIELDS = frozenset(('policy_instance_list', 'policy_instance_minimum', 'policy_instance_percentage'))
 
     def get_absolute_url(self, request=None):
         return reverse('api:instance_group_detail', kwargs={'pk': self.pk}, request=request)
@@ -231,14 +209,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     @property
     def jobs_total(self):
         return UnifiedJob.objects.filter(instance_group=self).count()
-
-    @property
-    def is_controller(self):
-        return self.controlled_groups.exists()
-
-    @property
-    def is_isolated(self):
-        return bool(self.controller)
 
     '''
     RelatedJobsMixin
@@ -270,9 +240,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
                 elif i.capacity > largest_instance.capacity:
                     largest_instance = i
         return largest_instance
-
-    def choose_online_controller_node(self):
-        return random.choice(list(self.controller.instances.filter(capacity__gt=0, enabled=True).values_list('hostname', flat=True)))
 
     def set_default_policy_fields(self):
         self.policy_instance_list = []

@@ -10,7 +10,10 @@ jest.mock('../../../api');
 const hostData = {
   name: 'new name',
   description: 'new description',
-  inventory: 1,
+  inventory: {
+    id: 1,
+    name: 'Demo Inventory',
+  },
   variables: '---\nfoo: bar',
 };
 
@@ -44,7 +47,7 @@ describe('<HostAdd />', () => {
     await act(async () => {
       wrapper.find('HostForm').prop('handleSubmit')(hostData);
     });
-    expect(HostsAPI.create).toHaveBeenCalledWith(hostData);
+    expect(HostsAPI.create).toHaveBeenCalledWith({ ...hostData, inventory: 1 });
   });
 
   test('should navigate to hosts list when cancel is clicked', async () => {

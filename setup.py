@@ -27,7 +27,7 @@ def get_version():
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
-    webconfig  = "/etc/nginx"
+    webconfig = "/etc/nginx"
     siteconfig = "/etc/nginx/sites-enabled"
     # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
     # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
@@ -35,7 +35,7 @@ if os.path.exists("/etc/debian_version"):
     sosconfig = "/usr/share/sosreport/sos/plugins"
 else:
     sysinit = "/etc/rc.d/init.d"
-    webconfig  = "/etc/nginx"
+    webconfig = "/etc/nginx"
     siteconfig = "/etc/nginx/sites-enabled"
     # The .spec will create symlinks to support multiple versions of sosreport
     sosconfig = "/usr/share/sosreport/sos/plugins"
@@ -71,7 +71,7 @@ def proc_data_files(data_files):
     if hasattr(sys, 'real_prefix'):
         return result
 
-    for dir,files in data_files:
+    for dir, files in data_files:
         includes = []
         for item in files:
             includes.extend(explode_glob_path(item))
@@ -97,8 +97,7 @@ setup(
     author='Ansible, Inc.',
     author_email='info@ansible.com',
     description='awx: API, UI and Task Engine for Ansible',
-    long_description='AWX provides a web-based user interface, REST API and '
-                     'task engine built on top of Ansible',
+    long_description='AWX provides a web-based user interface, REST API and ' 'task engine built on top of Ansible',
     license='Apache License 2.0',
     keywords='ansible',
     url='http://github.com/ansible/awx',
@@ -112,8 +111,7 @@ setup(
         'Framework :: Django',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
-        'Intended Audience :: System Administrators'
-        'License :: Apache License 2.0',
+        'Intended Audience :: System Administrators' 'License :: Apache License 2.0',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Operating System :: POSIX',
@@ -121,7 +119,7 @@ setup(
         'Topic :: System :: Installation/Setup',
         'Topic :: System :: Systems Administration',
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'awx-manage = awx:manage',
         ],
@@ -131,29 +129,38 @@ setup(
             'hashivault_ssh = awx.main.credential_plugins.hashivault:hashivault_ssh_plugin',
             'azure_kv = awx.main.credential_plugins.azure_kv:azure_keyvault_plugin',
             'aim = awx.main.credential_plugins.aim:aim_plugin',
-            'centrify_vault_kv = awx.main.credential_plugins.centrify_vault:centrify_plugin'
-        ]
+            'centrify_vault_kv = awx.main.credential_plugins.centrify_vault:centrify_plugin',
+        ],
     },
-    data_files = proc_data_files([
-        ("%s" % homedir,        ["config/wsgi.py",
-                                 "awx/static/favicon.ico"]),
-        ("%s" % siteconfig,      ["config/awx-nginx.conf"]),
-        #        ("%s" % webconfig,      ["config/uwsgi_params"]),
-        ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
-        ("%s" % docdir,         ["docs/licenses/*",]),
-        ("%s" % bindir, ["tools/scripts/automation-controller-service",
-                         "tools/scripts/failure-event-handler",
-                         "tools/scripts/awx-python",
-                         "tools/scripts/ansible-tower-setup"]),
-        ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
-    options = {
-        'aliases': {
-            'dev_build': 'clean --all egg_info sdist',
-            'release_build': 'clean --all egg_info -b "" sdist'
-        },
+    data_files=proc_data_files(
+        [
+            ("%s" % homedir, ["awx/static/favicon.ico"]),
+            ("%s" % siteconfig, ["config/awx-nginx.conf"]),
+            #        ("%s" % webconfig,      ["config/uwsgi_params"]),
+            ("%s" % sharedir, ["tools/scripts/request_tower_configuration.sh", "tools/scripts/request_tower_configuration.ps1"]),
+            (
+                "%s" % docdir,
+                [
+                    "docs/licenses/*",
+                ],
+            ),
+            (
+                "%s" % bindir,
+                [
+                    "tools/scripts/automation-controller-service",
+                    "tools/scripts/failure-event-handler",
+                    "tools/scripts/awx-python",
+                    "tools/scripts/ansible-tower-setup",
+                ],
+            ),
+            ("%s" % sosconfig, ["tools/sosreport/tower.py"]),
+        ]
+    ),
+    options={
+        'aliases': {'dev_build': 'clean --all egg_info sdist', 'release_build': 'clean --all egg_info -b "" sdist'},
         'build_scripts': {
             'executable': '/usr/bin/awx-python',
         },
     },
-    cmdclass={'egg_info_dev': egg_info_dev}
+    cmdclass={'egg_info_dev': egg_info_dev},
 )

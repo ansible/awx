@@ -29,6 +29,7 @@ if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@
     awx-manage update_password --username=admin --password=${admin_password}
 fi
 awx-manage create_preload_data
+awx-manage register_default_execution_environments
 
 mkdir -p /awx_devel/awx/public/static
 mkdir -p /awx_devel/awx/ui/static

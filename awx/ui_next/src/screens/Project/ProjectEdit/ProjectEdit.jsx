@@ -19,6 +19,8 @@ function ProjectEdit({ project }) {
       // has a zero-length string as its credential field. As a work-around,
       // normalize falsey credential fields by deleting them.
       delete values.credential;
+    } else {
+      values.credential = values.credential.id;
     }
     try {
       const {

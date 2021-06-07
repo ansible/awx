@@ -41,6 +41,32 @@ describe('ProjectSyncButton', () => {
 
     expect(ProjectsAPI.sync).toHaveBeenCalledWith(1);
   });
+  test('disable button and set onClick to undefined on sync', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectSyncButton projectId={1} lastJobStatus="running">
+          {children}
+        </ProjectSyncButton>
+      );
+    });
+
+    expect(wrapper.find('Button').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('Button').prop('onClick')).toBe(undefined);
+  });
+  test('should render tooltip on sync', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectSyncButton projectId={1} lastJobStatus="running">
+          {children}
+        </ProjectSyncButton>
+      );
+    });
+
+    expect(wrapper.find('Tooltip')).toHaveLength(1);
+    expect(wrapper.find('Tooltip').prop('content')).toEqual(
+      'This project is currently on sync and cannot be clicked until sync process completed'
+    );
+  });
   test('displays error modal after unsuccessful sync', async () => {
     ProjectsAPI.sync.mockRejectedValue(
       new Error({

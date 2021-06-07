@@ -77,11 +77,10 @@ based on the value of `settings.AUTHENTICATION_BACKENDS` *at import time*:
 https://github.com/python-social-auth/social-app-django/blob/c1e2795b00b753d58a81fa6a0261d8dae1d9c73d/social_django/utils.py#L13
 
 Our `settings.AUTHENTICATION_BACKENDS` can *change*
-dynamically as Tower settings are changed (i.e., if somebody
+dynamically as settings are changed (i.e., if somebody
 configures Github OAuth2 integration), so we need to
 _overwrite_ this in-memory value at the top of every request so
 that we have the latest version
-see: https://github.com/ansible/tower/issues/1979
 
 ### django-oauth-toolkit
 

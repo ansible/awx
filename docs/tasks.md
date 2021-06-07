@@ -157,17 +157,6 @@ One of the most important tasks in a clustered AWX installation is the periodic 
 If a node in an AWX cluster discovers that one of its peers has not updated its heartbeat within a certain grace period, it is assumed to be offline, and its capacity is set to zero to avoid scheduling new tasks on that node. Additionally, jobs allegedly running or scheduled to run on that node are assumed to be lost, and "reaped", or marked as failed.
 
 
-#### Isolated Tasks and Their Heartbeats
-
-AWX reports as much status as it can via the browsable API at `/api/v2/ping` in order to provide validation of the health of an instance, including the timestamps of the last heartbeat. Since isolated nodes don't have access to the AWX database, their heartbeats are performed by controller nodes instead. A periodic task, `awx_isolated_heartbeat`, is responsible for periodically connecting from a controller to each isolated node and retrieving its capacity (via SSH).
-
-When a job is scheduled to run on an isolated instance, the controller instance puts together the metadata required to run the job and then transfers it to the isolated instance. Once the metadata has been synchronized to the isolated host, the controller instance starts a process on the isolated instance, which consumes the metadata and starts running `ansible/ansible-playbook`. As the playbook runs, job artifacts (such as `stdout` and job events) are written to disk on the isolated instance.
-
-Alternatively: "While the job runs on the isolated instance, the controller instance periodically checks for and copies the job artifacts (_e.g._, `stdout` and job events) that it produces. It processes these until the job finishes running."
-
-To read more about Isolated Instances, refer to the [Isolated Instance Groups](https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html#isolated-instance-groups) section of the Clustering page in the Ansible Tower Administration guide.
-
-
 ## AWX Jobs
 
 ### Unified Jobs

@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
 import AlertModal from '../AlertModal';
@@ -9,16 +9,13 @@ import useRequest from '../../util/useRequest';
 import { HostsAPI } from '../../api';
 
 function HostToggle({
-  i18n,
   className,
   host,
   isDisabled = false,
   onToggle,
-  tooltip = i18n._(
-    t`Indicates if a host is available and should be included in running
+  tooltip = t`Indicates if a host is available and should be included in running
     jobs.  For hosts that are part of an external inventory, this may be
-    reset by the inventory sync process.`
-  ),
+    reset by the inventory sync process.`,
 }) {
   const [isEnabled, setIsEnabled] = useState(host.enabled);
   const [showError, setShowError] = useState(false);
@@ -55,8 +52,8 @@ function HostToggle({
           className={className}
           css="display: inline-flex;"
           id={`host-${host.id}-toggle`}
-          label={i18n._(t`On`)}
-          labelOff={i18n._(t`Off`)}
+          label={t`On`}
+          labelOff={t`Off`}
           isChecked={isEnabled}
           isDisabled={
             isLoading ||
@@ -64,17 +61,17 @@ function HostToggle({
             !host.summary_fields.user_capabilities.edit
           }
           onChange={toggleHost}
-          aria-label={i18n._(t`Toggle host`)}
+          aria-label={t`Toggle host`}
         />
       </Tooltip>
       {showError && error && !isLoading && (
         <AlertModal
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           isOpen={error && !isLoading}
           onClose={() => setShowError(false)}
         >
-          {i18n._(t`Failed to toggle host.`)}
+          {t`Failed to toggle host.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -82,4 +79,4 @@ function HostToggle({
   );
 }
 
-export default withI18n()(HostToggle);
+export default HostToggle;

@@ -2,8 +2,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { InstancesAPI } from '../../../api';
+import useDebounce from '../../../util/useDebounce';
 
 import InstanceListItem from './InstanceListItem';
+
+jest.mock('../../../api');
+jest.mock('../../../util/useDebounce');
 
 const instance = [
   {
@@ -37,6 +42,10 @@ const instance = [
 describe('<InstanceListItem/>', () => {
   let wrapper;
 
+  beforeEach(() => {
+    useDebounce.mockImplementation(fn => fn);
+  });
+
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -44,10 +53,53 @@ describe('<InstanceListItem/>', () => {
           instance={instance[0]}
           isSelected={false}
           onSelect={() => {}}
+          fetchInstances={() => {}}
         />
       );
     });
     expect(wrapper.find('InstanceListItem').length).toBe(1);
+  });
+
+  test('should calculate number of forks when slide changes', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InstanceListItem
+          instance={instance[0]}
+          isSelected={false}
+          onSelect={() => {}}
+          fetchInstances={() => {}}
+        />
+      );
+    });
+    expect(wrapper.find('InstanceListItem').length).toBe(1);
+    expect(wrapper.find('InstanceListItem__SliderForks').text()).toContain(
+      '10 forks'
+    );
+
+    await act(async () => {
+      wrapper.find('Slider').prop('onChange')(1);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('InstanceListItem__SliderForks').text()).toContain(
+      '24 forks'
+    );
+
+    await act(async () => {
+      wrapper.find('Slider').prop('onChange')(0);
+    });
+    wrapper.update();
+    expect(wrapper.find('InstanceListItem__SliderForks').text()).toContain(
+      '1 fork'
+    );
+
+    await act(async () => {
+      wrapper.find('Slider').prop('onChange')(0.5);
+    });
+    wrapper.update();
+    expect(wrapper.find('InstanceListItem__SliderForks').text()).toContain(
+      '12 forks'
+    );
   });
 
   test('should render the proper data instance', async () => {
@@ -57,6 +109,7 @@ describe('<InstanceListItem/>', () => {
           instance={instance[0]}
           isSelected={false}
           onSelect={() => {}}
+          fetchInstances={() => {}}
         />
       );
     });
@@ -68,6 +121,19 @@ describe('<InstanceListItem/>', () => {
       wrapper.find('PFDataListCell[aria-label="instance type"]').text()
     ).toBe('TypeAuto');
     expect(wrapper.find('input#instances-1').prop('checked')).toBe(false);
+    expect(
+      wrapper
+        .find('PFDataListCell[aria-label="capacity adjustment"]')
+        .containsMatchingElement(<div>CPU 24</div>)
+    );
+    expect(
+      wrapper
+        .find('PFDataListCell[aria-label="capacity adjustment"]')
+        .containsMatchingElement(<div>RAM 24</div>)
+    );
+    expect(wrapper.find('InstanceListItem__SliderForks').text()).toContain(
+      '10 forks'
+    );
   });
 
   test('should be checked', async () => {
@@ -77,6 +143,7 @@ describe('<InstanceListItem/>', () => {
           instance={instance[0]}
           isSelected
           onSelect={() => {}}
+          fetchInstances={() => {}}
         />
       );
     });
@@ -85,5 +152,53 @@ describe('<InstanceListItem/>', () => {
 
   test('should display instance toggle', () => {
     expect(wrapper.find('InstanceToggle').length).toBe(1);
+  });
+
+  test('should display error', async () => {
+    jest.useFakeTimers();
+    InstancesAPI.update.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'patch',
+            url: '/api/v2/instances/1',
+            data: { capacity_adjustment: 0.30001 },
+          },
+          data: {
+            capacity_adjustment: [
+              'Ensure that there are no more than 3 digits in total.',
+            ],
+          },
+          status: 400,
+          statusText: 'Bad Request',
+        },
+      })
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InstanceListItem
+          instance={instance[0]}
+          isSelected={false}
+          onSelect={() => {}}
+          fetchInstances={() => {}}
+        />,
+        { context: { network: { handleHttpError: () => {} } } }
+      );
+    });
+    await act(async () => {
+      wrapper.update();
+    });
+    expect(wrapper.find('ErrorDetail').length).toBe(0);
+    await act(async () => {
+      wrapper.find('Slider').prop('onChange')(0.30001);
+    });
+    await act(async () => {
+      wrapper.update();
+    });
+    jest.advanceTimersByTime(210);
+    await act(async () => {
+      wrapper.update();
+    });
+    expect(wrapper.find('ErrorDetail').length).toBe(1);
   });
 });

@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect, Fragment } from 'react';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Dropdown, DropdownPosition } from '@patternfly/react-core';
 import { ToolbarAddButton } from '../PaginatedDataList';
 import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
-function AddDropDownButton({ dropdownItems, i18n }) {
+function AddDropDownButton({ dropdownItems, ouiaId }) {
   const { isKebabified } = useKebabifiedMenu();
   const [isOpen, setIsOpen] = useState(false);
   const element = useRef(null);
@@ -36,7 +35,8 @@ function AddDropDownButton({ dropdownItems, i18n }) {
         position={DropdownPosition.right}
         toggle={
           <ToolbarAddButton
-            aria-label={i18n._(t`Add`)}
+            ouiaId={ouiaId}
+            aria-label={t`Add`}
             showToggleIndicator
             onClick={() => setIsOpen(!isOpen)}
           />
@@ -52,4 +52,4 @@ AddDropDownButton.propTypes = {
 };
 
 export { AddDropDownButton as _AddDropDownButton };
-export default withI18n()(AddDropDownButton);
+export default AddDropDownButton;

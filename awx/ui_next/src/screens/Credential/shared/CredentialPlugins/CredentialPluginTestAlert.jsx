@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { string, shape } from 'prop-types';
 import {
@@ -9,7 +9,6 @@ import {
 } from '@patternfly/react-core';
 
 function CredentialPluginTestAlert({
-  i18n,
   credentialName,
   successResponse,
   errorResponse,
@@ -39,17 +38,15 @@ function CredentialPluginTestAlert({
         }
       } else {
         setTestMessage(
-          i18n._(
-            t`Something went wrong with the request to test this credential and metadata.`
-          )
+          t`Something went wrong with the request to test this credential and metadata.`
         );
       }
       setTestVariant('danger');
     } else if (successResponse) {
-      setTestMessage(i18n._(t`Test passed`));
+      setTestMessage(t`Test passed`);
       setTestVariant('success');
     }
-  }, [i18n, successResponse, errorResponse]);
+  }, [successResponse, errorResponse]);
 
   return (
     <AlertGroup isToast>
@@ -87,4 +84,4 @@ CredentialPluginTestAlert.defaultProps = {
   errorResponse: null,
 };
 
-export default withI18n()(CredentialPluginTestAlert);
+export default CredentialPluginTestAlert;

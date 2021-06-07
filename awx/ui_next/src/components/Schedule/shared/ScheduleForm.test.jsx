@@ -150,7 +150,12 @@ describe('<ScheduleForm />', () => {
                 description: '',
               },
             }}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
       });
@@ -199,7 +204,13 @@ describe('<ScheduleForm />', () => {
                 description: '',
               },
             }}
-            resource={{ id: 23, type: 'job_template', inventory: 1 }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              inventory: 1,
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
       });
@@ -232,6 +243,8 @@ describe('<ScheduleForm />', () => {
               summary_fields: {
                 credentials: [],
               },
+              name: 'Foo Job Template',
+              description: '',
             }}
             launchConfig={{
               can_start_without_user_input: false,
@@ -330,17 +343,15 @@ describe('<ScheduleForm />', () => {
       ).toBe(true);
       await act(async () => {
         promptWrapper
-          .find('input[aria-labelledby="check-action-item-1"]')
-          .simulate('change', {
-            target: {
-              checked: true,
-            },
-          });
+          .find('td#check-action-item-1')
+          .find('input')
+          .simulate('click');
       });
       promptWrapper.update();
       expect(
         promptWrapper
-          .find('input[aria-labelledby="check-action-item-1"]')
+          .find('td#check-action-item-1')
+          .find('input')
           .prop('checked')
       ).toBe(true);
       await act(async () =>
@@ -368,6 +379,8 @@ describe('<ScheduleForm />', () => {
             resource={{
               id: 23,
               type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
             }}
             launchConfig={{
               can_start_without_user_input: false,
@@ -420,7 +433,13 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
-            resource={{ id: 23, type: 'job_template', inventory: 1 }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              inventory: 1,
+              name: 'Foo Job Template',
+              description: '',
+            }}
             launchConfig={{
               can_start_without_user_input: true,
               passwords_needed_to_start: [],
@@ -756,7 +775,12 @@ describe('<ScheduleForm />', () => {
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
             schedule={{ inventory: null, ...mockSchedule }}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
             launchConfig={{
               can_start_without_user_input: true,
               passwords_needed_to_start: [],
@@ -792,7 +816,12 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
             launchConfig={{
               can_start_without_user_input: true,
               passwords_needed_to_start: [],
@@ -833,6 +862,8 @@ describe('<ScheduleForm />', () => {
               id: 23,
               type: 'project',
               inventory: 2,
+              name: 'Foo Project',
+              description: '',
             }}
           />
         );
@@ -856,7 +887,12 @@ describe('<ScheduleForm />', () => {
             handleCancel={jest.fn()}
             schedule={mockSchedule}
             launchConfig={{ inventory_needed_to_start: false }}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
       });
@@ -886,7 +922,12 @@ describe('<ScheduleForm />', () => {
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=10;FREQ=MINUTELY',
               dtend: null,
             })}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
       });
@@ -921,7 +962,12 @@ describe('<ScheduleForm />', () => {
               dtend: '2020-04-03T03:45:00Z',
               until: '',
             })}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
       });
@@ -957,7 +1003,12 @@ describe('<ScheduleForm />', () => {
               dtend: null,
               until: '',
             })}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
         expect(wrapper.find('ScheduleForm').length).toBe(1);
@@ -992,7 +1043,12 @@ describe('<ScheduleForm />', () => {
               dtend: '2020-10-30T18:45:00Z',
               until: '2021-01-01T00:00:00',
             })}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
       });
@@ -1051,7 +1107,12 @@ describe('<ScheduleForm />', () => {
               dtend: null,
               until: '',
             })}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
         expect(wrapper.find('ScheduleForm').length).toBe(1);
@@ -1098,7 +1159,12 @@ describe('<ScheduleForm />', () => {
               dtend: null,
               until: '',
             })}
-            resource={{ id: 23, type: 'job_template' }}
+            resource={{
+              id: 23,
+              type: 'job_template',
+              name: 'Foo Job Template',
+              description: '',
+            }}
           />
         );
         expect(wrapper.find('ScheduleForm').length).toBe(1);

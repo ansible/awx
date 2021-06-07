@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { func, bool } from 'prop-types';
+import { func, bool, string } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { InventoriesAPI } from '../../api';
 import { Inventory } from '../../types';
@@ -23,7 +22,6 @@ function InventoryLookup({
   value,
   onChange,
   onBlur,
-  i18n,
   history,
   required,
   isPromptableField,
@@ -31,6 +29,8 @@ function InventoryLookup({
   promptId,
   promptName,
   isOverrideDisabled,
+  validate,
+  fieldName,
 }) {
   const {
     result: {
@@ -50,6 +50,7 @@ function InventoryLookup({
         InventoriesAPI.read(params),
         InventoriesAPI.readOptions(),
       ]);
+
       return {
         inventories: data.results,
         count: data.count,
@@ -73,6 +74,25 @@ function InventoryLookup({
     }
   );
 
+  const checkInventoryName = useCallback(
+    async name => {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await InventoriesAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
@@ -82,20 +102,23 @@ function InventoryLookup({
       <FieldWithPrompt
         fieldId={fieldId}
         isRequired={required}
-        label={i18n._(t`Inventory`)}
+        label={t`Inventory`}
         promptId={promptId}
         promptName={promptName}
         isDisabled={!canEdit}
-        tooltip={i18n._(t`Select the inventory containing the hosts
-            you want this job to manage.`)}
+        tooltip={t`Select the inventory containing the hosts
+            you want this job to manage.`}
       >
         <Lookup
           id="inventory-lookup"
-          header={i18n._(t`Inventory`)}
+          header={t`Inventory`}
           value={value}
           onChange={onChange}
           onBlur={onBlur}
           required={required}
+          onDebounce={checkInventoryName}
+          fieldName={fieldName}
+          validate={validate}
           isLoading={isLoading}
           isDisabled={!canEdit}
           qsConfig={QS_CONFIG}
@@ -106,29 +129,29 @@ function InventoryLookup({
               optionCount={count}
               searchColumns={[
                 {
-                  name: i18n._(t`Name`),
+                  name: t`Name`,
                   key: 'name__icontains',
                   isDefault: true,
                 },
                 {
-                  name: i18n._(t`Created By (Username)`),
+                  name: t`Created By (Username)`,
                   key: 'created_by__username__icontains',
                 },
                 {
-                  name: i18n._(t`Modified By (Username)`),
+                  name: t`Modified By (Username)`,
                   key: 'modified_by__username__icontains',
                 },
               ]}
               sortColumns={[
                 {
-                  name: i18n._(t`Name`),
+                  name: t`Name`,
                   key: 'name',
                 },
               ]}
               searchableKeys={searchableKeys}
               relatedSearchableKeys={relatedSearchableKeys}
               multiple={state.multiple}
-              header={i18n._(t`Inventory`)}
+              header={t`Inventory`}
               name="inventory"
               qsConfig={QS_CONFIG}
               readOnly={!canDelete}
@@ -144,9 +167,12 @@ function InventoryLookup({
     <>
       <Lookup
         id="inventory-lookup"
-        header={i18n._(t`Inventory`)}
+        header={t`Inventory`}
         value={value}
         onChange={onChange}
+        onDebounce={checkInventoryName}
+        fieldName={fieldName}
+        validate={validate}
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
@@ -159,29 +185,29 @@ function InventoryLookup({
             optionCount={count}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: t`Created By (Username)`,
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
             ]}
             searchableKeys={searchableKeys}
             relatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
-            header={i18n._(t`Inventory`)}
+            header={t`Inventory`}
             name="inventory"
             qsConfig={QS_CONFIG}
             readOnly={!canDelete}
@@ -200,12 +226,16 @@ InventoryLookup.propTypes = {
   onChange: func.isRequired,
   required: bool,
   isOverrideDisabled: bool,
+  validate: func,
+  fieldName: string,
 };
 
 InventoryLookup.defaultProps = {
   value: null,
   required: false,
   isOverrideDisabled: false,
+  validate: () => {},
+  fieldName: 'inventory',
 };
 
-export default withI18n()(withRouter(InventoryLookup));
+export default withRouter(InventoryLookup);

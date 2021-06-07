@@ -85,7 +85,7 @@ def oauth2_getattribute(self, attr):
         # setting lookups for references to model classes (e.g.,
         # oauth2_settings.REFRESH_TOKEN_MODEL)
         # If we're doing an OAuth2 setting lookup *while running* a migration,
-        # don't do our usual "Configure Tower in Tower" database setting lookup
+        # don't do our usual database settings lookup
         val = settings.OAUTH2_PROVIDER.get(attr)
     if val is None:
         val = object.__getattribute__(self, attr)

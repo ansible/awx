@@ -1,4 +1,4 @@
-import React, { Fragment, useReducer, useEffect } from 'react';
+import React, { Fragment, useReducer, useEffect, useState } from 'react';
 import {
   string,
   bool,
@@ -9,6 +9,7 @@ import {
   shape,
 } from 'prop-types';
 import { withRouter } from 'react-router-dom';
+import { useField } from 'formik';
 import { SearchIcon } from '@patternfly/react-icons';
 import {
   Button,
@@ -16,12 +17,12 @@ import {
   Chip,
   InputGroup,
   Modal,
+  TextInput,
 } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import useDebounce from '../../util/useDebounce';
 import ChipGroup from '../ChipGroup';
-
 import reducer, { initReducer } from './shared/reducer';
 import { QSConfig } from '../../types';
 
@@ -44,9 +45,23 @@ function Lookup(props) {
     renderItemChip,
     renderOptionsList,
     history,
-    i18n,
     isDisabled,
+    onDebounce,
+    fieldName,
+    validate,
   } = props;
+  const [typedText, setTypedText] = useState('');
+  const debounceRequest = useDebounce(onDebounce, 1000);
+
+  useField({
+    name: fieldName,
+    validate: val => {
+      if (!multiple && !val && typedText && typedText !== '') {
+        return t`That value was not found. Please enter or select a valid value.`;
+      }
+      return validate(val);
+    },
+  });
 
   const [state, dispatch] = useReducer(
     reducer,
@@ -60,7 +75,16 @@ function Lookup(props) {
 
   useEffect(() => {
     dispatch({ type: 'SET_VALUE', value });
-  }, [value]);
+    if (value?.name) {
+      setTypedText(value.name);
+    }
+  }, [value, multiple]);
+
+  useEffect(() => {
+    if (!multiple) {
+      setTypedText(state.selectedItems[0] ? state.selectedItems[0].name : '');
+    }
+  }, [state.selectedItems, multiple]);
 
   const clearQSParams = () => {
     const parts = history.location.search.replace(/^\?/, '').split('&');
@@ -71,19 +95,16 @@ function Lookup(props) {
 
   const save = () => {
     const { selectedItems } = state;
-    const val = multiple ? selectedItems : selectedItems[0] || null;
-    onChange(val);
+    if (multiple) {
+      onChange(selectedItems);
+    } else {
+      onChange(selectedItems[0] || null);
+    }
     clearQSParams();
     dispatch({ type: 'CLOSE_MODAL' });
   };
 
-  const removeItem = item => {
-    if (multiple) {
-      onChange(value.filter(i => i.id !== item.id));
-    } else {
-      onChange(null);
-    }
-  };
+  const removeItem = item => onChange(value.filter(i => i.id !== item.id));
 
   const closeModal = () => {
     clearQSParams();
@@ -99,11 +120,12 @@ function Lookup(props) {
   } else if (value) {
     items.push(value);
   }
+
   return (
     <Fragment>
       <InputGroup onBlur={onBlur}>
         <Button
-          aria-label={i18n._(t`Search`)}
+          aria-label={t`Search`}
           id={id}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.control}
@@ -111,23 +133,37 @@ function Lookup(props) {
         >
           <SearchIcon />
         </Button>
-        <ChipHolder isDisabled={isDisabled} className="pf-c-form-control">
-          <ChipGroup numChips={5} totalChips={items.length}>
-            {items.map(item =>
-              renderItemChip({
-                item,
-                removeItem,
-                canDelete,
-              })
-            )}
-          </ChipGroup>
-        </ChipHolder>
+        {multiple ? (
+          <ChipHolder isDisabled={isDisabled} className="pf-c-form-control">
+            <ChipGroup numChips={5} totalChips={items.length}>
+              {items.map(item =>
+                renderItemChip({
+                  item,
+                  removeItem,
+                  canDelete,
+                })
+              )}
+            </ChipGroup>
+          </ChipHolder>
+        ) : (
+          <TextInput
+            id={`${id}-input`}
+            value={typedText}
+            onChange={inputValue => {
+              setTypedText(inputValue);
+              if (value?.name !== inputValue) {
+                debounceRequest(inputValue);
+              }
+            }}
+            isDisabled={isLoading || isDisabled}
+          />
+        )}
       </InputGroup>
 
       <Modal
         variant="large"
-        title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
-        aria-label={i18n._(t`Lookup modal`)}
+        title={t`Select ${header || t`Items`}`}
+        aria-label={t`Lookup modal`}
         isOpen={isModalOpen}
         onClose={closeModal}
         actions={[
@@ -138,16 +174,16 @@ function Lookup(props) {
             onClick={save}
             isDisabled={required && selectedItems.length === 0}
           >
-            {i18n._(t`Select`)}
+            {t`Select`}
           </Button>,
           <Button
             ouiaId="modal-cancel-button"
             key="cancel"
             variant="link"
             onClick={closeModal}
-            aria-label={i18n._(t`Cancel lookup`)}
+            aria-label={t`Cancel lookup`}
           >
-            {i18n._(t`Cancel`)}
+            {t`Cancel`}
           </Button>,
         ]}
       >
@@ -176,6 +212,9 @@ Lookup.propTypes = {
   qsConfig: QSConfig.isRequired,
   renderItemChip: func,
   renderOptionsList: func.isRequired,
+  fieldName: string.isRequired,
+  validate: func,
+  onDebounce: func,
 };
 
 Lookup.defaultProps = {
@@ -194,7 +233,9 @@ Lookup.defaultProps = {
       {item.name}
     </Chip>
   ),
+  validate: () => undefined,
+  onDebounce: () => undefined,
 };
 
 export { Lookup as _Lookup };
-export default withI18n()(withRouter(Lookup));
+export default withRouter(Lookup);

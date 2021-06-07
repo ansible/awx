@@ -2,7 +2,7 @@
 
 This feature builds in the capability to send detailed logs to several kinds
 of third party external log aggregation services. Services connected to this
-data feed should be useful in order to gain insights into Tower usage
+data feed should be useful in order to gain insights into AWX usage
 or technical trends. The data is intended to be
 sent in JSON format via three ways: over an HTTP connection, a direct TCP
 connection, or a direct UDP connection. It uses minimal service-specific
@@ -17,14 +17,14 @@ following the same structure as one would expect if obtaining the data
 from the API. These data loggers are the following:
 
  - `awx.analytics.job_events` - Data returned from the Ansible callback module
- - `awx.analytics.activity_stream` - Record of changes to the objects within the Ansible Tower app
+ - `awx.analytics.activity_stream` - Record of changes to the objects within the AWX app
  - `awx.analytics.system_tracking` - Data gathered by Ansible scan modules ran by scan job templates
 
-These loggers only use log-level of `INFO`. Additionally, the standard Tower logs are deliverable through this
+These loggers only use log-level of `INFO`. Additionally, the standard AWX logs are deliverable through this
 same mechanism. It should be obvious to the user how to enable or disable
 each of these five sources of data without manipulating a complex dictionary
 in their local settings file, as well as adjust the log level consumed
-from the standard Tower logs.
+from the standard AWX logs.
 
 
 ## Supported Services
@@ -92,8 +92,8 @@ Common schema for all loggers:
 
 | Field | Information |
 |-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `cluster_host_id` | (string) Unique identifier of the host within the Tower cluster |
-| `level` | (choice of `DEBUG`, `INFO`, `WARNING`, `ERROR`, etc.) Standard python log level, roughly reflecting the significance of the event; all of the data loggers (as a part of this feature) use `INFO` level, but the other Tower logs will use different levels as appropriate |
+| `cluster_host_id` | (string) Unique identifier of the host within the AWX cluster |
+| `level` | (choice of `DEBUG`, `INFO`, `WARNING`, `ERROR`, etc.) Standard python log level, roughly reflecting the significance of the event; all of the data loggers (as a part of this feature) use `INFO` level, but the other AWX logs will use different levels as appropriate |
 | `logger_name` | (string) Name of the logger we use in the settings, *e.g.*, "`awx.analytics.activity_stream`" |
 | `@timestamp` | (datetime) Time of log |
 | `path` | (string) File path in code where the log was generated |
@@ -105,7 +105,7 @@ Common schema for all loggers:
 |-------------------|-------------------------------------------------------------------------------------------------------------------------|
 | (common)          | This uses all the fields common to all loggers listed above                                                             |
 | actor             | (string) Username of the user who took the action documented in the log |
-| changes           | (string) Unique identifier of the host within the Tower cluster                                                         |
+| changes           | (string) Unique identifier of the host within the AWX cluster                                                         |
 | operation         | (choice of several options) The basic category of the change logged in the Activity Stream, for instance, "associate". |
 | object1           | (string) Information about the primary object being operated on, consistent with what we show in the Activity Stream    |
 | object2           | (string) If applicable, the second object involved in the action                                                        |
@@ -149,7 +149,7 @@ In addition to common fields, these logs include fields present on
 the job model.
 
 
-## Tower Logs
+## AWX Logs
 
 In addition to the common fields, this will contain a `msg` field with
 the log message. Errors contain a separate `traceback` field.
@@ -157,7 +157,7 @@ These logs can be enabled or disabled in CTiT by adding or removing
 it to the setting `LOG_AGGREGATOR_LOGGERS`.
 
 
-# Configuring Inside of Tower
+# Configuring Inside of AWX
 
 Parameters needed in order to configure the connection to the log
 aggregation service will include most of the following for all
@@ -178,7 +178,7 @@ Some settings for the log handler will not be exposed to the user via
 this mechanism. For example, threading (enabled).
 
 Parameters for the items listed above should be configurable through
-the Configure-Tower-in-Tower interface.
+the settings interface.
 
 One note on configuring Host and Port: When entering URL it is customary to
 include port number, like `https://localhost:4399/foo/bar`. So for the convenience
@@ -196,7 +196,7 @@ portion will be extracted as the actual hostname.
 **Connection:** Testers need to replicate the documented steps for setting up
 and connecting with a destination log aggregation service, if that is
 an officially supported service. That will involve 1) configuring the
-settings, as documented, 2) taking some action in Tower that causes a log
+settings, as documented, 2) taking some action in AWX that causes a log
 message from each type of data logger to be sent and 3) verifying that
 the content is present in the log aggregation service.
 
@@ -206,7 +206,7 @@ It also needs to be confirmed that the schema is consistent with the
 documentation. In the case of Splunk, we need basic confirmation that
 the data is compatible with the existing app schema.
 
-**Tower logs:** Formatting of Traceback message is a known issue in several
+**AWX logs:** Formatting of Traceback message is a known issue in several
 open-source log handlers, so we should confirm that server errors result
 in the log aggregator receiving a well-formatted multi-line string
 with the traceback message.
@@ -215,4 +215,4 @@ Log messages should be sent outside of the
 request-response cycle. For example, Loggly examples use
 rsyslog, which handles these messages without interfering with other
 operations. A timeout on the part of the log aggregation service should
-not cause Tower operations to hang.
+not cause AWX operations to hang.

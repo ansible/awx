@@ -1,7 +1,6 @@
-import React from 'react';
-import { withI18n } from '@lingui/react';
+import React, { useCallback } from 'react';
 import { t } from '@lingui/macro';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
@@ -9,18 +8,24 @@ import FormField, { FormSubmitError } from '../../../components/FormField';
 import ApplicationLookup from '../../../components/Lookup/ApplicationLookup';
 import Popover from '../../../components/Popover';
 import { required } from '../../../util/validators';
-
 import { FormColumnLayout } from '../../../components/FormLayout';
 
-function UserTokenFormFields({ i18n }) {
-  const [applicationField, applicationMeta, applicationHelpers] = useField(
-    'application'
-  );
+function UserTokenFormFields() {
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [applicationField, applicationMeta] = useField('application');
 
   const [scopeField, scopeMeta, scopeHelpers] = useField({
     name: 'scope',
-    validate: required(i18n._(t`Please enter a value.`), i18n),
+    validate: required(t`Please enter a value.`),
   });
+
+  const handleApplicationUpdate = useCallback(
+    value => {
+      setFieldValue('application', value);
+      setFieldTouched('application', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
 
   return (
     <>
@@ -36,16 +41,12 @@ function UserTokenFormFields({ i18n }) {
       >
         <ApplicationLookup
           value={applicationField.value}
-          onChange={value => {
-            applicationHelpers.setValue(value);
-          }}
+          onChange={handleApplicationUpdate}
           label={
             <span>
-              {i18n._(t`Application`)}
+              {t`Application`}
               <Popover
-                content={i18n._(
-                  t`Select the application that this token will belong to.`
-                )}
+                content={t`Select the application that this token will belong to.`}
               />
             </span>
           }
@@ -56,7 +57,7 @@ function UserTokenFormFields({ i18n }) {
         id="token-description"
         name="description"
         type="text"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
       />
 
       <FormGroup
@@ -65,11 +66,9 @@ function UserTokenFormFields({ i18n }) {
         helperTextInvalid={scopeMeta.error}
         isRequired
         validated={!scopeMeta.touched || !scopeMeta.error ? 'default' : 'error'}
-        label={i18n._(t`Scope`)}
+        label={t`Scope`}
         labelIcon={
-          <Popover
-            content={i18n._(t`Specify a scope for the token's access`)}
-          />
+          <Popover content={t`Specify a scope for the token's access`} />
         }
       >
         <AnsibleSelect
@@ -77,8 +76,8 @@ function UserTokenFormFields({ i18n }) {
           id="token-scope"
           data={[
             { key: 'default', label: '', value: '' },
-            { key: 'read', value: 'read', label: i18n._(t`Read`) },
-            { key: 'write', value: 'write', label: i18n._(t`Write`) },
+            { key: 'read', value: 'read', label: t`Read` },
+            { key: 'write', value: 'write', label: t`Write` },
           ]}
           onChange={(event, value) => {
             scopeHelpers.setValue(value);
@@ -93,7 +92,6 @@ function UserTokenForm({
   handleCancel,
   handleSubmit,
   submitError,
-  i18n,
   token = {},
 }) {
   return (
@@ -108,7 +106,7 @@ function UserTokenForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <UserTokenFormFields i18n={i18n} />
+            <UserTokenFormFields />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={handleCancel}
@@ -122,4 +120,4 @@ function UserTokenForm({
     </Formik>
   );
 }
-export default withI18n()(UserTokenForm);
+export default UserTokenForm;

@@ -40,6 +40,7 @@ describe('<JobTemplateForm />', () => {
       project: {
         id: 3,
         name: 'qux',
+        allow_override: false,
       },
       labels: {
         results: [
@@ -113,7 +114,7 @@ describe('<JobTemplateForm />', () => {
     ProjectsAPI.readDetail.mockReturnValue({
       name: 'foo',
       id: 1,
-      allow_override: true,
+      allow_override: false,
     });
     ProjectsAPI.readPlaybooks.mockReturnValue({
       data: ['debug.yml'],
@@ -150,6 +151,30 @@ describe('<JobTemplateForm />', () => {
     expect(select.prop('value')).toEqual(
       mockData.summary_fields.labels.results
     );
+  });
+
+  test('should not render source control branch when allow_override is false', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateForm
+          template={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('TextInputBase#template-scm-branch').length).toEqual(0);
+    await act(async () => {
+      wrapper.find('ProjectLookup').invoke('onChange')({
+        id: 4,
+        name: 'project',
+        allow_override: true,
+      });
+    });
+    wrapper.update();
+    expect(wrapper.find('TextInputBase#template-scm-branch').length).toEqual(1);
   });
 
   test('should update form values on input changes', async () => {

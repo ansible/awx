@@ -70,9 +70,9 @@ IS_K8S = False
 
 RECEPTOR_RELEASE_WORK = True
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
-AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
-AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
+# Timeout when waiting for pod to enter running state. If the pod is still in pending state , it will be terminated. Valid time units are "s", "m", "h". Example : "5m" , "10s".
+AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "5m"
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -125,10 +125,6 @@ LOGIN_URL = '/api/login/'
 # This directory should not be web-accessible.
 PROJECTS_ROOT = '/var/lib/awx/projects/'
 
-# Absolute filesystem path to the directory to host collections for
-# running inventory imports, isolated playbooks
-AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(BASE_DIR, 'vendor', 'awx_ansible_collections')
-
 # Absolute filesystem path to the directory for job status stdout (default for
 # development and tests, default for production defined in production.py). This
 # directory should not be web-accessible
@@ -137,7 +133,7 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # Absolute filesystem path to the directory to store logs
 LOG_ROOT = '/var/log/tower/'
 
-# The heartbeat file for the tower scheduler
+# The heartbeat file for the scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
 # Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
@@ -167,7 +163,7 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
-# If Tower is behind a reverse proxy/load balancer, use this setting to
+# If we is behind a reverse proxy/load balancer, use this setting to
 # allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
 # REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
@@ -178,7 +174,7 @@ PROXY_IP_ALLOWED_LIST = []
 
 CUSTOM_VENV_PATHS = []
 
-# Warning: this is a placeholder for a configure tower-in-tower setting
+# Warning: this is a placeholder for a database setting
 # This should not be set via a file.
 DEFAULT_EXECUTION_ENVIRONMENT = None
 
@@ -364,7 +360,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
-    'django.contrib.auth.backends.ModelBackend',
+    'awx.main.backends.AWXModelBackend',
 )
 
 
@@ -408,23 +404,6 @@ AUTH_BASIC_ENABLED = True
 # when trying to access a UI page that requries authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
-# Default to skipping isolated host key checking (the initial connection will
-# hang on an interactive "The authenticity of host example.org can't be
-# established" message)
-AWX_ISOLATED_HOST_KEY_CHECKING = False
-
-# The number of seconds to sleep between status checks for jobs running on isolated nodes
-AWX_ISOLATED_CHECK_INTERVAL = 30
-
-# The timeout (in seconds) for launching jobs on isolated nodes
-AWX_ISOLATED_LAUNCH_TIMEOUT = 600
-
-# Ansible connection timeout (in seconds) for communicating with isolated instances
-AWX_ISOLATED_CONNECTION_TIMEOUT = 10
-
-# The time (in seconds) between the periodic isolated heartbeat status check
-AWX_ISOLATED_PERIODIC_CHECK = 600
-
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
@@ -440,7 +419,6 @@ CELERYBEAT_SCHEDULE = {
     'k8s_reaper': {'task': 'awx.main.tasks.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.cleanup_execution_environment_images', 'schedule': timedelta(hours=3)},
-    # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 
 # Django Caching Configuration
@@ -586,7 +564,7 @@ GALAXY_IGNORE_CERTS = False
 # Note: This setting may be overridden by database settings.
 AWX_ISOLATION_SHOW_PATHS = []
 
-# The directory in which Tower will create new temporary directories for job
+# The directory in which the service will create new temporary directories for job
 # execution and isolation (such as credential files and custom
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
@@ -603,7 +581,7 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
-# Enables Insights data collection for Ansible Tower.
+# Enables Insights data collection.
 # Note: This setting may be overridden by database settings.
 INSIGHTS_TRACKING_STATE = False
 
@@ -734,6 +712,7 @@ CALLBACK_QUEUE = "callback_tasks"
 # Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 MANAGE_ORGANIZATION_AUTH = True
+DISABLE_LOCAL_AUTH = False
 
 # Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
@@ -756,7 +735,7 @@ LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 
 # The number of retry attempts for websocket session establishment
-# If you're encountering issues establishing websockets in clustered Tower,
+# If you're encountering issues establishing websockets in a cluster,
 # raising this value can help
 CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
@@ -854,12 +833,6 @@ LOGGING = {
             'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
             'formatter': 'simple',
         },
-        'isolated_manager': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': os.path.join(LOG_ROOT, 'isolated_manager.log'),
-            'formatter': 'simple',
-        },
         'job_lifecycle': {
             'level': 'DEBUG',
             'class': 'logging.handlers.WatchedFileHandler',
@@ -881,8 +854,6 @@ LOGGING = {
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
-        'awx.isolated.manager': {'level': 'WARNING', 'handlers': ['console', 'file', 'isolated_manager'], 'propagate': True},
-        'awx.isolated.manager.playbooks': {'handlers': ['management_playbooks'], 'propagate': False},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
         'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
         'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
@@ -939,6 +910,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',

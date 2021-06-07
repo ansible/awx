@@ -5,7 +5,7 @@
 ###
 
 # Build container
-FROM centos:8 as builder
+FROM quay.io/centos/centos:8 as builder
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -24,7 +24,6 @@ RUN dnf -y update && \
     gcc-c++ \
     git-core \
     glibc-langpack-en \
-    libcurl-devel \
     libffi-devel \
     libtool-ltdl-devel \
     make \
@@ -70,7 +69,7 @@ RUN make sdist && \
 {% endif %}
 
 # Final container(s)
-FROM centos:8
+FROM quay.io/centos/centos:8
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -157,13 +156,17 @@ RUN dnf install -y podman
 RUN echo -e 'cgroup_manager = "cgroupfs"\nevents_logger = "file"' > /etc/containers/libpod.conf
 {% endif %}
 
+# Ensure we must use fully qualified image names
+# This prevents podman prompt that hangs when trying to pull unqualified images
+RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
+
 # Copy app from builder
 COPY --from=builder /var/lib/awx /var/lib/awx
 
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 
 {%if build_dev|bool %}
-COPY --from=quay.io/project-receptor/receptor:0.9.7 /usr/bin/receptor /usr/bin/receptor
+COPY --from=quay.io/project-receptor/receptor:1.0.0a2 /usr/bin/receptor /usr/bin/receptor
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
         -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost" && \
     openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \

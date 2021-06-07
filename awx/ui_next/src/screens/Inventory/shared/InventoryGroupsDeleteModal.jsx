@@ -2,7 +2,6 @@ import 'styled-components/macro';
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { func, bool, arrayOf } from 'prop-types';
-import { useLingui } from '@lingui/react';
 import { t, Plural } from '@lingui/macro';
 import { Button, Radio, DropdownItem } from '@patternfly/react-core';
 import styled from 'styled-components';
@@ -19,7 +18,6 @@ const ListItem = styled.li`
 `;
 
 const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
-  const { i18n } = useLingui();
   const [radioOption, setRadioOption] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -63,19 +61,19 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
           key="delete"
           isDisabled={isDisabled || isDeleteLoading}
           component="button"
-          aria-label={i18n._(t`Delete`)}
+          aria-label={t`Delete`}
           onClick={() => setIsModalOpen(true)}
         >
-          {i18n._(t`Delete`)}
+          {t`Delete`}
         </DropdownItem>
       ) : (
         <Button
           variant="secondary"
-          aria-label={i18n._(t`Delete`)}
+          aria-label={t`Delete`}
           onClick={() => setIsModalOpen(true)}
           isDisabled={isDisabled || isDeleteLoading}
         >
-          {i18n._(t`Delete`)}
+          {t`Delete`}
         </Button>
       )}
       {isModalOpen && (
@@ -92,21 +90,21 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
           onClose={() => setIsModalOpen(false)}
           actions={[
             <Button
-              aria-label={i18n._(t`Confirm Delete`)}
+              aria-label={t`Confirm Delete`}
               onClick={() => handleDelete(radioOption)}
               variant="danger"
               key="delete"
               isDisabled={radioOption === null}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </Button>,
             <Button
-              aria-label={i18n._(t`Close`)}
+              aria-label={t`Close`}
               onClick={() => setIsModalOpen(false)}
               variant="link"
               key="cancel"
             >
-              {i18n._(t`Cancel`)}
+              {t`Cancel`}
             </Button>,
           ]}
         >
@@ -125,7 +123,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
             <Radio
               id="radio-delete"
               key="radio-delete"
-              label={i18n._(t`Delete All Groups and Hosts`)}
+              label={t`Delete All Groups and Hosts`}
               name="option"
               onChange={() => setRadioOption('delete')}
             />
@@ -133,7 +131,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
               css="margin-top: 5px;"
               id="radio-promote"
               key="radio-promote"
-              label={i18n._(t`Promote Child Groups and Hosts`)}
+              label={t`Promote Child Groups and Hosts`}
               name="option"
               onChange={() => setRadioOption('promote')}
             />
@@ -144,11 +142,11 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
         <AlertModal
           isOpen={deletionError}
           variant="error"
-          aria-label={i18n._(t`deletion error`)}
-          title={i18n._(t`Error!`)}
+          aria-label={t`deletion error`}
+          title={t`Error!`}
           onClose={() => setDeletionError(null)}
         >
-          {i18n._(t`Failed to delete one or more groups.`)}
+          {t`Failed to delete one or more groups.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}

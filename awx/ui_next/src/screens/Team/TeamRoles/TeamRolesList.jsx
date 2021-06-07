@@ -1,9 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
 import {
   Button,
   EmptyState,
@@ -15,11 +12,15 @@ import { CubesIcon } from '@patternfly/react-icons';
 import { TeamsAPI, RolesAPI, UsersAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import TeamRoleListItem from './TeamRoleListItem';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
@@ -28,9 +29,11 @@ const QS_CONFIG = getQSConfig('roles', {
   order_by: 'id',
 });
 
-function TeamRolesList({ i18n, me, team }) {
+function TeamRolesList({ me, team }) {
   const { search } = useLocation();
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [associateError, setAssociateError] = useState(null);
 
   const {
     isLoading,
@@ -123,12 +126,10 @@ function TeamRolesList({ i18n, me, team }) {
       <EmptyState variant="full">
         <EmptyStateIcon icon={CubesIcon} />
         <Title headingLevel="h5" size="lg">
-          {i18n._(t`System Administrator`)}
+          {t`System Administrator`}
         </Title>
         <EmptyStateBody>
-          {i18n._(
-            t`System administrators have unrestricted access to all resources.`
-          )}
+          {t`System administrators have unrestricted access to all resources.`}
         </EmptyStateBody>
       </EmptyState>
     );
@@ -136,23 +137,23 @@ function TeamRolesList({ i18n, me, team }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={roles}
         itemCount={roleCount}
-        pluralizedItemName={i18n._(t`Team Roles`)}
+        pluralizedItemName={t`Team Roles`}
         qsConfig={QS_CONFIG}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Role`),
+            name: t`Role`,
             key: 'role_field__icontains',
             isDefault: true,
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`ID`),
+            name: t`ID`,
             key: 'id',
           },
         ]}
@@ -165,77 +166,104 @@ function TeamRolesList({ i18n, me, team }) {
             additionalControls={[
               ...(canAdd
                 ? [
-                    <UserAndTeamAccessAdd
-                      apiModel={TeamsAPI}
-                      onFetchData={fetchRoles}
-                      title={i18n._(t`Add team permissions`)}
+                    <ToolbarAddButton
+                      ouiaId="role-add-button"
+                      key="add"
+                      onClick={() => setShowAddModal(true)}
                     />,
                   ]
                 : []),
             ]}
           />
         )}
-        renderItem={role => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell>{t`Resource Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell sortKey="id">{t`Role`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(role, index) => (
           <TeamRoleListItem
             key={role.id}
             role={role}
             detailUrl={detailUrl(role)}
-            onSelect={item => {
-              setRoleToDisassociate(item);
-            }}
+            onDisassociate={setRoleToDisassociate}
+            index={index}
           />
         )}
       />
-
+      {showAddModal && (
+        <UserAndTeamAccessAdd
+          apiModel={TeamsAPI}
+          onFetchData={() => {
+            setShowAddModal(false);
+            fetchRoles();
+          }}
+          title={t`Add team permissions`}
+          onClose={() => setShowAddModal(false)}
+          onError={err => setAssociateError(err)}
+        />
+      )}
       {roleToDisassociate && (
         <AlertModal
-          aria-label={i18n._(t`Disassociate role`)}
+          aria-label={t`Disassociate role`}
           isOpen={roleToDisassociate}
           variant="error"
-          title={i18n._(t`Disassociate role!`)}
+          title={t`Disassociate role!`}
           onClose={() => setRoleToDisassociate(null)}
           actions={[
             <Button
               ouiaId="disassociate-confirm-button"
               key="disassociate"
               variant="danger"
-              aria-label={i18n._(t`confirm disassociate`)}
-              onClick={() => disassociateRole()}
+              aria-label={t`confirm disassociate`}
+              onClick={disassociateRole}
             >
-              {i18n._(t`Disassociate`)}
+              {t`Disassociate`}
             </Button>,
             <Button
               ouiaId="disassociate-cancel-button"
               key="cancel"
               variant="link"
-              aria-label={i18n._(t`Cancel`)}
+              aria-label={t`Cancel`}
               onClick={() => setRoleToDisassociate(null)}
             >
-              {i18n._(t`Cancel`)}
+              {t`Cancel`}
             </Button>,
           ]}
         >
           <div>
-            {i18n._(
-              t`This action will disassociate the following role from ${roleToDisassociate.summary_fields.resource_name}:`
-            )}
+            {t`This action will disassociate the following role from ${roleToDisassociate.summary_fields.resource_name}:`}
             <br />
             <strong>{roleToDisassociate.name}</strong>
           </div>
+        </AlertModal>
+      )}
+      {associateError && (
+        <AlertModal
+          aria-label={t`Associate role error`}
+          isOpen={associateError}
+          variant="error"
+          title={t`Error!`}
+          onClose={() => setAssociateError(null)}
+        >
+          {t`Failed to associate role`}
+          <ErrorDetail error={associateError} />
         </AlertModal>
       )}
       {disassociationError && (
         <AlertModal
           isOpen={disassociationError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDisassociationError}
         >
-          {i18n._(t`Failed to delete role.`)}
+          {t`Failed to delete role.`}
           <ErrorDetail error={disassociationError} />
         </AlertModal>
       )}
     </>
   );
 }
-export default withI18n()(TeamRolesList);
+export default TeamRolesList;

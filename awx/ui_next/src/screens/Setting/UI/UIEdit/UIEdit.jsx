@@ -49,9 +49,18 @@ function UIEdit() {
     useCallback(
       async values => {
         await SettingsAPI.updateAll(values);
-        history.push('/settings/ui/details');
+        if (
+          values?.PENDO_TRACKING_STATE !== uiData?.PENDO_TRACKING_STATE?.value
+        ) {
+          history.push({
+            pathname: '/settings/ui/details',
+            hardReload: true,
+          });
+        } else {
+          history.push('/settings/ui/details');
+        }
       },
-      [history]
+      [history, uiData]
     ),
     null
   );

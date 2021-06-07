@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Enable Tower virtualenv
+# Enable AWX virtualenv
 for venv_path in /var/lib/awx/venv/awx; do
   if [ -f $venv_path/bin/activate ]; then
     . $venv_path/bin/activate

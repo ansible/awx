@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory, Link, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import {
@@ -12,18 +11,17 @@ import {
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import { ConfigAPI, SettingsAPI, MeAPI, RootAPI } from '../../../../api';
+import { ConfigAPI, SettingsAPI, RootAPI } from '../../../../api';
 import useRequest, { useDismissableError } from '../../../../util/useRequest';
 import ContentLoading from '../../../../components/ContentLoading';
 import ContentError from '../../../../components/ContentError';
 import { FormSubmitError } from '../../../../components/FormField';
 import { useConfig } from '../../../../contexts/Config';
-import issuePendoIdentity from './pendoUtils';
 import SubscriptionStep from './SubscriptionStep';
 import AnalyticsStep from './AnalyticsStep';
 import EulaStep from './EulaStep';
 
-const CustomFooter = withI18n()(({ i18n, isSubmitLoading }) => {
+const CustomFooter = ({ isSubmitLoading }) => {
   const { values, errors } = useFormikContext();
   const { me, license_info } = useConfig();
   const history = useHistory();
@@ -36,13 +34,12 @@ const CustomFooter = withI18n()(({ i18n, isSubmitLoading }) => {
             {activeStep.id === 'eula-step' ? (
               <Button
                 id="subscription-wizard-submit"
-                aria-label={i18n._(t`Submit`)}
+                aria-label={t`Submit`}
                 variant="primary"
                 onClick={onNext}
                 isDisabled={
                   (!values.manifest_file && !values.subscription) ||
                   !me?.is_superuser ||
-                  !values.eula ||
                   Object.keys(errors).length !== 0
                 }
                 type="button"
@@ -77,7 +74,7 @@ const CustomFooter = withI18n()(({ i18n, isSubmitLoading }) => {
                 id="subscription-wizard-cancel"
                 ouiaId="subscription-wizard-cancel"
                 variant="link"
-                aria-label={i18n._(t`Cancel subscription edit`)}
+                aria-label={t`Cancel subscription edit`}
                 onClick={() => history.push('/settings/subscription/details')}
               >
                 <Trans>Cancel</Trans>
@@ -88,11 +85,11 @@ const CustomFooter = withI18n()(({ i18n, isSubmitLoading }) => {
       </WizardContextConsumer>
     </WizardFooter>
   );
-});
+};
 
-function SubscriptionEdit({ i18n }) {
+function SubscriptionEdit() {
   const history = useHistory();
-  const { license_info, setConfig } = useConfig();
+  const { request: updateConfig, license_info } = useConfig();
   const hasValidKey = Boolean(license_info?.valid_key);
   const subscriptionMgmtRoute = useRouteMatch({
     path: '/subscription_management',
@@ -102,20 +99,18 @@ function SubscriptionEdit({ i18n }) {
     isLoading: isContentLoading,
     error: contentError,
     request: fetchContent,
-    result: { brandName, pendoApiKey },
+    result: { brandName },
   } = useRequest(
     useCallback(async () => {
       const {
-        data: { BRAND_NAME, PENDO_API_KEY },
+        data: { BRAND_NAME },
       } = await RootAPI.readAssetVariables();
       return {
         brandName: BRAND_NAME,
-        pendoApiKey: PENDO_API_KEY,
       };
     }, []),
     {
       brandName: null,
-      pendoApiKey: null,
     }
   );
 
@@ -136,32 +131,16 @@ function SubscriptionEdit({ i18n }) {
       if (form.manifest_file) {
         await ConfigAPI.create({
           manifest: form.manifest_file,
-          eula_accepted: form.eula,
         });
       } else if (form.subscription) {
         await ConfigAPI.attach({ pool_id: form.subscription.pool_id });
-        await ConfigAPI.create({
-          eula_accepted: form.eula,
-        });
       }
-
-      const [
-        { data },
-        {
-          data: {
-            results: [me],
-          },
-        },
-      ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
-      const newConfig = { ...data, me };
-      setConfig(newConfig);
 
       if (!hasValidKey) {
         if (form.pendo) {
           await SettingsAPI.updateCategory('ui', {
             PENDO_TRACKING_STATE: 'detailed',
           });
-          await issuePendoIdentity(newConfig, pendoApiKey);
         } else {
           await SettingsAPI.updateCategory('ui', {
             PENDO_TRACKING_STATE: 'off',
@@ -178,6 +157,9 @@ function SubscriptionEdit({ i18n }) {
           });
         }
       }
+
+      await updateConfig();
+
       return true;
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -209,25 +191,25 @@ function SubscriptionEdit({ i18n }) {
   const steps = [
     {
       name: hasValidKey
-        ? i18n._(t`Subscription Management`)
-        : `${brandName} ${i18n._(t`Subscription`)}`,
+        ? t`Subscription Management`
+        : `${brandName} ${t`Subscription`}`,
       id: 'subscription-step',
       component: <SubscriptionStep />,
     },
     ...(!hasValidKey
       ? [
           {
-            name: i18n._(t`User and Insights analytics`),
+            name: t`User and Insights analytics`,
             id: 'analytics-step',
             component: <AnalyticsStep />,
           },
         ]
       : []),
     {
-      name: i18n._(t`End user license agreement`),
+      name: t`End user license agreement`,
       component: <EulaStep />,
       id: 'eula-step',
-      nextButtonText: i18n._(t`Submit`),
+      nextButtonText: t`Submit`,
     },
   ];
 
@@ -235,7 +217,6 @@ function SubscriptionEdit({ i18n }) {
     <>
       <Formik
         initialValues={{
-          eula: false,
           insights: true,
           manifest_file: null,
           manifest_filename: '',
@@ -270,7 +251,7 @@ function SubscriptionEdit({ i18n }) {
         {submitSuccessful && (
           <Alert
             variant="success"
-            title={i18n._(t`Save successful!`)}
+            title={t`Save successful!`}
             ouiaId="success-alert"
           >
             {subscriptionMgmtRoute ? (
@@ -289,4 +270,4 @@ function SubscriptionEdit({ i18n }) {
   );
 }
 
-export default withI18n()(SubscriptionEdit);
+export default SubscriptionEdit;

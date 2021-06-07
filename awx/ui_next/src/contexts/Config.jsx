@@ -1,15 +1,16 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+import { useRouteMatch } from 'react-router-dom';
+
 import { t } from '@lingui/macro';
 
-import { ConfigAPI, MeAPI, RootAPI } from '../api';
+import { ConfigAPI, MeAPI } from '../api';
 import useRequest, { useDismissableError } from '../util/useRequest';
 import AlertModal from '../components/AlertModal';
 import ErrorDetail from '../components/ErrorDetail';
+import { useSession } from './Session';
 
 // eslint-disable-next-line import/prefer-default-export
-export const ConfigContext = React.createContext([{}, () => {}]);
+export const ConfigContext = React.createContext({});
 ConfigContext.displayName = 'ConfigContext';
 
 export const Config = ConfigContext.Consumer;
@@ -21,16 +22,10 @@ export const useConfig = () => {
   return context;
 };
 
-export const ConfigProvider = withI18n()(({ i18n, children }) => {
-  const { pathname } = useLocation();
+export const ConfigProvider = ({ children }) => {
+  const { logout } = useSession();
 
-  const {
-    error: configError,
-    isLoading,
-    request,
-    result: config,
-    setValue: setConfig,
-  } = useRequest(
+  const { error: configError, isLoading, request, result: config } = useRequest(
     useCallback(async () => {
       const [
         { data },
@@ -48,21 +43,19 @@ export const ConfigProvider = withI18n()(({ i18n, children }) => {
   const { error, dismissError } = useDismissableError(configError);
 
   useEffect(() => {
-    if (pathname !== '/login') {
-      request();
-    }
-  }, [request, pathname]);
+    request();
+  }, [request]);
 
   useEffect(() => {
     if (error?.response?.status === 401) {
-      RootAPI.logout();
+      logout();
     }
-  }, [error]);
+  }, [error, logout]);
 
-  const value = useMemo(() => ({ ...config, isLoading, setConfig }), [
+  const value = useMemo(() => ({ ...config, request, isLoading }), [
     config,
+    request,
     isLoading,
-    setConfig,
   ]);
 
   return (
@@ -71,18 +64,18 @@ export const ConfigProvider = withI18n()(({ i18n, children }) => {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
           ouiaId="config-error-modal"
         >
-          {i18n._(t`Failed to retrieve configuration.`)}
+          {t`Failed to retrieve configuration.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
       {children}
     </ConfigContext.Provider>
   );
-});
+};
 
 export const useAuthorizedPath = () => {
   const config = useConfig();

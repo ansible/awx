@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ('always', 'Always pull container before running.'),
-                    ('missing', 'No pull option has been selected.'),
+                    ('missing', 'Only pull the image if not present before running.'),
                     ('never', 'Never pull container before running.'),
                 ],
                 blank=True,

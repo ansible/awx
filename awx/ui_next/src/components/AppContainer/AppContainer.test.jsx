@@ -4,19 +4,25 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { ConfigAPI, MeAPI, RootAPI } from '../../api';
+import { MeAPI, RootAPI } from '../../api';
 import { useAuthorizedPath } from '../../contexts/Config';
 import AppContainer from './AppContainer';
 
 jest.mock('../../api');
+jest.mock('../../util/bootstrapPendo');
+
+global.pendo = {
+  initialize: jest.fn(),
+};
 
 describe('<AppContainer />', () => {
   const version = '222';
 
   beforeEach(() => {
-    ConfigAPI.read.mockResolvedValue({
+    RootAPI.readAssetVariables.mockResolvedValue({
       data: {
-        version,
+        BRAND_NAME: 'AWX',
+        PENDO_API_KEY: 'some-pendo-key',
       },
     });
     MeAPI.read.mockResolvedValue({ data: { results: [{}] } });
@@ -31,7 +37,7 @@ describe('<AppContainer />', () => {
   test('expected content is rendered', async () => {
     const routeConfig = [
       {
-        groupTitle: 'Group One',
+        groupTitle: <span>Group One</span>,
         groupId: 'group_one',
         routes: [
           { title: 'Foo', path: '/foo' },
@@ -39,7 +45,7 @@ describe('<AppContainer />', () => {
         ],
       },
       {
-        groupTitle: 'Group Two',
+        groupTitle: <span>Group Two</span>,
         groupId: 'group_two',
         routes: [{ title: 'Fiz', path: '/fiz' }],
       },
@@ -52,7 +58,22 @@ describe('<AppContainer />', () => {
           {routeConfig.map(({ groupId }) => (
             <div key={groupId} id={groupId} />
           ))}
-        </AppContainer>
+        </AppContainer>,
+        {
+          context: {
+            config: {
+              analytics_status: 'detailed',
+              ansible_version: null,
+              custom_virtualenvs: [],
+              version: '9000',
+              me: { is_superuser: true },
+              toJSON: () => '/config/',
+              license_info: {
+                valid_key: true,
+              },
+            },
+          },
+        }
       );
     });
     wrapper.update();
@@ -70,6 +91,60 @@ describe('<AppContainer />', () => {
 
     expect(wrapper.find('#group_one').length).toBe(1);
     expect(wrapper.find('#group_two').length).toBe(1);
+
+    expect(global.pendo.initialize).toHaveBeenCalledTimes(1);
+  });
+
+  test('Pendo not initialized when key is missing', async () => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+        PENDO_API_KEY: '',
+      },
+    });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: {
+          config: {
+            analytics_status: 'detailed',
+            ansible_version: null,
+            custom_virtualenvs: [],
+            version: '9000',
+            me: { is_superuser: true },
+            toJSON: () => '/config/',
+            license_info: {
+              valid_key: true,
+            },
+          },
+        },
+      });
+    });
+    wrapper.update();
+    expect(global.pendo.initialize).toHaveBeenCalledTimes(0);
+  });
+
+  test('Pendo not initialized when status is analytics off', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: {
+          config: {
+            analytics_status: 'off',
+            ansible_version: null,
+            custom_virtualenvs: [],
+            version: '9000',
+            me: { is_superuser: true },
+            toJSON: () => '/config/',
+            license_info: {
+              valid_key: true,
+            },
+          },
+        },
+      });
+    });
+    wrapper.update();
+    expect(global.pendo.initialize).toHaveBeenCalledTimes(0);
   });
 
   test('opening the about modal renders prefetched config data', async () => {
@@ -106,12 +181,17 @@ describe('<AppContainer />', () => {
   test('logout makes expected call to api client', async () => {
     const userMenuButton = 'UserIcon';
     const logoutButton = '#logout-button button';
-
+    const logout = jest.fn();
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<AppContainer />);
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: {
+          session: {
+            logout,
+          },
+        },
+      });
     });
-
     // open the user menu
     expect(wrapper.find(logoutButton)).toHaveLength(0);
     wrapper.find(userMenuButton).simulate('click');
@@ -119,6 +199,6 @@ describe('<AppContainer />', () => {
 
     // logout
     wrapper.find(logoutButton).simulate('click');
-    expect(RootAPI.logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 });

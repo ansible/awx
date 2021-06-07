@@ -1,10 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { bool, shape, func } from 'prop-types';
 import {
-  MinusCircleIcon,
   DownloadIcon,
   RocketIcon,
   TrashAltIcon,
@@ -15,6 +14,9 @@ import {
   LaunchButton,
   ReLaunchDropDown,
 } from '../../../../components/LaunchButton';
+import { useConfig } from '../../../../contexts/Config';
+
+import JobCancelButton from '../../../../components/JobCancelButton';
 
 const BadgeGroup = styled.div`
   margin-left: 20px;
@@ -62,14 +64,7 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
   'inventory_update',
 ];
 
-const OutputToolbar = ({
-  i18n,
-  job,
-  onDelete,
-  onCancel,
-  isDeleteDisabled,
-  jobStatus,
-}) => {
+const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 
   const playCount = job?.playbook_counts?.play_count;
@@ -80,33 +75,34 @@ const OutputToolbar = ({
     (sum, key) => sum + job?.host_status_counts[key],
     0
   );
+  const { me } = useConfig();
 
   return (
     <Wrapper>
       {!hideCounts && (
         <>
           {playCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Play Count`)}>
-              <div>{i18n._(t`Plays`)}</div>
+            <BadgeGroup aria-label={t`Play Count`}>
+              <div>{t`Plays`}</div>
               <Badge isRead>{playCount}</Badge>
             </BadgeGroup>
           )}
           {taskCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Task Count`)}>
-              <div>{i18n._(t`Tasks`)}</div>
+            <BadgeGroup aria-label={t`Task Count`}>
+              <div>{t`Tasks`}</div>
               <Badge isRead>{taskCount}</Badge>
             </BadgeGroup>
           )}
           {totalHostCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Host Count`)}>
-              <div>{i18n._(t`Hosts`)}</div>
+            <BadgeGroup aria-label={t`Host Count`}>
+              <div>{t`Hosts`}</div>
               <Badge isRead>{totalHostCount}</Badge>
             </BadgeGroup>
           )}
           {darkCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Unreachable Host Count`)}>
-              <div>{i18n._(t`Unreachable`)}</div>
-              <Tooltip content={i18n._(t`Unreachable Hosts`)}>
+            <BadgeGroup aria-label={t`Unreachable Host Count`}>
+              <div>{t`Unreachable`}</div>
+              <Tooltip content={t`Unreachable Hosts`}>
                 <Badge color="#470000" isRead>
                   {darkCount}
                 </Badge>
@@ -114,9 +110,9 @@ const OutputToolbar = ({
             </BadgeGroup>
           )}
           {failureCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Failed Host Count`)}>
-              <div>{i18n._(t`Failed`)}</div>
-              <Tooltip content={i18n._(t`Failed Hosts`)}>
+            <BadgeGroup aria-label={t`Failed Host Count`}>
+              <div>{t`Failed`}</div>
+              <Tooltip content={t`Failed Hosts`}>
                 <Badge color="#C9190B" isRead>
                   {failureCount}
                 </Badge>
@@ -126,85 +122,82 @@ const OutputToolbar = ({
         </>
       )}
 
-      <BadgeGroup aria-label={i18n._(t`Elapsed Time`)}>
-        <div>{i18n._(t`Elapsed`)}</div>
-        <Tooltip content={i18n._(t`Elapsed time that the job ran`)}>
+      <BadgeGroup aria-label={t`Elapsed Time`}>
+        <div>{t`Elapsed`}</div>
+        <Tooltip content={t`Elapsed time that the job ran`}>
           <Badge isRead>{toHHMMSS(job.elapsed)}</Badge>
         </Tooltip>
       </BadgeGroup>
-
-      {job.type !== 'system_job' &&
-        job.summary_fields.user_capabilities?.start && (
-          <Tooltip
-            content={
-              job.status === 'failed' && job.type === 'job'
-                ? i18n._(t`Relaunch using host parameters`)
-                : i18n._(t`Relaunch Job`)
-            }
-          >
-            {job.status === 'failed' && job.type === 'job' ? (
-              <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
-                  <ReLaunchDropDown
-                    handleRelaunch={handleRelaunch}
-                    ouiaId="job-output-relaunch-dropdown"
-                    isLaunching={isLaunching}
-                  />
-                )}
-              </LaunchButton>
-            ) : (
-              <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
-                  <Button
-                    ouiaId="job-output-relaunch-button"
-                    variant="plain"
-                    onClick={handleRelaunch}
-                    aria-label={i18n._(t`Relaunch`)}
-                    isDisabled={isLaunching}
-                  >
-                    <RocketIcon />
-                  </Button>
-                )}
-              </LaunchButton>
-            )}
-          </Tooltip>
+      {['pending', 'waiting', 'running'].includes(jobStatus) &&
+        (job.type === 'system_job'
+          ? me.is_superuser
+          : job?.summary_fields?.user_capabilities?.start) && (
+          <JobCancelButton
+            job={job}
+            errorTitle={t`Job Cancel Error`}
+            title={t`Cancel ${job.name}`}
+            errorMessage={t`Failed to cancel ${job.name}`}
+            showIconButton
+          />
         )}
+      {job.summary_fields.user_capabilities?.start && (
+        <Tooltip
+          content={
+            job.status === 'failed' && job.type === 'job'
+              ? t`Relaunch using host parameters`
+              : t`Relaunch Job`
+          }
+        >
+          {job.status === 'failed' && job.type === 'job' ? (
+            <LaunchButton resource={job}>
+              {({ handleRelaunch, isLaunching }) => (
+                <ReLaunchDropDown
+                  handleRelaunch={handleRelaunch}
+                  ouiaId="job-output-relaunch-dropdown"
+                  isLaunching={isLaunching}
+                />
+              )}
+            </LaunchButton>
+          ) : (
+            <LaunchButton resource={job}>
+              {({ handleRelaunch, isLaunching }) => (
+                <Button
+                  ouiaId="job-output-relaunch-button"
+                  variant="plain"
+                  onClick={handleRelaunch}
+                  aria-label={t`Relaunch`}
+                  isDisabled={isLaunching}
+                >
+                  <RocketIcon />
+                </Button>
+              )}
+            </LaunchButton>
+          )}
+        </Tooltip>
+      )}
 
       {job.related?.stdout && (
-        <Tooltip content={i18n._(t`Download Output`)}>
+        <Tooltip content={t`Download Output`}>
           <a href={`${job.related.stdout}?format=txt_download`}>
             <Button
               ouiaId="job-output-download-button"
               variant="plain"
-              aria-label={i18n._(t`Download Output`)}
+              aria-label={t`Download Output`}
             >
               <DownloadIcon />
             </Button>
           </a>
         </Tooltip>
       )}
-      {job.summary_fields.user_capabilities.start &&
-        ['pending', 'waiting', 'running'].includes(jobStatus) && (
-          <Tooltip content={i18n._(t`Cancel Job`)}>
-            <Button
-              ouiaId="job-output-cancel-button"
-              variant="plain"
-              aria-label={i18n._(t`Cancel Job`)}
-              onClick={onCancel}
-            >
-              <MinusCircleIcon />
-            </Button>
-          </Tooltip>
-        )}
       {job.summary_fields.user_capabilities.delete &&
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(
           jobStatus
         ) && (
-          <Tooltip content={i18n._(t`Delete Job`)}>
+          <Tooltip content={t`Delete Job`}>
             <DeleteButton
               ouiaId="job-output-delete-button"
               name={job.name}
-              modalTitle={i18n._(t`Delete Job`)}
+              modalTitle={t`Delete Job`}
               onConfirm={onDelete}
               variant="plain"
               isDisabled={isDeleteDisabled}
@@ -227,4 +220,4 @@ OutputToolbar.defaultProps = {
   isDeleteDisabled: false,
 };
 
-export default withI18n()(OutputToolbar);
+export default OutputToolbar;

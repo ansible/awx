@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import InventoryLookup from './InventoryLookup';
 import { InventoriesAPI } from '../../api';
@@ -39,7 +40,11 @@ describe('InventoryLookup', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <InventoryLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     wrapper.update();
     expect(InventoriesAPI.read).toHaveBeenCalledTimes(1);
@@ -58,7 +63,9 @@ describe('InventoryLookup', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <InventoryLookup isOverrideDisabled onChange={() => {}} />
+        <Formik>
+          <InventoryLookup isOverrideDisabled onChange={() => {}} />
+        </Formik>
       );
     });
     wrapper.update();
@@ -77,7 +84,11 @@ describe('InventoryLookup', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <InventoryLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     wrapper.update();
     expect(InventoriesAPI.read).toHaveBeenCalledTimes(1);

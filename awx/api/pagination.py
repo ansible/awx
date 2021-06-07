@@ -1,12 +1,16 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+from collections import OrderedDict
+
 # Django REST Framework
 from django.conf import settings
 from django.core.paginator import Paginator as DjangoPaginator
 from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param
+from rest_framework.settings import api_settings
+from django.utils.translation import gettext_lazy as _
 
 
 class DisabledPaginator(DjangoPaginator):
@@ -65,3 +69,65 @@ class Pagination(pagination.PageNumberPagination):
         if self.count_disabled:
             return Response({'results': data})
         return super(Pagination, self).get_paginated_response(data)
+
+
+class LimitPagination(pagination.BasePagination):
+    default_limit = api_settings.PAGE_SIZE
+    limit_query_param = 'limit'
+    limit_query_description = _('Number of results to return per page.')
+    max_page_size = settings.MAX_PAGE_SIZE
+
+    def paginate_queryset(self, queryset, request, view=None):
+        self.limit = self.get_limit(request)
+        self.request = request
+
+        return list(queryset[0 : self.limit])
+
+    def get_paginated_response(self, data):
+        return Response(OrderedDict([('results', data)]))
+
+    def get_paginated_response_schema(self, schema):
+        return {
+            'type': 'object',
+            'properties': {
+                'results': schema,
+            },
+        }
+
+    def get_limit(self, request):
+        try:
+            return pagination._positive_int(request.query_params[self.limit_query_param], strict=True)
+        except (KeyError, ValueError):
+            pass
+
+        return self.default_limit
+
+
+class UnifiedJobEventPagination(Pagination):
+    """
+    By default, use Pagination for all operations.
+    If `limit` query parameter specified use LimitPagination
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.use_limit_paginator = False
+        self.limit_pagination = LimitPagination()
+        return super().__init__(*args, **kwargs)
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if 'limit' in request.query_params:
+            self.use_limit_paginator = True
+
+        if self.use_limit_paginator:
+            return self.limit_pagination.paginate_queryset(queryset, request, view=view)
+        return super().paginate_queryset(queryset, request, view=view)
+
+    def get_paginated_response(self, data):
+        if self.use_limit_paginator:
+            return self.limit_pagination.get_paginated_response(data)
+        return super().get_paginated_response(data)
+
+    def get_paginated_response_schema(self, schema):
+        if self.use_limit_paginator:
+            return self.limit_pagination.get_paginated_response_schema(schema)
+        return super().get_paginated_response_schema(schema)

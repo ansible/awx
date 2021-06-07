@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   PageSection,
@@ -44,7 +44,7 @@ function useInterval(callback, delay, instance, metric) {
   }, [callback, delay, instance, metric]);
   return { count };
 }
-function Metrics({ i18n }) {
+function Metrics() {
   const [instanceIsOpen, setInstanceIsOpen] = useState(false);
   const [instance, setInstance] = useState(null);
   const [metric, setMetric] = useState(null);
@@ -167,7 +167,7 @@ function Metrics({ i18n }) {
   }
   return (
     <>
-      <ScreenHeader breadcrumbConfig={{ '/metrics': i18n._(t`Metrics`) }} />
+      <ScreenHeader breadcrumbConfig={{ '/metrics': t`Metrics` }} />
 
       <PageSection>
         <Card>
@@ -175,7 +175,7 @@ function Metrics({ i18n }) {
             <Toolbar>
               <ToolbarContent>
                 <ToolbarGroup>
-                  <ToolbarItem>{i18n._(t`Instance`)}</ToolbarItem>
+                  <ToolbarItem>{t`Instance`}</ToolbarItem>
                   <ToolbarItem>
                     <Select
                       ouiaId="Instance-select"
@@ -188,18 +188,18 @@ function Metrics({ i18n }) {
                         setRenderedData([]);
                       }}
                       selections={instance}
-                      placeholderText={i18n._(t`Select a instance`)}
+                      placeholderText={t`Select a instance`}
                     >
                       {instances.map(inst => (
                         <SelectOption value={inst} key={inst} />
                       ))}
                     </Select>
                   </ToolbarItem>
-                  <ToolbarItem>{i18n._(t`Metric`)}</ToolbarItem>
+                  <ToolbarItem>{t`Metric`}</ToolbarItem>
                   <ToolbarItem>
                     <Select
                       ouiaId="Metric-select"
-                      placeholderText={i18n._(t`Select a metric`)}
+                      placeholderText={t`Select a metric`}
                       isOpen={metricIsOpen}
                       onSelect={(e, value) => {
                         count = [0];
@@ -230,7 +230,7 @@ function Metrics({ i18n }) {
               )
             ) : (
               <ContentEmpty
-                title={i18n._(t`Select an instance and a metric to show chart`)}
+                title={t`Select an instance and a metric to show chart`}
               />
             )}
           </CardBody>
@@ -240,4 +240,4 @@ function Metrics({ i18n }) {
   );
 }
 
-export default withI18n()(Metrics);
+export default Metrics;

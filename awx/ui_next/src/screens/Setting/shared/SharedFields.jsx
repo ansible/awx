@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { shape, string } from 'prop-types';
-import { useLingui } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
+  Button,
   FileUpload,
   FormGroup as PFFormGroup,
   InputGroup,
@@ -26,6 +26,7 @@ import {
   url,
 } from '../../../util/validators';
 import RevertButton from './RevertButton';
+import AlertModal from '../../../components/AlertModal';
 
 const FormGroup = styled(PFFormGroup)`
   .pf-c-form__group-label {
@@ -47,7 +48,6 @@ const SettingGroup = ({
   popoverContent,
   validated,
 }) => {
-  const { i18n } = useLingui();
   return (
     <FormGroup
       fieldId={fieldId}
@@ -60,7 +60,7 @@ const SettingGroup = ({
         <>
           <Popover
             content={popoverContent}
-            ariaLabel={`${i18n._(t`More information for`)} ${label}`}
+            ariaLabel={`${t`More information for`} ${label}`}
           />
           <RevertButton
             id={fieldId}
@@ -75,9 +75,56 @@ const SettingGroup = ({
     </FormGroup>
   );
 };
-const BooleanField = ({ ariaLabel = '', name, config, disabled = false }) => {
+const BooleanField = ({
+  ariaLabel = '',
+  name,
+  config,
+  disabled = false,
+  needsConfirmationModal,
+  modalTitle,
+}) => {
   const [field, meta, helpers] = useField(name);
-  const { i18n } = useLingui();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  if (isModalOpen) {
+    return (
+      <AlertModal
+        isOpen
+        title={modalTitle}
+        variant="danger"
+        aria-label={modalTitle}
+        onClose={() => {
+          helpers.setValue(false);
+        }}
+        actions={[
+          <Button
+            ouiaId="confirm-misc-settings-modal"
+            key="confirm"
+            variant="danger"
+            aria-label={t`Confirm`}
+            onClick={() => {
+              helpers.setValue(true);
+              setIsModalOpen(false);
+            }}
+          >
+            {t`Confirm`}
+          </Button>,
+          <Button
+            ouiaId="cancel-misc-settings-modal"
+            key="cancel"
+            variant="link"
+            aria-label={t`Cancel`}
+            onClick={() => {
+              helpers.setValue(false);
+              setIsModalOpen(false);
+            }}
+          >
+            {t`Cancel`}
+          </Button>,
+        ]}
+      >{t`Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change.`}</AlertModal>
+    );
+  }
 
   return config ? (
     <SettingGroup
@@ -93,9 +140,13 @@ const BooleanField = ({ ariaLabel = '', name, config, disabled = false }) => {
         ouiaId={name}
         isChecked={field.value}
         isDisabled={disabled}
-        label={i18n._(t`On`)}
-        labelOff={i18n._(t`Off`)}
-        onChange={() => helpers.setValue(!field.value)}
+        label={t`On`}
+        labelOff={t`Off`}
+        onChange={() =>
+          needsConfirmationModal
+            ? setIsModalOpen(true)
+            : helpers.setValue(!field.value)
+        }
         aria-label={ariaLabel || config.label}
       />
     </SettingGroup>
@@ -107,9 +158,7 @@ BooleanField.propTypes = {
 };
 
 const ChoiceField = ({ name, config, isRequired = false }) => {
-  const { i18n } = useLingui();
-
-  const validate = isRequired ? required(null, i18n) : null;
+  const validate = isRequired ? required(null) : null;
   const [field, meta] = useField({ name, validate });
   const isValid = !meta.error || !meta.touched;
 
@@ -143,9 +192,7 @@ ChoiceField.propTypes = {
 };
 
 const EncryptedField = ({ name, config, isRequired = false }) => {
-  const { i18n } = useLingui();
-
-  const validate = isRequired ? required(null, i18n) : null;
+  const validate = isRequired ? required(null) : null;
   const [, meta] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
@@ -177,15 +224,13 @@ EncryptedField.propTypes = {
 };
 
 const InputField = ({ name, config, type = 'text', isRequired = false }) => {
-  const { i18n } = useLingui();
-
   const min_value = config?.min_value ?? Number.MIN_SAFE_INTEGER;
   const max_value = config?.max_value ?? Number.MAX_SAFE_INTEGER;
   const validators = [
-    ...(isRequired ? [required(null, i18n)] : []),
-    ...(type === 'url' ? [url(i18n)] : []),
+    ...(isRequired ? [required(null)] : []),
+    ...(type === 'url' ? [url()] : []),
     ...(type === 'number'
-      ? [integer(i18n), minMaxValue(min_value, max_value, i18n)]
+      ? [integer(), minMaxValue(min_value, max_value)]
       : []),
   ];
   const [field, meta] = useField({ name, validate: combine(validators) });
@@ -221,9 +266,7 @@ InputField.propTypes = {
 };
 
 const TextAreaField = ({ name, config, isRequired = false }) => {
-  const { i18n } = useLingui();
-
-  const validate = isRequired ? required(null, i18n) : null;
+  const validate = isRequired ? required(null) : null;
   const [field, meta] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
@@ -258,9 +301,7 @@ TextAreaField.propTypes = {
 };
 
 const ObjectField = ({ name, config, isRequired = false }) => {
-  const { i18n } = useLingui();
-
-  const validate = isRequired ? required(null, i18n) : null;
+  const validate = isRequired ? required(null) : null;
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
@@ -308,9 +349,7 @@ const FileUploadField = ({
   type = 'text',
   isRequired = false,
 }) => {
-  const { i18n } = useLingui();
-
-  const validate = isRequired ? required(null, i18n) : null;
+  const validate = isRequired ? required(null) : null;
   const [filename, setFilename] = useState('');
   const [fileIsUploading, setFileIsUploading] = useState(false);
   const [field, meta, helpers] = useField({ name, validate });

@@ -12,7 +12,7 @@ export default function useSchedulePromptSteps(
   launchConfig,
   schedule,
   resource,
-  i18n,
+
   scheduleCredentials,
   resourceDefaultCredentials
 ) {
@@ -22,15 +22,14 @@ export default function useSchedulePromptSteps(
   const [visited, setVisited] = useState({});
 
   const steps = [
-    useInventoryStep(launchConfig, sourceOfValues, i18n, visited),
+    useInventoryStep(launchConfig, sourceOfValues, visited),
     useCredentialsStep(
       launchConfig,
       sourceOfValues,
-      resourceDefaultCredentials,
-      i18n
+      resourceDefaultCredentials
     ),
-    useOtherPromptsStep(launchConfig, sourceOfValues, i18n),
-    useSurveyStep(launchConfig, surveyConfig, sourceOfValues, i18n, visited),
+    useOtherPromptsStep(launchConfig, sourceOfValues),
+    useSurveyStep(launchConfig, surveyConfig, sourceOfValues, visited),
   ];
 
   const hasErrors = steps.some(step => step.hasError);
@@ -38,12 +37,12 @@ export default function useSchedulePromptSteps(
   steps.push(
     usePreviewStep(
       launchConfig,
-      i18n,
+
       resource,
       surveyConfig,
       hasErrors,
       true,
-      i18n._(t`Save`)
+      t`Save`
     )
   );
 

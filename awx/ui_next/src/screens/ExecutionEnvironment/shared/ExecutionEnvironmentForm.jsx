@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { func, shape, bool } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
-
 import { ExecutionEnvironmentsAPI } from '../../../api';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import FormActionGroup from '../../../components/FormActionGroup';
@@ -18,7 +16,6 @@ import { required } from '../../../util/validators';
 import useRequest from '../../../util/useRequest';
 
 function ExecutionEnvironmentFormFields({
-  i18n,
   me,
   options,
   executionEnvironment,
@@ -27,16 +24,13 @@ function ExecutionEnvironmentFormFields({
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
   );
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate:
-      !me?.is_superuser &&
-      required(i18n._(t`Select a value for this field`), i18n),
-  });
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
 
   const isGloballyAvailable = useRef(!organizationField.value);
 
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const onCredentialChange = useCallback(
     value => {
@@ -45,20 +39,19 @@ function ExecutionEnvironmentFormFields({
     [setFieldValue]
   );
 
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   const [
     containerOptionsField,
     containerOptionsMeta,
     containerOptionsHelpers,
-  ] = useField({
-    name: 'pull',
-  });
+  ] = useField('pull');
 
   const containerPullChoices = options?.actions?.POST?.pull?.choices.map(
     ([value, label]) => ({ value, label, key: value })
@@ -70,20 +63,23 @@ function ExecutionEnvironmentFormFields({
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required={!me.is_superuser}
         helperText={
           me?.is_superuser &&
           ((!isOrgLookupDisabled && isGloballyAvailable) ||
             organizationField.value === null)
-            ? i18n._(
-                t`Leave this field blank to make the execution environment globally available.`
-              )
+            ? t`Leave this field blank to make the execution environment globally available.`
             : null
         }
         autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
         isDisabled={!!isOrgLookupDisabled && isGloballyAvailable.current}
+        validate={
+          !me?.is_superuser
+            ? required(t`Select a value for this field`)
+            : undefined
+        }
       />
     );
   };
@@ -92,22 +88,35 @@ function ExecutionEnvironmentFormFields({
     <>
       <FormField
         id="execution-environment-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="execution-environment-image"
-        label={i18n._(t`Image name`)}
+        label={t`Image`}
         name="image"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
-        tooltip={i18n._(
-          t`The registry location where the container is stored.`
-        )}
+        tooltip={
+          <span>
+            {t`The full image location, including the container registry, image name, and version tag.`}
+            <br />
+            <br />
+            {t`Examples:`}
+            <ul css="margin: 10px 0 10px 20px">
+              <li>
+                <code>quay.io/ansible/awx-ee:latest</code>
+              </li>
+              <li>
+                <code>repo/project/image-name:tag</code>
+              </li>
+            </ul>
+          </span>
+        }
       />
       <FormGroup
         fieldId="execution-environment-container-options"
@@ -117,7 +126,7 @@ function ExecutionEnvironmentFormFields({
             ? 'default'
             : 'error'
         }
-        label={i18n._(t`Pull`)}
+        label={t`Pull`}
       >
         <AnsibleSelect
           {...containerOptionsField}
@@ -130,15 +139,13 @@ function ExecutionEnvironmentFormFields({
       </FormGroup>
       <FormField
         id="execution-environment-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
       {isOrgLookupDisabled && isGloballyAvailable.current ? (
         <Tooltip
-          content={i18n._(
-            t`Globally available execution environment can not be reassigned to a specific Organization`
-          )}
+          content={t`Globally available execution environment can not be reassigned to a specific Organization`}
         >
           {renderOrganizationLookup()}
         </Tooltip>
@@ -147,16 +154,14 @@ function ExecutionEnvironmentFormFields({
       )}
 
       <CredentialLookup
-        label={i18n._(t`Registry credential`)}
+        label={t`Registry credential`}
         credentialTypeKind="registry"
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
         onChange={onCredentialChange}
         value={credentialField.value}
-        tooltip={i18n._(
-          t`Credential to authenticate with a protected container registry.`
-        )}
+        tooltip={t`Credential to authenticate with a protected container registry.`}
       />
     </>
   );
@@ -243,4 +248,4 @@ ExecutionEnvironmentForm.defaultProps = {
   isOrgLookupDisabled: false,
 };
 
-export default withI18n()(ExecutionEnvironmentForm);
+export default ExecutionEnvironmentForm;

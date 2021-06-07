@@ -1,10 +1,10 @@
 import 'styled-components/macro';
-import React, { Fragment } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { TableComposable, Tbody } from '@patternfly/react-table';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import ListHeader from '../ListHeader';
 import ContentEmpty from '../ContentEmpty';
@@ -14,11 +14,7 @@ import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 import LoadingSpinner from '../LoadingSpinner';
 
-import {
-  encodeNonDefaultQueryString,
-  parseQueryString,
-  replaceParams,
-} from '../../util/qs';
+import { parseQueryString, updateQueryString } from '../../util/qs';
 import { QSConfig, SearchColumns } from '../../types';
 
 function PaginatedTable({
@@ -35,47 +31,51 @@ function PaginatedTable({
   toolbarRelatedSearchableKeys,
   pluralizedItemName,
   showPageSizeOptions,
-  i18n,
   renderToolbar,
   emptyContentMessage,
+  clearSelected,
   ouiaId,
 }) {
+  const { search, pathname } = useLocation();
   const history = useHistory();
+  const location = useLocation();
 
-  const pushHistoryState = params => {
-    const { pathname, search } = history.location;
-    const nonNamespacedParams = parseQueryString({}, search);
-    const encodedParams = encodeNonDefaultQueryString(
-      qsConfig,
-      params,
-      nonNamespacedParams
-    );
-    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  useEffect(() => {
+    clearSelected();
+  }, [location.search, clearSelected]);
+
+  const pushHistoryState = qs => {
+    history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   const handleSetPage = (event, pageNumber) => {
-    const oldParams = parseQueryString(qsConfig, history.location.search);
-    pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
+    const qs = updateQueryString(qsConfig, search, {
+      page: pageNumber,
+    });
+    pushHistoryState(qs);
   };
 
   const handleSetPageSize = (event, pageSize, page) => {
-    const oldParams = parseQueryString(qsConfig, history.location.search);
-    pushHistoryState(replaceParams(oldParams, { page_size: pageSize, page }));
+    const qs = updateQueryString(qsConfig, search, {
+      page_size: pageSize,
+      page,
+    });
+    pushHistoryState(qs);
   };
 
   const searchColumns = toolbarSearchColumns.length
     ? toolbarSearchColumns
     : [
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
           isDefault: true,
         },
       ];
   const queryParams = parseQueryString(qsConfig, history.location.search);
 
-  const dataListLabel = i18n._(t`${pluralizedItemName} List`);
-  const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
+  const dataListLabel = t`${pluralizedItemName} List`;
+  const emptyContentTitle = t`No ${pluralizedItemName} Found `;
 
   let Content;
   if (hasContentLoading && items.length <= 0) {
@@ -88,7 +88,7 @@ function PaginatedTable({
         title={emptyContentTitle}
         message={
           emptyContentMessage ||
-          i18n._(t`Please add ${pluralizedItemName} to populate this list `)
+          t`Please add ${pluralizedItemName} to populate this list `
         }
       />
     );
@@ -96,7 +96,10 @@ function PaginatedTable({
     Content = (
       <div css="overflow: auto">
         {hasContentLoading && <LoadingSpinner />}
-        <TableComposable aria-label={dataListLabel} ouiaId={ouiaId}>
+        <TableComposable
+          aria-label={dataListLabel}
+          ouiaId={ouiaId || `paginated-table-${pluralizedItemName}`}
+        >
           {headerRow}
           <Tbody>{items.map(renderRow)}</Tbody>
         </TableComposable>
@@ -130,7 +133,7 @@ function PaginatedTable({
   );
 
   return (
-    <Fragment>
+    <>
       <ListHeader
         itemCount={itemCount}
         renderToolbar={renderToolbar}
@@ -162,7 +165,7 @@ function PaginatedTable({
           onPerPageSelect={handleSetPageSize}
         />
       ) : null}
-    </Fragment>
+    </>
   );
 }
 
@@ -185,6 +188,7 @@ PaginatedTable.propTypes = {
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
   contentError: PropTypes.shape(),
+  clearSelected: PropTypes.func,
   ouiaId: PropTypes.string,
 };
 
@@ -198,7 +202,8 @@ PaginatedTable.defaultProps = {
   showPageSizeOptions: true,
   renderToolbar: props => <DataListToolbar {...props} />,
   ouiaId: null,
+  clearSelected: () => {},
 };
 
 export { PaginatedTable as _PaginatedTable };
-export default withI18n()(PaginatedTable);
+export default PaginatedTable;

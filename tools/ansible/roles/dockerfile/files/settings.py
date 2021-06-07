@@ -14,8 +14,6 @@ STATIC_ROOT = '/var/lib/awx/public/static'
 
 PROJECTS_ROOT = '/var/lib/awx/projects'
 
-AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
-
 JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
 
 SECRET_KEY = get_secret()
@@ -58,7 +56,6 @@ LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
 LOGGING['loggers']['social']['handlers'] = ['console']
 LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
 LOGGING['loggers']['rbac_migrations']['handlers'] = ['console']
-LOGGING['loggers']['awx.isolated.manager.playbooks']['handlers'] = ['console']
 LOGGING['handlers']['callback_receiver'] = {'class': 'logging.NullHandler'}
 LOGGING['handlers']['task_system'] = {'class': 'logging.NullHandler'}
 LOGGING['handlers']['tower_warnings'] = {'class': 'logging.NullHandler'}

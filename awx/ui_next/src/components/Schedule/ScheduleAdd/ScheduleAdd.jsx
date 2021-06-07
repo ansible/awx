@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { func, shape } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
@@ -16,7 +16,6 @@ import getSurveyValues from '../../../util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from '../../../util/lists';
 
 function ScheduleAdd({
-  i18n,
   resource,
   apiModel,
   launchConfig,
@@ -62,6 +61,15 @@ function ScheduleAdd({
     );
     let extraVars;
     const surveyValues = getSurveyValues(values);
+
+    if (
+      !Object.values(surveyValues).length &&
+      surveyConfiguration?.spec?.length
+    ) {
+      surveyConfiguration.spec.forEach(q => {
+        surveyValues[q.variable] = q.default;
+      });
+    }
     const initialExtraVars =
       launchConfiguration?.ask_variables_on_launch &&
       (values.extra_vars || '---');
@@ -77,7 +85,7 @@ function ScheduleAdd({
     }
 
     try {
-      const rule = new RRule(buildRuleObj(values, i18n));
+      const rule = new RRule(buildRuleObj(values));
       const requestData = {
         ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
@@ -87,7 +95,9 @@ function ScheduleAdd({
         if (requestData.extra_data) {
           requestData.extra_data.days = values.daysToKeep;
         } else {
-          requestData.extra_data = JSON.stringify({ days: values.daysToKeep });
+          requestData.extra_data = JSON.stringify({
+            days: values.daysToKeep,
+          });
         }
       }
 
@@ -131,4 +141,4 @@ ScheduleAdd.propTypes = {
 
 ScheduleAdd.defaultProps = {};
 
-export default withI18n()(ScheduleAdd);
+export default ScheduleAdd;

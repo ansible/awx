@@ -27,7 +27,7 @@ def migrate_galaxy_settings(apps, schema_editor):
     galaxy_type = CredentialType.objects.get(kind='galaxy')
     private_galaxy_url = Setting.objects.filter(key='PRIMARY_GALAXY_URL').first()
 
-    # by default, prior versions of AWX/Tower automatically pulled content
+    # by default, prior versions of AWX automatically pulled content
     # from galaxy.ansible.com
     public_galaxy_enabled = True
     public_galaxy_setting = Setting.objects.filter(key='PUBLIC_GALAXY_ENABLED').first()

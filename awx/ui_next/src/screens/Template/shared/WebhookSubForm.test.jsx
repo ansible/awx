@@ -69,12 +69,9 @@ describe('<WebhookSubForm />', () => {
         .find('TextInputBase[aria-label="workflow job template webhook key"]')
         .prop('value')
     ).toBe('webhook key');
-    expect(
-      wrapper
-        .find('Chip')
-        .find('span')
-        .text()
-    ).toBe('Github credential');
+    expect(wrapper.find('input#credential-input').prop('value')).toBe(
+      'Github credential'
+    );
   });
   test('should make other credential type available', async () => {
     CredentialsAPI.read.mockResolvedValue({

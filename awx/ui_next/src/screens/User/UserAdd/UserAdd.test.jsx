@@ -23,7 +23,10 @@ describe('<UserAdd />', () => {
       first_name: 'System',
       last_name: 'Administrator',
       password: 'password',
-      organization: 1,
+      organization: {
+        id: 1,
+        name: 'Default',
+      },
       is_superuser: true,
       is_system_auditor: false,
     };
@@ -33,7 +36,7 @@ describe('<UserAdd />', () => {
 
     const { organization, ...userData } = updatedUserData;
     expect(OrganizationsAPI.createUser.mock.calls).toEqual([
-      [organization, userData],
+      [organization.id, userData],
     ]);
   });
 
@@ -58,7 +61,10 @@ describe('<UserAdd />', () => {
       first_name: 'System',
       last_name: 'Administrator',
       password: 'password',
-      organization: 1,
+      organization: {
+        id: 1,
+        name: 'Default',
+      },
       is_superuser: true,
       is_system_auditor: false,
     };

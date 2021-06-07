@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   FormGroup,
@@ -11,7 +10,6 @@ import {
 import { ProjectsAPI } from '../../../../api';
 import useRequest from '../../../../util/useRequest';
 import { required } from '../../../../util/validators';
-
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
 import Popover from '../../../../components/Popover';
@@ -24,18 +22,17 @@ import {
   HostFilterField,
 } from './SharedFields';
 
-const SCMSubForm = ({ autoPopulateProject, i18n }) => {
+const SCMSubForm = ({ autoPopulateProject }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
-  const [projectField, projectMeta, projectHelpers] = useField({
-    name: 'source_project',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
-  });
+  const [projectField, projectMeta, projectHelpers] = useField(
+    'source_project'
+  );
   const [sourcePathField, sourcePathMeta, sourcePathHelpers] = useField({
     name: 'source_path',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   const { error: sourcePathError, request: fetchSourcePath } = useRequest(
@@ -60,7 +57,10 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
       setFieldValue('source_project', value);
       setFieldValue('source_path', '');
       setFieldTouched('source_path', false);
-      fetchSourcePath(value.id);
+      setFieldTouched('source_project', true, false);
+      if (value) {
+        fetchSourcePath(value.id);
+      }
     },
     [fetchSourcePath, setFieldValue, setFieldTouched]
   );
@@ -68,15 +68,16 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
   const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('credential', value);
+      setFieldTouched('credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
     <>
       <CredentialLookup
         credentialTypeKind="cloud"
-        label={i18n._(t`Credential`)}
+        label={t`Credential`}
         value={credentialField.value}
         onChange={handleCredentialUpdate}
       />
@@ -88,6 +89,8 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
         onChange={handleProjectUpdate}
         required
         autoPopulate={autoPopulateProject}
+        fieldName="source_project"
+        validate={required(t`Select a value for this field`)}
       />
       <FormGroup
         fieldId="source_path"
@@ -99,12 +102,12 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
             : 'error'
         }
         isRequired
-        label={i18n._(t`Inventory file`)}
+        label={t`Inventory file`}
         labelIcon={
           <Popover
-            content={i18n._(t`Select the inventory file
+            content={t`Select the inventory file
           to be synced by this source. You can select from
-          the dropdown or enter a file within the input.`)}
+          the dropdown or enter a file within the input.`}
           />
         }
       >
@@ -124,10 +127,10 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
             value = value.trim();
             sourcePathHelpers.setValue(value);
           }}
-          aria-label={i18n._(t`Select source path`)}
-          typeAheadAriaLabel={i18n._(t`Select source path`)}
-          placeholder={i18n._(t`Select source path`)}
-          createText={i18n._(t`Set source path to`)}
+          aria-label={t`Select source path`}
+          typeAheadAriaLabel={t`Select source path`}
+          placeholder={t`Select source path`}
+          createText={t`Set source path to`}
           isCreatable
           onCreateOption={value => {
             value.trim();
@@ -149,4 +152,4 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
   );
 };
 
-export default withI18n()(SCMSubForm);
+export default SCMSubForm;

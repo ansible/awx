@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { node, func, bool } from 'prop-types';
+import { node, func, bool, string } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { OrganizationsAPI } from '../../api';
@@ -21,7 +20,6 @@ const QS_CONFIG = getQSConfig('organizations', {
 
 function OrganizationLookup({
   helperTextInvalid,
-  i18n,
   isValid,
   onBlur,
   onChange,
@@ -31,6 +29,8 @@ function OrganizationLookup({
   autoPopulate,
   isDisabled,
   helperText,
+  validate,
+  fieldName,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
@@ -69,6 +69,25 @@ function OrganizationLookup({
     }
   );
 
+  const checkOrganizationName = useCallback(
+    async name => {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await OrganizationsAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchOrganizations();
   }, [fetchOrganizations]);
@@ -79,16 +98,19 @@ function OrganizationLookup({
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
-      label={i18n._(t`Organization`)}
+      label={t`Organization`}
       helperText={helperText}
     >
       <Lookup
         isDisabled={isDisabled}
         id="organization"
-        header={i18n._(t`Organization`)}
+        header={t`Organization`}
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onDebounce={checkOrganizationName}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         required={required}
         sortedColumnKey="name"
@@ -98,27 +120,27 @@ function OrganizationLookup({
             options={organizations}
             optionCount={itemCount}
             multiple={state.multiple}
-            header={i18n._(t`Organization`)}
+            header={t`Organization`}
             name="organization"
             qsConfig={QS_CONFIG}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: t`Created By (Username)`,
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
             ]}
@@ -144,6 +166,8 @@ OrganizationLookup.propTypes = {
   value: Organization,
   autoPopulate: bool,
   isDisabled: bool,
+  validate: func,
+  fieldName: string,
 };
 
 OrganizationLookup.defaultProps = {
@@ -154,7 +178,9 @@ OrganizationLookup.defaultProps = {
   value: null,
   autoPopulate: false,
   isDisabled: false,
+  validate: () => undefined,
+  fieldName: 'organization',
 };
 
 export { OrganizationLookup as _OrganizationLookup };
-export default withI18n()(withRouter(OrganizationLookup));
+export default withRouter(OrganizationLookup);

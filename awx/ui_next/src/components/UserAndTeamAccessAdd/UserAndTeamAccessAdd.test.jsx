@@ -9,6 +9,9 @@ import UserAndTeamAccessAdd from './UserAndTeamAccessAdd';
 
 jest.mock('../../api');
 
+const onError = jest.fn();
+const onClose = jest.fn();
+
 describe('<UserAndTeamAccessAdd/>', () => {
   const resources = {
     data: {
@@ -57,24 +60,21 @@ describe('<UserAndTeamAccessAdd/>', () => {
         <UserAndTeamAccessAdd
           apiModel={UsersAPI}
           onFetchData={() => {}}
+          onClose={onClose}
           title="Add user permissions"
+          onError={onError}
         />
       );
     });
-    await waitForElement(wrapper, 'Button[aria-label="Add"]');
+    wrapper.update();
   });
   afterEach(() => {
     jest.resetAllMocks();
   });
   test('should mount properly', async () => {
-    expect(wrapper.find('Button[aria-label="Add"]').length).toBe(1);
-    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
-    wrapper.update();
     expect(wrapper.find('PFWizard').length).toBe(1);
   });
   test('should disable steps', async () => {
-    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
-    wrapper.update();
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     expect(
       wrapper
@@ -122,8 +122,6 @@ describe('<UserAndTeamAccessAdd/>', () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
     JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockResolvedValue({});
-    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
-    wrapper.update();
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,
@@ -152,7 +150,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
         .find('CheckboxListItem')
         .first()
         .find('input[type="checkbox"]')
-        .simulate('change', { target: { checked: true } })
+        .simulate('click')
     );
 
     wrapper.update();
@@ -179,15 +177,16 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await expect(UsersAPI.associateRole).toHaveBeenCalled();
   });
 
-  test('should close wizard', async () => {
-    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+  test('should close wizard on cancel', async () => {
+    await act(async () =>
+      wrapper.find('Button[children="Cancel"]').prop('onClick')()
+    );
     wrapper.update();
-    act(() => wrapper.find('PFWizard').prop('onClose')());
-    wrapper.update();
-    expect(wrapper.find('PFWizard').length).toBe(0);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   test('should throw error', async () => {
+    expect(onError).toHaveBeenCalledTimes(0);
     JobTemplatesAPI.read.mockResolvedValue(resources);
     JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockRejectedValue(
@@ -209,9 +208,6 @@ describe('<UserAndTeamAccessAdd/>', () => {
         id: 'a',
       }),
     }));
-
-    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
-    wrapper.update();
 
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
@@ -235,7 +231,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
         .find('CheckboxListItem')
         .first()
         .find('input[type="checkbox"]')
-        .simulate('change', { target: { checked: true } })
+        .simulate('click')
     );
 
     wrapper.update();
@@ -261,6 +257,6 @@ describe('<UserAndTeamAccessAdd/>', () => {
 
     await expect(UsersAPI.associateRole).toHaveBeenCalled();
     wrapper.update();
-    expect(wrapper.find('AlertModal').length).toBe(1);
+    expect(onError).toHaveBeenCalled();
   });
 });

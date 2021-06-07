@@ -34,6 +34,12 @@ options:
       description:
         - Default Execution Environment to use for jobs owned by the Organization.
       type: str
+    custom_virtualenv:
+      description:
+        - Local absolute file path containing a custom Python virtualenv to use.
+        - Only compatible with older versions of AWX/Tower
+        - Deprecated, will be removed in the future
+      type: str
     max_hosts:
       description:
         - The max hosts allowed in this organizations
@@ -112,6 +118,7 @@ def main():
         name=dict(required=True),
         description=dict(),
         default_environment=dict(),
+        custom_virtualenv=dict(),
         max_hosts=dict(type='int', default="0"),
         instance_groups=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),
@@ -129,6 +136,7 @@ def main():
     name = module.params.get('name')
     description = module.params.get('description')
     default_ee = module.params.get('default_environment')
+    custom_virtualenv = module.params.get('custom_virtualenv')
     max_hosts = module.params.get('max_hosts')
     state = module.params.get('state')
 
@@ -183,6 +191,8 @@ def main():
         org_fields['description'] = description
     if default_ee is not None:
         org_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
+    if custom_virtualenv is not None:
+        org_fields['custom_virtualenv'] = custom_virtualenv
     if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
 

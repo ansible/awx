@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
 import { PencilAltIcon, PlusIcon, TrashAltIcon } from '@patternfly/react-icons';
@@ -22,13 +22,7 @@ const LinkG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
 `;
 
-function VisualizerLink({
-  i18n,
-  link,
-  updateLinkHelp,
-  readOnly,
-  updateHelpText,
-}) {
+function VisualizerLink({ link, updateLinkHelp, readOnly, updateHelpText }) {
   const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
@@ -52,7 +46,7 @@ function VisualizerLink({
         });
       }}
       onMouseEnter={() =>
-        updateHelpText(i18n._(t`Add a new node between these two nodes`))
+        updateHelpText(t`Add a new node between these two nodes`)
       }
       onMouseLeave={() => updateHelpText(null)}
     >
@@ -73,7 +67,7 @@ function VisualizerLink({
               setHovering(false);
               dispatch({ type: 'SET_LINK_TO_EDIT', value: link });
             }}
-            onMouseEnter={() => updateHelpText(i18n._(t`Edit this link`))}
+            onMouseEnter={() => updateHelpText(t`Edit this link`)}
             onMouseLeave={() => updateHelpText(null)}
           >
             <PencilAltIcon />
@@ -86,7 +80,7 @@ function VisualizerLink({
               setHovering(false);
               dispatch({ type: 'START_DELETE_LINK', link });
             }}
-            onMouseEnter={() => updateHelpText(i18n._(t`Delete this link`))}
+            onMouseEnter={() => updateHelpText(t`Delete this link`)}
             onMouseLeave={() => updateHelpText(null)}
           >
             <TrashAltIcon />
@@ -163,4 +157,4 @@ VisualizerLink.propTypes = {
   updateLinkHelp: func.isRequired,
 };
 
-export default withI18n()(VisualizerLink);
+export default VisualizerLink;

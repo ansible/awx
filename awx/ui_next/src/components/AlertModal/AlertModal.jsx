@@ -8,7 +8,7 @@ import {
   InfoCircleIcon,
   TimesCircleIcon,
 } from '@patternfly/react-icons';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
@@ -20,13 +20,11 @@ const Header = styled.div`
 `;
 
 function AlertModal({
-  i18n,
   isOpen = null,
   title,
   label,
   variant,
   children,
-  i18nHash,
   ...props
 }) {
   const variantIcons = {
@@ -74,7 +72,7 @@ function AlertModal({
   return (
     <Modal
       header={customHeader}
-      aria-label={label || i18n._(t`Alert modal`)}
+      aria-label={label || t`Alert modal`}
       aria-labelledby="alert-modal-header-label"
       isOpen={Boolean(isOpen)}
       variant="small"
@@ -86,4 +84,4 @@ function AlertModal({
   );
 }
 
-export default withI18n()(AlertModal);
+export default AlertModal;

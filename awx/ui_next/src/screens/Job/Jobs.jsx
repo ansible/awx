@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Route, Switch, useParams, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection } from '@patternfly/react-core';
 import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
@@ -9,28 +9,25 @@ import JobTypeRedirect from './JobTypeRedirect';
 import JobList from '../../components/JobList';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
-function Jobs({ i18n }) {
+function Jobs() {
   const match = useRouteMatch();
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    '/jobs': i18n._(t`Jobs`),
+    '/jobs': t`Jobs`,
   });
 
-  const buildBreadcrumbConfig = useCallback(
-    job => {
-      if (!job) {
-        return;
-      }
+  const buildBreadcrumbConfig = useCallback(job => {
+    if (!job) {
+      return;
+    }
 
-      const typeSegment = JOB_TYPE_URL_SEGMENTS[job.type];
-      setBreadcrumbConfig({
-        '/jobs': i18n._(t`Jobs`),
-        [`/jobs/${typeSegment}/${job.id}`]: `${job.name}`,
-        [`/jobs/${typeSegment}/${job.id}/output`]: i18n._(t`Output`),
-        [`/jobs/${typeSegment}/${job.id}/details`]: i18n._(t`Details`),
-      });
-    },
-    [i18n]
-  );
+    const typeSegment = JOB_TYPE_URL_SEGMENTS[job.type];
+    setBreadcrumbConfig({
+      '/jobs': t`Jobs`,
+      [`/jobs/${typeSegment}/${job.id}`]: `${job.name}`,
+      [`/jobs/${typeSegment}/${job.id}/output`]: t`Output`,
+      [`/jobs/${typeSegment}/${job.id}/details`]: t`Details`,
+    });
+  }, []);
 
   function TypeRedirect({ view }) {
     const { id } = useParams();
@@ -65,4 +62,4 @@ function Jobs({ i18n }) {
 }
 
 export { Jobs as _Jobs };
-export default withI18n()(Jobs);
+export default Jobs;

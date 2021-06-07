@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useRouteMatch } from 'react-router-dom';
 import {
@@ -19,6 +19,7 @@ import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 import SurveyPreviewModal from './SurveyPreviewModal';
+import useSelected from '../../../util/useSelected';
 
 const Button = styled(_Button)`
   margin: 20px;
@@ -32,20 +33,20 @@ function SurveyList({
   updateSurvey,
   deleteSurvey,
   canEdit,
-  i18n,
 }) {
   const match = useRouteMatch();
 
   const questions = survey?.spec || [];
-  const [selected, setSelected] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-  const isAllSelected =
-    selected.length === questions?.length && selected.length > 0;
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...questions] : []);
-  };
+  const {
+    selected,
+    isAllSelected,
+    setSelected,
+    selectAll,
+    clearSelected,
+  } = useSelected(questions);
 
   const handleSelect = item => {
     if (selected.some(q => q.variable === item.variable)) {
@@ -62,7 +63,7 @@ function SurveyList({
       await updateSurvey(questions.filter(q => !selected.includes(q)));
     }
     setIsDeleteModalOpen(false);
-    setSelected([]);
+    clearSelected();
   };
 
   const moveUp = question => {
@@ -88,39 +89,37 @@ function SurveyList({
   const deleteModal = (
     <AlertModal
       variant="danger"
-      title={
-        isAllSelected ? i18n._(t`Delete Survey`) : i18n._(t`Delete Questions`)
-      }
+      title={isAllSelected ? t`Delete Survey` : t`Delete Questions`}
       isOpen={isDeleteModalOpen}
       onClose={() => {
         setIsDeleteModalOpen(false);
-        setSelected([]);
+        clearSelected();
       }}
       actions={[
         <Button
           ouiaId="delete-confirm-button"
           key="delete"
           variant="danger"
-          aria-label={i18n._(t`confirm delete`)}
+          aria-label={t`confirm delete`}
           onClick={handleDelete}
         >
-          {i18n._(t`Delete`)}
+          {t`Delete`}
         </Button>,
         <Button
           ouiaId="delete-cancel-button"
           key="cancel"
           variant="link"
-          aria-label={i18n._(t`cancel delete`)}
+          aria-label={t`cancel delete`}
           onClick={() => {
             setIsDeleteModalOpen(false);
-            setSelected([]);
+            clearSelected();
           }}
         >
-          {i18n._(t`Cancel`)}
+          {t`Cancel`}
         </Button>,
       ]}
     >
-      <div>{i18n._(t`This action will delete the following:`)}</div>
+      <div>{t`This action will delete the following:`}</div>
       {selected.map(question => (
         <span key={question.variable}>
           <strong>{question.question_name}</strong>
@@ -135,7 +134,7 @@ function SurveyList({
     content = <ContentLoading />;
   } else {
     content = (
-      <DataList aria-label={i18n._(t`Survey List`)}>
+      <DataList aria-label={t`Survey List`}>
         {questions?.map((question, index) => (
           <SurveyListItem
             key={question.variable}
@@ -160,9 +159,9 @@ function SurveyList({
         <Button
           onClick={() => setIsPreviewModalOpen(true)}
           variant="primary"
-          aria-label={i18n._(t`Preview`)}
+          aria-label={t`Preview`}
         >
-          {i18n._(t`Preview`)}
+          {t`Preview`}
         </Button>
       </DataList>
     );
@@ -173,11 +172,9 @@ function SurveyList({
       <EmptyState variant="full">
         <EmptyStateIcon icon={CubesIcon} />
         <Title size="lg" headingLevel="h3">
-          {i18n._(t`No survey questions found.`)}
+          {t`No survey questions found.`}
         </Title>
-        <EmptyStateBody>
-          {i18n._(t`Please add survey questions.`)}
-        </EmptyStateBody>
+        <EmptyStateBody>{t`Please add survey questions.`}</EmptyStateBody>
         <ToolbarAddButton isDisabled={!canEdit} linkTo={`${match.url}/add`} />
       </EmptyState>
     );
@@ -186,7 +183,7 @@ function SurveyList({
     <>
       <SurveyToolbar
         isAllSelected={isAllSelected}
-        onSelectAll={handleSelectAll}
+        onSelectAll={selectAll}
         surveyEnabled={surveyEnabled}
         onToggleSurvey={toggleSurvey}
         isDeleteDisabled={selected?.length === 0}
@@ -198,4 +195,4 @@ function SurveyList({
   );
 }
 
-export default withI18n()(SurveyList);
+export default SurveyList;

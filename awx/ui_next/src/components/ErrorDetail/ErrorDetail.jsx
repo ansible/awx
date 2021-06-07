@@ -1,7 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import {
@@ -32,7 +32,7 @@ const Expandable = styled(PFExpandable)`
   }
 `;
 
-function ErrorDetail({ error, i18n }) {
+function ErrorDetail({ error }) {
   const { response } = error;
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -70,7 +70,7 @@ function ErrorDetail({ error, i18n }) {
 
   return (
     <Expandable
-      toggleText={i18n._(t`Details`)}
+      toggleText={t`Details`}
       onToggle={handleToggle}
       isExpanded={isExpanded}
     >
@@ -87,4 +87,4 @@ ErrorDetail.propTypes = {
   error: PropTypes.instanceOf(Error).isRequired,
 };
 
-export default withI18n()(ErrorDetail);
+export default ErrorDetail;

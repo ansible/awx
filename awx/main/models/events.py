@@ -15,6 +15,7 @@ from django.utils.encoding import force_text
 
 from awx.api.versioning import reverse
 from awx.main import consumers
+from awx.main.managers import DeferJobCreatedManager
 from awx.main.fields import JSONField
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
@@ -271,6 +272,10 @@ class BasePlaybookEvent(CreatedModifiedModel):
         null=True,
         default=None,
         editable=False,
+    )
+    modified = models.DateTimeField(
+        default=None,
+        editable=False,
         db_index=True,
     )
 
@@ -365,14 +370,24 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
                     # find parent links and progagate changed=T and failed=T
                     changed = (
-                        job.job_events.filter(changed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()
+                        job.get_event_queryset()
+                        .filter(changed=True)
+                        .exclude(parent_uuid=None)
+                        .only('parent_uuid')
+                        .values_list('parent_uuid', flat=True)
+                        .distinct()
                     )  # noqa
                     failed = (
-                        job.job_events.filter(failed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()
+                        job.get_event_queryset()
+                        .filter(failed=True)
+                        .exclude(parent_uuid=None)
+                        .only('parent_uuid')
+                        .values_list('parent_uuid', flat=True)
+                        .distinct()
                     )  # noqa
 
-                    JobEvent.objects.filter(job_id=self.job_id, uuid__in=changed).update(changed=True)
-                    JobEvent.objects.filter(job_id=self.job_id, uuid__in=failed).update(failed=True)
+                    job.get_event_queryset().filter(uuid__in=changed).update(changed=True)
+                    job.get_event_queryset().filter(uuid__in=failed).update(failed=True)
 
                     # send success/failure notifications when we've finished handling the playbook_on_stats event
                     from awx.main.tasks import handle_success_and_failure_notifications  # circular import
@@ -423,6 +438,16 @@ class BasePlaybookEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
+        # same as above, for job_created
+        # TODO: if this approach, identical to above, works, can convert to for loop
+        try:
+            if not isinstance(kwargs['job_created'], datetime.datetime):
+                kwargs['job_created'] = parse_datetime(kwargs['job_created'])
+            if not kwargs['job_created'].tzinfo:
+                kwargs['job_created'] = kwargs['job_created'].replace(tzinfo=utc)
+        except (KeyError, ValueError):
+            kwargs.pop('job_created', None)
+
         host_map = kwargs.pop('host_map', {})
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
@@ -430,6 +455,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
         event = cls(**kwargs)
         if workflow_job_id:
             setattr(event, 'workflow_job_id', workflow_job_id)
+        # shouldn't job_created _always_ be present?
+        # if it's not, how could we save the event to the db?
+        job_created = kwargs.pop('job_created', None)
+        if job_created:
+            setattr(event, 'job_created', job_created)
         setattr(event, 'host_map', host_map)
         event._update_from_event_data()
         return event
@@ -444,25 +474,28 @@ class JobEvent(BasePlaybookEvent):
     An event/message logged from the callback when running a job.
     """
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
         index_together = [
-            ('job', 'event'),
-            ('job', 'uuid'),
-            ('job', 'start_line'),
-            ('job', 'end_line'),
-            ('job', 'parent_uuid'),
+            ('job', 'job_created', 'event'),
+            ('job', 'job_created', 'uuid'),
+            ('job', 'job_created', 'parent_uuid'),
+            ('job', 'job_created', 'counter'),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     job = models.ForeignKey(
         'Job',
         related_name='job_events',
-        on_delete=models.CASCADE,
+        null=True,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_index=False,
     )
     host = models.ForeignKey(
         'Host',
@@ -482,6 +515,7 @@ class JobEvent(BasePlaybookEvent):
         default='',
         editable=False,
     )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -510,12 +544,15 @@ class JobEvent(BasePlaybookEvent):
             job = self.job
 
             from awx.main.models import Host, JobHostSummary  # circular import
+            from awx.main.models import Host, JobHostSummary, HostMetric
 
-            all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id')
+            all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
             existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
+            updated_hosts_list = list()
             for host in hostnames:
+                updated_hosts_list.append(host)
                 host_id = self.host_map.get(host, None)
                 if host_id not in existing_host_ids:
                     host_id = None
@@ -546,36 +583,62 @@ class JobEvent(BasePlaybookEvent):
 
             Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
 
+            # bulk-create
+            current_time = now()
+            HostMetric.objects.bulk_create(
+                [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=100
+            )
+            HostMetric.objects.filter(hostname__in=updated_hosts_list).update(last_automation=current_time)
+
     @property
     def job_verbosity(self):
         return self.job.verbosity
 
 
+class UnpartitionedJobEvent(JobEvent):
+    class Meta:
+        proxy = True
+
+
+UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_table  # noqa
+
+
 class ProjectUpdateEvent(BasePlaybookEvent):
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
         index_together = [
-            ('project_update', 'event'),
-            ('project_update', 'uuid'),
-            ('project_update', 'start_line'),
-            ('project_update', 'end_line'),
+            ('project_update', 'job_created', 'event'),
+            ('project_update', 'job_created', 'uuid'),
+            ('project_update', 'job_created', 'counter'),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     project_update = models.ForeignKey(
         'ProjectUpdate',
         related_name='project_update_events',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_index=False,
     )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     @property
     def host_name(self):
         return 'localhost'
+
+
+class UnpartitionedProjectUpdateEvent(ProjectUpdateEvent):
+    class Meta:
+        proxy = True
+
+
+UnpartitionedProjectUpdateEvent._meta.db_table = '_unpartitioned_' + ProjectUpdateEvent._meta.db_table  # noqa
 
 
 class BaseCommandEvent(CreatedModifiedModel):
@@ -616,6 +679,16 @@ class BaseCommandEvent(CreatedModifiedModel):
     end_line = models.PositiveIntegerField(
         default=0,
         editable=False,
+    )
+    created = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+    )
+    modified = models.DateTimeField(
+        default=None,
+        editable=False,
+        db_index=True,
     )
 
     def __str__(self):
@@ -671,16 +744,17 @@ class BaseCommandEvent(CreatedModifiedModel):
 
 class AdHocCommandEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
         index_together = [
-            ('ad_hoc_command', 'event'),
-            ('ad_hoc_command', 'uuid'),
-            ('ad_hoc_command', 'start_line'),
-            ('ad_hoc_command', 'end_line'),
+            ('ad_hoc_command', 'job_created', 'event'),
+            ('ad_hoc_command', 'job_created', 'uuid'),
+            ('ad_hoc_command', 'job_created', 'counter'),
         ]
 
     EVENT_TYPES = [
@@ -727,8 +801,9 @@ class AdHocCommandEvent(BaseCommandEvent):
     ad_hoc_command = models.ForeignKey(
         'AdHocCommand',
         related_name='ad_hoc_command_events',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_index=False,
     )
     host = models.ForeignKey(
         'Host',
@@ -743,6 +818,7 @@ class AdHocCommandEvent(BaseCommandEvent):
         default='',
         editable=False,
     )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     def get_absolute_url(self, request=None):
         return reverse('api:ad_hoc_command_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -758,26 +834,37 @@ class AdHocCommandEvent(BaseCommandEvent):
         analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
 
 
+class UnpartitionedAdHocCommandEvent(AdHocCommandEvent):
+    class Meta:
+        proxy = True
+
+
+UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommandEvent._meta.db_table  # noqa
+
+
 class InventoryUpdateEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
         index_together = [
-            ('inventory_update', 'uuid'),
-            ('inventory_update', 'start_line'),
-            ('inventory_update', 'end_line'),
+            ('inventory_update', 'job_created', 'uuid'),
+            ('inventory_update', 'job_created', 'counter'),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     inventory_update = models.ForeignKey(
         'InventoryUpdate',
         related_name='inventory_update_events',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_index=False,
     )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     @property
     def event(self):
@@ -792,26 +879,37 @@ class InventoryUpdateEvent(BaseCommandEvent):
         return False
 
 
+class UnpartitionedInventoryUpdateEvent(InventoryUpdateEvent):
+    class Meta:
+        proxy = True
+
+
+UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + InventoryUpdateEvent._meta.db_table  # noqa
+
+
 class SystemJobEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
         index_together = [
-            ('system_job', 'uuid'),
-            ('system_job', 'start_line'),
-            ('system_job', 'end_line'),
+            ('system_job', 'job_created', 'uuid'),
+            ('system_job', 'job_created', 'counter'),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     system_job = models.ForeignKey(
         'SystemJob',
         related_name='system_job_events',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_index=False,
     )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     @property
     def event(self):
@@ -824,3 +922,11 @@ class SystemJobEvent(BaseCommandEvent):
     @property
     def changed(self):
         return False
+
+
+class UnpartitionedSystemJobEvent(SystemJobEvent):
+    class Meta:
+        proxy = True
+
+
+UnpartitionedSystemJobEvent._meta.db_table = '_unpartitioned_' + SystemJobEvent._meta.db_table  # noqa

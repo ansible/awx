@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class UserEnterpriseAuth(models.Model):
-    """Tower Enterprise Auth association model"""
+    """Enterprise Auth association model"""
 
     PROVIDER_CHOICES = (('radius', _('RADIUS')), ('tacacs+', _('TACACS+')), ('saml', _('SAML')))
 

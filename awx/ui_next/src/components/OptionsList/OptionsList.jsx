@@ -9,13 +9,12 @@ import {
   oneOfType,
 } from 'prop-types';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import SelectedList from '../SelectedList';
-import PaginatedDataList from '../PaginatedDataList';
 import CheckboxListItem from '../CheckboxListItem';
 import DataListToolbar from '../DataListToolbar';
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
+import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 
 const ModalList = styled.div`
   .pf-c-toolbar__content {
@@ -41,14 +40,13 @@ function OptionsList({
   deselectItem,
   renderItemChip,
   isLoading,
-  i18n,
   displayKey,
 }) {
   return (
     <ModalList>
       {value.length > 0 && (
         <SelectedList
-          label={i18n._(t`Selected`)}
+          label={t`Selected`}
           selected={value}
           onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
@@ -56,7 +54,7 @@ function OptionsList({
           displayKey={displayKey}
         />
       )}
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         items={options}
         itemCount={optionCount}
@@ -67,10 +65,16 @@ function OptionsList({
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         hasContentLoading={isLoading}
+        headerRow={
+          <HeaderRow qsConfig={qsConfig}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+          </HeaderRow>
+        }
         onRowClick={selectItem}
-        renderItem={item => (
+        renderRow={(item, index) => (
           <CheckboxListItem
             key={item.id}
+            rowIndex={index}
             itemId={item.id}
             name={multiple ? item[displayKey] : name}
             label={item[displayKey]}
@@ -113,4 +117,4 @@ OptionsList.defaultProps = {
   displayKey: 'name',
 };
 
-export default withI18n()(OptionsList);
+export default OptionsList;

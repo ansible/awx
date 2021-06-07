@@ -1,6 +1,6 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
@@ -17,6 +17,7 @@ import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import useSelected from '../../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import TeamListItem from './TeamListItem';
@@ -27,10 +28,9 @@ const QS_CONFIG = getQSConfig('team', {
   order_by: 'name',
 });
 
-function TeamList({ i18n }) {
+function TeamList() {
   const location = useLocation();
   const match = useRouteMatch();
-  const [selected, setSelected] = useState([]);
 
   const {
     result: {
@@ -75,7 +75,14 @@ function TeamList({ i18n }) {
     fetchTeams();
   }, [fetchTeams]);
 
-  const isAllSelected = selected.length === teams.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(teams);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteTeams,
@@ -94,26 +101,14 @@ function TeamList({ i18n }) {
 
   const handleTeamDelete = async () => {
     await deleteTeams();
-    setSelected([]);
+    clearSelected();
   };
 
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...teams] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
-
   return (
-    <Fragment>
+    <>
       <PageSection>
         <Card>
           <PaginatedTable
@@ -121,29 +116,29 @@ function TeamList({ i18n }) {
             hasContentLoading={hasContentLoading}
             items={teams}
             itemCount={itemCount}
-            pluralizedItemName={i18n._(t`Teams`)}
+            pluralizedItemName={t`Teams`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
               {
-                name: i18n._(t`Organization Name`),
+                name: t`Organization Name`,
                 key: 'organization__name__icontains',
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: t`Created By (Username)`,
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
             ]}
@@ -151,9 +146,9 @@ function TeamList({ i18n }) {
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Organization`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
@@ -161,7 +156,7 @@ function TeamList({ i18n }) {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
@@ -176,7 +171,7 @@ function TeamList({ i18n }) {
                     key="delete"
                     onDelete={handleTeamDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName={i18n._(t`Teams`)}
+                    pluralizedItemName={t`Teams`}
                   />,
                 ]}
               />
@@ -202,14 +197,14 @@ function TeamList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more teams.`)}
+        {t`Failed to delete one or more teams.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-    </Fragment>
+    </>
   );
 }
 
-export default withI18n()(TeamList);
+export default TeamList;

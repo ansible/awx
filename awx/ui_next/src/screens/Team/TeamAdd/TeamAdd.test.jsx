@@ -17,12 +17,18 @@ describe('<TeamAdd />', () => {
     const updatedTeamData = {
       name: 'new name',
       description: 'new description',
-      organization: 1,
+      organization: {
+        id: 1,
+        name: 'Default',
+      },
     };
     await act(async () => {
       wrapper.find('TeamForm').invoke('handleSubmit')(updatedTeamData);
     });
-    expect(TeamsAPI.create).toHaveBeenCalledWith(updatedTeamData);
+    expect(TeamsAPI.create).toHaveBeenCalledWith({
+      ...updatedTeamData,
+      organization: 1,
+    });
   });
 
   test('should navigate to teams list when cancel is clicked', async () => {
@@ -41,7 +47,10 @@ describe('<TeamAdd />', () => {
     const teamData = {
       name: 'new name',
       description: 'new description',
-      organization: 1,
+      organization: {
+        id: 1,
+        name: 'Default',
+      },
     };
     TeamsAPI.create.mockResolvedValueOnce({
       data: {

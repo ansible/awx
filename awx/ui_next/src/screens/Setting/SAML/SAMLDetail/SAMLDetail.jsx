@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -15,7 +15,7 @@ import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
 import { SettingDetail } from '../../shared';
 
-function SAMLDetail({ i18n }) {
+function SAMLDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
   options.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT.type = 'certificate';
@@ -37,14 +37,14 @@ function SAMLDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/settings/saml/details`,
       id: 0,
     },
@@ -78,11 +78,11 @@ function SAMLDetail({ i18n }) {
           <CardActionsRow>
             <Button
               ouiaId="saml-detail-edit-button"
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to="/settings/saml/edit"
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -91,4 +91,4 @@ function SAMLDetail({ i18n }) {
   );
 }
 
-export default withI18n()(SAMLDetail);
+export default SAMLDetail;

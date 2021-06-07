@@ -1,6 +1,6 @@
 import React from 'react';
 import { string } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
@@ -12,11 +12,7 @@ import {
 import DataListCell from '../../../components/DataListCell';
 import { ExecutionEnvironment } from '../../../types';
 
-function OrganizationExecEnvListItem({
-  executionEnvironment,
-  detailUrl,
-  i18n,
-}) {
+function OrganizationExecEnvListItem({ executionEnvironment, detailUrl }) {
   const labelId = `check-action-${executionEnvironment.id}`;
 
   return (
@@ -28,17 +24,14 @@ function OrganizationExecEnvListItem({
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell
-              key="name"
-              aria-label={i18n._(t`Execution environment name`)}
-            >
+            <DataListCell key="name" aria-label={t`Execution environment name`}>
               <Link to={`${detailUrl}`}>
                 <b>{executionEnvironment.name}</b>
               </Link>
             </DataListCell>,
             <DataListCell
               key="image"
-              aria-label={i18n._(t`Execution environment image`)}
+              aria-label={t`Execution environment image`}
             >
               {executionEnvironment.image}
             </DataListCell>,
@@ -54,4 +47,4 @@ OrganizationExecEnvListItem.prototype = {
   detailUrl: string.isRequired,
 };
 
-export default withI18n()(OrganizationExecEnvListItem);
+export default OrganizationExecEnvListItem;

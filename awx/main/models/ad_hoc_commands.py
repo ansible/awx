@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import prevent_search, AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, VarsDictProperty
-from awx.main.models.events import AdHocCommandEvent
+from awx.main.models.events import AdHocCommandEvent, UnpartitionedAdHocCommandEvent
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
 
@@ -127,6 +127,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @property
     def event_class(self):
+        if self.has_unpartitioned_events:
+            return UnpartitionedAdHocCommandEvent
         return AdHocCommandEvent
 
     @property
@@ -145,10 +147,6 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         from awx.main.tasks import RunAdHocCommand
 
         return RunAdHocCommand
-
-    @classmethod
-    def supports_isolation(cls):
-        return True
 
     @property
     def is_container_group_task(self):
@@ -219,9 +217,6 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
             self.name = Truncator(u': '.join(filter(None, (self.module_name, self.module_args)))).chars(512)
             if 'name' not in update_fields:
                 update_fields.append('name')
-        if not self.execution_environment_id:
-            self.execution_environment = self.resolve_execution_environment()
-            update_fields.append('execution_environment')
         super(AdHocCommand, self).save(*args, **kwargs)
 
     @property

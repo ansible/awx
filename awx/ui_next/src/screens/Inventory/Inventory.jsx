@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import {
   Switch,
   Route,
@@ -23,7 +23,7 @@ import InventoryHosts from './InventoryHosts/InventoryHosts';
 import InventorySources from './InventorySources';
 import { InventoriesAPI } from '../../api';
 
-function Inventory({ i18n, setBreadcrumb }) {
+function Inventory({ setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [inventory, setInventory] = useState(null);
@@ -53,19 +53,19 @@ function Inventory({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Inventories`)}
+          {t`Back to Inventories`}
         </>
       ),
       link: `/inventories`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-    { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
-    { name: i18n._(t`Groups`), link: `${match.url}/groups`, id: 2 },
-    { name: i18n._(t`Hosts`), link: `${match.url}/hosts`, id: 3 },
-    { name: i18n._(t`Sources`), link: `${match.url}/sources`, id: 4 },
+    { name: t`Details`, link: `${match.url}/details`, id: 0 },
+    { name: t`Access`, link: `${match.url}/access`, id: 1 },
+    { name: t`Groups`, link: `${match.url}/groups`, id: 2 },
+    { name: t`Hosts`, link: `${match.url}/hosts`, id: 3 },
+    { name: t`Sources`, link: `${match.url}/sources`, id: 4 },
     {
-      name: i18n._(t`Jobs`),
+      name: t`Jobs`,
       link: `${match.url}/jobs`,
       id: 5,
     },
@@ -88,10 +88,8 @@ function Inventory({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(t`Inventory not found.`)}{' '}
-                <Link to="/inventories">
-                  {i18n._(t`View all Inventories.`)}
-                </Link>
+                {t`Inventory not found.`}{' '}
+                <Link to="/inventories">{t`View all Inventories.`}</Link>
               </span>
             )}
           </ContentError>
@@ -177,7 +175,7 @@ function Inventory({ i18n, setBreadcrumb }) {
                   <Link
                     to={`/inventories/inventory/${match.params.id}/details`}
                   >
-                    {i18n._(t`View Inventory Details`)}
+                    {t`View Inventory Details`}
                   </Link>
                 )}
               </ContentError>
@@ -190,4 +188,4 @@ function Inventory({ i18n, setBreadcrumb }) {
 }
 
 export { Inventory as _Inventory };
-export default withI18n()(Inventory);
+export default Inventory;

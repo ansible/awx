@@ -1,10 +1,13 @@
 import collections
+import json
 import logging
 from base64 import b64encode
+from urllib import parse as urlparse
 
 from django.conf import settings
 from kubernetes import client, config
 from django.utils.functional import cached_property
+from django.utils.translation import ugettext_lazy as _
 
 from awx.main.utils.common import parse_yaml_or_json
 from awx.main.utils.execution_environments import get_default_pod_spec
@@ -51,6 +54,96 @@ class PodManager(object):
 
         return pods
 
+    def create_secret(self, job):
+        registry_cred = job.execution_environment.credential
+        host = registry_cred.get_input('host')
+        # urlparse requires '//' to be provided if scheme is not specified
+        original_parsed = urlparse.urlsplit(host)
+        if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
+            host = 'https://%s' % (host)
+        parsed = urlparse.urlsplit(host)
+        host = parsed.hostname
+        if parsed.port:
+            host = "{0}:{1}".format(host, parsed.port)
+
+        username = registry_cred.get_input("username")
+        password = registry_cred.get_input("password")
+
+        # Construct container auth dict and base64 encode it
+        token = b64encode("{}:{}".format(username, password).encode('UTF-8')).decode()
+        auth_dict = json.dumps({"auths": {host: {"auth": token}}}, indent=4)
+        auth_data = b64encode(str(auth_dict).encode('UTF-8')).decode()
+
+        # Construct Secret object
+        secret = client.V1Secret()
+        secret_name = "automation-{0}-image-pull-secret-{1}".format(settings.INSTALL_UUID[:5], job.execution_environment.credential.id)
+        secret.metadata = client.V1ObjectMeta(name="{}".format(secret_name))
+        secret.type = "kubernetes.io/dockerconfigjson"
+        secret.kind = "Secret"
+        secret.data = {".dockerconfigjson": auth_data}
+
+        # Check if secret already exists
+        replace_secret = False
+        try:
+            existing_secret = self.kube_api.read_namespaced_secret(namespace=self.namespace, name=secret_name)
+            if existing_secret.data != secret.data:
+                replace_secret = True
+            secret_exists = True
+        except client.rest.ApiException as e:
+            if e.status == 404:
+                secret_exists = False
+            else:
+                error_msg = _('Invalid openshift or k8s cluster credential')
+                if e.status == 403:
+                    error_msg = _(
+                        'Failed to create secret for container group {} because additional service account role rules are needed.  Add get, create and delete role rules for secret resources for your cluster credential.'.format(
+                            job.instance_group.name
+                        )
+                    )
+                full_error_msg = '{0}: {1}'.format(error_msg, str(e))
+                logger.exception(full_error_msg)
+                raise PermissionError(full_error_msg)
+
+        if replace_secret:
+            try:
+                # Try to replace existing secret
+                self.kube_api.delete_namespaced_secret(name=secret.metadata.name, namespace=self.namespace)
+                self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
+            except client.rest.ApiException as e:
+                error_msg = _('Invalid openshift or k8s cluster credential')
+                if e.status == 403:
+                    error_msg = _(
+                        'Failed to delete secret for container group {} because additional service account role rules are needed.  Add create and delete role rules for secret resources for your cluster credential.'.format(
+                            job.instance_group.name
+                        )
+                    )
+                full_error_msg = '{0}: {1}'.format(error_msg, str(e))
+                logger.exception(full_error_msg)
+                # let job continue for the case where secret was created manually and cluster cred doesn't have permission to create a secret
+            except Exception as e:
+                error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
+                logger.exception('{0}: {1}'.format(error_msg, str(e)))
+                raise RuntimeError(error_msg)
+        elif secret_exists and not replace_secret:
+            pass
+        else:
+            # Create an image pull secret in namespace
+            try:
+                self.kube_api.create_namespaced_secret(namespace=self.namespace, body=secret)
+            except client.rest.ApiException as e:
+                if e.status == 403:
+                    error_msg = _(
+                        'Failed to create imagePullSecret: {}. Check that openshift or k8s credential has permission to create a secret.'.format(e.status)
+                    )
+                    logger.exception(error_msg)
+                    # let job continue for the case where secret was created manually and cluster cred doesn't have permission to create a secret
+            except Exception:
+                error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
+                logger.exception(error_msg)
+                job.cancel(job_explanation=error_msg)
+
+        return secret.metadata.name
+
     @property
     def namespace(self):
         return self.pod_definition['metadata']['namespace']
@@ -81,7 +174,7 @@ class PodManager(object):
 
     @property
     def pod_name(self):
-        return f"awx-job-{self.task.id}"
+        return f"automation-job-{self.task.id}"
 
     @property
     def pod_definition(self):

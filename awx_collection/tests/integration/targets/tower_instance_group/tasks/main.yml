@@ -53,6 +53,7 @@
       tower_instance_group:
         name: "{{ group_name2 }}"
         credential: "{{ cred_result.id }}"
+        is_container_group: true
       register: result
 
     - assert:

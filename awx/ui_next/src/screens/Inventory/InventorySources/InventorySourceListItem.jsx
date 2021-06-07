@@ -1,25 +1,19 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  DataListItem,
-  DataListItemRow,
-  DataListCheck,
-  DataListItemCells,
-  DataListCell,
-  DataListAction,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import {
   ExclamationTriangleIcon as PFExclamationTriangleIcon,
   PencilAltIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import StatusIcon from '../../../components/StatusIcon';
+import JobCancelButton from '../../../components/JobCancelButton';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
+import { formatDateString } from '../../../util/dates';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
@@ -30,23 +24,23 @@ function InventorySourceListItem({
   source,
   isSelected,
   onSelect,
-  i18n,
   detailUrl,
   label,
+  rowIndex,
 }) {
   const generateLastJobTooltip = job => {
     return (
       <>
-        <div>{i18n._(t`MOST RECENT SYNC`)}</div>
+        <div>{t`MOST RECENT SYNC`}</div>
         <div>
-          {i18n._(t`JOB ID:`)} {job.id}
+          {t`JOB ID:`} {job.id}
         </div>
         <div>
-          {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
+          {t`STATUS:`} {job.status.toUpperCase()}
         </div>
         {job.finished && (
           <div>
-            {i18n._(t`FINISHED:`)} {job.finished}
+            {t`FINISHED:`} {formatDateString(job.finished)}
           </div>
         )}
       </>
@@ -58,83 +52,84 @@ function InventorySourceListItem({
 
   return (
     <>
-      <DataListItem aria-labelledby={`check-action-${source.id}`}>
-        <DataListItemRow>
-          <DataListCheck
-            id={`select-source-${source.id}`}
-            checked={isSelected}
-            onChange={onSelect}
-            aria-labelledby={`check-action-${source.id}`}
-          />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="status" isFilled={false}>
-                {source.summary_fields.last_job && (
-                  <Tooltip
-                    position="top"
-                    content={generateLastJobTooltip(
-                      source.summary_fields.last_job
-                    )}
-                    key={source.summary_fields.last_job.id}
-                  >
-                    <Link
-                      to={`/jobs/inventory/${source.summary_fields.last_job.id}`}
-                    >
-                      <StatusIcon
-                        status={source.summary_fields.last_job.status}
-                      />
-                    </Link>
-                  </Tooltip>
-                )}
-              </DataListCell>,
-              <DataListCell aria-label={i18n._(t`name`)} key="name">
-                <span>
-                  <Link to={`${detailUrl}/details`}>
-                    <b>{source.name}</b>
-                  </Link>
-                </span>
-                {missingExecutionEnvironment && (
-                  <span>
-                    <Tooltip
-                      className="missing-execution-environment"
-                      content={i18n._(
-                        t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`
-                      )}
-                      position="right"
-                    >
-                      <ExclamationTriangleIcon />
-                    </Tooltip>
-                  </span>
-                )}
-              </DataListCell>,
-              <DataListCell aria-label={i18n._(t`type`)} key="type">
-                {label}
-              </DataListCell>,
-            ]}
-          />
-          <DataListAction
-            id="actions"
-            aria-labelledby="actions"
-            aria-label={i18n._(t`actions`)}
-          >
-            {source.summary_fields.user_capabilities.start && (
-              <InventorySourceSyncButton source={source} />
-            )}
-            {source.summary_fields.user_capabilities.edit && (
-              <Button
-                ouiaId={`${source.id}-edit-button`}
-                aria-label={i18n._(t`Edit Source`)}
-                variant="plain"
-                component={Link}
-                to={`${detailUrl}/edit`}
+      <Tr id={`source-row-${source.id}`}>
+        <Td
+          data-cy={`check-action-${source.id}`}
+          select={{
+            rowIndex,
+            isSelected,
+            onSelect,
+          }}
+        />
+        <Td dataLabel={t`Name`}>
+          <Link to={`${detailUrl}/details`}>
+            <b>{source.name}</b>
+          </Link>
+          {missingExecutionEnvironment && (
+            <span>
+              <Tooltip
+                className="missing-execution-environment"
+                content={t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`}
+                position="right"
               >
-                <PencilAltIcon />
-              </Button>
-            )}
-          </DataListAction>
-        </DataListItemRow>
-      </DataListItem>
+                <ExclamationTriangleIcon />
+              </Tooltip>
+            </span>
+          )}
+        </Td>
+        <Td dataLabel={t`Status`}>
+          {source.summary_fields.last_job && (
+            <Tooltip
+              position="top"
+              content={generateLastJobTooltip(source.summary_fields.last_job)}
+              key={source.summary_fields.last_job.id}
+            >
+              <Link to={`/jobs/inventory/${source.summary_fields.last_job.id}`}>
+                <StatusIcon status={source.summary_fields.last_job.status} />
+              </Link>
+            </Tooltip>
+          )}
+        </Td>
+        <Td dataLabel={t`Type`}>{label}</Td>
+        <ActionsTd dataLabel={t`Actions`}>
+          {['running', 'pending', 'waiting'].includes(source?.status) ? (
+            <ActionItem visible={source.summary_fields.user_capabilities.start}>
+              <JobCancelButton
+                job={{
+                  type: 'inventory_update',
+                  id: source.summary_fields.last_job.id,
+                }}
+                errorTitle={t`Inventory Source Sync Error`}
+                errorMessage={t`Failed to cancel Inventory Source Sync`}
+                title={t`Cancel Inventory Source Sync`}
+                showIconButton
+              />
+            </ActionItem>
+          ) : (
+            <ActionItem
+              visible={source.summary_fields.user_capabilities.start}
+              tooltip={t`Sync`}
+            >
+              <InventorySourceSyncButton source={source} />
+            </ActionItem>
+          )}
+          <ActionItem
+            visible={source.summary_fields.user_capabilities.edit}
+            tooltip={t`Edit`}
+          >
+            <Button
+              ouiaId={`${source.id}-edit-button`}
+              aria-label={t`Edit Source`}
+              variant="plain"
+              component={Link}
+              to={`${detailUrl}/edit`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </ActionItem>
+        </ActionsTd>
+      </Tr>
     </>
   );
 }
-export default withI18n()(InventorySourceListItem);
+export default InventorySourceListItem;

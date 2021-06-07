@@ -10,7 +10,7 @@ from awx.main.utils.pglock import advisory_lock
 
 class Command(BaseCommand):
     """
-    Deprovision a Tower cluster node
+    Deprovision a cluster node
     """
 
     help = 'Remove instance from the database. ' 'Specify `--hostname` to use this command.'

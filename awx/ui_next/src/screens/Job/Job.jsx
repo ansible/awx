@@ -8,7 +8,7 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -32,7 +32,7 @@ export const JOB_URL_SEGMENT_MAP = {
   workflow: 'workflow_job',
 };
 
-function Job({ i18n, setBreadcrumb }) {
+function Job({ setBreadcrumb }) {
   const { id, typeSegment } = useParams();
   const match = useRouteMatch();
 
@@ -94,14 +94,14 @@ function Job({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Jobs`)}
+          {t`Back to Jobs`}
         </>
       ),
       link: `/jobs`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-    { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 },
+    { name: t`Details`, link: `${match.url}/details`, id: 0 },
+    { name: t`Output`, link: `${match.url}/output`, id: 1 },
   ];
 
   if (isLoading) {
@@ -121,8 +121,8 @@ function Job({ i18n, setBreadcrumb }) {
           <ContentError error={error}>
             {error.response.status === 404 && (
               <span>
-                {i18n._(t`The page you requested could not be found.`)}{' '}
-                <Link to="/jobs">{i18n._(t`View all Jobs.`)}</Link>
+                {t`The page you requested could not be found.`}{' '}
+                <Link to="/jobs">{t`View all Jobs.`}</Link>
               </span>
             )}
           </ContentError>
@@ -162,7 +162,7 @@ function Job({ i18n, setBreadcrumb }) {
             <Route key="not-found" path="*">
               <ContentError isNotFound>
                 <Link to={`/jobs/${typeSegment}/${id}/details`}>
-                  {i18n._(t`View Job Details`)}
+                  {t`View Job Details`}
                 </Link>
               </ContentError>
             </Route>,
@@ -173,5 +173,5 @@ function Job({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(withRouter(Job));
+export default withRouter(Job);
 export { Job as _Job };

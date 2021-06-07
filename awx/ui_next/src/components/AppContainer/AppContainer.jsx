@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useHistory, withRouter } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import {
   Button,
   Nav,
@@ -11,135 +11,48 @@ import {
   PageHeaderToolsItem,
   PageSidebar,
 } from '@patternfly/react-core';
-import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+import { t, Plural } from '@lingui/macro';
+
 import styled from 'styled-components';
 
-import { MeAPI, RootAPI } from '../../api';
 import { useConfig, useAuthorizedPath } from '../../contexts/Config';
-import { SESSION_TIMEOUT_KEY } from '../../constants';
-import { isAuthenticated } from '../../util/auth';
+import { useSession } from '../../contexts/Session';
+import issuePendoIdentity from '../../util/issuePendoIdentity';
 import About from '../About';
-import AlertModal from '../AlertModal';
 import BrandLogo from './BrandLogo';
 import NavExpandableGroup from './NavExpandableGroup';
 import PageHeaderToolbar from './PageHeaderToolbar';
-
-// The maximum supported timeout for setTimeout(), in milliseconds,
-// is the highest number you can represent as a signed 32bit
-// integer (approximately 25 days)
-const MAX_TIMEOUT = 2 ** (32 - 1) - 1;
-
-// The number of seconds the session timeout warning is displayed
-// before the user is logged out. Increasing this number (up to
-// the total session time, which is 1800s by default) will cause
-// the session timeout warning to display sooner.
-const SESSION_WARNING_DURATION = 10;
+import AlertModal from '../AlertModal';
 
 const PageHeader = styled(PFPageHeader)`
   & .pf-c-page__header-brand-link {
     color: inherit;
-
     &:hover {
       color: inherit;
     }
   }
 `;
 
-/**
- * The useStorage hook integrates with the browser's localStorage api.
- * It accepts a storage key as its only argument and returns a state
- * variable and setter function for that state variable.
- *
- * This utility behaves much like the standard useState hook with some
- * key differences:
- *   1. You don't pass it an initial value. Instead, the provided key
- *      is used to retrieve the initial value from local storage. If
- *      the key doesn't exist in local storage, null is returned.
- *   2. Behind the scenes, this hook registers an event listener with
- *      the Web Storage api to establish a two-way binding between the
- *      state variable and its corresponding local storage value. This
- *      means that updates to the state variable with the setter
- *      function will produce a corresponding update to the local
- *      storage value and vice-versa.
- *   3. When local storage is shared across browser tabs, the data
- *      binding is also shared across browser tabs. This means that
- *      updates to the state variable using the setter function on
- *      one tab will also update the state variable on any other tab
- *      using this hook with the same key and vice-versa.
- */
-function useStorage(key) {
-  const [storageVal, setStorageVal] = useState(
-    window.localStorage.getItem(key)
-  );
-  window.addEventListener('storage', () => {
-    const newVal = window.localStorage.getItem(key);
-    if (newVal !== storageVal) {
-      setStorageVal(newVal);
-    }
-  });
-  const setValue = val => {
-    window.localStorage.setItem(key, val);
-    setStorageVal(val);
-  };
-  return [storageVal, setValue];
-}
-
-function AppContainer({ i18n, navRouteConfig = [], children }) {
-  const history = useHistory();
+function AppContainer({ navRouteConfig = [], children }) {
   const config = useConfig();
+  const { logout, handleSessionContinue, sessionCountdown } = useSession();
 
   const isReady = !!config.license_info;
   const isSidebarVisible = useAuthorizedPath();
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
-  const sessionTimeoutId = useRef();
-  const sessionIntervalId = useRef();
-  const [sessionTimeout, setSessionTimeout] = useStorage(SESSION_TIMEOUT_KEY);
-  const [timeoutWarning, setTimeoutWarning] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(null);
-
   const handleAboutModalOpen = () => setIsAboutModalOpen(true);
   const handleAboutModalClose = () => setIsAboutModalOpen(false);
-  const handleSessionTimeout = () => setTimeoutWarning(true);
-
-  const handleLogout = useCallback(async () => {
-    await RootAPI.logout();
-    setSessionTimeout(null);
-  }, [setSessionTimeout]);
-
-  const handleSessionContinue = () => {
-    MeAPI.read();
-    setTimeoutWarning(false);
-  };
 
   useEffect(() => {
-    if (!isAuthenticated(document.cookie)) history.replace('/login');
-    const calcRemaining = () =>
-      parseInt(sessionTimeout, 10) - new Date().getTime();
-    const updateRemaining = () => setTimeRemaining(calcRemaining());
-    setTimeoutWarning(false);
-    clearTimeout(sessionTimeoutId.current);
-    clearInterval(sessionIntervalId.current);
-    sessionTimeoutId.current = setTimeout(
-      handleSessionTimeout,
-      Math.min(calcRemaining() - SESSION_WARNING_DURATION * 1000, MAX_TIMEOUT)
-    );
-    sessionIntervalId.current = setInterval(updateRemaining, 1000);
-    return () => {
-      clearTimeout(sessionTimeoutId.current);
-      clearInterval(sessionIntervalId.current);
-    };
-  }, [history, sessionTimeout]);
-
-  useEffect(() => {
-    if (timeRemaining !== null && timeRemaining <= 1) {
-      handleLogout();
+    if ('analytics_status' in config) {
+      issuePendoIdentity(config);
     }
-  }, [handleLogout, timeRemaining]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.analytics_status]);
 
   const brandName = config?.license_info?.product_name;
-  const alt = brandName ? i18n._(t`${brandName} logo`) : i18n._(t`brand logo`);
+  const alt = brandName ? t`${brandName} logo` : t`brand logo`;
 
   const header = (
     <PageHeader
@@ -151,7 +64,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
           loggedInUser={config?.me}
           isAboutDisabled={!config?.version}
           onAboutClick={handleAboutModalOpen}
-          onLogoutClick={handleLogout}
+          onLogoutClick={logout}
         />
       }
     />
@@ -164,8 +77,8 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
         <PageHeaderTools>
           <PageHeaderToolsGroup>
             <PageHeaderToolsItem>
-              <Button onClick={handleLogout} variant="tertiary" ouiaId="logout">
-                {i18n._(t`Logout`)}
+              <Button onClick={logout} variant="tertiary" ouiaId="logout">
+                {t`Logout`}
               </Button>
             </PageHeaderToolsItem>
           </PageHeaderToolsGroup>
@@ -178,7 +91,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     <PageSidebar
       theme="dark"
       nav={
-        <Nav aria-label={i18n._(t`Navigation`)} theme="dark">
+        <Nav aria-label={t`Navigation`} theme="dark">
           <NavList>
             {navRouteConfig.map(({ groupId, groupTitle, routes }) => (
               <NavExpandableGroup
@@ -210,9 +123,9 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
       />
       <AlertModal
         ouiaId="session-expiration-modal"
-        title={i18n._(t`Your session is about to expire`)}
-        isOpen={timeoutWarning && sessionTimeout > 0 && timeRemaining !== null}
-        onClose={handleLogout}
+        title={t`Your session is about to expire`}
+        isOpen={sessionCountdown && sessionCountdown > 0}
+        onClose={logout}
         showClose={false}
         variant="warning"
         actions={[
@@ -222,27 +135,27 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
             variant="primary"
             onClick={handleSessionContinue}
           >
-            {i18n._(t`Continue`)}
+            {t`Continue`}
           </Button>,
           <Button
             ouiaId="session-expiration-logout-button"
             key="logout"
             variant="secondary"
-            onClick={handleLogout}
+            onClick={logout}
           >
-            {i18n._(t`Logout`)}
+            {t`Logout`}
           </Button>,
         ]}
       >
-        {i18n._(
-          t`You will be logged out in ${Number(
-            Math.max(Math.floor(timeRemaining / 1000), 0)
-          )} seconds due to inactivity.`
-        )}
+        <Plural
+          value={sessionCountdown}
+          one="You will be logged out in # second due to inactivity"
+          other="You will be logged out in # seconds due to inactivity"
+        />
       </AlertModal>
     </>
   );
 }
 
 export { AppContainer as _AppContainer };
-export default withI18n()(withRouter(AppContainer));
+export default withRouter(AppContainer);

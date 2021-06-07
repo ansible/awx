@@ -14,7 +14,7 @@ class ExecutionEnvironment(CommonModel):
 
     PULL_CHOICES = [
         ('always', _("Always pull container before running.")),
-        ('missing', _("No pull option has been selected.")),
+        ('missing', _("Only pull the image if not present before running.")),
         ('never', _("Never pull container before running.")),
     ]
 
@@ -30,7 +30,7 @@ class ExecutionEnvironment(CommonModel):
     image = models.CharField(
         max_length=1024,
         verbose_name=_('image location'),
-        help_text=_("The registry location where the container is stored."),
+        help_text=_("The full image location, including the container registry, image name, and version tag."),
     )
     managed_by_tower = models.BooleanField(default=False, editable=False)
     credential = models.ForeignKey(

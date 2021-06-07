@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
 import AlertModal from '../AlertModal';
@@ -8,13 +8,7 @@ import useRequest from '../../util/useRequest';
 import { InstancesAPI } from '../../api';
 import { useConfig } from '../../contexts/Config';
 
-function InstanceToggle({
-  className,
-  fetchInstances,
-  instance,
-  onToggle,
-  i18n,
-}) {
+function InstanceToggle({ className, fetchInstances, instance, onToggle }) {
   const { me = {} } = useConfig();
   const [isEnabled, setIsEnabled] = useState(instance.enabled);
   const [showError, setShowError] = useState(false);
@@ -46,31 +40,29 @@ function InstanceToggle({
   return (
     <>
       <Tooltip
-        content={i18n._(
-          t`Set the instance online or offline. If offline, jobs will not be assigned to this instance.`
-        )}
+        content={t`Set the instance online or offline. If offline, jobs will not be assigned to this instance.`}
         position="top"
       >
         <Switch
           className={className}
           css="display: inline-flex;"
           id={`host-${instance.id}-toggle`}
-          label={i18n._(t`On`)}
-          labelOff={i18n._(t`Off`)}
+          label={t`On`}
+          labelOff={t`Off`}
           isChecked={isEnabled}
           isDisabled={isLoading || !me?.is_superuser}
           onChange={toggleInstance}
-          aria-label={i18n._(t`Toggle instance`)}
+          aria-label={t`Toggle instance`}
         />
       </Tooltip>
       {showError && error && !isLoading && (
         <AlertModal
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           isOpen={error && !isLoading}
           onClose={() => setShowError(false)}
         >
-          {i18n._(t`Failed to toggle instance.`)}
+          {t`Failed to toggle instance.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -78,4 +70,4 @@ function InstanceToggle({
   );
 }
 
-export default withI18n()(InstanceToggle);
+export default InstanceToggle;

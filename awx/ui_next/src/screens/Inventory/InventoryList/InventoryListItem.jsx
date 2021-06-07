@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { Button, Label } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
@@ -19,7 +19,7 @@ function InventoryListItem({
   isSelected,
   onSelect,
   detailUrl,
-  i18n,
+
   fetchInventories,
 }) {
   InventoryListItem.propTypes = {
@@ -58,14 +58,12 @@ function InventoryListItem({
   let tooltipContent = '';
   if (inventory.has_inventory_sources) {
     if (inventory.inventory_sources_with_failures > 0) {
-      tooltipContent = i18n._(
-        t`${inventory.inventory_sources_with_failures} sources with sync failures.`
-      );
+      tooltipContent = t`${inventory.inventory_sources_with_failures} sources with sync failures.`;
     } else {
-      tooltipContent = i18n._(t`No inventory sync failures.`);
+      tooltipContent = t`No inventory sync failures.`;
     }
   } else {
-    tooltipContent = i18n._(t`Not configured for inventory sync.`);
+    tooltipContent = t`Not configured for inventory sync.`;
   }
 
   return (
@@ -76,9 +74,9 @@ function InventoryListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         {inventory.pending_deletion ? (
           <b>{inventory.name}</b>
         ) : (
@@ -87,17 +85,15 @@ function InventoryListItem({
           </Link>
         )}
       </Td>
-      <Td dataLabel={i18n._(t`Status`)}>
+      <Td dataLabel={t`Status`}>
         {inventory.kind !== 'smart' && (
           <StatusLabel status={syncStatus} tooltipContent={tooltipContent} />
         )}
       </Td>
-      <Td dataLabel={i18n._(t`Type`)}>
-        {inventory.kind === 'smart'
-          ? i18n._(t`Smart Inventory`)
-          : i18n._(t`Inventory`)}
+      <Td dataLabel={t`Type`}>
+        {inventory.kind === 'smart' ? t`Smart Inventory` : t`Inventory`}
       </Td>
-      <Td key="organization" dataLabel={i18n._(t`Organization`)}>
+      <Td key="organization" dataLabel={t`Organization`}>
         <Link
           to={`/organizations/${inventory?.summary_fields?.organization?.id}/details`}
         >
@@ -105,19 +101,19 @@ function InventoryListItem({
         </Link>
       </Td>
       {inventory.pending_deletion ? (
-        <Td dataLabel={i18n._(t`Groups`)}>
-          <Label color="red">{i18n._(t`Pending delete`)}</Label>
+        <Td dataLabel={t`Groups`}>
+          <Label color="red">{t`Pending delete`}</Label>
         </Td>
       ) : (
-        <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionsTd dataLabel={t`Actions`}>
           <ActionItem
             visible={inventory.summary_fields.user_capabilities.edit}
-            tooltip={i18n._(t`Edit Inventory`)}
+            tooltip={t`Edit Inventory`}
           >
             <Button
               ouiaId={`${inventory.id}-edit-button`}
               isDisabled={isCopying}
-              aria-label={i18n._(t`Edit Inventory`)}
+              aria-label={t`Edit Inventory`}
               variant="plain"
               component={Link}
               to={`/inventories/${
@@ -131,8 +127,8 @@ function InventoryListItem({
             visible={inventory.summary_fields.user_capabilities.copy}
             tooltip={
               inventory.has_inventory_sources
-                ? i18n._(t`Inventories with sources cannot be copied`)
-                : i18n._(t`Copy Inventory`)
+                ? t`Inventories with sources cannot be copied`
+                : t`Copy Inventory`
             }
           >
             <CopyButton
@@ -140,7 +136,7 @@ function InventoryListItem({
               isDisabled={isCopying || inventory.has_inventory_sources}
               onCopyStart={handleCopyStart}
               onCopyFinish={handleCopyFinish}
-              errorMessage={i18n._(t`Failed to copy inventory.`)}
+              errorMessage={t`Failed to copy inventory.`}
             />
           </ActionItem>
         </ActionsTd>
@@ -148,4 +144,4 @@ function InventoryListItem({
     </Tr>
   );
 }
-export default withI18n()(InventoryListItem);
+export default InventoryListItem;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Link,
@@ -24,7 +24,7 @@ import SmartInventoryDetail from './SmartInventoryDetail';
 import SmartInventoryEdit from './SmartInventoryEdit';
 import SmartInventoryHosts from './SmartInventoryHosts';
 
-function SmartInventory({ i18n, setBreadcrumb }) {
+function SmartInventory({ setBreadcrumb }) {
   const location = useLocation();
   const match = useRouteMatch('/inventories/smart_inventory/:id');
 
@@ -60,17 +60,17 @@ function SmartInventory({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Inventories`)}
+          {t`Back to Inventories`}
         </>
       ),
       link: `/inventories`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-    { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
-    { name: i18n._(t`Hosts`), link: `${match.url}/hosts`, id: 2 },
+    { name: t`Details`, link: `${match.url}/details`, id: 0 },
+    { name: t`Access`, link: `${match.url}/access`, id: 1 },
+    { name: t`Hosts`, link: `${match.url}/hosts`, id: 2 },
     {
-      name: i18n._(t`Jobs`),
+      name: t`Jobs`,
       link: `${match.url}/jobs`,
       id: 3,
     },
@@ -93,10 +93,8 @@ function SmartInventory({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError?.response?.status === 404 && (
               <span>
-                {i18n._(t`Smart Inventory not found.`)}{' '}
-                <Link to="/inventories">
-                  {i18n._(t`View all Inventories.`)}
-                </Link>
+                {t`Smart Inventory not found.`}{' '}
+                <Link to="/inventories">{t`View all Inventories.`}</Link>
               </span>
             )}
           </ContentError>
@@ -168,7 +166,7 @@ function SmartInventory({ i18n, setBreadcrumb }) {
                     <Link
                       to={`/inventories/smart_inventory/${match.params.id}/details`}
                     >
-                      {i18n._(t`View Inventory Details`)}
+                      {t`View Inventory Details`}
                     </Link>
                   )}
                 </ContentError>
@@ -182,4 +180,4 @@ function SmartInventory({ i18n, setBreadcrumb }) {
 }
 
 export { SmartInventory as _SmartInventory };
-export default withI18n()(SmartInventory);
+export default SmartInventory;

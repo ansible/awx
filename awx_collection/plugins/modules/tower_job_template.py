@@ -86,6 +86,12 @@ options:
       description:
         - Execution Environment to use for the JT.
       type: str
+    custom_virtualenv:
+      description:
+        - Local absolute file path containing a custom Python virtualenv to use.
+        - Only compatible with older versions of AWX/Tower
+        - Deprecated, will be removed in the future
+      type: str
     instance_groups:
       description:
         - list of Instance Groups for this Organization to run on.
@@ -372,6 +378,7 @@ def main():
         vault_credential=dict(),
         credentials=dict(type='list', elements='str'),
         execution_environment=dict(),
+        custom_virtualenv=dict(),
         instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
         limit=dict(),
@@ -496,6 +503,7 @@ def main():
         'become_enabled',
         'diff_mode',
         'allow_simultaneous',
+        'custom_virtualenv',
         'job_slice_count',
         'webhook_service',
     ):
@@ -545,13 +553,8 @@ def main():
     if labels is not None:
         association_fields['labels'] = []
         for item in labels:
-            association_fields['labels'].append(module.resolve_name_to_id('labels', item))
-    # Code to use once Issue #7567 is resolved
-    #            search_fields = {'name': item}
-    #            if organization:
-    #                search_fields['organization'] = organization_id
-    #            label_id = module.get_one('labels', **{'data': search_fields})
-    #            association_fields['labels'].append(label_id)
+            label_id = module.get_one('labels', name_or_id=item, **{'data': search_fields})
+            association_fields['labels'].append(label_id['id'])
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:

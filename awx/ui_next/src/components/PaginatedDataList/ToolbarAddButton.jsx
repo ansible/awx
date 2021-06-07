@@ -3,17 +3,18 @@ import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import CaretDownIcon from '@patternfly/react-icons/dist/js/icons/caret-down-icon';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
 function ToolbarAddButton({
   linkTo,
   onClick,
-  i18n,
+
   isDisabled,
-  defaultLabel = i18n._(t`Add`),
+  defaultLabel = t`Add`,
   showToggleIndicator,
+  ouiaId,
 }) {
   const { isKebabified } = useKebabifiedMenu();
 
@@ -26,6 +27,7 @@ function ToolbarAddButton({
   if (isKebabified) {
     return (
       <DropdownItem
+        ouiaId={ouiaId}
         key="add"
         isDisabled={isDisabled}
         component={linkTo ? Link : 'button'}
@@ -40,6 +42,7 @@ function ToolbarAddButton({
     return (
       <Tooltip content={defaultLabel} position="top">
         <Button
+          ouiaId={ouiaId}
           isDisabled={isDisabled}
           component={Link}
           to={linkTo}
@@ -53,6 +56,7 @@ function ToolbarAddButton({
   }
   return (
     <Button
+      ouiaId={ouiaId}
       icon={showToggleIndicator ? <CaretDownIcon /> : null}
       iconPosition={showToggleIndicator ? 'right' : null}
       variant="primary"
@@ -72,4 +76,4 @@ ToolbarAddButton.defaultProps = {
   onClick: null,
 };
 
-export default withI18n()(ToolbarAddButton);
+export default ToolbarAddButton;

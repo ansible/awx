@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useParams, useLocation, Link } from 'react-router-dom';
 
@@ -10,7 +10,10 @@ import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
 import InventoryGroupRelatedGroupListItem from './InventoryRelatedGroupListItem';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
@@ -24,8 +27,9 @@ const QS_CONFIG = getQSConfig('group', {
   page_size: 20,
   order_by: 'name',
 });
-function InventoryRelatedGroupList({ i18n }) {
+function InventoryRelatedGroupList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const [associateError, setAssociateError] = useState(null);
   const [disassociateError, setDisassociateError] = useState(null);
   const { id: inventoryId, groupId } = useParams();
@@ -125,11 +129,12 @@ function InventoryRelatedGroupList({ i18n }) {
 
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_groups/add`;
 
-  const addExistingGroup = i18n._(t`Add existing group`);
-  const addNewGroup = i18n._(t`Add new group`);
+  const addExistingGroup = t`Add existing group`;
+  const addNewGroup = t`Add new group`;
   const addButton = (
     <AddDropDownButton
       key="add"
+      ouiaId="add-existing-group-button"
       dropdownItems={[
         <DropdownItem
           key={addExistingGroup}
@@ -139,6 +144,7 @@ function InventoryRelatedGroupList({ i18n }) {
           {addExistingGroup}
         </DropdownItem>,
         <DropdownItem
+          ouiaId="add-new-group-button"
           component={Link}
           to={`${addFormUrl}`}
           key={addNewGroup}
@@ -152,32 +158,32 @@ function InventoryRelatedGroupList({ i18n }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
         itemCount={itemCount}
-        pluralizedItemName={i18n._(t`Related Groups`)}
+        pluralizedItemName={t`Related Groups`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
           },
         ]}
@@ -197,53 +203,61 @@ function InventoryRelatedGroupList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={itemCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={disassociateGroups}
                 itemsToDisassociate={selected}
-                modalTitle={i18n._(t`Disassociate related group(s)?`)}
+                modalTitle={t`Disassociate related group(s)?`}
               />,
             ]}
           />
         )}
-        renderItem={o => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(group, index) => (
           <InventoryGroupRelatedGroupListItem
-            key={o.id}
-            group={o}
-            detailUrl={`/inventories/inventory/${inventoryId}/groups/${o.id}/details`}
-            editUrl={`/inventories/inventory/${inventoryId}/groups/${o.id}/edit`}
-            isSelected={selected.some(row => row.id === o.id)}
-            onSelect={() => handleSelect(o)}
+            key={group.id}
+            rowIndex={index}
+            group={group}
+            detailUrl={`/inventories/inventory/${inventoryId}/groups/${group.id}/details`}
+            editUrl={`/inventories/inventory/${inventoryId}/groups/${group.id}/edit`}
+            isSelected={selected.some(row => row.id === group.id)}
+            onSelect={() => handleSelect(group)}
           />
         )}
         emptyStateControls={canAdd && addButton}
       />
       {isModalOpen && (
         <AssociateModal
-          header={i18n._(t`Groups`)}
+          header={t`Groups`}
           fetchRequest={fetchGroupsToAssociate}
           optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
           onAssociate={associateGroup}
           onClose={() => setIsModalOpen(false)}
-          title={i18n._(t`Select Groups`)}
+          title={t`Select Groups`}
         />
       )}
       {error && (
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           variant="error"
         >
           {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more groups.`)}
+            ? t`Failed to associate.`
+            : t`Failed to disassociate one or more groups.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
     </>
   );
 }
-export default withI18n()(InventoryRelatedGroupList);
+export default InventoryRelatedGroupList;
