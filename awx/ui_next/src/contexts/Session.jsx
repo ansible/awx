@@ -73,15 +73,12 @@ function SessionProvider({ children }) {
   const [authRedirectTo, setAuthRedirectTo] = useState('/');
 
   const logout = useCallback(async () => {
-    if (!isSessionExpired.current) {
-      history.replace('/');
-    }
     await RootAPI.logout();
     setSessionTimeout(0);
     setSessionCountdown(0);
     clearTimeout(sessionTimeoutId.current);
     clearInterval(sessionIntervalId.current);
-  }, [setSessionTimeout, setSessionCountdown, history]);
+  }, [setSessionTimeout, setSessionCountdown]);
 
   useEffect(() => {
     if (!isAuthenticated(document.cookie)) {
