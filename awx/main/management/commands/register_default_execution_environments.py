@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = """
     Creates or updates the execution environments set in settings.DEFAULT_EXECUTION_ENVIRONMENTS if they are not yet created.
     Optionally provide authentication details to create or update a container registry credential that will be set on all of these default execution environments.
-    Note that settings.DEFAULT_EXECUTION_ENVIRONMENTS is and ordered list, the first in the list will be used for project updates and system jobs.
+    Note that settings.DEFAULT_EXECUTION_ENVIRONMENTS is and ordered list, the first in the list will be used for project updates.
     """
 
     # Preserves newlines in the help text
@@ -51,7 +51,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        changed = []
+        changed = False
         registry_cred = None
 
         if options.get("registry_username"):
@@ -84,28 +84,40 @@ class Command(BaseCommand):
 
             registry_cred.inputs = inputs
             registry_cred.save()
-            changed.append(True)
+            changed = True
 
             if not cred_created:
                 print("Updated 'Default Execution Environment Credential'")
 
         # Create default globally available Execution Environments
         for ee in reversed(settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS):
-            _, ee_created = ExecutionEnvironment.objects.update_or_create(name=ee["name"], image=ee["image"], credential=registry_cred)
+            _this_ee, ee_created = ExecutionEnvironment.objects.get_or_create(name=ee["name"], defaults={'image': ee["image"], 'credential': registry_cred})
             if ee_created:
-                changed.append(True)
+                changed = True
                 print(f"'{ee['name']}' Default Execution Environment registered.")
+            elif _this_ee.image != ee["image"] or (registry_cred and _this_ee.credential_id != registry_cred.id):
+                _this_ee.image = ee["image"]
+                _this_ee.credential = registry_cred
+                _this_ee.save()
+                changed = True
+                print(f"'{ee['name']}' Default Execution Environment updated.")
 
         # Create the control plane execution environment that is used for project updates and system jobs
-        control_plane_ee = settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT
-        _cp_ee, cp_created = ExecutionEnvironment.objects.update_or_create(
-            name="Control Plane Execution Environment", defaults={'image': control_plane_ee, 'managed_by_tower': True, 'credential': registry_cred}
+        control_plane_ee_image = settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT
+        _cp_ee, cp_created = ExecutionEnvironment.objects.get_or_create(
+            name="Control Plane Execution Environment", defaults={'image': control_plane_ee_image, 'managed_by_tower': True, 'credential': registry_cred}
         )
         if cp_created:
-            changed.append(True)
+            changed = True
             print("Control Plane Execution Environment registered.")
+        elif _cp_ee.image != control_plane_ee_image or (registry_cred and _cp_ee.credential_id != registry_cred.id):
+            _cp_ee.image = control_plane_ee_image
+            _cp_ee.credential = registry_cred
+            _cp_ee.save()
+            changed = True
+            print("Control Plane Execution Environment updated.")
 
-        if any(changed):
+        if changed:
             print("(changed: True)")
         else:
             print("(changed: False)")
