@@ -5,9 +5,11 @@ import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AssociateModal from '../../../components/AssociateModal';
 import AlertModal from '../../../components/AlertModal';
@@ -73,9 +75,13 @@ function InstanceList() {
     }
   );
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    instances
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(instances);
 
   useEffect(() => {
     fetchInstances();
@@ -116,7 +122,7 @@ function InstanceList() {
 
   const handleDisassociate = async () => {
     await disassociateInstances();
-    setSelected([]);
+    clearSelected();
   };
 
   const { error, dismissError } = useDismissableError(
@@ -140,14 +146,14 @@ function InstanceList() {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={instances}
         itemCount={count}
         pluralizedItemName={t`Instances`}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         toolbarSearchColumns={[
@@ -168,9 +174,7 @@ function InstanceList() {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...instances] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -200,7 +204,18 @@ function InstanceList() {
             }
           />
         )}
-        renderItem={instance => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell>{t`Running Jobs`}</HeaderCell>
+            <HeaderCell>{t`Total Jobs`}</HeaderCell>
+            <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
+            <HeaderCell>{t`Used Capacity`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(instance, index) => (
           <InstanceListItem
             key={instance.id}
             value={instance.hostname}
@@ -208,6 +223,7 @@ function InstanceList() {
             onSelect={() => handleSelect(instance)}
             isSelected={selected.some(row => row.id === instance.id)}
             fetchInstances={fetchInstances}
+            rowIndex={index}
           />
         )}
       />

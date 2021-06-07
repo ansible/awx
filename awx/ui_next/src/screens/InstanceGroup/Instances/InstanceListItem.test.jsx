@@ -49,12 +49,16 @@ describe('<InstanceListItem/>', () => {
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceListItem
-          instance={instance[0]}
-          isSelected={false}
-          onSelect={() => {}}
-          fetchInstances={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[0]}
+              isSelected={false}
+              onSelect={() => {}}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('InstanceListItem').length).toBe(1);
@@ -63,12 +67,16 @@ describe('<InstanceListItem/>', () => {
   test('should calculate number of forks when slide changes', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceListItem
-          instance={instance[0]}
-          isSelected={false}
-          onSelect={() => {}}
-          fetchInstances={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[0]}
+              isSelected={false}
+              onSelect={() => {}}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('InstanceListItem').length).toBe(1);
@@ -105,30 +113,41 @@ describe('<InstanceListItem/>', () => {
   test('should render the proper data instance', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceListItem
-          instance={instance[0]}
-          isSelected={false}
-          onSelect={() => {}}
-          fetchInstances={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[0]}
+              isSelected={false}
+              onSelect={() => {}}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
-      wrapper.find('PFDataListCell[aria-label="instance host name"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
     ).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
     expect(
-      wrapper.find('PFDataListCell[aria-label="instance type"]').text()
-    ).toBe('TypeAuto');
-    expect(wrapper.find('input#instances-1').prop('checked')).toBe(false);
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
+    ).toBe('Auto');
     expect(
       wrapper
-        .find('PFDataListCell[aria-label="capacity adjustment"]')
+        .find('Td')
+        .at(5)
         .containsMatchingElement(<div>CPU 24</div>)
     );
     expect(
       wrapper
-        .find('PFDataListCell[aria-label="capacity adjustment"]')
+        .find('Td')
+        .at(5)
         .containsMatchingElement(<div>RAM 24</div>)
     );
     expect(wrapper.find('InstanceListItem__SliderForks').text()).toContain(
@@ -136,18 +155,27 @@ describe('<InstanceListItem/>', () => {
     );
   });
 
-  test('should be checked', async () => {
+  test('should render checkbox', async () => {
+    const onSelect = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceListItem
-          instance={instance[0]}
-          isSelected
-          onSelect={() => {}}
-          fetchInstances={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[0]}
+              onSelect={onSelect}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find('input#instances-1').prop('checked')).toBe(true);
+    expect(
+      wrapper
+        .find('Td')
+        .first()
+        .prop('select').onSelect
+    ).toEqual(onSelect);
   });
 
   test('should display instance toggle', () => {
@@ -176,12 +204,16 @@ describe('<InstanceListItem/>', () => {
     );
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceListItem
-          instance={instance[0]}
-          isSelected={false}
-          onSelect={() => {}}
-          fetchInstances={() => {}}
-        />,
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[0]}
+              isSelected={false}
+              onSelect={() => {}}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>,
         { context: { network: { handleHttpError: () => {} } } }
       );
     });
