@@ -1038,7 +1038,7 @@ class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
 
         if not self.check_related('source_project', Project, data, role_field='use_role'):
             return False
