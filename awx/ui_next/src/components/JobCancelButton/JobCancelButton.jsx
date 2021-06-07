@@ -27,11 +27,14 @@ function JobCancelButton({
     cancelError
   );
 
+  const isAlreadyCancelled = cancelError?.response?.status === 405;
+
   return (
     <>
-      <Tooltip content={title}>
+      <Tooltip content={isAlreadyCancelled ? null : title}>
         {showIconButton ? (
           <Button
+            isDisabled={isAlreadyCancelled}
             aria-label={title}
             ouiaId="cancel-job-button"
             onClick={() => setIsOpen(true)}
@@ -41,6 +44,7 @@ function JobCancelButton({
           </Button>
         ) : (
           <Button
+            isDisabled={isAlreadyCancelled}
             aria-label={title}
             variant="secondary"
             ouiaId="cancel-job-button"
@@ -83,7 +87,7 @@ function JobCancelButton({
           {t`Are you sure you want to cancel this job?`}
         </AlertModal>
       )}
-      {error && (
+      {error && !isAlreadyCancelled && (
         <AlertModal
           isOpen={error}
           variant="danger"
