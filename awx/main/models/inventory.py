@@ -51,6 +51,7 @@ from awx.main.models.credential.injectors import _openstack_data
 from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.utils.execution_environments import to_container_path
+from awx.main.utils.licensing import server_product_name
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership']
@@ -1336,6 +1337,7 @@ class PluginFileInjector(object):
     namespace = None
     collection = None
     collection_migration = '2.9'  # Starting with this version, we use collections
+    use_fqcn = False  # plugin: name versus plugin: namespace.collection.name
 
     # TODO: delete this method and update unit tests
     @classmethod
@@ -1362,7 +1364,12 @@ class PluginFileInjector(object):
         Note that a plugin value of '' should still be overridden.
         '''
         if self.plugin_name is not None:
-            source_vars['plugin'] = self.plugin_name
+            if hasattr(self, 'downstream_namespace') and server_product_name() != 'AWX':
+                source_vars['plugin'] = f'{self.downstream_namespace}.{self.downstream_collection}.{self.plugin_name}'
+            elif self.use_fqcn:
+                source_vars['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
+            else:
+                source_vars['plugin'] = self.plugin_name
         return source_vars
 
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
@@ -1510,12 +1517,17 @@ class rhv(PluginFileInjector):
     initial_version = '2.9'
     namespace = 'ovirt'
     collection = 'ovirt'
+    downstream_namespace = 'redhat'
+    downstream_collection = 'rhv'
 
 
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'
     namespace = 'theforeman'
     collection = 'foreman'
+    downstream_namespace = 'redhat'
+    downstream_collection = 'satellite'
+    use_fqcn = True
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
         # this assumes that this is merged
@@ -1528,18 +1540,14 @@ class satellite6(PluginFileInjector):
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
         return ret
 
-    def inventory_as_dict(self, inventory_update, private_data_dir):
-        ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
-        # this inventory plugin requires the fully qualified inventory plugin name
-        ret['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
-        return ret
-
 
 class tower(PluginFileInjector):
     plugin_name = 'tower'
     base_injector = 'template'
     namespace = 'awx'
     collection = 'awx'
+    downstream_namespace = 'ansible'
+    downstream_collection = 'controller'
 
 
 class insights(PluginFileInjector):

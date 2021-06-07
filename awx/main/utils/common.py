@@ -51,7 +51,6 @@ __all__ = [
     'underscore_to_camelcase',
     'memoize',
     'memoize_delete',
-    'get_licenser',
     'get_awx_http_client_headers',
     'get_awx_version',
     'update_scm_url',
@@ -253,18 +252,6 @@ def get_awx_http_client_headers():
         'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Automation Platform', get_awx_version(), license),
     }
     return headers
-
-
-def get_licenser(*args, **kwargs):
-    from awx.main.utils.licensing import Licenser, OpenLicense
-
-    try:
-        if os.path.exists('/var/lib/awx/.tower_version'):
-            return Licenser(*args, **kwargs)
-        else:
-            return OpenLicense()
-    except Exception as e:
-        raise ValueError(_('Error importing License: %s') % e)
 
 
 def update_scm_url(scm_type, url, username=True, password=True, check_special_cases=True, scp_format=False):

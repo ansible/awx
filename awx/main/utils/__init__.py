@@ -11,3 +11,4 @@ from awx.main.utils.encryption import (  # noqa
     decrypt_value,
     encrypt_dict,
 )
+from awx.main.utils.licensing import get_licenser  # noqa

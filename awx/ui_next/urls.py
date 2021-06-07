@@ -2,8 +2,7 @@ from django.conf.urls import url
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 
-from awx.main.utils.common import get_licenser
-from awx.main.utils.licensing import OpenLicense
+from awx.main.utils.licensing import server_product_name
 
 
 class IndexView(TemplateView):
@@ -17,7 +16,7 @@ class MigrationsNotran(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        product_name = 'AWX' if isinstance(get_licenser(), OpenLicense) else 'Red Hat Ansible Automation Platform'
+        product_name = server_product_name()
         context['title'] = _('%s Upgrading' % product_name)
         context['image_alt'] = _('Logo')
         context['aria_spinner'] = _('Loading')
