@@ -60,7 +60,7 @@ function ProjectList() {
     },
     error: contentError,
     isLoading,
-    request: fetchUpdatedProjects,
+    request: fetchProjects,
     setValue: setProjects,
   } = useRequest(
     useCallback(async () => {
@@ -91,8 +91,8 @@ function ProjectList() {
   );
 
   useEffect(() => {
-    fetchUpdatedProjects();
-  }, [fetchUpdatedProjects]);
+    fetchProjects();
+  }, [fetchProjects]);
 
   const projects = useWsProjects(results);
 
@@ -117,7 +117,7 @@ function ProjectList() {
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
-      fetchItems: fetchUpdatedProjects,
+      fetchItems: fetchProjects,
     }
   );
 
@@ -246,7 +246,7 @@ function ProjectList() {
             )}
             renderRow={(project, index) => (
               <ProjectListItem
-                fetchUpdatedProjects={fetchUpdatedProjects}
+                fetchProjects={fetchProjects}
                 key={project.id}
                 project={project}
                 detailUrl={`${match.url}/${project.id}`}
