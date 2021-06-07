@@ -30,12 +30,19 @@ describe('<TeamEdit />', () => {
     const updatedTeamData = {
       name: 'new name',
       description: 'new description',
+      organization: {
+        id: 2,
+        name: 'Other Org',
+      },
     };
     await act(async () => {
       wrapper.find('TeamForm').invoke('handleSubmit')(updatedTeamData);
     });
 
-    expect(TeamsAPI.update).toHaveBeenCalledWith(1, updatedTeamData);
+    expect(TeamsAPI.update).toHaveBeenCalledWith(1, {
+      ...updatedTeamData,
+      organization: 2,
+    });
     expect(history.location.pathname).toEqual('/teams/1/details');
   });
 

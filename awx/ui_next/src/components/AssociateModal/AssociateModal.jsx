@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
 import OptionsList from '../OptionsList';
@@ -17,15 +17,15 @@ const QS_CONFIG = (order_by = 'name') => {
 };
 
 function AssociateModal({
-  i18n,
-  header = i18n._(t`Items`),
-  title = i18n._(t`Select Items`),
+  header = t`Items`,
+  title = t`Select Items`,
   onClose,
   onAssociate,
   fetchRequest,
   optionsRequest,
   isModalOpen = false,
   displayKey = 'name',
+  ouiaId,
 }) {
   const history = useHistory();
   const { selected, handleSelect } = useSelected([]);
@@ -94,30 +94,31 @@ function AssociateModal({
   return (
     <Fragment>
       <Modal
+        ouiaId={ouiaId}
         variant="large"
         title={title}
-        aria-label={i18n._(t`Association modal`)}
+        aria-label={t`Association modal`}
         isOpen={isModalOpen}
         onClose={handleClose}
         actions={[
           <Button
             ouiaId="associate-modal-save"
-            aria-label={i18n._(t`Save`)}
+            aria-label={t`Save`}
             key="select"
             variant="primary"
             onClick={handleSave}
             isDisabled={selected.length === 0}
           >
-            {i18n._(t`Save`)}
+            {t`Save`}
           </Button>,
           <Button
             ouiaId="associate-modal-cancel"
-            aria-label={i18n._(t`Cancel`)}
+            aria-label={t`Cancel`}
             key="cancel"
             variant="link"
             onClick={handleClose}
           >
-            {i18n._(t`Cancel`)}
+            {t`Cancel`}
           </Button>,
         ]}
       >
@@ -136,22 +137,22 @@ function AssociateModal({
           value={selected}
           searchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: `${displayKey}__icontains`,
               isDefault: true,
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
           sortColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: `${displayKey}`,
             },
           ]}
@@ -163,4 +164,4 @@ function AssociateModal({
   );
 }
 
-export default withI18n()(AssociateModal);
+export default AssociateModal;

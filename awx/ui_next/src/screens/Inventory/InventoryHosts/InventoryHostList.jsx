@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, HostsAPI } from '../../../api';
@@ -8,10 +7,15 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import useSelected from '../../../util/useSelected';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';
 
@@ -21,8 +25,8 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function InventoryHostList({ i18n }) {
-  const [selected, setSelected] = useState([]);
+function InventoryHostList() {
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const { id } = useParams();
   const { search } = useLocation();
 
@@ -70,17 +74,14 @@ function InventoryHostList({ i18n }) {
     fetchData();
   }, [fetchData]);
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...hosts] : []);
-  };
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(hosts);
 
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteHosts,
@@ -95,50 +96,55 @@ function InventoryHostList({ i18n }) {
 
   const handleDeleteHosts = async () => {
     await deleteHosts();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected = selected.length > 0 && selected.length === hosts.length;
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
-        hasContentLoading={isLoading || isDeleteLoading}
+        hasContentLoading={isLoading || isDeleteLoading || isAdHocLaunchLoading}
         items={hosts}
         itemCount={hostCount}
-        pluralizedItemName={i18n._(t`Hosts`)}
+        pluralizedItemName={t`Hosts`}
         qsConfig={QS_CONFIG}
-        toolbarColumns={[
-          {
-            name: i18n._(t`Name`),
-            key: 'name',
-            isSortable: true,
-            isSearchable: true,
-          },
-          {
-            name: i18n._(t`Modified`),
-            key: 'modified',
-            isSortable: true,
-            isNumeric: true,
-          },
-          {
-            name: i18n._(t`Created`),
-            key: 'created',
-            isSortable: true,
-            isNumeric: true,
-          },
-        ]}
+        clearSelected={clearSelected}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
+        toolbarSearchColumns={[
+          {
+            name: t`Name`,
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: t`Description`,
+            key: 'description__icontains',
+          },
+          {
+            name: t`Created By (Username)`,
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: t`Modified By (Username)`,
+            key: 'modified_by__username__icontains',
+          },
+        ]}
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
         renderToolbar={props => (
           <DataListToolbar
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={handleSelectAll}
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -152,24 +158,26 @@ function InventoryHostList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={hostCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <ToolbarDeleteButton
                 key="delete"
                 onDelete={handleDeleteHosts}
                 itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Hosts`)}
+                pluralizedItemName={t`Hosts`}
               />,
             ]}
           />
         )}
-        renderItem={o => (
+        renderRow={(host, index) => (
           <InventoryHostItem
-            key={o.id}
-            host={o}
-            detailUrl={`/inventories/inventory/${id}/hosts/${o.id}/details`}
-            editUrl={`/inventories/inventory/${id}/hosts/${o.id}/edit`}
-            isSelected={selected.some(row => row.id === o.id)}
-            onSelect={() => handleSelect(o)}
+            key={host.id}
+            host={host}
+            detailUrl={`/inventories/inventory/${id}/hosts/${host.id}/details`}
+            editUrl={`/inventories/inventory/${id}/hosts/${host.id}/edit`}
+            isSelected={selected.some(row => row.id === host.id)}
+            onSelect={() => handleSelect(host)}
+            rowIndex={index}
           />
         )}
         emptyStateControls={
@@ -185,10 +193,10 @@ function InventoryHostList({ i18n }) {
         <AlertModal
           isOpen={deletionError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more hosts.`)}
+          {t`Failed to delete one or more hosts.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -196,4 +204,4 @@ function InventoryHostList({ i18n }) {
   );
 }
 
-export default withI18n()(InventoryHostList);
+export default InventoryHostList;

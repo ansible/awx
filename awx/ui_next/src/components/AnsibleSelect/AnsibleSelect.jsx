@@ -8,14 +8,14 @@ import {
   shape,
   bool,
 } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { FormSelect, FormSelectOption } from '@patternfly/react-core';
 
 function AnsibleSelect({
   id,
   data,
-  i18n,
+
   isValid,
   onBlur,
   value,
@@ -35,7 +35,7 @@ function AnsibleSelect({
       value={value}
       onChange={onSelectChange}
       onBlur={onBlur}
-      aria-label={i18n._(t`Select Input`)}
+      aria-label={t`Select Input`}
       validated={isValid ? 'default' : 'error'}
       className={className}
       isDisabled={isDisabled}
@@ -79,4 +79,4 @@ AnsibleSelect.propTypes = {
 };
 
 export { AnsibleSelect as _AnsibleSelect };
-export default withI18n()(AnsibleSelect);
+export default AnsibleSelect;

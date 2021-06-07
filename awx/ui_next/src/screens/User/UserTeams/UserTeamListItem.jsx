@@ -1,61 +1,36 @@
 import React from 'react';
 import { bool, func } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  DataListItemCells,
-  DataListItemRow,
-  DataListItem,
-  DataListCheck,
-  Split,
-  SplitItem,
-} from '@patternfly/react-core';
-import DataListCell from '../../../components/DataListCell';
+import { Tr, Td } from '@patternfly/react-table';
 import { Team } from '../../../types';
 
-function UserTeamListItem({ team, isSelected, onSelect, i18n }) {
+function UserTeamListItem({ team, isSelected, onSelect, rowIndex }) {
   return (
-    <DataListItem
-      key={team.id}
-      id={`${team.id}`}
-      aria-labelledby={`team-${team.id}`}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          aria-labelledby={`team-${team.id}`}
-          checked={isSelected}
-          id={`team-${team.id}`}
-          onChange={onSelect}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link to={`/teams/${team.id}/details`} id={`team-${team.id}`}>
-                <b>{team.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="organization">
-              {team.summary_fields.organization && (
-                <Split hasGutter>
-                  <SplitItem>
-                    <b>{i18n._(t`Organization`)}</b>{' '}
-                  </SplitItem>
-                  <SplitItem>
-                    <Link
-                      to={`/organizations/${team.summary_fields.organization.id}/details`}
-                    >
-                      <b>{team.summary_fields.organization.name}</b>
-                    </Link>
-                  </SplitItem>
-                </Split>
-              )}
-            </DataListCell>,
-            <DataListCell key="description">{team.description}</DataListCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr id={`user-team-row-${team.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+      />
+      <Td id={`team-${team.id}`} dataLabel={t`Name`}>
+        <Link to={`/teams/${team.id}/details`}>
+          <b>{team.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={t`Organization`}>
+        {team.summary_fields.organization ? (
+          <Link
+            to={`/organizations/${team.summary_fields.organization.id}/details`}
+          >
+            {team.summary_fields.organization.name}
+          </Link>
+        ) : null}
+      </Td>
+      <Td dataLabel={t`Description`}>{team.description}</Td>
+    </Tr>
   );
 }
 
@@ -65,4 +40,4 @@ UserTeamListItem.prototype = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(UserTeamListItem);
+export default UserTeamListItem;

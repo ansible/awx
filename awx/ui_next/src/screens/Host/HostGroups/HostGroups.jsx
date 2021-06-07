@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { Switch, Route } from 'react-router-dom';
 import HostGroupsList from './HostGroupsList';
 
@@ -14,4 +14,4 @@ function HostGroups({ host }) {
 }
 
 export { HostGroups as _HostGroups };
-export default withI18n()(HostGroups);
+export default HostGroups;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Switch,
@@ -24,7 +24,7 @@ import OrganizationTeams from './OrganizationTeams';
 import { OrganizationsAPI } from '../../api';
 import OrganizationExecEnvList from './OrganizationExecEnvList';
 
-function Organization({ i18n, setBreadcrumb, me }) {
+function Organization({ setBreadcrumb, me }) {
   const location = useLocation();
   const { id: organizationId } = useParams();
   const match = useRouteMatch();
@@ -114,17 +114,17 @@ function Organization({ i18n, setBreadcrumb, me }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Organizations`)}
+          {t`Back to Organizations`}
         </>
       ),
       link: `/organizations`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
-    { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
-    { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
+    { name: t`Details`, link: `${match.url}/details`, id: 0 },
+    { name: t`Access`, link: `${match.url}/access`, id: 1 },
+    { name: t`Teams`, link: `${match.url}/teams`, id: 2 },
     {
-      name: i18n._(t`Execution Environments`),
+      name: t`Execution Environments`,
       link: `${match.url}/execution_environments`,
       id: 4,
     },
@@ -132,7 +132,7 @@ function Organization({ i18n, setBreadcrumb, me }) {
 
   if (canSeeNotificationsTab) {
     tabsArray.push({
-      name: i18n._(t`Notifications`),
+      name: t`Notifications`,
       link: `${match.url}/notifications`,
       id: 3,
     });
@@ -151,10 +151,8 @@ function Organization({ i18n, setBreadcrumb, me }) {
           <ContentError error={organizationError}>
             {organizationError.response.status === 404 && (
               <span>
-                {i18n._(t`Organization not found.`)}{' '}
-                <Link to="/organizations">
-                  {i18n._(t`View all Organizations.`)}
-                </Link>
+                {t`Organization not found.`}{' '}
+                <Link to="/organizations">{t`View all Organizations.`}</Link>
               </span>
             )}
           </ContentError>
@@ -224,7 +222,7 @@ function Organization({ i18n, setBreadcrumb, me }) {
               <ContentError isNotFound>
                 {match.params.id && (
                   <Link to={`/organizations/${match.params.id}/details`}>
-                    {i18n._(t`View Organization Details`)}
+                    {t`View Organization Details`}
                   </Link>
                 )}
               </ContentError>
@@ -237,5 +235,5 @@ function Organization({ i18n, setBreadcrumb, me }) {
   );
 }
 
-export default withI18n()(withRouter(Organization));
+export default withRouter(Organization);
 export { Organization as _Organization };

@@ -1,9 +1,9 @@
-Starting from API V2, the Named URL feature lets users access Tower resources via resource-specific human-readable identifiers. Previously, the only way of accessing a resource object without auxiliary query string was via resource primary key number(*e.g.*, via URL path `/api/v2/hosts/2/`). Now users can use named URL to do the same thing, for example, via URL path `/api/v2/hosts/host_name++inv_name++org_name/`.
+Starting from API V2, the Named URL feature lets users access AWX resources via resource-specific human-readable identifiers. Previously, the only way of accessing a resource object without auxiliary query string was via resource primary key number(*e.g.*, via URL path `/api/v2/hosts/2/`). Now users can use named URL to do the same thing, for example, via URL path `/api/v2/hosts/host_name++inv_name++org_name/`.
 
 
 ## Usage
 
-There are two named-URL-related Tower configuration settings available under `/api/v2/settings/named-url/`: `NAMED_URL_FORMATS` and `NAMED_URL_GRAPH_NODES`.
+There are two named-URL-related AWX configuration settings available under `/api/v2/settings/named-url/`: `NAMED_URL_FORMATS` and `NAMED_URL_GRAPH_NODES`.
 
 `NAMED_URL_FORMATS` is a *read only* key-value pair list of all available named URL identifier formats. A typical `NAMED_URL_FORMATS` looks like this:
 ```
@@ -14,7 +14,6 @@ There are two named-URL-related Tower configuration settings available under `/a
     "inventories": "<name>++<organization.name>",
     "users": "<username>",
     "applications": "<name>++<organization.name>",
-    "inventory_scripts": "<name>++<organization.name>",
     "labels": "<name>++<organization.name>",
     "credential_types": "<name>+<kind>",
     "notification_templates": "<name>++<organization.name>",
@@ -43,21 +42,21 @@ An important aspect of generating unique identifiers for named URL is dealing wi
 
 `NAMED_URL_FORMATS` exclusively lists every resource that can have named URL; any resource not listed there has no named URL. `NAMED_URL_FORMATS` alone should be instructive enough for users to compose human-readable unique identifier and named URL themselves. For more convenience, every object of a resource that can have named URL will have a related field `named_url` that displays that object's named URL. Users can simply copy-paste that field for their custom usages. Also, users are expected to see indications in the help text of the API browser if a resource object has named URL.
 
-Although `NAMED_URL_FORMATS` is immutable on the user side, it will be automatically modified and expanded over time, reflecting underlying resource modification and expansion. Please consult `NAMED_URL_FORMATS` on the same Tower cluster where you want to use the named URL feature against.
+Although `NAMED_URL_FORMATS` is immutable on the user side, it will be automatically modified and expanded over time, reflecting underlying resource modification and expansion. Please consult `NAMED_URL_FORMATS` on the same AWX cluster where you want to use the named URL feature against.
 
-`NAMED_URL_GRAPH_NODES` is another *read-only* list of key-value pairs that exposes the internal graph data structure that Tower uses to manage named URLs. This is not supposed to be human-readable but should be used for programmatically generating named URLs. An example script of generating a named URL given the primary key of arbitrary resource objects that can have named URL (using info provided by `NAMED_URL_GRAPH_NODES`) can be found as `/tools/scripts/pk_to_named_url.py`.
+`NAMED_URL_GRAPH_NODES` is another *read-only* list of key-value pairs that exposes the internal graph data structure that AWX uses to manage named URLs. This is not supposed to be human-readable but should be used for programmatically generating named URLs. An example script of generating a named URL given the primary key of arbitrary resource objects that can have named URL (using info provided by `NAMED_URL_GRAPH_NODES`) can be found as `/tools/scripts/pk_to_named_url.py`.
 
 
 ## Identifier Format Protocol
 
-Resources in Tower are identifiable by their unique keys, which are basically tuples of resource fields. Every Tower resource is guaranteed to have its primary key number alone as a unique key, but there might be multiple other unique keys.
+Resources in AWX are identifiable by their unique keys, which are basically tuples of resource fields. Every AWX resource is guaranteed to have its primary key number alone as a unique key, but there might be multiple other unique keys.
 
 A resource can generate identifier formats and thus have named URL if it contains at least one unique key that satisfies rules below:
 
 1. The key *contains and only contains* fields that are either the `name` field, or text fields with a finite number of possible choices (like credential type resource's `kind` field).
 2. The only allowed exceptional fields that breaks the first rule is a many-to-one related field relating to a resource *other than self* which is also allowed to have a slug.
 
-Here is an example for understanding the rules: Suppose Tower has resources `Foo` and `Bar`; both `Foo` and `Bar` contain a `name` field and a `choice` field that can only have value `'yes'` or `'no'`. Additionally, resource `Foo` contains a many-to-one field (a foreign key) relating to `Bar`, say `fk`. `Foo` has a unique key tuple `(name, choice, fk)` and `Bar` has a unique key tuple `(name, choice)`. Apparently `Bar` can have named URL because it satisfies rule 1. On the other hand, `Foo` can also have named URL, because although `Foo` breaks rule 1, the extra field breaking rule 1 is a `fk` field, which is many-to-one-related to `Bar` and `Bar` can have named URL.
+Here is an example for understanding the rules: Suppose AWX has resources `Foo` and `Bar`; both `Foo` and `Bar` contain a `name` field and a `choice` field that can only have value `'yes'` or `'no'`. Additionally, resource `Foo` contains a many-to-one field (a foreign key) relating to `Bar`, say `fk`. `Foo` has a unique key tuple `(name, choice, fk)` and `Bar` has a unique key tuple `(name, choice)`. Apparently `Bar` can have named URL because it satisfies rule 1. On the other hand, `Foo` can also have named URL, because although `Foo` breaks rule 1, the extra field breaking rule 1 is a `fk` field, which is many-to-one-related to `Bar` and `Bar` can have named URL.
 
 For resources satisfying rule 1 above, their human-readable unique identifiers are combinations of foreign key fields, delimited by `+`. Specifically, resource `Bar` above will have the slug format `<name>+<choice>`. Note the field order matters in slug format: `name` field always comes first if present, followed by all the rest of the fields arranged in lexicographic order of field name. For example, if `Bar` also has an `a_choice` field satisfying rule 1 and the unique key becomes `(name, choice, a_choice)`, its slug format becomes `<name>+<a_choice>+<choice>`.
 
@@ -75,9 +74,9 @@ When generating identifiers according to the given identifier format, there are 
 
 ## Implementation Overview
 
-Module `awx.main.utils.named_url_graph` stands at the core of named URL implementation. It exposes a single public function, `generate_graph`. `generate_graph` accepts a list of Tower models in Tower that might have named URL (meaning they have corresponding endpoints under `/api/v2/`), filter out those that are unable to have named URLs, and connect the rest together into a named URL graph. The graph is available as a settings option, `NAMED_URL_GRAPH`, and each node of it contains all info needed to generate named URL identifier formats and parse incoming named URL identifiers.
+Module `awx.main.utils.named_url_graph` stands at the core of named URL implementation. It exposes a single public function, `generate_graph`. `generate_graph` accepts a list of AWX models in AWX that might have named URL (meaning they have corresponding endpoints under `/api/v2/`), filter out those that are unable to have named URLs, and connect the rest together into a named URL graph. The graph is available as a settings option, `NAMED_URL_GRAPH`, and each node of it contains all info needed to generate named URL identifier formats and parse incoming named URL identifiers.
 
-`generate_graph` will run only once for each Tower WSGI process. This is guaranteed by putting the function call inside `__init__` of `URLModificationMiddleware`. When an incoming request enters `URLModificationMiddleware`, the part of its URL path that could contain a valid named URL identifier is extracted and processed to find (possible) corresponding resource objects. The internal process is basically crawling against part of the named URL graph. If the object is found, the identifier part of the URL path is converted to the object's primary key. Going forward, Tower can treat the request with the old-styled URL.
+`generate_graph` will run only once for each AWX WSGI process. This is guaranteed by putting the function call inside `__init__` of `URLModificationMiddleware`. When an incoming request enters `URLModificationMiddleware`, the part of its URL path that could contain a valid named URL identifier is extracted and processed to find (possible) corresponding resource objects. The internal process is basically crawling against part of the named URL graph. If the object is found, the identifier part of the URL path is converted to the object's primary key. Going forward, AWX can treat the request with the old-styled URL.
 
 ## Job Template Organization Changes
 
@@ -94,7 +93,7 @@ If multiple job templates with the same name exist, the oldest one will be retur
 In general, acceptance should follow what's in the "Usage" section. The contents in the "Identifier Format Protocol" section should not be relevant.
 
 * The classical way of getting objects via primary keys should behave the same.
-* Tower configuration for named URL should work as described. Particularly, `NAMED_URL_FORMATS` should be immutable on the user's side and display accurately-named URL identifier format info.
+* AWX configuration for named URL should work as described. Particularly, `NAMED_URL_FORMATS` should be immutable on the user's side and display accurately-named URL identifier format info.
 * `NAMED_URL_FORMATS` should be exclusive, meaning resources specified in `NAMED_URL_FORMATS` should have named URL, and resources not specified there should *not* have named URL.
 * If a resource can have named URL, its objects should have a `named_url` field which represents the object-specific named URL. That field should only be visible under detail view, not list view.
 * A user following the rules specified in `NAMED_URL_FORMATS` should be able to generate named URL exactly the same as the `named_url` field.

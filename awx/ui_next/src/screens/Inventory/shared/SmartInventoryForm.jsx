@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
 import { func, shape, arrayOf } from 'prop-types';
@@ -26,39 +25,39 @@ import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 import { InventoriesAPI } from '../../../api';
 
-const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
-  const { setFieldValue } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
-  });
-  const [instanceGroupsField, , instanceGroupsHelpers] = useField({
-    name: 'instance_groups',
-  });
+const SmartInventoryFormFields = ({ inventory }) => {
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
+  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
+    'instance_groups'
+  );
   const [hostFilterField, hostFilterMeta, hostFilterHelpers] = useField({
     name: 'host_filter',
-    validate: required(null, i18n),
+    validate: required(null),
   });
-  const onOrganizationChange = useCallback(
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
     <>
       <FormField
         id="name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -66,10 +65,11 @@ const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         required
         autoPopulate={!inventory?.id}
+        validate={required(t`Select a value for this field`)}
       />
       <HostFilterLookup
         value={hostFilterField.value}
@@ -87,25 +87,21 @@ const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
         onChange={value => {
           instanceGroupsHelpers.setValue(value);
         }}
-        tooltip={i18n._(
-          t`Select the Instance Groups for this Inventory to run on.`
-        )}
+        tooltip={t`Select the Instance Groups for this Inventory to run on.`}
       />
       <FormFullWidthLayout>
         <VariablesField
           id="variables"
           name="variables"
-          label={i18n._(t`Variables`)}
-          tooltip={i18n._(
-            t`Enter inventory variables using either JSON or YAML syntax.
+          label={t`Variables`}
+          tooltip={t`Enter inventory variables using either JSON or YAML syntax.
             Use the radio button to toggle between the two. Refer to the
-            Ansible Tower documentation for example syntax.`
-          )}
+            Ansible Tower documentation for example syntax.`}
         />
       </FormFullWidthLayout>
     </>
   );
-});
+};
 
 function SmartInventoryForm({
   inventory,
@@ -195,4 +191,4 @@ SmartInventoryForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(SmartInventoryForm);
+export default SmartInventoryForm;

@@ -11,9 +11,14 @@ from django.conf import settings
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
 
-___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager']
+___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager']
 
 logger = logging.getLogger('awx.main.managers')
+
+
+class DeferJobCreatedManager(models.Manager):
+    def get_queryset(self):
+        return super(DeferJobCreatedManager, self).get_queryset().defer('job_created')
 
 
 class HostManager(models.Manager):
@@ -142,7 +147,7 @@ class InstanceManager(models.Manager):
             pod_ip = os.environ.get('MY_POD_IP')
             registered = self.register(ip_address=pod_ip)
             is_container_group = settings.IS_K8S
-            RegisterQueue('tower', None, 100, 0, [], is_container_group).register()
+            RegisterQueue('tower', 100, 0, [], is_container_group).register()
             return registered
         else:
             return (False, self.me())
@@ -154,9 +159,6 @@ class InstanceManager(models.Manager):
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
-
-    def all_non_isolated(self):
-        return self.exclude(rampart_groups__controller__isnull=False)
 
 
 class InstanceGroupManager(models.Manager):

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Badge, Tooltip } from '@patternfly/react-core';
 
@@ -27,28 +27,28 @@ const TooltipContent = styled.div`
   }
 `;
 
-const HostStatusBar = ({ i18n, counts = {} }) => {
+const HostStatusBar = ({ counts = {} }) => {
   const noData = Object.keys(counts).length === 0;
   const hostStatus = {
     ok: {
       color: '#4CB140',
-      label: i18n._(t`OK`),
+      label: t`OK`,
     },
     skipped: {
       color: '#73BCF7',
-      label: i18n._(t`Skipped`),
+      label: t`Skipped`,
     },
     changed: {
       color: '#F0AB00',
-      label: i18n._(t`Changed`),
+      label: t`Changed`,
     },
     failures: {
       color: '#C9190B',
-      label: i18n._(t`Failed`),
+      label: t`Failed`,
     },
     dark: {
       color: '#8F4700',
-      label: i18n._(t`Unreachable`),
+      label: t`Unreachable`,
     },
   };
 
@@ -73,9 +73,7 @@ const HostStatusBar = ({ i18n, counts = {} }) => {
     return (
       <BarWrapper>
         <Tooltip
-          content={i18n._(
-            t`Host status information for this job is unavailable.`
-          )}
+          content={t`Host status information for this job is unavailable.`}
         >
           <BarSegment count={1} />
         </Tooltip>
@@ -86,4 +84,4 @@ const HostStatusBar = ({ i18n, counts = {} }) => {
   return <BarWrapper>{barSegments}</BarWrapper>;
 };
 
-export default withI18n()(HostStatusBar);
+export default HostStatusBar;

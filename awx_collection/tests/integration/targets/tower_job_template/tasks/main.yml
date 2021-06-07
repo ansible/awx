@@ -5,6 +5,7 @@
 
 - name: generate random string for project
   set_fact:
+    org_name: "AWX-Collection-tests-tower_organization-org-{{ test_id }}"
     cred1: "AWX-Collection-tests-tower_job_template-cred1-{{ test_id }}"
     cred2: "AWX-Collection-tests-tower_job_template-cred2-{{ test_id }}"
     cred3: "AWX-Collection-tests-tower_job_template-cred3-{{ test_id }}"
@@ -15,6 +16,13 @@
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
     webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
     group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
+
+- name: "Create a new organization"
+  tower_organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+  register: result
 
 - name: Create a Demo Project
   tower_project:
@@ -44,10 +52,13 @@
     organization: Default
     kind: ssh
 
-- name: Create Label
+- name: Create Labels
   tower_label:
     name: "{{ lab1 }}"
-    organization: Default
+    organization: "{{ item }}"
+  loop:
+    - Default
+    - "{{ org_name }}"
 
 - name: Create an Instance Group
   tower_instance_group:
@@ -202,6 +213,7 @@
 - name: Create Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
+    organization: Default
     project: "{{ proj1 }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
@@ -409,3 +421,9 @@
     name: "{{ webhook_not }}"
     organization: Default
     state: absent
+
+- name: "Remove the organization"
+  tower_organization:
+    name: "{{ org_name }}"
+    state: absent
+  register: result

@@ -110,21 +110,21 @@ describe('<InventoryRelatedGroupList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-group-2"]').props().checked
+      wrapper.find('input[aria-label="Select row 0"]').props().checked
     ).toBe(false);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-2"]').invoke('onChange')();
+      wrapper.find('input[aria-label="Select row 0"]').invoke('onChange')();
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-group-2"]').props().checked
+      wrapper.find('input[aria-label="Select row 0"]').props().checked
     ).toBe(true);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-2"]').invoke('onChange')();
+      wrapper.find('input[aria-label="Select row 0"]').invoke('onChange')();
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-group-2"]').props().checked
+      wrapper.find('input[aria-label="Select row 0"]').props().checked
     ).toBe(false);
   });
 

@@ -1,14 +1,17 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { JobTemplatesAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
 import useRequest from '../../../../../../util/useRequest';
-import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../../../../components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('job-templates', {
   page: 1,
@@ -16,7 +19,7 @@ const QS_CONFIG = getQSConfig('job-templates', {
   order_by: 'name',
 });
 
-function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
+function JobTemplatesList({ nodeResource, onUpdateNodeResource }) {
   const location = useLocation();
 
   const {
@@ -57,15 +60,20 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
   }, [fetchJobTemplates]);
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={error}
       hasContentLoading={isLoading}
       itemCount={count}
       items={jobTemplates}
-      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
-      renderItem={item => (
+      headerRow={
+        <HeaderRow isExpandable={false} qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(item, index) => (
         <CheckboxListItem
+          rowIndex={index}
           isSelected={!!(nodeResource && nodeResource.id === item.id)}
           itemId={item.id}
           key={`${item.id}-listItem`}
@@ -80,27 +88,21 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
       showPageSizeOptions={false}
       toolbarSearchColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name__icontains',
           isDefault: true,
         },
         {
-          name: i18n._(t`Playbook name`),
+          name: t`Playbook name`,
           key: 'playbook__icontains',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: t`Created By (Username)`,
           key: 'created_by__username__icontains',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: t`Modified By (Username)`,
           key: 'modified_by__username__icontains',
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: i18n._(t`Name`),
-          key: 'name',
         },
       ]}
       toolbarSearchableKeys={searchableKeys}
@@ -118,4 +120,4 @@ JobTemplatesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(JobTemplatesList);
+export default JobTemplatesList;

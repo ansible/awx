@@ -21,7 +21,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
 
-# Tower
+# AWX
 from awx.api.generics import APIView, GenericAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse

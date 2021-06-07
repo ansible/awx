@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { string, bool } from 'prop-types';
-import { withI18n } from '@lingui/react';
+import { string, bool, func, oneOf } from 'prop-types';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
@@ -25,18 +25,19 @@ const StyledCheckboxField = styled(CheckboxField)`
 `;
 
 function VariablesField({
-  i18n,
   id,
   name,
   label,
   readOnly,
   promptId,
   tooltip,
+  initialMode,
+  onModeChange,
 }) {
   // track focus manually, because the Code Editor library doesn't wire
   // into Formik completely
   const [shouldValidate, setShouldValidate] = useState(false);
-  const [mode, setMode] = useState(YAML_MODE);
+  const [mode, setMode] = useState(initialMode || YAML_MODE);
   const validate = useCallback(
     value => {
       if (!shouldValidate) {
@@ -62,6 +63,7 @@ function VariablesField({
       // mode's useState above couldn't be initialized to JSON_MODE because
       // the field value had to be defined below it
       setMode(JSON_MODE);
+      onModeChange(JSON_MODE);
       helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -84,6 +86,7 @@ function VariablesField({
     if (newMode === YAML_MODE && !isJsonEdited && lastYamlValue !== null) {
       helpers.setValue(lastYamlValue, false);
       setMode(newMode);
+      onModeChange(newMode);
       return;
     }
 
@@ -94,6 +97,7 @@ function VariablesField({
           : yamlToJson(field.value);
       helpers.setValue(newVal, false);
       setMode(newMode);
+      onModeChange(newMode);
     } catch (err) {
       helpers.setError(err.message);
     }
@@ -112,7 +116,6 @@ function VariablesField({
   return (
     <div>
       <VariablesFieldInternals
-        i18n={i18n}
         id={id}
         name={name}
         label={label}
@@ -132,19 +135,18 @@ function VariablesField({
         onClose={() => setIsExpanded(false)}
         actions={[
           <Button
-            aria-label={i18n._(t`Done`)}
+            aria-label={t`Done`}
             key="select"
             variant="primary"
             onClick={() => setIsExpanded(false)}
             ouiaId={`${id}-variables-unexpand`}
           >
-            {i18n._(t`Done`)}
+            {t`Done`}
           </Button>,
         ]}
       >
         <div className="pf-c-form">
           <VariablesFieldInternals
-            i18n={i18n}
             id={`${id}-expanded`}
             name={name}
             label={label}
@@ -173,14 +175,17 @@ VariablesField.propTypes = {
   label: string.isRequired,
   readOnly: bool,
   promptId: string,
+  initialMode: oneOf([YAML_MODE, JSON_MODE]),
+  onModeChange: func,
 };
 VariablesField.defaultProps = {
   readOnly: false,
   promptId: null,
+  initialMode: YAML_MODE,
+  onModeChange: () => {},
 };
 
 function VariablesFieldInternals({
-  i18n,
   id,
   name,
   label,
@@ -200,7 +205,11 @@ function VariablesFieldInternals({
     if (mode === YAML_MODE) {
       return;
     }
-    helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
+    try {
+      helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
+    } catch (e) {
+      helpers.setError(e.message);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -221,20 +230,21 @@ function VariablesFieldInternals({
               ]}
               value={mode}
               onChange={setMode}
+              name={name}
             />
           </SplitItem>
         </Split>
         {promptId && (
           <StyledCheckboxField
             id="template-ask-variables-on-launch"
-            label={i18n._(t`Prompt on launch`)}
+            label={t`Prompt on launch`}
             name="ask_variables_on_launch"
           />
         )}
         {onExpand && (
           <Button
             variant="plain"
-            aria-label={i18n._(t`Expand input`)}
+            aria-label={t`Expand input`}
             onClick={onExpand}
             ouiaId={`${id}-variables-expand`}
           >
@@ -257,4 +267,4 @@ function VariablesFieldInternals({
   );
 }
 
-export default withI18n()(VariablesField);
+export default VariablesField;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import useIsMounted from '../../util/useIsMounted';
 
 /*
   Hook for using PatternFly's <Select> component when a pre-existing value
@@ -9,8 +10,12 @@ import { useState, useEffect } from 'react';
 export default function useSyncedSelectValue(value, onChange) {
   const [options, setOptions] = useState([]);
   const [selections, setSelections] = useState([]);
+  const isMounted = useIsMounted();
 
   useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
     const newOptions = [];
     if (value !== selections && options.length) {
       const syncedValue = value.map(item => {
@@ -41,7 +46,11 @@ export default function useSyncedSelectValue(value, onChange) {
     selections: options.length ? addToStringToObjects(selections) : [],
     onSelect,
     options,
-    setOptions: newOpts => setOptions(addToStringToObjects(newOpts)),
+    setOptions: newOpts => {
+      if (isMounted.current) {
+        setOptions(addToStringToObjects(newOpts));
+      }
+    },
   };
 }
 

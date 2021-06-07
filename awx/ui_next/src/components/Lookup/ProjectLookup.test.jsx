@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import { ProjectsAPI } from '../../api';
 import ProjectLookup from './ProjectLookup';
@@ -14,27 +15,35 @@ describe('<ProjectLookup />', () => {
   test('should auto-select project when only one available and autoPopulate prop is true', async () => {
     ProjectsAPI.read.mockReturnValue({
       data: {
-        results: [{ id: 1 }],
+        results: [{ id: 1, name: 'Test' }],
         count: 1,
       },
     });
     const onChange = jest.fn();
     await act(async () => {
-      mountWithContexts(<ProjectLookup autoPopulate onChange={onChange} />);
+      mountWithContexts(
+        <Formik>
+          <ProjectLookup autoPopulate onChange={onChange} />
+        </Formik>
+      );
     });
-    expect(onChange).toHaveBeenCalledWith({ id: 1 });
+    expect(onChange).toHaveBeenCalledWith({ id: 1, name: 'Test' });
   });
 
   test('should not auto-select project when autoPopulate prop is false', async () => {
     ProjectsAPI.read.mockReturnValue({
       data: {
-        results: [{ id: 1 }],
+        results: [{ id: 1, name: 'Test' }],
         count: 1,
       },
     });
     const onChange = jest.fn();
     await act(async () => {
-      mountWithContexts(<ProjectLookup onChange={onChange} />);
+      mountWithContexts(
+        <Formik>
+          <ProjectLookup onChange={onChange} />
+        </Formik>
+      );
     });
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -42,13 +51,20 @@ describe('<ProjectLookup />', () => {
   test('should not auto-select project when multiple available', async () => {
     ProjectsAPI.read.mockReturnValue({
       data: {
-        results: [{ id: 1 }, { id: 2 }],
+        results: [
+          { id: 1, name: 'Test' },
+          { id: 2, name: 'Test 2' },
+        ],
         count: 2,
       },
     });
     const onChange = jest.fn();
     await act(async () => {
-      mountWithContexts(<ProjectLookup autoPopulate onChange={onChange} />);
+      mountWithContexts(
+        <Formik>
+          <ProjectLookup autoPopulate onChange={onChange} />
+        </Formik>
+      );
     });
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -57,7 +73,7 @@ describe('<ProjectLookup />', () => {
     let wrapper;
     ProjectsAPI.read.mockReturnValue({
       data: {
-        results: [{ id: 1 }],
+        results: [{ id: 1, name: 'Test' }],
         count: 1,
       },
     });
@@ -71,7 +87,9 @@ describe('<ProjectLookup />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <ProjectLookup isOverrideDisabled onChange={() => {}} />
+        <Formik>
+          <ProjectLookup isOverrideDisabled onChange={() => {}} />
+        </Formik>
       );
     });
     wrapper.update();
@@ -92,7 +110,11 @@ describe('<ProjectLookup />', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ProjectLookup onChange={() => {}} />);
+      wrapper = mountWithContexts(
+        <Formik>
+          <ProjectLookup onChange={() => {}} />
+        </Formik>
+      );
     });
     wrapper.update();
     expect(ProjectsAPI.read).toHaveBeenCalledTimes(1);
@@ -113,11 +135,13 @@ describe('<ProjectLookup />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <ProjectLookup
-          isValid
-          helperTextInvalid="select value"
-          onChange={() => {}}
-        />
+        <Formik>
+          <ProjectLookup
+            isValid
+            helperTextInvalid="select value"
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     wrapper.update();
@@ -138,11 +162,13 @@ describe('<ProjectLookup />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <ProjectLookup
-          isValid={false}
-          helperTextInvalid="select value"
-          onChange={() => {}}
-        />
+        <Formik>
+          <ProjectLookup
+            isValid={false}
+            helperTextInvalid="select value"
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     wrapper.update();

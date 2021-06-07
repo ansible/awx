@@ -46,6 +46,8 @@ function JobTemplateEdit({ template }) {
       instanceGroups,
       initialInstanceGroups,
       credentials,
+      inventory,
+      project,
       webhook_credential,
       webhook_key,
       webhook_url,
@@ -55,8 +57,9 @@ function JobTemplateEdit({ template }) {
 
     setFormSubmitError(null);
     setIsLoading(true);
-    remainingValues.project = values.project.id;
+    remainingValues.project = project.id;
     remainingValues.webhook_credential = webhook_credential?.id || null;
+    remainingValues.inventory = inventory?.id || null;
     remainingValues.execution_environment = execution_environment?.id || null;
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);

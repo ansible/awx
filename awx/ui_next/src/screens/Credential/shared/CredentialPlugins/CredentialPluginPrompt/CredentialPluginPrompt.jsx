@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { func, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -16,7 +15,7 @@ import { CredentialsAPI } from '../../../../../api';
 import useRequest from '../../../../../util/useRequest';
 import { CredentialPluginTestAlert } from '..';
 
-function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
+function CredentialPluginWizard({ handleSubmit, onClose }) {
   const [selectedCredential] = useField('credential');
   const [inputValues] = useField('inputs');
 
@@ -38,14 +37,14 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
   const steps = [
     {
       id: 1,
-      name: i18n._(t`Credential`),
+      name: t`Credential`,
       key: 'credential',
       component: <CredentialsStep />,
       enableNext: !!selectedCredential.value,
     },
     {
       id: 2,
-      name: i18n._(t`Metadata`),
+      name: t`Metadata`,
       key: 'metadata',
       component: <MetadataStep />,
       canJumpTo: !!selectedCredential.value,
@@ -64,14 +63,12 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
               onClick={onNext}
               isDisabled={!selectedCredential.value}
             >
-              {activeStep.key === 'metadata' ? i18n._(t`OK`) : i18n._(t`Next`)}
+              {activeStep.key === 'metadata' ? t`OK` : t`Next`}
             </Button>
             {activeStep && activeStep.key === 'metadata' && (
               <>
                 <Tooltip
-                  content={i18n._(
-                    t`Click this button to verify connection to the secret management system using the selected credential and specified inputs.`
-                  )}
+                  content={t`Click this button to verify connection to the secret management system using the selected credential and specified inputs.`}
                   position="right"
                 >
                   <Button
@@ -80,7 +77,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
                     variant="secondary"
                     onClick={() => testPluginMetadata()}
                   >
-                    {i18n._(t`Test`)}
+                    {t`Test`}
                   </Button>
                 </Tooltip>
 
@@ -90,7 +87,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
                   variant="secondary"
                   onClick={onBack}
                 >
-                  {i18n._(t`Back`)}
+                  {t`Back`}
                 </Button>
               </>
             )}
@@ -100,7 +97,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
               variant="link"
               onClick={onClose}
             >
-              {i18n._(t`Cancel`)}
+              {t`Cancel`}
             </Button>
           </>
         )}
@@ -113,7 +110,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
       <Wizard
         isOpen
         onClose={onClose}
-        title={i18n._(t`External Secret Management System`)}
+        title={t`External Secret Management System`}
         steps={steps}
         onSave={handleSubmit}
         footer={CustomFooter}
@@ -129,7 +126,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
   );
 }
 
-function CredentialPluginPrompt({ i18n, onClose, onSubmit, initialValues }) {
+function CredentialPluginPrompt({ onClose, onSubmit, initialValues }) {
   return (
     <Formik
       initialValues={{
@@ -139,11 +136,7 @@ function CredentialPluginPrompt({ i18n, onClose, onSubmit, initialValues }) {
       onSubmit={onSubmit}
     >
       {({ handleSubmit }) => (
-        <CredentialPluginWizard
-          handleSubmit={handleSubmit}
-          i18n={i18n}
-          onClose={onClose}
-        />
+        <CredentialPluginWizard handleSubmit={handleSubmit} onClose={onClose} />
       )}
     </Formik>
   );
@@ -159,4 +152,4 @@ CredentialPluginPrompt.defaultProps = {
   initialValues: {},
 };
 
-export default withI18n()(CredentialPluginPrompt);
+export default CredentialPluginPrompt;

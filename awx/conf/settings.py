@@ -20,7 +20,7 @@ from rest_framework.fields import empty, SkipField
 
 import cachetools
 
-# Tower
+# AWX
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
 from awx.conf.models import Setting
@@ -350,13 +350,8 @@ class SettingsWrapper(UserSettingsHolder):
         if value is empty:
             setting = None
             setting_id = None
-            if not field.read_only or name in (
-                # these values are read-only - however - we *do* want
-                # to fetch their value from the database
-                'INSTALL_UUID',
-                'AWX_ISOLATED_PRIVATE_KEY',
-                'AWX_ISOLATED_PUBLIC_KEY',
-            ):
+            # this value is read-only, however we *do* want to fetch its value from the database
+            if not field.read_only or name == 'INSTALL_UUID':
                 setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
             if setting:
                 if getattr(field, 'encrypted', False):

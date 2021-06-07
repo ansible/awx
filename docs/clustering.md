@@ -1,10 +1,10 @@
-## Tower Clustering/HA Overview
+## AWX Clustering/HA Overview
 
 Prior to 3.1, the Ansible Tower HA solution was not a true high-availability system. This system has been entirely rewritten in 3.1 with a focus towards a proper highly-available clustered system. This has been extended further in 3.2 to allow grouping of clustered instances into different pools/queues.
 
 * Each instance should be able to act as an entry point for UI and API Access.
-  This should enable Tower administrators to use load balancers in front of as many instances as they wish and maintain good data visibility.
-* Each instance should be able to join the Tower cluster and expand its ability to execute jobs.
+  This should enable AWX administrators to use load balancers in front of as many instances as they wish and maintain good data visibility.
+* Each instance should be able to join the AWX cluster and expand its ability to execute jobs.
 * Provisioning new instance should be as simple as updating the `inventory` file and re-running the setup playbook.
 * Instances can be de-provisioned with a simple management command.
 * Instances can be grouped into one or more Instance Groups to share resources for topical purposes.
@@ -18,7 +18,7 @@ Prior to 3.1, the Ansible Tower HA solution was not a true high-availability sys
 It's important to point out a few existing things:
 
 * PostgreSQL is still a standalone instance and is not clustered. Replica configuration will not be managed. If the user configures standby replicas, database failover will also not be managed.
-* All instances should be reachable from all other instances and they should be able to reach the database. It's also important for the hosts to have a stable address and/or hostname (depending on how you configure the Tower host).
+* All instances should be reachable from all other instances and they should be able to reach the database. It's also important for the hosts to have a stable address and/or hostname (depending on how you configure the AWX host).
 * Existing old-style HA deployments will be transitioned automatically to the new HA system during the upgrade process to 3.1.
 * Manual projects will need to be synced to all instances by the customer.
 
@@ -27,8 +27,8 @@ Ansible Tower 3.3 adds support for container-based clusters using Openshift or K
 
 ## Important Changes
 
-* There is no concept of primary/secondary in the new Tower system. *All* systems are primary.
-* The `inventory` file for Tower deployments should be saved/persisted. If new instances are to be provisioned, the passwords and configuration options as well as host names will need to be available to the installer.
+* There is no concept of primary/secondary in the new AWX system. *All* systems are primary.
+* The `inventory` file for AWX deployments should be saved/persisted. If new instances are to be provisioned, the passwords and configuration options as well as host names will need to be available to the installer.
 
 
 ## Concepts and Configuration
@@ -70,74 +70,17 @@ Recommendations and constraints:
  - Do not create a group named `instance_group_tower`.
  - Do not name any instance the same as a group name.
 
-
-### Security-Isolated Rampart Groups
-
-In Tower versions 3.2+, customers may optionally define isolated groups inside of security-restricted networking zones from which to run jobs and ad hoc commands. Instances in these groups will _not_ have a full install of Tower, but will have a minimal set of utilities used to run jobs. Isolated groups must be specified in the inventory file prefixed with `isolated_group_`. An example inventory file is shown below:
-
-```
-[tower]
-towerA
-towerB
-towerC
-
-[instance_group_security]
-towerB
-towerC
-
-[isolated_group_govcloud]
-isolatedA
-isolatedB
-
-[isolated_group_govcloud:vars]
-controller=security
-```
-
-In the isolated rampart model, "controller" instances interact with "isolated" instances via a series of Ansible playbooks over SSH.  At installation time, a randomized RSA key is generated and distributed as an authorized key to all "isolated" instances.  The private half of the key is encrypted and stored within Tower, and is used to authenticate from "controller" instances to "isolated" instances when jobs are run.
-
-When a job is scheduled to run on an "isolated" instance:
-
-*  The "controller" instance compiles metadata required to run the job and copies it to the "isolated" instance via `rsync` (any related project or inventory updates are run on the controller instance). This metadata includes:
-
-   - the entire SCM checkout directory for the project
-   - a static inventory file
-   - pexpect passwords
-   - environment variables
-   - the `ansible`/`ansible-playbook` command invocation, _i.e._, `ansible-playbook -i /path/to/inventory /path/to/playbook.yml -e ...`
-
-* Once the metadata has been `rsync`ed to the isolated host, the "controller instance" starts a process on the "isolated" instance which consumes the metadata and starts running `ansible`/`ansible-playbook`.  As the playbook runs, job artifacts (such as `stdout` and job events) are written to disk on the "isolated" instance.
-
-* While the job runs on the "isolated" instance, the "controller" instance periodically copies job artifacts (`stdout` and job events) from the "isolated" instance using `rsync`.  It consumes these until the job finishes running on the "isolated" instance.
-
-Isolated groups are architected such that they may exist inside of a VPC with security rules that _only_ permit the instances in its `controller` group to access them; only ingress SSH traffic from "controller" instances to "isolated" instances is required.
-
-Recommendations for system configuration with isolated groups:
- - Do not create a group named `isolated_group_tower`.
- - Do not put any isolated instances inside the `tower` group or other ordinary instance groups.
- - Define the `controller` variable as either a group var or as a hostvar on all the instances in the isolated group. Please _do not_ allow isolated instances in the same group have a different value for this variable - the behavior in this case can not be predicted.
- - Do not put an isolated instance in more than one isolated group.
-
-
-Isolated Instance Authentication
---------------------------------
-At installation time, by default, a randomized RSA key is generated and distributed as an authorized key to all "isolated" instances.  The private half of the key is encrypted and stored within Tower, and is used to authenticate from "controller" instances to "isolated" instances when jobs are run.
-
-For users who wish to manage SSH authentication from controlling instances to isolated instances via some system _outside_ of Tower (such as externally-managed, password-less SSH keys), this behavior can be disabled by unsetting two Tower API settings values:
-
-`HTTP PATCH /api/v2/settings/jobs/ {'AWX_ISOLATED_PRIVATE_KEY': '', 'AWX_ISOLATED_PUBLIC_KEY': ''}`
-
-
 ### Provisioning and Deprovisioning Instances and Groups
 
 * **Provisioning** - Provisioning Instances after installation is supported by updating the `inventory` file and re-running the setup playbook. It's important that this file contain all passwords and information used when installing the cluster, or other instances may be reconfigured (this can be done intentionally).
 
-* **Deprovisioning** - Tower does not automatically de-provision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure. Instead, the procedure for de-provisioning an instance is to shut it down (or stop the `automation-controller-service`) and run the Tower de-provision command:
+* **Deprovisioning** - AWX does not automatically de-provision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure. Instead, the procedure for de-provisioning an instance is to shut it down (or stop the `automation-controller-service`) and run the AWX de-provision command:
 
 ```
 $ awx-manage deprovision_instance --hostname=<hostname>
 ```
 
-* **Removing/Deprovisioning Instance Groups** - Tower does not automatically de-provision or remove instance groups, even though re-provisioning will often cause these to be unused. They may still show up in API endpoints and stats monitoring. These groups can be removed with the following command:
+* **Removing/Deprovisioning Instance Groups** - AWX does not automatically de-provision or remove instance groups, even though re-provisioning will often cause these to be unused. They may still show up in API endpoints and stats monitoring. These groups can be removed with the following command:
 
 ```
 $ awx-manage unregister_queue --queuename=<name>
@@ -158,12 +101,12 @@ An `Instance` that is added to an `InstanceGroup` will automatically reconfigure
 
 ### Instance Group Policies
 
-Tower `Instances` can be configured to automatically join `Instance Groups` when they come online by defining a policy. These policies are evaluated for
+AWX `Instances` can be configured to automatically join `Instance Groups` when they come online by defining a policy. These policies are evaluated for
 every new Instance that comes online.
 
 Instance Group Policies are controlled by three optional fields on an `Instance Group`:
 
-* `policy_instance_percentage`: This is a number between 0 - 100. It guarantees that this percentage of active Tower instances will be added to this `Instance Group`. As new instances come online, if the number of Instances in this group relative to the total number of instances is fewer than the given percentage, then new ones will be added until the percentage condition is satisfied.
+* `policy_instance_percentage`: This is a number between 0 - 100. It guarantees that this percentage of active AWX instances will be added to this `Instance Group`. As new instances come online, if the number of Instances in this group relative to the total number of instances is fewer than the given percentage, then new ones will be added until the percentage condition is satisfied.
 * `policy_instance_minimum`: This policy attempts to keep at least this many `Instances` in the `Instance Group`. If the number of available instances is lower than this minimum, then all `Instances` will be placed in this `Instance Group`.
 * `policy_instance_list`: This is a fixed list of `Instance` names to always include in this `Instance Group`.
 
@@ -200,7 +143,7 @@ HTTP PATCH /api/v2/instances/X/
 
 ### Status and Monitoring
 
-Tower itself reports as much status as it can via the API at `/api/v2/ping` in order to provide validation of the health of the Cluster. This includes:
+AWX itself reports as much status as it can via the API at `/api/v2/ping` in order to provide validation of the health of the Cluster. This includes:
 
 * The instance servicing the HTTP request.
 * The last heartbeat time of all other instances in the cluster.
@@ -212,25 +155,25 @@ information can be seen at `/api/v2/instances/` and `/api/v2/instance_groups`.
 
 ### Instance Services and Failure Behavior
 
-Each Tower instance is made up of several different services working collaboratively:
+Each AWX instance is made up of several different services working collaboratively:
 
-* **HTTP Services** - This includes the Tower application itself as well as external web services.
+* **HTTP Services** - This includes the AWX application itself as well as external web services.
 * **Callback Receiver** - Receives job events that result from running Ansible jobs.
 * **Celery** - The worker queue that processes and runs all jobs.
 * **Redis** - this is used as a queue for AWX to process ansible playbook callback events.
 
-Tower is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
+AWX is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
 
 
 ### Job Runtime Behavior
 
-Ideally a regular user of Tower should not notice any semantic difference to the way jobs are run and reported. Behind the scenes it is worth pointing out the differences in how the system behaves.
+Ideally a regular user of AWX should not notice any semantic difference to the way jobs are run and reported. Behind the scenes it is worth pointing out the differences in how the system behaves.
 
-When a job is submitted from the API interface, it gets pushed into the dispatcher queue via postgres notify/listen (https://www.postgresql.org/docs/10/sql-notify.html), and the task is handled by the dispatcher process running on that specific Tower node.  If an instance fails while executing jobs, then the work is marked as permanently failed.
+When a job is submitted from the API interface, it gets pushed into the dispatcher queue via postgres notify/listen (https://www.postgresql.org/docs/10/sql-notify.html), and the task is handled by the dispatcher process running on that specific AWX node.  If an instance fails while executing jobs, then the work is marked as permanently failed.
 
 If a cluster is divided into separate Instance Groups, then the behavior is similar to the cluster as a whole. If two instances are assigned to a group then either one is just as likely to receive a job as any other in the same group.
 
-As Tower instances are brought online, it effectively expands the work capacity of the Tower system. If those instances are also placed into Instance Groups, then they also expand that group's capacity. If an instance is performing work and it is a member of multiple groups, then capacity will be reduced from all groups for which it is a member. De-provisioning an instance will remove capacity from the cluster wherever that instance was assigned.
+As AWX instances are brought online, it effectively expands the work capacity of the AWX system. If those instances are also placed into Instance Groups, then they also expand that group's capacity. If an instance is performing work and it is a member of multiple groups, then capacity will be reduced from all groups for which it is a member. De-provisioning an instance will remove capacity from the cluster wherever that instance was assigned.
 
 It's important to note that not all instances are required to be provisioned with an equal capacity.
 
@@ -275,8 +218,8 @@ When this property is disabled, no jobs will be assigned to that `Instance`. Exi
 
 When verifying acceptance, we should ensure that the following statements are true:
 
-* Tower should install as a standalone Instance
-* Tower should install in a Clustered fashion
+* AWX should install as a standalone Instance
+* AWX should install in a Clustered fashion
 * Instances should, optionally, be able to be grouped arbitrarily into different Instance Groups
 * Capacity should be tracked at the group level and capacity impact should make sense relative to what instance a job is running on and what groups that instance is a member of
 * Provisioning should be supported via the setup playbook
@@ -284,8 +227,8 @@ When verifying acceptance, we should ensure that the following statements are tr
 * All jobs, inventory updates, and project updates should run successfully
 * Jobs should be able to run on hosts for which they are targeted; if assigned implicitly or directly to groups, then they should only run on instances in those Instance Groups
 * Project updates should manifest their data on the host that will run the job immediately prior to the job running
-* Tower should be able to reasonably survive the removal of all instances in the cluster
-* Tower should behave in a predictable fashion during network partitioning
+* AWX should be able to reasonably survive the removal of all instances in the cluster
+* AWX should behave in a predictable fashion during network partitioning
 
 ## Testing Considerations
 

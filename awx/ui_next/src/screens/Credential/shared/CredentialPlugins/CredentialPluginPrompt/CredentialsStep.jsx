@@ -1,15 +1,18 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { CredentialsAPI } from '../../../../../api';
 import CheckboxListItem from '../../../../../components/CheckboxListItem';
 import ContentError from '../../../../../components/ContentError';
 import DataListToolbar from '../../../../../components/DataListToolbar';
-import PaginatedDataList from '../../../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../../../util/qs';
 import useRequest from '../../../../../util/useRequest';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../../../components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,
@@ -18,7 +21,7 @@ const QS_CONFIG = getQSConfig('credential', {
   credential_type__kind: 'external',
 });
 
-function CredentialsStep({ i18n }) {
+function CredentialsStep() {
   const [selectedCredential, , selectedCredentialHelper] = useField(
     'credential'
   );
@@ -59,15 +62,20 @@ function CredentialsStep({ i18n }) {
   }
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={credentialsError}
       hasContentLoading={isCredentialsLoading}
       itemCount={count}
       items={credentials}
-      onRowClick={row => selectedCredentialHelper.setValue(row)}
       qsConfig={QS_CONFIG}
-      renderItem={credential => (
+      headerRow={
+        <HeaderRow isExpandable={false} qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(credential, index) => (
         <CheckboxListItem
+          rowIndex={index}
           isSelected={selectedCredential?.value?.id === credential.id}
           itemId={credential.id}
           key={credential.id}
@@ -82,23 +90,17 @@ function CredentialsStep({ i18n }) {
       showPageSizeOptions={false}
       toolbarSearchColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name__icontains',
           isDefault: true,
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: t`Created By (Username)`,
           key: 'created_by__username__icontains',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: t`Modified By (Username)`,
           key: 'modified_by__username__icontains',
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: i18n._(t`Name`),
-          key: 'name',
         },
       ]}
       toolbarSearchableKeys={searchableKeys}
@@ -107,4 +109,4 @@ function CredentialsStep({ i18n }) {
   );
 }
 
-export default withI18n()(CredentialsStep);
+export default CredentialsStep;

@@ -9,9 +9,13 @@ describe('<UserOrganizationListItem />', () => {
     let wrapper;
     act(() => {
       wrapper = mountWithContexts(
-        <UserOrganizationListItem
-          organization={{ name: 'foo', id: 1, description: 'Bar' }}
-        />
+        <table>
+          <tbody>
+            <UserOrganizationListItem
+              organization={{ name: 'foo', id: 1, description: 'Bar' }}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('UserOrganizationListItem').length).toBe(1);
@@ -20,20 +24,24 @@ describe('<UserOrganizationListItem />', () => {
     let wrapper;
     act(() => {
       wrapper = mountWithContexts(
-        <UserOrganizationListItem
-          organization={{ name: 'foo', id: 1, description: 'Bar' }}
-        />
+        <table>
+          <tbody>
+            <UserOrganizationListItem
+              organization={{ name: 'foo', id: 1, description: 'Bar' }}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
       wrapper
-        .find('DataListCell')
+        .find('Td')
         .at(0)
         .text()
     ).toBe('foo');
     expect(
       wrapper
-        .find('DataListCell')
+        .find('Td')
         .at(1)
         .text()
     ).toBe('Bar');

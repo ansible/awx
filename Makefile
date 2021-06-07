@@ -13,7 +13,6 @@ MANAGEMENT_COMMAND ?= awx-manage
 IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
 VERSION := $(shell cat VERSION)
-PYCURL_SSL_LIBRARY ?= openssl
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -28,7 +27,7 @@ DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
-SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio,pycurl
+SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
 VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0 wheel==0.36.2
@@ -174,12 +173,7 @@ init:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --instance_percent=100;\
-	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
-		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
-		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
-		$(MANAGEMENT_COMMAND) generate_isolated_key > /awx_devel/awx/main/isolated/authorized_keys; \
-	fi;
+	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --instance_percent=100;
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -277,7 +271,9 @@ black: reports
 	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
 .git/hooks/pre-commit:
-	@echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only --diff-filter=AM | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
+	@echo "if [ -x pre-commit.sh ]; then" > .git/hooks/pre-commit
+	@echo "    ./pre-commit.sh;" >> .git/hooks/pre-commit
+	@echo "fi" >> .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 
 genschema: reports
@@ -392,7 +388,7 @@ clean-ui:
 	rm -rf $(UI_BUILD_FLAG_FILE)
 
 awx/ui_next/node_modules:
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn install
+	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui_next --loglevel warn ci
 
 $(UI_BUILD_FLAG_FILE):
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
@@ -474,7 +470,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e cluster_node_count=$(CLUSTER_NODE_COUNT)
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml up $(COMPOSE_UP_OPTS)
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"

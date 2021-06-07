@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
@@ -12,7 +12,7 @@ import GitHubEnterpriseEdit from './GitHubEnterpriseEdit';
 import GitHubEnterpriseOrgEdit from './GitHubEnterpriseOrgEdit';
 import GitHubEnterpriseTeamEdit from './GitHubEnterpriseTeamEdit';
 
-function GitHub({ i18n }) {
+function GitHub() {
   const baseURL = '/settings/github';
   const baseRoute = useRouteMatch({ path: '/settings/github', exact: true });
   const categoryRoute = useRouteMatch({
@@ -55,7 +55,7 @@ function GitHub({ i18n }) {
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
               <Link to={`${baseURL}/default/details`}>
-                {i18n._(t`View GitHub Settings`)}
+                {t`View GitHub Settings`}
               </Link>
             </ContentError>
           </Route>
@@ -65,4 +65,4 @@ function GitHub({ i18n }) {
   );
 }
 
-export default withI18n()(GitHub);
+export default GitHub;

@@ -7,7 +7,7 @@ Job Slicing solves this problem by adding a Job Template field `job_slice_count`
 
 ## Implications for Job Execution
 
-When jobs are sliced, they can run on any Tower node; however, some may not run at the same time. Because of this, anything that relies on setting/sliced state (using modules such as `set_fact`) will not work as expected. It's reasonable to expect that not all jobs will actually run at the same time (*e.g.*, if there is not enough capacity in the system)
+When jobs are sliced, they can run on any AWX node; however, some may not run at the same time. Because of this, anything that relies on setting/sliced state (using modules such as `set_fact`) will not work as expected. It's reasonable to expect that not all jobs will actually run at the same time (*e.g.*, if there is not enough capacity in the system)
 
 
 ## Simultaneous Execution Behavior

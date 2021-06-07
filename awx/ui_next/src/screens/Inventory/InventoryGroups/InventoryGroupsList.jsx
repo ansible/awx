@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
@@ -8,9 +7,11 @@ import useSelected from '../../../util/useSelected';
 import useRequest from '../../../util/useRequest';
 import { InventoriesAPI } from '../../../api';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
@@ -27,9 +28,10 @@ function cannotDelete(item) {
   return !item.summary_fields.user_capabilities.delete;
 }
 
-function InventoryGroupsList({ i18n }) {
+function InventoryGroupsList() {
   const location = useLocation();
   const { id: inventoryId } = useParams();
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
 
   const {
     result: {
@@ -75,9 +77,13 @@ function InventoryGroupsList({ i18n }) {
     fetchData();
   }, [fetchData]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    groups
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(groups);
 
   const renderTooltip = () => {
     const itemsUnableToDelete = selected
@@ -88,16 +94,14 @@ function InventoryGroupsList({ i18n }) {
     if (selected.some(cannotDelete)) {
       return (
         <div>
-          {i18n._(
-            t`You do not have permission to delete the following Groups: ${itemsUnableToDelete}`
-          )}
+          {t`You do not have permission to delete the following Groups: ${itemsUnableToDelete}`}
         </div>
       );
     }
     if (selected.length) {
-      return i18n._(t`Delete`);
+      return t`Delete`;
     }
-    return i18n._(t`Select a row to delete`);
+    return t`Select a row to delete`;
   };
 
   const canAdd =
@@ -105,52 +109,53 @@ function InventoryGroupsList({ i18n }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
         itemCount={groupCount}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Group type`),
+            name: t`Group type`,
             key: 'parents__isnull',
             isBoolean: true,
             booleanLabels: {
-              true: i18n._(t`Show only root groups`),
-              false: i18n._(t`Show all groups`),
+              true: t`Show only root groups`,
+              false: t`Show all groups`,
             },
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
-          },
-        ]}
-        toolbarSortColumns={[
-          {
-            name: i18n._(t`Name`),
-            key: 'name',
           },
         ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={item => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(item, index) => (
           <InventoryGroupItem
             key={item.id}
             group={item}
             inventoryId={inventoryId}
             isSelected={selected.some(row => row.id === item.id)}
             onSelect={() => handleSelect(item)}
+            rowIndex={index}
           />
         )}
         renderToolbar={props => (
@@ -158,9 +163,7 @@ function InventoryGroupsList({ i18n }) {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...groups] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -174,6 +177,7 @@ function InventoryGroupsList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={groupCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <Tooltip content={renderTooltip()} position="top" key="delete">
                 <InventoryGroupsDeleteModal
@@ -183,7 +187,7 @@ function InventoryGroupsList({ i18n }) {
                   }
                   onAfterDelete={() => {
                     fetchData();
-                    setSelected([]);
+                    clearSelected();
                   }}
                 />
               </Tooltip>,
@@ -202,4 +206,4 @@ function InventoryGroupsList({ i18n }) {
     </>
   );
 }
-export default withI18n()(InventoryGroupsList);
+export default InventoryGroupsList;

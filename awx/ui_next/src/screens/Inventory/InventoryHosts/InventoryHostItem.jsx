@@ -1,84 +1,57 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 
 import HostToggle from '../../../components/HostToggle';
-import Sparkline from '../../../components/Sparkline';
 import { Host } from '../../../types';
 
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 24px;
-  grid-template-columns: min-content 40px;
-`;
-
-function InventoryHostItem(props) {
-  const { detailUrl, editUrl, host, i18n, isSelected, onSelect } = props;
-
-  const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
-    ...job,
-    type: 'job',
-  }));
-
+function InventoryHostItem({
+  detailUrl,
+  editUrl,
+  host,
+  isSelected,
+  onSelect,
+  rowIndex,
+}) {
   const labelId = `check-action-${host.id}`;
 
   return (
-    <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-host-${host.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="divider">
-              <Link to={`${detailUrl}`}>
-                <b>{host.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="recentJobs">
-              <Sparkline jobs={recentPlaybookJobs} />
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`host-row-${host.id}`}>
+      <Td
+        data-cy={labelId}
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+      />
+      <Td id={labelId} dataLabel={t`Name`}>
+        <Link to={`${detailUrl}`}>
+          <b>{host.name}</b>
+        </Link>
+      </Td>
+      <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
+        <HostToggle host={host} />
+        <ActionItem
+          visible={host.summary_fields.user_capabilities?.edit}
+          tooltip={t`Edit host`}
         >
-          <HostToggle host={host} />
-          {host.summary_fields.user_capabilities?.edit && (
-            <Tooltip content={i18n._(t`Edit Host`)} position="top">
-              <Button
-                ouiaId={`${host.id}-edit-button`}
-                variant="plain"
-                component={Link}
-                to={`${editUrl}`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            ouiaId={`${host.id}-edit-button`}
+            variant="plain"
+            component={Link}
+            to={`${editUrl}`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 
@@ -89,4 +62,4 @@ InventoryHostItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(InventoryHostItem);
+export default InventoryHostItem;

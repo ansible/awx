@@ -62,26 +62,39 @@ npm --prefix awx/ui_next run test -- --coverage
 - All commands are run on your host machine and not in the api development containers.
 
 
-## Adding Dependencies
+## Updating Dependencies
+It is not uncommon to run the ui development tooling outside of the awx development
+container. That said, dependencies should always be modified from within the
+container to ensure consistency.
+
 ```shell
-# add an exact development or build dependency
-npm --prefix awx/ui_next install --save-dev --save-exact dev-package@1.2.3
+# make sure the awx development container is running and open a shell
+docker exec -it tools_awx_1 bash
+
+# start with a fresh install of the current dependencies
+(tools_awx_1)$ make clean-ui && npm --prefix=awx/ui_next ci
+
+# add an exact development dependency
+(tools_awx_1)$ npm --prefix awx/ui_next install --save-dev --save-exact dev-package@1.2.3
 
 # add an exact production dependency
-npm --prefix awx/ui_next install --save --save-exact prod-package@1.23
+(tools_awx_1)$ npm --prefix awx/ui_next install --save --save-exact prod-package@1.23
+
+# remove a development dependency
+(tools_awx_1)$ npm --prefix awx/ui_next uninstall --save-dev dev-package
+
+# remove a production dependency
+(tools_awx_1)$ npm --prefix awx/ui_next uninstall --save prod-package
+
+# exit the container
+(tools_awx_1)$ exit
 
 # add the updated package.json and package-lock.json files to scm
 git add awx/ui_next_next/package.json awx/ui_next_next/package-lock.json
 ```
-
-## Removing Dependencies
-```shell
-# remove a development or build dependency
-npm --prefix awx/ui_next uninstall --save-dev dev-package
-
-# remove a production dependency
-npm --prefix awx/ui_next uninstall --save prod-package
-```
+#### Note:
+- Building the ui can use up a lot of resources. If you're running docker for mac or similar
+virtualization, the default memory limit may not be enough and you should increase it.
 
 ## Building for Production
 ```shell

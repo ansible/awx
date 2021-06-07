@@ -8,14 +8,22 @@ import {
   LabelsAPI,
   ExecutionEnvironmentsAPI,
   UsersAPI,
+  InventoriesAPI,
 } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
+import useDebounce from '../../../util/useDebounce';
 
-jest.mock('../../../api');
+jest.mock('../../../util/useDebounce');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/Users');
+jest.mock('../../../api/models/Inventories');
 
 const mockTemplate = {
   id: 6,
@@ -66,17 +74,39 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         ],
       },
     });
-    OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
+
+    InventoriesAPI.read.mockResolvedValue({
+      data: {
+        results: [],
+        count: 0,
+      },
+    });
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+
+    OrganizationsAPI.read.mockResolvedValue({
+      data: { results: [{ id: 1, name: 'Default' }], count: 1 },
+    });
+    OrganizationsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
       data: {
         results: mockExecutionEnvironment,
         count: 1,
       },
     });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
 
     UsersAPI.readAdminOfOrganizations.mockResolvedValue({
-      data: { count: 1, results: [{ id: 1 }] },
+      data: { count: 1, results: [{ id: 1, name: 'Default' }] },
     });
+
+    useDebounce.mockImplementation(fn => fn);
 
     await act(async () => {
       history = createMemoryHistory({
@@ -120,7 +150,9 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         .find('SelectToggle')
         .simulate('click');
       wrapper.update();
-      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
+      wrapper.find('TextInput#execution-environments-input').invoke('onChange')(
+        ''
+      );
       wrapper.find('input#wfjt-description').simulate('change', {
         target: { value: 'main', name: 'scm_branch' },
       });
@@ -130,6 +162,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     });
 
     wrapper.update();
+
     await waitForElement(
       wrapper,
       'SelectOption button[aria-label="Label 3"]',

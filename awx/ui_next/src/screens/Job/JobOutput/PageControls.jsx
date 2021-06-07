@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button as PFButton } from '@patternfly/react-core';
 import {
@@ -25,7 +25,6 @@ const Button = styled(PFButton)`
 `;
 
 const PageControls = ({
-  i18n,
   onScrollFirst,
   onScrollLast,
   onScrollNext,
@@ -34,7 +33,7 @@ const PageControls = ({
   <Wrapper>
     <Button
       ouiaId="job-output-expand-collapse-lines-button"
-      aria-label={i18n._(t`Toggle expand/collapse event lines`)}
+      aria-label={t`Toggle expand/collapse event lines`}
       variant="plain"
       css="margin-right: auto"
     >
@@ -42,7 +41,7 @@ const PageControls = ({
     </Button>
     <Button
       ouiaId="job-output-scroll-previous-button"
-      aria-label={i18n._(t`Scroll previous`)}
+      aria-label={t`Scroll previous`}
       onClick={onScrollPrevious}
       variant="plain"
     >
@@ -50,7 +49,7 @@ const PageControls = ({
     </Button>
     <Button
       ouiaId="job-output-scroll-next-button"
-      aria-label={i18n._(t`Scroll next`)}
+      aria-label={t`Scroll next`}
       onClick={onScrollNext}
       variant="plain"
     >
@@ -58,7 +57,7 @@ const PageControls = ({
     </Button>
     <Button
       ouiaId="job-output-scroll-first-button"
-      aria-label={i18n._(t`Scroll first`)}
+      aria-label={t`Scroll first`}
       onClick={onScrollFirst}
       variant="plain"
     >
@@ -66,7 +65,7 @@ const PageControls = ({
     </Button>
     <Button
       ouiaId="job-output-scroll-last-button"
-      aria-label={i18n._(t`Scroll last`)}
+      aria-label={t`Scroll last`}
       onClick={onScrollLast}
       variant="plain"
     >
@@ -75,4 +74,4 @@ const PageControls = ({
   </Wrapper>
 );
 
-export default withI18n()(PageControls);
+export default PageControls;

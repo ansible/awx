@@ -1,7 +1,0 @@
----
-version: 2
-updates:
-  - package-ecosystem: "pip"
-    directory: "/requirements"
-    schedule:
-      interval: "monthly"

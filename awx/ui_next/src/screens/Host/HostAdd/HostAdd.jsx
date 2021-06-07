@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-
 import HostForm from '../../../components/HostForm';
 import { CardBody } from '../../../components/Card';
 import { HostsAPI } from '../../../api';
@@ -12,7 +11,11 @@ function HostAdd() {
 
   const handleSubmit = async formData => {
     try {
-      const { data: response } = await HostsAPI.create(formData);
+      const dataToSend = { ...formData };
+      if (dataToSend.inventory) {
+        dataToSend.inventory = dataToSend.inventory.id;
+      }
+      const { data: response } = await HostsAPI.create(dataToSend);
       history.push(`/hosts/${response.id}/details`);
     } catch (error) {
       setFormError(error);

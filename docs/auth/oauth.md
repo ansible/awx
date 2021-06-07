@@ -1,5 +1,5 @@
 ## Introduction
-Starting from Tower 3.3, OAuth2 will be used as the new means of token-based authentication. Users
+OAuth2 is the AWX means of token-based authentication. Users
 will be able to manage OAuth2 tokens as well as applications, a server-side representation of API
 clients used to generate tokens. With OAuth2, a user can authenticate by passing a token as part of
 the HTTP authentication header. The token can be scoped to have more restrictive permissions on top of
@@ -166,7 +166,7 @@ For an OAuth2 token, the only fully mutable fields are `scope` and `description`
 field is *immutable on update*, and all other fields are totally immutable, and will be auto-populated
 during creation.
 * `user` - this field corresponds to the user the token is created for
-* `expires` will be generated according to Tower configuration setting `OAUTH2_PROVIDER`
+* `expires` will be generated according to the configuration setting `OAUTH2_PROVIDER`
 * `token` and `refresh_token` will be auto-generated to be non-clashing random strings.  
 
 Both application tokens and personal access tokens will be shown at the `/api/v2/tokens/`
@@ -398,6 +398,6 @@ at `/api/v2/tokens/`.
 * Incoming requests using unexpired OAuth2 token correctly in authentication header should be able
   to successfully authenticate themselves.
 * Token scope mask over RBAC should work as described.
-* Tower configuration setting `OAUTH2_PROVIDER` should be configurable and function as described.
+* AWX configuration setting `OAUTH2_PROVIDER` should be configurable and function as described.
 * `/api/o/` endpoint should work as expected. In specific, all examples given in the description
   help text should be working (a user following the steps should get expected result).

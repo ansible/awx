@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
 
 import {
   Switch,
@@ -20,7 +19,6 @@ import { SchedulesAPI } from '../../api';
 import useRequest from '../../util/useRequest';
 
 function Schedule({
-  i18n,
   setBreadcrumb,
   resource,
   launchConfig,
@@ -58,14 +56,14 @@ function Schedule({
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Schedules`)}
+          {t`Back to Schedules`}
         </>
       ),
       link: `${pathRoot}schedules`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `${pathRoot}schedules/${schedule && schedule.id}/details`,
       id: 0,
     },
@@ -82,7 +80,7 @@ function Schedule({
     return (
       <ContentError>
         {schedule && (
-          <Link to={`${pathRoot}schedules`}>{i18n._(t`View Schedules`)}</Link>
+          <Link to={`${pathRoot}schedules`}>{t`View Schedules`}</Link>
         )}
       </ContentError>
     );
@@ -132,7 +130,7 @@ function Schedule({
         <Route key="not-found" path="*">
           <ContentError>
             {resource && (
-              <Link to={`${pathRoot}details`}>{i18n._(t`View Details`)}</Link>
+              <Link to={`${pathRoot}details`}>{t`View Details`}</Link>
             )}
           </ContentError>
         </Route>
@@ -142,4 +140,4 @@ function Schedule({
 }
 
 export { Schedule as _Schedule };
-export default withI18n()(Schedule);
+export default Schedule;

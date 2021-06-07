@@ -76,9 +76,13 @@ function ExecutionEnvironmentList() {
     fetchExecutionEnvironments();
   }, [fetchExecutionEnvironments]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    executionEnvironments
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(executionEnvironments);
 
   const {
     isLoading: deleteLoading,
@@ -100,7 +104,7 @@ function ExecutionEnvironmentList() {
 
   const handleDelete = async () => {
     await deleteExecutionEnvironments();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd = actions && actions.POST;
@@ -119,7 +123,7 @@ function ExecutionEnvironmentList() {
             itemCount={executionEnvironmentsCount}
             pluralizedItemName={t`Execution Environments`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             toolbarSearchColumns={[
@@ -164,14 +168,13 @@ function ExecutionEnvironmentList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={isSelected =>
-                  setSelected(isSelected ? [...executionEnvironments] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
                     ? [
                         <ToolbarAddButton
+                          ouiaId="add-execution-environment"
                           key="add"
                           linkTo={`${match.url}/add`}
                         />,

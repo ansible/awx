@@ -30,9 +30,6 @@ function JobsEdit() {
       const { data } = await SettingsAPI.readCategory('jobs');
       const {
         ALLOW_JINJA_IN_EXTRA_VARS,
-        AWX_ISOLATED_KEY_GENERATION,
-        AWX_ISOLATED_PRIVATE_KEY,
-        AWX_ISOLATED_PUBLIC_KEY,
         EVENT_STDOUT_MAX_BYTES_DISPLAY,
         STDOUT_MAX_BYTES_DISPLAY,
         ...jobsData
@@ -169,27 +166,6 @@ function JobsEdit() {
                   <BooleanField
                     name="AWX_SHOW_PLAYBOOK_LINKS"
                     config={jobs.AWX_SHOW_PLAYBOOK_LINKS}
-                  />
-                  <BooleanField
-                    name="AWX_ISOLATED_HOST_KEY_CHECKING"
-                    config={jobs.AWX_ISOLATED_HOST_KEY_CHECKING}
-                  />
-                  <InputField
-                    name="AWX_ISOLATED_CHECK_INTERVAL"
-                    config={jobs.AWX_ISOLATED_CHECK_INTERVAL}
-                    type="number"
-                    isRequired
-                  />
-                  <InputField
-                    name="AWX_ISOLATED_LAUNCH_TIMEOUT"
-                    config={jobs.AWX_ISOLATED_LAUNCH_TIMEOUT}
-                    type="number"
-                    isRequired
-                  />
-                  <InputField
-                    name="AWX_ISOLATED_CONNECTION_TIMEOUT"
-                    config={jobs.AWX_ISOLATED_CONNECTION_TIMEOUT}
-                    type="number"
                   />
                   <ObjectField
                     name="AD_HOC_COMMANDS"

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import { PageSection, Card } from '@patternfly/react-core';
@@ -8,7 +8,7 @@ import ScreenHeader from '../../components/ScreenHeader';
 import { ScheduleList } from '../../components/Schedule';
 import { SchedulesAPI } from '../../api';
 
-function AllSchedules({ i18n }) {
+function AllSchedules() {
   const loadScheduleOptions = useCallback(() => {
     return SchedulesAPI.readOptions();
   }, []);
@@ -22,7 +22,7 @@ function AllSchedules({ i18n }) {
       <ScreenHeader
         streamType="schedule"
         breadcrumbConfig={{
-          '/schedules': i18n._(t`Schedules`),
+          '/schedules': t`Schedules`,
         }}
       />
       <Switch>
@@ -42,4 +42,4 @@ function AllSchedules({ i18n }) {
   );
 }
 
-export default withI18n()(AllSchedules);
+export default AllSchedules;

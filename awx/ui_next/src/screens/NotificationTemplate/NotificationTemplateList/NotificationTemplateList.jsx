@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Alert,
@@ -32,7 +32,7 @@ const QS_CONFIG = getQSConfig('notification-templates', {
   order_by: 'name',
 });
 
-function NotificationTemplatesList({ i18n }) {
+function NotificationTemplatesList() {
   const location = useLocation();
   const match = useRouteMatch();
   const [testToasts, setTestToasts] = useState([]);
@@ -82,9 +82,13 @@ function NotificationTemplatesList({ i18n }) {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    templates
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(templates);
 
   const {
     isLoading: isDeleteLoading,
@@ -106,7 +110,7 @@ function NotificationTemplatesList({ i18n }) {
 
   const handleDelete = async () => {
     await deleteTemplates();
-    setSelected([]);
+    clearSelected();
   };
 
   const addTestToast = useCallback(notification => {
@@ -120,6 +124,7 @@ function NotificationTemplatesList({ i18n }) {
   };
 
   const canAdd = actions && actions.POST;
+  const alertGroupDataCy = 'notification-template-alerts';
 
   return (
     <>
@@ -130,41 +135,41 @@ function NotificationTemplatesList({ i18n }) {
             hasContentLoading={isTemplatesLoading || isDeleteLoading}
             items={templates}
             itemCount={count}
-            pluralizedItemName={i18n._(t`Notification Templates`)}
+            pluralizedItemName={t`Notification Templates`}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
               {
-                name: i18n._(t`Notification type`),
+                name: t`Notification type`,
                 key: 'or__notification_type',
                 options: [
-                  ['email', i18n._(t`Email`)],
-                  ['grafana', i18n._(t`Grafana`)],
-                  ['hipchat', i18n._(t`Hipchat`)],
-                  ['irc', i18n._(t`IRC`)],
-                  ['mattermost', i18n._(t`Mattermost`)],
-                  ['pagerduty', i18n._(t`Pagerduty`)],
-                  ['rocketchat', i18n._(t`Rocket.Chat`)],
-                  ['slack', i18n._(t`Slack`)],
-                  ['twilio', i18n._(t`Twilio`)],
-                  ['webhook', i18n._(t`Webhook`)],
+                  ['email', t`Email`],
+                  ['grafana', t`Grafana`],
+                  ['hipchat', t`Hipchat`],
+                  ['irc', t`IRC`],
+                  ['mattermost', t`Mattermost`],
+                  ['pagerduty', t`Pagerduty`],
+                  ['rocketchat', t`Rocket.Chat`],
+                  ['slack', t`Slack`],
+                  ['twilio', t`Twilio`],
+                  ['webhook', t`Webhook`],
                 ],
               },
               {
-                name: i18n._(t`Created by (username)`),
+                name: t`Created by (username)`,
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified by (username)`),
+                name: t`Modified by (username)`,
                 key: 'modified_by__username__icontains',
               },
             ]}
@@ -175,7 +180,7 @@ function NotificationTemplatesList({ i18n }) {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={set => setSelected(set ? [...templates] : [])}
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
@@ -185,19 +190,17 @@ function NotificationTemplatesList({ i18n }) {
                     key="delete"
                     onDelete={handleDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName={i18n._(t`Notification Templates`)}
+                    pluralizedItemName={t`Notification Templates`}
                   />,
                 ]}
               />
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
-                <HeaderCell sortKey="notification_type">
-                  {i18n._(t`Type`)}
-                </HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Status`}</HeaderCell>
+                <HeaderCell sortKey="notification_type">{t`Type`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderRow={(template, index) => (
@@ -221,13 +224,13 @@ function NotificationTemplatesList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more notification template.`)}
+        {t`Failed to delete one or more notification template.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-      <AlertGroup ouiaId="notification-template-alerts" isToast>
+      <AlertGroup data-cy={alertGroupDataCy} isToast>
         {testToasts
           .filter(notification => notification.status !== 'pending')
           .map(notification => (
@@ -246,11 +249,11 @@ function NotificationTemplatesList({ i18n }) {
             >
               <>
                 {notification.status === 'successful' && (
-                  <p>{i18n._(t`Notification sent successfully`)}</p>
+                  <p>{t`Notification sent successfully`}</p>
                 )}
                 {notification.status === 'failed' &&
                   notification?.error === 'timed out' && (
-                    <p>{i18n._(t`Notification timed out`)}</p>
+                    <p>{t`Notification timed out`}</p>
                   )}
                 {notification.status === 'failed' &&
                   notification?.error !== 'timed out' && (
@@ -264,4 +267,4 @@ function NotificationTemplatesList({ i18n }) {
   );
 }
 
-export default withI18n()(NotificationTemplatesList);
+export default NotificationTemplatesList;

@@ -49,6 +49,7 @@ from awx.main.utils import (
     getattr_dne,
     polymorphic,
     schedule_task_manager,
+    get_event_partition_epoch,
 )
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -366,8 +367,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             for fd, val in eager_fields.items():
                 setattr(unified_job, fd, val)
 
-        unified_job.execution_environment = self.resolve_execution_environment()
-
         # NOTE: slice workflow jobs _get_parent_field_name method
         # is not correct until this is set
         if not parent_field_name:
@@ -588,7 +587,7 @@ class UnifiedJob(
         blank=True,
         default='',
         editable=False,
-        help_text=_("The instance that managed the isolated execution environment."),
+        help_text=_("The instance that managed the execution environment."),
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -736,10 +735,6 @@ class UnifiedJob(
     @classmethod
     def _get_task_class(cls):
         raise NotImplementedError  # Implement in subclasses.
-
-    @classmethod
-    def supports_isolation(cls):
-        return False
 
     @property
     def can_run_containerized(self):
@@ -996,8 +991,18 @@ class UnifiedJob(
             'main_systemjob': 'system_job_id',
         }[tablename]
 
+    @property
+    def has_unpartitioned_events(self):
+        applied = get_event_partition_epoch()
+        return applied and self.created and self.created < applied
+
     def get_event_queryset(self):
-        return self.event_class.objects.filter(**{self.event_parent_key: self.id})
+        kwargs = {
+            self.event_parent_key: self.id,
+        }
+        if not self.has_unpartitioned_events:
+            kwargs['job_created'] = self.created
+        return self.event_class.objects.filter(**kwargs)
 
     @property
     def event_processing_finished(self):
@@ -1083,13 +1088,15 @@ class UnifiedJob(
                 # .write() calls on the fly to maintain this interface
                 _write = fd.write
                 fd.write = lambda s: _write(smart_text(s))
+                tbl = self._meta.db_table + 'event'
+                created_by_cond = ''
+                if self.has_unpartitioned_events:
+                    tbl = f'_unpartitioned_{tbl}'
+                else:
+                    created_by_cond = f"job_created='{self.created.isoformat()}' AND "
 
-                cursor.copy_expert(
-                    "copy (select stdout from {} where {}={} and stdout != '' order by start_line) to stdout".format(
-                        self._meta.db_table + 'event', self.event_parent_key, self.id
-                    ),
-                    fd,
-                )
+                sql = f"copy (select stdout from {tbl} where {created_by_cond}{self.event_parent_key}={self.id} and stdout != '' order by start_line) to stdout"  # nosql
+                cursor.copy_expert(sql, fd)
 
                 if hasattr(fd, 'name'):
                     # If we're dealing with a physical file, use `sed` to clean
@@ -1402,12 +1409,11 @@ class UnifiedJob(
     @property
     def preferred_instance_groups(self):
         """
-        Return Instance/Rampart Groups preferred by this unified job templates
+        Return Instance/Rampart Groups preferred by this unified job template
         """
         if not self.unified_job_template:
             return []
-        template_groups = [x for x in self.unified_job_template.instance_groups.all()]
-        return template_groups
+        return list(self.unified_job_template.instance_groups.all())
 
     @property
     def global_instance_groups(self):
@@ -1466,9 +1472,6 @@ class UnifiedJob(
 
     def get_queue_name(self):
         return self.controller_node or self.execution_node or get_local_queuename()
-
-    def is_isolated(self):
-        return bool(self.controller_node)
 
     @property
     def is_container_group_task(self):

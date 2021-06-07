@@ -32,13 +32,7 @@ def unwrap_broadcast_msg(payload: dict):
 
 def get_broadcast_hosts():
     Instance = apps.get_model('main', 'Instance')
-    instances = (
-        Instance.objects.filter(rampart_groups__controller__isnull=True)
-        .exclude(hostname=Instance.objects.me().hostname)
-        .order_by('hostname')
-        .values('hostname', 'ip_address')
-        .distinct()
-    )
+    instances = Instance.objects.exclude(hostname=Instance.objects.me().hostname).order_by('hostname').values('hostname', 'ip_address').distinct()
     return {i['hostname']: i['ip_address'] or i['hostname'] for i in instances}
 
 

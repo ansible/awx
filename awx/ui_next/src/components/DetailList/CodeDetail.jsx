@@ -60,7 +60,7 @@ CodeDetail.propTypes = {
   label: node.isRequired,
   dataCy: string,
   helpText: string,
-  rows: oneOfType(number, string),
+  rows: oneOfType([number, string]),
   mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
 };
 CodeDetail.defaultProps = {

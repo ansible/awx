@@ -111,6 +111,21 @@ describe('<UIEdit />', () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
     expect(history.location.pathname).toEqual('/settings/ui/details');
+    expect(history.location.hardReload).toEqual(undefined);
+  });
+
+  test('should navigate to ui detail with reload param on successful submission where PENDO_TRACKING_STATE changes', async () => {
+    act(() => {
+      wrapper.find('select#PENDO_TRACKING_STATE').simulate('change', {
+        target: { value: 'off', name: 'CUSTOM_LOGIN_INFO' },
+      });
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('Form').invoke('onSubmit')();
+    });
+    expect(history.location.pathname).toEqual('/settings/ui/details');
+    expect(history.location.hardReload).toEqual(true);
   });
 
   test('should navigate to ui detail when cancel is clicked', async () => {

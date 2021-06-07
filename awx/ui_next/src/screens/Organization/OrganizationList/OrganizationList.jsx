@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -17,6 +17,7 @@ import PaginatedTable, {
   HeaderCell,
 } from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useSelected from '../../../util/useSelected';
 import OrganizationListItem from './OrganizationListItem';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
@@ -29,8 +30,6 @@ const QS_CONFIG = getQSConfig('organization', {
 function OrganizationsList() {
   const location = useLocation();
   const match = useRouteMatch();
-
-  const [selected, setSelected] = useState([]);
 
   const addUrl = `${match.url}/add`;
 
@@ -77,8 +76,14 @@ function OrganizationsList() {
     fetchOrganizations();
   }, [fetchOrganizations]);
 
-  const isAllSelected =
-    selected.length === organizations.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(organizations);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteOrganizations,
@@ -99,23 +104,12 @@ function OrganizationsList() {
 
   const handleOrgDelete = async () => {
     await deleteOrganizations();
-    setSelected([]);
+    clearSelected();
   };
 
   const hasContentLoading = isDeleteLoading || isOrgsLoading;
   const canAdd = actions && actions.POST;
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...organizations] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
   const deleteDetailsRequests = relatedResourceDeleteRequests.organization(
     selected[0]
   );
@@ -131,6 +125,7 @@ function OrganizationsList() {
             itemCount={organizationCount}
             pluralizedItemName={t`Organizations`}
             qsConfig={QS_CONFIG}
+            clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
                 name: t`Name`,
@@ -165,7 +160,7 @@ function OrganizationsList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd

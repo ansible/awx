@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { CardBody } from '../../../components/Card';
 import UserForm from '../shared/UserForm';
 import { UsersAPI } from '../../../api';
@@ -13,6 +13,7 @@ function UserEdit({ user }) {
   const handleSubmit = async values => {
     setFormSubmitError(null);
     try {
+      delete values.organization;
       await UsersAPI.update(user.id, values);
       history.push(`/users/${user.id}/details`);
     } catch (error) {
@@ -36,4 +37,4 @@ function UserEdit({ user }) {
   );
 }
 
-export default withI18n()(UserEdit);
+export default UserEdit;

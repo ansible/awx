@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Split,
@@ -30,7 +30,7 @@ function VariablesDetail({
   label,
   rows,
   fullHeight,
-  i18n,
+  name,
 }) {
   const [mode, setMode] = useState(
     isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
@@ -84,7 +84,7 @@ function VariablesDetail({
           setMode={setMode}
           currentValue={currentValue}
           onExpand={() => setIsExpanded(true)}
-          i18n={i18n}
+          name={name}
         />
       </DetailName>
       <DetailValue
@@ -107,7 +107,7 @@ function VariablesDetail({
             css="color: var(--pf-global--danger-color--100);
             font-size: var(--pf-global--FontSize--sm"
           >
-            {i18n._(t`Error:`)} {error.message}
+            {t`Error:`} {error.message}
           </div>
         )}
       </DetailValue>
@@ -118,13 +118,13 @@ function VariablesDetail({
         onClose={() => setIsExpanded(false)}
         actions={[
           <Button
-            aria-label={i18n._(t`Done`)}
+            aria-label={t`Done`}
             key="select"
             variant="primary"
             onClick={() => setIsExpanded(false)}
             ouiaId={`${dataCy}-unexpand`}
           >
-            {i18n._(t`Done`)}
+            {t`Done`}
           </Button>,
         ]}
       >
@@ -137,7 +137,7 @@ function VariablesDetail({
             mode={mode}
             setMode={setMode}
             currentValue={currentValue}
-            i18n={i18n}
+            name={name}
           />
           <CodeEditor
             id={`${dataCy}-preview-expanded`}
@@ -159,6 +159,7 @@ VariablesDetail.propTypes = {
   rows: oneOfType([number, string]),
   dataCy: string,
   helpText: string,
+  name: string.isRequired,
 };
 VariablesDetail.defaultProps = {
   rows: null,
@@ -174,7 +175,7 @@ function ModeToggle({
   mode,
   setMode,
   onExpand,
-  i18n,
+  name,
 }) {
   return (
     <Split hasGutter>
@@ -203,6 +204,7 @@ function ModeToggle({
               onChange={newMode => {
                 setMode(newMode);
               }}
+              name={name}
             />
           </SplitItem>
         </Split>
@@ -211,7 +213,7 @@ function ModeToggle({
         <SplitItem>
           <Button
             variant="plain"
-            aria-label={i18n._(t`Expand input`)}
+            aria-label={t`Expand input`}
             onClick={onExpand}
             ouiaId={`${dataCy}-expand`}
           >
@@ -223,4 +225,4 @@ function ModeToggle({
   );
 }
 
-export default withI18n()(VariablesDetail);
+export default VariablesDetail;

@@ -17,6 +17,7 @@ describe('<InventoryRelatedGroupListItem />', () => {
         group={mockGroup}
         isSelected={false}
         onSelect={() => {}}
+        rowIndex={0}
       />
     );
   });
@@ -26,12 +27,7 @@ describe('<InventoryRelatedGroupListItem />', () => {
   });
 
   test('should display expected row item content', () => {
-    expect(
-      wrapper
-        .find('DataListCell')
-        .first()
-        .text()
-    ).toBe(' Group 2 Inventory 0');
+    expect(wrapper.find('b').text()).toContain('Group 2 Inventory 0');
   });
 
   test('edit button shown to users with edit capabilities', () => {
@@ -46,6 +42,7 @@ describe('<InventoryRelatedGroupListItem />', () => {
         group={mockRelatedGroups.results[2]}
         isSelected={false}
         onSelect={() => {}}
+        rowIndex={0}
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();

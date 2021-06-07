@@ -45,6 +45,7 @@ from awx.main.models import (
     InventoryUpdateEvent,
     Job,
     JobEvent,
+    UnpartitionedJobEvent,
     JobHostSummary,
     JobLaunchConfig,
     JobTemplate,
@@ -1356,11 +1357,8 @@ class ExecutionEnvironmentAccess(BaseAccess):
             return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
         return self.check_related('organization', Organization, data, mandatory=True, role_field='execution_environment_admin_role')
 
+    @check_superuser
     def can_change(self, obj, data):
-        if obj.managed_by_tower:
-            raise PermissionDenied
-        if self.user.is_superuser:
-            return True
         if obj and obj.organization_id is None:
             raise PermissionDenied
         if self.user not in obj.organization.execution_environment_admin_role:
@@ -2355,6 +2353,11 @@ class JobEventAccess(BaseAccess):
         return False
 
 
+class UnpartitionedJobEventAccess(JobEventAccess):
+
+    model = UnpartitionedJobEvent
+
+
 class ProjectUpdateEventAccess(BaseAccess):
     """
     I can see project update event records whenever I can access the project update
@@ -2898,3 +2901,4 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 
 for cls in BaseAccess.__subclasses__():
     access_registry[cls.model] = cls
+access_registry[UnpartitionedJobEvent] = UnpartitionedJobEventAccess

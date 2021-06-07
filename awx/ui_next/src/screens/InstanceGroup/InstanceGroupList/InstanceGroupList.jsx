@@ -92,9 +92,13 @@ function InstanceGroupList() {
     fetchInstanceGroups();
   }, [fetchInstanceGroups]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    instanceGroups
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(instanceGroups);
 
   const modifiedSelected = modifyInstanceGroups(selected);
 
@@ -118,7 +122,7 @@ function InstanceGroupList() {
 
   const handleDelete = async () => {
     await deleteInstanceGroups();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd = actions && actions.POST;
@@ -157,9 +161,11 @@ function InstanceGroupList() {
 
   const addButton = (
     <AddDropDownButton
+      ouiaId="add-instance-group-button"
       key="add"
       dropdownItems={[
         <DropdownItem
+          ouiaId="add-container-group-item"
           to="/instance_groups/container_group/add"
           component={Link}
           key={addContainerGroup}
@@ -168,6 +174,7 @@ function InstanceGroupList() {
           {addContainerGroup}
         </DropdownItem>,
         <DropdownItem
+          ouiaId="add-instance-group-item"
           to="/instance_groups/add"
           component={Link}
           key={addInstanceGroup}
@@ -198,7 +205,7 @@ function InstanceGroupList() {
             itemCount={instanceGroupsCount}
             pluralizedItemName={pluralizedItemName}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
+            clearSelected={clearSelected}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
@@ -206,9 +213,7 @@ function InstanceGroupList() {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={isSelected =>
-                  setSelected(isSelected ? [...instanceGroups] : [])
-                }
+                onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd ? [addButton] : []),

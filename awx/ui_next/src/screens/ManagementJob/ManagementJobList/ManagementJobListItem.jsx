@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Tooltip } from '@patternfly/react-core';
@@ -13,7 +13,6 @@ import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import LaunchManagementPrompt from './LaunchManagementPrompt';
 
 function ManagementJobListItem({
-  i18n,
   onLaunchError,
   isPrompted,
   isSuperUser,
@@ -65,17 +64,14 @@ function ManagementJobListItem({
     <>
       <Tr id={`mgmt-jobs-row-${jobType ? jobType.replace('_', '-') : ''}`}>
         <Td />
-        <Td dataLabel={i18n._(t`Name`)}>
+        <Td dataLabel={t`Name`}>
           <Link to={`${detailsUrl}`}>
             <b>{name}</b>
           </Link>
         </Td>
-        <Td dataLabel={i18n._(t`Description`)}>{description}</Td>
-        <ActionsTd dataLabel={i18n._(t`Actions`)}>
-          <ActionItem
-            visible={isSuperUser}
-            tooltip={i18n._(t`Launch Management Job`)}
-          >
+        <Td dataLabel={t`Description`}>{description}</Td>
+        <ActionsTd dataLabel={t`Actions`}>
+          <ActionItem visible={isSuperUser} tooltip={t`Launch Management Job`}>
             {isSuperUser ? (
               <>
                 {isPrompted ? (
@@ -90,13 +86,10 @@ function ManagementJobListItem({
                     />
                   </>
                 ) : (
-                  <Tooltip
-                    content={i18n._(t`Launch management job`)}
-                    position="top"
-                  >
+                  <Tooltip content={t`Launch management job`} position="top">
                     <Button
                       ouiaId={`${id}-launch-button`}
-                      aria-label={i18n._(t`Launch management job`)}
+                      aria-label={t`Launch management job`}
                       variant="plain"
                       onClick={handleLaunch}
                       isDisabled={isLaunchLoading}
@@ -115,8 +108,8 @@ function ManagementJobListItem({
           isOpen={managementPromptError}
           variant="danger"
           onClose={() => setManagementPromptError(null)}
-          title={i18n._(t`Management job launch error`)}
-          label={i18n._(t`Management job launch error`)}
+          title={t`Management job launch error`}
+          label={t`Management job launch error`}
         >
           <ErrorDetail error={managementPromptError} />
         </AlertModal>
@@ -125,4 +118,4 @@ function ManagementJobListItem({
   );
 }
 
-export default withI18n()(ManagementJobListItem);
+export default ManagementJobListItem;

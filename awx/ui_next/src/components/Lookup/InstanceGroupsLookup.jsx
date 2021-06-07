@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { arrayOf, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from '../../api';
@@ -19,17 +19,16 @@ const QS_CONFIG = getQSConfig('instance-groups', {
   order_by: 'name',
 });
 
-function InstanceGroupsLookup(props) {
-  const {
-    value,
-    onChange,
-    tooltip,
-    className,
-    required,
-    history,
-    i18n,
-  } = props;
-
+function InstanceGroupsLookup({
+  value,
+  onChange,
+  tooltip,
+  className,
+  required,
+  history,
+  fieldName,
+  validate,
+}) {
   const {
     result: { instanceGroups, count, relatedSearchableKeys, searchableKeys },
     request: fetchInstanceGroups,
@@ -68,15 +67,17 @@ function InstanceGroupsLookup(props) {
   return (
     <FormGroup
       className={className}
-      label={i18n._(t`Instance Groups`)}
+      label={t`Instance Groups`}
       labelIcon={tooltip && <Popover content={tooltip} />}
       fieldId="org-instance-groups"
     >
       <Lookup
         id="org-instance-groups"
-        header={i18n._(t`Instance Groups`)}
+        header={t`Instance Groups`}
         value={value}
         onChange={onChange}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         multiple
         required={required}
@@ -88,25 +89,25 @@ function InstanceGroupsLookup(props) {
             optionCount={count}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Credential Name`),
+                name: t`Credential Name`,
                 key: 'credential__name__icontains',
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
             ]}
             searchableKeys={searchableKeys}
             relatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
-            header={i18n._(t`Instance Groups`)}
+            header={t`Instance Groups`}
             name="instanceGroups"
             qsConfig={QS_CONFIG}
             readOnly={!canDelete}
@@ -126,12 +127,16 @@ InstanceGroupsLookup.propTypes = {
   onChange: func.isRequired,
   className: string,
   required: bool,
+  validate: func,
+  fieldName: string,
 };
 
 InstanceGroupsLookup.defaultProps = {
   tooltip: '',
   className: '',
   required: false,
+  validate: () => undefined,
+  fieldName: 'instance_groups',
 };
 
-export default withI18n()(withRouter(InstanceGroupsLookup));
+export default withRouter(InstanceGroupsLookup);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t, Trans } from '@lingui/macro';
 import { Button, Label } from '@patternfly/react-core';
 import {
@@ -18,7 +18,7 @@ import {
   secondsToDays,
 } from '../../../../util/dates';
 
-function SubscriptionDetail({ i18n }) {
+function SubscriptionDetail() {
   const { license_info, version } = useConfig();
   const baseURL = '/settings/subscription';
   const tabsArray = [
@@ -26,14 +26,14 @@ function SubscriptionDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: '/settings',
       id: 99,
     },
     {
-      name: i18n._(t`Subscription Details`),
+      name: t`Subscription Details`,
       link: `${baseURL}/details`,
       id: 0,
     },
@@ -46,11 +46,11 @@ function SubscriptionDetail({ i18n }) {
         <DetailList>
           <Detail
             dataCy="subscription-status"
-            label={i18n._(t`Status`)}
+            label={t`Status`}
             value={
               license_info.compliant ? (
                 <Label variant="outline" color="green" icon={<CheckIcon />}>
-                  {i18n._(t`Compliant`)}
+                  {t`Compliant`}
                 </Label>
               ) : (
                 <Label
@@ -58,34 +58,34 @@ function SubscriptionDetail({ i18n }) {
                   color="red"
                   icon={<ExclamationCircleIcon />}
                 >
-                  {i18n._(t`Out of compliance`)}
+                  {t`Out of compliance`}
                 </Label>
               )
             }
           />
           <Detail
             dataCy="subscription-version"
-            label={i18n._(t`Version`)}
+            label={t`Version`}
             value={version}
           />
           <Detail
             dataCy="subscription-type"
-            label={i18n._(t`Subscription type`)}
+            label={t`Subscription type`}
             value={license_info.license_type}
           />
           <Detail
             dataCy="subscription-name"
-            label={i18n._(t`Subscription`)}
+            label={t`Subscription`}
             value={license_info.subscription_name}
           />
           <Detail
             dataCy="subscription-trial"
-            label={i18n._(t`Trial`)}
-            value={license_info.trial ? i18n._(t`True`) : i18n._(t`False`)}
+            label={t`Trial`}
+            value={license_info.trial ? t`True` : t`False`}
           />
           <Detail
             dataCy="subscription-expires-on-date"
-            label={i18n._(t`Expires on`)}
+            label={t`Expires on`}
             value={
               license_info.license_date &&
               formatDateString(
@@ -95,7 +95,7 @@ function SubscriptionDetail({ i18n }) {
           />
           <Detail
             dataCy="subscription-expires-on-utc-date"
-            label={i18n._(t`Expires on UTC`)}
+            label={t`Expires on UTC`}
             value={
               license_info.license_date &&
               formatDateStringUTC(
@@ -105,7 +105,7 @@ function SubscriptionDetail({ i18n }) {
           />
           <Detail
             dataCy="subscription-days-remaining"
-            label={i18n._(t`Days remaining`)}
+            label={t`Days remaining`}
             value={
               license_info.time_remaining &&
               secondsToDays(license_info.time_remaining)
@@ -114,25 +114,25 @@ function SubscriptionDetail({ i18n }) {
           {license_info.instance_count < 9999999 && (
             <Detail
               dataCy="subscription-hosts-available"
-              label={i18n._(t`Hosts available`)}
+              label={t`Hosts available`}
               value={license_info.available_instances}
             />
           )}
           {license_info.instance_count >= 9999999 && (
             <Detail
               dataCy="subscription-unlimited-hosts-available"
-              label={i18n._(t`Hosts available`)}
-              value={i18n._(t`Unlimited`)}
+              label={t`Hosts available`}
+              value={t`Unlimited`}
             />
           )}
           <Detail
             dataCy="subscription-hosts-used"
-            label={i18n._(t`Hosts used`)}
+            label={t`Hosts used`}
             value={license_info.current_instances}
           />
           <Detail
             dataCy="subscription-hosts-remaining"
-            label={i18n._(t`Hosts remaining`)}
+            label={t`Hosts remaining`}
             value={license_info.free_instances}
           />
         </DetailList>
@@ -151,7 +151,7 @@ function SubscriptionDetail({ i18n }) {
         </Trans>
         <CardActionsRow>
           <Button
-            aria-label={i18n._(t`edit`)}
+            aria-label={t`edit`}
             component={Link}
             to="/settings/subscription/edit"
           >
@@ -163,4 +163,4 @@ function SubscriptionDetail({ i18n }) {
   );
 }
 
-export default withI18n()(SubscriptionDetail);
+export default SubscriptionDetail;

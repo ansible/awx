@@ -1,11 +1,11 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import { PasswordField } from '../../FormField';
 
-function CredentialPasswordsStep({ launchConfig, i18n }) {
+function CredentialPasswordsStep({ launchConfig }) {
   const {
     values: { credentials },
   } = useFormikContext();
@@ -92,7 +92,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
       {showcredentialPasswordSsh && (
         <PasswordField
           id="launch-ssh-password"
-          label={i18n._(t`SSH password`)}
+          label={t`SSH password`}
           name="credential_passwords.ssh_password"
           isRequired
         />
@@ -100,7 +100,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
       {showcredentialPasswordPrivateKeyPassphrase && (
         <PasswordField
           id="launch-private-key-passphrase"
-          label={i18n._(t`Private key passphrase`)}
+          label={t`Private key passphrase`}
           name="credential_passwords.ssh_key_unlock"
           isRequired
         />
@@ -108,7 +108,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
       {showcredentialPasswordPrivilegeEscalation && (
         <PasswordField
           id="launch-privilege-escalation-password"
-          label={i18n._(t`Privilege escalation password`)}
+          label={t`Privilege escalation password`}
           name="credential_passwords.become_password"
           isRequired
         />
@@ -118,9 +118,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
           id={`launch-vault-password-${credId}`}
           key={credId}
           label={
-            credId === ''
-              ? i18n._(t`Vault password`)
-              : i18n._(t`Vault password | ${credId}`)
+            credId === '' ? t`Vault password` : t`Vault password | ${credId}`
           }
           name={`credential_passwords['vault_password${
             credId !== '' ? `.${credId}` : ''
@@ -132,4 +130,4 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
   );
 }
 
-export default withI18n()(CredentialPasswordsStep);
+export default CredentialPasswordsStep;

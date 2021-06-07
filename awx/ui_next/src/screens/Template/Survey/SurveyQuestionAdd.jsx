@@ -9,23 +9,39 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
   const match = useRouteMatch();
 
   const handleSubmit = async question => {
+    const formData = { ...question };
     try {
-      if (survey.spec?.some(q => q.variable === question.variable)) {
+      if (survey?.spec?.some(q => q.variable === formData.variable)) {
         setFormError(
           new Error(
-            `Survey already contains a question with variable named “${question.variable}”`
+            `Survey already contains a question with variable named “${formData.variable}”`
           )
         );
         return;
       }
-      if (question.type === 'multiselect') {
-        question.default = question.default
-          .split('\n')
-          .filter(v => v !== '' || '\n')
-          .map(v => v.trim())
-          .join('\n');
+      let choices = '';
+      let defaultAnswers = '';
+      if (
+        formData.type === 'multiselect' ||
+        formData.type === 'multiplechoice'
+      ) {
+        formData.formattedChoices.forEach(({ choice, isDefault }, i) => {
+          choices =
+            i === formData.formattedChoices.length - 1
+              ? choices.concat(`${choice}`)
+              : choices.concat(`${choice}\n`);
+          if (isDefault) {
+            defaultAnswers =
+              i === formData.formattedChoices.length - 1
+                ? defaultAnswers.concat(`${choice}`)
+                : defaultAnswers.concat(`${choice}\n`);
+          }
+        });
+        formData.default = defaultAnswers.trim();
+        formData.choices = choices.trim();
       }
-      const newSpec = survey.spec ? survey.spec.concat(question) : [question];
+      delete formData.formattedChoices;
+      const newSpec = survey?.spec ? survey.spec.concat(formData) : [formData];
       await updateSurvey(newSpec);
       history.push(match.url.replace('/add', ''));
     } catch (err) {

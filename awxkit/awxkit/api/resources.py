@@ -140,6 +140,7 @@ class Resources(object):
     _organization_admins = r'organizations/\d+/admins/'
     _organization_applications = r'organizations/\d+/applications/'
     _organization_execution_environments = r'organizations/\d+/execution_environments/'
+    _organization_galaxy_credentials = r'organizations/\d+/galaxy_credentials/'
     _organization_inventories = r'organizations/\d+/inventories/'
     _organization_users = r'organizations/\d+/users/'
     _organizations = 'organizations/'

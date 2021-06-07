@@ -53,14 +53,6 @@ If no inventory sources use a project as an SCM inventory source, then
 the inventory listing may not be refreshed on update.
 
 
-### Still-to-come 3.2 Changes
-
-As a part of a different feature, it is planned to have all inventory sources
-inside of an inventory all update with a single button click. When this
-happens for an inventory containing an SCM inventory source, it should
-update the project.
-
-
 ### Inventory Source Restriction
 
 Since automatic inventory updates (triggered by a project update) do not
@@ -76,34 +68,11 @@ inventory source for its inventory.
 > Any Inventory Ansible supports should be supported by this feature.
 
 This is accomplished by making use of the `ansible-inventory` command.
-The inventory import `tower-manage` command will check for the existence
-of `ansible-inventory` and if it is not present, it will call a backported
-version of it. The backport is maintained as its own GPL3 licensed
-repository.
 
-https://github.com/ansible/ansible-inventory-backport
-
-Because the internal mechanism is different, there needs to be some coverage
-testing with Ansible versions pre-2.4 and after.
-
-### Vars Restrictions
-
-When creating any `scm` type inventory source, the `overwrite_vars` field
-must be set to `true`. This should be enforced by API validation and
-the UI should also force this setting.
-
-Why? This is because `ansible-inventory` is planned to
-return group vars at the group-level in its JSON output, but the backported
-script returns them on the host-level. In Ansible 2.4, inventory modules are
-being refactored into plugins, and showing vars on the group-level depends on
-this. Since it is not possible to _also_ backport the inventory module
-refactor to prior Ansible versions, this discrepancy can not be resolved.
-While "flattening" the group vars down to the host-level is functionally
-equivalent, upgrading Ansible would cause an anomaly in variable precedence.
-
-This future variable precedence problem is avoided by forcing overwriting
-of variables until Ansible 2.3 is deprecated, after which all updates
-will consistently utilize group-level variables.
+When running an inventory update, the `ansible-inventory` command is invoked,
+passing the location specified by `source_path` to the `-i` CLI option.
+Then `ansible-inventory` writes JSON data to a file, which is read, parsed,
+and then data saved to the database.
 
 # Acceptance Criteria Use Cases
 
@@ -113,7 +82,7 @@ Some test scenarios to look at:
    `group_vars`, `host_vars`, etc.
  - Test scripts in the project repo
  - Test scripts that use environment variables provided by a credential
-   in Tower
+   in AWX
  - Test multiple inventories that use the same project, pointing to different
    files / directories inside of the project
  - Feature works correctly even if project doesn't have any playbook files
@@ -122,12 +91,6 @@ Some test scenarios to look at:
    + invalid syntax in file
  - If the project SCM update encounters errors, it should not run the
    inventory updates
-
-# Notes for Official Documentation
-
-The API guide should summarize what is in the use details.
-Once the UI implementation is done, the product docs should cover its
-standard use.
 
 ## Update-On-Launch
 
@@ -159,12 +122,12 @@ Note that a failed inventory update does not mark the project as failed.
 
 ## Restricting Instance Group to Run Script On
 
-Since SCM inventory sources are running scripts written by people with
+Since SCM inventory sources can run scripts written by people with
 access to the source-control, a user may want to restrict which instance
 groups the inventory update runs on.
 
 If the inventory source is set to update on project update, it will run
-on the same instance (inside of the Tower cluster) as the project update.
+on the same instance (inside of the AWX cluster) as the project update.
 This can be restricted by limiting the instance groups of the organization
 that contains the `source_project` of the inventory source.
 

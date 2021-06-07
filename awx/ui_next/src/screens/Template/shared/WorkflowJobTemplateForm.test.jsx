@@ -13,9 +13,18 @@ import {
   InventoriesAPI,
   ProjectsAPI,
   CredentialTypesAPI,
+  ExecutionEnvironmentsAPI,
+  CredentialsAPI,
 } from '../../../api';
 
-jest.mock('../../../api');
+jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/Projects');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/Credentials');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -58,24 +67,46 @@ describe('<WorkflowJobTemplateForm/>', () => {
           { name: 'Label 2', id: 2 },
           { name: 'Label 3', id: 3 },
         ],
+        count: 3,
       },
     });
     OrganizationsAPI.read.mockResolvedValue({
-      results: [{ id: 1 }, { id: 2 }],
+      data: {
+        results: [
+          { id: 1, name: 'Organization 1' },
+          { id: 2, name: 'Organization 2' },
+        ],
+        count: 2,
+      },
     });
     InventoriesAPI.read.mockResolvedValue({
-      results: [
-        { id: 1, name: 'Foo' },
-        { id: 2, name: 'Bar' },
-      ],
+      data: {
+        results: [
+          { id: 1, name: 'Foo' },
+          { id: 2, name: 'Bar' },
+        ],
+        count: 2,
+      },
     });
     CredentialTypesAPI.read.mockResolvedValue({
-      data: { results: [{ id: 1 }] },
+      data: { results: [{ id: 1 }], count: 1 },
     });
     InventoriesAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
     ProjectsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    CredentialsAPI.read.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
+    CredentialsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
 

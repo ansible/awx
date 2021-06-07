@@ -25,11 +25,13 @@ options:
         - file path to a Red Hat subscription manifest (a .zip file)
       required: True
       type: str
-    eula_accepted:
+    force:
       description:
-        - Whether or not the EULA is accepted.
+        - By default, the license manifest will only be applied if Tower is currently
+          unlicensed or trial licensed.  When force=true, the license is always applied.
       required: True
       type: bool
+      default: 'False'
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -39,7 +41,6 @@ EXAMPLES = '''
 - name: Set the license using a file
   tower_license:
     manifest: "/tmp/my_manifest.zip"
-    eula_accepted: True
 '''
 
 import base64
@@ -51,25 +52,39 @@ def main():
     module = TowerAPIModule(
         argument_spec=dict(
             manifest=dict(type='str', required=True),
-            eula_accepted=dict(type='bool', required=True),
+            force=dict(type='bool', required=False),
         ),
     )
 
-    json_output = {'changed': True}
-
-    if not module.params.get('eula_accepted'):
-        module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
+    json_output = {'changed': False}
 
     try:
         manifest = base64.b64encode(open(module.params.get('manifest'), 'rb').read())
     except OSError as e:
         module.fail_json(msg=str(e))
 
-    # Deal with check mode
+    # Check if Tower is already licensed
+    config = module.get_endpoint('config')['json']
+    already_licensed = (
+        'license_info' in config
+        and 'instance_count' in config['license_info']
+        and config['license_info']['instance_count'] > 0
+        and 'trial' in config['license_info']
+        and not config['license_info']['trial']
+    )
+
+    # Determine if we will install the license
+    perform_install = bool((not already_licensed) or module.params.get('force'))
+
+    # Handle check mode
     if module.check_mode:
+        json_output['changed'] = perform_install
         module.exit_json(**json_output)
 
-    module.post_endpoint('config', data={'eula_accepted': True, 'manifest': manifest.decode()})
+    # Do the actual install, if we need to
+    if perform_install:
+        json_output['changed'] = True
+        module.post_endpoint('config', data={'manifest': manifest.decode()})
 
     module.exit_json(**json_output)
 

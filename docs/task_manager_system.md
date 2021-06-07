@@ -16,7 +16,7 @@ The `schedule()` function is run (a) periodically by a background task and (b) o
 
 `schedule()` is triggered via both mechanisms because of the following properties:
 1. It reduces the time from launch to running, resulting a better user experience.
-2. It is a fail-safe in case we miss code-paths, in the present and future, that change the scheduling considerations for which we should call `schedule()` (_i.e._, adding new nodes to Tower changes the capacity, obscure job error handling that fails a job).
+2. It is a fail-safe in case we miss code-paths, in the present and future, that change the scheduling considerations for which we should call `schedule()` (_i.e._, adding new nodes to AWX changes the capacity, obscure job error handling that fails a job).
 
 Empirically, the periodic task manager has been effective in the past and will continue to be relied upon with the added event-triggered `schedule()`.
 
@@ -35,7 +35,7 @@ Empirically, the periodic task manager has been effective in the past and will c
 |:----------:|:------------------------------------------------------------------------------------------------------------------:|
 | pending    | Job has been launched.  <br>1. Hasn't yet been seen by the scheduler <br>2. Is blocked by another task <br>3. Not enough capacity |
 | waiting    | Job published to an AMQP queue.
-| running    | Job is running on a Tower node.
+| running    | Job is running on a AWX node.
 | successful | Job finished with `ansible-playbook` return code 0.                                                                  |
 | failed     | Job finished with `ansible-playbook` return code other than 0.                                                       |
 | error      | System failure.                                                                                                    |
@@ -48,7 +48,7 @@ The Task Manager decides which exact node a job will run on. It does so by consi
 
 ## Code Composition
 
-The main goal of the new task manager is to run in our HA environment. This translates to making the task manager logic run on any Tower node. To support this, we need to remove any reliance on the state between task manager schedule logic runs. A future goal of AWX is to design the task manager to have limited/no access to the database for this feature. This secondary requirement, combined with performance needs, led to the creation of partial models that wrap dict database model data.
+The main goal of the new task manager is to run in our HA environment. This translates to making the task manager logic run on any AWX node. To support this, we need to remove any reliance on the state between task manager schedule logic runs. A future goal of AWX is to design the task manager to have limited/no access to the database for this feature. This secondary requirement, combined with performance needs, led to the creation of partial models that wrap dict database model data.
 
 
 ### Blocking Logic
@@ -73,7 +73,7 @@ The new task manager should, in essence, work like the old one. Old task manager
 
 ### Update on Launch Logic
 
-This is a feature in Tower where dynamic inventory and projects associated with Job Templates may be set to invoke and update when related Job Templates are launched. Related to this feature is a cache feature on dynamic inventory updates and project updates. The rules for these two intertwined features are below:
+This is a feature in AWX where dynamic inventory and projects associated with Job Templates may be set to invoke and update when related Job Templates are launched. Related to this feature is a cache feature on dynamic inventory updates and project updates. The rules for these two intertwined features are below:
 
 * Projects marked as `update on launch` should trigger a project update when a related job template is launched.
 * Inventory sources marked as `update on launch` should trigger an inventory update when a related job template is launched.

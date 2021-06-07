@@ -64,7 +64,7 @@ describe('useWsProjects', () => {
       {
         id: 1,
         summary_fields: {
-          last_job: {
+          current_job: {
             id: 1,
             status: 'running',
             finished: null,
@@ -87,7 +87,7 @@ describe('useWsProjects', () => {
       })
     );
     expect(
-      wrapper.find('TestInner').prop('projects')[0].summary_fields.last_job
+      wrapper.find('TestInner').prop('projects')[0].summary_fields.current_job
         .status
     ).toEqual('running');
     await act(async () => {
@@ -104,7 +104,7 @@ describe('useWsProjects', () => {
     wrapper.update();
 
     expect(
-      wrapper.find('TestInner').prop('projects')[0].summary_fields.last_job
+      wrapper.find('TestInner').prop('projects')[0].summary_fields.current_job
     ).toEqual({
       id: 12,
       status: 'successful',

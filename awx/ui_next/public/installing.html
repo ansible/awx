@@ -2,10 +2,10 @@
 <!DOCTYPE html>
 <html lang="en-US">
    <head>
-      <title>{{ title }}</title>
+      <title data-cy="migration-title">{{ title }}</title>
       <meta
          http-equiv="Content-Security-Policy"
-         content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'nonce-{{ csp_nonce }}'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
+         content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
          />
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -23,7 +23,7 @@
       <div class="pf-l-bullseye pf-m-gutter">
          <div class="pf-l-bullseye__item">
             <div class="pf-l-bullseye">
-            <img src="{% static 'media/logo-header.svg' %}" width="300px" alt={{image_alt}} />
+            <img src="{% static 'media/logo-black.svg' %}" width="300px" alt={{image_alt}} />
             </div>
             <div class="pf-l-bullseye">
               <span class="pf-c-spinner" role="progressbar" aria-valuetext={{aria_spinner}}>
@@ -32,7 +32,7 @@
                 <span class="pf-c-spinner__tail-ball"></span>
               </span>
             </div>
-            <h2 class="pf-l-bullseye pf-c-title pf-m-2xl ws-heading ws-title ws-h2">{{message_upgrade}}</h2>
+            <h2 data-cy="migration-message-upgrade" class="pf-l-bullseye pf-c-title pf-m-2xl ws-heading ws-title ws-h2">{{message_upgrade}}</h2>
             <h2 class="pf-l-bullseye pf-c-title pf-m-2xl ws-heading ws-title ws-h2">{{message_refresh}}</h2>
          </div>
       </div>

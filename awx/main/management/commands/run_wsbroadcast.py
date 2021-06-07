@@ -10,7 +10,6 @@ from datetime import datetime as dt
 
 from django.core.management.base import BaseCommand
 from django.db import connection
-from django.db.models import Q
 from django.db.migrations.executor import MigrationExecutor
 
 from awx.main.analytics.broadcast_websocket import (
@@ -140,7 +139,7 @@ class Command(BaseCommand):
                     data[family.name] = family.samples[0].value
 
             me = Instance.objects.me()
-            hostnames = [i.hostname for i in Instance.objects.exclude(Q(hostname=me.hostname) | Q(rampart_groups__controller__isnull=False))]
+            hostnames = [i.hostname for i in Instance.objects.exclude(hostname=me.hostname)]
 
             host_stats = Command.get_connection_status(me, hostnames, data)
             lines = Command._format_lines(host_stats)

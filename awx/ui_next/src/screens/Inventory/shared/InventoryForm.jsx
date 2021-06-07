@@ -1,9 +1,7 @@
 import React, { useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, number, shape } from 'prop-types';
-
 import { Form } from '@patternfly/react-core';
 import { VariablesField } from '../../../components/CodeEditor';
 import FormField, { FormSubmitError } from '../../../components/FormField';
@@ -17,42 +15,46 @@ import {
   FormFullWidthLayout,
 } from '../../../components/FormLayout';
 
-function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
-  const { setFieldValue } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField({
-    name: 'organization',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
-  });
+function InventoryFormFields({ credentialTypeId, inventory }) {
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
   const [instanceGroupsField, , instanceGroupsHelpers] = useField(
     'instanceGroups'
   );
-  const [insightsCredentialField] = useField('insights_credential');
-  const onOrganizationChange = useCallback(
+  const [insightsCredentialField, insightsCredentialMeta] = useField(
+    'insights_credential'
+  );
+  const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
+      setFieldTouched('organization', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
-  const onCredentialChange = useCallback(
+
+  const handleCredentialUpdate = useCallback(
     value => {
       setFieldValue('insights_credential', value);
+      setFieldTouched('insights_credential', true, false);
     },
-    [setFieldValue]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
     <>
       <FormField
         id="inventory-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="inventory-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -60,33 +62,38 @@ function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
+        onChange={handleOrganizationUpdate}
         value={organizationField.value}
         touched={organizationMeta.touched}
         error={organizationMeta.error}
         required
         autoPopulate={!inventory?.id}
+        validate={required(t`Select a value for this field`)}
       />
       <CredentialLookup
-        label={i18n._(t`Insights Credential`)}
+        helperTextInvalid={insightsCredentialMeta.error}
+        isValid={
+          !insightsCredentialMeta.touched || !insightsCredentialMeta.error
+        }
+        label={t`Insights Credential`}
         credentialTypeId={credentialTypeId}
-        onChange={onCredentialChange}
+        onChange={handleCredentialUpdate}
         value={insightsCredentialField.value}
+        fieldName="insights_credential"
       />
       <InstanceGroupsLookup
         value={instanceGroupsField.value}
         onChange={value => {
           instanceGroupsHelpers.setValue(value);
         }}
+        fieldName="instanceGroups"
       />
       <FormFullWidthLayout>
         <VariablesField
-          tooltip={i18n._(
-            t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
-          )}
+          tooltip={t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`}
           id="inventory-variables"
           name="variables"
-          label={i18n._(t`Variables`)}
+          label={t`Variables`}
         />
       </FormFullWidthLayout>
     </>
@@ -153,4 +160,4 @@ InventoryForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(InventoryForm);
+export default InventoryForm;

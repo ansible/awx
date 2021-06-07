@@ -30,6 +30,7 @@ describe('<MiscSystemDetail />', () => {
         INSIGHTS_TRACKING_STATE: false,
         LOGIN_REDIRECT_OVERRIDE: 'https://redirect.com',
         MANAGE_ORGANIZATION_AUTH: true,
+        DISABLE_LOCAL_AUTH: false,
         OAUTH2_PROVIDER: {
           ACCESS_TOKEN_EXPIRE_SECONDS: 1,
           AUTHORIZATION_CODE_EXPIRE_SECONDS: 2,
@@ -86,17 +87,21 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'Authorization Code Expiration', '2 seconds');
     assertDetail(
       wrapper,
-      'Automation Analytics Gather Interval',
+      'Insights for Ansible Automation Platform Gather Interval',
       '14400 seconds'
     );
     assertDetail(
       wrapper,
-      'Automation Analytics upload URL',
+      'Insights for Ansible Automation Platform upload URL',
       'https://example.com'
     );
-    assertDetail(wrapper, 'Base URL of the Tower host', 'https://towerhost');
+    assertDetail(wrapper, 'Base URL of the service', 'https://towerhost');
     assertDetail(wrapper, 'Enable HTTP Basic Auth', 'On');
-    assertDetail(wrapper, 'Gather data for Automation Analytics', 'Off');
+    assertDetail(
+      wrapper,
+      'Gather data for Insights for Ansible Automation Platform',
+      'Off'
+    );
     assertDetail(wrapper, 'Idle Time Force Log Out', '30000000000 seconds');
     assertDetail(
       wrapper,

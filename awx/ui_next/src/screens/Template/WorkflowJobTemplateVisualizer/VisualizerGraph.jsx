@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { bool } from 'prop-types';
@@ -35,7 +35,7 @@ const WorkflowSVG = styled.svg`
   height: 100%;
 `;
 
-function VisualizerGraph({ i18n, readOnly }) {
+function VisualizerGraph({ readOnly }) {
   const [helpText, setHelpText] = useState(null);
   const [linkHelp, setLinkHelp] = useState();
   const [nodeHelp, setNodeHelp] = useState();
@@ -257,9 +257,7 @@ function VisualizerGraph({ i18n, readOnly }) {
             onMouseMove: e => drawPotentialLinkToCursor(e),
             onMouseOver: () =>
               setHelpText(
-                i18n._(
-                  t`Click an available node to create a new link.  Click outside the graph to cancel.`
-                )
+                t`Click an available node to create a new link.  Click outside the graph to cancel.`
               ),
             onMouseOut: () => setHelpText(null),
             onClick: () => handleBackgroundClick(),
@@ -339,4 +337,4 @@ VisualizerGraph.propTypes = {
   readOnly: bool.isRequired,
 };
 
-export default withI18n()(VisualizerGraph);
+export default VisualizerGraph;

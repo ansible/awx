@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useEffect } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import {
   Button,
   Chip,
@@ -33,7 +33,7 @@ import useRequest, { useDismissableError } from '../../../util/useRequest';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
-function JobTemplateDetail({ i18n, template }) {
+function JobTemplateDetail({ template }) {
   const {
     ask_inventory_on_launch,
     allow_simultaneous,
@@ -103,12 +103,12 @@ function JobTemplateDetail({ i18n, template }) {
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
   const verbosityOptions = [
-    { verbosity: 0, details: i18n._(t`0 (Normal)`) },
-    { verbosity: 1, details: i18n._(t`1 (Verbose)`) },
-    { verbosity: 2, details: i18n._(t`2 (More Verbose)`) },
-    { verbosity: 3, details: i18n._(t`3 (Debug)`) },
-    { verbosity: 4, details: i18n._(t`4 (Connection Debug)`) },
-    { verbosity: 5, details: i18n._(t`5 (WinRM Debug)`) },
+    { verbosity: 0, details: t`0 (Normal)` },
+    { verbosity: 1, details: t`1 (Verbose)` },
+    { verbosity: 2, details: t`2 (More Verbose)` },
+    { verbosity: 3, details: t`3 (Debug)` },
+    { verbosity: 4, details: t`4 (Connection Debug)` },
+    { verbosity: 5, details: t`5 (WinRM Debug)` },
   ];
   const verbosityDetails = verbosityOptions.filter(
     option => option.verbosity === verbosity
@@ -121,22 +121,22 @@ function JobTemplateDetail({ i18n, template }) {
     <TextList component={TextListVariants.ul}>
       {become_enabled && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`Enable Privilege Escalation`)}
+          {t`Enable Privilege Escalation`}
         </TextListItem>
       )}
       {host_config_key && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`Allow Provisioning Callbacks`)}
+          {t`Allow Provisioning Callbacks`}
         </TextListItem>
       )}
       {allow_simultaneous && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`Enable Concurrent Jobs`)}
+          {t`Enable Concurrent Jobs`}
         </TextListItem>
       )}
       {use_fact_cache && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`Use Fact Storage`)}
+          {t`Use Fact Storage`}
         </TextListItem>
       )}
     </TextList>
@@ -161,7 +161,7 @@ function JobTemplateDetail({ i18n, template }) {
         <Link to={`/inventories/${inventorykind}/${id}/details`}>
           {summary_fields.inventory.name}
         </Link>
-        <span> {i18n._(t`(Prompt on launch)`)}</span>
+        <span> {t`(Prompt on launch)`}</span>
       </Fragment>
     ) : (
       <Link to={`/inventories/${inventorykind}/${id}/details`}>
@@ -181,12 +181,12 @@ function JobTemplateDetail({ i18n, template }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} dataCy="jt-detail-name" />
-        <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail label={i18n._(t`Job Type`)} value={job_type} />
+        <Detail label={t`Name`} value={name} dataCy="jt-detail-name" />
+        <Detail label={t`Description`} value={description} />
+        <Detail label={t`Job Type`} value={job_type} />
         {summary_fields.organization ? (
           <Detail
-            label={i18n._(t`Organization`)}
+            label={t`Organization`}
             value={
               <Link
                 to={`/organizations/${summary_fields.organization.id}/details`}
@@ -196,24 +196,22 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          <DeletedDetail label={i18n._(t`Organization`)} />
+          <DeletedDetail label={t`Organization`} />
         )}
         {summary_fields.inventory ? (
           <Detail
-            label={i18n._(t`Inventory`)}
+            label={t`Inventory`}
             value={inventoryValue(
               summary_fields.inventory.kind,
               summary_fields.inventory.id
             )}
           />
         ) : (
-          !ask_inventory_on_launch && (
-            <DeletedDetail label={i18n._(t`Inventory`)} />
-          )
+          !ask_inventory_on_launch && <DeletedDetail label={t`Inventory`} />
         )}
         {summary_fields.project ? (
           <Detail
-            label={i18n._(t`Project`)}
+            label={t`Project`}
             value={
               <Link to={`/projects/${summary_fields.project.id}/details`}>
                 {summary_fields.project.name}
@@ -221,37 +219,25 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          <DeletedDetail label={i18n._(t`Project`)} />
+          <DeletedDetail label={t`Project`} />
         )}
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.execution_environment}
         />
-        <Detail
-          label={i18n._(t`Source Control Branch`)}
-          value={template.scm_branch}
-        />
-        <Detail label={i18n._(t`Playbook`)} value={playbook} />
-        <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
-        <Detail label={i18n._(t`Limit`)} value={limit} />
-        <Detail
-          label={i18n._(t`Verbosity`)}
-          value={verbosityDetails[0].details}
-        />
-        <Detail label={i18n._(t`Timeout`)} value={timeout || '0'} />
-        <Detail
-          label={i18n._(t`Show Changes`)}
-          value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
-        />
-        <Detail label={i18n._(t`Job Slicing`)} value={job_slice_count} />
+        <Detail label={t`Source Control Branch`} value={template.scm_branch} />
+        <Detail label={t`Playbook`} value={playbook} />
+        <Detail label={t`Forks`} value={forks || '0'} />
+        <Detail label={t`Limit`} value={limit} />
+        <Detail label={t`Verbosity`} value={verbosityDetails[0].details} />
+        <Detail label={t`Timeout`} value={timeout || '0'} />
+        <Detail label={t`Show Changes`} value={diff_mode ? t`On` : t`Off`} />
+        <Detail label={t`Job Slicing`} value={job_slice_count} />
         {host_config_key && (
           <React.Fragment>
+            <Detail label={t`Host Config Key`} value={host_config_key} />
             <Detail
-              label={i18n._(t`Host Config Key`)}
-              value={host_config_key}
-            />
-            <Detail
-              label={i18n._(t`Provisioning Callback URL`)}
+              label={t`Provisioning Callback URL`}
               value={generateCallBackUrl}
             />
           </React.Fragment>
@@ -266,14 +252,14 @@ function JobTemplateDetail({ i18n, template }) {
         )}
         {webhook_receiver && (
           <Detail
-            label={i18n._(t`Webhook URL`)}
+            label={t`Webhook URL`}
             value={`${document.location.origin}${webhook_receiver}`}
           />
         )}
-        <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
+        <Detail label={t`Webhook Key`} value={webhook_key} />
         {summary_fields.webhook_credential && (
           <Detail
-            label={i18n._(t`Webhook Credential`)}
+            label={t`Webhook Credential`}
             value={
               <Link
                 to={`/credentials/${summary_fields.webhook_credential.id}/details`}
@@ -284,22 +270,22 @@ function JobTemplateDetail({ i18n, template }) {
           />
         )}
         {renderOptionsField && (
-          <Detail label={i18n._(t`Options`)} value={renderOptions} />
+          <Detail label={t`Options`} value={renderOptions} />
         )}
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={created}
           user={summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={modified}
           user={summary_fields.modified_by}
         />
         {summary_fields.credentials && summary_fields.credentials.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Credentials`)}
+            label={t`Credentials`}
             value={
               <ChipGroup
                 numChips={5}
@@ -315,7 +301,7 @@ function JobTemplateDetail({ i18n, template }) {
         {summary_fields.labels && summary_fields.labels.results.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Labels`)}
+            label={t`Labels`}
             value={
               <ChipGroup
                 numChips={5}
@@ -333,7 +319,7 @@ function JobTemplateDetail({ i18n, template }) {
         {instanceGroups.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Instance Groups`)}
+            label={t`Instance Groups`}
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
@@ -348,7 +334,7 @@ function JobTemplateDetail({ i18n, template }) {
         {job_tags && job_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Job Tags`)}
+            label={t`Job Tags`}
             value={
               <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
                 {job_tags.split(',').map(jobTag => (
@@ -363,7 +349,7 @@ function JobTemplateDetail({ i18n, template }) {
         {skip_tags && skip_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Skip Tags`)}
+            label={t`Skip Tags`}
             value={
               <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
                 {skip_tags.split(',').map(skipTag => (
@@ -378,8 +364,9 @@ function JobTemplateDetail({ i18n, template }) {
         <VariablesDetail
           value={extra_vars}
           rows={4}
-          label={i18n._(t`Variables`)}
+          label={t`Variables`}
           dataCy={`jt-details-${template.id}`}
+          name="extra_vars"
         />
       </DetailList>
       <CardActionsRow>
@@ -389,13 +376,13 @@ function JobTemplateDetail({ i18n, template }) {
               ouiaId="job-template-detail-edit-button"
               component={Link}
               to={`/templates/job_template/${templateId}/edit`}
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
         {canLaunch && (
-          <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
+          <LaunchButton resource={template} aria-label={t`Launch`}>
             {({ handleLaunch, isLaunching }) => (
               <Button
                 ouiaId="job-template-detail-launch-button"
@@ -404,7 +391,7 @@ function JobTemplateDetail({ i18n, template }) {
                 onClick={handleLaunch}
                 isDisabled={isLaunching}
               >
-                {i18n._(t`Launch`)}
+                {t`Launch`}
               </Button>
             )}
           </LaunchButton>
@@ -414,15 +401,13 @@ function JobTemplateDetail({ i18n, template }) {
             <DeleteButton
               ouiaId="job-template-detail-delete-button"
               name={name}
-              modalTitle={i18n._(t`Delete Job Template`)}
+              modalTitle={t`Delete Job Template`}
               onConfirm={deleteJobTemplate}
               isDisabled={isDeleteLoading}
               deleteDetailsRequests={deleteDetailsRequests}
-              deleteMessage={i18n._(
-                t`This job template is currently being used by other resources. Are you sure you want to delete it?`
-              )}
+              deleteMessage={t`This job template is currently being used by other resources. Are you sure you want to delete it?`}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -431,10 +416,10 @@ function JobTemplateDetail({ i18n, template }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to delete job template.`)}
+          {t`Failed to delete job template.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -443,4 +428,4 @@ function JobTemplateDetail({ i18n, template }) {
 }
 
 export { JobTemplateDetail as _JobTemplateDetail };
-export default withI18n()(JobTemplateDetail);
+export default JobTemplateDetail;

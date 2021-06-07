@@ -43,87 +43,86 @@ export default function useLaunchSteps(
   launchConfig,
   surveyConfig,
   resource,
-  i18n,
   resourceDefaultCredentials
 ) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
   const { touched, values: formikValues } = useFormikContext();
   const steps = [
-    useInventoryStep(launchConfig, resource, i18n, visited),
+    useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(
       launchConfig,
       resource,
       resourceDefaultCredentials,
-      i18n,
       true
     ),
     useCredentialPasswordsStep(
       launchConfig,
-      i18n,
       showCredentialPasswordsStep(formikValues.credentials, launchConfig),
       visited
     ),
-    useOtherPromptsStep(launchConfig, resource, i18n),
-    useSurveyStep(launchConfig, surveyConfig, resource, i18n, visited),
+    useOtherPromptsStep(launchConfig, resource),
+    useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
   const { resetForm } = useFormikContext();
   const hasErrors = steps.some(step => step.hasError);
 
   steps.push(
-    usePreviewStep(launchConfig, i18n, resource, surveyConfig, hasErrors, true)
+    usePreviewStep(launchConfig, resource, surveyConfig, hasErrors, true)
   );
 
   const pfSteps = steps.map(s => s.step).filter(s => s != null);
   const stepsAreReady = !steps.some(s => !s.isReady);
 
   useEffect(() => {
-    if (stepsAreReady) {
-      const initialValues = steps.reduce((acc, cur) => {
-        return {
-          ...acc,
-          ...cur.initialValues,
-        };
-      }, {});
-
-      const newFormValues = { ...initialValues };
-
-      Object.keys(formikValues).forEach(formikValueKey => {
-        if (
-          formikValueKey === 'credential_passwords' &&
-          Object.prototype.hasOwnProperty.call(
-            newFormValues,
-            'credential_passwords'
-          )
-        ) {
-          const formikCredentialPasswords = formikValues.credential_passwords;
-          Object.keys(formikCredentialPasswords).forEach(
-            credentialPasswordValueKey => {
-              if (
-                Object.prototype.hasOwnProperty.call(
-                  newFormValues.credential_passwords,
-                  credentialPasswordValueKey
-                )
-              ) {
-                newFormValues.credential_passwords[credentialPasswordValueKey] =
-                  formikCredentialPasswords[credentialPasswordValueKey];
-              }
-            }
-          );
-        } else if (
-          Object.prototype.hasOwnProperty.call(newFormValues, formikValueKey)
-        ) {
-          newFormValues[formikValueKey] = formikValues[formikValueKey];
-        }
-      });
-
-      resetForm({
-        values: newFormValues,
-        touched,
-      });
-
-      setIsReady(true);
+    if (!stepsAreReady) {
+      return;
     }
+
+    const initialValues = steps.reduce((acc, cur) => {
+      return {
+        ...acc,
+        ...cur.initialValues,
+      };
+    }, {});
+
+    const newFormValues = { ...initialValues };
+
+    Object.keys(formikValues).forEach(formikValueKey => {
+      if (
+        formikValueKey === 'credential_passwords' &&
+        Object.prototype.hasOwnProperty.call(
+          newFormValues,
+          'credential_passwords'
+        )
+      ) {
+        const formikCredentialPasswords = formikValues.credential_passwords;
+        Object.keys(formikCredentialPasswords).forEach(
+          credentialPasswordValueKey => {
+            if (
+              Object.prototype.hasOwnProperty.call(
+                newFormValues.credential_passwords,
+                credentialPasswordValueKey
+              )
+            ) {
+              newFormValues.credential_passwords[credentialPasswordValueKey] =
+                formikCredentialPasswords[credentialPasswordValueKey];
+            }
+          }
+        );
+      } else if (
+        Object.prototype.hasOwnProperty.call(newFormValues, formikValueKey)
+      ) {
+        newFormValues[formikValueKey] = formikValues[formikValueKey];
+      }
+    });
+
+    resetForm({
+      values: newFormValues,
+      touched,
+    });
+
+    setIsReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formikValues.credentials, stepsAreReady]);
 

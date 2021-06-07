@@ -51,7 +51,7 @@ describe('ListHeader', () => {
     expect(history.location.search).toEqual('');
   });
 
-  test('should test clear all', () => {
+  test('should clear all', () => {
     const query = '?item.page_size=5&item.name=foo';
     const history = createMemoryHistory({
       initialEntries: [`/organizations/1/teams${query}`],

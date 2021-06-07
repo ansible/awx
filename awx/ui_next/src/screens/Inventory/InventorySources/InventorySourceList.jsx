@@ -9,7 +9,11 @@ import useRequest, {
 } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -79,9 +83,13 @@ function InventorySourceList() {
     fetchSources();
   }, [fetchSources]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    sources
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(sources);
 
   const {
     isLoading: isDeleteLoading,
@@ -136,7 +144,7 @@ function InventorySourceList() {
     if (!deleteRelatedResourcesError) {
       await handleDeleteSources();
     }
-    setSelected([]);
+    clearSelected();
   };
   const canAdd =
     sourceChoicesOptions &&
@@ -148,7 +156,7 @@ function InventorySourceList() {
   );
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={fetchError}
         hasContentLoading={
           isLoading ||
@@ -160,14 +168,13 @@ function InventorySourceList() {
         itemCount={sourceCount}
         pluralizedItemName={t`Inventory Sources`}
         qsConfig={QS_CONFIG}
+        clearSelected={clearSelected}
         renderToolbar={props => (
           <DatalistToolbar
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...sources] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -208,21 +215,27 @@ function InventorySourceList() {
             ]}
           />
         )}
-        renderItem={inventorySource => {
-          let label;
-          sourceChoices.forEach(([scMatch, scLabel]) => {
-            if (inventorySource.source === scMatch) {
-              label = scLabel;
-            }
-          });
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Status`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(inventorySource, index) => {
+          const label = sourceChoices.find(
+            ([scMatch]) => inventorySource.source === scMatch
+          );
           return (
             <InventorySourceListItem
               key={inventorySource.id}
               source={inventorySource}
               onSelect={() => handleSelect(inventorySource)}
-              label={label}
+              label={label[1]}
               detailUrl={`${listUrl}${inventorySource.id}`}
               isSelected={selected.some(row => row.id === inventorySource.id)}
+              rowIndex={index}
             />
           );
         }}

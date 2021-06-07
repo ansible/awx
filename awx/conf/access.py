@@ -4,7 +4,7 @@
 # Django
 from django.db.models import Q
 
-# Tower
+# AWX
 from awx.main.access import BaseAccess, register_access
 from awx.conf.models import Setting
 

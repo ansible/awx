@@ -56,6 +56,7 @@ describe('<ProjectAdd />', () => {
           kind: 'scm',
         },
       ],
+      count: 1,
     },
   };
 
@@ -68,6 +69,7 @@ describe('<ProjectAdd />', () => {
           kind: 'insights',
         },
       ],
+      count: 1,
     },
   };
 

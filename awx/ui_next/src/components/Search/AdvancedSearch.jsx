@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -28,7 +28,6 @@ const AdvancedGroup = styled.div`
 `;
 
 function AdvancedSearch({
-  i18n,
   onSearch,
   searchableKeys,
   relatedSearchableKeys,
@@ -86,191 +85,203 @@ function AdvancedSearch({
   return (
     <AdvancedGroup>
       <Select
-        aria-label={i18n._(t`Set type select`)}
+        ouiaId="set-type-typeahead"
+        aria-label={t`Set type select`}
         className="setTypeSelect"
         variant={SelectVariant.typeahead}
-        typeAheadAriaLabel={i18n._(t`Set type typeahead`)}
+        typeAheadAriaLabel={t`Set type typeahead`}
         onToggle={setIsPrefixDropdownOpen}
         onSelect={(event, selection) => setPrefixSelection(selection)}
         onClear={() => setPrefixSelection(null)}
         selections={prefixSelection}
         isOpen={isPrefixDropdownOpen}
-        placeholderText={i18n._(t`Set type`)}
+        placeholderText={t`Set type`}
         maxHeight={maxSelectHeight}
-        noResultsFoundText={i18n._(t`No results found`)}
+        noResultsFoundText={t`No results found`}
       >
         <SelectOption
+          id="and-option-select"
           key="and"
           value="and"
-          description={i18n._(
-            t`Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected.`
-          )}
+          description={t`Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected.`}
         />
         <SelectOption
+          id="or-option-select"
           key="or"
           value="or"
-          description={i18n._(
-            t`Returns results that satisfy this one or any other filters.`
-          )}
+          description={t`Returns results that satisfy this one or any other filters.`}
         />
         <SelectOption
+          id="not-option-select"
           key="not"
           value="not"
-          description={i18n._(
-            t`Returns results that have values other than this one as well as other filters.`
-          )}
+          description={t`Returns results that have values other than this one as well as other filters.`}
         />
       </Select>
       <Select
-        aria-label={i18n._(t`Key select`)}
+        ouiaId="set-key-typeahead"
+        aria-label={t`Key select`}
         className="keySelect"
         variant={SelectVariant.typeahead}
-        typeAheadAriaLabel={i18n._(t`Key typeahead`)}
+        typeAheadAriaLabel={t`Key typeahead`}
         onToggle={setIsKeyDropdownOpen}
         onSelect={(event, selection) => setKeySelection(selection)}
         onClear={() => setKeySelection(null)}
         selections={keySelection}
         isOpen={isKeyDropdownOpen}
-        placeholderText={i18n._(t`Key`)}
+        placeholderText={t`Key`}
         isCreatable
         onCreateOption={setKeySelection}
         maxHeight={maxSelectHeight}
-        noResultsFoundText={i18n._(t`No results found`)}
+        noResultsFoundText={t`No results found`}
       >
         {allKeys.map(optionKey => (
-          <SelectOption key={optionKey} value={optionKey}>
+          <SelectOption
+            key={optionKey}
+            value={optionKey}
+            id={`select-option-${optionKey}`}
+          >
             {optionKey}
           </SelectOption>
         ))}
       </Select>
       <Select
-        aria-label={i18n._(t`Lookup select`)}
+        ouiaId="set-lookup-typeahead"
+        aria-label={t`Lookup select`}
         className="lookupSelect"
         variant={SelectVariant.typeahead}
-        typeAheadAriaLabel={i18n._(t`Lookup typeahead`)}
+        typeAheadAriaLabel={t`Lookup typeahead`}
         onToggle={setIsLookupDropdownOpen}
         onSelect={(event, selection) => setLookupSelection(selection)}
         onClear={() => setLookupSelection(null)}
         selections={lookupSelection}
         isOpen={isLookupDropdownOpen}
-        placeholderText={i18n._(t`Lookup type`)}
+        placeholderText={t`Lookup type`}
         maxHeight={maxSelectHeight}
-        noResultsFoundText={i18n._(t`No results found`)}
+        noResultsFoundText={t`No results found`}
       >
         <SelectOption
+          id="exact-option-select"
           key="exact"
           value="exact"
-          description={i18n._(
-            t`Exact match (default lookup if not specified).`
-          )}
+          description={t`Exact match (default lookup if not specified).`}
         />
         <SelectOption
+          id="iexact-option-select"
           key="iexact"
           value="iexact"
-          description={i18n._(t`Case-insensitive version of exact.`)}
+          description={t`Case-insensitive version of exact.`}
         />
         <SelectOption
+          id="contains-option-select"
           key="contains"
           value="contains"
-          description={i18n._(t`Field contains value.`)}
+          description={t`Field contains value.`}
         />
         <SelectOption
+          id="icontains-option-select"
           key="icontains"
           value="icontains"
-          description={i18n._(t`Case-insensitive version of contains`)}
+          description={t`Case-insensitive version of contains`}
         />
         <SelectOption
+          id="startswith-option-select"
           key="startswith"
           value="startswith"
-          description={i18n._(t`Field starts with value.`)}
+          description={t`Field starts with value.`}
         />
         <SelectOption
+          id="istartswith-option-select"
           key="istartswith"
           value="istartswith"
-          description={i18n._(t`Case-insensitive version of startswith.`)}
+          description={t`Case-insensitive version of startswith.`}
         />
         <SelectOption
+          id="endswith-option-select"
           key="endswith"
           value="endswith"
-          description={i18n._(t`Field ends with value.`)}
+          description={t`Field ends with value.`}
         />
         <SelectOption
+          id="iendswith-option-select"
           key="iendswith"
           value="iendswith"
-          description={i18n._(t`Case-insensitive version of endswith.`)}
+          description={t`Case-insensitive version of endswith.`}
         />
         <SelectOption
+          id="regex-option-select"
           key="regex"
           value="regex"
-          description={i18n._(t`Field matches the given regular expression.`)}
+          description={t`Field matches the given regular expression.`}
         />
         <SelectOption
+          id="iregex-option-select"
           key="iregex"
           value="iregex"
-          description={i18n._(t`Case-insensitive version of regex.`)}
+          description={t`Case-insensitive version of regex.`}
         />
         <SelectOption
+          id="gt-option-select"
           key="gt"
           value="gt"
-          description={i18n._(t`Greater than comparison.`)}
+          description={t`Greater than comparison.`}
         />
         <SelectOption
+          id="gte-option-select"
           key="gte"
           value="gte"
-          description={i18n._(t`Greater than or equal to comparison.`)}
+          description={t`Greater than or equal to comparison.`}
         />
         <SelectOption
+          id="lt-option-select"
           key="lt"
           value="lt"
-          description={i18n._(t`Less than comparison.`)}
+          description={t`Less than comparison.`}
         />
         <SelectOption
+          id="lte-option-select"
           key="lte"
           value="lte"
-          description={i18n._(t`Less than or equal to comparison.`)}
+          description={t`Less than or equal to comparison.`}
         />
         <SelectOption
+          id="isnull-option-select"
           key="isnull"
           value="isnull"
-          description={i18n._(
-            t`Check whether the given field or related object is null; expects a boolean value.`
-          )}
+          description={t`Check whether the given field or related object is null; expects a boolean value.`}
         />
         <SelectOption
+          id="in-option-select"
           key="in"
           value="in"
-          description={i18n._(
-            t`Check whether the given field's value is present in the list provided; expects a comma-separated list of items.`
-          )}
+          description={t`Check whether the given field's value is present in the list provided; expects a comma-separated list of items.`}
         />
       </Select>
       <InputGroup>
         <TextInput
+          data-cy="advanced-search-text-input"
           type="search"
-          aria-label={i18n._(t`Advanced search value input`)}
+          aria-label={t`Advanced search value input`}
           isDisabled={!keySelection}
-          value={
-            (!keySelection && i18n._(t`First, select a key`)) || searchValue
-          }
+          value={(!keySelection && t`First, select a key`) || searchValue}
           onChange={setSearchValue}
           onKeyDown={handleAdvancedTextKeyDown}
         />
         <div css={!searchValue && `cursor:not-allowed`}>
           <Button
+            ouiaId="advanced-search-text-input"
             variant={ButtonVariant.control}
             isDisabled={!searchValue}
-            aria-label={i18n._(t`Search submit button`)}
+            aria-label={t`Search submit button`}
             onClick={handleAdvancedSearch}
           >
             <SearchIcon />
           </Button>
         </div>
       </InputGroup>
-      <Tooltip
-        content={i18n._(t`Advanced search documentation`)}
-        position="bottom"
-      >
+      <Tooltip content={t`Advanced search documentation`} position="bottom">
         <Button
+          ouiaId="search-docs-button"
           component="a"
           variant="plain"
           target="_blank"
@@ -296,4 +307,4 @@ AdvancedSearch.defaultProps = {
   maxSelectHeight: '300px',
 };
 
-export default withI18n()(AdvancedSearch);
+export default AdvancedSearch;

@@ -15,7 +15,7 @@ function UserAdd() {
     try {
       const {
         data: { id },
-      } = await OrganizationsAPI.createUser(organization, userValues);
+      } = await OrganizationsAPI.createUser(organization.id, userValues);
       history.push(`/users/${id}/details`);
     } catch (error) {
       setFormSubmitError(error);

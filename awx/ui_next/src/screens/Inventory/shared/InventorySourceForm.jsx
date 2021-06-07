@@ -1,13 +1,11 @@
 import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { func, shape } from 'prop-types';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import { InventorySourcesAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
-
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -42,7 +40,6 @@ const InventorySourceFormFields = ({
   source,
   sourceOptions,
   organizationId,
-  i18n,
 }) => {
   const {
     values,
@@ -53,15 +50,13 @@ const InventorySourceFormFields = ({
   } = useFormikContext();
   const [sourceField, sourceMeta] = useField({
     name: 'source',
-    validate: required(i18n._(t`Set a value for this field`), i18n),
+    validate: required(t`Set a value for this field`),
   });
   const [
     executionEnvironmentField,
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
-  ] = useField({
-    name: 'execution_environment',
-  });
+  ] = useField('execution_environment');
 
   const resetSubFormFields = sourceType => {
     if (sourceType === initialValues.source) {
@@ -98,19 +93,27 @@ const InventorySourceFormFields = ({
     }
   };
 
+  const handleExecutionEnvironmentUpdate = useCallback(
+    value => {
+      setFieldValue('execution_environment', value);
+      setFieldTouched('execution_environment', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
   return (
     <>
       <FormField
         id="name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -121,7 +124,7 @@ const InventorySourceFormFields = ({
         }
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
-        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        onChange={handleExecutionEnvironmentUpdate}
         globallyAvailable
         organizationId={organizationId}
       />
@@ -132,7 +135,7 @@ const InventorySourceFormFields = ({
         validated={
           !sourceMeta.touched || !sourceMeta.error ? 'default' : 'error'
         }
-        label={i18n._(t`Source`)}
+        label={t`Source`}
       >
         <AnsibleSelect
           {...sourceField}
@@ -141,7 +144,7 @@ const InventorySourceFormFields = ({
             {
               value: '',
               key: '',
-              label: i18n._(t`Choose a source`),
+              label: t`Choose a source`,
               isDisabled: true,
             },
             ...buildSourceChoiceOptions(sourceOptions),
@@ -154,7 +157,7 @@ const InventorySourceFormFields = ({
       {!['', 'custom'].includes(sourceField.value) && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
-            {i18n._(t`Source details`)}
+            {t`Source details`}
           </Title>
           <FormColumnLayout>
             {
@@ -229,7 +232,6 @@ const InventorySourceFormFields = ({
 };
 
 const InventorySourceForm = ({
-  i18n,
   onCancel,
   onSubmit,
   source,
@@ -295,7 +297,6 @@ const InventorySourceForm = ({
           <FormColumnLayout>
             <InventorySourceFormFields
               formik={formik}
-              i18n={i18n}
               source={source}
               sourceOptions={sourceOptions}
               organizationId={organizationId}
@@ -322,4 +323,4 @@ InventorySourceForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(InventorySourceForm);
+export default InventorySourceForm;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Switch,
@@ -25,7 +25,7 @@ import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
 import { OrganizationsAPI, ProjectsAPI } from '../../api';
 
-function Project({ i18n, setBreadcrumb }) {
+function Project({ setBreadcrumb }) {
   const { me = {} } = useConfig();
   const { id } = useParams();
   const location = useLocation();
@@ -96,31 +96,31 @@ function Project({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Projects`)}
+          {t`Back to Projects`}
         </>
       ),
       link: `/projects`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `/projects/${id}/details` },
-    { name: i18n._(t`Access`), link: `/projects/${id}/access` },
+    { name: t`Details`, link: `/projects/${id}/details` },
+    { name: t`Access`, link: `/projects/${id}/access` },
   ];
 
   if (canSeeNotificationsTab) {
     tabsArray.push({
-      name: i18n._(t`Notifications`),
+      name: t`Notifications`,
       link: `/projects/${id}/notifications`,
     });
   }
 
   tabsArray.push({
-    name: i18n._(t`Job Templates`),
+    name: t`Job Templates`,
     link: `/projects/${id}/job_templates`,
   });
 
   if (project?.scm_type) {
     tabsArray.push({
-      name: i18n._(t`Schedules`),
+      name: t`Schedules`,
       link: `/projects/${id}/schedules`,
     });
   }
@@ -136,8 +136,8 @@ function Project({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response.status === 404 && (
               <span>
-                {i18n._(t`Project not found.`)}{' '}
-                <Link to="/projects">{i18n._(t`View all Projects.`)}</Link>
+                {t`Project not found.`}{' '}
+                <Link to="/projects">{t`View all Projects.`}</Link>
               </span>
             )}
           </ContentError>
@@ -195,7 +195,7 @@ function Project({ i18n, setBreadcrumb }) {
               <ContentError isNotFound>
                 {id && (
                   <Link to={`/projects/${id}/details`}>
-                    {i18n._(t`View Project Details`)}
+                    {t`View Project Details`}
                   </Link>
                 )}
               </ContentError>
@@ -207,5 +207,5 @@ function Project({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(withRouter(Project));
+export default withRouter(Project);
 export { Project as _Project };

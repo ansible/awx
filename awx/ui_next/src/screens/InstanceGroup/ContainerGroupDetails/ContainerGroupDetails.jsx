@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Label } from '@patternfly/react-core';
@@ -18,7 +18,7 @@ import { jsonToYaml, isJsonString } from '../../../util/yaml';
 import { InstanceGroupsAPI } from '../../../api';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
-function ContainerGroupDetails({ instanceGroup, i18n }) {
+function ContainerGroupDetails({ instanceGroup }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -42,45 +42,50 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
     <CardBody>
       <DetailList>
         <Detail
-          label={i18n._(t`Name`)}
+          label={t`Name`}
           value={instanceGroup.name}
           dataCy="container-group-detail-name"
         />
         <Detail
-          label={i18n._(t`Type`)}
-          value={i18n._(t`Container group`)}
+          label={t`Type`}
+          value={t`Container group`}
           dataCy="container-group-type"
         />
         {instanceGroup.summary_fields.credential && (
           <Detail
-            label={i18n._(t`Credential`)}
+            label={t`Credential`}
             value={
-              <Label variant="outline" color="blue">
-                {instanceGroup.summary_fields.credential?.name}
-              </Label>
+              <Link
+                to={`/credentials/${instanceGroup?.summary_fields?.credential?.id}`}
+              >
+                <Label variant="outline" color="blue">
+                  {instanceGroup?.summary_fields?.credential?.name}
+                </Label>
+              </Link>
             }
             dataCy="container-group-credential"
           />
         )}
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={instanceGroup.created}
           user={instanceGroup.summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={instanceGroup.modified}
           user={instanceGroup.summary_fields.modified_by}
         />
         {instanceGroup.pod_spec_override && (
           <VariablesDetail
-            label={i18n._(t`Pod spec override`)}
+            label={t`Pod spec override`}
             value={
               isJsonString(instanceGroup.pod_spec_override)
                 ? jsonToYaml(instanceGroup.pod_spec_override)
                 : instanceGroup.pod_spec_override
             }
             rows={6}
+            name="pod_spec_override"
           />
         )}
       </DetailList>
@@ -90,26 +95,25 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
           instanceGroup.summary_fields.user_capabilities.edit && (
             <Button
               ouiaId="container-group-detail-edit-button"
-              aria-label={i18n._(t`edit`)}
+              aria-label={t`edit`}
               component={Link}
               to={`/instance_groups/container_group/${id}/edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
         {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
+              ouiaId="container-group-detail-delete-button"
               name={name}
-              modalTitle={i18n._(t`Delete instance group`)}
+              modalTitle={t`Delete instance group`}
               onConfirm={deleteInstanceGroup}
               isDisabled={isLoading}
               deleteDetailsRequests={deleteDetailsRequests}
-              deleteMessage={i18n._(
-                t`This container group is currently being by other resources. Are you sure you want to delete it?`
-              )}
+              deleteMessage={t`This container group is currently being by other resources. Are you sure you want to delete it?`}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -117,7 +121,7 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error`)}
+          title={t`Error`}
           variant="error"
         />
       )}
@@ -125,4 +129,4 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
   );
 }
 
-export default withI18n()(ContainerGroupDetails);
+export default ContainerGroupDetails;

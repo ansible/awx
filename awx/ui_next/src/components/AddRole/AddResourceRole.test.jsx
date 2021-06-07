@@ -95,13 +95,15 @@ describe('<_AddResourceRole />', () => {
 
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    expect(wrapper.find('Chip').length).toBe(0);
     act(() =>
-      wrapper.find('DataListCheck[name="foo"]').invoke('onChange')(true)
+      wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
     wrapper.update();
-    expect(wrapper.find('DataListCheck[name="foo"]').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('CheckboxListItem[name="foo"]').prop('isSelected')
+    ).toBe(true);
+    expect(wrapper.find('Chip').length).toBe(1);
     act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
     wrapper.update();
 
@@ -162,12 +164,12 @@ describe('<_AddResourceRole />', () => {
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     act(() =>
-      wrapper.find('DataListCheck[name="foo"]').invoke('onChange')(true)
+      wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
     wrapper.update();
-    expect(wrapper.find('DataListCheck[name="foo"]').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('CheckboxListItem[name="foo"]').prop('isSelected')
+    ).toBe(true);
     act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
     wrapper.update();
 
@@ -214,12 +216,12 @@ describe('<_AddResourceRole />', () => {
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     act(() =>
-      wrapper.find('DataListCheck[name="foo"]').invoke('onChange')(true)
+      wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
     wrapper.update();
-    expect(wrapper.find('DataListCheck[name="foo"]').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('CheckboxListItem[name="foo"]').prop('isSelected')
+    ).toBe(true);
     await act(async () =>
       wrapper.find('PFWizard').prop('onGoToStep')({ id: 1 })
     );
@@ -280,12 +282,12 @@ describe('<_AddResourceRole />', () => {
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     act(() =>
-      wrapper.find('DataListCheck[name="foo"]').invoke('onChange')(true)
+      wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
     wrapper.update();
-    expect(wrapper.find('DataListCheck[name="foo"]').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('CheckboxListItem[name="foo"]').prop('isSelected')
+    ).toBe(true);
     act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
     wrapper.update();
 

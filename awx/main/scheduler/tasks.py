@@ -11,5 +11,5 @@ logger = logging.getLogger('awx.main.scheduler')
 
 @task(queue=get_local_queuename)
 def run_task_manager():
-    logger.debug("Running Tower task manager.")
+    logger.debug("Running task manager.")
     TaskManager().schedule()

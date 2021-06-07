@@ -1,11 +1,12 @@
 import 'styled-components/macro';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import styled from 'styled-components';
 
+import { useConfig } from '../../../contexts/Config';
 import AlertModal from '../../../components/AlertModal';
 import {
   DetailList,
@@ -24,10 +25,10 @@ import {
   ReLaunchDropDown,
 } from '../../../components/LaunchButton';
 import StatusIcon from '../../../components/StatusIcon';
+import JobCancelButton from '../../../components/JobCancelButton';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from '../../../util/jobs';
 import { toTitleCase } from '../../../util/strings';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { formatDateString } from '../../../util/dates';
 import { Job } from '../../../types';
 
@@ -52,7 +53,8 @@ const VERBOSITY = {
   4: '4 (Connection Debug)',
 };
 
-function JobDetail({ job, i18n }) {
+function JobDetail({ job }) {
+  const { me } = useConfig();
   const {
     created_by,
     credential,
@@ -68,37 +70,17 @@ function JobDetail({ job, i18n }) {
     source_workflow_job,
     execution_environment: executionEnvironment,
   } = job.summary_fields;
+  const { scm_branch: scmBranch } = job;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
 
-  const [showCancelModal, setShowCancelModal] = useState(false);
-
-  const {
-    error: cancelError,
-    isLoading: isCancelling,
-    request: cancelJob,
-  } = useRequest(
-    useCallback(async () => {
-      await getJobModel(job.type).cancel(job.id, job.type);
-    }, [job.id, job.type]),
-    {}
-  );
-
-  const {
-    error: dismissableCancelError,
-    dismissError: dismissCancelError,
-  } = useDismissableError(cancelError);
-
   const jobTypes = {
-    project_update: i18n._(t`Source Control Update`),
-    inventory_update: i18n._(t`Inventory Sync`),
-    job:
-      job.job_type === 'check'
-        ? i18n._(t`Playbook Check`)
-        : i18n._(t`Playbook Run`),
-    ad_hoc_command: i18n._(t`Command`),
-    management_job: i18n._(t`Management Job`),
-    workflow_job: i18n._(t`Workflow Job`),
+    project_update: t`Source Control Update`,
+    inventory_update: t`Inventory Sync`,
+    job: job.job_type === 'check' ? t`Playbook Check` : t`Playbook Run`,
+    ad_hoc_command: t`Command`,
+    management_job: t`Management Job`,
+    workflow_job: t`Workflow Job`,
   };
 
   const deleteJob = async () => {
@@ -127,7 +109,7 @@ function JobDetail({ job, i18n }) {
       <DetailList>
         <Detail
           fullWidth={Boolean(job.job_explanation)}
-          label={i18n._(t`Status`)}
+          label={t`Status`}
           value={
             <StatusDetailValue>
               {job.status && <StatusIcon status={job.status} />}
@@ -137,17 +119,11 @@ function JobDetail({ job, i18n }) {
             </StatusDetailValue>
           }
         />
-        <Detail
-          label={i18n._(t`Started`)}
-          value={formatDateString(job.started)}
-        />
-        <Detail
-          label={i18n._(t`Finished`)}
-          value={formatDateString(job.finished)}
-        />
+        <Detail label={t`Started`} value={formatDateString(job.started)} />
+        <Detail label={t`Finished`} value={formatDateString(job.finished)} />
         {jobTemplate && (
           <Detail
-            label={i18n._(t`Job Template`)}
+            label={t`Job Template`}
             value={
               <Link to={`/templates/job_template/${jobTemplate.id}`}>
                 {jobTemplate.name}
@@ -157,7 +133,7 @@ function JobDetail({ job, i18n }) {
         )}
         {workflowJobTemplate && (
           <Detail
-            label={i18n._(t`Workflow Job Template`)}
+            label={t`Workflow Job Template`}
             value={
               <Link
                 to={`/templates/workflow_job_template/${workflowJobTemplate.id}`}
@@ -169,7 +145,7 @@ function JobDetail({ job, i18n }) {
         )}
         {source_workflow_job && (
           <Detail
-            label={i18n._(t`Source Workflow Job`)}
+            label={t`Source Workflow Job`}
             value={
               <Link to={`/jobs/workflow/${source_workflow_job.id}`}>
                 {source_workflow_job.id} - {source_workflow_job.name}
@@ -177,11 +153,11 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Job Type`)} value={jobTypes[job.type]} />
-        <LaunchedByDetail job={job} i18n={i18n} />
+        <Detail label={t`Job Type`} value={jobTypes[job.type]} />
+        <LaunchedByDetail job={job} />
         {inventory && (
           <Detail
-            label={i18n._(t`Inventory`)}
+            label={t`Inventory`}
             value={
               <Link
                 to={
@@ -197,7 +173,7 @@ function JobDetail({ job, i18n }) {
         )}
         {inventory_source && (
           <Detail
-            label={i18n._(t`Inventory Source`)}
+            label={t`Inventory Source`}
             value={
               <Link
                 to={`/inventories/inventory/${inventory.id}/sources/${inventory_source.id}`}
@@ -209,7 +185,7 @@ function JobDetail({ job, i18n }) {
         )}
         {inventory_source && inventory_source.source === 'scm' && (
           <Detail
-            label={i18n._(t`Project`)}
+            label={t`Project`}
             value={
               <StatusDetailValue>
                 {source_project.status && (
@@ -224,7 +200,7 @@ function JobDetail({ job, i18n }) {
         )}
         {project && (
           <Detail
-            label={i18n._(t`Project`)}
+            label={t`Project`}
             value={
               <StatusDetailValue>
                 {project.status && <StatusIcon status={project.status} />}
@@ -233,37 +209,44 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Revision`)} value={job.scm_revision} />
-        <Detail label={i18n._(t`Playbook`)} value={job.playbook} />
-        <Detail label={i18n._(t`Limit`)} value={job.limit} />
-        <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
+        {scmBranch && (
+          <Detail
+            dataCy="source-control-branch"
+            label={t`Source Control Branch`}
+            value={scmBranch}
+          />
+        )}
+        <Detail label={t`Revision`} value={job.scm_revision} />
+        <Detail label={t`Playbook`} value={job.playbook} />
+        <Detail label={t`Limit`} value={job.limit} />
+        <Detail label={t`Verbosity`} value={VERBOSITY[job.verbosity]} />
         <ExecutionEnvironmentDetail
           virtualEnvironment={job.custom_virtualenv}
           executionEnvironment={executionEnvironment}
         />
-        <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
+        <Detail label={t`Execution Node`} value={job.execution_node} />
         {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
-            label={i18n._(t`Instance Group`)}
+            label={t`Instance Group`}
             value={buildInstanceGroupLink(instanceGroup)}
           />
         )}
         {instanceGroup && instanceGroup?.is_container_group && (
           <Detail
-            label={i18n._(t`Container Group`)}
+            label={t`Container Group`}
             value={buildContainerGroupLink(instanceGroup)}
           />
         )}
         {typeof job.job_slice_number === 'number' &&
           typeof job.job_slice_count === 'number' && (
             <Detail
-              label={i18n._(t`Job Slice`)}
+              label={t`Job Slice`}
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
         {credential && (
           <Detail
-            label={i18n._(t`Machine Credential`)}
+            label={t`Machine Credential`}
             value={
               <ChipGroup numChips={5} totalChips={1}>
                 <CredentialChip
@@ -278,7 +261,7 @@ function JobDetail({ job, i18n }) {
         {credentials && credentials.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Credentials`)}
+            label={t`Credentials`}
             value={
               <ChipGroup numChips={5} totalChips={credentials.length}>
                 {credentials.map(c => (
@@ -291,7 +274,7 @@ function JobDetail({ job, i18n }) {
         {labels && labels.count > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Labels`)}
+            label={t`Labels`}
             value={
               <ChipGroup numChips={5} totalChips={labels.results.length}>
                 {labels.results.map(l => (
@@ -306,7 +289,7 @@ function JobDetail({ job, i18n }) {
         {job.job_tags && job.job_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Job Tags`)}
+            label={t`Job Tags`}
             value={
               <ChipGroup
                 numChips={5}
@@ -324,7 +307,7 @@ function JobDetail({ job, i18n }) {
         {job.skip_tags && job.skip_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Skip Tags`)}
+            label={t`Skip Tags`}
             value={
               <ChipGroup
                 numChips={5}
@@ -340,11 +323,11 @@ function JobDetail({ job, i18n }) {
           />
         )}
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={job.created}
           user={created_by}
         />
-        <UserDateDetail label={i18n._(t`Last Modified`)} date={job.modified} />
+        <UserDateDetail label={t`Last Modified`} date={job.modified} />
       </DetailList>
       {job.extra_vars && (
         <VariablesInput
@@ -353,7 +336,8 @@ function JobDetail({ job, i18n }) {
           readOnly
           value={job.extra_vars}
           rows={4}
-          label={i18n._(t`Variables`)}
+          label={t`Variables`}
+          name="extra_vars"
         />
       )}
       {job.artifacts && (
@@ -363,7 +347,8 @@ function JobDetail({ job, i18n }) {
           readOnly
           value={JSON.stringify(job.artifacts)}
           rows={4}
-          label={i18n._(t`Artifacts`)}
+          label={t`Artifacts`}
+          name="artifacts"
         />
       )}
       <CardActionsRow>
@@ -381,7 +366,7 @@ function JobDetail({ job, i18n }) {
               )}
             </LaunchButton>
           ) : (
-            <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
+            <LaunchButton resource={job} aria-label={t`Relaunch`}>
               {({ handleRelaunch, isLaunching }) => (
                 <Button
                   ouiaId="job-detail-relaunch-button"
@@ -389,86 +374,40 @@ function JobDetail({ job, i18n }) {
                   onClick={handleRelaunch}
                   isDisabled={isLaunching}
                 >
-                  {i18n._(t`Relaunch`)}
+                  {t`Relaunch`}
                 </Button>
               )}
             </LaunchButton>
           ))}
         {isJobRunning(job.status) &&
-          job?.summary_fields?.user_capabilities?.start && (
-            <Button
-              variant="secondary"
-              aria-label={i18n._(t`Cancel`)}
-              isDisabled={isCancelling}
-              onClick={() => setShowCancelModal(true)}
-              ouiaId="job-detail-cancel-button"
-            >
-              {i18n._(t`Cancel`)}
-            </Button>
+          (job.type === 'system_job'
+            ? me.is_superuser
+            : job?.summary_fields?.user_capabilities?.start) && (
+            <JobCancelButton
+              job={job}
+              errorTitle={t`Job Cancel Error`}
+              title={t`Cancel ${job.name}`}
+              errorMessage={t`Failed to cancel ${job.name}`}
+            />
           )}
         {!isJobRunning(job.status) &&
           job?.summary_fields?.user_capabilities?.delete && (
             <DeleteButton
               name={job.name}
-              modalTitle={i18n._(t`Delete Job`)}
+              modalTitle={t`Delete Job`}
               onConfirm={deleteJob}
               ouiaId="job-detail-delete-button"
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
-      {showCancelModal && isJobRunning(job.status) && (
-        <AlertModal
-          isOpen={showCancelModal}
-          variant="danger"
-          onClose={() => setShowCancelModal(false)}
-          title={i18n._(t`Cancel Job`)}
-          label={i18n._(t`Cancel Job`)}
-          actions={[
-            <Button
-              id="cancel-job-confirm-button"
-              key="delete"
-              variant="danger"
-              isDisabled={isCancelling}
-              aria-label={i18n._(t`Cancel job`)}
-              onClick={cancelJob}
-            >
-              {i18n._(t`Cancel job`)}
-            </Button>,
-            <Button
-              id="cancel-job-return-button"
-              key="cancel"
-              variant="secondary"
-              aria-label={i18n._(t`Return`)}
-              onClick={() => setShowCancelModal(false)}
-            >
-              {i18n._(t`Return`)}
-            </Button>,
-          ]}
-        >
-          {i18n._(
-            t`Are you sure you want to submit the request to cancel this job?`
-          )}
-        </AlertModal>
-      )}
-      {dismissableCancelError && (
-        <AlertModal
-          isOpen={dismissableCancelError}
-          variant="danger"
-          onClose={dismissCancelError}
-          title={i18n._(t`Job Cancel Error`)}
-          label={i18n._(t`Job Cancel Error`)}
-        >
-          <ErrorDetail error={dismissableCancelError} />
-        </AlertModal>
-      )}
       {errorMsg && (
         <AlertModal
           isOpen={errorMsg}
           variant="error"
           onClose={() => setErrorMsg()}
-          title={i18n._(t`Job Delete Error`)}
+          title={t`Job Delete Error`}
         >
           <ErrorDetail error={errorMsg} />
         </AlertModal>
@@ -480,4 +419,4 @@ JobDetail.propTypes = {
   job: Job.isRequired,
 };
 
-export default withI18n()(JobDetail);
+export default JobDetail;

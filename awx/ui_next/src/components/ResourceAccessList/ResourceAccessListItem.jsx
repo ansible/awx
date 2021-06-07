@@ -1,30 +1,16 @@
 import 'styled-components/macro';
 import React from 'react';
 import { func } from 'prop-types';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Chip,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells as PFDataListItemCells,
-  Text,
-  TextContent,
-  TextVariants,
-} from '@patternfly/react-core';
+import { Chip } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
-import DataListCell from '../DataListCell';
 
 import ChipGroup from '../ChipGroup';
 import { DetailList, Detail } from '../DetailList';
 import { AccessRecord } from '../../types';
 
-const DataListItemCells = styled(PFDataListItemCells)`
-  align-items: start;
-`;
-
-function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
+function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
   ResourceAccessListItem.propTypes = {
     accessRecord: AccessRecord.isRequired,
     onRoleDelete: func.isRequired,
@@ -57,7 +43,7 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
         }}
         isReadOnly={!role.user_capabilities.unattach}
         ouiaId={`${role.name}-${role.id}`}
-        closeBtnAriaLabel={i18n._(t`Remove ${role.name} chip`)}
+        closeBtnAriaLabel={t`Remove ${role.name} chip`}
       >
         {role.name}
       </Chip>
@@ -67,71 +53,44 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
   const [teamRoles, userRoles] = getRoleLists();
 
   return (
-    <DataListItem
-      aria-labelledby="access-list-item"
-      key={accessRecord.id}
-      id={`${accessRecord.id}`}
-    >
-      <DataListItemRow>
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              {accessRecord.username && (
-                <TextContent>
-                  {accessRecord.id ? (
-                    <Text component={TextVariants.h6}>
-                      <Link
-                        to={{ pathname: `/users/${accessRecord.id}/details` }}
-                        css="font-weight: bold"
-                      >
-                        {accessRecord.username}
-                      </Link>
-                    </Text>
-                  ) : (
-                    <Text component={TextVariants.h6} css="font-weight: bold">
-                      {accessRecord.username}
-                    </Text>
-                  )}
-                </TextContent>
-              )}
-              {accessRecord.first_name || accessRecord.last_name ? (
-                <DetailList stacked>
-                  <Detail
-                    label={i18n._(t`Name`)}
-                    value={`${accessRecord.first_name} ${accessRecord.last_name}`}
-                  />
-                </DetailList>
-              ) : null}
-            </DataListCell>,
-            <DataListCell key="roles">
-              <DetailList stacked>
-                {userRoles.length > 0 && (
-                  <Detail
-                    label={i18n._(t`User Roles`)}
-                    value={
-                      <ChipGroup numChips={5} totalChips={userRoles.length}>
-                        {userRoles.map(renderChip)}
-                      </ChipGroup>
-                    }
-                  />
-                )}
-                {teamRoles.length > 0 && (
-                  <Detail
-                    label={i18n._(t`Team Roles`)}
-                    value={
-                      <ChipGroup numChips={5} totalChips={teamRoles.length}>
-                        {teamRoles.map(renderChip)}
-                      </ChipGroup>
-                    }
-                  />
-                )}
-              </DetailList>
-            </DataListCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr id={`access-item-row-${accessRecord.id}`}>
+      <Td id={`access-record-${accessRecord.id}`} dataLabel={t`Name`}>
+        {accessRecord.id ? (
+          <Link to={{ pathname: `/users/${accessRecord.id}/details` }}>
+            <b>{accessRecord.username}</b>
+          </Link>
+        ) : (
+          <b>{accessRecord.username}</b>
+        )}
+      </Td>
+      <Td dataLabel={t`First name`}>{accessRecord.first_name}</Td>
+      <Td dataLabel={t`Last name`}>{accessRecord.first_name}</Td>
+      <Td dataLabel={t`Roles`}>
+        <DetailList stacked>
+          {userRoles.length > 0 && (
+            <Detail
+              label={t`User Roles`}
+              value={
+                <ChipGroup numChips={5} totalChips={userRoles.length}>
+                  {userRoles.map(renderChip)}
+                </ChipGroup>
+              }
+            />
+          )}
+          {teamRoles.length > 0 && (
+            <Detail
+              label={t`Team Roles`}
+              value={
+                <ChipGroup numChips={5} totalChips={teamRoles.length}>
+                  {teamRoles.map(renderChip)}
+                </ChipGroup>
+              }
+            />
+          )}
+        </DetailList>
+      </Td>
+    </Tr>
   );
 }
 
-export default withI18n()(ResourceAccessListItem);
+export default ResourceAccessListItem;

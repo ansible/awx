@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { func, node } from 'prop-types';
+import { func, node, string } from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ApplicationsAPI } from '../../api';
@@ -18,7 +17,7 @@ const QS_CONFIG = getQSConfig('applications', {
   order_by: 'name',
 });
 
-function ApplicationLookup({ i18n, onChange, value, label }) {
+function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
   const location = useLocation();
   const {
     error,
@@ -55,6 +54,26 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
       searchableKeys: [],
     }
   );
+
+  const checkApplicationName = useCallback(
+    async name => {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await ApplicationsAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
@@ -62,43 +81,46 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
     <FormGroup fieldId="application" label={label}>
       <Lookup
         id="application"
-        header={i18n._(t`Application`)}
+        header={t`Application`}
         value={value}
         onChange={onChange}
+        onDebounce={checkApplicationName}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}
             options={applications}
             optionCount={itemCount}
-            header={i18n._(t`Applications`)}
+            header={t`Applications`}
             qsConfig={QS_CONFIG}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
               {
-                name: i18n._(t`Created`),
+                name: t`Created`,
                 key: 'created',
               },
               {
-                name: i18n._(t`Organization`),
+                name: t`Organization`,
                 key: 'organization',
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description',
               },
             ]}
@@ -119,10 +141,14 @@ ApplicationLookup.propTypes = {
   label: node.isRequired,
   onChange: func.isRequired,
   value: Application,
+  validate: func,
+  fieldName: string,
 };
 
 ApplicationLookup.defaultProps = {
   value: null,
+  validate: () => undefined,
+  fieldName: 'application',
 };
 
-export default withI18n()(withRouter(ApplicationLookup));
+export default withRouter(ApplicationLookup);

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
@@ -17,6 +17,7 @@ import PaginatedTable, {
   HeaderCell,
 } from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
 import {
   encodeQueryString,
   getQSConfig,
@@ -32,11 +33,10 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function HostList({ i18n }) {
+function HostList() {
   const history = useHistory();
   const location = useLocation();
   const match = useRouteMatch();
-  const [selected, setSelected] = useState([]);
   const parsedQueryStrings = parseQueryString(QS_CONFIG, location.search);
   const nonDefaultSearchParams = {};
 
@@ -86,7 +86,14 @@ function HostList({ i18n }) {
     fetchHosts();
   }, [fetchHosts]);
 
-  const isAllSelected = selected.length === hosts.length && selected.length > 0;
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(hosts);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteHosts,
@@ -105,19 +112,7 @@ function HostList({ i18n }) {
 
   const handleHostDelete = async () => {
     await deleteHosts();
-    setSelected([]);
-  };
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...hosts] : []);
-  };
-
-  const handleSelect = host => {
-    if (selected.some(h => h.id === host.id)) {
-      setSelected(selected.filter(h => h.id !== host.id));
-    } else {
-      setSelected(selected.concat(host));
-    }
+    clearSelected();
   };
 
   const handleSmartInventoryClick = () => {
@@ -139,25 +134,25 @@ function HostList({ i18n }) {
           hasContentLoading={isLoading || isDeleteLoading}
           items={hosts}
           itemCount={count}
-          pluralizedItemName={i18n._(t`Hosts`)}
+          pluralizedItemName={t`Hosts`}
           qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
+          clearSelected={clearSelected}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Description`),
+              name: t`Description`,
               key: 'description__icontains',
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
@@ -165,9 +160,9 @@ function HostList({ i18n }) {
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG}>
-              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Inventory`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell>{t`Inventory`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
           renderToolbar={props => (
@@ -175,7 +170,7 @@ function HostList({ i18n }) {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={selectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAdd
@@ -185,7 +180,7 @@ function HostList({ i18n }) {
                   key="delete"
                   onDelete={handleHostDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Hosts`)}
+                  pluralizedItemName={t`Hosts`}
                 />,
                 ...(canAdd
                   ? [
@@ -219,10 +214,10 @@ function HostList({ i18n }) {
         <AlertModal
           isOpen={deletionError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more hosts.`)}
+          {t`Failed to delete one or more hosts.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -230,4 +225,4 @@ function HostList({ i18n }) {
   );
 }
 
-export default withI18n()(HostList);
+export default HostList;

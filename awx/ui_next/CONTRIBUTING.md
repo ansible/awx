@@ -336,23 +336,21 @@ Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) 
 
 The lingui library provides various React helpers for dealing with both marking strings for translation, and replacing strings that have been translated. For consistency and ease of use, we have consolidated on one pattern for the codebase. To set strings to be translated in the UI:
 
-- import the withI18n function and wrap the export of your component in it (i.e. `export default withI18n()(Foo)`)
-- doing the above gives you access to the i18n object on props. Make sure to put it in the scope of the function that contains strings needed to be translated (i.e. `const { i18n } = this.props;`)
 - import the t template tag function from the @lingui/macro package.
-- wrap your string using the following format: `` i18n._(t`String to be translated`) ``
+- wrap your string using the following format: `` t`String to be translated` ``
 
-**Note:** Variables that are put inside the t-marked template tag will not be translated. If you have a variable string with text that needs translating, you must wrap it in ` i18n._(t``) ` where it is defined.
+**Note:** If you have a variable string with text that needs translating, you must wrap it in `` t`${variable} string` `` where it is defined. Then you must run `npm run extract-strings` to generate new `.po` files and submit those files along with your pull request.
 
-**Note:** We try to avoid the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo. i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant. Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
+**Note:** We try to avoid the `I18n` consumer, or `i18nMark` function lingui gives us access to in this repo. i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant. Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
 
-**Note:** Pluralization can be complicated so it is best to allow lingui handle cases where we have a string that may need to be pluralized based on number of items, or count. In that case lingui provides a `<Plural>` component, and a `plural()` function. See documentation [here](https://lingui.js.org/guides/plurals.html?highlight=pluralization).
+**Note:** Pluralization can be complicated so it is best to allow lingui handle cases where we have a string that may need to be pluralized based on number of items, or count. In that case lingui provides a `<Plural>` component, and a `plural()` function. When adding or updating strings in a `<Plural/>` tag you must run `npm run extra-strings` and submit the new `.po` files with your pull request. See documentation [here](https://lingui.js.org/guides/plurals.html?highlight=pluralization).
 
 You can learn more about the ways lingui and its React helpers at [this link](https://lingui.js.org/tutorials/react-patterns.html).
 
 ### Setting up .po files to give to translation team
 
 1. `npm run add-locale` to add the language that you want to translate to (we should only have to do this once and the commit to repo afaik). Example: `npm run add-locale en es fr` # Add English, Spanish and French locale
-2. `npm run extract-strings` to create .po files for each language specified. The .po files will be placed in src/locales. When updating strings that are used by `<Plural>` or `plural()` you will need to run this command to get the strings to render properly. This commmand will create `.po` files for each of the supported languages that will need to be commited with your PR.
+2. `npm run extract-strings` to create .po files for each language specified. The .po files will be placed in src/locales. When updating strings that are used by `<Plural>` or `plural()` you will need to run this command to get the strings to render properly. This command will create `.po` files for each of the supported languages that will need to be committed with your PR.
 3. Open up the .po file for the language you want to test and add some translations. In production we would pass this .po file off to the translation team.
 4. Once you've edited your .po file (or we've gotten a .po file back from the translation team) run `npm run compile-strings`. This command takes the .po files and turns them into a minified JSON object and can be seen in the `messages.js` file in each locale directory. These files get loaded at the App root level (see: App.jsx).
 5. Change the language in your browser and reload the page. You should see your specified translations in place of English strings.

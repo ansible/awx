@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ApplicationLookup from './ApplicationLookup';
 import { ApplicationsAPI } from '../../api';
@@ -41,11 +42,13 @@ describe('ApplicationLookup', () => {
   test('should render successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationLookup
-          label="Application"
-          value={application}
-          onChange={() => {}}
-        />
+        <Formik>
+          <ApplicationLookup
+            label="Application"
+            value={application}
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     expect(wrapper.find('ApplicationLookup')).toHaveLength(1);
@@ -54,11 +57,13 @@ describe('ApplicationLookup', () => {
   test('should fetch applications', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationLookup
-          label="Application"
-          value={application}
-          onChange={() => {}}
-        />
+        <Formik>
+          <ApplicationLookup
+            label="Application"
+            value={application}
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     expect(ApplicationsAPI.read).toHaveBeenCalledTimes(1);
@@ -67,11 +72,13 @@ describe('ApplicationLookup', () => {
   test('should display label', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationLookup
-          label="Application"
-          value={application}
-          onChange={() => {}}
-        />
+        <Formik>
+          <ApplicationLookup
+            label="Application"
+            value={application}
+            onChange={() => {}}
+          />
+        </Formik>
       );
     });
     const title = wrapper.find('FormGroup .pf-c-form__label-text');

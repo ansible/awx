@@ -70,9 +70,9 @@ describe('<ContainerGroupDetails/>', () => {
     expect(wrapper.find('Detail[label="Type"]').prop('value')).toEqual(
       'Container group'
     );
-    expect(
-      wrapper.find('Detail[label="Credential"]').prop('value').props.children
-    ).toEqual(instanceGroup.summary_fields.credential.name);
+    expect(wrapper.find('Detail[label="Credential"]').text()).toContain(
+      instanceGroup.summary_fields.credential.name
+    );
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       instanceGroup.pod_spec_override
     );

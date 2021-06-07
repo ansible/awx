@@ -40,10 +40,10 @@ Important Changes
   ``ask_credential_on_launch = true``, ``JobTemplate.credentials`` can be
   specified in the launch payload.
 
-* Custom inventory sources can now utilize a ``Credential``; you
+* SCM inventory sources can utilize a ``Credential``; you
   can store third-party credentials encrypted within Tower and use their
-  values from within your custom inventory script (by - for example - reading
-  an environment variable or a file's contents).
+  values in the Ansible inventory loading context (by - for example -
+  an inventory script reading an environment variable or a file's contents).
 
 API Interaction for Credential Management
 -----------------------------------------

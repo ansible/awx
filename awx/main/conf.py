@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 # Django REST Framework
 from rest_framework import serializers
 
-# Tower
+# AWX
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
 
@@ -36,7 +36,7 @@ register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
-    help_text=_('Controls whether any Organization Admin can view all users and teams, ' 'even those not associated with their Organization.'),
+    help_text=_('Controls whether any Organization Admin can view all users and teams, even those not associated with their Organization.'),
     category=_('System'),
     category_slug='system',
 )
@@ -58,8 +58,8 @@ register(
     field_class=fields.URLField,
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Base URL of the Tower host'),
-    help_text=_('This setting is used by services like notifications to render ' 'a valid url to the Tower host.'),
+    label=_('Base URL of the service'),
+    help_text=_('This setting is used by services like notifications to render a valid url to the service.'),
     category=_('System'),
     category_slug='system',
 )
@@ -84,8 +84,8 @@ register(
     field_class=fields.StringListField,
     label=_('Proxy IP Allowed List'),
     help_text=_(
-        "If Tower is behind a reverse proxy/load balancer, use this setting "
-        "to configure the proxy IP addresses from which Tower should trust "
+        "If the service is behind a reverse proxy/load balancer, use this setting "
+        "to configure the proxy IP addresses from which the service should trust "
         "custom REMOTE_HOST_HEADERS header values. "
         "If this setting is an empty list (the default), the headers specified by "
         "REMOTE_HOST_HEADERS will be trusted unconditionally')"
@@ -94,13 +94,12 @@ register(
     category_slug='system',
 )
 
-
 register(
     'LICENSE',
     field_class=fields.DictField,
     default=lambda: {},
     label=_('License'),
-    help_text=_('The license controls which features and functionality are ' 'enabled. Use /api/v2/config/ to update or change ' 'the license.'),
+    help_text=_('The license controls which features and functionality are enabled. Use /api/v2/config/ to update or change the license.'),
     category=_('System'),
     category_slug='system',
 )
@@ -113,7 +112,7 @@ register(
     encrypted=False,
     read_only=False,
     label=_('Red Hat customer username'),
-    help_text=_('This username is used to send data to Automation Analytics'),
+    help_text=_('This username is used to send data to Insights for Ansible Automation Platform'),
     category=_('System'),
     category_slug='system',
 )
@@ -126,7 +125,7 @@ register(
     encrypted=True,
     read_only=False,
     label=_('Red Hat customer password'),
-    help_text=_('This password is used to send data to Automation Analytics'),
+    help_text=_('This password is used to send data to Insights for Ansible Automation Platform'),
     category=_('System'),
     category_slug='system',
 )
@@ -163,8 +162,8 @@ register(
     default='https://example.com',
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Automation Analytics upload URL'),
-    help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard'),
+    label=_('Insights for Ansible Automation Platform upload URL'),
+    help_text=_('This setting is used to to configure the upload URL for data collection for Red Hat Insights.'),
     category=_('System'),
     category_slug='system',
 )
@@ -172,7 +171,7 @@ register(
 register(
     'INSTALL_UUID',
     field_class=fields.CharField,
-    label=_('Unique identifier for an AWX/Tower installation'),
+    label=_('Unique identifier for an installation'),
     category=_('System'),
     category_slug='system',
     read_only=True,
@@ -194,7 +193,7 @@ register(
     'CUSTOM_VENV_PATHS',
     field_class=fields.StringListPathField,
     label=_('Custom virtual environment paths'),
-    help_text=_('Paths where Tower will look for custom virtual environments ' '(in addition to /var/lib/awx/venv/). Enter one path per line.'),
+    help_text=_('Paths where Tower will look for custom virtual environments (in addition to /var/lib/awx/venv/). Enter one path per line.'),
     category=_('System'),
     category_slug='system',
     default=[],
@@ -223,7 +222,7 @@ register(
     help_text=_(
         'Ansible allows variable substitution via the Jinja2 templating '
         'language for --extra-vars. This poses a potential security '
-        'risk where Tower users with the ability to specify extra vars at job '
+        'risk where users with the ability to specify extra vars at job '
         'launch time can use Jinja2 templates to run arbitrary Python.  It is '
         'recommended that this value be set to "template" or "never".'
     ),
@@ -235,7 +234,7 @@ register(
     'AWX_ISOLATION_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),
-    help_text=_('The directory in which Tower will create new temporary directories for job execution and isolation (such as credential files).'),
+    help_text=_('The directory in which the service will create new temporary directories for job execution and isolation (such as credential files).'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -246,95 +245,6 @@ register(
     required=False,
     label=_('Paths to expose to isolated jobs'),
     help_text=_('List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-)
-
-register(
-    'AWX_ISOLATED_CHECK_INTERVAL',
-    field_class=fields.IntegerField,
-    min_value=0,
-    label=_('Isolated status check interval'),
-    help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    unit=_('seconds'),
-)
-
-register(
-    'AWX_ISOLATED_LAUNCH_TIMEOUT',
-    field_class=fields.IntegerField,
-    min_value=0,
-    label=_('Isolated launch timeout'),
-    help_text=_(
-        'The timeout (in seconds) for launching jobs on isolated instances.  '
-        'This includes the time needed to copy source control files (playbooks) to the isolated instance.'
-    ),
-    category=_('Jobs'),
-    category_slug='jobs',
-    unit=_('seconds'),
-)
-
-register(
-    'AWX_ISOLATED_CONNECTION_TIMEOUT',
-    field_class=fields.IntegerField,
-    min_value=0,
-    default=10,
-    label=_('Isolated connection timeout'),
-    help_text=_(
-        'Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. '
-        'Value should be substantially greater than expected network latency.'
-    ),
-    category=_('Jobs'),
-    category_slug='jobs',
-    unit=_('seconds'),
-)
-
-register(
-    'AWX_ISOLATED_HOST_KEY_CHECKING',
-    field_class=fields.BooleanField,
-    label=_('Isolated host key checking'),
-    help_text=_('When set to True, AWX will enforce strict host key checking for communication with isolated nodes.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    default=False,
-)
-
-register(
-    'AWX_ISOLATED_KEY_GENERATION',
-    field_class=fields.BooleanField,
-    default=True,
-    label=_('Generate RSA keys for isolated instances'),
-    help_text=_(
-        'If set, a random RSA key will be generated and distributed to '
-        'isolated instances.  To disable this behavior and manage authentication '
-        'for isolated instances outside of Tower, disable this setting.'
-    ),  # noqa
-    category=_('Jobs'),
-    category_slug='jobs',
-)
-
-register(
-    'AWX_ISOLATED_PRIVATE_KEY',
-    field_class=fields.CharField,
-    default='',
-    allow_blank=True,
-    encrypted=True,
-    read_only=True,
-    label=_('The RSA private key for SSH traffic to isolated instances'),
-    help_text=_('The RSA private key for SSH traffic to isolated instances'),  # noqa
-    category=_('Jobs'),
-    category_slug='jobs',
-)
-
-register(
-    'AWX_ISOLATED_PUBLIC_KEY',
-    field_class=fields.CharField,
-    default='',
-    allow_blank=True,
-    read_only=True,
-    label=_('The RSA public key for SSH traffic to isolated instances'),
-    help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -354,8 +264,8 @@ register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Gather data for Automation Analytics'),
-    help_text=_('Enables Tower to gather data on automation and send it to Red Hat.'),
+    label=_('Gather data for Insights for Ansible Automation Platform'),
+    help_text=_('Enables the service to gather data on automation and send it to Red Hat Insights.'),
     category=_('System'),
     category_slug='system',
 )
@@ -407,7 +317,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Ignore Ansible Galaxy SSL Certificate Verification'),
-    help_text=_('If set to true, certificate validation will not be done when ' 'installing content from any Galaxy server.'),
+    help_text=_('If set to true, certificate validation will not be done when installing content from any Galaxy server.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -522,7 +432,7 @@ register(
     allow_null=False,
     default=200,
     label=_('Maximum number of forks per job'),
-    help_text=_('Saving a Job Template with more than this number of forks will result in an error. ' 'When set to 0, no limit is applied.'),
+    help_text=_('Saving a Job Template with more than this number of forks will result in an error. When set to 0, no limit is applied.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -543,7 +453,7 @@ register(
     allow_null=True,
     default=None,
     label=_('Logging Aggregator Port'),
-    help_text=_('Port on Logging Aggregator to send logs to (if required and not' ' provided in Logging Aggregator).'),
+    help_text=_('Port on Logging Aggregator to send logs to (if required and not provided in Logging Aggregator).'),
     category=_('Logging'),
     category_slug='logging',
     required=False,
@@ -626,8 +536,8 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('Cluster-wide Tower unique identifier.'),
-    help_text=_('Useful to uniquely identify Tower instances.'),
+    label=_('Cluster-wide unique identifier.'),
+    help_text=_('Useful to uniquely identify instances.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -650,7 +560,7 @@ register(
     field_class=fields.IntegerField,
     default=5,
     label=_('TCP Connection Timeout'),
-    help_text=_('Number of seconds for a TCP connection to external log ' 'aggregator to timeout. Applies to HTTPS and TCP log ' 'aggregator protocols.'),
+    help_text=_('Number of seconds for a TCP connection to external log aggregator to timeout. Applies to HTTPS and TCP log aggregator protocols.'),
     category=_('Logging'),
     category_slug='logging',
     unit=_('seconds'),
@@ -662,7 +572,7 @@ register(
     label=_('Enable/disable HTTPS certificate verification'),
     help_text=_(
         'Flag to control enable/disable of certificate verification'
-        ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, Tower\'s'
+        ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, the'
         ' log handler will verify certificate sent by external log aggregator'
         ' before establishing connection.'
     ),
@@ -716,7 +626,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Enable rsyslogd debugging'),
-    help_text=_('Enabled high verbosity debugging for rsyslogd.  ' 'Useful for debugging connection issues for external log aggregation.'),
+    help_text=_('Enabled high verbosity debugging for rsyslogd.  Useful for debugging connection issues for external log aggregation.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -725,7 +635,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_GATHER',
     field_class=fields.DateTimeField,
-    label=_('Last gather date for Automation Analytics.'),
+    label=_('Last gather date for Insights for Ansible Automation Platform.'),
     allow_null=True,
     category=_('System'),
     category_slug='system',
@@ -733,7 +643,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
     field_class=fields.CharField,
-    label=_('Last gathered entries for expensive Automation Analytics collectors.'),
+    label=_('Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.'),
     default='',
     allow_blank=True,
     category=_('System'),
@@ -744,7 +654,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
     field_class=fields.IntegerField,
-    label=_('Automation Analytics Gather Interval'),
+    label=_('Insights for Ansible Automation Platform Gather Interval'),
     help_text=_('Interval (in seconds) between data gathering.'),
     default=14400,  # every 4 hours
     min_value=1800,  # every 30 minutes

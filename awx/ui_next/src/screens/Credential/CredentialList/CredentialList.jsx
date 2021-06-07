@@ -76,9 +76,14 @@ function CredentialList() {
     fetchCredentials();
   }, [fetchCredentials]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    credentials
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    setSelected,
+    selectAll,
+    clearSelected,
+  } = useSelected(credentials);
 
   const {
     isLoading: isDeleteLoading,
@@ -115,7 +120,7 @@ function CredentialList() {
           items={credentials}
           itemCount={credentialCount}
           qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
+          clearSelected={clearSelected}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
@@ -160,9 +165,7 @@ function CredentialList() {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={isSelected =>
-                setSelected(isSelected ? [...credentials] : [])
-              }
+              onSelectAll={selectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAdd

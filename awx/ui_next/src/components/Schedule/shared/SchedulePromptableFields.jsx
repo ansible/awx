@@ -1,6 +1,5 @@
-import React from 'react';
-import { Wizard } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+import React, { useState } from 'react';
+import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import AlertModal from '../../AlertModal';
@@ -18,7 +17,6 @@ function SchedulePromptableFields({
   credentials,
   resource,
   resourceDefaultCredentials,
-  i18n,
 }) {
   const {
     setFieldTouched,
@@ -38,11 +36,10 @@ function SchedulePromptableFields({
     launchConfig,
     schedule,
     resource,
-    i18n,
     credentials,
     resourceDefaultCredentials
   );
-
+  const [showDescription, setShowDescription] = useState(false);
   const { error, dismissError } = useDismissableError(contentError);
   const cancelPromptableValues = async () => {
     resetForm({
@@ -74,7 +71,7 @@ function SchedulePromptableFields({
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
           onCloseWizard();
@@ -108,22 +105,39 @@ function SchedulePromptableFields({
           validateStep(nextStep.id);
         }
       }}
-      title={i18n._(t`Prompts`)}
+      title={t`Prompt | ${resource.name}`}
+      description={
+        resource.description.length > 512 ? (
+          <ExpandableSection
+            toggleText={
+              showDescription ? t`Hide description` : t`Show description`
+            }
+            onToggle={() => {
+              setShowDescription(!showDescription);
+            }}
+            isExpanded={showDescription}
+          >
+            {resource.description}
+          </ExpandableSection>
+        ) : (
+          resource.description
+        )
+      }
       steps={
         isReady
           ? steps
           : [
               {
-                name: i18n._(t`Content Loading`),
+                name: t`Content Loading`,
                 component: <ContentLoading />,
               },
             ]
       }
-      backButtonText={i18n._(t`Back`)}
-      cancelButtonText={i18n._(t`Cancel`)}
-      nextButtonText={i18n._(t`Next`)}
+      backButtonText={t`Back`}
+      cancelButtonText={t`Cancel`}
+      nextButtonText={t`Next`}
     />
   );
 }
 
-export default withI18n()(SchedulePromptableFields);
+export default SchedulePromptableFields;

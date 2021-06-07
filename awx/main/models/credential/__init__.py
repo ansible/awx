@@ -31,6 +31,7 @@ from awx.main.fields import (
 )
 from awx.main.utils import decrypt_field, classproperty
 from awx.main.utils.safe_yaml import safe_dump
+from awx.main.utils.execution_environments import to_container_path
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
 from awx.main.models.mixins import ResourceMixin
@@ -89,7 +90,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         related_name='credentials',
         null=False,
         on_delete=models.CASCADE,
-        help_text=_('Specify the type of credential you want to create. Refer ' 'to the Ansible Tower documentation for details on each type.'),
+        help_text=_('Specify the type of credential you want to create. Refer ' 'to the documentation for details on each type.'),
     )
     managed_by_tower = models.BooleanField(default=False, editable=False)
     organization = models.ForeignKey(
@@ -101,7 +102,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         related_name='credentials',
     )
     inputs = CredentialInputField(
-        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the Ansible Tower documentation for example syntax.')
+        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -343,12 +344,12 @@ class CredentialType(CommonModelNameNotUnique):
     managed_by_tower = models.BooleanField(default=False, editable=False)
     namespace = models.CharField(max_length=1024, null=True, default=None, editable=False)
     inputs = CredentialTypeInputField(
-        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the Ansible Tower documentation for example syntax.')
+        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
         default=dict,
-        help_text=_('Enter injectors using either JSON or YAML syntax. ' 'Refer to the Ansible Tower documentation for example syntax.'),
+        help_text=_('Enter injectors using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.'),
     )
 
     @classmethod
@@ -493,12 +494,11 @@ class CredentialType(CommonModelNameNotUnique):
 
         for file_label, file_tmpl in file_tmpls.items():
             data = sandbox_env.from_string(file_tmpl).render(**namespace)
-            _, path = tempfile.mkstemp(dir=private_data_dir)
+            _, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            # FIXME: develop some better means of referencing paths inside containers
-            container_path = os.path.join('/runner', os.path.basename(path))
+            container_path = to_container_path(path, private_data_dir)
 
             # determine if filename indicates single file or many
             if file_label.find('.') == -1:
@@ -526,7 +526,7 @@ class CredentialType(CommonModelNameNotUnique):
                 extra_vars[var_name] = sandbox_env.from_string(tmpl).render(**namespace)
 
             def build_extra_vars_file(vars, private_dir):
-                handle, path = tempfile.mkstemp(dir=private_dir)
+                handle, path = tempfile.mkstemp(dir=os.path.join(private_dir, 'env'))
                 f = os.fdopen(handle, 'w')
                 f.write(safe_dump(vars))
                 f.close()
@@ -535,8 +535,7 @@ class CredentialType(CommonModelNameNotUnique):
 
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
-                # FIXME: develop some better means of referencing paths inside containers
-                container_path = os.path.join('/runner', os.path.basename(path))
+                container_path = to_container_path(path, private_data_dir)
                 args.extend(['-e', '@%s' % container_path])
 
 
@@ -752,7 +751,7 @@ ManagedCredentialType(
                 'help_text': ugettext_noop(
                     'OpenStack domains define administrative boundaries. '
                     'It is only needed for Keystone v3 authentication '
-                    'URLs. Refer to Ansible Tower documentation for '
+                    'URLs. Refer to the documentation for '
                     'common scenarios.'
                 ),
             },
@@ -1051,9 +1050,7 @@ ManagedCredentialType(
                 'label': ugettext_noop('OAuth Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop(
-                    'An OAuth token to use to authenticate to Tower with.' 'This should not be set if username/password are being used.'
-                ),
+                'help_text': ugettext_noop('An OAuth token to use to authenticate with.' 'This should not be set if username/password are being used.'),
             },
             {'id': 'verify_ssl', 'label': ugettext_noop('Verify SSL'), 'type': 'boolean', 'secret': False},
         ],

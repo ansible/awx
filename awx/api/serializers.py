@@ -150,7 +150,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'group': DEFAULT_SUMMARY_FIELDS,
     'default_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
     'execution_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
-    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
+    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type', 'allow_override'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed'),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'kubernetes', 'credential_type_id'),
@@ -170,7 +170,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': ('id', 'name', 'controller_id', 'is_container_group'),
+    'instance_group': ('id', 'name', 'is_container_group'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -723,6 +723,19 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
+
+    def get_summary_fields(self, obj):
+        summary_fields = super().get_summary_fields(obj)
+
+        if self.is_detail_view:
+            resolved_ee = obj.resolve_execution_environment()
+            summary_fields['resolved_environment'] = {
+                field: getattr(resolved_ee, field, None)
+                for field in SUMMARIZABLE_FK_FIELDS['execution_environment']
+                if getattr(resolved_ee, field, None) is not None
+            }
+
+        return summary_fields
 
 
 class UnifiedJobSerializer(BaseSerializer):
@@ -2207,6 +2220,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             'org_host_limit_error',
             'source_project_update',
             'custom_virtualenv',
+            'instance_group',
             '-controller_node',
         )
 
@@ -3030,7 +3044,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         res = super(JobSerializer, self).get_related(obj)
         res.update(
             dict(
-                job_events=self.reverse('api:job_job_events_list', kwargs={'pk': obj.pk}),
+                job_events=self.reverse('api:job_job_events_list', kwargs={'pk': obj.pk}),  # TODO: consider adding job_created
                 job_host_summaries=self.reverse('api:job_job_host_summaries_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:job_activity_stream_list', kwargs={'pk': obj.pk}),
                 notifications=self.reverse('api:job_notifications_list', kwargs={'pk': obj.pk}),
@@ -3097,8 +3111,8 @@ class JobDetailSerializer(JobSerializer):
         fields = ('*', 'host_status_counts', 'playbook_counts', 'custom_virtualenv')
 
     def get_playbook_counts(self, obj):
-        task_count = obj.job_events.filter(event='playbook_on_task_start').count()
-        play_count = obj.job_events.filter(event='playbook_on_play_start').count()
+        task_count = obj.get_event_queryset().filter(event='playbook_on_task_start').count()
+        play_count = obj.get_event_queryset().filter(event='playbook_on_play_start').count()
 
         data = {'play_count': play_count, 'task_count': task_count}
 
@@ -3106,7 +3120,7 @@ class JobDetailSerializer(JobSerializer):
 
     def get_host_status_counts(self, obj):
         try:
-            counts = obj.job_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
+            counts = obj.get_event_queryset().only('event_data').get(event='playbook_on_stats').get_host_status_counts()
         except JobEvent.DoesNotExist:
             counts = {}
 
@@ -4374,7 +4388,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         return res
 
     def _recent_notifications(self, obj):
-        return [{'id': x.id, 'status': x.status, 'created': x.created} for x in obj.notifications.all().order_by('-created')[:5]]
+        return [{'id': x.id, 'status': x.status, 'created': x.created, 'error': x.error} for x in obj.notifications.all().order_by('-created')[:5]]
 
     def get_summary_fields(self, obj):
         d = super(NotificationTemplateSerializer, self).get_summary_fields(obj)
@@ -4818,10 +4832,6 @@ class InstanceGroupSerializer(BaseSerializer):
     )
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance group'), read_only=True)
     instances = serializers.SerializerMethodField()
-    is_controller = serializers.BooleanField(help_text=_('Indicates whether instance group controls any other group'), read_only=True)
-    is_isolated = serializers.BooleanField(
-        help_text=_('Indicates whether instances in this group are isolated.' 'Isolated groups have a designated controller group.'), read_only=True
-    )
     is_container_group = serializers.BooleanField(
         required=False,
         help_text=_('Indicates whether instances in this group are containerized.' 'Containerized groups have a designated Openshift or Kubernetes cluster.'),
@@ -4869,9 +4879,6 @@ class InstanceGroupSerializer(BaseSerializer):
             "jobs_running",
             "jobs_total",
             "instances",
-            "controller",
-            "is_controller",
-            "is_isolated",
             "is_container_group",
             "credential",
             "policy_instance_percentage",
@@ -4885,8 +4892,6 @@ class InstanceGroupSerializer(BaseSerializer):
         res = super(InstanceGroupSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
-        if obj.controller_id:
-            res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         if obj.credential:
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential_id})
 
@@ -4898,10 +4903,6 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
             if not Instance.objects.filter(hostname=instance_name).exists():
                 raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
-            if Instance.objects.get(hostname=instance_name).is_isolated():
-                raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
-            if self.instance and self.instance.controller_id is not None:
-                raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
         if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value

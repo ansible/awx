@@ -4,8 +4,12 @@ import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { LabelsAPI } from '../../../api';
 import { useSyncedSelectValue } from '../../../components/MultiSelect';
+import useIsMounted from '../../../util/useIsMounted';
 
-async function loadLabelOptions(setLabels, onError) {
+async function loadLabelOptions(setLabels, onError, isMounted) {
+  if (!isMounted.current) {
+    return;
+  }
   let labels;
   try {
     const { data } = await LabelsAPI.read({
@@ -32,11 +36,12 @@ async function loadLabelOptions(setLabels, onError) {
 
 function LabelSelect({ value, placeholder, onChange, onError, createText }) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isMounted = useIsMounted();
   const { selections, onSelect, options, setOptions } = useSyncedSelectValue(
     value,
     onChange
   );
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = toggleValue => {
     setIsExpanded(toggleValue);
@@ -44,7 +49,10 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
 
   useEffect(() => {
     (async () => {
-      await loadLabelOptions(setOptions, onError);
+      await loadLabelOptions(setOptions, onError, isMounted);
+      if (!isMounted.current) {
+        return;
+      }
       setIsLoading(false);
     })();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

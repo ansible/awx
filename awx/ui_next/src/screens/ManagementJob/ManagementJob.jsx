@@ -8,7 +8,7 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -22,7 +22,7 @@ import { Schedules } from '../../components/Schedule';
 import { useConfig } from '../../contexts/Config';
 import useRequest from '../../util/useRequest';
 
-function ManagementJob({ i18n, setBreadcrumb }) {
+function ManagementJob({ setBreadcrumb }) {
   const basePath = '/management_jobs';
 
   const match = useRouteMatch();
@@ -95,7 +95,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to management jobs`)}
+          {t`Back to management jobs`}
         </>
       ),
     },
@@ -104,7 +104,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
   if (shouldShowSchedules) {
     tabsArray.push({
       id: 0,
-      name: i18n._(t`Schedules`),
+      name: t`Schedules`,
       link: `${match.url}/schedules`,
     });
   }
@@ -112,7 +112,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
   if (shouldShowNotifications) {
     tabsArray.push({
       id: 1,
-      name: i18n._(t`Notifications`),
+      name: t`Notifications`,
       link: `${match.url}/notifications`,
     });
   }
@@ -129,9 +129,9 @@ function ManagementJob({ i18n, setBreadcrumb }) {
           <ContentError error={error}>
             {error?.response?.status === 404 && (
               <span>
-                {i18n._(t`Management job not found.`)}
+                {t`Management job not found.`}
                 {''}
-                <Link to={basePath}>{i18n._(t`View all management jobs`)}</Link>
+                <Link to={basePath}>{t`View all management jobs`}</Link>
               </span>
             )}
           </ContentError>
@@ -190,4 +190,4 @@ function ManagementJob({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(ManagementJob);
+export default ManagementJob;

@@ -50,7 +50,7 @@ class ActionModule(ActionBase):
         session.auth = requests.auth.HTTPBasicAuth(username, password)
         headers = {
             'Content-Type': 'application/json',
-            'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Tower', awx_version, license),
+            'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Automation Platform', awx_version, license),
         }
         url = '/api/remediations/v1/remediations'
         while url:

@@ -4,7 +4,7 @@ import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/re
 import { Tooltip } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import yaml from 'js-yaml';
 import mergeExtraVars, {
   maskPasswords,
@@ -25,13 +25,7 @@ const ErrorMessageWrapper = styled.div`
   margin-bottom: 10px;
 `;
 
-function PreviewStep({
-  resource,
-  launchConfig,
-  surveyConfig,
-  formErrors,
-  i18n,
-}) {
+function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
   const { values } = useFormikContext();
   const surveyValues = getSurveyValues(values);
 
@@ -40,20 +34,24 @@ function PreviewStep({
   };
 
   if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
-    const initialExtraVars =
-      launchConfig.ask_variables_on_launch && (overrides.extra_vars || '---');
-    if (surveyConfig?.spec) {
-      const passwordFields = surveyConfig.spec
-        .filter(q => q.type === 'password')
-        .map(q => q.variable);
-      const masked = maskPasswords(surveyValues, passwordFields);
-      overrides.extra_vars = yaml.safeDump(
-        mergeExtraVars(initialExtraVars, masked)
-      );
-    } else {
-      overrides.extra_vars = yaml.safeDump(
-        mergeExtraVars(initialExtraVars, {})
-      );
+    try {
+      const initialExtraVars =
+        launchConfig.ask_variables_on_launch && (overrides.extra_vars || '---');
+      if (surveyConfig?.spec) {
+        const passwordFields = surveyConfig.spec
+          .filter(q => q.type === 'password')
+          .map(q => q.variable);
+        const masked = maskPasswords(surveyValues, passwordFields);
+        overrides.extra_vars = yaml.safeDump(
+          mergeExtraVars(initialExtraVars, masked)
+        );
+      } else {
+        overrides.extra_vars = yaml.safeDump(
+          mergeExtraVars(initialExtraVars, {})
+        );
+      }
+    } catch (e) {
+      //
     }
   }
 
@@ -61,10 +59,10 @@ function PreviewStep({
     <Fragment>
       {formErrors && (
         <ErrorMessageWrapper>
-          {i18n._(t`Some of the previous step(s) have errors`)}
+          {t`Some of the previous step(s) have errors`}
           <Tooltip
             position="right"
-            content={i18n._(t`See errors on the left`)}
+            content={t`See errors on the left`}
             trigger="click mouseenter focus"
           >
             <ExclamationCircleIcon />
@@ -80,4 +78,4 @@ function PreviewStep({
   );
 }
 
-export default withI18n()(PreviewStep);
+export default PreviewStep;

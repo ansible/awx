@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { string, func, bool, oneOfType, number } from 'prop-types';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
-
 import { ExecutionEnvironmentsAPI, ProjectsAPI } from '../../api';
 import { ExecutionEnvironment } from '../../types';
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
@@ -23,17 +21,20 @@ const QS_CONFIG = getQSConfig('execution_environments', {
 
 function ExecutionEnvironmentLookup({
   globallyAvailable,
-  i18n,
+  helperTextInvalid,
   isDefaultEnvironment,
-  isGlobalDefaultEnvironment,
   isDisabled,
+  isGlobalDefaultEnvironment,
+  isValid,
   onBlur,
   onChange,
   organizationId,
   popoverContent,
   projectId,
   tooltip,
+  validate,
   value,
+  fieldName,
 }) {
   const location = useLocation();
 
@@ -113,6 +114,25 @@ function ExecutionEnvironmentLookup({
     }
   );
 
+  const checkExecutionEnvironmentName = useCallback(
+    async name => {
+      if (!name) {
+        onChange(null);
+        return;
+      }
+
+      try {
+        const {
+          data: { results: nameMatchResults, count: nameMatchCount },
+        } = await ExecutionEnvironmentsAPI.read({ name });
+        onChange(nameMatchCount ? nameMatchResults[0] : null);
+      } catch {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     fetchExecutionEnvironments();
   }, [fetchExecutionEnvironments]);
@@ -121,10 +141,13 @@ function ExecutionEnvironmentLookup({
     <>
       <Lookup
         id="execution-environments"
-        header={i18n._(t`Execution Environments`)}
+        header={t`Execution Environments`}
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onDebounce={checkExecutionEnvironmentName}
+        fieldName={fieldName}
+        validate={validate}
         qsConfig={QS_CONFIG}
         isLoading={isLoading || fetchProjectLoading}
         isDisabled={isDisabled}
@@ -135,21 +158,21 @@ function ExecutionEnvironmentLookup({
             optionCount={count}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
             ]}
             searchableKeys={searchableKeys}
             relatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
-            header={i18n._(t`Execution Environment`)}
+            header={t`Execution Environment`}
             name="executionEnvironments"
             qsConfig={QS_CONFIG}
             readOnly={!canDelete}
@@ -166,12 +189,12 @@ function ExecutionEnvironmentLookup({
     defaultExecutionEnvironment
   ) => {
     if (globalDefaultEnvironment) {
-      return i18n._(t`Global Default Execution Environment`);
+      return t`Global Default Execution Environment`;
     }
     if (defaultExecutionEnvironment) {
-      return i18n._(t`Default Execution Environment`);
+      return t`Default Execution Environment`;
     }
-    return i18n._(t`Execution Environment`);
+    return t`Execution Environment`;
   };
 
   return (
@@ -179,6 +202,8 @@ function ExecutionEnvironmentLookup({
       fieldId="execution-environment-lookup"
       label={renderLabel(isGlobalDefaultEnvironment, isDefaultEnvironment)}
       labelIcon={popoverContent && <Popover content={popoverContent} />}
+      helperTextInvalid={helperTextInvalid}
+      validated={isValid ? 'default' : 'error'}
     >
       {tooltip && isDisabled ? (
         <Tooltip content={tooltip}>{renderLookup()}</Tooltip>
@@ -199,6 +224,8 @@ ExecutionEnvironmentLookup.propTypes = {
   isGlobalDefaultEnvironment: bool,
   projectId: oneOfType([number, string]),
   organizationId: oneOfType([number, string]),
+  validate: func,
+  fieldName: string,
 };
 
 ExecutionEnvironmentLookup.defaultProps = {
@@ -208,6 +235,8 @@ ExecutionEnvironmentLookup.defaultProps = {
   value: null,
   projectId: null,
   organizationId: null,
+  validate: () => undefined,
+  fieldName: 'execution_environment',
 };
 
-export default withI18n()(ExecutionEnvironmentLookup);
+export default ExecutionEnvironmentLookup;

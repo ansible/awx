@@ -5,7 +5,7 @@
 Use the GitHub [issue tracker](https://github.com/ansible/awx/issues) for filing bugs. In order to save time, and help us respond to issues quickly, make sure to fill out as much of the issue template
 as possible. Version information, and an accurate reproducing scenario are critical to helping us identify the problem.
 
-Please don't use the issue tracker as a way to ask how to do something. Instead, use the [mailing list](https://groups.google.com/forum/#!forum/awx-project) , and the `#ansible-awx` channel on irc.freenode.net to get help.
+Please don't use the issue tracker as a way to ask how to do something. Instead, use the [mailing list](https://groups.google.com/forum/#!forum/awx-project) , and the `#ansible-awx` channel on irc.libera.chat to get help.
 
 Before opening a new issue, please use the issue search feature to see if what you're experiencing has already been reported. If you have any extra detail to provide, please comment. Otherwise, rather than posting a "me too" comment, please consider giving it a ["thumbs up"](https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comment) to give us an indication of the severity of the problem.
 

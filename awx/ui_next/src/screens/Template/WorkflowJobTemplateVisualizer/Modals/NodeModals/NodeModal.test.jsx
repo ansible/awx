@@ -253,10 +253,6 @@ describe('NodeModal', () => {
     });
     await waitForElement(wrapper, 'PFWizard');
   });
-  afterEach(() => {
-    // jest.clearAllMocks();
-    // onSave.mockClear();
-  });
 
   test('Can successfully create a new job template node', async () => {
     act(() => {
@@ -268,7 +264,10 @@ describe('NodeModal', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper.find('Radio').simulate('click');
+      wrapper
+        .find('td#check-action-item-1')
+        .find('input')
+        .simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -333,8 +332,12 @@ describe('NodeModal', () => {
       wrapper.find('AnsibleSelect').prop('onChange')(null, 'project');
     });
     wrapper.update();
+
     await act(async () => {
-      wrapper.find('Radio').simulate('click');
+      wrapper
+        .find('td#check-action-item-1')
+        .find('input')
+        .simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -370,7 +373,10 @@ describe('NodeModal', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper.find('Radio').simulate('click');
+      wrapper
+        .find('td#check-action-item-1')
+        .find('input')
+        .simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -405,7 +411,12 @@ describe('NodeModal', () => {
       );
     });
     wrapper.update();
-    await act(async () => wrapper.find('Radio').simulate('click'));
+    await act(async () =>
+      wrapper
+        .find('td#check-action-item-1')
+        .find('input')
+        .simulate('click')
+    );
     wrapper.update();
 
     await act(async () => {
@@ -659,7 +670,10 @@ describe('Edit existing node', () => {
       'workflow_job_template'
     );
     await act(async () => {
-      newWrapper.find('Radio').simulate('click');
+      newWrapper
+        .find('td#check-action-item-1')
+        .find('input')
+        .simulate('click');
       newWrapper.update();
     });
     newWrapper.update();

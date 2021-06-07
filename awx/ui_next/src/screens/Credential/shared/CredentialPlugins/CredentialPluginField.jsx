@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -19,15 +19,7 @@ import { CredentialPluginPrompt } from './CredentialPluginPrompt';
 import CredentialPluginSelected from './CredentialPluginSelected';
 
 function CredentialPluginInput(props) {
-  const {
-    children,
-    i18n,
-    isDisabled,
-    isRequired,
-    validated,
-    fieldOptions,
-  } = props;
-
+  const { children, isDisabled, isRequired, validated, fieldOptions } = props;
   const [showPluginWizard, setShowPluginWizard] = useState(false);
   const [inputField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
@@ -61,17 +53,13 @@ function CredentialPluginInput(props) {
             },
           })}
           <Tooltip
-            content={i18n._(
-              t`Populate field from an external secret management system`
-            )}
+            content={t`Populate field from an external secret management system`}
           >
             <Button
               ouiaId={`credential-field-${fieldOptions.id}-external-button`}
               id={`credential-${fieldOptions.id}-external-button`}
               variant={ButtonVariant.control}
-              aria-label={i18n._(
-                t`Populate field from an external secret management system`
-              )}
+              aria-label={t`Populate field from an external secret management system`}
               onClick={() => setShowPluginWizard(true)}
               isDisabled={isDisabled || disableFieldAndButtons}
             >
@@ -170,4 +158,4 @@ CredentialPluginField.defaultProps = {
   isRequired: false,
 };
 
-export default withI18n()(CredentialPluginField);
+export default CredentialPluginField;
