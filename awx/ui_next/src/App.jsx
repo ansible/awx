@@ -86,7 +86,7 @@ const AuthorizedRoutes = ({ routeConfig }) => {
 };
 
 const ProtectedRoute = ({ children, ...rest }) => {
-  const { setAuthRedirectTo } = useSession();
+  const { authRedirectTo, setAuthRedirectTo } = useSession();
   const { pathname } = useLocation();
 
   if (isAuthenticated(document.cookie)) {
@@ -99,7 +99,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
     );
   }
 
-  setAuthRedirectTo(pathname);
+  setAuthRedirectTo(authRedirectTo === '/logout' ? '/' : pathname);
+
   return <Redirect to="/login" />;
 };
 
