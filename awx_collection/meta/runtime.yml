@@ -27,7 +27,6 @@ action_groups:
     - workflow_job_template_node
     - workflow_job_template
     - workflow_launch
-
 plugin_routing:
   inventory:
     tower:
@@ -39,8 +38,8 @@ plugin_routing:
       redirect: awx.awx.controller_api
     tower_schedule_rrule:
       redirect: awx.awx.schedule_rrule
-   awx.awx.tower_api:
-     redirect: awx.awx.controller_api
+    awx.awx.tower_api:
+      redirect: awx.awx.controller_api
     awx.awx.tower_schedule_rrule:
       redirect: awx.awx.tower_schedule_rrule
   modules:
