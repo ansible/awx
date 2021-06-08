@@ -81,6 +81,7 @@ const SmartInventoryFormFields = ({ inventory }) => {
         onBlur={() => hostFilterHelpers.setTouched()}
         isValid={!hostFilterMeta.touched || !hostFilterMeta.error}
         isDisabled={!organizationField.value}
+        enableNegativeFiltering={false}
       />
       <InstanceGroupsLookup
         value={instanceGroupsField.value}

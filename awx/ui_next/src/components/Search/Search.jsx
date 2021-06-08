@@ -32,7 +32,6 @@ const NoOptionDropdown = styled.div`
 
 function Search({
   columns,
-
   onSearch,
   onReplaceSearch,
   onRemove,
@@ -43,6 +42,7 @@ function Search({
   onShowAdvancedSearch,
   isDisabled,
   maxSelectHeight,
+  enableNegativeFiltering,
 }) {
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
@@ -206,6 +206,7 @@ function Search({
               searchableKeys={searchableKeys}
               relatedSearchableKeys={relatedSearchableKeys}
               maxSelectHeight={maxSelectHeight}
+              enableNegativeFiltering={enableNegativeFiltering}
             />
           )) ||
             (options && (
@@ -325,6 +326,7 @@ Search.propTypes = {
   onShowAdvancedSearch: PropTypes.func.isRequired,
   isDisabled: PropTypes.bool,
   maxSelectHeight: PropTypes.string,
+  enableNegativeFiltering: PropTypes.bool,
 };
 
 Search.defaultProps = {
@@ -332,6 +334,7 @@ Search.defaultProps = {
   onRemove: null,
   isDisabled: false,
   maxSelectHeight: '300px',
+  enableNegativeFiltering: true,
 };
 
 export default withRouter(Search);
