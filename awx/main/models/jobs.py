@@ -1254,9 +1254,11 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return SystemJobEvent
 
     @property
+    def can_run_on_control_plane(self):
+        return True
+
+    @property
     def task_impact(self):
-        if settings.IS_K8S:
-            return 0
         return 5
 
     @property

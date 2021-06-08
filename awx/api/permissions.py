@@ -4,6 +4,8 @@
 # Python
 import logging
 
+from django.conf import settings
+
 # Django REST Framework
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework import permissions
@@ -245,7 +247,7 @@ class IsSuperUser(permissions.BasePermission):
 
 class InstanceGroupTowerPermission(ModelAccessPermission):
     def has_object_permission(self, request, view, obj):
-        if request.method == 'DELETE' and obj.name == "tower":
+        if request.method == 'DELETE' and obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             return False
         return super(InstanceGroupTowerPermission, self).has_object_permission(request, view, obj)
 

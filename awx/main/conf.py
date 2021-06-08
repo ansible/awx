@@ -178,6 +178,24 @@ register(
 )
 
 register(
+    'DEFAULT_CONTROL_PLANE_QUEUE_NAME',
+    field_class=fields.CharField,
+    label=_('The instance group where control plane tasks run'),
+    category=_('System'),
+    category_slug='system',
+    read_only=True,
+)
+
+register(
+    'DEFAULT_EXECUTION_QUEUE_NAME',
+    field_class=fields.CharField,
+    label=_('The instance group where user jobs run (currently only on non-VM installs)'),
+    category=_('System'),
+    category_slug='system',
+    read_only=True,
+)
+
+register(
     'DEFAULT_EXECUTION_ENVIRONMENT',
     field_class=fields.PrimaryKeyRelatedField,
     allow_null=True,

@@ -474,6 +474,7 @@ class TaskManager:
                         tasks_to_update_job_explanation.append(task)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
+
             found_acceptable_queue = False
             if isinstance(task, WorkflowJob):
                 if task.unified_job_template_id in running_workflow_templates:
@@ -484,6 +485,7 @@ class TaskManager:
                     running_workflow_templates.add(task.unified_job_template_id)
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
+
             for rampart_group in preferred_instance_groups:
                 if task.can_run_containerized and rampart_group.is_container_group:
                     self.graph[rampart_group.name]['graph'].add_job(task)
@@ -491,12 +493,12 @@ class TaskManager:
                     found_acceptable_queue = True
                     break
 
+                if not task.can_run_on_control_plane:
+                    logger.debug("Skipping group {}, task cannot run on control plane".format(rampart_group.name))
+                    continue
+
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
-                if (
-                    task.task_impact > 0
-                    and not rampart_group.is_container_group  # project updates have a cost of zero
-                    and self.get_remaining_capacity(rampart_group.name) <= 0
-                ):
+                if task.task_impact > 0 and self.get_remaining_capacity(rampart_group.name) <= 0:
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
                     continue
 

@@ -173,7 +173,7 @@ init:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --instance_percent=100;
+	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate

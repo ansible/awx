@@ -737,6 +737,13 @@ class UnifiedJob(
         raise NotImplementedError  # Implement in subclasses.
 
     @property
+    def can_run_on_control_plane(self):
+        if settings.IS_K8S:
+            return False
+
+        return True
+
+    @property
     def can_run_containerized(self):
         return False
 
@@ -1416,13 +1423,20 @@ class UnifiedJob(
         return list(self.unified_job_template.instance_groups.all())
 
     @property
+    def control_plane_instance_group(self):
+        from awx.main.models.ha import InstanceGroup
+
+        control_plane_instance_group = InstanceGroup.objects.filter(name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+
+        return list(control_plane_instance_group)
+
+    @property
     def global_instance_groups(self):
         from awx.main.models.ha import InstanceGroup
 
-        default_instance_group = InstanceGroup.objects.filter(name='tower')
-        if default_instance_group.exists():
-            return [default_instance_group.first()]
-        return []
+        default_instance_groups = InstanceGroup.objects.filter(name__in=[settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME])
+
+        return list(default_instance_groups)
 
     def awx_meta_vars(self):
         """
