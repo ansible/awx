@@ -38,6 +38,7 @@ import { HostStatusBar, OutputToolbar } from './shared';
 import getRowRangePageSize from './shared/jobOutputUtils';
 import { getJobModel, isJobRunning } from '../../../util/jobs';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import useInterval from '../../../util/useInterval';
 import {
   parseQueryString,
   mergeParams,
@@ -297,8 +298,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const listRef = useRef(null);
   const previousWidth = useRef(0);
   const jobSocketCounter = useRef(0);
-  const interval = useRef(null);
   const isMounted = useIsMounted();
+  const scrollTop = useRef(0);
+  const scrollHeight = useRef(0);
   const history = useHistory();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
@@ -310,6 +312,17 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [results, setResults] = useState({});
+  const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(
+    isJobRunning(job.status)
+  );
+  const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
+
+  useInterval(
+    () => {
+      monitorJobSocketCounter();
+    },
+    isMonitoringWebsocket ? 5000 : null
+  );
 
   useEffect(() => {
     loadJobEvents();
@@ -330,14 +343,15 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           }
         }
       });
-      interval.current = setInterval(() => monitorJobSocketCounter(), 5000);
+      setIsMonitoringWebsocket(true);
     }
 
     return function cleanup() {
       if (ws) {
         ws.close();
       }
-      clearInterval(interval.current);
+      setIsMonitoringWebsocket(false);
+      isMounted.current = false;
     };
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -346,6 +360,22 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       listRef.current.recomputeRowHeights();
     }
   }, [currentlyLoading, cssMap, remoteRowCount]);
+
+  useEffect(() => {
+    if (jobStatus && !isJobRunning(jobStatus)) {
+      if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+        setRemoteRowCount(jobSocketCounter.current);
+      }
+
+      if (isMonitoringWebsocket) {
+        setIsMonitoringWebsocket(false);
+      }
+
+      if (isFollowModeEnabled) {
+        setTimeout(() => setIsFollowModeEnabled(false), 1000);
+      }
+    }
+  }, [jobStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     error: cancelError,
@@ -381,14 +411,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   } = useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
+    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+      setRemoteRowCount(jobSocketCounter.current);
+    }
     if (
       jobSocketCounter.current === remoteRowCount &&
       !isJobRunning(job.status)
     ) {
-      clearInterval(interval.current);
-    }
-    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-      setRemoteRowCount(jobSocketCounter.current);
+      setIsMonitoringWebsocket(false);
     }
   };
 
@@ -492,6 +522,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const rowRenderer = ({ index, parent, key, style }) => {
+    if (listRef.current && isFollowModeEnabled) {
+      setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
+    }
     let actualLineTextHtml = [];
     if (results[index]) {
       const { lineTextHtml } = getLineTextHtml(results[index]);
@@ -584,7 +617,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const scrollToRow = rowIndex => {
-    listRef.current.scrollToRow(rowIndex);
+    if (listRef.current) {
+      listRef.current.scrollToRow(rowIndex);
+    }
   };
 
   const handleScrollPrevious = () => {
@@ -604,7 +639,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleScrollLast = () => {
-    scrollToRow(remoteRowCount);
+    scrollToRow(remoteRowCount - 1);
   };
 
   const handleResize = ({ width }) => {
@@ -655,6 +690,27 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const pushHistoryState = qs => {
     const { pathname } = history.location;
     history.push(qs ? `${pathname}?${qs}` : pathname);
+  };
+
+  const handleFollowToggle = () => {
+    if (isFollowModeEnabled) {
+      setIsFollowModeEnabled(false);
+    } else {
+      setIsFollowModeEnabled(true);
+      scrollToRow(remoteRowCount - 1);
+    }
+  };
+
+  const handleScroll = e => {
+    if (
+      isFollowModeEnabled &&
+      scrollTop.current > e.scrollTop &&
+      scrollHeight.current === e.scrollHeight
+    ) {
+      setIsFollowModeEnabled(false);
+    }
+    scrollTop.current = e.scrollTop;
+    scrollHeight.current = e.scrollHeight;
   };
 
   const renderSearchComponent = () => (
@@ -763,6 +819,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                 )}
               </ToolbarItem>
             </ToolbarToggleGroup>
+            {isJobRunning(job.status) ? (
+              <Button
+                variant={isFollowModeEnabled ? 'secondary' : 'primary'}
+                onClick={handleFollowToggle}
+              >
+                {isFollowModeEnabled ? t`Unfollow` : t`Follow`}
+              </Button>
+            ) : null}
           </SearchToolbarContent>
         </SearchToolbar>
         <PageControls
@@ -801,6 +865,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                           scrollToAlignment="start"
                           width={width || 1}
                           overscanRowCount={20}
+                          onScroll={handleScroll}
                         />
                       )}
                     </>
