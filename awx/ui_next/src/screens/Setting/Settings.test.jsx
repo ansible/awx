@@ -5,7 +5,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { SettingsAPI } from '../../api';
+import { SettingsAPI, RootAPI } from '../../api';
 import mockAllOptions from './shared/data.allSettingOptions.json';
 import Settings from './Settings';
 
@@ -19,6 +19,11 @@ describe('<Settings />', () => {
   let wrapper;
 
   beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     SettingsAPI.readAllOptions.mockResolvedValue({
       data: mockAllOptions,
     });

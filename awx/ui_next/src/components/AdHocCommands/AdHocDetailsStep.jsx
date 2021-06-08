@@ -6,8 +6,6 @@ import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { Form, FormGroup, Switch, Checkbox } from '@patternfly/react-core';
 import styled from 'styled-components';
-
-import { BrandName } from '../../variables';
 import AnsibleSelect from '../AnsibleSelect';
 import FormField from '../FormField';
 import { VariablesField } from '../CodeEditor';
@@ -18,17 +16,14 @@ import {
 } from '../FormLayout';
 import Popover from '../Popover';
 import { required } from '../../util/validators';
+import useBrandName from '../../util/useBrandName';
 
 const TooltipWrapper = styled.div`
   text-align: left;
 `;
 
-// Setting BrandName to a variable here is necessary to get the jest tests
-// passing.  Attempting to use BrandName in the template literal results
-// in failing tests.
-const brandName = BrandName;
-
 function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
+  const brandName = useBrandName();
   const [moduleNameField, moduleNameMeta, moduleNameHelpers] = useField({
     name: 'module_name',
     validate: required(null),
@@ -70,7 +65,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
             }
             labelIcon={
               <Popover
-                content={t`These are the modules that ${brandName} supports running commands against.`}
+                content={t`These are the modules that ${brandName.current} supports running commands against.`}
               />
             }
           >

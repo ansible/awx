@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import {
   Card as _Card,
@@ -14,14 +13,9 @@ import {
   PageSection,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { BrandName } from '../../variables';
 import { useConfig } from '../../contexts/Config';
 import ContentLoading from '../../components/ContentLoading/ContentLoading';
-
-// Setting BrandName to a variable here is necessary to get the jest tests
-// passing.  Attempting to use BrandName in the template literal results
-// in failing tests.
-const brandName = BrandName;
+import useBrandName from '../../util/useBrandName';
 
 const SplitLayout = styled(PageSection)`
   column-count: 1;
@@ -50,10 +44,11 @@ const CardDescription = styled.div`
 
 function SettingList() {
   const config = useConfig();
+  const brandName = useBrandName();
   const settingRoutes = [
     {
       header: t`Authentication`,
-      description: t`Enable simplified login for your ${brandName} applications`,
+      description: t`Enable simplified login for your ${brandName.current} applications`,
       id: 'authentication',
       routes: [
         {
@@ -88,7 +83,7 @@ function SettingList() {
     },
     {
       header: t`Jobs`,
-      description: t`Update settings pertaining to Jobs within ${brandName}`,
+      description: t`Update settings pertaining to Jobs within ${brandName.current}`,
       id: 'jobs',
       routes: [
         {

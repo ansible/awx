@@ -1,6 +1,5 @@
 import 'styled-components/macro';
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { FormGroup, Alert } from '@patternfly/react-core';
@@ -8,18 +7,14 @@ import { required } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import FormField from '../../../../components/FormField';
 import Popover from '../../../../components/Popover';
-import { BrandName } from '../../../../variables';
-
-// Setting BrandName to a variable here is necessary to get the jest tests
-// passing.  Attempting to use BrandName in the template literal results
-// in failing tests.
-const brandName = BrandName;
+import useBrandName from '../../../../util/useBrandName';
 
 const ManualSubForm = ({
   localPath,
   project_base_dir,
   project_local_paths,
 }) => {
+  const brandName = useBrandName();
   const localPaths = [...new Set([...project_local_paths, localPath])];
   const options = [
     {
@@ -54,7 +49,7 @@ const ManualSubForm = ({
             Either that directory is empty, or all of the contents are already
             assigned to other projects. Create a new directory there and make
             sure the playbook files can be read by the "awx" system user,
-            or have ${brandName} directly retrieve your playbooks from
+            or have ${brandName.current} directly retrieve your playbooks from
             source control using the Source Control Type option above.`}
         </Alert>
       )}

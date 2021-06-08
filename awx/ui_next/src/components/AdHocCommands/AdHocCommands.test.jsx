@@ -9,6 +9,7 @@ import {
   InventoriesAPI,
   CredentialsAPI,
   ExecutionEnvironmentsAPI,
+  RootAPI,
 } from '../../api';
 import AdHocCommands from './AdHocCommands';
 
@@ -16,6 +17,7 @@ jest.mock('../../api/models/CredentialTypes');
 jest.mock('../../api/models/Inventories');
 jest.mock('../../api/models/Credentials');
 jest.mock('../../api/models/ExecutionEnvironments');
+jest.mock('../../api/models/Root');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -40,6 +42,11 @@ const adHocItems = [
 
 describe('<AdHocCommands />', () => {
   beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     InventoriesAPI.readAdHocOptions.mockResolvedValue({
       data: {
         actions: {

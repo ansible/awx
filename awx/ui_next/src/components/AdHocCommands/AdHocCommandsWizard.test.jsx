@@ -4,13 +4,14 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { CredentialsAPI, ExecutionEnvironmentsAPI } from '../../api';
+import { CredentialsAPI, ExecutionEnvironmentsAPI, RootAPI } from '../../api';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 
 jest.mock('../../api/models/CredentialTypes');
 jest.mock('../../api/models/Inventories');
 jest.mock('../../api/models/Credentials');
 jest.mock('../../api/models/ExecutionEnvironments');
+jest.mock('../../api/models/Root');
 
 const verbosityOptions = [
   { value: '0', key: '0', label: '0 (Normal)' },
@@ -32,6 +33,11 @@ describe('<AdHocCommandsWizard/>', () => {
   let wrapper;
   const onLaunch = jest.fn();
   beforeEach(async () => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommandsWizard

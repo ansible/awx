@@ -12,6 +12,7 @@ import {
   JobTemplatesAPI,
   LabelsAPI,
   ProjectsAPI,
+  RootAPI,
 } from '../../../api';
 
 jest.mock('../../../api');
@@ -67,6 +68,11 @@ describe('<JobTemplateAdd />', () => {
   };
 
   beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     CredentialsAPI.read.mockResolvedValue({
       data: {
         results: [],

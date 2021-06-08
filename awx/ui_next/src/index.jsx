@@ -3,9 +3,6 @@ import ReactDOM from 'react-dom';
 import './setupCSP';
 import '@patternfly/react-core/dist/styles/base.css';
 import App from './App';
-import { BrandName } from './variables';
-
-document.title = `${BrandName}`;
 
 ReactDOM.render(
   <React.StrictMode>

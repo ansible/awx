@@ -14,6 +14,7 @@ import {
   InventoriesAPI,
   ExecutionEnvironmentsAPI,
   InstanceGroupsAPI,
+  RootAPI,
 } from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
 import useDebounce from '../../../util/useDebounce';
@@ -27,6 +28,7 @@ jest.mock('../../../api/models/Projects');
 jest.mock('../../../api/models/Inventories');
 jest.mock('../../../api/models/ExecutionEnvironments');
 jest.mock('../../../api/models/InstanceGroups');
+jest.mock('../../../api/models/Root');
 
 const mockJobTemplate = {
   allow_callbacks: false,
@@ -203,6 +205,11 @@ const mockExecutionEnvironment = [
 
 describe('<JobTemplateEdit />', () => {
   beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     JobTemplatesAPI.readCredentials.mockResolvedValue({
       data: mockRelatedCredentials,
     });
