@@ -14,6 +14,8 @@ const config = {
     date_expired: false,
     date_warning: true,
     free_instances: 1000,
+    automated_instances: '12',
+    automated_since: '1614714228',
     grace_period_remaining: 2904229,
     instance_count: 1001,
     license_date: '1614401999',
@@ -65,8 +67,9 @@ describe('<SubscriptionDetail />', () => {
     assertDetail('Trial', 'False');
     assertDetail('Expires on', '2/27/2021, 4:59:59 AM');
     assertDetail('Days remaining', '3');
-    assertDetail('Hosts used', '1');
+    assertDetail('Hosts imported', '1');
     assertDetail('Hosts remaining', '1000');
+    assertDetail('Hosts automated', '12 since 3/2/2021, 7:43:48 PM');
 
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(1);
   });
