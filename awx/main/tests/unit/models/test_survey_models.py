@@ -75,7 +75,6 @@ def job(mocker):
             'launch_type': 'manual',
             'verbosity': 1,
             'awx_meta_vars.return_value': {},
-            'ansible_virtualenv_path': '',
             'inventory.get_script_data.return_value': {},
         }
     )

@@ -1262,10 +1262,6 @@ class BaseTask(object):
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
-            # store a record of the venv used at runtime
-            if hasattr(self.instance, 'custom_virtualenv'):
-                self.update_model(pk, custom_virtualenv=getattr(self.instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
-
             # Fetch "cached" fact data from prior runs and put on the disk
             # where ansible expects to find it
             if getattr(self.instance, 'use_fact_cache', False):

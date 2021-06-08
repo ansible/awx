@@ -187,7 +187,6 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
             'source_vars_dict': {},
             'get_cloud_credential': mocker.Mock(return_value=credential),
             'get_extra_credentials': lambda x: [],
-            'ansible_virtualenv_path': '/var/lib/awx/venv/foo',
         }
     )
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
@@ -229,7 +228,6 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
             'source_vars_dict': {},
             'get_cloud_credential': mocker.Mock(return_value=credential),
             'get_extra_credentials': lambda x: [],
-            'ansible_virtualenv_path': '/var/lib/awx/venv/foo',
         }
     )
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
@@ -273,7 +271,6 @@ def test_openstack_client_config_generation_with_region(mocker, source, expected
             'source_vars_dict': {},
             'get_cloud_credential': mocker.Mock(return_value=credential),
             'get_extra_credentials': lambda x: [],
-            'ansible_virtualenv_path': '/venv/foo',
         }
     )
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
@@ -315,7 +312,6 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
             'source_vars_dict': {'private': source},
             'get_cloud_credential': mocker.Mock(return_value=credential),
             'get_extra_credentials': lambda x: [],
-            'ansible_virtualenv_path': '/var/lib/awx/venv/foo',
         }
     )
     cloud_config = update.build_private_data(inventory_update, private_data_dir)

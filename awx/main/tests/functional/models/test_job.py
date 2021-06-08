@@ -4,50 +4,12 @@ from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inven
 
 
 @pytest.mark.django_db
-def test_awx_virtualenv_from_settings(inventory, project, machine_credential):
-    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
-    jt.credentials.add(machine_credential)
-    job = jt.create_unified_job()
-    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/ansible'
-
-
-@pytest.mark.django_db
 def test_prevent_slicing():
     jt = JobTemplate.objects.create(name='foo', job_slice_count=4)
     job = jt.create_unified_job(_prevent_slicing=True)
     assert job.job_slice_count == 1
     assert job.job_slice_number == 0
     assert isinstance(job, Job)
-
-
-@pytest.mark.django_db
-def test_awx_custom_virtualenv(inventory, project, machine_credential, organization):
-    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml', organization=organization)
-    jt.credentials.add(machine_credential)
-    job = jt.create_unified_job()
-
-    job.organization.custom_virtualenv = '/var/lib/awx/venv/fancy-org'
-    job.organization.save()
-    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-org'
-
-    job.project.custom_virtualenv = '/var/lib/awx/venv/fancy-proj'
-    job.project.save()
-    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-proj'
-
-    job.job_template.custom_virtualenv = '/var/lib/awx/venv/fancy-jt'
-    job.job_template.save()
-    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-jt'
-
-
-@pytest.mark.django_db
-def test_awx_custom_virtualenv_without_jt(project):
-    project.custom_virtualenv = '/var/lib/awx/venv/fancy-proj'
-    project.save()
-    job = Job(project=project)
-    job.save()
-
-    job = Job.objects.get(pk=job.id)
-    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-proj'
 
 
 @pytest.mark.django_db

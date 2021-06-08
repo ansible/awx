@@ -35,7 +35,6 @@ SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
 # Ansible base virtualenv paths and enablement
 BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
-ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 
 # Base virtualenv paths and enablement
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
