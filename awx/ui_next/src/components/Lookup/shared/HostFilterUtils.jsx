@@ -35,7 +35,6 @@ export function toSearchParams(string = '') {
  */
 export function toQueryString(config, searchParams = {}) {
   if (Object.keys(searchParams).length === 0) return '';
-
   return Object.keys(searchParams)
     .flatMap(key => {
       if (Array.isArray(searchParams[key])) {
@@ -59,14 +58,40 @@ export function toQueryString(config, searchParams = {}) {
  * @return {string} Host filter string
  */
 export function toHostFilter(searchParams = {}) {
-  return Object.keys(searchParams)
+  const flattenSearchParams = Object.keys(searchParams)
+    .sort()
     .flatMap(key => {
       if (Array.isArray(searchParams[key])) {
         return searchParams[key].map(val => `${key}=${val}`);
       }
       return `${key}=${searchParams[key]}`;
-    })
-    .join(' and ');
+    });
+
+  const filteredSearchParams = flattenSearchParams.filter(
+    el => el.indexOf('or__') === -1
+  );
+
+  const conditionalSearchParams = flattenSearchParams.filter(
+    el => !filteredSearchParams.includes(el)
+  );
+
+  const conditionalQuery = conditionalSearchParams
+    .map(el => el.replace('or__', 'or '))
+    .join(' ')
+    .trim();
+
+  if (filteredSearchParams.length === 0 && conditionalQuery) {
+    // when there are just or operators the first one should be removed from the query
+    // `name=foo or name__contains=bar or name__iexact=foo` instead of
+    // `or name=foo or name__contains=bar or name__iexact=foo` that is the reason of the slice(3)
+    return conditionalQuery.slice(3);
+  }
+
+  if (conditionalQuery) {
+    return filteredSearchParams.join(' and ').concat(' ', conditionalQuery);
+  }
+
+  return filteredSearchParams.join(' and ').trim();
 }
 
 /**
