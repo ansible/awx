@@ -215,7 +215,7 @@ describe('<ProjectsListItem />', () => {
   });
 
   test('should render proper alert modal on copy error', async () => {
-    ProjectsAPI.copy.mockRejectedValue(new Error());
+    ProjectsAPI.copy.mockRejectedValue(new Error('This is an error'));
 
     const wrapper = mountWithContexts(
       <table>
@@ -285,7 +285,7 @@ describe('<ProjectsListItem />', () => {
     );
     expect(wrapper.find('CopyButton').length).toBe(0);
   });
-  test('should render disabled copy to clipboard button', () => {
+  test('should render proper revision text when project has not been synced', () => {
     const wrapper = mountWithContexts(
       <table>
         <tbody>
@@ -314,10 +314,82 @@ describe('<ProjectsListItem />', () => {
         </tbody>
       </table>
     );
-    expect(
-      wrapper.find('span[aria-label="copy to clipboard disabled"]').text()
-    ).toBe('Sync for revision');
-    expect(wrapper.find('ClipboardCopyButton').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('ClipboardCopy').length).toBe(0);
+    expect(wrapper.find('td[data-label="Revision"]').text()).toBe(
+      'Sync for revision'
+    );
+  });
+  test('should render the clipboard copy with the right text when scm revision available', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <ProjectsListItem
+            isSelected={false}
+            detailUrl="/project/1"
+            onSelect={() => {}}
+            project={{
+              id: 1,
+              name: 'Project 1',
+              url: '/api/v2/projects/1',
+              type: 'project',
+              scm_type: 'git',
+              scm_revision: 'osofej904r09a9sf0udfsajogsdfbh4e23489adf',
+              summary_fields: {
+                last_job: {
+                  id: 9000,
+                  status: 'successful',
+                },
+                user_capabilities: {
+                  edit: true,
+                },
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('ClipboardCopy').length).toBe(1);
+    expect(wrapper.find('ClipboardCopy').text()).toBe('osofej9');
+  });
+  test('should indicate that the revision needs to be refreshed when project sync is done', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <ProjectsListItem
+            isSelected={false}
+            detailUrl="/project/1"
+            onSelect={() => {}}
+            project={{
+              id: 1,
+              name: 'Project 1',
+              url: '/api/v2/projects/1',
+              type: 'project',
+              scm_type: 'git',
+              scm_revision: null,
+              summary_fields: {
+                current_job: {
+                  id: 9001,
+                  status: 'successful',
+                  finished: '2021-06-01T18:43:53.332201Z',
+                },
+                last_job: {
+                  id: 9000,
+                  status: 'successful',
+                },
+                user_capabilities: {
+                  edit: true,
+                },
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('ClipboardCopy').length).toBe(0);
+    expect(wrapper.find('td[data-label="Revision"]').text()).toBe(
+      'Refresh for revision'
+    );
+    expect(wrapper.find('UndoIcon').length).toBe(1);
   });
   test('should render expected details in expanded section', async () => {
     const wrapper = mountWithContexts(

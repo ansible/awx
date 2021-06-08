@@ -1,20 +1,19 @@
 import 'styled-components/macro';
 import React, { Fragment, useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
-
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button, ClipboardCopy, Tooltip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
   PencilAltIcon,
   ExclamationTriangleIcon as PFExclamationTriangleIcon,
+  UndoIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { formatDateString, timeOfDay } from '../../../util/dates';
 import { ProjectsAPI } from '../../../api';
-import ClipboardCopyButton from '../../../components/ClipboardCopyButton';
 import {
   DetailList,
   Detail,
@@ -23,6 +22,7 @@ import {
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import StatusLabel from '../../../components/StatusLabel';
 import { toTitleCase } from '../../../util/strings';
+import { isJobRunning } from '../../../util/jobs';
 import CopyButton from '../../../components/CopyButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { Project } from '../../../types';
@@ -44,6 +44,7 @@ function ProjectListItem({
   detailUrl,
   fetchProjects,
   rowIndex,
+  onRefreshRow,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -87,6 +88,62 @@ function ProjectListItem({
   const handleCopyFinish = useCallback(() => {
     setIsDisabled(false);
   }, []);
+
+  const renderRevision = () => {
+    if (!project.summary_fields?.current_job || project.scm_revision) {
+      return project.scm_revision ? (
+        <ClipboardCopy
+          data-cy={`project-copy-revision-${project.id}`}
+          variant="inline-compact"
+          clickTip={t`Successfully copied to clipboard!`}
+          hoverTip={t`Copy full revision to clipboard.`}
+          onCopy={() =>
+            navigator.clipboard.writeText(project.scm_revision.toString())
+          }
+        >
+          {project.scm_revision.substring(0, 7)}
+        </ClipboardCopy>
+      ) : (
+        <Label
+          aria-label={t`The project must be synced before a revision is available.`}
+        >
+          {t`Sync for revision`}
+        </Label>
+      );
+    }
+
+    if (
+      isJobRunning(project.summary_fields.current_job.status) &&
+      !project.scm_revision
+    ) {
+      return (
+        <Label
+          aria-label={t`The project is currently syncing and the revision will be available after the sync is complete.`}
+        >
+          {t`Syncing`}
+        </Label>
+      );
+    }
+
+    return (
+      <>
+        <Label
+          aria-label={t`The project revision is currently out of date.  Please refresh to fetch the most recent revision.`}
+        >
+          {t`Refresh for revision`}
+        </Label>
+        <Tooltip content={t`Refresh project revision`}>
+          <Button
+            ouiaId={`project-refresh-revision-${project.id}`}
+            variant="plain"
+            onClick={() => onRefreshRow(project.id)}
+          >
+            <UndoIcon />
+          </Button>
+        </Tooltip>
+      </>
+    );
+  };
 
   const labelId = `check-action-${project.id}`;
 
@@ -153,21 +210,7 @@ function ProjectListItem({
         <Td dataLabel={t`Type`}>
           {project.scm_type === '' ? t`Manual` : toTitleCase(project.scm_type)}
         </Td>
-        <Td dataLabel={t`Revision`}>
-          {project.scm_revision.substring(0, 7)}
-          {!project.scm_revision && (
-            <Label aria-label={t`copy to clipboard disabled`}>
-              {t`Sync for revision`}
-            </Label>
-          )}
-          <ClipboardCopyButton
-            isDisabled={!project.scm_revision}
-            stringToCopy={project.scm_revision}
-            copyTip={t`Copy full revision to clipboard.`}
-            copiedSuccessTip={t`Successfully copied to clipboard!`}
-            ouiaId="copy-revision-button"
-          />
-        </Td>
+        <Td dataLabel={t`Revision`}>{renderRevision()}</Td>
         <ActionsTd dataLabel={t`Actions`}>
           {['running', 'pending', 'waiting'].includes(job?.status) ? (
             <ActionItem

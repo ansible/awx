@@ -1,11 +1,16 @@
 import React, { Fragment, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
-import { Button, List, ListItem, Tooltip } from '@patternfly/react-core';
+import styled from 'styled-components';
+import {
+  Button,
+  ClipboardCopy,
+  List,
+  ListItem,
+  Tooltip,
+} from '@patternfly/react-core';
 import { Project } from '../../../types';
 import { Config } from '../../../contexts/Config';
-
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import DeleteButton from '../../../components/DeleteButton';
@@ -27,6 +32,10 @@ import StatusLabel from '../../../components/StatusLabel';
 import { formatDateString } from '../../../util/dates';
 import useWsProject from './useWsProject';
 
+const Label = styled.span`
+  color: var(--pf-global--disabled-color--100);
+`;
+
 function ProjectDetail({ project }) {
   const {
     allow_override,
@@ -42,6 +51,7 @@ function ProjectDetail({ project }) {
     scm_delete_on_update,
     scm_track_submodules,
     scm_refspec,
+    scm_revision,
     scm_type,
     scm_update_on_launch,
     scm_update_cache_timeout,
@@ -145,6 +155,31 @@ function ProjectDetail({ project }) {
         <Detail
           label={t`Source Control Type`}
           value={scm_type === '' ? t`Manual` : toTitleCase(project.scm_type)}
+        />
+        <Detail
+          label={t`Source Control Revision`}
+          value={
+            scm_revision ? (
+              <ClipboardCopy
+                data-cy="project-copy-revision"
+                variant="inline-compact"
+                clickTip={t`Successfully copied to clipboard!`}
+                hoverTip={t`Copy full revision to clipboard.`}
+                onCopy={() =>
+                  navigator.clipboard.writeText(scm_revision.toString())
+                }
+              >
+                {scm_revision.substring(0, 7)}
+              </ClipboardCopy>
+            ) : (
+              <Label
+                aria-label={t`The project must be synced before a revision is available.`}
+              >
+                {t`Sync for revision`}
+              </Label>
+            )
+          }
+          alwaysVisible
         />
         <Detail label={t`Source Control URL`} value={scm_url} />
         <Detail label={t`Source Control Branch`} value={scm_branch} />

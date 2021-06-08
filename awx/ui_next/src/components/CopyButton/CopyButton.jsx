@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
-
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
-
 import { Button } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons';
 import useRequest, { useDismissableError } from '../../util/useRequest';
@@ -16,7 +14,6 @@ function CopyButton({
   onCopyStart,
   onCopyFinish,
   errorMessage,
-
   ouiaId,
 }) {
   const { isLoading, error: copyError, request: copyItemToAPI } = useRequest(
@@ -44,16 +41,18 @@ function CopyButton({
       >
         <CopyIcon />
       </Button>
-      <AlertModal
-        aria-label={t`Copy Error`}
-        isOpen={error}
-        variant="error"
-        title={t`Error!`}
-        onClose={dismissError}
-      >
-        {errorMessage}
-        <ErrorDetail error={error} />
-      </AlertModal>
+      {error && (
+        <AlertModal
+          aria-label={t`Copy Error`}
+          isOpen={error}
+          variant="error"
+          title={t`Error!`}
+          onClose={dismissError}
+        >
+          {errorMessage}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
     </>
   );
 }

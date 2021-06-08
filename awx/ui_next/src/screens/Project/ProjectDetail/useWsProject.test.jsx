@@ -2,7 +2,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import WS from 'jest-websocket-mock';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { ProjectsAPI } from '../../../api';
 import useWsProject from './useWsProject';
+
+jest.mock('../../../api/models/Projects');
 
 function TestInner() {
   return <div />;
@@ -15,13 +18,30 @@ function Test({ project }) {
 describe('useWsProject', () => {
   let debug;
   let wrapper;
+
   beforeEach(() => {
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
+    ProjectsAPI.readDetail.mockResolvedValue({
+      data: {
+        id: 1,
+        summary_fields: {
+          last_job: {
+            id: 19,
+            name: 'Test Project',
+            description: '',
+            finished: '2021-06-01T18:43:53.332201Z',
+            status: 'successful',
+            failed: false,
+          },
+        },
+      },
+    });
   });
 
   afterEach(() => {
     global.console.debug = debug;
+    jest.clearAllMocks();
   });
 
   test('should return project detail', async () => {
@@ -127,14 +147,20 @@ describe('useWsProject', () => {
         })
       );
     });
+
     wrapper.update();
 
+    expect(ProjectsAPI.readDetail).toHaveBeenCalledTimes(1);
+
     expect(
-      wrapper.find('TestInner').prop('project').summary_fields.current_job
+      wrapper.find('TestInner').prop('project').summary_fields.last_job
     ).toEqual({
-      id: 2,
+      id: 19,
+      name: 'Test Project',
+      description: '',
+      finished: '2021-06-01T18:43:53.332201Z',
       status: 'successful',
-      finished: '2020-07-02T16:28:31.839071Z',
+      failed: false,
     });
     WS.clean();
   });
