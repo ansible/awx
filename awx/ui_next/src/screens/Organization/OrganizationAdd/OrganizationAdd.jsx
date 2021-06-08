@@ -1,14 +1,39 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-
-import { OrganizationsAPI } from '../../../api';
+import useRequest from '../../../util/useRequest';
+import { CredentialsAPI, OrganizationsAPI } from '../../../api';
 import { CardBody } from '../../../components/Card';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 import OrganizationForm from '../shared/OrganizationForm';
 
 function OrganizationAdd() {
   const history = useHistory();
   const [formError, setFormError] = useState(null);
+
+  const {
+    isLoading,
+    error: defaultGalaxyCredentialError,
+    request: fetchDefaultGalaxyCredential,
+    result: defaultGalaxyCredential,
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { results },
+      } = await CredentialsAPI.read({
+        credential_type__kind: 'galaxy',
+        managed_by_tower: true,
+      });
+
+      return results[0] || null;
+    }, []),
+    null
+  );
+
+  useEffect(() => {
+    fetchDefaultGalaxyCredential();
+  }, [fetchDefaultGalaxyCredential]);
 
   const handleSubmit = async (values, groupsToAssociate) => {
     try {
@@ -35,6 +60,30 @@ function OrganizationAdd() {
     history.push('/organizations');
   };
 
+  if (defaultGalaxyCredentialError) {
+    return (
+      <PageSection>
+        <Card>
+          <CardBody>
+            <ContentError error={defaultGalaxyCredentialError} />
+          </CardBody>
+        </Card>
+      </PageSection>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <PageSection>
+        <Card>
+          <CardBody>
+            <ContentLoading />
+          </CardBody>
+        </Card>
+      </PageSection>
+    );
+  }
+
   return (
     <PageSection>
       <Card>
@@ -43,6 +92,7 @@ function OrganizationAdd() {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             submitError={formError}
+            defaultGalaxyCredential={defaultGalaxyCredential}
           />
         </CardBody>
       </Card>
