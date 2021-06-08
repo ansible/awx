@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = """
     Creates or updates the execution environments set in settings.DEFAULT_EXECUTION_ENVIRONMENTS if they are not yet created.
     Optionally provide authentication details to create or update a container registry credential that will be set on all of these default execution environments.
-    Note that settings.DEFAULT_EXECUTION_ENVIRONMENTS is and ordered list, the first in the list will be used for project updates and system jobs.
+    Note that settings.DEFAULT_EXECUTION_ENVIRONMENTS is and ordered list, the first in the list will be used for project updates.
     """
 
     # Preserves newlines in the help text
@@ -68,35 +68,66 @@ class Command(BaseCommand):
                 sys.stderr.write("No registry credential type found")
                 sys.exit(1)
 
-            registry_cred, created = Credential.objects.get_or_create(
-                name="Default Execution Environment Registry Credential", managed_by_tower=True, credential_type=registry_cred_type[0]
-            )
-
-            if created:
-                print("Default Execution Environment Credential registered.")
-
             inputs = {
                 "host": options.get("registry_url"),
                 "password": options.get("registry_password"),
                 "username": options.get("registry_username"),
                 "verify_ssl": options.get("verify_ssl"),
             }
-
-            registry_cred.inputs = inputs
-            registry_cred.save()
-            changed = True
-
-            if not created:
-                print('Updated Default Execution Environment Credential')
-
-        for ee in reversed(settings.DEFAULT_EXECUTION_ENVIRONMENTS):
-            _, created = ExecutionEnvironment.objects.update_or_create(
-                name=ee["name"], defaults={"image": ee["image"], "managed_by_tower": True, "credential": registry_cred}
+            registry_cred, cred_created = Credential.objects.get_or_create(
+                name="Default Execution Environment Registry Credential",
+                managed_by_tower=True,
+                credential_type=registry_cred_type[0],
+                defaults={'inputs': inputs},
             )
 
-        if created:
+            if cred_created:
+                changed = True
+                print("'Default Execution Environment Credential' registered.")
+
+            for key, value in inputs.items():
+                if not registry_cred.inputs.get(key) or registry_cred.get_input(key) != value:
+                    registry_cred.inputs[key] = value
+                    changed = True
+
+            if changed:
+                registry_cred.save()
+                print("'Default Execution Environment Credential' updated.")
+
+        # Create default globally available Execution Environments
+        for ee in reversed(settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS):
+            _this_ee, ee_created = ExecutionEnvironment.objects.get_or_create(name=ee["name"], defaults={'image': ee["image"], 'credential': registry_cred})
+            if ee_created:
+                changed = True
+                print(f"'{ee['name']}' Default Execution Environment registered.")
+            else:
+                if _this_ee.image != ee["image"]:
+                    _this_ee.image = ee["image"]
+                    changed = True
+                if _this_ee.credential != registry_cred:
+                    _this_ee.credential = registry_cred
+                    changed = True
+            if changed:
+                _this_ee.save()
+                print(f"'{ee['name']}' Default Execution Environment updated.")
+
+        # Create the control plane execution environment that is used for project updates and system jobs
+        ee = settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT
+        _this_ee, cp_created = ExecutionEnvironment.objects.get_or_create(
+            name="Control Plane Execution Environment", defaults={'image': ee, 'managed_by_tower': True, 'credential': registry_cred}
+        )
+        if cp_created:
             changed = True
-            print("Default Execution Environment(s) registered.")
+            print("Control Plane Execution Environment registered.")
+        else:
+            if _this_ee.image != ee:
+                _this_ee.image = ee
+                changed = True
+            if _this_ee.credential != registry_cred:
+                _this_ee.credential = registry_cred
+                changed = True
+        if changed:
+            _this_ee.save()
 
         if changed:
             print("(changed: True)")

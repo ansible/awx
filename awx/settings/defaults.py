@@ -180,7 +180,15 @@ DEFAULT_EXECUTION_ENVIRONMENT = None
 
 # This list is used for creating default EEs when running awx-manage create_preload_data.
 # Should be ordered from highest to lowest precedence.
-DEFAULT_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE 0.2.0', 'image': 'quay.io/ansible/awx-ee:0.2.0'}]
+# The awx-manage register_default_execution_environments command reads this setting and registers the EE(s)
+# If a registry credential is needed to pull the image, that can be provided to the awx-manage command
+GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE 0.3.0', 'image': 'quay.io/ansible/awx-ee:0.3.0'}]
+# This setting controls which EE will be used for project updates.
+# The awx-manage register_default_execution_environments command reads this setting and registers the EE
+# This image is distinguished from others by having "managed_by_tower" set to True and users have limited
+# ability to modify it through the API.
+# If a registry credential is needed to pull the image, that can be provided to the awx-manage command
+CONTROL_PLANE_EXECUTION_ENVIRONMENT = 'quay.io/ansible/awx-ee:0.3.0'
 
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
