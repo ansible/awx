@@ -14,9 +14,9 @@ import re
 
 # Read-only endpoints are dynamically created by an options page with no POST section.
 # Normally a read-only endpoint should not have a module (i.e. /api/v2/me) but sometimes we reuse a name
-# For example, we have a tower_role module but /api/v2/roles is a read only endpoint.
+# For example, we have a role module but /api/v2/roles is a read only endpoint.
 # This list indicates which read-only endpoints have associated modules with them.
-read_only_endpoints_with_modules = ['tower_settings', 'tower_role', 'tower_project_update']
+read_only_endpoints_with_modules = ['settings', 'role', 'project_update']
 
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
 # THINK HARD ABOUT DOING THIS
@@ -24,23 +24,23 @@ no_module_for_endpoint = []
 
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
-    'tower_import',
-    'tower_meta',
-    'tower_export',
-    'tower_inventory_source_update',
-    'tower_job_launch',
-    'tower_job_wait',
-    'tower_job_list',
-    'tower_license',
-    'tower_ping',
-    'tower_receive',
-    'tower_send',
-    'tower_workflow_launch',
-    'tower_workflow_node_wait',
-    'tower_job_cancel',
-    'tower_workflow_template',
-    'tower_ad_hoc_command_wait',
-    'tower_ad_hoc_command_cancel',
+    'import',
+    'controller_meta',
+    'export',
+    'inventory_source_update',
+    'job_launch',
+    'job_wait',
+    'job_list',
+    'license',
+    'ping',
+    'receive',
+    'send',
+    'workflow_launch',
+    'workflow_node_wait',
+    'job_cancel',
+    'workflow_template',
+    'ad_hoc_command_wait',
+    'ad_hoc_command_cancel',
 ]
 
 # Global module parameters we can ignore
@@ -50,32 +50,32 @@ ignore_parameters = ['state', 'new_name', 'update_secrets', 'copy_from']
 # Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
     # The wait is for whether or not to wait for a project update on change
-    'tower_project': ['wait', 'interval', 'update_project'],
+    'project': ['wait', 'interval', 'update_project'],
     # Existing_token and id are for working with an existing tokens
-    'tower_token': ['existing_token', 'existing_token_id'],
+    'token': ['existing_token', 'existing_token_id'],
     # /survey spec is now how we handle associations
     # We take an organization here to help with the lookups only
-    'tower_job_template': ['survey_spec', 'organization'],
-    'tower_inventory_source': ['organization'],
+    'job_template': ['survey_spec', 'organization'],
+    'inventory_source': ['organization'],
     # Organization is how we are looking up job templates, Approval node is for workflow_approval_templates
-    'tower_workflow_job_template_node': ['organization', 'approval_node'],
+    'workflow_job_template_node': ['organization', 'approval_node'],
     # Survey is how we handle associations
-    'tower_workflow_job_template': ['survey_spec', 'destroy_current_schema'],
-    # ad hoc commands support interval and timeout since its more like tower_job_launch
-    'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
-    # tower_group parameters to perserve hosts and children.
-    'tower_group': ['preserve_existing_children', 'preserve_existing_hosts'],
-    # tower_workflow_approval parameters that do not apply when approving an approval node.
-    'tower_workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
+    'workflow_job_template': ['survey_spec', 'destroy_current_schema'],
+    # ad hoc commands support interval and timeout since its more like job_launch
+    'ad_hoc_command': ['interval', 'timeout', 'wait'],
+    # group parameters to perserve hosts and children.
+    'group': ['preserve_existing_children', 'preserve_existing_hosts'],
+    # workflow_approval parameters that do not apply when approving an approval node.
+    'workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
-needs_development = ['tower_inventory_script']
+needs_development = ['inventory_script']
 needs_param_development = {
-    'tower_host': ['instance_id'],
-    'tower_workflow_approval': ['description', 'execution_environment'],
+    'host': ['instance_id'],
+    'workflow_approval': ['description', 'execution_environment'],
 }
 # -----------------------------------------------------------------------------------------------------------
 
@@ -169,7 +169,8 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
     for root, dirs, files in os.walk(module_directory):
         if root == module_directory:
             for filename in files:
-                if re.match('^tower_.*.py$', filename):
+                # must begin with a letter a-z, and end in .py
+                if re.match(r'^[a-z].*.py$', filename):
                     module_name = filename[:-3]
                     option_comparison[module_name] = {
                         'endpoint': 'N/A',
@@ -192,7 +193,7 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
             singular_endpoint = singular_endpoint[:-3]
         if singular_endpoint != 'settings' and singular_endpoint.endswith('s'):
             singular_endpoint = singular_endpoint[:-1]
-        module_name = 'tower_{0}'.format(singular_endpoint)
+        module_name = '{0}'.format(singular_endpoint)
 
         endpoint_url = endpoint_response.data.get(endpoint)
 

@@ -13,7 +13,7 @@ def test_create_group(run_module, admin_user):
     inv = Inventory.objects.create(name='test-inv', organization=org)
     variables = {"ansible_network_os": "iosxr"}
 
-    result = run_module('tower_group', dict(name='Test Group', inventory='test-inv', variables=variables, state='present'), admin_user)
+    result = run_module('group', dict(name='Test Group', inventory='test-inv', variables=variables, state='present'), admin_user)
     assert result.get('changed'), result
 
     group = Group.objects.get(name='Test Group')
@@ -39,7 +39,7 @@ def test_associate_hosts_and_children(run_module, admin_user, organization):
     child = Group.objects.create(inventory=inv, name='child_group')
 
     result = run_module(
-        'tower_group',
+        'group',
         dict(name='Test Group', inventory='test-inv', hosts=[inv_hosts[1].name, inv_hosts[2].name], children=[child.name], state='present'),
         admin_user,
     )
@@ -56,7 +56,7 @@ def test_associate_on_create(run_module, admin_user, organization):
     child = Group.objects.create(name='test-child', inventory=inv)
     host = Host.objects.create(name='test-host', inventory=inv)
 
-    result = run_module('tower_group', dict(name='Test Group', inventory='test-inv', hosts=[host.name], groups=[child.name], state='present'), admin_user)
+    result = run_module('group', dict(name='Test Group', inventory='test-inv', hosts=[host.name], groups=[child.name], state='present'), admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result['changed'] is True
 
@@ -70,7 +70,7 @@ def test_children_alias_of_groups(run_module, admin_user, organization):
     inv = Inventory.objects.create(name='test-inv', organization=organization)
     group = Group.objects.create(name='Test Group', inventory=inv)
     child = Group.objects.create(inventory=inv, name='child_group')
-    result = run_module('tower_group', dict(name='Test Group', inventory='test-inv', groups=[child.name], state='present'), admin_user)
+    result = run_module('group', dict(name='Test Group', inventory='test-inv', groups=[child.name], state='present'), admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result['changed'] is True
 
@@ -78,7 +78,7 @@ def test_children_alias_of_groups(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_tower_group_idempotent(run_module, admin_user):
+def test_group_idempotent(run_module, admin_user):
     # https://github.com/ansible/ansible/issues/46803
     org = Organization.objects.create(name='test-org')
     inv = Inventory.objects.create(name='test-inv', organization=org)
@@ -87,7 +87,7 @@ def test_tower_group_idempotent(run_module, admin_user):
         inventory=inv,
     )
 
-    result = run_module('tower_group', dict(name='Test Group', inventory='test-inv', state='present'), admin_user)
+    result = run_module('group', dict(name='Test Group', inventory='test-inv', state='present'), admin_user)
 
     result.pop('invocation')
     assert result == {

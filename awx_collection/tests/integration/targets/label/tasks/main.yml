@@ -1,0 +1,27 @@
+---
+- name: Generate names
+  set_fact:
+    label_name: "AWX-Collection-tests-label-label-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Create a Label
+  label:
+    name: "{{ label_name }}"
+    organization: Default
+    state: present
+
+- name: Check module fails with correct msg
+  label:
+    name: "Test Label"
+    organization: "Non_existing_org"
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_existing_org' in result.msg"
+      - "result.total_results == 0"
+
+# You can't delete a label directly so no cleanup is necessary

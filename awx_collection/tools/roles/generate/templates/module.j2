@@ -1,0 +1,221 @@
+#!/usr/bin/env python
+# coding: utf-8 -*-
+
+{# The following is set by the generate.yml file:
+ #   item_type: the type of item i.e. 'teams'
+ #   human_readable: the type with _ replaced with spaces i.e. worflow job template
+ #   singular_item_type: the type of an item replace singularized i.e. team
+ #   type_map: a mapping of things like string to str
+ #}
+{% set name_option = 'username' if item_type == 'users' else 'name' %}
+
+# (c) {{ ansible_date_time['year'] }}, John Westcott IV <john.westcott.iv@redhat.com>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+DOCUMENTATION = '''
+---
+module: {{ singular_item_type }}
+author: "John Westcott IV (@john-westcott-iv)"
+version_added: "4.0.0"
+short_description: create, update, or destroy Automation Platform Controller {{ human_readable }}.
+description:
+    - Create, update, or destroy Automation Platform Controller {{ human_readable }}. See
+      U(https://www.ansible.com/tower) for an overview.
+options:
+{% for option in item['json']['actions']['POST'] %}
+{# to do: sort documentation options #}
+    {{ option }}:
+      description:
+{% if 'help_text' in item['json']['actions']['POST'][option] %}
+        - {{ item['json']['actions']['POST'][option]['help_text'] }}
+{% else %}
+        - NO DESCRIPTION GIVEN IN THE API
+{% endif %}
+      required: {{ item['json']['actions']['POST'][option]['required'] }}
+      type: {{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}
+{% if 'default' in item['json']['actions']['POST'][option] %}
+{# for job_template/extra vars, its type is dict but its default is '', so we want to make that {} #}
+{%   if item['json']['actions']['POST'][option]['default'] == '' and type_map[ item['json']['actions']['POST'][option]['type'] ] == 'dict' %}
+      default: {}
+{%   else %}
+      default: '{{ item['json']['actions']['POST'][option]['default'] }}'
+{%   endif %}
+{% endif %}
+{% if 'choices' in item['json']['actions']['POST'][option] %}
+      choices:
+{% for choice in item['json']['actions']['POST'][option]['choices'] %}
+        - '{{ choice[0] }}'
+{% endfor %}
+{%endif %}
+{% if aliases[item_type][option] | default(False) %}
+      aliases:
+{% for alias_name in aliases[item_type][option] %}
+        - {{ alias_name }}
+{% endfor %}
+{% endif %}
+{% if option == name_option %}
+    new_{{ name_option }}:
+      description:
+        - Setting this option will change the existing name (looked up via the {{ name_option }} field.
+      required: True
+      type: str
+{% endif %}
+{% endfor %}
+{% for association in associations[item_type] | default([]) %}
+    {{ association['related_item'] }}:
+      description:
+        - {{ association['description'] }}
+      required: {{ association['required'] }}
+      type: list
+{% endfor %}
+    state:
+      description:
+        - Desired state of the resource.
+      choices: ["present", "absent"]
+      default: "present"
+      type: str
+    controller_oauthtoken:
+      description:
+        - The OAuth token to use.
+      required: False
+      type: str
+extends_documentation_fragment: awx.awx.auth
+'''
+
+EXAMPLES = '''
+{% if examples[item_type] | default(False) %}
+{{ examples[item_type] }}
+{% endif %}
+'''
+
+from ..module_utils.controller_api import ControllerAPIModule
+
+
+def main():
+    # Any additional arguments that are not fields of the item can be added here
+    argument_spec = dict(
+{% for option in item['json']['actions']['POST'] %}
+{%   set option_data = [] %}
+{{   option_data.append('required={}'.format(item['json']['actions']['POST'][option]['required'])) -}}
+{{   option_data.append('type=\'{}\''.format(type_map[item['json']['actions']['POST'][option]['type']])) -}}
+{%   if item['json']['actions']['POST'][option]['type'] == 'password' %}
+{{     option_data.append('no_log=True') -}}
+{%   endif %}
+{%   if 'choices' in item['json']['actions']['POST'][option] %}
+{%     set all_choices = [] %}
+{%     for choice in item['json']['actions']['POST'][option]['choices'] %}
+{{       all_choices.append("'{}'".format(choice[0])) -}}
+{%     endfor %}
+{{     option_data.append('choices=[{}]'.format(all_choices | join(', '))) -}}
+{%   endif %}
+{%   if item['json']['actions']['POST'][option].get('default', '') != '' %}
+{%     set default_value = item['json']['actions']['POST'][option]['default'] %}
+{%     if item['json']['actions']['POST'][option]['default'] == '' and type_map[ item['json']['actions']['POST'][option]['type'] ] == 'dict' %}
+{%       set default_value = '{}' %}
+{%     endif %}
+{{     option_data.append("default='{}'".format(default_value)) -}}
+{%   endif %}
+{%   if aliases[item_type][option] | default(False) %}
+{%     set alias_list = [] %}
+{%     for alias_name in aliases[item_type][option] %}
+{{       alias_list.append("'{}'".format(alias_name)) -}}
+{%     endfor %}
+{{     option_data.append('aliases=[{}]'.format(alias_list | join(', '))) -}}
+{%   endif %}
+        {{ option }}=dict({{ option_data | join(', ') }}),
+{% if option == name_option %}
+        new_{{ name_option }}=dict(required=False, type='str'),
+{% endif %}
+{% endfor %}
+{% for association_option in associations[item_type] | default([]) %}
+        {{ association_option['related_item'] }}=dict(required={{ association_option['required'] }}, type="list", default=None),
+{% endfor %}
+        state=dict(choices=['present', 'absent'], default='present'),
+    )
+
+    # Create a module for ourselves
+    module = ControllerAPIModule(argument_spec=argument_spec)
+
+    # Extract our parameters
+{% for option in item['json']['actions']['POST'] %}
+    {{ option }} = module.params.get('{{ option }}')
+{% if option == name_option %}
+    new_{{ name_option }} = module.params.get("new_{{ name_option }}")
+{% endif %}
+{% endfor %}
+{% for association_option in associations[item_type] | default([]) %}
+    {{ association_option['related_item'] }} = module.params.get('{{ association_option['related_item'] }}')
+{% endfor %}
+    state = module.params.get('state')
+
+{% if item['json']['actions']['POST'] | length() > 0 %}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+{% for option in item['json']['actions']['POST'] %}
+{% if item['json']['actions']['POST'][option]['type'] == 'id' %}
+    {{ option }}_id = None
+    if {{ option }}:
+        {{ option }}_id = module.resolve_name_to_id('{{ name_to_id_endpoint_resolution[option] }}', {{ option }})
+{% endif %}
+{% endfor %}
+{% endif %}
+{% for association in associations[item_type] | default([]) %}
+    {{ association['related_item'] }}_ids = None
+    if {{ association['related_item'] }} is not None:
+        {{ association['related_item'] }}_ids = []
+        for item in {{ association['related_item'] }}:
+            {{ association['related_item'] }}_ids.append( module.resolve_name_to_id('{{ association['related_item'] }}', item) )
+{% endfor %}
+
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('{{ item_type }}', name_or_id={{ name_option }}, **{
+        'data': {
+{% if 'organization' in item['json']['actions']['POST'] and item['json']['actions']['POST']['organization']['type'] == 'id' %}
+            'organization': org_id,
+{% endif %}
+{% if item_type in ['hosts', 'groups', 'inventory_sources'] %}
+            'inventory': inventory_id,
+{% endif %}
+        }
+    })
+
+    if state is 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
+    # Create the data that gets sent for create and update
+    new_fields = {}
+{% for option in item['json']['actions']['POST'] %}
+{% if option == name_option %}
+    new_fields['{{ name_option }}'] = new_{{ name_option }} if new_{{ name_option }} else (module.get_item_name(existing_item) if existing_item else {{ name_option }}t)
+{% else %}
+    if {{ option }} is not None:
+{% if item['json']['actions']['POST'][option]['type'] == 'id' %}
+        new_fields['{{ option }}'] = {{ option }}_id
+{% else %}
+        new_fields['{{ option }}'] = {{ option }}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='{{ item_type }}', item_type='{{ singular_item_type }}',
+        associations={
+{% for association in associations[item_type] | default([]) %}
+            '{{ association['endpoint'] }}': {{ association['related_item'] }}_ids,
+{% endfor %}
+        }
+    )
+
+
+if __name__ == '__main__':
+    main()

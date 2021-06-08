@@ -150,14 +150,14 @@ def run_module(request, collection_import):
         def mock_load_params(self):
             self.params = module_params
 
-        if getattr(resource_module, 'TowerAWXKitModule', None):
-            resource_class = resource_module.TowerAWXKitModule
-        elif getattr(resource_module, 'TowerAPIModule', None):
-            resource_class = resource_module.TowerAPIModule
+        if getattr(resource_module, 'ControllerAWXKitModule', None):
+            resource_class = resource_module.ControllerAWXKitModule
+        elif getattr(resource_module, 'ControllerAPIModule', None):
+            resource_class = resource_module.ControllerAPIModule
         elif getattr(resource_module, 'TowerLegacyModule', None):
             resource_class = resource_module.TowerLegacyModule
         else:
-            raise ("The module has neither a TowerLegacyModule, TowerAWXKitModule or a TowerAPIModule")
+            raise ("The module has neither a TowerLegacyModule, ControllerAWXKitModule or a ControllerAPIModule")
 
         with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
             # Call the test utility (like a mock server) instead of issuing HTTP requests
@@ -184,7 +184,7 @@ def run_module(request, collection_import):
         try:
             result = json.loads(module_stdout)
         except Exception as e:
-            raise Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout))
+            raise Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout)) from e
         # A module exception should never be a test expectation
         if 'exception' in result:
             if "ModuleNotFoundError: No module named 'tower_cli'" in result['exception']:

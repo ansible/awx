@@ -1,22 +1,22 @@
 ---
 - name: Assure that default organization exists
-  tower_organization:
+  organization:
     name: Default
 
 - name: HACK - delete orphaned projects from preload data where organization deletd
-  tower_project:
+  project:
     name: "{{ item['id'] }}"
     scm_type: git
     state: absent
   loop: >
-    {{ query('awx.awx.tower_api', 'projects',
+    {{ query('awx.awx.controller_api', 'projects',
        query_params={'organization__isnull': true, 'name': 'Demo Project'})
     }}
   loop_control:
     label: "Deleting Demo Project with null organization id={{ item['id'] }}"
 
 - name: Assure that demo project exists
-  tower_project:
+  project:
     name: "Demo Project"
     scm_type: 'git'
     scm_url: 'https://github.com/ansible/ansible-tower-samples'
@@ -24,12 +24,12 @@
     organization: Default
 
 - name: Assure that demo inventory exists
-  tower_inventory:
+  inventory:
     name: "Demo Inventory"
     organization: Default
 
 - name: Create a Host
-  tower_host:
+  host:
     name: "localhost"
     inventory: "Demo Inventory"
     state: present
@@ -38,7 +38,7 @@
   register: result
 
 - name: Assure that demo job template exists
-  tower_job_template:
+  job_template:
     name: "Demo Job Template"
     project: "Demo Project"
     inventory: "Demo Inventory"

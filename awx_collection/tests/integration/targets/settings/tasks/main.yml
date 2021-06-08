@@ -1,0 +1,87 @@
+---
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS to a baseline
+  settings:
+    name: AWX_ISOLATION_SHOW_PATHS
+    value: '["/var/lib/awx/projects/"]'
+
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS to get an error back from the controller
+  settings:
+    settings:
+      AWX_ISOLATION_SHOW_PATHS:
+        'not': 'a valid'
+        'tower': 'setting'
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS
+  settings:
+    name: AWX_ISOLATION_SHOW_PATHS
+    value: '["/var/lib/awx/projects/", "/tmp"]'
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Attempt to set the value of AWX_ISOLATION_BASE_PATH to what it already is
+  settings:
+    name: AWX_ISOLATION_BASE_PATH
+    value: /tmp
+  register: result
+
+- debug:
+    msg: "{{ result }}"
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Apply a single setting via settings
+  settings:
+    name: AWX_ISOLATION_SHOW_PATHS
+    value: '["/var/lib/awx/projects/", "/var/tmp"]'
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Apply multiple setting via settings with no change
+  settings:
+    settings:
+      AWX_ISOLATION_BASE_PATH: /tmp
+      AWX_ISOLATION_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
+  register: result
+
+- debug:
+    msg: "{{ result }}"
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Apply multiple setting via settings with change
+  settings:
+    settings:
+      AWX_ISOLATION_BASE_PATH: /tmp
+      AWX_ISOLATION_SHOW_PATHS: []
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Handle an omit value
+  settings:
+    name: AWX_ISOLATION_BASE_PATH
+    value: '{{ junk_var | default(omit) }}'
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'Unable to update settings' in result.msg"

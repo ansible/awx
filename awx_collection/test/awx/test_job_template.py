@@ -20,7 +20,7 @@ def test_create_job_template(run_module, admin_user, project, inventory):
         'state': 'present',
     }
 
-    result = run_module('tower_job_template', module_args, admin_user)
+    result = run_module('job_template', module_args, admin_user)
 
     jt = JobTemplate.objects.get(name='foo')
     assert jt.extra_vars == '{"foo": "bar"}'
@@ -48,7 +48,7 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
         'ask_limit_on_launch': True,
     }
 
-    result = run_module('tower_job_template', module_args, admin_user)
+    result = run_module('job_template', module_args, admin_user)
 
     jt = JobTemplate.objects.get(name='foo')
     assert jt.forks == 20
@@ -70,7 +70,7 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
         'ask_limit_on_launch': False,
     }
 
-    result = run_module('tower_job_template', module_args, admin_user)
+    result = run_module('job_template', module_args, admin_user)
     assert result['changed']
 
     jt = JobTemplate.objects.get(name='foo')
@@ -92,7 +92,7 @@ def test_job_launch_with_prompting(run_module, admin_user, project, organization
         ask_credential_on_launch=True,
     )
     result = run_module(
-        'tower_job_launch',
+        'job_launch',
         dict(
             job_template='foo',
             inventory=inventory.name,
@@ -112,7 +112,7 @@ def test_job_launch_with_prompting(run_module, admin_user, project, organization
 @pytest.mark.django_db
 def test_job_template_with_new_credentials(run_module, admin_user, project, inventory, machine_credential, vault_credential):
     result = run_module(
-        'tower_job_template',
+        'job_template',
         dict(
             name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, credentials=[machine_credential.name, vault_credential.name]
         ),
@@ -126,7 +126,7 @@ def test_job_template_with_new_credentials(run_module, admin_user, project, inve
 
     prior_ct = ActivityStream.objects.count()
     result = run_module(
-        'tower_job_template',
+        'job_template',
         dict(
             name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, credentials=[machine_credential.name, vault_credential.name]
         ),
@@ -144,7 +144,7 @@ def test_job_template_with_new_credentials(run_module, admin_user, project, inve
 @pytest.mark.django_db
 def test_job_template_with_survey_spec(run_module, admin_user, project, inventory, survey_spec):
     result = run_module(
-        'tower_job_template',
+        'job_template',
         dict(name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, survey_spec=survey_spec, survey_enabled=True),
         admin_user,
     )
@@ -156,7 +156,7 @@ def test_job_template_with_survey_spec(run_module, admin_user, project, inventor
 
     prior_ct = ActivityStream.objects.count()
     result = run_module(
-        'tower_job_template',
+        'job_template',
         dict(name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, survey_spec=survey_spec, survey_enabled=True),
         admin_user,
     )
@@ -172,7 +172,7 @@ def test_job_template_with_survey_spec(run_module, admin_user, project, inventor
 @pytest.mark.django_db
 def test_job_template_with_wrong_survey_spec(run_module, admin_user, project, inventory, survey_spec):
     result = run_module(
-        'tower_job_template',
+        'job_template',
         dict(name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, survey_spec=survey_spec, survey_enabled=True),
         admin_user,
     )
@@ -187,7 +187,7 @@ def test_job_template_with_wrong_survey_spec(run_module, admin_user, project, in
     del survey_spec['description']
 
     result = run_module(
-        'tower_job_template',
+        'job_template',
         dict(name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, survey_spec=survey_spec, survey_enabled=True),
         admin_user,
     )
@@ -204,7 +204,7 @@ def test_job_template_with_survey_encrypted_default(run_module, admin_user, proj
     }
     for i in range(2):
         result = run_module(
-            'tower_job_template',
+            'job_template',
             dict(name='foo', playbook='helloworld.yml', project=project.name, inventory=inventory.name, survey_spec=spec, survey_enabled=True),
             admin_user,
         )
@@ -236,9 +236,7 @@ def test_associate_only_on_success(run_module, admin_user, organization, project
     jt.notification_templates_error.add(nt1)
 
     # test preservation of error NTs when success NTs are added
-    result = run_module(
-        'tower_job_template', dict(name='foo', playbook='helloworld.yml', project=project.name, notification_templates_success=['nt2']), admin_user
-    )
+    result = run_module('job_template', dict(name='foo', playbook='helloworld.yml', project=project.name, notification_templates_success=['nt2']), admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', True), result
 
@@ -246,7 +244,7 @@ def test_associate_only_on_success(run_module, admin_user, organization, project
     assert list(jt.notification_templates_error.values_list('id', flat=True)) == [nt1.id]
 
     # test removal to empty list
-    result = run_module('tower_job_template', dict(name='foo', playbook='helloworld.yml', project=project.name, notification_templates_success=[]), admin_user)
+    result = run_module('job_template', dict(name='foo', playbook='helloworld.yml', project=project.name, notification_templates_success=[]), admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', True), result
 

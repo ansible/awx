@@ -29,7 +29,7 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_aim.name,
             target_credential=tgt_cred.name,
@@ -73,7 +73,7 @@ def test_conjur_credential_source(run_module, admin_user, organization, source_c
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_conjur.name,
             target_credential=tgt_cred.name,
@@ -123,7 +123,7 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, so
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_hashi_secret.name,
             target_credential=tgt_cred.name,
@@ -170,7 +170,7 @@ def test_hashi_ssh_credential_source(run_module, admin_user, organization, sourc
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_hashi_ssh.name,
             target_credential=tgt_cred.name,
@@ -224,7 +224,7 @@ def test_azure_kv_credential_source(run_module, admin_user, organization, source
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_azure_kv.name,
             target_credential=tgt_cred.name,
@@ -265,7 +265,7 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_aim.name,
             target_credential=tgt_cred.name,
@@ -280,7 +280,7 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
     assert result.get('changed'), result
 
     unchangedResult = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_aim.name,
             target_credential=tgt_cred.name,
@@ -295,7 +295,7 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
     assert not unchangedResult.get('changed'), result
 
     changedResult = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(source_credential=source_cred_aim_alt.name, target_credential=tgt_cred.name, input_field_name='password', state='present'),
         admin_user,
     )
@@ -336,7 +336,7 @@ def test_centrify_vault_credential_source(run_module, admin_user, organization, 
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
 
     result = run_module(
-        'tower_credential_input_source',
+        'credential_input_source',
         dict(
             source_credential=source_cred_centrify_secret.name,
             target_credential=tgt_cred.name,

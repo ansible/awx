@@ -1,0 +1,243 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    wfjt_name1: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}"
+    wfjt_name2: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}-2"
+    approval_node_name: "AWX-Collection-tests-workflow_launch_approval_node-{{ test_id }}"
+
+- block:
+
+    - name: Create our workflow
+      workflow_job_template:
+        name: "{{ wfjt_name1 }}"
+        state: present
+
+    - name: Add a node
+      workflow_job_template_node:
+        workflow_job_template: "{{ wfjt_name1 }}"
+        unified_job_template: "Demo Job Template"
+        identifier: leaf
+      register: new_node
+
+    - name: Connect to controller server but request an invalid workflow
+      workflow_launch:
+        workflow_template: "Does Not Exist"
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'Unable to find workflow job template' in result.msg"
+
+    - name: Run the workflow without waiting (this should just give us back a job ID)
+      workflow_launch:
+        workflow_template: "{{ wfjt_name1 }}"
+        wait: false
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is not failed
+          - "'id' in result['job_info']"
+
+    - name: Kick off a workflow and wait for it, but only for a second
+      workflow_launch:
+        workflow_template: "{{ wfjt_name1 }}"
+        timeout: 1
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'Monitoring of Workflow Job - {{ wfjt_name1 }} aborted due to timeout' in result.msg"
+
+    - name: Kick off a workflow and wait for it
+      workflow_launch:
+        workflow_template: "{{ wfjt_name1 }}"
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is not failed
+          - "'id' in result['job_info']"
+
+    - name: Kick off a workflow with extra_vars but not enabled
+      workflow_launch:
+        workflow_template: "{{ wfjt_name1 }}"
+        extra_vars:
+          var1: My First Variable
+          var2: My Second Variable
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'The field extra_vars was specified but the workflow job template does not allow for it to be overridden' in result.errors"
+
+    - name: Prompt the workflow's with survey
+      workflow_job_template:
+        name: "{{ wfjt_name1 }}"
+        state: present
+        survey_enabled: true
+        ask_variables_on_launch: false
+        survey:
+          name: ''
+          description: ''
+          spec:
+            - question_name: Basic Name
+              question_description: Name
+              required: true
+              type: text
+              variable: basic_name
+              min: 0
+              max: 1024
+              default: ''
+              choices: ''
+              new_question: true
+            - question_name: Choose yes or no?
+              question_description: Choosing yes or no.
+              required: false
+              type: multiplechoice
+              variable: option_true_false
+              min:
+              max:
+              default: 'yes'
+              choices: |-
+                yes
+                no
+              new_question: true
+
+    - name: Kick off a workflow with survey
+      workflow_launch:
+        workflow_template: "{{ wfjt_name1 }}"
+        extra_vars:
+          basic_name: My First Variable
+          option_true_false: 'no'
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is not failed
+
+    - name: Prompt the workflow's extra_vars on launch
+      workflow_job_template:
+        name: "{{ wfjt_name1 }}"
+        state: present
+        ask_variables_on_launch: true
+
+    - name: Kick off a workflow with extra_vars
+      workflow_launch:
+        workflow_template: "{{ wfjt_name1 }}"
+        extra_vars:
+          basic_name: My First Variable
+          var1: My First Variable
+          var2: My Second Variable
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is not failed
+
+    - name: Test waiting for an approval node that doesn't exit on the last workflow for failure.
+      workflow_approval:
+        workflow_job_id: "{{ result.id }}"
+        name: Test workflow approval
+        interval: 1
+        timeout: 2
+        action: deny
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'Monitoring of Workflow Approval - Test workflow approval aborted due to timeout' in result.msg"
+
+    - name: Create new Workflow
+      workflow_job_template:
+        name: "{{ wfjt_name2 }}"
+        state: present
+
+    - name: Add a job node
+      workflow_job_template_node:
+        workflow_job_template: "{{ wfjt_name2 }}"
+        unified_job_template: "Demo Job Template"
+        identifier: leaf
+
+    # Test workflow_approval and workflow_node_wait
+    - name: Create approval node
+      workflow_job_template_node:
+        identifier: approval_test
+        approval_node:
+          name: "{{ approval_node_name }}"
+          timeout: 900
+        workflow: "{{ wfjt_name2 }}"
+
+    - name: Create link for approval node
+      workflow_job_template_node:
+        identifier: approval_test
+        workflow: "{{ wfjt_name2 }}"
+        always_nodes:
+          - leaf
+
+    - name: Run the workflow without waiting This should pause waiting for approval
+      workflow_launch:
+        workflow_template: "{{ wfjt_name2 }}"
+        wait: false
+      ignore_errors: true
+      register: wfjt_info
+
+    - name: Wait for Job node wait to fail as it is waiting on approval
+      awx.awx.workflow_node_wait:
+        workflow_job_id: "{{ wfjt_info.id }}"
+        name: Demo Job Template
+        interval: 1
+        timeout: 5
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'Monitoring of Workflow Node - Demo Job Template aborted due to timeout' in result.msg"
+
+    - name: Wait for approval node to activate and approve
+      awx.awx.workflow_approval:
+        workflow_job_id: "{{ wfjt_info.id }}"
+        name: "{{ approval_node_name }}"
+        interval: 1
+        timeout: 10
+        action: deny
+      register: result
+
+    - assert:
+        that:
+          - result is not failed
+          - result is changed
+
+    - name: Wait for workflow job to finish max 120s
+      job_wait:
+        job_id: "{{ wfjt_info.id }}"
+        timeout: 120
+        job_type: "workflow_jobs"
+
+  always:
+    - name: Clean up test workflow
+      workflow_job_template:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ wfjt_name1 }}"
+        - "{{ wfjt_name2 }}"

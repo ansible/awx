@@ -76,11 +76,13 @@ Notable releases of the `{{ collection_namespace }}.{{ collection_package }}` co
  - 0.0.1-devel is the version you should see if installing from source, which is intended for development and expected to be unstable.
 {% else %}
  - 3.7.0 initial release
+ - 4.0.0 ansible.tower renamed to ansible.controller
+   - tower_ prefix is dropped from the module names, e.g. tower_inventory becomes inventory
 {% endif %}
 
 The following notes are changes that may require changes to playbooks:
 
- - The module tower_notification was renamed tower_notification_template. In ansible >= 2.10 there is a seemless redirect. Ansible 2.9 does not respect the redirect.
+ - The module tower_notification was renamed tower_notification_template. In ansible >= 2.10 there is a seamless redirect. Ansible 2.9 does not respect the redirect.
  - When a project is created, it will wait for the update/sync to finish by default; this can be turned off with the `wait` parameter, if desired.
  - Creating a "scan" type job template is no longer supported.
  - Specifying a custom certificate via the `TOWER_CERTIFICATE` environment variable no longer works.

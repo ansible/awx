@@ -1,0 +1,50 @@
+---
+- name: Get our collection package
+  controller_meta:
+  register: controller_meta
+
+- name: Generate the name of our plugin
+  set_fact:
+    plugin_name: "{{ controller_meta.prefix }}.schedule_rrule"
+
+- name: Test too many params (failure from validation of terms)
+  debug:
+    msg: "{{ query(plugin_name, 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'You may only pass one schedule type in at a time' in result.msg"
+
+- name: Test invalid frequency (failure from validation of term)
+  debug:
+    msg: "{{ query(plugin_name, 'john', start_date='2020-4-16 03:45:07') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Frequency of john is invalid' in result.msg"
+
+- name: Test an invalid start date (generic failure case from get_rrule)
+  debug:
+    msg: "{{ query(plugin_name, 'none', start_date='invalid') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Parameter start_date must be in the format YYYY-MM-DD' in result.msg"
+
+- name: Test end_on as count (generic success case)
+  debug:
+    msg: "{{ query(plugin_name, 'minute', start_date='2020-4-16 03:45:07', end_on='2') }}"
+  register: result
+
+- assert:
+    that:
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MINUTELY;COUNT=2;INTERVAL=1'

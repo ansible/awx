@@ -1,0 +1,248 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate usernames
+  set_fact:
+    usernames:
+      - "AWX-Collection-tests-api_lookup-user1-{{ test_id }}"
+      - "AWX-Collection-tests-api_lookup-user2-{{ test_id }}"
+      - "AWX-Collection-tests-api_lookup-user3-{{ test_id }}"
+    hosts:
+      - "AWX-Collection-tests-api_lookup-host1-{{ test_id }}"
+      - "AWX-Collection-tests-api_lookup-host2-{{ test_id }}"
+    group_name: "AWX-Collection-tests-api_lookup-group1-{{ test_id }}"
+
+- name: Get our collection package
+  controller_meta:
+  register: controller_meta
+
+- name: Generate the name of our plugin
+  set_fact:
+    plugin_name: "{{ controller_meta.prefix }}.controller_api"
+
+- name: Create all of our users
+  user:
+    username: "{{ item }}"
+    is_superuser: true
+    password: "{{ test_id }}"
+  loop: "{{ usernames }}"
+  register: user_creation_results
+
+- block:
+    - name: Specify the connection params
+      debug:
+        msg: "{{ query(plugin_name, 'ping', host='DNE://junk.com', username='john', password='not_legit', verify_ssl=True) }}"
+      register: results
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "'DNE' in results.msg"
+
+    - name: Create our hosts
+      host:
+        name: "{{ item }}"
+        inventory: "Demo Inventory"
+      loop: "{{ hosts }}"
+
+    - name: Test too many params (failure from validation of terms)
+      set_fact:
+        junk: "{{ query(plugin_name, 'users', 'teams', query_params={}, ) }}"
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'You must pass exactly one endpoint to query' in result.msg"
+
+    - name: Try to load invalid endpoint
+      set_fact:
+        junk: "{{ query(plugin_name, 'john', query_params={}, ) }}"
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'The requested object could not be found at' in result.msg"
+
+    - name: Load user of a specific name without promoting objects
+      set_fact:
+        users_list: "{{ lookup(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=False) }}"
+
+    - assert:
+        that:
+          - users_list['results'] | length() == 1
+          - users_list['count'] == 1
+          - users_list['results'][0]['id'] == user_creation_results['results'][0]['id']
+
+    - name: Load user of a specific name with promoting objects
+      set_fact:
+        user_objects: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=True ) }}"
+
+    - assert:
+        that:
+          - user_objects | length() == 1
+          - users_list['results'][0]['id'] == user_objects[0]['id']
+
+    - name: Loop over one user with the loop syntax
+      assert:
+        that:
+          - item['id'] == user_creation_results['results'][0]['id']
+      loop: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] } ) }}"
+      loop_control:
+        label: "{{ item.id }}"
+
+    - name: Get a page of users as just ids
+      set_fact:
+        users: "{{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 }, return_ids=True ) }}"
+
+    - name: Assert that user list has 2 ids only and that they are strings, not ints
+      assert:
+        that:
+          - users | length() == 2
+          - user_creation_results['results'][0]['id'] not in users
+          - user_creation_results['results'][0]['id'] | string in users
+
+    - name: Get all users of a system through next attribute
+      set_fact:
+        users: "{{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true ) }}"
+
+    - assert:
+        that:
+          - users | length() >= 3
+
+    - name: Get all of the users created with a max_objects of 1
+      set_fact:
+        users: "{{ lookup(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true, max_objects=1 ) }}"
+      ignore_errors: true
+      register: max_user_errors
+
+    - assert:
+        that:
+          - max_user_errors is failed
+          - "'List view at users returned 3 objects, which is more than the maximum allowed by max_objects' in max_user_errors.msg"
+
+    - name: Get the ID of the first user created and verify that it is correct
+      assert:
+        that: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True)[0] }} == {{ user_creation_results['results'][0]['id'] }}"
+
+    - name: Try to get an ID of someone who does not exist
+      set_fact:
+        failed_user_id: "{{ query(plugin_name, 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }, expect_one=True) }}"
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'Expected one object from endpoint users' in result['msg']"
+
+    - name: Lookup too many users
+      set_fact:
+        too_many_user_ids: " {{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id }, expect_one=True) }}"
+      register: results
+      ignore_errors: true
+
+    - assert:
+        that:
+          - results is failed
+          - "'Expected one object from endpoint users, but obtained 3' in results['msg']"
+
+    - name: Get the ping page
+      set_fact:
+        ping_data: "{{ lookup(plugin_name, 'ping' ) }}"
+      register: results
+
+    - assert:
+        that:
+          - results is succeeded
+          - "'active_node' in ping_data"
+
+    - name: "Make sure that expect_objects fails on an API page"
+      set_fact:
+        my_var: "{{ lookup(plugin_name, 'settings/ui', expect_objects=True) }}"
+      ignore_errors: true
+      register: results
+
+    - assert:
+        that:
+          - results is failed
+          - "'Did not obtain a list or detail view at settings/ui, and expect_objects or expect_one is set to True' in results.msg"
+
+    # DOCS Example Tests
+    - name: Load the UI settings
+      set_fact:
+        controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui') }}"
+
+    - assert:
+        that:
+          - "'CUSTOM_LOGO' in controller_settings"
+
+    - name: Display the usernames of all admin users
+      debug:
+        msg: "Admin users: {{ query('awx.awx.controller_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
+      register: results
+
+    - assert:
+        that:
+          - "'admin' in results.msg"
+
+    - name: debug all organizations in a loop  # use query to return a list
+      debug:
+        msg: "Organization description={{ item['description'] }} id={{ item['id'] }}"
+      loop: "{{ query('awx.awx.controller_api', 'organizations') }}"
+      loop_control:
+        label: "{{ item['name'] }}"
+
+    - name: Make sure user 'john' is an org admin of the default org if the user exists
+      role:
+        organization: Default
+        role: admin
+        user: "{{ usernames[0] }}"
+        state: absent
+      register: role_revoke
+      when: "query('awx.awx.controller_api', 'users', query_params={ 'username': 'DNE_TESTING' }) | length  == 1"
+
+    - assert:
+        that:
+          - role_revoke is skipped
+
+    - name: Create an inventory group with all 'foo' hosts
+      group:
+        name: "{{ group_name }}"
+        inventory: "Demo Inventory"
+        hosts: >-
+          {{ query(
+               'awx.awx.controller_api',
+                'hosts',
+                query_params={ 'name__endswith' : test_id, },
+            ) | map(attribute='name') | list }}
+      register: group_creation
+
+    - assert:
+        that: group_creation is changed
+
+  always:
+    - name: Cleanup group
+      group:
+        name: "{{ group_name }}"
+        inventory: "Demo Inventory"
+        state: absent
+
+    - name: Cleanup hosts
+      host:
+        name: "{{ item }}"
+        inventory: "Demo Inventory"
+        state: absent
+      loop: "{{ hosts }}"
+
+    - name: Cleanup users
+      user:
+        username: "{{ item }}"
+        state: absent
+      loop: "{{ usernames }}"

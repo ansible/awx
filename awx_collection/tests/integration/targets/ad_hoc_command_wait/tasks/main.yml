@@ -1,0 +1,131 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    inv_name: "AWX-Collection-tests-ad_hoc_command_wait-inventory-{{ test_id }}"
+    ssh_cred_name: "AWX-Collection-tests-ad_hoc_command_wait-ssh-cred-{{ test_id }}"
+    org_name: "AWX-Collection-tests-ad_hoc_command_wait-org-{{ test_id }}"
+
+- name: Create a New Organization
+  organization:
+    name: "{{ org_name }}"
+
+- name: Create an Inventory
+  inventory:
+    name: "{{ inv_name }}"
+    organization: "{{ org_name }}"
+    state: present
+
+- name: Add localhost to the Inventory
+  host:
+    name: localhost
+    inventory: "{{ inv_name }}"
+    variables:
+      ansible_connection: local
+
+- name: Create a Credential
+  credential:
+    name: "{{ ssh_cred_name }}"
+    organization: "{{ org_name }}"
+    credential_type: 'Machine'
+    state: present
+
+- name: Check module fails with correct msg
+  ad_hoc_command_wait:
+    command_id: "99999999"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - result is failed
+      - "result.msg == 'Unable to wait on ad hoc command 99999999; that ID does not exist.'"
+
+- name: Launch command module with sleep 10
+  ad_hoc_command:
+    inventory: "{{ inv_name }}"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "command"
+    module_args: "sleep 5"
+  register: command
+
+- assert:
+    that:
+      - command is changed
+
+- name: Wait for the Job to finish
+  ad_hoc_command_wait:
+    command_id: "{{ command.id }}"
+  register: wait_results
+
+# Make sure it worked and that we have some data in our results
+- assert:
+    that:
+      - wait_results is successful
+      - "'elapsed' in wait_results"
+      - "'id' in wait_results"
+
+- name: Launch a long running command
+  ad_hoc_command:
+    inventory: "{{ inv_name }}"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "command"
+    module_args: "sleep 10000"
+  register: command
+
+- assert:
+    that:
+      - command is changed
+
+- name: Timeout waiting for the command to complete
+  ad_hoc_command_wait:
+    command_id: "{{ command.id }}"
+    timeout: 1
+  ignore_errors: true
+  register: wait_results
+
+# Make sure that we failed and that we have some data in our results
+- assert:
+    that:
+      - "'Monitoring aborted due to timeout' or 'Timeout waiting for command to finish.' in wait_results.msg"
+      - "'id' in wait_results"
+
+- name: Async cancel the long-running command
+  ad_hoc_command_cancel:
+    command_id: "{{ command.id }}"
+  async: 3600
+  poll: 0
+
+- name: Wait for the command to exit on cancel
+  ad_hoc_command_wait:
+    command_id: "{{ command.id }}"
+  register: wait_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - wait_results is failed
+      - 'wait_results.status == "canceled"'
+      - "wait_results.msg == 'The ad hoc command - {{ command.id }}, failed'"
+
+- name: Delete the Credential
+  credential:
+    name: "{{ ssh_cred_name }}"
+    organization: "{{ org_name }}"
+    credential_type: 'Machine'
+    state: absent
+
+- name: Delete the Inventory
+  inventory:
+    name: "{{ inv_name }}"
+    organization: "{{ org_name }}"
+    state: absent
+
+- name: Remove the Organization
+  organization:
+    name: "{{ org_name }}"
+    state: absent

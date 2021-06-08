@@ -1,0 +1,79 @@
+---
+- name: Generate a test id
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Generate names
+  set_fact:
+    app1_name: "AWX-Collection-tests-application-app1-{{ test_id }}"
+    app2_name: "AWX-Collection-tests-application-app2-{{ test_id }}"
+    app3_name: "AWX-Collection-tests-application-app3-{{ test_id }}"
+
+- block:
+    - name: Create an application
+      application:
+        name: "{{ app1_name }}"
+        authorization_grant_type: "password"
+        client_type: "public"
+        organization: "Default"
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Delete our application
+      application:
+        name: "{{ app1_name }}"
+        organization: "Default"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a second application
+      application:
+        name: "{{ app2_name }}"
+        authorization_grant_type: "authorization-code"
+        client_type: "confidential"
+        organization: "Default"
+        description: "Another application"
+        redirect_uris:
+          - http://tower.com/api/v2/
+          - http://tower.com/api/v2/teams
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an all trusting application
+      application:
+        name: "{{ app3_name }}"
+        organization: "Default"
+        description: "All Trusting Application"
+        skip_authorization: true
+        authorization_grant_type: "password"
+        client_type: "confidential"
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+  always:
+    - name: Delete our application
+      application:
+        name: "{{ item }}"
+        organization: "Default"
+        state: absent
+      register: result
+      loop:
+        - "{{ app1_name }}"
+        - "{{ app2_name }}"
+        - "{{ app3_name }}"

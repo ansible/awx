@@ -8,7 +8,7 @@ short_description: gather all maintenance plan playbooks for an insights account
 description:
   - Supply insights Credentials to download all playbooks for all maintenance plans.
     The totality of the plans are versioned based on the http ETag response.
-version_added: "2.3"
+version_added: "2.3.0"
 options:
   insights_url:
     description:

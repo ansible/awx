@@ -4,10 +4,13 @@ associations:
     - related_item: credentials
       endpoint: credentials
       description: "The credentials used by this job template"
+      required: false
   groups:
     - related_item: hosts
       endpoint: hosts
       description: "The hosts associated with this group"
+      required: false
     - related_item: groups
       endpoint: children
       description: "The hosts associated with this group"
+      required: false

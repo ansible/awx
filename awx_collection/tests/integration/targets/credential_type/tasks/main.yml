@@ -1,0 +1,27 @@
+---
+- name: Generate names
+  set_fact:
+    cred_type_name: "AWX-Collection-tests-credential_type-cred-type-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Add Tower credential type
+  credential_type:
+    description: Credential type for Test
+    name: "{{ cred_type_name }}"
+    kind: cloud
+    inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+    injectors: {"extra_vars": {"test": "foo"}}
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove a Tower credential type
+  credential_type:
+    name: "{{ result.id }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"

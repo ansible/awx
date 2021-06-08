@@ -1,0 +1,67 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    project_name1: "AWX-Collection-tests-project_update-project-{{ test_id }}"
+
+- name: Create a git project without credentials without waiting
+  project:
+    name: "{{ project_name1 }}"
+    organization: Default
+    scm_type: git
+    scm_url: https://github.com/ansible/test-playbooks
+    wait: false
+  register: project_create_result
+
+- assert:
+    that:
+      - project_create_result is changed
+
+- name: Update a project without waiting
+  project_update:
+    name: "{{ project_name1 }}"
+    organization: Default
+    wait: false
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Update a project and wait
+  project_update:
+    name: "{{ project_name1 }}"
+    organization: Default
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - result is successful
+
+- name: Update a project by ID
+  project_update:
+    name: "{{ project_create_result.id }}"
+    organization: Default
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - result is successful
+      - result is not changed
+
+- name: Delete the test project 1
+  project:
+    name: "{{ project_name1 }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed

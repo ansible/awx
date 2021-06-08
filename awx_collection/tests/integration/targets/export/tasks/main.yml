@@ -1,0 +1,77 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    org_name1: "AWX-Collection-tests-export-organization-{{ test_id }}"
+    org_name2: "AWX-Collection-tests-export-organization2-{{ test_id }}"
+    inventory_name1: "AWX-Collection-tests-export-inv1-{{ test_id }}"
+
+- block:
+    - name: Create some organizations
+      organization:
+        name: "{{ item }}"
+      loop:
+        - "{{ org_name1 }}"
+        - "{{ org_name2 }}"
+
+    - name: Create an inventory
+      inventory:
+        name: "{{ inventory_name1 }}"
+        organization: "{{ org_name1 }}"
+
+    - name: Export all assets
+      export:
+        all: true
+      register: all_assets
+
+    - assert:
+        that:
+          - all_assets is not changed
+          - all_assets is successful
+          - all_assets['assets']['organizations'] | length() >= 2
+
+    - name: Export all inventories
+      export:
+        inventory: 'all'
+      register: inventory_export
+
+    - assert:
+        that:
+          - inventory_export is successful
+          - inventory_export is not changed
+          - inventory_export['assets']['inventory'] | length() >= 1
+          - "'organizations' not in inventory_export['assets']"
+
+    # This mimics the example in the module
+    - name: Export an all and a specific
+      export:
+        inventory: 'all'
+        organizations: "{{ org_name1 }}"
+      register: mixed_export
+
+    - assert:
+        that:
+          - mixed_export is successful
+          - mixed_export is not changed
+          - mixed_export['assets']['inventory'] | length() >= 1
+          - mixed_export['assets']['organizations'] | length() == 1
+          - "'workflow_job_templates' not in mixed_export['assets']"
+
+  always:
+    - name: Remove our inventory
+      inventory:
+        name: "{{ inventory_name1 }}"
+        organization: "{{ org_name1 }}"
+        state: absent
+
+    - name: Remove test organizations
+      organization:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ org_name1 }}"
+        - "{{ org_name2 }}"

@@ -11,7 +11,7 @@ from awx.main.models import Organization, Team
 def test_create_team(run_module, admin_user):
     org = Organization.objects.create(name='foo')
 
-    result = run_module('tower_team', {'name': 'foo_team', 'description': 'fooin around', 'state': 'present', 'organization': 'foo'}, admin_user)
+    result = run_module('team', {'name': 'foo_team', 'description': 'fooin around', 'state': 'present', 'organization': 'foo'}, admin_user)
 
     team = Team.objects.filter(name='foo_team').first()
 
@@ -32,7 +32,7 @@ def test_modify_team(run_module, admin_user):
     team = Team.objects.create(name='foo_team', organization=org, description='flat foo')
     assert team.description == 'flat foo'
 
-    result = run_module('tower_team', {'name': 'foo_team', 'description': 'fooin around', 'organization': 'foo'}, admin_user)
+    result = run_module('team', {'name': 'foo_team', 'description': 'fooin around', 'organization': 'foo'}, admin_user)
     team.refresh_from_db()
     result.pop('invocation')
     assert result == {
@@ -42,6 +42,6 @@ def test_modify_team(run_module, admin_user):
     assert team.description == 'fooin around'
 
     # 2nd modification, should cause no change
-    result = run_module('tower_team', {'name': 'foo_team', 'description': 'fooin around', 'organization': 'foo'}, admin_user)
+    result = run_module('team', {'name': 'foo_team', 'description': 'fooin around', 'organization': 'foo'}, admin_user)
     result.pop('invocation')
     assert result == {"id": team.id, "changed": False}

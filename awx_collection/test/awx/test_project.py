@@ -10,7 +10,7 @@ from awx.main.models import Project
 @pytest.mark.django_db
 def test_create_project(run_module, admin_user, organization, silence_warning):
     result = run_module(
-        'tower_project',
+        'project',
         dict(name='foo', organization=organization.name, scm_type='git', scm_url='https://foo.invalid', wait=False, scm_update_cache_timeout=5),
         admin_user,
     )

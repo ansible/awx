@@ -1,0 +1,51 @@
+---
+- name: Generate names
+  set_fact:
+    host_name: "AWX-Collection-tests-host-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    inv_name: "AWX-Collection-tests-host-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Create an Inventory
+  inventory:
+    name: "{{ inv_name }}"
+    organization: Default
+    state: present
+  register: result
+
+- name: Create a Host
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ result.id }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Host
+  host:
+    name: "{{ result.id }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check module fails with correct msg
+  host:
+    name: test-host
+    description: Host Description
+    inventory: test-non-existing-inventory
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+      - "'test-non-existing-inventory' in result.msg"
+      - "result.total_results == 0"

@@ -7,12 +7,13 @@ When trying to fix a bug, it is best to replicate its behavior within a test wit
 
 ## Unit Tests
 
-The unit tests are stored in the `test/awx` directory and, where possible, test interactions between the collections modules and the AWX database. This is achieved by  using a Python testing suite and having a mocked layer which emulates interactions with the Tower API. You do not need a server to run these unit tests. The depth of testing is not fixed and can change from module to module.
+The unit tests are stored in the `test/awx` directory and, where possible, test interactions between the collections modules and the AWX database. This is achieved by  using a Python testing suite and having a mocked layer which emulates interactions with the API. You do not need a server to run these unit tests. The depth of testing is not fixed and can change from module to module.
 
-Let's take a closer look at the `test_token.py` file (which tests the `tower_token` module):
+Let's take a closer look at the `test_token.py` file (which tests the `token` module):
 
 ```
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import pytest
@@ -27,15 +28,15 @@ def test_create_token(run_module, admin_user):
         'description': 'barfoo',
         'state': 'present',
         'scope': 'read',
-        'tower_host': None,
-        'tower_username': None,
-        'tower_password': None,
+        'controller_host': None,
+        'controller_username': None,
+        'controller_password': None,
         'validate_certs': None,
-        'tower_oauthtoken': None,
-        'tower_config_file': None,
+        'controller_oauthtoken': None,
+        'controller_config_file': None,
     }
 
-    result = run_module('tower_token', module_args, admin_user)
+    result = run_module('token', module_args, admin_user)
     assert result.get('changed'), result
 
     tokens = OAuth2AccessToken.objects.filter(description='barfoo')
@@ -43,7 +44,7 @@ def test_create_token(run_module, admin_user):
     assert tokens[0].scope == 'read', 'Token was not given read access'
 ```
 
-This test has a single test called `test_create_token`. It creates a `module_args` section which is what will be passed into our module. We then call `run_module`, asking it to run the `tower_token` module with the `module_args` we created and give us back the results. After that, we run an assertion to validate that our module did in fact report a change to the system. We will then use Python objects to look up the token that has a description of `barfoo` (which was in our arguments to the module). We want to validate that we only got back one token (the one we created) and that the scope of the token we created was read.
+This test has a single test called `test_create_token`. It creates a `module_args` section which is what will be passed into our module. We then call `run_module`, asking it to run the `token` module with the `module_args` we created and give us back the results. After that, we run an assertion to validate that our module did in fact report a change to the system. We will then use Python objects to look up the token that has a description of `barfoo` (which was in our arguments to the module). We want to validate that we only got back one token (the one we created) and that the scope of the token we created was read.
 
 
 ### Completion Test
@@ -70,7 +71,7 @@ Inside the `/tests` directory, there are two folders:
 
 In the `/sanity` folder are file directives for specific Ansible versions which contain information about which tests to skip for specific files. There are a number of reasons you may need to skip a sanity test. See the [`ansible-test` documentation](https://docs.ansible.com/ansible/latest/dev_guide/testing_running_locally.html) for more details about how and why you might want to skip a test.
 
-In the `integration/targets` folder you will see directories (which act as roles) for all of the different modules and plugins. When the collection is tested, an instance of Ansible Tower (or AWX) will be spun up and these roles will be applied to the target server to validate the functionality of the modules. Since these are really roles, each directory will contain a tasks folder under it with a `main.yml` file as an entry point.
+In the `integration/targets` folder you will see directories (which act as roles) for all of the different modules and plugins. When the collection is tested, an instance of Automation Platform Controller (or AWX) will be spun up and these roles will be applied to the target server to validate the functionality of the modules. Since these are really roles, each directory will contain a tasks folder under it with a `main.yml` file as an entry point.
 
 While not strictly followed, the general flow of a test should be:
 
@@ -87,17 +88,17 @@ While not strictly followed, the general flow of a test should be:
 ```
 - name: Generate names
   set_fact:
-    group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
-    group_name2: "AWX-Collection-tests-tower_instance_group-group2-{{ test_id }}"
-    cred_name1: "AWX-Collection-tests-tower_instance_group-cred1-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
+    group_name2: "AWX-Collection-tests-instance_group-group2-{{ test_id }}"
+    cred_name1: "AWX-Collection-tests-instance_group-cred1-{{ test_id }}"
 ```
 
 - **Non-creating tests (i.e. test for specific error conditions, etc), with assertion**
 
 ```
 - name: Try to use a token as a dict which is missing the token parameter
-  tower_job_list:
-    tower_oauthtoken:
+  job_list:
+    controller_oauthtoken:
       not_token: "This has no token entry"
   register: results
   ignore_errors: true
@@ -105,14 +106,14 @@ While not strictly followed, the general flow of a test should be:
 - assert:
     that:
       - results is failed
-      - '"The provided dict in tower_oauthtoken did not properly contain the token entry" == results.msg'
+      - '"The provided dict in controller_oauthtoken did not properly contain the token entry" == results.msg'
 ```
 
 - **`Block:`**
   - Run test which creates/modifies/deletes object(s)
 ```
     - name: Create a container group
-      tower_instance_group:
+      instance_group:
         name: "{{ group_name2 }}"
         credential: "{{ cred_result.id }}"
       register: result
@@ -128,14 +129,14 @@ While not strictly followed, the general flow of a test should be:
   - Cleanup created objects
 ```
     - name: Delete the credential
-      tower_credential:
+      credential:
         name: "{{ cred_name1 }}"
         organization: "Default"
         credential_type: "OpenShift or Kubernetes API Bearer Token"
 ```
   - Assert cleanup worked properly (if needed)
 
-When writing an integration test, a test of asset type A does not need to make assertions for asset type B. For example, if you are writing an integration test for a credential and you create a custom credential type, you do not need to assert that the `tower_credential_type` call properly worked, you can assume it will. In addition, when cleaning up and deleting the `tower_credential_type`, you do not need to assert that it properly deleted the credential type.
+When writing an integration test, a test of asset type A does not need to make assertions for asset type B. For example, if you are writing an integration test for a credential and you create a custom credential type, you do not need to assert that the `credential_type` call properly worked, you can assume it will. In addition, when cleaning up and deleting the `credential_type`, you do not need to assert that it properly deleted the credential type.
 
 
 ## Running Unit Tests
@@ -176,7 +177,7 @@ FAILED awx_collection/test/awx/test_module_utils.py::test_type_warning - SystemE
 make: *** [Makefile:382: test_collection] Error 1
 ```
 
-In addition to running all of the tests, you can also specify specific tests to run. This is useful when developing a single module. In this example, we will run the tests for the `tower_token` module:
+In addition to running all of the tests, you can also specify specific tests to run. This is useful when developing a single module. In this example, we will run the tests for the `token` module:
 
 ```
 $ pytest awx_collection/test/awx/test_token.py
@@ -195,7 +196,7 @@ awx_collection/test/awx/test_token.py .                               [100%]
 
 ## Running Integration Tests
 
-For integration tests, you will need an existing AWX or Ansible Tower instance to run the test playbooks against. You can write a simple `run_it.yml` playbook to invoke the main method:
+For integration tests, you will need an existing AWX or Automation Platform Controller instance to run the test playbooks against. You can write a simple `run_it.yml` playbook to invoke the main method:
 
 ```
 ---
@@ -215,7 +216,7 @@ For integration tests, you will need an existing AWX or Ansible Tower instance t
     - include_tasks: main.yml
 ```
 
-Place this file in the `/tasks` directory of the test playbook you'd like to run (i.e., `awx/awx_collection/tests/integration/targets/tower_ad_hoc_command_cancel/tasks/`; a test playbook named `main.yml` must be in the same directory).
+Place this file in the `/tasks` directory of the test playbook you'd like to run (i.e., `awx/awx_collection/tests/integration/targets/ad_hoc_command_cancel/tasks/`; a test playbook named `main.yml` must be in the same directory).
 
 The `run_it.yml` playbook will set up your connection parameters via environment variables and then invoke the `main.yml` play of the role.
 

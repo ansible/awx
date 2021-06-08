@@ -1,0 +1,120 @@
+---
+- name: Generate names
+  set_fact:
+    username: "AWX-Collection-tests-user-user-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Create a User
+  user:
+    username: "{{ username }}"
+    first_name: Joe
+    password: "{{ 65535 | random | to_uuid }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Change a User by ID
+  user:
+    username: "{{ result.id }}"
+    last_name: User
+    email: joe@example.org
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check idempotency
+  user:
+    username: "{{ username }}"
+    first_name: Joe
+    last_name: User
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete a User
+  user:
+    username: "{{ username }}"
+    email: joe@example.org
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create an Auditor
+  user:
+    first_name: Joe
+    last_name: Auditor
+    username: "{{ username }}"
+    password: "{{ 65535 | random | to_uuid }}"
+    email: joe@example.org
+    state: present
+    auditor: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete an Auditor
+  user:
+    username: "{{ username }}"
+    email: joe@example.org
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a Superuser
+  user:
+    first_name: Joe
+    last_name: Super
+    username: "{{ username }}"
+    password: "{{ 65535 | random | to_uuid }}"
+    email: joe@example.org
+    state: present
+    superuser: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Superuser
+  user:
+    username: "{{ username }}"
+    email: joe@example.org
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Test SSL parameter
+  user:
+    first_name: Joe
+    last_name: User
+    username: "{{ username }}"
+    password: "{{ 65535 | random | to_uuid }}"
+    email: joe@example.org
+    state: present
+    validate_certs: true
+    controller_host: http://foo.invalid
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - "'Unable to resolve controller_host' in result.msg or
+        'Can not verify ssl with non-https protocol' in result.exception"
