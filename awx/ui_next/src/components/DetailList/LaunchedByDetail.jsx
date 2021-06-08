@@ -31,7 +31,7 @@ function getScheduleURL(template, scheduleId, inventoryId = null) {
   return scheduleUrl;
 }
 
-const getLaunchedByDetails = ({ summary_fields = {}, launch_type }, i18n) => {
+const getLaunchedByDetails = ({ summary_fields = {}, launch_type }) => {
   const {
     created_by: createdBy,
     job_template: jobTemplate,
@@ -50,7 +50,7 @@ const getLaunchedByDetails = ({ summary_fields = {}, launch_type }, i18n) => {
 
   switch (launch_type) {
     case 'webhook':
-      value = i18n._(t`Webhook`);
+      value = t`Webhook`;
       link =
         (jobTemplate && `/templates/job_template/${jobTemplate.id}/details`) ||
         (workflowJT &&
@@ -75,7 +75,7 @@ const getLaunchedByDetails = ({ summary_fields = {}, launch_type }, i18n) => {
 
 export default function LaunchedByDetail({ job }) {
   const { value: launchedByValue, link: launchedByLink } =
-    getLaunchedByDetails(job, i18n) || {};
+    getLaunchedByDetails(job) || {};
 
   return (
     <Detail
