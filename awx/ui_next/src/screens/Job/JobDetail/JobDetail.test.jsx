@@ -108,6 +108,61 @@ describe('<JobDetail />', () => {
     ).toHaveLength(1);
   });
 
+  test('should show schedule that launched workflow job', async () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          launch_type: 'scheduled',
+          summary_fields: {
+            user_capabilities: {},
+            schedule: {
+              name: 'mock wf schedule',
+              id: 999,
+            },
+            unified_job_template: {
+              unified_job_type: 'workflow_job',
+              id: 888,
+            },
+          },
+        }}
+      />
+    );
+    const launchedByDetail = wrapper.find('Detail[label="Launched By"] dd');
+    expect(launchedByDetail).toHaveLength(1);
+    expect(launchedByDetail.text()).toBe('mock wf schedule');
+    expect(
+      launchedByDetail.find(
+        'a[href="/templates/workflow_job_template/888/schedules/999/details"]'
+      )
+    ).toHaveLength(1);
+  });
+
+  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', async () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          launch_type: 'workflow',
+          type: 'job',
+          summary_fields: {
+            user_capabilities: {},
+            source_workflow_job: {
+              name: 'mock wf job',
+              id: 888,
+            },
+            unified_job_template: {
+              unified_job_type: 'job',
+              id: 111,
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Launched By"] dt')).toHaveLength(0);
+    expect(wrapper.find('Detail[label="Launched By"] dd')).toHaveLength(0);
+  });
+
   test('should properly delete job', async () => {
     wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');

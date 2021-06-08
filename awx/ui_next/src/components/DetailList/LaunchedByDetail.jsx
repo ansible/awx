@@ -3,13 +3,43 @@ import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import Detail from './Detail';
 
-const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
+function getScheduleURL(template, scheduleId, inventoryId = null) {
+  let scheduleUrl;
+
+  switch (template.unified_job_type) {
+    case 'inventory_update':
+      scheduleUrl =
+        inventoryId &&
+        `/inventories/inventory/${inventoryId}/sources/${template.id}/schedules/${scheduleId}/details`;
+      break;
+    case 'job':
+      scheduleUrl = `/templates/job_template/${template.id}/schedules/${scheduleId}/details`;
+      break;
+    case 'project_update':
+      scheduleUrl = `/projects/${template.id}/schedules/${scheduleId}/details`;
+      break;
+    case 'system_job':
+      scheduleUrl = `/management_jobs/${template.id}/schedules/${scheduleId}/details`;
+      break;
+    case 'workflow_job':
+      scheduleUrl = `/templates/workflow_job_template/${template.id}/schedules/${scheduleId}/details`;
+      break;
+    default:
+      break;
+  }
+
+  return scheduleUrl;
+}
+
+const getLaunchedByDetails = ({ summary_fields = {}, launch_type }) => {
   const {
     created_by: createdBy,
     job_template: jobTemplate,
+    unified_job_template: unifiedJT,
+    workflow_job_template: workflowJT,
+    inventory,
     schedule,
   } = summary_fields;
-  const { schedule: relatedSchedule } = related;
 
   if (!createdBy && !schedule) {
     return {};
@@ -18,15 +48,26 @@ const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
   let link;
   let value;
 
-  if (createdBy) {
-    link = `/users/${createdBy.id}`;
-    value = createdBy.username;
-  } else if (relatedSchedule && jobTemplate) {
-    link = `/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
-    value = schedule.name;
-  } else {
-    link = null;
-    value = schedule.name;
+  switch (launch_type) {
+    case 'webhook':
+      value = t`Webhook`;
+      link =
+        (jobTemplate && `/templates/job_template/${jobTemplate.id}/details`) ||
+        (workflowJT &&
+          `/templates/workflow_job_template/${workflowJT.id}/details`);
+      break;
+    case 'scheduled':
+      value = schedule.name;
+      link = getScheduleURL(unifiedJT, schedule.id, inventory?.id);
+      break;
+    case 'manual':
+      link = `/users/${createdBy.id}/details`;
+      value = createdBy.username;
+      break;
+    default:
+      link = createdBy && `/users/${createdBy.id}/details`;
+      value = createdBy && createdBy.username;
+      break;
   }
 
   return { link, value };
