@@ -74,6 +74,7 @@
     "lint": "eslint --ext .js --ext .jsx .",
     "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",
+    "extract-template": "lingui extract-template",
     "compile-strings": "lingui compile",
     "prettier": "prettier --write \"src/**/*.{js,jsx,scss}\"",
     "prettier-check": "prettier --check \"src/**/*.{js,jsx,scss}\""
