@@ -32,7 +32,9 @@ import {
 } from './shared/HostFilterUtils';
 
 const ChipHolder = styled.div`
-  --pf-c-form-control--Height: auto;
+  && {
+    --pf-c-form-control--Height: auto;
+  }
   .pf-c-chip-group {
     margin-right: 8px;
   }
@@ -271,6 +273,27 @@ function HostFilterLookup({
             ))}
           </ChipGroup>
         ))}
+        {/* Parse advanced search chips */}
+        {Object.keys(chips).length > 0 &&
+          Object.keys(chips)
+            .filter(val => chips[val].chips.length > 0)
+            .filter(
+              val => searchColumns.map(val2 => val2.key).indexOf(val) === -1
+            )
+            .map(leftoverKey => (
+              <ChipGroup
+                categoryName={chips[leftoverKey].key}
+                key={chips[leftoverKey].key}
+                numChips={5}
+                totalChips={chips[leftoverKey]?.chips?.length || 0}
+              >
+                {chips[leftoverKey]?.chips?.map(chip => (
+                  <Chip key={chip.key} isReadOnly>
+                    {chip.node}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            ))}
       </ChipHolder>
     </InputGroup>
   );
