@@ -43,6 +43,7 @@ function Search({
   isDisabled,
   maxSelectHeight,
   enableNegativeFiltering,
+  enableRelatedFuzzyFiltering,
 }) {
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
@@ -207,6 +208,7 @@ function Search({
               relatedSearchableKeys={relatedSearchableKeys}
               maxSelectHeight={maxSelectHeight}
               enableNegativeFiltering={enableNegativeFiltering}
+              enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
             />
           )) ||
             (options && (
@@ -327,6 +329,7 @@ Search.propTypes = {
   isDisabled: PropTypes.bool,
   maxSelectHeight: PropTypes.string,
   enableNegativeFiltering: PropTypes.bool,
+  enableRelatedFuzzyFiltering: PropTypes.bool,
 };
 
 Search.defaultProps = {
@@ -335,6 +338,7 @@ Search.defaultProps = {
   isDisabled: false,
   maxSelectHeight: '300px',
   enableNegativeFiltering: true,
+  enableRelatedFuzzyFiltering: true,
 };
 
 export default withRouter(Search);
