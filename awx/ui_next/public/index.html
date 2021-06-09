@@ -1,3 +1,20 @@
+<!-- There's multiple layers of templating in this file:
+
+  * "< ... >" with % symbols are ejs templates used by react-scripts at build time. These
+     templates are mainly used to check whether or not we're building a ui for production
+     versus one that will be sent from the ui dev server.  Since this type of template is
+     applied at build time, it can be used to conditionally render the others.
+
+  * "% ... %" are templates used by the react-scripts dev server when serving the ui from
+    port 3001. These are applied at runtime and only work for development mode.
+
+  * "{ ... }" with % symbols and "{{ ... }}" are django templates that only run for
+    production builds (e.g port 8043) when serving the ui from a webserver.
+
+-->
+<% if (process.env.NODE_ENV === 'production') { %>
+  {% load static %}
+<% } %>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,6 +26,9 @@
         http-equiv="Content-Security-Policy"
         content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
       />
+      <link rel="shortcut icon" href="{% static 'media/favicon.ico' %}" />
+    <% } else { %>
+      <link rel="shortcut icon" href="%PUBLIC_URL%/static/media/favicon.ico" />
     <% } %>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
