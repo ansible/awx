@@ -17,6 +17,9 @@ def get_default_execution_environment():
 
 
 def get_default_pod_spec():
+    ee = get_default_execution_environment()
+    if ee is None:
+        raise RuntimeError("Unable to find an execution environment.")
 
     return {
         "apiVersion": "v1",
@@ -25,7 +28,7 @@ def get_default_pod_spec():
         "spec": {
             "containers": [
                 {
-                    "image": get_default_execution_environment().image,
+                    "image": ee.image,
                     "name": 'worker',
                     "args": ['ansible-runner', 'worker', '--private-data-dir=/runner'],
                 }
