@@ -6,13 +6,20 @@ from django.conf import settings
 from awx.main.models.execution_environments import ExecutionEnvironment
 
 
-def get_default_execution_environment():
-    if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-        return settings.DEFAULT_EXECUTION_ENVIRONMENT
+def get_control_plane_execution_environment():
     return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
 
 
+def get_default_execution_environment():
+    if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
+        return settings.DEFAULT_EXECUTION_ENVIRONMENT
+    return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=False).first()
+
+
 def get_default_pod_spec():
+    ee = get_default_execution_environment()
+    if ee is None:
+        raise RuntimeError("Unable to find an execution environment.")
 
     return {
         "apiVersion": "v1",
@@ -21,7 +28,7 @@ def get_default_pod_spec():
         "spec": {
             "containers": [
                 {
-                    "image": get_default_execution_environment().image,
+                    "image": ee.image,
                     "name": 'worker',
                     "args": ['ansible-runner', 'worker', '--private-data-dir=/runner'],
                 }

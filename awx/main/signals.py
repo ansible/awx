@@ -31,6 +31,7 @@ from crum.signals import current_user_getter
 # AWX
 from awx.main.models import (
     ActivityStream,
+    ExecutionEnvironment,
     Group,
     Host,
     InstanceGroup,
@@ -621,6 +622,12 @@ def delete_approval_node_type_change(sender, instance, **kwargs):
 def deny_orphaned_approvals(sender, instance, **kwargs):
     for approval in WorkflowApproval.objects.filter(workflow_approval_template=instance, status='pending'):
         approval.deny()
+
+
+@receiver(pre_delete, sender=ExecutionEnvironment)
+def remove_default_ee(sender, instance, **kwargs):
+    if instance.id == getattr(settings.DEFAULT_EXECUTION_ENVIRONMENT, 'id', None):
+        settings.DEFAULT_EXECUTION_ENVIRONMENT = None
 
 
 @receiver(post_save, sender=Session)

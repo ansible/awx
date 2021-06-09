@@ -588,7 +588,8 @@ class TestGenericRun:
 @pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
     def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
-        ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
+        ExecutionEnvironment.objects.create(name='Control Plane EE', managed_by_tower=True)
+        ExecutionEnvironment.objects.create(name='Default Job EE', managed_by_tower=False)
 
         adhoc_job.module_args = '{{ ansible_ssh_pass }}'
         adhoc_job.websocket_emit_status = mock.Mock()

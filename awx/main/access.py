@@ -465,7 +465,7 @@ class BaseAccess(object):
             if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource)):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
@@ -1370,6 +1370,8 @@ class ExecutionEnvironmentAccess(BaseAccess):
         return self.check_related('organization', Organization, data, obj=obj, mandatory=True, role_field='execution_environment_admin_role')
 
     def can_delete(self, obj):
+        if obj.managed_by_tower:
+            raise PermissionDenied
         return self.can_change(obj, None)
 
 
