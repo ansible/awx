@@ -695,6 +695,7 @@ class TeamAccessList(ResourceAccessList):
 
 class ExecutionEnvironmentList(ListCreateAPIView):
 
+    always_allow_superuser = False
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
     swagger_topic = "Execution Environments"
@@ -702,9 +703,21 @@ class ExecutionEnvironmentList(ListCreateAPIView):
 
 class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
 
+    always_allow_superuser = False
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
     swagger_topic = "Execution Environments"
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        fields_to_check = ['name', 'description', 'organization', 'image', 'credential']
+        if instance.managed_by_tower and request.user.can_access(models.ExecutionEnvironment, 'change', instance):
+            for field in fields_to_check:
+                left = getattr(instance, field, None)
+                right = request.data.get(field, None)
+                if left != right:
+                    raise PermissionDenied(_("Only the 'pull' field can be edited for managed execution environments."))
+        return super().update(request, *args, **kwargs)
 
 
 class ExecutionEnvironmentJobTemplateList(SubListAPIView):
