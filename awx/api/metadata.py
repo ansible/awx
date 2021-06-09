@@ -24,7 +24,7 @@ from rest_framework.request import clone_request
 from awx.api.fields import ChoiceNullField
 from awx.main.fields import JSONField, ImplicitRoleField
 from awx.main.models import NotificationTemplate
-from awx.main.tasks import AWXReceptorJob
+from awx.main.utils.execution_environments import get_default_pod_spec
 
 # Polymorphic
 from polymorphic.models import PolymorphicModel
@@ -211,7 +211,7 @@ class Metadata(metadata.SimpleMetadata):
                     continue
 
                 if field == "pod_spec_override":
-                    meta['default'] = AWXReceptorJob().pod_definition
+                    meta['default'] = get_default_pod_spec()
 
                 # Add type choices if available from the serializer.
                 if field == 'type' and hasattr(serializer, 'get_type_choices'):

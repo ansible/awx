@@ -2879,7 +2879,7 @@ class TransmitterThread(threading.Thread):
 
 
 class AWXReceptorJob:
-    def __init__(self, task=None, runner_params=None):
+    def __init__(self, task, runner_params=None):
         self.task = task
         self.runner_params = runner_params
         self.unit_id = None
@@ -3034,10 +3034,7 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
-        if self.task and self.task.instance.execution_environment:
-            ee = self.task.instance.execution_environment
-        else:
-            ee = get_default_execution_environment()
+        ee = self.task.instance.execution_environment
 
         default_pod_spec = get_default_pod_spec()
 
