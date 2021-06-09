@@ -117,6 +117,7 @@ function OrganizationForm({
   onCancel,
   onSubmit,
   submitError,
+  defaultGalaxyCredential,
   ...rest
 }) {
   const [contentError, setContentError] = useState(null);
@@ -181,7 +182,9 @@ function OrganizationForm({
         name: organization.name,
         description: organization.description,
         max_hosts: organization.max_hosts || '0',
-        galaxy_credentials: organization.galaxy_credentials || [],
+        galaxy_credentials:
+          organization.galaxy_credentials ||
+          (defaultGalaxyCredential ? [defaultGalaxyCredential] : []),
         default_environment:
           organization.summary_fields?.default_environment || null,
       }}
@@ -209,6 +212,7 @@ function OrganizationForm({
 }
 
 OrganizationForm.propTypes = {
+  defaultGalaxyCredential: PropTypes.shape(),
   organization: PropTypes.shape(),
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
@@ -216,6 +220,7 @@ OrganizationForm.propTypes = {
 };
 
 OrganizationForm.defaultProps = {
+  defaultGalaxyCredential: null,
   organization: {
     id: '',
     name: '',

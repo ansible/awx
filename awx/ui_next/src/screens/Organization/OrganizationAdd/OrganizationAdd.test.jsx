@@ -6,11 +6,28 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import OrganizationAdd from './OrganizationAdd';
-import { OrganizationsAPI } from '../../../api';
+import { CredentialsAPI, OrganizationsAPI } from '../../../api';
 
 jest.mock('../../../api');
 
 describe('<OrganizationAdd />', () => {
+  beforeEach(() => {
+    CredentialsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 2,
+            type: 'credential',
+            name: 'Ansible Galaxy',
+            credential_type: 18,
+            managed_by_tower: true,
+            kind: 'galaxy_api_token',
+          },
+        ],
+      },
+    });
+  });
+
   test('onSubmit should post to api', async () => {
     const updatedOrgData = {
       name: 'new name',

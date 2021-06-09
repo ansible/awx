@@ -4,7 +4,6 @@ import { PageSection, Card } from '@patternfly/react-core';
 import { CardBody } from '../../../components/Card';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
-
 import {
   CredentialInputSourcesAPI,
   CredentialTypesAPI,

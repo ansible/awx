@@ -47,6 +47,32 @@ describe('<OrganizationForm />', () => {
     jest.clearAllMocks();
   });
 
+  test('should render default galaxy credential when passed', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationForm
+          onSubmit={jest.fn()}
+          onCancel={jest.fn()}
+          me={meConfig.me}
+          defaultGalaxyCredential={{
+            id: 2,
+            type: 'credential',
+            name: 'Ansible Galaxy',
+            credential_type: 18,
+            managed_by_tower: true,
+            kind: 'galaxy_api_token',
+          }}
+        />,
+        {
+          context: { network },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'CredentialLookup', el => el.length === 1);
+    expect(wrapper.find('CredentialLookup Chip span')).toHaveLength(1);
+  });
+
   test('should request related instance groups from api', async () => {
     let wrapper;
     await act(async () => {
