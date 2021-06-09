@@ -98,7 +98,7 @@ from awx.main.utils import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec, CONTAINER_ROOT, to_container_path
+from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
