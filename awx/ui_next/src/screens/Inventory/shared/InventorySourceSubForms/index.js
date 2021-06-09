@@ -1,6 +1,7 @@
 export { default as AzureSubForm } from './AzureSubForm';
 export { default as EC2SubForm } from './EC2SubForm';
 export { default as GCESubForm } from './GCESubForm';
+export { default as InsightsSubForm } from './InsightsSubForm';
 export { default as OpenStackSubForm } from './OpenStackSubForm';
 export { default as SCMSubForm } from './SCMSubForm';
 export { default as SatelliteSubForm } from './SatelliteSubForm';

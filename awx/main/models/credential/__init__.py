@@ -954,6 +954,10 @@ ManagedCredentialType(
             "scm_username": "{{username}}",
             "scm_password": "{{password}}",
         },
+        'env': {
+            'INSIGHTS_USER': '{{username}}',
+            'INSIGHTS_PASSWORD': '{{password}}',
+        },
     },
 )
 

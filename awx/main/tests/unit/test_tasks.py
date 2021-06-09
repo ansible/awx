@@ -1746,6 +1746,34 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env["FOREMAN_PASSWORD"] == "secret"
         assert safe_env["FOREMAN_PASSWORD"] == tasks.HIDDEN_PASSWORD
 
+    def test_insights_source(self, inventory_update, private_data_dir, mocker):
+        task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
+        insights = CredentialType.defaults['insights']()
+        inventory_update.source = 'insights'
+
+        def get_cred():
+            cred = Credential(
+                pk=1,
+                credential_type=insights,
+                inputs={
+                    'username': 'bob',
+                    'password': 'secret',
+                },
+            )
+            cred.inputs['password'] = encrypt_field(cred, 'password')
+            return cred
+
+        inventory_update.get_cloud_credential = get_cred
+        inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
+
+        env = task.build_env(inventory_update, private_data_dir, False)
+        safe_env = build_safe_env(env)
+
+        assert env["INSIGHTS_USER"] == "bob"
+        assert env["INSIGHTS_PASSWORD"] == "secret"
+        assert safe_env['INSIGHTS_PASSWORD'] == tasks.HIDDEN_PASSWORD
+
     @pytest.mark.parametrize('verify', [True, False])
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()

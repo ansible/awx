@@ -20,6 +20,7 @@ import {
   AzureSubForm,
   EC2SubForm,
   GCESubForm,
+  InsightsSubForm,
   OpenStackSubForm,
   SCMSubForm,
   SatelliteSubForm,
@@ -177,6 +178,13 @@ const InventorySourceFormFields = ({
                       !source?.id || source?.source !== 'gce'
                     }
                     sourceOptions={sourceOptions}
+                  />
+                ),
+                insights: (
+                  <InsightsSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'insights'
+                    }
                   />
                 ),
                 openstack: (
