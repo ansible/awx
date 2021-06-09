@@ -55,6 +55,13 @@ function GitHubEnterpriseTeamEdit() {
     null
   );
 
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('github-enterprise-team');
+    }, []),
+    null
+  );
+
   const handleSubmit = async form => {
     await submitForm({
       ...form,
@@ -68,13 +75,11 @@ function GitHubEnterpriseTeamEdit() {
   };
 
   const handleRevertAll = async () => {
-    const defaultValues = Object.assign(
-      ...Object.entries(github).map(([key, value]) => ({
-        [key]: value.default,
-      }))
-    );
-    await submitForm(defaultValues);
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/github/enterprise_team/details');
   };
 
   const handleCancel = () => {
@@ -134,6 +139,7 @@ function GitHubEnterpriseTeamEdit() {
                   config={github.SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>
               <RevertFormActionGroup
                 onCancel={handleCancel}

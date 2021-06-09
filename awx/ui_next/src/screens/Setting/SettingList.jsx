@@ -107,8 +107,8 @@ function SettingList() {
           path: '/settings/miscellaneous_system',
         },
         {
-          title: t`Activity Stream settings`,
-          path: '/settings/activity_stream',
+          title: t`Miscellaneous Authentication settings`,
+          path: '/settings/miscellaneous_authentication',
         },
         {
           title: t`Logging settings`,

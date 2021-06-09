@@ -23,27 +23,22 @@ const mockExecutionEnvironment = [
 ];
 
 const systemData = {
-  ALLOW_OAUTH2_FOR_EXTERNAL_USERS: false,
-  AUTH_BASIC_ENABLED: true,
+  ACTIVITY_STREAM_ENABLED: true,
+  ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
   AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
+  AUTOMATION_ANALYTICS_LAST_ENTRIES: '',
   AUTOMATION_ANALYTICS_URL: 'https://example.com',
   DEFAULT_EXECUTION_ENVIRONMENT: 1,
   INSIGHTS_TRACKING_STATE: false,
-  LOGIN_REDIRECT_OVERRIDE: '',
   MANAGE_ORGANIZATION_AUTH: true,
-  DISABLE_LOCAL_AUTH: false,
-  OAUTH2_PROVIDER: {
-    ACCESS_TOKEN_EXPIRE_SECONDS: 31536000000,
-    AUTHORIZATION_CODE_EXPIRE_SECONDS: 600,
-    REFRESH_TOKEN_EXPIRE_SECONDS: 2628000,
-  },
   ORG_ADMINS_CAN_SEE_ALL_USERS: true,
-  REDHAT_PASSWORD: '',
   REDHAT_USERNAME: '',
+  REDHAT_PASSWORD: '',
+  SUBSCRIPTIONS_USERNAME: '',
+  SUBSCRIPTIONS_PASSWORD: '',
   REMOTE_HOST_HEADERS: ['REMOTE_ADDR', 'REMOTE_HOST'],
-  SESSIONS_PER_USER: -1,
-  SESSION_COOKIE_AGE: 1800,
   TOWER_URL_BASE: 'https://localhost:3000',
+  PROXY_IP_ALLOWED_LIST: [],
 };
 
 describe('<MiscSystemEdit />', () => {
@@ -55,6 +50,7 @@ describe('<MiscSystemEdit />', () => {
   });
 
   beforeEach(async () => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: mockAllSettings,
@@ -116,7 +112,7 @@ describe('<MiscSystemEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -131,7 +127,8 @@ describe('<MiscSystemEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('system');
   });
 
   test('should successfully send request to api on form submission', async () => {

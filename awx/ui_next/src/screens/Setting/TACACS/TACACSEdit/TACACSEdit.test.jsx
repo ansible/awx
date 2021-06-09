@@ -17,6 +17,7 @@ describe('<TACACSEdit />', () => {
   let history;
 
   beforeEach(() => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
@@ -68,7 +69,7 @@ describe('<TACACSEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -83,14 +84,8 @@ describe('<TACACSEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      TACACSPLUS_HOST: '',
-      TACACSPLUS_PORT: 49,
-      TACACSPLUS_SECRET: '',
-      TACACSPLUS_SESSION_TIMEOUT: 5,
-      TACACSPLUS_AUTH_PROTOCOL: 'ascii',
-    });
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('tacacsplus');
   });
 
   test('should successfully send request to api on form submission', async () => {

@@ -17,6 +17,7 @@ describe('<GitHubOrgEdit />', () => {
   let history;
 
   beforeEach(() => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
@@ -79,7 +80,7 @@ describe('<GitHubOrgEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -94,14 +95,8 @@ describe('<GitHubOrgEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SOCIAL_AUTH_GITHUB_ORG_KEY: '',
-      SOCIAL_AUTH_GITHUB_ORG_SECRET: '',
-      SOCIAL_AUTH_GITHUB_ORG_NAME: '',
-      SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: null,
-      SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
-    });
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('github-org');
   });
 
   test('should successfully send request to api on form submission', async () => {

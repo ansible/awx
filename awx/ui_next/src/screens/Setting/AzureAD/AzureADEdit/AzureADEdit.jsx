@@ -55,6 +55,13 @@ function AzureADEdit() {
     null
   );
 
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('azuread-oauth2');
+    }, []),
+    null
+  );
+
   const handleSubmit = async form => {
     await submitForm({
       ...form,
@@ -68,13 +75,11 @@ function AzureADEdit() {
   };
 
   const handleRevertAll = async () => {
-    const defaultValues = Object.assign(
-      ...Object.entries(azure).map(([key, value]) => ({
-        [key]: value.default,
-      }))
-    );
-    await submitForm(defaultValues);
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/azure/details');
   };
 
   const handleCancel = () => {
@@ -120,6 +125,7 @@ function AzureADEdit() {
                   config={azure.SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>
               <RevertFormActionGroup
                 onCancel={handleCancel}

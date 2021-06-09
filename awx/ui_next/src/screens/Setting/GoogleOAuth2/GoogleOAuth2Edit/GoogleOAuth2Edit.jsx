@@ -60,6 +60,13 @@ function GoogleOAuth2Edit() {
     null
   );
 
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('google-oauth2');
+    }, []),
+    null
+  );
+
   const handleSubmit = async form => {
     await submitForm({
       ...form,
@@ -79,13 +86,11 @@ function GoogleOAuth2Edit() {
   };
 
   const handleRevertAll = async () => {
-    const defaultValues = Object.assign(
-      ...Object.entries(googleOAuth2).map(([key, value]) => ({
-        [key]: value.default,
-      }))
-    );
-    await submitForm(defaultValues);
+    await revertAll();
+
     closeModal();
+
+    history.push('/settings/google_oauth2/details');
   };
 
   const handleCancel = () => {
@@ -148,6 +153,7 @@ function GoogleOAuth2Edit() {
                   config={googleOAuth2.SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>
               <RevertFormActionGroup
                 onCancel={handleCancel}

@@ -17,6 +17,7 @@ describe('<UIEdit />', () => {
   let history;
 
   beforeEach(() => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
@@ -62,7 +63,7 @@ describe('<UIEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -77,12 +78,8 @@ describe('<UIEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      CUSTOM_LOGIN_INFO: '',
-      CUSTOM_LOGO: '',
-      PENDO_TRACKING_STATE: 'off',
-    });
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('ui');
   });
 
   test('should successfully send request to api on form submission', async () => {

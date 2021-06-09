@@ -5,55 +5,57 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import ActivityStream from './ActivityStream';
 import { SettingsAPI } from '../../../api';
+import MiscAuthentication from './MiscAuthentication';
 
-jest.mock('../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    ACTIVITY_STREAM_ENABLED: true,
-    ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
-  },
-});
+jest.mock('../../../api');
 
-describe('<ActivityStream />', () => {
+describe('<MiscAuthentication />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {},
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();
     jest.clearAllMocks();
   });
 
-  test('should render activity stream details', async () => {
+  test('should render miscellaneous authentication details', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/settings/activity_stream/details'],
+      initialEntries: ['/settings/miscellaneous_authentication/details'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ActivityStream />, {
+      wrapper = mountWithContexts(<MiscAuthentication />, {
         context: { router: { history } },
       });
     });
-    expect(wrapper.find('ActivityStreamDetail').length).toBe(1);
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('MiscAuthenticationDetail').length).toBe(1);
   });
 
-  test('should render activity stream edit', async () => {
+  test('should render miscellaneous authentication edit', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/settings/activity_stream/edit'],
+      initialEntries: ['/settings/miscellaneous_authentication/edit'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ActivityStream />, {
+      wrapper = mountWithContexts(<MiscAuthentication />, {
         context: { router: { history } },
       });
     });
-    expect(wrapper.find('ActivityStreamEdit').length).toBe(1);
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('MiscAuthenticationEdit').length).toBe(1);
   });
 
   test('should show content error when user navigates to erroneous route', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/settings/activity_stream/foo'],
+      initialEntries: ['/settings/miscellaneous_authentication/foo'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ActivityStream />, {
+      wrapper = mountWithContexts(<MiscAuthentication />, {
         context: { router: { history } },
       });
     });
@@ -62,10 +64,10 @@ describe('<ActivityStream />', () => {
 
   test('should redirect to details for users without system admin permissions', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/settings/activity_stream/edit'],
+      initialEntries: ['/settings/miscellaneous_authentication/edit'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ActivityStream />, {
+      wrapper = mountWithContexts(<MiscAuthentication />, {
         context: {
           router: {
             history,
@@ -79,7 +81,7 @@ describe('<ActivityStream />', () => {
       });
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    expect(wrapper.find('ActivityStreamDetail').length).toBe(1);
-    expect(wrapper.find('ActivityStreamEdit').length).toBe(0);
+    expect(wrapper.find('MiscAuthenticationDetail').length).toBe(1);
+    expect(wrapper.find('MiscAuthenticationEdit').length).toBe(0);
   });
 });

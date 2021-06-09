@@ -17,6 +17,7 @@ describe('<GoogleOAuth2Edit />', () => {
   let history;
 
   beforeEach(() => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
@@ -82,7 +83,7 @@ describe('<GoogleOAuth2Edit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -97,15 +98,8 @@ describe('<GoogleOAuth2Edit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: '',
-      SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: '',
-      SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: [],
-      SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS: {},
-      SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP: null,
-      SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP: null,
-    });
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('google-oauth2');
   });
 
   test('should successfully send request to api on form submission', async () => {

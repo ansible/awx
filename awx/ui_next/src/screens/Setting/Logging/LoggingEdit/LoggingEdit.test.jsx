@@ -35,29 +35,6 @@ const mockSettings = {
   LOG_AGGREGATOR_MAX_DISK_USAGE_PATH: '/var/lib/awx',
   LOG_AGGREGATOR_RSYSLOGD_DEBUG: false,
 };
-const mockDefaultSettings = {
-  LOG_AGGREGATOR_HOST: null,
-  LOG_AGGREGATOR_PORT: null,
-  LOG_AGGREGATOR_TYPE: null,
-  LOG_AGGREGATOR_USERNAME: '',
-  LOG_AGGREGATOR_PASSWORD: '',
-  LOG_AGGREGATOR_LOGGERS: [
-    'awx',
-    'activity_stream',
-    'job_events',
-    'system_tracking',
-  ],
-  LOG_AGGREGATOR_INDIVIDUAL_FACTS: false,
-  LOG_AGGREGATOR_ENABLED: false,
-  LOG_AGGREGATOR_TOWER_UUID: '',
-  LOG_AGGREGATOR_PROTOCOL: 'https',
-  LOG_AGGREGATOR_TCP_TIMEOUT: 5,
-  LOG_AGGREGATOR_VERIFY_CERT: true,
-  LOG_AGGREGATOR_LEVEL: 'INFO',
-  LOG_AGGREGATOR_MAX_DISK_USAGE_GB: 1,
-  LOG_AGGREGATOR_MAX_DISK_USAGE_PATH: '/var/lib/awx',
-  LOG_AGGREGATOR_RSYSLOGD_DEBUG: false,
-};
 
 describe('<LoggingEdit />', () => {
   let wrapper;
@@ -68,6 +45,7 @@ describe('<LoggingEdit />', () => {
   });
 
   beforeEach(async () => {
+    SettingsAPI.revertCategory.mockResolvedValue({});
     SettingsAPI.updateAll.mockResolvedValue({});
     SettingsAPI.readCategory.mockResolvedValue({
       data: mockSettings,
@@ -227,7 +205,7 @@ describe('<LoggingEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -242,8 +220,8 @@ describe('<LoggingEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith(mockDefaultSettings);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('logging');
   });
 
   test('should successfully send request to api on form submission', async () => {

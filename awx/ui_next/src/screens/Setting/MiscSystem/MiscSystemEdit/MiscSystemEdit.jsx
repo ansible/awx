@@ -30,76 +30,33 @@ function MiscSystemEdit() {
 
   const { isLoading, error, request: fetchSystem, result: system } = useRequest(
     useCallback(async () => {
-      const { data } = await SettingsAPI.readCategory('all');
-      const {
-        OAUTH2_PROVIDER: {
-          ACCESS_TOKEN_EXPIRE_SECONDS,
-          REFRESH_TOKEN_EXPIRE_SECONDS,
-          AUTHORIZATION_CODE_EXPIRE_SECONDS,
-        },
-        ...pluckedSystemData
-      } = pluck(
+      const { data } = await SettingsAPI.readCategory('system');
+      const systemData = pluck(
         data,
-        'ALLOW_OAUTH2_FOR_EXTERNAL_USERS',
-        'AUTH_BASIC_ENABLED',
+        'ACTIVITY_STREAM_ENABLED',
+        'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC',
         'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
         'AUTOMATION_ANALYTICS_URL',
+        'AUTOMATION_ANALYTICS_LAST_ENTRIES',
         'INSIGHTS_TRACKING_STATE',
-        'LOGIN_REDIRECT_OVERRIDE',
         'MANAGE_ORGANIZATION_AUTH',
-        'DISABLE_LOCAL_AUTH',
-        'OAUTH2_PROVIDER',
         'ORG_ADMINS_CAN_SEE_ALL_USERS',
-        'REDHAT_PASSWORD',
         'REDHAT_USERNAME',
+        'REDHAT_PASSWORD',
+        'SUBSCRIPTIONS_USERNAME',
+        'SUBSCRIPTIONS_PASSWORD',
         'REMOTE_HOST_HEADERS',
-        'SESSIONS_PER_USER',
-        'SESSION_COOKIE_AGE',
         'TOWER_URL_BASE',
-        'DEFAULT_EXECUTION_ENVIRONMENT'
+        'DEFAULT_EXECUTION_ENVIRONMENT',
+        'PROXY_IP_ALLOWED_LIST'
       );
-
-      const systemData = {
-        ...pluckedSystemData,
-        ACCESS_TOKEN_EXPIRE_SECONDS,
-        REFRESH_TOKEN_EXPIRE_SECONDS,
-        AUTHORIZATION_CODE_EXPIRE_SECONDS,
-      };
-
-      const {
-        OAUTH2_PROVIDER: OAUTH2_PROVIDER_OPTIONS,
-        ...restOptions
-      } = options;
-
-      const systemOptions = {
-        ...restOptions,
-        ACCESS_TOKEN_EXPIRE_SECONDS: {
-          ...OAUTH2_PROVIDER_OPTIONS,
-          default: OAUTH2_PROVIDER_OPTIONS.default.ACCESS_TOKEN_EXPIRE_SECONDS,
-          type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: t`Access Token Expiration`,
-        },
-        REFRESH_TOKEN_EXPIRE_SECONDS: {
-          ...OAUTH2_PROVIDER_OPTIONS,
-          default: OAUTH2_PROVIDER_OPTIONS.default.REFRESH_TOKEN_EXPIRE_SECONDS,
-          type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: t`Refresh Token Expiration`,
-        },
-        AUTHORIZATION_CODE_EXPIRE_SECONDS: {
-          ...OAUTH2_PROVIDER_OPTIONS,
-          default:
-            OAUTH2_PROVIDER_OPTIONS.default.AUTHORIZATION_CODE_EXPIRE_SECONDS,
-          type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: t`Authorization Code Expiration`,
-        },
-      };
 
       const mergedData = {};
       Object.keys(systemData).forEach(key => {
-        if (!systemOptions[key]) {
+        if (!options[key]) {
           return;
         }
-        mergedData[key] = systemOptions[key];
+        mergedData[key] = options[key];
         mergedData[key].value = systemData[key];
       });
       return mergedData;
@@ -122,50 +79,29 @@ function MiscSystemEdit() {
     null
   );
 
-  const handleSubmit = async form => {
-    const {
-      ACCESS_TOKEN_EXPIRE_SECONDS,
-      REFRESH_TOKEN_EXPIRE_SECONDS,
-      AUTHORIZATION_CODE_EXPIRE_SECONDS,
-      ...formData
-    } = form;
+  const { error: revertError, request: revertAll } = useRequest(
+    useCallback(async () => {
+      await SettingsAPI.revertCategory('system');
+    }, []),
+    null
+  );
 
+  const handleSubmit = async form => {
     await submitForm({
-      ...formData,
-      REMOTE_HOST_HEADERS: formatJson(formData.REMOTE_HOST_HEADERS),
-      OAUTH2_PROVIDER: {
-        ACCESS_TOKEN_EXPIRE_SECONDS,
-        REFRESH_TOKEN_EXPIRE_SECONDS,
-        AUTHORIZATION_CODE_EXPIRE_SECONDS,
-      },
+      ...form,
+      PROXY_IP_ALLOWED_LIST: formatJson(form.PROXY_IP_ALLOWED_LIST),
+      REMOTE_HOST_HEADERS: formatJson(form.REMOTE_HOST_HEADERS),
       DEFAULT_EXECUTION_ENVIRONMENT:
-        formData.DEFAULT_EXECUTION_ENVIRONMENT?.id || null,
+        form.DEFAULT_EXECUTION_ENVIRONMENT?.id || null,
     });
   };
 
   const handleRevertAll = async () => {
-    const {
-      ACCESS_TOKEN_EXPIRE_SECONDS,
-      REFRESH_TOKEN_EXPIRE_SECONDS,
-      AUTHORIZATION_CODE_EXPIRE_SECONDS,
-      ...systemData
-    } = system;
+    await revertAll();
 
-    const defaultValues = {};
-    Object.entries(systemData).forEach(([key, value]) => {
-      defaultValues[key] = value.default;
-    });
-
-    await submitForm({
-      ...defaultValues,
-      OAUTH2_PROVIDER: {
-        ACCESS_TOKEN_EXPIRE_SECONDS: ACCESS_TOKEN_EXPIRE_SECONDS.default,
-        REFRESH_TOKEN_EXPIRE_SECONDS: REFRESH_TOKEN_EXPIRE_SECONDS.default,
-        AUTHORIZATION_CODE_EXPIRE_SECONDS:
-          AUTHORIZATION_CODE_EXPIRE_SECONDS.default,
-      },
-    });
     closeModal();
+
+    history.push('/settings/miscellaneous_system/details');
   };
 
   const handleCancel = () => {
@@ -226,6 +162,14 @@ function MiscSystemEdit() {
             return (
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
                 <FormColumnLayout>
+                  <BooleanField
+                    name="ACTIVITY_STREAM_ENABLED"
+                    config={system.ACTIVITY_STREAM_ENABLED}
+                  />
+                  <BooleanField
+                    name="ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC"
+                    config={system.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC}
+                  />
                   <ExecutionEnvironmentLookup
                     helperTextInvalid={
                       formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
@@ -268,52 +212,6 @@ function MiscSystemEdit() {
                     config={system.MANAGE_ORGANIZATION_AUTH}
                   />
                   <BooleanField
-                    name="DISABLE_LOCAL_AUTH"
-                    needsConfirmationModal
-                    modalTitle={t`Confirm Disable Local Authorization`}
-                    config={system.DISABLE_LOCAL_AUTH}
-                  />
-                  <InputField
-                    name="SESSION_COOKIE_AGE"
-                    config={system.SESSION_COOKIE_AGE}
-                    type="number"
-                    isRequired
-                  />
-                  <InputField
-                    name="SESSIONS_PER_USER"
-                    config={system.SESSIONS_PER_USER}
-                    type="number"
-                    isRequired
-                  />
-                  <BooleanField
-                    name="AUTH_BASIC_ENABLED"
-                    config={system.AUTH_BASIC_ENABLED}
-                  />
-                  <BooleanField
-                    name="ALLOW_OAUTH2_FOR_EXTERNAL_USERS"
-                    config={system.ALLOW_OAUTH2_FOR_EXTERNAL_USERS}
-                  />
-                  <InputField
-                    name="LOGIN_REDIRECT_OVERRIDE"
-                    config={system.LOGIN_REDIRECT_OVERRIDE}
-                    type="url"
-                  />
-                  <InputField
-                    name="ACCESS_TOKEN_EXPIRE_SECONDS"
-                    config={system.ACCESS_TOKEN_EXPIRE_SECONDS}
-                    type="number"
-                  />
-                  <InputField
-                    name="REFRESH_TOKEN_EXPIRE_SECONDS"
-                    config={system.REFRESH_TOKEN_EXPIRE_SECONDS}
-                    type="number"
-                  />
-                  <InputField
-                    name="AUTHORIZATION_CODE_EXPIRE_SECONDS"
-                    config={system.AUTHORIZATION_CODE_EXPIRE_SECONDS}
-                    type="number"
-                  />
-                  <BooleanField
                     name="INSIGHTS_TRACKING_STATE"
                     config={system.INSIGHTS_TRACKING_STATE}
                   />
@@ -326,6 +224,14 @@ function MiscSystemEdit() {
                     config={system.REDHAT_PASSWORD}
                   />
                   <InputField
+                    name="SUBSCRIPTIONS_USERNAME"
+                    config={system.SUBSCRIPTIONS_USERNAME}
+                  />
+                  <EncryptedField
+                    name="SUBSCRIPTIONS_PASSWORD"
+                    config={system.SUBSCRIPTIONS_PASSWORD}
+                  />
+                  <InputField
                     name="AUTOMATION_ANALYTICS_URL"
                     config={system.AUTOMATION_ANALYTICS_URL}
                     type="url"
@@ -336,12 +242,22 @@ function MiscSystemEdit() {
                     type="number"
                     isRequired
                   />
+                  <InputField
+                    name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
+                    config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}
+                  />
                   <ObjectField
                     name="REMOTE_HOST_HEADERS"
                     config={system.REMOTE_HOST_HEADERS}
                     isRequired
                   />
+                  <ObjectField
+                    name="PROXY_IP_ALLOWED_LIST"
+                    config={system.PROXY_IP_ALLOWED_LIST}
+                    isRequired
+                  />
                   {submitError && <FormSubmitError error={submitError} />}
+                  {revertError && <FormSubmitError error={revertError} />}
                 </FormColumnLayout>
                 <RevertFormActionGroup
                   onCancel={handleCancel}

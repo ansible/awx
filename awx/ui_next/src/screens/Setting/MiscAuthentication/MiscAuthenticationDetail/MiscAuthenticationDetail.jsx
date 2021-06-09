@@ -1,36 +1,27 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
-import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Button } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
 import { CardBody, CardActionsRow } from '../../../../components/Card';
 import ContentLoading from '../../../../components/ContentLoading';
 import ContentError from '../../../../components/ContentError';
 import { DetailList } from '../../../../components/DetailList';
 import RoutedTabs from '../../../../components/RoutedTabs';
-import useRequest from '../../../../util/useRequest';
 import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
+import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
 import { SettingDetail } from '../../shared';
 
-function ActivityStreamDetail() {
+function MiscAuthenticationDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: activityStream } = useRequest(
+  const { isLoading, error, request, result: authentication } = useRequest(
     useCallback(async () => {
-      const {
-        data: {
-          ACTIVITY_STREAM_ENABLED,
-          ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC,
-        },
-      } = await SettingsAPI.readCategory('system');
-      return {
-        ACTIVITY_STREAM_ENABLED,
-        ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC,
-      };
+      const { data } = await SettingsAPI.readCategory('authentication');
+      return data;
     }, []),
     null
   );
@@ -52,7 +43,7 @@ function ActivityStreamDetail() {
     },
     {
       name: t`Details`,
-      link: `/settings/activity_stream/details`,
+      link: `/settings/miscellaneous_authentication/details`,
       id: 0,
     },
   ];
@@ -63,9 +54,9 @@ function ActivityStreamDetail() {
       <CardBody>
         {isLoading && <ContentLoading />}
         {!isLoading && error && <ContentError error={error} />}
-        {!isLoading && activityStream && (
+        {!isLoading && authentication && (
           <DetailList>
-            {Object.keys(activityStream).map(key => {
+            {Object.keys(authentication).map(key => {
               const record = options?.[key];
               return (
                 <SettingDetail
@@ -75,7 +66,7 @@ function ActivityStreamDetail() {
                   label={record?.label}
                   type={record?.type}
                   unit={record?.unit}
-                  value={activityStream?.[key]}
+                  value={authentication?.[key]}
                 />
               );
             })}
@@ -84,10 +75,10 @@ function ActivityStreamDetail() {
         {me?.is_superuser && (
           <CardActionsRow>
             <Button
-              ouiaId="activity-stream-detail-edit-button"
+              ouiaId="authentication-detail-edit-button"
               aria-label={t`Edit`}
               component={Link}
-              to="/settings/activity_stream/edit"
+              to="/settings/miscellaneous_authentication/edit"
             >
               {t`Edit`}
             </Button>
@@ -98,4 +89,4 @@ function ActivityStreamDetail() {
   );
 }
 
-export default ActivityStreamDetail;
+export default MiscAuthenticationDetail;

@@ -18,84 +18,49 @@ import { sortNestedDetails, pluck } from '../../shared/settingUtils';
 
 function MiscSystemDetail() {
   const { me } = useConfig();
-  const { GET: allOptions } = useSettings();
+  const { GET: options } = useSettings();
 
   const { isLoading, error, request, result: system } = useRequest(
     useCallback(async () => {
-      const { data } = await SettingsAPI.readCategory('all');
-      let DEFAULT_EXECUTION_ENVIRONMENT = '';
+      const { data } = await SettingsAPI.readCategory('system');
       if (data.DEFAULT_EXECUTION_ENVIRONMENT) {
         const {
           data: { name },
         } = await ExecutionEnvironmentsAPI.readDetail(
           data.DEFAULT_EXECUTION_ENVIRONMENT
         );
-        DEFAULT_EXECUTION_ENVIRONMENT = name;
+        data.DEFAULT_EXECUTION_ENVIRONMENT = name;
       }
-      const {
-        OAUTH2_PROVIDER: {
-          ACCESS_TOKEN_EXPIRE_SECONDS,
-          REFRESH_TOKEN_EXPIRE_SECONDS,
-          AUTHORIZATION_CODE_EXPIRE_SECONDS,
-        },
-        ...pluckedSystemData
-      } = pluck(
+
+      const systemData = pluck(
         data,
-        'ALLOW_OAUTH2_FOR_EXTERNAL_USERS',
-        'AUTH_BASIC_ENABLED',
+        'ACTIVITY_STREAM_ENABLED',
+        'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC',
         'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
         'AUTOMATION_ANALYTICS_URL',
         'INSIGHTS_TRACKING_STATE',
-        'LOGIN_REDIRECT_OVERRIDE',
         'MANAGE_ORGANIZATION_AUTH',
-        'DISABLE_LOCAL_AUTH',
-        'OAUTH2_PROVIDER',
         'ORG_ADMINS_CAN_SEE_ALL_USERS',
-        'REDHAT_PASSWORD',
         'REDHAT_USERNAME',
-        'REMOTE_HOST_HEADERS',
-        'SESSIONS_PER_USER',
-        'SESSION_COOKIE_AGE',
+        'REDHAT_PASSWORD',
         'SUBSCRIPTIONS_USERNAME',
         'SUBSCRIPTIONS_PASSWORD',
-        'TOWER_URL_BASE'
+        'INSTALL_UUID',
+        'REMOTE_HOST_HEADERS',
+        'TOWER_URL_BASE',
+        'DEFAULT_EXECUTION_ENVIRONMENT',
+        'PROXY_IP_ALLOWED_LIST',
+        'AUTOMATION_ANALYTICS_LAST_GATHER',
+        'AUTOMATION_ANALYTICS_LAST_ENTRIES'
       );
-      const systemData = {
-        ...pluckedSystemData,
-        ACCESS_TOKEN_EXPIRE_SECONDS,
-        REFRESH_TOKEN_EXPIRE_SECONDS,
-        AUTHORIZATION_CODE_EXPIRE_SECONDS,
-        DEFAULT_EXECUTION_ENVIRONMENT,
-      };
-      const {
-        OAUTH2_PROVIDER: OAUTH2_PROVIDER_OPTIONS,
-        ...options
-      } = allOptions;
-      const systemOptions = {
-        ...options,
-        ACCESS_TOKEN_EXPIRE_SECONDS: {
-          ...OAUTH2_PROVIDER_OPTIONS,
-          type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: t`Access Token Expiration`,
-        },
-        REFRESH_TOKEN_EXPIRE_SECONDS: {
-          ...OAUTH2_PROVIDER_OPTIONS,
-          type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: t`Refresh Token Expiration`,
-        },
-        AUTHORIZATION_CODE_EXPIRE_SECONDS: {
-          ...OAUTH2_PROVIDER_OPTIONS,
-          type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: t`Authorization Code Expiration`,
-        },
-      };
+
       const mergedData = {};
       Object.keys(systemData).forEach(key => {
-        mergedData[key] = systemOptions[key];
+        mergedData[key] = options[key];
         mergedData[key].value = systemData[key];
       });
       return sortNestedDetails(mergedData);
-    }, [allOptions]),
+    }, [options]),
     null
   );
 
