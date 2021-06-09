@@ -42,49 +42,79 @@ describe('<ApplicationTokenListItem/>', () => {
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationTokenListItem
-          token={token}
-          detailUrl="/users/2/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ApplicationTokenListItem
+              token={token}
+              detailUrl="/users/2/details"
+              isSelected={false}
+              onSelect={() => {}}
+              rowIndex={1}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('ApplicationTokenListItem').length).toBe(1);
   });
+
   test('should render the proper data', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationTokenListItem
-          token={token}
-          detailUrl="/users/2/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ApplicationTokenListItem
+              token={token}
+              detailUrl="/users/2/details"
+              isSelected={false}
+              onSelect={() => {}}
+              rowIndex={1}
+            />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find('DataListCell[aria-label="token name"]').text()).toBe(
-      'admin'
-    );
-    expect(wrapper.find('DataListCell[aria-label="scope"]').text()).toBe(
-      'ScopeRead'
-    );
-    expect(wrapper.find('DataListCell[aria-label="expiration"]').text()).toBe(
-      'Expiration10/25/3019, 7:56:38 PM'
-    );
-    expect(wrapper.find('input#select-token-2').prop('checked')).toBe(false);
+    expect(
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
+    ).toBe('admin');
+    expect(
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
+    ).toBe('Read');
+    expect(
+      wrapper
+        .find('Td')
+        .at(3)
+        .text()
+    ).toBe('10/25/3019, 7:56:38 PM');
   });
+
   test('should be checked', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationTokenListItem
-          token={token}
-          detailUrl="/users/2/details"
-          isSelected
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ApplicationTokenListItem
+              token={token}
+              detailUrl="/users/2/details"
+              isSelected
+              onSelect={() => {}}
+              rowIndex={1}
+            />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find('input#select-token-2').prop('checked')).toBe(true);
+    expect(
+      wrapper
+        .find('Td')
+        .at(0)
+        .prop('select').isSelected
+    ).toBe(true);
   });
 });

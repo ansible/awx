@@ -1,10 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { ApplicationsAPI, TokensAPI } from '../../../api';
 import ApplicationTokenList from './ApplicationTokenList';
 
@@ -100,14 +97,16 @@ describe('<ApplicationTokenList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationTokenList />);
     });
-    await waitForElement(wrapper, 'ApplicationTokenList', el => el.length > 0);
+    wrapper.update();
+    expect(wrapper.find('ApplicationTokenList')).toHaveLength(1);
   });
+
   test('should have data fetched and render 2 rows', async () => {
     ApplicationsAPI.readTokens.mockResolvedValue(tokens);
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationTokenList />);
     });
-    await waitForElement(wrapper, 'ApplicationTokenList', el => el.length > 0);
+    wrapper.update();
     expect(wrapper.find('ApplicationTokenListItem').length).toBe(2);
     expect(ApplicationsAPI.readTokens).toBeCalled();
   });
@@ -117,15 +116,22 @@ describe('<ApplicationTokenList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationTokenList />);
     });
-    waitForElement(wrapper, 'ApplicationTokenList', el => el.length > 0);
-
-    wrapper
-      .find('input#select-token-2')
-      .simulate('change', tokens.data.results[0]);
-
     wrapper.update();
 
-    expect(wrapper.find('input#select-token-2').prop('checked')).toBe(true);
+    wrapper
+      .find('.pf-c-table__check')
+      .at(0)
+      .find('input')
+      .simulate('change', tokens.data.results[0]);
+    wrapper.update();
+
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .at(0)
+        .find('input')
+        .prop('checked')
+    ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
     );
@@ -153,8 +159,8 @@ describe('<ApplicationTokenList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationTokenList />);
     });
+    wrapper.update();
 
-    await waitForElement(wrapper, 'ApplicationTokenList', el => el.length > 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 
@@ -174,13 +180,23 @@ describe('<ApplicationTokenList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationTokenList />);
     });
-    waitForElement(wrapper, 'ApplicationTokenList', el => el.length > 0);
+    wrapper.update();
 
-    wrapper.find('input#select-token-2').simulate('change', 'a');
+    wrapper
+      .find('.pf-c-table__check')
+      .at(0)
+      .find('input')
+      .simulate('change', 'a');
 
     wrapper.update();
 
-    expect(wrapper.find('input#select-token-2').prop('checked')).toBe(true);
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .at(0)
+        .find('input')
+        .prop('checked')
+    ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
     );
@@ -191,7 +207,9 @@ describe('<ApplicationTokenList/>', () => {
       wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
     );
     wrapper.update();
-    expect(wrapper.find('ErrorDetail').length).toBe(1);
+
+    expect(!!wrapper.find('AlertModal').prop('isOpen')).toEqual(true);
+    expect(wrapper.find('ErrorDetail')).toHaveLength(1);
   });
 
   test('should not render add button', async () => {
@@ -200,7 +218,7 @@ describe('<ApplicationTokenList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationTokenList />);
     });
-    waitForElement(wrapper, 'ApplicationTokenList', el => el.length > 0);
+    wrapper.update();
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 });

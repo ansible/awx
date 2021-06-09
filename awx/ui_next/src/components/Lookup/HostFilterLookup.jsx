@@ -18,7 +18,7 @@ import ChipGroup from '../ChipGroup';
 import Popover from '../Popover';
 import DataListToolbar from '../DataListToolbar';
 import LookupErrorMessage from './shared/LookupErrorMessage';
-import PaginatedDataList from '../PaginatedDataList';
+import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 import HostListItem from './HostListItem';
 import { HostsAPI } from '../../api';
 import { getQSConfig, mergeParams, parseQueryString } from '../../util/qs';
@@ -352,20 +352,20 @@ function HostFilterLookup({
         ]}
       >
         <ModalList>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={error}
             hasContentLoading={isLoading}
             itemCount={count}
             items={hosts}
-            onRowClick={() => {}}
             pluralizedItemName={t`hosts`}
             qsConfig={QS_CONFIG}
-            renderItem={item => (
-              <HostListItem
-                key={item.id}
-                item={{ ...item, url: `/hosts/${item.id}/details` }}
-              />
-            )}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Inventory`}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={item => <HostListItem key={item.id} item={item} />}
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
@@ -375,20 +375,6 @@ function HostFilterLookup({
               />
             )}
             toolbarSearchColumns={searchColumns}
-            toolbarSortColumns={[
-              {
-                name: t`Name`,
-                key: 'name',
-              },
-              {
-                name: t`Created`,
-                key: 'created',
-              },
-              {
-                name: t`Modified`,
-                key: 'modified',
-              },
-            ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
           />

@@ -11,14 +11,18 @@ describe('<InventoryGroupHostListItem />', () => {
 
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <InventoryGroupHostListItem
-        detailUrl="/host/1"
-        editUrl="/host/1"
-        host={mockHost}
-        isSelected={false}
-        onSelect={() => {}}
-        rowIndex={0}
-      />
+      <table>
+        <tbody>
+          <InventoryGroupHostListItem
+            detailUrl="/host/1"
+            editUrl="/host/1"
+            host={mockHost}
+            isSelected={false}
+            onSelect={() => {}}
+            rowIndex={0}
+          />
+        </tbody>
+      </table>
     );
   });
 
@@ -42,14 +46,18 @@ describe('<InventoryGroupHostListItem />', () => {
     const copyMockHost = Object.assign({}, mockHost);
     copyMockHost.summary_fields.user_capabilities.edit = false;
     wrapper = mountWithContexts(
-      <InventoryGroupHostListItem
-        detailUrl="/host/1"
-        editUrl="/host/1"
-        host={mockHost}
-        isSelected={false}
-        onSelect={() => {}}
-        rowIndex={0}
-      />
+      <table>
+        <tbody>
+          <InventoryGroupHostListItem
+            detailUrl="/host/1"
+            editUrl="/host/1"
+            host={mockHost}
+            isSelected={false}
+            onSelect={() => {}}
+            rowIndex={0}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });
