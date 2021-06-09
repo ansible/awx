@@ -13,11 +13,10 @@ import {
 } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
-import { BrandName } from '../../../variables';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import { TagMultiSelect } from '../../../components/MultiSelect';
 import useRequest from '../../../util/useRequest';
-
+import useBrandName from '../../../util/useBrandName';
 import FormActionGroup from '../../../components/FormActionGroup';
 import FormField, {
   CheckboxField,
@@ -67,6 +66,7 @@ function JobTemplateForm({
     Boolean(template.webhook_service)
   );
   const isMounted = useIsMounted();
+  const brandName = useBrandName();
 
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
@@ -567,7 +567,7 @@ function JobTemplateForm({
                         &nbsp;
                         <Popover
                           content={t`Enables creation of a provisioning
-                              callback URL. Using the URL a host can contact ${BrandName}
+                              callback URL. Using the URL a host can contact ${brandName.current}
                               and request a configuration update using this job
                               template.`}
                         />

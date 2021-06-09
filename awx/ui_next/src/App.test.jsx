@@ -1,12 +1,21 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../testUtils/enzymeHelpers';
+import { RootAPI } from './api';
 import * as SessionContext from './contexts/Session';
 import App from './App';
 
 jest.mock('./api');
 
 describe('<App />', () => {
+  beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
+  });
+
   test('renders ok', async () => {
     const contextValues = {
       setAuthRedirectTo: jest.fn(),

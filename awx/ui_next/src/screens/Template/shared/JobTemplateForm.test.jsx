@@ -15,6 +15,7 @@ import {
   CredentialsAPI,
   CredentialTypesAPI,
   InventoriesAPI,
+  RootAPI,
 } from '../../../api';
 
 jest.mock('../../../api');
@@ -95,6 +96,11 @@ describe('<JobTemplateForm />', () => {
   beforeEach(() => {
     consoleError = global.console.error;
     global.console.error = jest.fn();
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     LabelsAPI.read.mockReturnValue({
       data: mockData.summary_fields.labels,
     });

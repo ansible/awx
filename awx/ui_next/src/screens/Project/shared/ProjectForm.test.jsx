@@ -5,7 +5,7 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import ProjectForm from './ProjectForm';
-import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
+import { CredentialTypesAPI, ProjectsAPI, RootAPI } from '../../../api';
 
 jest.mock('../../../api');
 
@@ -81,6 +81,11 @@ describe('<ProjectForm />', () => {
   };
 
   beforeEach(async () => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     await ProjectsAPI.readOptions.mockImplementation(
       () => projectOptionsResolve
     );

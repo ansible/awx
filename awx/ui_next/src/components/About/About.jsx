@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { AboutModal } from '@patternfly/react-core';
-
-import { BrandName } from '../../variables';
+import useBrandName from '../../util/useBrandName';
 
 function About({ version, isOpen, onClose }) {
+  const brandName = useBrandName();
   const createSpeechBubble = () => {
-    let text = `${BrandName} ${version}`;
+    let text = `${brandName.current} ${version}`;
     let top = '';
     let bottom = '';
 
@@ -31,7 +31,7 @@ function About({ version, isOpen, onClose }) {
     <AboutModal
       isOpen={isOpen}
       onClose={onClose}
-      productName={`Ansible ${BrandName}`}
+      productName={`Ansible ${brandName.current}`}
       trademark={`${copyright} ${new Date().getFullYear()} ${redHatInc}`}
       brandImageSrc="/static/media/logo-header.svg"
       brandImageAlt={t`Brand Image`}

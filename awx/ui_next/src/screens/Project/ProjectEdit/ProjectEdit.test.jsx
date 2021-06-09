@@ -6,7 +6,7 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import ProjectEdit from './ProjectEdit';
-import { ProjectsAPI, CredentialTypesAPI } from '../../../api';
+import { ProjectsAPI, CredentialTypesAPI, RootAPI } from '../../../api';
 
 jest.mock('../../../api');
 
@@ -83,6 +83,11 @@ describe('<ProjectEdit />', () => {
   };
 
   beforeEach(async () => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     await ProjectsAPI.readOptions.mockImplementation(
       () => projectOptionsResolve
     );

@@ -205,6 +205,8 @@ msgstr "操作"
 #: screens/Host/HostList/HostListItem.jsx:42
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:246
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:77
+#: screens/InstanceGroup/Instances/InstanceList.jsx:215
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:153
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:213
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:48
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.jsx:39
@@ -225,8 +227,8 @@ msgstr "操作"
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:118
 #: screens/Organization/OrganizationList/OrganizationList.jsx:155
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:68
-#: screens/Project/ProjectList/ProjectList.jsx:172
-#: screens/Project/ProjectList/ProjectListItem.jsx:171
+#: screens/Project/ProjectList/ProjectList.jsx:211
+#: screens/Project/ProjectList/ProjectListItem.jsx:214
 #: screens/Team/TeamList/TeamList.jsx:151
 #: screens/Team/TeamList/TeamListItem.jsx:47
 #: screens/User/UserList/UserList.jsx:168
@@ -253,7 +255,7 @@ msgstr "活动"
 msgid "Activity Stream"
 msgstr "活动流"
 
-#: screens/Setting/SettingList.jsx:110
+#: screens/Setting/SettingList.jsx:105
 msgid "Activity Stream settings"
 msgstr "活动流设置"
 
@@ -282,15 +284,15 @@ msgstr "添加节点"
 msgid "Add Question"
 msgstr "添加问题"
 
-#: components/AddRole/AddResourceRole.jsx:184
+#: components/AddRole/AddResourceRole.jsx:183
 msgid "Add Roles"
 msgstr "添加角色"
 
-#: components/AddRole/AddResourceRole.jsx:181
+#: components/AddRole/AddResourceRole.jsx:180
 msgid "Add Team Roles"
 msgstr "添加团队角色"
 
-#: components/AddRole/AddResourceRole.jsx:178
+#: components/AddRole/AddResourceRole.jsx:177
 msgid "Add User Roles"
 msgstr "添加用户角色"
 
@@ -364,16 +366,16 @@ msgstr "添加工作流模板"
 msgid "Administration"
 msgstr "管理"
 
-#: components/DataListToolbar/DataListToolbar.jsx:85
-#: screens/Job/JobOutput/JobOutput.jsx:706
+#: components/DataListToolbar/DataListToolbar.jsx:86
+#: screens/Job/JobOutput/JobOutput.jsx:762
 msgid "Advanced"
 msgstr "高级"
 
-#: components/Search/AdvancedSearch.jsx:282
+#: components/Search/AdvancedSearch.jsx:285
 msgid "Advanced search documentation"
 msgstr ""
 
-#: components/Search/AdvancedSearch.jsx:264
+#: components/Search/AdvancedSearch.jsx:267
 msgid "Advanced search value input"
 msgstr "高级搜索值输入"
 
@@ -391,7 +393,7 @@ msgstr ""
 #~ msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 #~ msgstr "因 SCM 修订版本变更进行每次项目更新后，请在执行作业任务前从所选源刷新清单。这是面向静态内容，如 Ansible 清单 .ini 文件格式。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:508
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:504
 msgid "After number of occurrences"
 msgstr "发生次数后"
 
@@ -421,7 +423,7 @@ msgid "All jobs"
 msgstr ""
 
 #: components/PromptDetail/PromptProjectDetail.jsx:48
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:80
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:90
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:106
 msgid "Allow Branch Override"
 msgstr "允许分支覆写"
@@ -574,11 +576,11 @@ msgstr ""
 msgid "Approved by {0} - {1}"
 msgstr "于 {0} - {1} 批准"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:127
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:123
 msgid "April"
 msgstr "4 月"
 
-#: components/JobCancelButton/JobCancelButton.jsx:83
+#: components/JobCancelButton/JobCancelButton.jsx:87
 msgid "Are you sure you want to cancel this job?"
 msgstr ""
 
@@ -622,12 +624,12 @@ msgstr "您确定要从 {1} 中删除访问 {0} 吗？这样做会影响团队�
 msgid "Are you sure you want to remove {0} access from {username}?"
 msgstr "您确定要从 {username} 中删除 {0} 吗？"
 
-#: screens/Job/JobOutput/JobOutput.jsx:844
+#: screens/Job/JobOutput/JobOutput.jsx:909
 msgid "Are you sure you want to submit the request to cancel this job?"
 msgstr "您确定要提交取消此作业的请求吗？"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:106
-#: components/AdHocCommands/AdHocDetailsStep.jsx:108
+#: components/AdHocCommands/AdHocDetailsStep.jsx:101
+#: components/AdHocCommands/AdHocDetailsStep.jsx:103
 msgid "Arguments"
 msgstr "参数"
 
@@ -635,7 +637,7 @@ msgstr "参数"
 msgid "Artifacts"
 msgstr "工件"
 
-#: screens/InstanceGroup/Instances/InstanceList.jsx:181
+#: screens/InstanceGroup/Instances/InstanceList.jsx:185
 #: screens/User/UserTeams/UserTeamList.jsx:215
 msgid "Associate"
 msgstr "关联"
@@ -653,11 +655,11 @@ msgstr "关联模态"
 msgid "At least one value must be selected for this field."
 msgstr "此字段至少选择一个值。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:147
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:143
 msgid "August"
 msgstr "8 月"
 
-#: screens/Setting/SettingList.jsx:55
+#: screens/Setting/SettingList.jsx:50
 msgid "Authentication"
 msgstr "身份验证"
 
@@ -671,7 +673,7 @@ msgstr "授权代码过期"
 msgid "Authorization grant type"
 msgstr "授权授予类型"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:161
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:121
 msgid "Auto"
 msgstr "Auto"
 
@@ -679,12 +681,12 @@ msgstr "Auto"
 msgid "Azure AD"
 msgstr "Azure AD"
 
-#: screens/Setting/SettingList.jsx:60
+#: screens/Setting/SettingList.jsx:55
 msgid "Azure AD settings"
 msgstr "Azure AD 设置"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:125
-#: components/AddRole/AddResourceRole.jsx:285
+#: components/AddRole/AddResourceRole.jsx:284
 #: components/LaunchPrompt/LaunchPrompt.jsx:133
 #: components/Schedule/shared/SchedulePromptableFields.jsx:136
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:90
@@ -800,7 +802,7 @@ msgstr "返回到实例组"
 msgid "Back to management jobs"
 msgstr "返回到管理作业"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:69
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:64
 msgid ""
 "Base path used for locating playbooks. Directories\n"
 "found inside this path will be listed in the playbook directory drop-down.\n"
@@ -844,13 +846,13 @@ msgstr ""
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
 msgstr ""
 
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:184
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:127
 msgid "CPU {0}"
 msgstr ""
 
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:102
 #: components/PromptDetail/PromptProjectDetail.jsx:95
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:166
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:201
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:124
 msgid "Cache Timeout"
 msgstr "缓存超时"
@@ -864,7 +866,7 @@ msgid "Cache timeout (seconds)"
 msgstr "缓存超时（秒）"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:126
-#: components/AddRole/AddResourceRole.jsx:286
+#: components/AddRole/AddResourceRole.jsx:285
 #: components/AssociateModal/AssociateModal.jsx:116
 #: components/AssociateModal/AssociateModal.jsx:121
 #: components/DeleteButton/DeleteButton.jsx:121
@@ -878,8 +880,8 @@ msgstr "缓存超时（秒）"
 #: components/Lookup/Lookup.jsx:186
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:281
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.jsx:38
-#: components/Schedule/shared/ScheduleForm.jsx:633
-#: components/Schedule/shared/ScheduleForm.jsx:638
+#: components/Schedule/shared/ScheduleForm.jsx:625
+#: components/Schedule/shared/ScheduleForm.jsx:630
 #: components/Schedule/shared/SchedulePromptableFields.jsx:137
 #: screens/Credential/shared/CredentialForm.jsx:342
 #: screens/Credential/shared/CredentialForm.jsx:347
@@ -914,23 +916,23 @@ msgstr "取消"
 msgid "Cancel Inventory Source Sync"
 msgstr ""
 
-#: components/JobCancelButton/JobCancelButton.jsx:49
-#: screens/Job/JobOutput/JobOutput.jsx:820
-#: screens/Job/JobOutput/JobOutput.jsx:821
+#: components/JobCancelButton/JobCancelButton.jsx:53
+#: screens/Job/JobOutput/JobOutput.jsx:885
+#: screens/Job/JobOutput/JobOutput.jsx:886
 msgid "Cancel Job"
 msgstr "取消作业"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:208
-#: screens/Project/ProjectList/ProjectListItem.jsx:179
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:243
+#: screens/Project/ProjectList/ProjectListItem.jsx:222
 msgid "Cancel Project Sync"
 msgstr ""
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:210
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:245
 msgid "Cancel Sync"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:828
-#: screens/Job/JobOutput/JobOutput.jsx:831
+#: screens/Job/JobOutput/JobOutput.jsx:893
+#: screens/Job/JobOutput/JobOutput.jsx:896
 msgid "Cancel job"
 msgstr "取消作业"
 
@@ -1007,27 +1009,32 @@ msgstr ""
 msgid "Capacity"
 msgstr "容量"
 
-#: components/Search/AdvancedSearch.jsx:185
+#: screens/InstanceGroup/Instances/InstanceList.jsx:213
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:125
+msgid "Capacity Adjustment"
+msgstr ""
+
+#: components/Search/AdvancedSearch.jsx:188
 msgid "Case-insensitive version of contains"
 msgstr "包含不区分大小写的版本。"
 
-#: components/Search/AdvancedSearch.jsx:209
+#: components/Search/AdvancedSearch.jsx:212
 msgid "Case-insensitive version of endswith."
 msgstr "结尾不区分大小写的版本。"
 
-#: components/Search/AdvancedSearch.jsx:173
+#: components/Search/AdvancedSearch.jsx:176
 msgid "Case-insensitive version of exact."
 msgstr "完全相同不区分大小写的版本。"
 
-#: components/Search/AdvancedSearch.jsx:221
+#: components/Search/AdvancedSearch.jsx:224
 msgid "Case-insensitive version of regex."
 msgstr "regex 不区分大小写的版本。"
 
-#: components/Search/AdvancedSearch.jsx:197
+#: components/Search/AdvancedSearch.jsx:200
 msgid "Case-insensitive version of startswith."
 msgstr "开头不区分大小写的版本。"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:75
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:70
 msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
@@ -1055,11 +1062,11 @@ msgstr "频道"
 msgid "Check"
 msgstr "检查"
 
-#: components/Search/AdvancedSearch.jsx:251
+#: components/Search/AdvancedSearch.jsx:254
 msgid "Check whether the given field or related object is null; expects a boolean value."
 msgstr "检查给定字段或相关对象是否为 null；需要布尔值。"
 
-#: components/Search/AdvancedSearch.jsx:257
+#: components/Search/AdvancedSearch.jsx:260
 msgid "Check whether the given field's value is present in the list provided; expects a comma-separated list of items."
 msgstr "检查给定字段的值是否出现在提供的列表中；需要一个以逗号分隔的项目列表。"
 
@@ -1071,7 +1078,7 @@ msgstr "选择 .json 文件"
 msgid "Choose a Notification Type"
 msgstr "选择通知类型"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:28
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:23
 msgid "Choose a Playbook Directory"
 msgstr "选择 Playbook 目录"
 
@@ -1088,7 +1095,7 @@ msgstr "选择 Webhook 服务"
 msgid "Choose a job type"
 msgstr "选择作业类型"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:86
+#: components/AdHocCommands/AdHocDetailsStep.jsx:81
 msgid "Choose a module"
 msgstr "选择模块"
 
@@ -1130,18 +1137,18 @@ msgstr "选择应用到所选资源的角色。请注意，所有选择的角色
 msgid "Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step."
 msgstr "选择将获得新角色的资源。您可以选择下一步中要应用的角色。请注意，此处选择的资源将接收下一步中选择的所有角色。"
 
-#: components/AddRole/AddResourceRole.jsx:194
+#: components/AddRole/AddResourceRole.jsx:193
 msgid "Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step."
 msgstr "选择将获得新角色的资源类型。例如，如果您想为一组用户添加新角色，请选择用户并点击下一步。您可以选择下一步中的具体资源。"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:40
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:72
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:82
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:72
 msgid "Clean"
 msgstr "清理"
 
-#: components/DataListToolbar/DataListToolbar.jsx:64
-#: screens/Job/JobOutput/JobOutput.jsx:750
+#: components/DataListToolbar/DataListToolbar.jsx:65
+#: screens/Job/JobOutput/JobOutput.jsx:806
 msgid "Clear all filters"
 msgstr "清除所有过滤器"
 
@@ -1265,11 +1272,11 @@ msgstr ""
 msgid "Confirm Password"
 msgstr "确认密码"
 
-#: components/JobCancelButton/JobCancelButton.jsx:65
+#: components/JobCancelButton/JobCancelButton.jsx:69
 msgid "Confirm cancel job"
 msgstr ""
 
-#: components/JobCancelButton/JobCancelButton.jsx:69
+#: components/JobCancelButton/JobCancelButton.jsx:73
 msgid "Confirm cancellation"
 msgstr ""
 
@@ -1365,7 +1372,7 @@ msgstr ""
 msgid "Convergence select"
 msgstr ""
 
-#: components/CopyButton/CopyButton.jsx:41
+#: components/CopyButton/CopyButton.jsx:38
 msgid "Copy"
 msgstr "复制"
 
@@ -1373,7 +1380,7 @@ msgstr "复制"
 msgid "Copy Credential"
 msgstr "复制凭证"
 
-#: components/CopyButton/CopyButton.jsx:48
+#: components/CopyButton/CopyButton.jsx:46
 msgid "Copy Error"
 msgstr "复制错误"
 
@@ -1389,7 +1396,7 @@ msgstr "复制清单"
 msgid "Copy Notification Template"
 msgstr "复制通知模板"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:211
+#: screens/Project/ProjectList/ProjectListItem.jsx:254
 msgid "Copy Project"
 msgstr "复制项目"
 
@@ -1397,7 +1404,8 @@ msgstr "复制项目"
 msgid "Copy Template"
 msgstr "复制模板"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:166
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:167
+#: screens/Project/ProjectList/ProjectListItem.jsx:99
 msgid "Copy full revision to clipboard."
 msgstr "将完整修订复制到剪贴板。"
 
@@ -1538,7 +1546,7 @@ msgid "Create user token"
 msgstr "创建用户令牌"
 
 #: components/Lookup/ApplicationLookup.jsx:115
-#: components/Lookup/HostFilterLookup.jsx:353
+#: components/Lookup/HostFilterLookup.jsx:359
 #: components/PromptDetail/PromptDetail.jsx:130
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:267
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:104
@@ -1561,7 +1569,7 @@ msgstr "创建用户令牌"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:315
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:105
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:111
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:182
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:217
 #: screens/Team/TeamDetail/TeamDetail.jsx:43
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:263
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:193
@@ -1574,7 +1582,7 @@ msgstr "已创建"
 
 #: components/AdHocCommands/AdHocCredentialStep.jsx:94
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:113
-#: components/AddRole/AddResourceRole.jsx:158
+#: components/AddRole/AddResourceRole.jsx:56
 #: components/AssociateModal/AssociateModal.jsx:145
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:176
 #: components/LaunchPrompt/steps/InventoryStep.jsx:89
@@ -1608,7 +1616,7 @@ msgstr "已创建"
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:93
 #: screens/Organization/OrganizationList/OrganizationList.jsx:140
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:125
-#: screens/Project/ProjectList/ProjectList.jsx:160
+#: screens/Project/ProjectList/ProjectList.jsx:199
 #: screens/Team/TeamList/TeamList.jsx:137
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:100
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:113
@@ -1726,11 +1734,11 @@ msgstr "自定义 pod 规格"
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:72
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:54
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:89
-#: screens/Project/ProjectList/ProjectListItem.jsx:131
+#: screens/Project/ProjectList/ProjectListItem.jsx:188
 msgid "Custom virtual environment {0} must be replaced by an execution environment."
 msgstr ""
 
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:52
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:53
 msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment."
 msgstr ""
 
@@ -1761,14 +1769,14 @@ msgstr "仪表板（所有活动）"
 msgid "Data retention period"
 msgstr "数据保留的周期"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:341
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:445
-#: components/Schedule/shared/ScheduleForm.jsx:162
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:337
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:441
+#: components/Schedule/shared/ScheduleForm.jsx:145
 msgid "Day"
 msgstr "天"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:263
-#: components/Schedule/shared/ScheduleForm.jsx:173
+#: components/Schedule/shared/ScheduleForm.jsx:156
 msgid "Days of Data to Keep"
 msgstr "要保留数据的天数"
 
@@ -1776,11 +1784,11 @@ msgstr "要保留数据的天数"
 msgid "Days remaining"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:698
+#: screens/Job/JobOutput/JobOutput.jsx:754
 msgid "Debug"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:167
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:163
 msgid "December"
 msgstr "12 月"
 
@@ -1789,7 +1797,7 @@ msgstr "12 月"
 msgid "Default"
 msgstr "默认"
 
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:25
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:26
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:195
 msgid "Default Execution Environment"
 msgstr ""
@@ -1804,7 +1812,7 @@ msgstr "默认回答"
 #~ msgid "Default choice must be answered from the choices listed."
 #~ msgstr "默认的选择必须从列出的选择中回答。"
 
-#: screens/Setting/SettingList.jsx:102
+#: screens/Setting/SettingList.jsx:97
 msgid "Define system-level features and functions"
 msgstr "定义系统级的特性和功能"
 
@@ -1838,7 +1846,7 @@ msgstr "定义系统级的特性和功能"
 #: screens/Job/JobDetail/JobDetail.jsx:401
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:352
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:168
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:227
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:262
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:78
 #: screens/Team/TeamDetail/TeamDetail.jsx:66
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:397
@@ -1898,7 +1906,7 @@ msgstr "删除通知"
 msgid "Delete Organization"
 msgstr "删除机构"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:221
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:256
 msgid "Delete Project"
 msgstr "删除项目"
 
@@ -1961,7 +1969,7 @@ msgid "Delete inventory source"
 msgstr "删除清单源"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:41
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:73
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:83
 msgid "Delete on Update"
 msgstr "更新时删除"
 
@@ -2002,7 +2010,7 @@ msgstr "已删除"
 #: components/TemplateList/TemplateList.jsx:268
 #: screens/Credential/CredentialList/CredentialList.jsx:194
 #: screens/Inventory/InventoryList/InventoryList.jsx:261
-#: screens/Project/ProjectList/ProjectList.jsx:230
+#: screens/Project/ProjectList/ProjectList.jsx:271
 msgid "Deletion Error"
 msgstr "删除错误"
 
@@ -2033,7 +2041,7 @@ msgstr "已拒绝 {0} - {1}"
 msgid "Deny"
 msgstr "拒绝"
 
-#: screens/Job/JobOutput/JobOutput.jsx:700
+#: screens/Job/JobOutput/JobOutput.jsx:756
 msgid "Deprecated"
 msgstr ""
 
@@ -2044,7 +2052,7 @@ msgstr ""
 #: components/PromptDetail/PromptDetail.jsx:110
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:256
 #: components/Schedule/ScheduleList/ScheduleList.jsx:186
-#: components/Schedule/shared/ScheduleForm.jsx:107
+#: components/Schedule/shared/ScheduleForm.jsx:104
 #: components/TemplateList/TemplateList.jsx:192
 #: components/TemplateList/TemplateListItem.jsx:227
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:67
@@ -2081,9 +2089,9 @@ msgstr ""
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:95
 #: screens/Organization/OrganizationList/OrganizationList.jsx:136
 #: screens/Organization/shared/OrganizationForm.jsx:65
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:132
-#: screens/Project/ProjectList/ProjectList.jsx:137
-#: screens/Project/ProjectList/ProjectListItem.jsx:230
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:142
+#: screens/Project/ProjectList/ProjectList.jsx:176
+#: screens/Project/ProjectList/ProjectListItem.jsx:273
 #: screens/Project/shared/ProjectForm.jsx:181
 #: screens/Team/TeamDetail/TeamDetail.jsx:34
 #: screens/Team/TeamList/TeamList.jsx:129
@@ -2255,7 +2263,7 @@ msgstr "从主机中解除关联组？"
 msgid "Disassociate host from group?"
 msgstr "从组中解除关联主机？"
 
-#: screens/InstanceGroup/Instances/InstanceList.jsx:190
+#: screens/InstanceGroup/Instances/InstanceList.jsx:194
 msgid "Disassociate instance from instance group?"
 msgstr "从实例组中解除关联实例？"
 
@@ -2365,7 +2373,7 @@ msgstr ""
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:132
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:151
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:155
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:200
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:235
 #: screens/Setting/ActivityStream/ActivityStreamDetail/ActivityStreamDetail.jsx:88
 #: screens/Setting/ActivityStream/ActivityStreamDetail/ActivityStreamDetail.jsx:92
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:80
@@ -2492,8 +2500,8 @@ msgstr "编辑通知模板"
 msgid "Edit Organization"
 msgstr "编辑机构"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:197
-#: screens/Project/ProjectList/ProjectListItem.jsx:202
+#: screens/Project/ProjectList/ProjectListItem.jsx:240
+#: screens/Project/ProjectList/ProjectListItem.jsx:245
 msgid "Edit Project"
 msgstr "编辑项目"
 
@@ -2644,14 +2652,18 @@ msgstr "启用外部日志记录"
 msgid "Enable log system tracking facts individually"
 msgstr "单独启用日志系统跟踪事实"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:224
-#: components/AdHocCommands/AdHocDetailsStep.jsx:227
+#: components/AdHocCommands/AdHocDetailsStep.jsx:219
+#: components/AdHocCommands/AdHocDetailsStep.jsx:222
 msgid "Enable privilege escalation"
 msgstr "启用权限升级"
 
+#: screens/Setting/SettingList.jsx:51
+msgid "Enable simplified login for your {0} applications"
+msgstr ""
+
 #: screens/Setting/SettingList.jsx:56
-msgid "Enable simplified login for your {brandName} applications"
-msgstr "为您的 {brandName} 应用启用简化的登录"
+#~ msgid "Enable simplified login for your {brandName} applications"
+#~ msgstr "为您的 {brandName} 应用启用简化的登录"
 
 #: screens/Template/shared/JobTemplateForm.jsx:589
 msgid "Enable webhook for this template."
@@ -2675,12 +2687,20 @@ msgstr "启用的变量"
 #: screens/Template/shared/JobTemplateForm.jsx:569
 msgid ""
 "Enables creation of a provisioning\n"
-"callback URL. Using the URL a host can contact {BrandName}\n"
+"callback URL. Using the URL a host can contact {0}\n"
 "and request a configuration update using this job\n"
 "template."
 msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:232
+#: screens/Template/shared/JobTemplateForm.jsx:569
+#~ msgid ""
+#~ "Enables creation of a provisioning\n"
+#~ "callback URL. Using the URL a host can contact {BrandName}\n"
+#~ "and request a configuration update using this job\n"
+#~ "template."
+#~ msgstr ""
+
+#: components/AdHocCommands/AdHocDetailsStep.jsx:227
 msgid ""
 "Enables creation of a provisioning\n"
 "callback URL. Using the URL a host can contact {brandName}\n"
@@ -2701,7 +2721,8 @@ msgstr ""
 msgid "Encrypted"
 msgstr "已加密"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:492
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:488
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:540
 msgid "End"
 msgstr "结束"
 
@@ -2710,10 +2731,10 @@ msgid "End User License Agreement"
 msgstr ""
 
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:550
-msgid "End date/time"
-msgstr "结束日期/时间"
+#~ msgid "End date/time"
+#~ msgstr "结束日期/时间"
 
-#: components/Schedule/shared/buildRuleObj.js:96
+#: components/Schedule/shared/buildRuleObj.js:99
 msgid "End did not match an expected value"
 msgstr "结束与预期值不匹配"
 
@@ -2741,7 +2762,7 @@ msgstr "使用 JSON 或 YAML 语法进行输入。示例语法请参阅 Ansible 
 #~ msgid "Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax."
 #~ msgstr ""
 
-#: screens/Inventory/shared/SmartInventoryForm.jsx:97
+#: screens/Inventory/shared/SmartInventoryForm.jsx:98
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
@@ -2871,10 +2892,14 @@ msgstr "使用 JSON 或 YAML 语法输入变量。使用单选按钮在两者之
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:124
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:133
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:268
-#: screens/Job/JobOutput/JobOutput.jsx:703
+#: screens/Job/JobOutput/JobOutput.jsx:759
 #: screens/Setting/shared/LoggingTestAlert.jsx:35
 msgid "Error"
 msgstr "错误"
+
+#: screens/Project/ProjectList/ProjectList.jsx:283
+msgid "Error fetching updated project"
+msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:415
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:144
@@ -2892,7 +2917,7 @@ msgid "Error saving the workflow!"
 msgstr ""
 
 #: components/AdHocCommands/AdHocCommands.jsx:105
-#: components/CopyButton/CopyButton.jsx:51
+#: components/CopyButton/CopyButton.jsx:49
 #: components/DeleteButton/DeleteButton.jsx:57
 #: components/HostToggle/HostToggle.jsx:70
 #: components/InstanceToggle/InstanceToggle.jsx:61
@@ -2919,8 +2944,8 @@ msgstr ""
 #: screens/Host/HostDetail/HostDetail.jsx:133
 #: screens/Host/HostGroups/HostGroupsList.jsx:245
 #: screens/Host/HostList/HostList.jsx:217
-#: screens/InstanceGroup/Instances/InstanceList.jsx:230
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:229
+#: screens/InstanceGroup/Instances/InstanceList.jsx:246
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:168
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:147
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:81
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:276
@@ -2944,9 +2969,10 @@ msgstr ""
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:163
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:177
 #: screens/Organization/OrganizationList/OrganizationList.jsx:205
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:235
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:270
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:197
-#: screens/Project/ProjectList/ProjectList.jsx:231
+#: screens/Project/ProjectList/ProjectList.jsx:272
+#: screens/Project/ProjectList/ProjectList.jsx:284
 #: screens/Project/shared/ProjectSyncButton.jsx:62
 #: screens/Team/TeamDetail/TeamDetail.jsx:74
 #: screens/Team/TeamList/TeamList.jsx:200
@@ -2981,7 +3007,7 @@ msgstr ""
 
 #: screens/ActivityStream/ActivityStream.jsx:256
 #: screens/ActivityStream/ActivityStreamListItem.jsx:46
-#: screens/Job/JobOutput/JobOutput.jsx:670
+#: screens/Job/JobOutput/JobOutput.jsx:726
 msgid "Event"
 msgstr "事件"
 
@@ -3001,7 +3027,7 @@ msgstr "事件摘要不可用"
 msgid "Events"
 msgstr "事件"
 
-#: components/Search/AdvancedSearch.jsx:167
+#: components/Search/AdvancedSearch.jsx:170
 msgid "Exact match (default lookup if not specified)."
 msgstr "完全匹配（如果没有指定，则默认查找）。"
 
@@ -3038,7 +3064,8 @@ msgid "Execute when the parent node results in a successful state."
 msgstr "当父节点具有成功状态时执行。"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:85
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:26
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:27
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:72
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:175
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:197
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:144
@@ -3069,6 +3096,10 @@ msgstr "执行节点"
 
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.jsx:34
 msgid "Execution environment image"
+msgstr ""
+
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:78
+msgid "Execution environment is missing or deleted."
 msgstr ""
 
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.jsx:27
@@ -3140,15 +3171,15 @@ msgstr "解释"
 msgid "External Secret Management System"
 msgstr "外部 Secret 管理系统"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:295
-#: components/AdHocCommands/AdHocDetailsStep.jsx:296
+#: components/AdHocCommands/AdHocDetailsStep.jsx:290
+#: components/AdHocCommands/AdHocDetailsStep.jsx:291
 msgid "Extra variables"
 msgstr "额外变量"
 
 #: components/Sparkline/Sparkline.jsx:35
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:43
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:97
-#: screens/Project/ProjectList/ProjectListItem.jsx:76
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:107
+#: screens/Project/ProjectList/ProjectListItem.jsx:77
 msgid "FINISHED:"
 msgstr "完成："
 
@@ -3204,7 +3235,7 @@ msgid "Failed to associate role"
 msgstr "关联角色失败"
 
 #: screens/Host/HostGroups/HostGroupsList.jsx:249
-#: screens/InstanceGroup/Instances/InstanceList.jsx:234
+#: screens/InstanceGroup/Instances/InstanceList.jsx:250
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:279
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:258
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.jsx:255
@@ -3216,8 +3247,8 @@ msgstr "关联失败。"
 msgid "Failed to cancel Inventory Source Sync"
 msgstr ""
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:209
-#: screens/Project/ProjectList/ProjectListItem.jsx:181
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:244
+#: screens/Project/ProjectList/ProjectListItem.jsx:224
 msgid "Failed to cancel Project Sync"
 msgstr ""
 
@@ -3247,7 +3278,7 @@ msgstr ""
 msgid "Failed to copy inventory."
 msgstr "复制清单失败。"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:219
+#: screens/Project/ProjectList/ProjectListItem.jsx:262
 msgid "Failed to copy project."
 msgstr "复制项目失败。"
 
@@ -3342,7 +3373,7 @@ msgstr "删除一个或多个通知模板失败。"
 msgid "Failed to delete one or more organizations."
 msgstr "删除一个或多个机构失败。"
 
-#: screens/Project/ProjectList/ProjectList.jsx:234
+#: screens/Project/ProjectList/ProjectList.jsx:275
 msgid "Failed to delete one or more projects."
 msgstr "删除一个或多个项目失败。"
 
@@ -3378,7 +3409,7 @@ msgstr "无法删除一个或多个工作流批准。"
 msgid "Failed to delete organization."
 msgstr "删除机构失败。"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:238
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:273
 msgid "Failed to delete project."
 msgstr "删除项目失败。"
 
@@ -3438,7 +3469,7 @@ msgstr "解除关联一个或多个组关联。"
 msgid "Failed to disassociate one or more hosts."
 msgstr "解除关联一个或多个主机失败。"
 
-#: screens/InstanceGroup/Instances/InstanceList.jsx:235
+#: screens/InstanceGroup/Instances/InstanceList.jsx:251
 msgid "Failed to disassociate one or more instances."
 msgstr "解除关联一个或多个实例失败。"
 
@@ -3449,6 +3480,10 @@ msgstr "解除关联一个或多个团队失败。"
 #: screens/Login/Login.jsx:213
 msgid "Failed to fetch custom login configuration settings.  System defaults will be shown instead."
 msgstr "获取自定义登录配置设置失败。系统默认设置会被显示。"
+
+#: screens/Project/ProjectList/ProjectList.jsx:287
+msgid "Failed to fetch the updated project data."
+msgstr ""
 
 #: components/AdHocCommands/AdHocCommands.jsx:113
 #: components/LaunchButton/LaunchButton.jsx:176
@@ -3500,7 +3535,7 @@ msgstr "切换通知失败。"
 msgid "Failed to toggle schedule."
 msgstr "切换调度失败。"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:233
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:172
 msgid "Failed to update capacity adjustment."
 msgstr ""
 
@@ -3527,15 +3562,15 @@ msgstr "失败"
 msgid "False"
 msgstr "false"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:117
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:113
 msgid "February"
 msgstr "2 月"
 
-#: components/Search/AdvancedSearch.jsx:179
+#: components/Search/AdvancedSearch.jsx:182
 msgid "Field contains value."
 msgstr "字段包含值。"
 
-#: components/Search/AdvancedSearch.jsx:203
+#: components/Search/AdvancedSearch.jsx:206
 msgid "Field ends with value."
 msgstr "字段以值结尾。"
 
@@ -3543,19 +3578,19 @@ msgstr "字段以值结尾。"
 msgid "Field for passing a custom Kubernetes or OpenShift Pod specification."
 msgstr "用于传递自定义 Kubernetes 或 OpenShift Pod 规格的字段。"
 
-#: components/Search/AdvancedSearch.jsx:215
+#: components/Search/AdvancedSearch.jsx:218
 msgid "Field matches the given regular expression."
 msgstr "字段与给出的正则表达式匹配。"
 
-#: components/Search/AdvancedSearch.jsx:191
+#: components/Search/AdvancedSearch.jsx:194
 msgid "Field starts with value."
 msgstr "字段以值开头。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:401
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:397
 msgid "Fifth"
 msgstr "第五"
 
-#: screens/Job/JobOutput/JobOutput.jsx:687
+#: screens/Job/JobOutput/JobOutput.jsx:743
 msgid "File Difference"
 msgstr ""
 
@@ -3577,12 +3612,12 @@ msgstr "完成时间"
 msgid "Finished"
 msgstr "完成"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:389
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:385
 msgid "First"
 msgstr "第一"
 
-#: components/AddRole/AddResourceRole.jsx:129
-#: components/AddRole/AddResourceRole.jsx:143
+#: components/AddRole/AddResourceRole.jsx:27
+#: components/AddRole/AddResourceRole.jsx:41
 #: components/ResourceAccessList/ResourceAccessList.jsx:132
 #: screens/User/UserDetail/UserDetail.jsx:65
 #: screens/User/UserList/UserList.jsx:127
@@ -3602,7 +3637,7 @@ msgstr "首次运行"
 msgid "First name"
 msgstr ""
 
-#: components/Search/AdvancedSearch.jsx:266
+#: components/Search/AdvancedSearch.jsx:269
 msgid "First, select a key"
 msgstr "首先，选择一个密钥"
 
@@ -3613,6 +3648,10 @@ msgstr "使图像与可用屏幕大小匹配"
 #: screens/Template/Survey/SurveyQuestionForm.jsx:95
 msgid "Float"
 msgstr "浮点值"
+
+#: screens/Job/JobOutput/JobOutput.jsx:827
+msgid "Follow"
+msgstr ""
 
 #: screens/Template/shared/JobTemplateForm.jsx:254
 msgid ""
@@ -3638,33 +3677,33 @@ msgstr ""
 msgid "For more information, refer to the"
 msgstr "有关详情请参阅"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:184
-#: components/AdHocCommands/AdHocDetailsStep.jsx:185
+#: components/AdHocCommands/AdHocDetailsStep.jsx:179
+#: components/AdHocCommands/AdHocDetailsStep.jsx:180
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:132
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:219
 #: screens/Template/shared/JobTemplateForm.jsx:425
 msgid "Forks"
 msgstr "分叉"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:399
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:395
 msgid "Fourth"
 msgstr "第六"
 
-#: components/Schedule/shared/ScheduleForm.jsx:183
+#: components/Schedule/shared/ScheduleForm.jsx:166
 msgid "Frequency Details"
 msgstr "频率详情"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:200
-#: components/Schedule/shared/buildRuleObj.js:69
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:196
+#: components/Schedule/shared/buildRuleObj.js:73
 msgid "Frequency did not match an expected value"
 msgstr "频率与预期值不匹配"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:297
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:293
 msgid "Fri"
 msgstr "周五"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:302
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:438
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:298
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:434
 msgid "Friday"
 msgstr "周五"
 
@@ -3677,7 +3716,7 @@ msgstr "Galaxy 凭证"
 msgid "Galaxy credentials must be owned by an Organization."
 msgstr "Galaxy 凭证必须属于机构。"
 
-#: screens/Job/JobOutput/JobOutput.jsx:695
+#: screens/Job/JobOutput/JobOutput.jsx:751
 msgid "Gathering Facts"
 msgstr ""
 
@@ -3692,7 +3731,7 @@ msgstr ""
 #: components/Lookup/ProjectLookup.jsx:136
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:89
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:158
-#: screens/Project/ProjectList/ProjectList.jsx:145
+#: screens/Project/ProjectList/ProjectList.jsx:184
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:98
 msgid "Git"
 msgstr "Git"
@@ -3732,7 +3771,7 @@ msgstr "GitHub Organization"
 msgid "GitHub Team"
 msgstr "GitHub Team"
 
-#: screens/Setting/SettingList.jsx:64
+#: screens/Setting/SettingList.jsx:59
 msgid "GitHub settings"
 msgstr "GitHub 设置"
 
@@ -3774,7 +3813,7 @@ msgstr "进入上一页"
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: screens/Setting/SettingList.jsx:68
+#: screens/Setting/SettingList.jsx:63
 msgid "Google OAuth 2 settings"
 msgstr "Google OAuth2 设置"
 
@@ -3796,11 +3835,11 @@ msgstr "Grafana API 密钥"
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
-#: components/Search/AdvancedSearch.jsx:227
+#: components/Search/AdvancedSearch.jsx:230
 msgid "Greater than comparison."
 msgstr "大于比较。"
 
-#: components/Search/AdvancedSearch.jsx:233
+#: components/Search/AdvancedSearch.jsx:236
 msgid "Greater than or equal to comparison."
 msgstr "大于或等于比较。"
 
@@ -3863,11 +3902,11 @@ msgstr "HipChat"
 msgid "Host"
 msgstr "主机"
 
-#: screens/Job/JobOutput/JobOutput.jsx:682
+#: screens/Job/JobOutput/JobOutput.jsx:738
 msgid "Host Async Failure"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:681
+#: screens/Job/JobOutput/JobOutput.jsx:737
 msgid "Host Async OK"
 msgstr ""
 
@@ -3885,11 +3924,11 @@ msgstr "主机计数"
 msgid "Host Details"
 msgstr "类型详情"
 
-#: screens/Job/JobOutput/JobOutput.jsx:673
+#: screens/Job/JobOutput/JobOutput.jsx:729
 msgid "Host Failed"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:676
+#: screens/Job/JobOutput/JobOutput.jsx:732
 msgid "Host Failure"
 msgstr ""
 
@@ -3902,27 +3941,27 @@ msgstr "主机过滤器"
 msgid "Host Name"
 msgstr "主机名"
 
-#: screens/Job/JobOutput/JobOutput.jsx:675
+#: screens/Job/JobOutput/JobOutput.jsx:731
 msgid "Host OK"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:680
+#: screens/Job/JobOutput/JobOutput.jsx:736
 msgid "Host Polling"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:686
+#: screens/Job/JobOutput/JobOutput.jsx:742
 msgid "Host Retry"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:677
+#: screens/Job/JobOutput/JobOutput.jsx:733
 msgid "Host Skipped"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:674
+#: screens/Job/JobOutput/JobOutput.jsx:730
 msgid "Host Started"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:678
+#: screens/Job/JobOutput/JobOutput.jsx:734
 msgid "Host Unreachable"
 msgstr ""
 
@@ -3986,7 +4025,7 @@ msgstr ""
 #~ msgid "Hosts used"
 #~ msgstr ""
 
-#: components/Schedule/shared/ScheduleForm.jsx:161
+#: components/Schedule/shared/ScheduleForm.jsx:144
 msgid "Hour"
 msgstr "小时"
 
@@ -4126,7 +4165,7 @@ msgstr ""
 #~ msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode."
 #~ msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:205
+#: components/AdHocCommands/AdHocDetailsStep.jsx:200
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode."
 msgstr "如果启用，显示 Ansible 任务所做的更改（在支持的情况下）。这等同于 Ansible 的 --diff 模式。"
 
@@ -4191,7 +4230,7 @@ msgstr ""
 #~ msgid "Image name"
 #~ msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:690
+#: screens/Job/JobOutput/JobOutput.jsx:746
 msgid "Including File"
 msgstr ""
 
@@ -4314,6 +4353,10 @@ msgstr "实例组"
 msgid "Instance group not found."
 msgstr "没有找到实例组"
 
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:147
+msgid "Instance group used capacity"
+msgstr ""
+
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:122
 msgid "Instance groups"
 msgstr "实例组"
@@ -4322,8 +4365,8 @@ msgstr "实例组"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:244
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:75
 #: screens/InstanceGroup/InstanceGroups.jsx:31
-#: screens/InstanceGroup/Instances/InstanceList.jsx:148
-#: screens/InstanceGroup/Instances/InstanceList.jsx:216
+#: screens/InstanceGroup/Instances/InstanceList.jsx:154
+#: screens/InstanceGroup/Instances/InstanceList.jsx:232
 msgid "Instances"
 msgstr "实例"
 
@@ -4331,7 +4374,7 @@ msgstr "实例"
 msgid "Integer"
 msgstr "整数"
 
-#: util/validators.jsx:67
+#: util/validators.jsx:87
 msgid "Invalid email address"
 msgstr "无效的电子邮件地址"
 
@@ -4342,6 +4385,10 @@ msgstr ""
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.jsx:149
 msgid "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
 msgstr "无效的链路目标。无法连接到子节点或祖先节点。不支持图形周期。"
+
+#: util/validators.jsx:32
+msgid "Invalid time format"
+msgstr ""
 
 #: screens/Login/Login.jsx:135
 msgid "Invalid username or password. Please try again."
@@ -4462,15 +4509,15 @@ msgstr "清单同步失败"
 #~ msgid "Isolated"
 #~ msgstr "已隔离"
 
-#: screens/Job/JobOutput/JobOutput.jsx:684
+#: screens/Job/JobOutput/JobOutput.jsx:740
 msgid "Item Failed"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:683
+#: screens/Job/JobOutput/JobOutput.jsx:739
 msgid "Item OK"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:685
+#: screens/Job/JobOutput/JobOutput.jsx:741
 msgid "Item Skipped"
 msgstr ""
 
@@ -4484,8 +4531,8 @@ msgstr "每页的项"
 
 #: components/Sparkline/Sparkline.jsx:28
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:36
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:90
-#: screens/Project/ProjectList/ProjectListItem.jsx:69
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:100
+#: screens/Project/ProjectList/ProjectListItem.jsx:70
 msgid "JOB ID:"
 msgstr "作业 ID："
 
@@ -4501,7 +4548,7 @@ msgstr "JSON 标签页"
 msgid "JSON:"
 msgstr "JSON："
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:112
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:108
 msgid "January"
 msgstr "1 月"
 
@@ -4512,15 +4559,15 @@ msgstr "作业"
 
 #: components/JobList/JobListItem.jsx:96
 #: screens/Job/JobDetail/JobDetail.jsx:388
-#: screens/Job/JobOutput/JobOutput.jsx:863
-#: screens/Job/JobOutput/JobOutput.jsx:864
+#: screens/Job/JobOutput/JobOutput.jsx:928
+#: screens/Job/JobOutput/JobOutput.jsx:929
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:137
 msgid "Job Cancel Error"
 msgstr "作业取消错误"
 
 #: screens/Job/JobDetail/JobDetail.jsx:410
-#: screens/Job/JobOutput/JobOutput.jsx:852
-#: screens/Job/JobOutput/JobOutput.jsx:853
+#: screens/Job/JobOutput/JobOutput.jsx:917
+#: screens/Job/JobOutput/JobOutput.jsx:918
 msgid "Job Delete Error"
 msgstr "作业删除错误"
 
@@ -4624,7 +4671,7 @@ msgstr "作业模板"
 #: screens/Inventory/SmartInventory.jsx:73
 #: screens/Job/Jobs.jsx:15
 #: screens/Job/Jobs.jsx:25
-#: screens/Setting/SettingList.jsx:90
+#: screens/Setting/SettingList.jsx:85
 #: screens/Setting/Settings.jsx:72
 #: screens/Template/Template.jsx:164
 #: screens/Template/Templates.jsx:46
@@ -4632,27 +4679,27 @@ msgstr "作业模板"
 msgid "Jobs"
 msgstr "作业"
 
-#: screens/Setting/SettingList.jsx:95
+#: screens/Setting/SettingList.jsx:90
 msgid "Jobs settings"
 msgstr "作业设置"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:142
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:138
 msgid "July"
 msgstr "7 月"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:137
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:133
 msgid "June"
 msgstr "6 月"
 
-#: components/Search/AdvancedSearch.jsx:132
+#: components/Search/AdvancedSearch.jsx:135
 msgid "Key"
 msgstr "密钥"
 
-#: components/Search/AdvancedSearch.jsx:123
+#: components/Search/AdvancedSearch.jsx:126
 msgid "Key select"
 msgstr "键选择"
 
-#: components/Search/AdvancedSearch.jsx:126
+#: components/Search/AdvancedSearch.jsx:129
 msgid "Key typeahead"
 msgstr "键 typeahead"
 
@@ -4689,7 +4736,7 @@ msgstr "LDAP 5"
 msgid "LDAP Default"
 msgstr "LDAP 默认"
 
-#: screens/Setting/SettingList.jsx:72
+#: screens/Setting/SettingList.jsx:67
 msgid "LDAP settings"
 msgstr "LDAP 设置"
 
@@ -4729,11 +4776,11 @@ msgstr "标签名称"
 msgid "Labels"
 msgstr "标签"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:402
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:398
 msgid "Last"
 msgstr "最后"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:116
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:126
 msgid "Last Job Status"
 msgstr ""
 
@@ -4759,7 +4806,7 @@ msgstr "最近登陆"
 #: screens/Job/JobDetail/JobDetail.jsx:330
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:320
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:110
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:187
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:222
 #: screens/Team/TeamDetail/TeamDetail.jsx:44
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:268
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:69
@@ -4767,8 +4814,8 @@ msgstr "最近登陆"
 msgid "Last Modified"
 msgstr "最后修改"
 
-#: components/AddRole/AddResourceRole.jsx:133
-#: components/AddRole/AddResourceRole.jsx:147
+#: components/AddRole/AddResourceRole.jsx:31
+#: components/AddRole/AddResourceRole.jsx:45
 #: components/ResourceAccessList/ResourceAccessList.jsx:136
 #: screens/User/UserDetail/UserDetail.jsx:66
 #: screens/User/UserList/UserList.jsx:131
@@ -4799,7 +4846,7 @@ msgstr "最后作业运行"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:258
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:142
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:51
-#: screens/Project/ProjectList/ProjectListItem.jsx:257
+#: screens/Project/ProjectList/ProjectListItem.jsx:300
 msgid "Last modified"
 msgstr "最后修改"
 
@@ -4808,7 +4855,7 @@ msgstr "最后修改"
 msgid "Last name"
 msgstr ""
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:262
+#: screens/Project/ProjectList/ProjectListItem.jsx:305
 msgid "Last used"
 msgstr ""
 
@@ -4854,7 +4901,7 @@ msgstr "启动工作流"
 msgid "Launch | {0}"
 msgstr ""
 
-#: components/DetailList/LaunchedByDetail.jsx:41
+#: components/DetailList/LaunchedByDetail.jsx:82
 msgid "Launched By"
 msgstr "启动者"
 
@@ -4882,11 +4929,11 @@ msgstr ""
 msgid "Legend"
 msgstr "图例"
 
-#: components/Search/AdvancedSearch.jsx:239
+#: components/Search/AdvancedSearch.jsx:242
 msgid "Less than comparison."
 msgstr "小于比较。"
 
-#: components/Search/AdvancedSearch.jsx:245
+#: components/Search/AdvancedSearch.jsx:248
 msgid "Less than or equal to comparison."
 msgstr "小于或等于比较。"
 
@@ -4900,8 +4947,8 @@ msgstr "小于或等于比较。"
 #~ msgid "License settings"
 #~ msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:164
-#: components/AdHocCommands/AdHocDetailsStep.jsx:165
+#: components/AdHocCommands/AdHocDetailsStep.jsx:159
+#: components/AdHocCommands/AdHocDetailsStep.jsx:160
 #: components/JobList/JobList.jsx:207
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:35
 #: components/PromptDetail/PromptDetail.jsx:186
@@ -4928,7 +4975,7 @@ msgstr "正在加载"
 msgid "Local Time Zone"
 msgstr "本地时区"
 
-#: components/Schedule/shared/ScheduleForm.jsx:138
+#: components/Schedule/shared/ScheduleForm.jsx:121
 msgid "Local time zone"
 msgstr "本地时区"
 
@@ -4944,7 +4991,7 @@ msgstr "日志聚合器测试发送成功。"
 msgid "Logging"
 msgstr "日志记录"
 
-#: screens/Setting/SettingList.jsx:114
+#: screens/Setting/SettingList.jsx:109
 msgid "Logging settings"
 msgstr "日志设置"
 
@@ -4959,21 +5006,21 @@ msgstr "退出"
 msgid "Lookup modal"
 msgstr "查找 modal"
 
-#: components/Search/AdvancedSearch.jsx:150
+#: components/Search/AdvancedSearch.jsx:153
 msgid "Lookup select"
 msgstr "查找选择"
 
-#: components/Search/AdvancedSearch.jsx:159
+#: components/Search/AdvancedSearch.jsx:162
 msgid "Lookup type"
 msgstr "查找类型"
 
-#: components/Search/AdvancedSearch.jsx:153
+#: components/Search/AdvancedSearch.jsx:156
 msgid "Lookup typeahead"
 msgstr "查找 typeahead"
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:34
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:88
-#: screens/Project/ProjectList/ProjectListItem.jsx:67
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:98
+#: screens/Project/ProjectList/ProjectListItem.jsx:68
 msgid "MOST RECENT SYNC"
 msgstr "最新同步"
 
@@ -5030,15 +5077,15 @@ msgstr "管理作业"
 #: components/PromptDetail/PromptProjectDetail.jsx:76
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:88
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:157
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:161
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:147
-#: screens/Project/ProjectList/ProjectList.jsx:144
-#: screens/Project/ProjectList/ProjectListItem.jsx:154
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:121
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:157
+#: screens/Project/ProjectList/ProjectList.jsx:183
+#: screens/Project/ProjectList/ProjectListItem.jsx:211
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:97
 msgid "Manual"
 msgstr "手动"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:122
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:118
 msgid "March"
 msgstr "3 月"
 
@@ -5060,7 +5107,7 @@ msgstr "最大值"
 msgid "Maximum length"
 msgstr "最大长度"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:132
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:128
 msgid "May"
 msgstr "5 月"
 
@@ -5113,7 +5160,7 @@ msgstr ""
 #~ msgid "Minimum percentage of all instances that will be automatically assigned to this group when new instances come online."
 #~ msgstr "新实例上线时将自动分配给此组的所有实例的最小百分比。"
 
-#: components/Schedule/shared/ScheduleForm.jsx:160
+#: components/Schedule/shared/ScheduleForm.jsx:143
 msgid "Minute"
 msgstr "分钟"
 
@@ -5121,7 +5168,7 @@ msgstr "分钟"
 msgid "Miscellaneous System"
 msgstr "杂项系统"
 
-#: screens/Setting/SettingList.jsx:106
+#: screens/Setting/SettingList.jsx:101
 msgid "Miscellaneous System settings"
 msgstr "杂项系统设置"
 
@@ -5130,11 +5177,12 @@ msgstr "杂项系统设置"
 msgid "Missing"
 msgstr "缺少"
 
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:49
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:50
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:75
 msgid "Missing resource"
 msgstr ""
 
-#: components/Lookup/HostFilterLookup.jsx:357
+#: components/Lookup/HostFilterLookup.jsx:363
 #: screens/Application/ApplicationTokens/ApplicationTokenList.jsx:131
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:119
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:115
@@ -5146,7 +5194,7 @@ msgstr "修改"
 
 #: components/AdHocCommands/AdHocCredentialStep.jsx:98
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:117
-#: components/AddRole/AddResourceRole.jsx:162
+#: components/AddRole/AddResourceRole.jsx:60
 #: components/AssociateModal/AssociateModal.jsx:149
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:180
 #: components/LaunchPrompt/steps/InventoryStep.jsx:93
@@ -5180,7 +5228,7 @@ msgstr "修改"
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:97
 #: screens/Organization/OrganizationList/OrganizationList.jsx:144
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:129
-#: screens/Project/ProjectList/ProjectList.jsx:156
+#: screens/Project/ProjectList/ProjectList.jsx:195
 #: screens/Team/TeamList/TeamList.jsx:141
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.jsx:104
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:109
@@ -5194,21 +5242,21 @@ msgstr "修改者（用户名）"
 msgid "Modified by (username)"
 msgstr "修改者（用户名）"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:63
+#: components/AdHocCommands/AdHocDetailsStep.jsx:58
 #: screens/Job/JobOutput/HostEventModal.jsx:131
 msgid "Module"
 msgstr "模块"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:257
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:253
 msgid "Mon"
 msgstr "周一"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:262
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:418
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:258
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:414
 msgid "Monday"
 msgstr "周一"
 
-#: components/Schedule/shared/ScheduleForm.jsx:164
+#: components/Schedule/shared/ScheduleForm.jsx:147
 msgid "Month"
 msgstr "月"
 
@@ -5246,8 +5294,8 @@ msgstr "多项选择选项"
 #: components/AdHocCommands/AdHocCredentialStep.jsx:104
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:108
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.jsx:123
-#: components/AddRole/AddResourceRole.jsx:153
-#: components/AddRole/AddResourceRole.jsx:169
+#: components/AddRole/AddResourceRole.jsx:51
+#: components/AddRole/AddResourceRole.jsx:67
 #: components/AssociateModal/AssociateModal.jsx:140
 #: components/AssociateModal/AssociateModal.jsx:155
 #: components/HostForm/HostForm.jsx:84
@@ -5265,7 +5313,7 @@ msgstr "多项选择选项"
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:161
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:168
 #: components/Lookup/HostFilterLookup.jsx:77
-#: components/Lookup/HostFilterLookup.jsx:349
+#: components/Lookup/HostFilterLookup.jsx:355
 #: components/Lookup/InstanceGroupsLookup.jsx:92
 #: components/Lookup/InstanceGroupsLookup.jsx:103
 #: components/Lookup/InventoryLookup.jsx:132
@@ -5291,7 +5339,7 @@ msgstr "多项选择选项"
 #: components/Schedule/ScheduleList/ScheduleList.jsx:161
 #: components/Schedule/ScheduleList/ScheduleList.jsx:181
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:77
-#: components/Schedule/shared/ScheduleForm.jsx:99
+#: components/Schedule/shared/ScheduleForm.jsx:96
 #: components/TemplateList/TemplateList.jsx:187
 #: components/TemplateList/TemplateList.jsx:220
 #: components/TemplateList/TemplateListItem.jsx:126
@@ -5347,8 +5395,10 @@ msgstr "多项选择选项"
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:50
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:240
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:63
-#: screens/InstanceGroup/Instances/InstanceList.jsx:155
-#: screens/InstanceGroup/Instances/InstanceList.jsx:162
+#: screens/InstanceGroup/Instances/InstanceList.jsx:161
+#: screens/InstanceGroup/Instances/InstanceList.jsx:168
+#: screens/InstanceGroup/Instances/InstanceList.jsx:209
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:117
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:45
 #: screens/InstanceGroup/shared/InstanceGroupForm.jsx:20
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:74
@@ -5401,12 +5451,12 @@ msgstr "多项选择选项"
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.jsx:66
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.jsx:81
 #: screens/Organization/shared/OrganizationForm.jsx:57
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:131
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:141
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:120
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:147
-#: screens/Project/ProjectList/ProjectList.jsx:132
-#: screens/Project/ProjectList/ProjectList.jsx:168
-#: screens/Project/ProjectList/ProjectListItem.jsx:122
+#: screens/Project/ProjectList/ProjectList.jsx:171
+#: screens/Project/ProjectList/ProjectList.jsx:207
+#: screens/Project/ProjectList/ProjectListItem.jsx:179
 #: screens/Project/shared/ProjectForm.jsx:173
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:147
 #: screens/Team/TeamDetail/TeamDetail.jsx:33
@@ -5446,7 +5496,7 @@ msgstr "名称"
 msgid "Navigation"
 msgstr "导航"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:497
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:493
 #: screens/Dashboard/shared/ChartTooltip.jsx:106
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:101
 msgid "Never"
@@ -5483,16 +5533,16 @@ msgstr "下一"
 msgid "Next Run"
 msgstr "下次运行"
 
-#: components/Search/Search.jsx:259
+#: components/Search/Search.jsx:260
 msgid "No"
 msgstr "否"
 
-#: screens/Job/JobOutput/JobOutput.jsx:691
+#: screens/Job/JobOutput/JobOutput.jsx:747
 msgid "No Hosts Matched"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:679
-#: screens/Job/JobOutput/JobOutput.jsx:692
+#: screens/Job/JobOutput/JobOutput.jsx:735
+#: screens/Job/JobOutput/JobOutput.jsx:748
 msgid "No Hosts Remaining"
 msgstr ""
 
@@ -5524,9 +5574,9 @@ msgstr "没有找到项。"
 msgid "No result found"
 msgstr "未找到结果"
 
-#: components/Search/AdvancedSearch.jsx:100
-#: components/Search/AdvancedSearch.jsx:136
-#: components/Search/AdvancedSearch.jsx:161
+#: components/Search/AdvancedSearch.jsx:101
+#: components/Search/AdvancedSearch.jsx:139
+#: components/Search/AdvancedSearch.jsx:164
 msgid "No results found"
 msgstr "没有找到结果"
 
@@ -5560,7 +5610,7 @@ msgstr "无"
 msgid "None (Run Once)"
 msgstr "无（运行一次）"
 
-#: components/Schedule/shared/ScheduleForm.jsx:159
+#: components/Schedule/shared/ScheduleForm.jsx:142
 msgid "None (run once)"
 msgstr "无（运行一次）"
 
@@ -5696,7 +5746,7 @@ msgstr "通知类型"
 msgid "Notifications"
 msgstr "通知"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:162
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:158
 msgid "November"
 msgstr "11月"
 
@@ -5707,15 +5757,15 @@ msgid "OK"
 msgstr "确定"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.jsx:42
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:531
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:527
 msgid "Occurrences"
 msgstr "发生次数"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:157
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:153
 msgid "October"
 msgstr "10 月"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:213
+#: components/AdHocCommands/AdHocDetailsStep.jsx:208
 #: components/HostToggle/HostToggle.jsx:56
 #: components/InstanceToggle/InstanceToggle.jsx:51
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:183
@@ -5733,7 +5783,7 @@ msgstr "10 月"
 msgid "Off"
 msgstr "关"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:212
+#: components/AdHocCommands/AdHocDetailsStep.jsx:207
 #: components/HostToggle/HostToggle.jsx:55
 #: components/InstanceToggle/InstanceToggle.jsx:50
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:183
@@ -5765,11 +5815,11 @@ msgstr "失败时"
 msgid "On Success"
 msgstr "成功时"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:519
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:515
 msgid "On date"
 msgstr "于日期"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:243
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:239
 msgid "On days"
 msgstr "于日"
 
@@ -5812,7 +5862,7 @@ msgstr "（可选）选择要用来向 Webhook 服务发回状态更新的凭证
 #: screens/Credential/shared/TypeInputsSubForm.jsx:47
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:62
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:245
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:164
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:199
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:67
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:260
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:190
@@ -5848,9 +5898,9 @@ msgstr "选项"
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:107
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:55
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:65
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:135
-#: screens/Project/ProjectList/ProjectListItem.jsx:236
-#: screens/Project/ProjectList/ProjectListItem.jsx:247
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:145
+#: screens/Project/ProjectList/ProjectListItem.jsx:279
+#: screens/Project/ProjectList/ProjectListItem.jsx:290
 #: screens/Team/TeamDetail/TeamDetail.jsx:36
 #: screens/Team/TeamList/TeamList.jsx:150
 #: screens/Team/TeamList/TeamListItem.jsx:38
@@ -5959,7 +6009,7 @@ msgstr "Pan 右"
 msgid "Pan Up"
 msgstr "Pan 上"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:266
+#: components/AdHocCommands/AdHocDetailsStep.jsx:261
 msgid "Pass extra command line changes. There are two ansible command line parameters:"
 msgstr "传递额外的命令行更改。有两个 ansible 命令行参数："
 
@@ -6041,7 +6091,7 @@ msgstr "Play"
 msgid "Play Count"
 msgstr "play 数量"
 
-#: screens/Job/JobOutput/JobOutput.jsx:696
+#: screens/Job/JobOutput/JobOutput.jsx:752
 msgid "Play Started"
 msgstr ""
 
@@ -6056,13 +6106,13 @@ msgstr "Playbook"
 msgid "Playbook Check"
 msgstr ""
 
-#: screens/Job/JobOutput/JobOutput.jsx:697
+#: screens/Job/JobOutput/JobOutput.jsx:753
 msgid "Playbook Complete"
 msgstr ""
 
 #: components/PromptDetail/PromptProjectDetail.jsx:103
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:179
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:85
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:214
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:80
 msgid "Playbook Directory"
 msgstr "Playbook 目录"
 
@@ -6073,7 +6123,7 @@ msgstr "Playbook 目录"
 msgid "Playbook Run"
 msgstr "Playbook 运行"
 
-#: screens/Job/JobOutput/JobOutput.jsx:688
+#: screens/Job/JobOutput/JobOutput.jsx:744
 msgid "Playbook Started"
 msgstr ""
 
@@ -6109,7 +6159,7 @@ msgstr "请添加 {pluralizedItemName} 来填充此列表"
 msgid "Please click the Start button to begin."
 msgstr "请点开始按钮开始。"
 
-#: util/validators.jsx:116
+#: util/validators.jsx:136
 msgid "Please enter a valid URL"
 msgstr "请输入有效的 URL。"
 
@@ -6121,7 +6171,7 @@ msgstr "请输入一个值。"
 msgid "Please log in"
 msgstr ""
 
-#: components/Schedule/shared/ScheduleForm.jsx:575
+#: components/Schedule/shared/ScheduleForm.jsx:567
 msgid "Please select a day number between 1 and 31."
 msgstr "选择的日数字应介于 1 到 31 之间。"
 
@@ -6133,7 +6183,7 @@ msgstr ""
 #~ msgid "Please select an Inventory or check the Prompt on Launch option."
 #~ msgstr "请选择一个清单或者选中“启动时提示”选项。"
 
-#: components/Schedule/shared/ScheduleForm.jsx:567
+#: components/Schedule/shared/ScheduleForm.jsx:559
 msgid "Please select an end date/time that comes after the start date/time."
 msgstr "请选择一个比开始日期/时间晚的结束日期/时间。"
 
@@ -6242,8 +6292,8 @@ msgid "Project"
 msgstr "项目"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:100
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:176
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:63
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:211
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:58
 msgid "Project Base Path"
 msgstr "项目基本路径"
 
@@ -6252,8 +6302,8 @@ msgstr "项目基本路径"
 msgid "Project Sync"
 msgstr "项目同步"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:207
-#: screens/Project/ProjectList/ProjectListItem.jsx:178
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:242
+#: screens/Project/ProjectList/ProjectListItem.jsx:221
 msgid "Project Sync Error"
 msgstr ""
 
@@ -6273,8 +6323,8 @@ msgstr "项目同步失败"
 #: routeConfig.jsx:73
 #: screens/ActivityStream/ActivityStream.jsx:165
 #: screens/Dashboard/Dashboard.jsx:103
-#: screens/Project/ProjectList/ProjectList.jsx:127
-#: screens/Project/ProjectList/ProjectList.jsx:195
+#: screens/Project/ProjectList/ProjectList.jsx:166
+#: screens/Project/ProjectList/ProjectList.jsx:234
 #: screens/Project/Projects.jsx:14
 #: screens/Project/Projects.jsx:24
 #: util/getRelatedResourceDeleteDetails.js:59
@@ -6287,8 +6337,8 @@ msgstr "项目"
 msgid "Promote Child Groups and Hosts"
 msgstr "提升子组和主机"
 
-#: components/Schedule/shared/ScheduleForm.jsx:625
-#: components/Schedule/shared/ScheduleForm.jsx:628
+#: components/Schedule/shared/ScheduleForm.jsx:617
+#: components/Schedule/shared/ScheduleForm.jsx:620
 msgid "Prompt"
 msgstr "提示"
 
@@ -6343,7 +6393,7 @@ msgstr ""
 msgid "Provide a value for this field or select the Prompt on launch option."
 msgstr "为这个字段输入值或者选择「启动时提示」选项。"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:270
+#: components/AdHocCommands/AdHocDetailsStep.jsx:265
 msgid ""
 "Provide key/value pairs using either\n"
 "YAML or JSON."
@@ -6401,11 +6451,11 @@ msgstr "问题"
 msgid "RADIUS"
 msgstr "RADIUS"
 
-#: screens/Setting/SettingList.jsx:76
+#: screens/Setting/SettingList.jsx:71
 msgid "RADIUS settings"
 msgstr "RADIUS 设置"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:201
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:143
 msgid "RAM {0}"
 msgstr ""
 
@@ -6440,7 +6490,7 @@ msgstr "接收者列表"
 #: components/Lookup/ProjectLookup.jsx:139
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:161
-#: screens/Project/ProjectList/ProjectList.jsx:148
+#: screens/Project/ProjectList/ProjectList.jsx:187
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:101
 msgid "Red Hat Insights"
 msgstr "Red Hat Insights"
@@ -6500,6 +6550,14 @@ msgstr "刷新令牌"
 msgid "Refresh Token Expiration"
 msgstr "刷新令牌过期"
 
+#: screens/Project/ProjectList/ProjectListItem.jsx:133
+msgid "Refresh for revision"
+msgstr ""
+
+#: screens/Project/ProjectList/ProjectListItem.jsx:135
+msgid "Refresh project revision"
+msgstr ""
+
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:117
 msgid "Regions"
 msgstr "区域"
@@ -6552,7 +6610,7 @@ msgstr "使用主机参数重新启动"
 #: components/Lookup/ProjectLookup.jsx:138
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:91
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:160
-#: screens/Project/ProjectList/ProjectList.jsx:147
+#: screens/Project/ProjectList/ProjectList.jsx:186
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:100
 msgid "Remote Archive"
 msgstr "远程归档"
@@ -6658,12 +6716,12 @@ msgstr ""
 #~ msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 #~ msgstr ""
 
-#: components/JobCancelButton/JobCancelButton.jsx:75
 #: components/JobCancelButton/JobCancelButton.jsx:79
+#: components/JobCancelButton/JobCancelButton.jsx:83
 #: components/JobList/JobListCancelButton.jsx:159
 #: components/JobList/JobListCancelButton.jsx:162
-#: screens/Job/JobOutput/JobOutput.jsx:837
-#: screens/Job/JobOutput/JobOutput.jsx:840
+#: screens/Job/JobOutput/JobOutput.jsx:902
+#: screens/Job/JobOutput/JobOutput.jsx:905
 msgid "Return"
 msgstr "返回"
 
@@ -6671,15 +6729,15 @@ msgstr "返回"
 msgid "Return to subscription management."
 msgstr ""
 
-#: components/Search/AdvancedSearch.jsx:118
+#: components/Search/AdvancedSearch.jsx:120
 msgid "Returns results that have values other than this one as well as other filters."
 msgstr "返回具有这个以外的值和其他过滤器的结果。"
 
-#: components/Search/AdvancedSearch.jsx:106
+#: components/Search/AdvancedSearch.jsx:107
 msgid "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
 msgstr "返回满足这个及其他过滤器的结果。如果没有进行选择，这是默认的集合类型。"
 
-#: components/Search/AdvancedSearch.jsx:112
+#: components/Search/AdvancedSearch.jsx:113
 msgid "Returns results that satisfy this one or any other filters."
 msgstr "返回满足这个或任何其他过滤器的结果。"
 
@@ -6711,8 +6769,8 @@ msgid "Revert to factory default."
 msgstr "恢复到工厂默认值。"
 
 #: screens/Job/JobDetail/JobDetail.jsx:219
-#: screens/Project/ProjectList/ProjectList.jsx:171
-#: screens/Project/ProjectList/ProjectListItem.jsx:156
+#: screens/Project/ProjectList/ProjectList.jsx:210
+#: screens/Project/ProjectList/ProjectListItem.jsx:213
 msgid "Revision"
 msgstr "修订"
 
@@ -6767,15 +6825,15 @@ msgstr "运行命令"
 msgid "Run command"
 msgstr "运行命令"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:215
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:211
 msgid "Run every"
 msgstr "运行每"
 
-#: components/Schedule/shared/ScheduleForm.jsx:154
+#: components/Schedule/shared/ScheduleForm.jsx:137
 msgid "Run frequency"
 msgstr "运行频率"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:329
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:325
 msgid "Run on"
 msgstr "运行于"
 
@@ -6789,16 +6847,17 @@ msgstr "运行类型"
 msgid "Running"
 msgstr "运行中"
 
-#: screens/Job/JobOutput/JobOutput.jsx:689
+#: screens/Job/JobOutput/JobOutput.jsx:745
 msgid "Running Handlers"
 msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:242
+#: screens/InstanceGroup/Instances/InstanceList.jsx:211
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:123
 msgid "Running Jobs"
 msgstr "运行作业"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:73
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:170
 msgid "Running jobs"
 msgstr "运行作业"
 
@@ -6806,7 +6865,7 @@ msgstr "运行作业"
 msgid "SAML"
 msgstr "SAML"
 
-#: screens/Setting/SettingList.jsx:80
+#: screens/Setting/SettingList.jsx:75
 msgid "SAML settings"
 msgstr "SAML 设置"
 
@@ -6834,27 +6893,27 @@ msgstr "开始"
 
 #: components/Sparkline/Sparkline.jsx:31
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:39
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:93
-#: screens/Project/ProjectList/ProjectListItem.jsx:72
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:103
+#: screens/Project/ProjectList/ProjectListItem.jsx:73
 msgid "STATUS:"
 msgstr "状态："
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:307
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:303
 msgid "Sat"
 msgstr "周六"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:312
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:443
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:308
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:439
 msgid "Saturday"
 msgstr "周六"
 
-#: components/AddRole/AddResourceRole.jsx:265
+#: components/AddRole/AddResourceRole.jsx:264
 #: components/AssociateModal/AssociateModal.jsx:106
 #: components/AssociateModal/AssociateModal.jsx:112
 #: components/FormActionGroup/FormActionGroup.jsx:14
 #: components/FormActionGroup/FormActionGroup.jsx:20
-#: components/Schedule/shared/ScheduleForm.jsx:611
-#: components/Schedule/shared/ScheduleForm.jsx:617
+#: components/Schedule/shared/ScheduleForm.jsx:603
+#: components/Schedule/shared/ScheduleForm.jsx:609
 #: components/Schedule/shared/useSchedulePromptSteps.js:45
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:117
 #: screens/Credential/shared/CredentialForm.jsx:317
@@ -6902,7 +6961,7 @@ msgstr "调度处于活跃状态。"
 msgid "Schedule is inactive"
 msgstr "调度处于非活跃状态。"
 
-#: components/Schedule/shared/ScheduleForm.jsx:531
+#: components/Schedule/shared/ScheduleForm.jsx:523
 msgid "Schedule is missing rrule"
 msgstr "调度缺少规则"
 
@@ -6953,26 +7012,26 @@ msgstr "滚动到前一个"
 msgid "Search"
 msgstr "搜索"
 
-#: screens/Job/JobOutput/JobOutput.jsx:757
+#: screens/Job/JobOutput/JobOutput.jsx:813
 msgid "Search is disabled while the job is running"
 msgstr ""
 
-#: components/Search/AdvancedSearch.jsx:275
-#: components/Search/Search.jsx:286
+#: components/Search/AdvancedSearch.jsx:278
+#: components/Search/Search.jsx:287
 msgid "Search submit button"
 msgstr "搜索提交按钮"
 
-#: components/Search/Search.jsx:275
+#: components/Search/Search.jsx:276
 msgid "Search text input"
 msgstr "搜索文本输入"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:393
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:389
 msgid "Second"
 msgstr "秒"
 
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:103
 #: components/PromptDetail/PromptProjectDetail.jsx:96
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:167
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:202
 msgid "Seconds"
 msgstr "秒"
 
@@ -7006,7 +7065,7 @@ msgstr "选择主机"
 msgid "Select Input"
 msgstr "选择输入"
 
-#: screens/InstanceGroup/Instances/InstanceList.jsx:221
+#: screens/InstanceGroup/Instances/InstanceList.jsx:237
 msgid "Select Instances"
 msgstr "选择实例"
 
@@ -7014,7 +7073,7 @@ msgstr "选择实例"
 msgid "Select Items"
 msgstr "选择项"
 
-#: components/AddRole/AddResourceRole.jsx:220
+#: components/AddRole/AddResourceRole.jsx:219
 msgid "Select Items from List"
 msgstr "从列表中选择项"
 
@@ -7022,7 +7081,7 @@ msgstr "从列表中选择项"
 msgid "Select Labels"
 msgstr ""
 
-#: components/AddRole/AddResourceRole.jsx:254
+#: components/AddRole/AddResourceRole.jsx:253
 msgid "Select Roles to Apply"
 msgstr "选择要应用的角色"
 
@@ -7038,7 +7097,7 @@ msgstr "选择一个 JSON 格式的服务帐户密钥来自动填充以下字段
 msgid "Select a Node Type"
 msgstr "选择节点类型"
 
-#: components/AddRole/AddResourceRole.jsx:190
+#: components/AddRole/AddResourceRole.jsx:189
 msgid "Select a Resource Type"
 msgstr "选择资源类型"
 
@@ -7076,7 +7135,7 @@ msgstr "选择要取消的作业"
 msgid "Select a metric"
 msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:79
+#: components/AdHocCommands/AdHocDetailsStep.jsx:74
 msgid "Select a module"
 msgstr "选择一个模块"
 
@@ -7111,17 +7170,16 @@ msgid "Select a subscription"
 msgstr ""
 
 #: components/Schedule/shared/ScheduleForm.jsx:84
-msgid "Select a valid date and time for this field"
-msgstr "为此字段选择有效日期和时间"
+#~ msgid "Select a valid date and time for this field"
+#~ msgstr "为此字段选择有效日期和时间"
 
 #: components/HostForm/HostForm.jsx:54
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:55
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:56
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:82
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:86
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:94
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:98
-#: components/Schedule/shared/ScheduleForm.jsx:88
-#: components/Schedule/shared/ScheduleForm.jsx:92
+#: components/Schedule/shared/ScheduleForm.jsx:85
+#: components/Schedule/shared/ScheduleForm.jsx:89
 #: screens/Credential/shared/CredentialForm.jsx:47
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:80
 #: screens/Inventory/shared/InventoryForm.jsx:71
@@ -7141,7 +7199,7 @@ msgstr "为此字段选择有效日期和时间"
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:444
 #: screens/Project/shared/ProjectForm.jsx:193
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.jsx:39
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:40
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:35
 #: screens/Team/shared/TeamForm.jsx:49
 #: screens/Template/Survey/SurveyQuestionForm.jsx:30
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:145
@@ -7153,7 +7211,7 @@ msgstr "为这个字段选择一个值"
 msgid "Select a webhook service."
 msgstr "选择 Webhook 服务。"
 
-#: components/DataListToolbar/DataListToolbar.jsx:73
+#: components/DataListToolbar/DataListToolbar.jsx:74
 #: screens/Template/Survey/SurveyToolbar.jsx:44
 msgid "Select all"
 msgstr "选择所有"
@@ -7196,7 +7254,7 @@ msgstr ""
 #~ msgid "Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking \"Prompt on launch\" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check \"Prompt on launch\", the selected credential(s) become the defaults that can be updated at run time."
 #~ msgstr "选择允许 Tower 访问将运行此作业的节点的凭证。每种类型您只能选择一个凭证。对于机器凭证 (SSH)，如果选中了“启动时提示”但未选择凭证，您需要在运行时选择机器凭证。如果选择了凭证并选中了“启动时提示”，则所选凭证将变为默认设置，可以在运行时更新。"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:88
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:83
 msgid ""
 "Select from the list of directories found in\n"
 "the Project Base Path. Together the base path and the playbook\n"
@@ -7245,7 +7303,7 @@ msgstr ""
 msgid "Select the Execution Environment you want this command to run inside."
 msgstr ""
 
-#: screens/Inventory/shared/SmartInventoryForm.jsx:90
+#: screens/Inventory/shared/SmartInventoryForm.jsx:91
 msgid "Select the Instance Groups for this Inventory to run on."
 msgstr "选择要运行此清单的实例组。"
 
@@ -7337,9 +7395,9 @@ msgstr ""
 msgid "Select {0}"
 msgstr "选择 {0}"
 
-#: components/AddRole/AddResourceRole.jsx:231
-#: components/AddRole/AddResourceRole.jsx:243
-#: components/AddRole/AddResourceRole.jsx:260
+#: components/AddRole/AddResourceRole.jsx:230
+#: components/AddRole/AddResourceRole.jsx:242
+#: components/AddRole/AddResourceRole.jsx:259
 #: components/AddRole/SelectRoleStep.jsx:27
 #: components/CheckboxListItem/CheckboxListItem.jsx:40
 #: components/OptionsList/OptionsList.jsx:49
@@ -7353,12 +7411,13 @@ msgstr "选择 {0}"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:55
 #: screens/Host/HostList/HostListItem.jsx:26
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:61
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:115
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:38
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:77
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.jsx:33
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:104
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:42
-#: screens/Project/ProjectList/ProjectListItem.jsx:120
+#: screens/Project/ProjectList/ProjectListItem.jsx:177
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:245
 #: screens/Team/TeamList/TeamListItem.jsx:31
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:57
@@ -7384,7 +7443,7 @@ msgstr "发件人电子邮件"
 msgid "Sender e-mail"
 msgstr "发件人电子邮件"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:152
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:148
 msgid "September"
 msgstr "9 月"
 
@@ -7401,7 +7460,7 @@ msgstr "为这个字段设置值"
 msgid "Set how many days of data should be retained."
 msgstr "设置数据应保留的天数。"
 
-#: screens/Setting/SettingList.jsx:121
+#: screens/Setting/SettingList.jsx:116
 msgid "Set preferences for data collection, logos, and logins"
 msgstr "为数据收集、日志和登录设置偏好"
 
@@ -7417,15 +7476,15 @@ msgstr "设置实例在线或离线。如果离线，则不会将作业分配给
 msgid "Set to Public or Confidential depending on how secure the client device is."
 msgstr "根据客户端设备的安全情况，设置为公共或机密。"
 
-#: components/Search/AdvancedSearch.jsx:98
+#: components/Search/AdvancedSearch.jsx:99
 msgid "Set type"
 msgstr "设置类型"
 
-#: components/Search/AdvancedSearch.jsx:89
+#: components/Search/AdvancedSearch.jsx:90
 msgid "Set type select"
 msgstr "设置类型选项"
 
-#: components/Search/AdvancedSearch.jsx:92
+#: components/Search/AdvancedSearch.jsx:93
 msgid "Set type typeahead"
 msgstr "设置类型 typeahead"
 
@@ -7470,8 +7529,8 @@ msgstr "显示更改"
 msgid "Show all groups"
 msgstr "显示所有组"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:201
-#: components/AdHocCommands/AdHocDetailsStep.jsx:202
+#: components/AdHocCommands/AdHocDetailsStep.jsx:196
+#: components/AdHocCommands/AdHocDetailsStep.jsx:197
 msgid "Show changes"
 msgstr "显示更改"
 
@@ -7639,7 +7698,7 @@ msgstr "源"
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:75
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:309
 #: screens/Job/JobDetail/JobDetail.jsx:215
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:150
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:185
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:217
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:138
 #: screens/Template/shared/JobTemplateForm.jsx:332
@@ -7651,7 +7710,7 @@ msgid "Source Control Branch/Tag/Commit"
 msgstr "源控制分支/标签/提交"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:83
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:154
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:189
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:58
 msgid "Source Control Credential"
 msgstr "源控制凭证"
@@ -7661,13 +7720,17 @@ msgid "Source Control Credential Type"
 msgstr "源控制凭证类型"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:80
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:151
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:186
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:50
 msgid "Source Control Refspec"
 msgstr "源控制 Refspec"
 
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:160
+msgid "Source Control Revision"
+msgstr ""
+
 #: components/PromptDetail/PromptProjectDetail.jsx:75
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:146
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:156
 msgid "Source Control Type"
 msgstr "源控制类型"
 
@@ -7675,8 +7738,8 @@ msgstr "源控制类型"
 #: components/PromptDetail/PromptProjectDetail.jsx:78
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:96
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:165
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:149
-#: screens/Project/ProjectList/ProjectList.jsx:152
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:184
+#: screens/Project/ProjectList/ProjectList.jsx:191
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:18
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:105
 msgid "Source Control URL"
@@ -7780,6 +7843,7 @@ msgstr "标准输出标签页"
 
 #: components/NotificationList/NotificationListItem.jsx:52
 #: components/NotificationList/NotificationListItem.jsx:53
+#: components/Schedule/shared/ScheduleForm.jsx:111
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.jsx:47
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.jsx:53
 msgid "Start"
@@ -7791,8 +7855,8 @@ msgid "Start Time"
 msgstr "开始时间"
 
 #: components/Schedule/shared/ScheduleForm.jsx:120
-msgid "Start date/time"
-msgstr "开始日期/时间"
+#~ msgid "Start date/time"
+#~ msgstr "开始日期/时间"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:379
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:108
@@ -7828,8 +7892,8 @@ msgstr "已开始"
 #: screens/Job/JobDetail/JobDetail.jsx:112
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:201
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:111
-#: screens/Project/ProjectList/ProjectList.jsx:169
-#: screens/Project/ProjectList/ProjectListItem.jsx:140
+#: screens/Project/ProjectList/ProjectList.jsx:208
+#: screens/Project/ProjectList/ProjectListItem.jsx:197
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:53
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:108
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:232
@@ -7837,7 +7901,7 @@ msgstr "已开始"
 msgid "Status"
 msgstr "状态"
 
-#: screens/Job/JobOutput/JobOutput.jsx:665
+#: screens/Job/JobOutput/JobOutput.jsx:721
 msgid "Stdout"
 msgstr ""
 
@@ -7857,7 +7921,7 @@ msgid ""
 "flag to git submodule update."
 msgstr ""
 
-#: screens/Setting/SettingList.jsx:131
+#: screens/Setting/SettingList.jsx:126
 #: screens/Setting/Settings.jsx:106
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:82
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:195
@@ -7880,7 +7944,7 @@ msgstr ""
 msgid "Subscription selection modal"
 msgstr ""
 
-#: screens/Setting/SettingList.jsx:136
+#: screens/Setting/SettingList.jsx:131
 msgid "Subscription settings"
 msgstr ""
 
@@ -7895,7 +7959,7 @@ msgstr ""
 #: components/Lookup/ProjectLookup.jsx:137
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:90
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:159
-#: screens/Project/ProjectList/ProjectList.jsx:146
+#: screens/Project/ProjectList/ProjectList.jsx:185
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:99
 msgid "Subversion"
 msgstr "Subversion"
@@ -7926,16 +7990,17 @@ msgstr "成功"
 msgid "Successful jobs"
 msgstr ""
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:167
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:166
+#: screens/Project/ProjectList/ProjectListItem.jsx:98
 msgid "Successfully copied to clipboard!"
 msgstr "成功复制至剪贴板！"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:247
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:243
 msgid "Sun"
 msgstr "周日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:252
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:413
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:248
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:409
 msgid "Sunday"
 msgstr "周日"
 
@@ -7973,7 +8038,7 @@ msgstr "可选的问卷调查问题"
 msgid "Sync"
 msgstr "同步"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:187
+#: screens/Project/ProjectList/ProjectListItem.jsx:230
 #: screens/Project/shared/ProjectSyncButton.jsx:39
 #: screens/Project/shared/ProjectSyncButton.jsx:50
 msgid "Sync Project"
@@ -7992,11 +8057,16 @@ msgstr "同步所有源"
 msgid "Sync error"
 msgstr "同步错误"
 
-#: screens/Project/ProjectList/ProjectListItem.jsx:160
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:178
+#: screens/Project/ProjectList/ProjectListItem.jsx:110
 msgid "Sync for revision"
 msgstr "修订版本同步"
 
-#: screens/Setting/SettingList.jsx:101
+#: screens/Project/ProjectList/ProjectListItem.jsx:123
+msgid "Syncing"
+msgstr ""
+
+#: screens/Setting/SettingList.jsx:96
 #: screens/User/UserRoles/UserRolesListItem.jsx:18
 msgid "System"
 msgstr "系统"
@@ -8015,7 +8085,7 @@ msgstr "系统管理员"
 msgid "System Auditor"
 msgstr "系统审核员"
 
-#: screens/Job/JobOutput/JobOutput.jsx:702
+#: screens/Job/JobOutput/JobOutput.jsx:758
 msgid "System Warning"
 msgstr ""
 
@@ -8028,7 +8098,7 @@ msgstr "系统管理员对所有资源的访问权限是不受限制的。"
 msgid "TACACS+"
 msgstr "TACACS+"
 
-#: screens/Setting/SettingList.jsx:84
+#: screens/Setting/SettingList.jsx:79
 msgid "TACACS+ settings"
 msgstr "TACACS+ 设置"
 
@@ -8093,7 +8163,7 @@ msgstr "任务"
 msgid "Task Count"
 msgstr "任务计数"
 
-#: screens/Job/JobOutput/JobOutput.jsx:693
+#: screens/Job/JobOutput/JobOutput.jsx:749
 msgid "Task Started"
 msgstr ""
 
@@ -8114,8 +8184,8 @@ msgstr "团队角色"
 msgid "Team not found."
 msgstr "未找到团队"
 
+#: components/AddRole/AddResourceRole.jsx:207
 #: components/AddRole/AddResourceRole.jsx:208
-#: components/AddRole/AddResourceRole.jsx:209
 #: routeConfig.jsx:104
 #: screens/ActivityStream/ActivityStream.jsx:182
 #: screens/Organization/Organization.jsx:125
@@ -8200,7 +8270,7 @@ msgstr "文本区"
 msgid "That value was not found. Please enter or select a valid value."
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:383
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:379
 msgid "The"
 msgstr "The"
 
@@ -8292,7 +8362,7 @@ msgstr ""
 #~ msgid "The number of parallel or simultaneous processes to use while executing the playbook. An empty value, or a value less than 1 will use the Ansible default which is usually 5. The default number of forks can be overwritten with a change to"
 #~ msgstr "执行 playbook 时使用的并行或同步进程数量。空值或小于 1 的值将使用 Ansible 默认值，通常为 5。要覆盖默认分叉数，可更改"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:188
+#: components/AdHocCommands/AdHocDetailsStep.jsx:183
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
 msgstr "执行 playbook 时使用的并行或同步进程数量。如果不输入值，则将使用 %s 配置文件 %s 中的默认值。您可以找到更多信息"
 
@@ -8301,9 +8371,22 @@ msgstr "执行 playbook 时使用的并行或同步进程数量。如果不输�
 msgid "The page you requested could not be found."
 msgstr "您请求的页面无法找到。"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:168
+#: components/AdHocCommands/AdHocDetailsStep.jsx:163
 msgid "The pattern used to target hosts in the inventory. Leaving the field blank, all, and * will all target all hosts in the inventory. You can find more information about Ansible's host patterns"
 msgstr "用于将字段保留为清单中的目标主机的模式。留空、所有和 * 将针对清单中的所有主机。您可以找到有关 Ansible 主机模式的更多信息"
+
+#: screens/Project/ProjectList/ProjectListItem.jsx:121
+msgid "The project is currently syncing and the revision will be available after the sync is complete."
+msgstr ""
+
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:176
+#: screens/Project/ProjectList/ProjectListItem.jsx:108
+msgid "The project must be synced before a revision is available."
+msgstr ""
+
+#: screens/Project/ProjectList/ProjectListItem.jsx:131
+msgid "The project revision is currently out of date.  Please refresh to fetch the most recent revision."
+msgstr ""
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:103
 #~ msgid "The registry location where the container is stored."
@@ -8329,15 +8412,25 @@ msgstr ""
 msgid "The tower instance group cannot be deleted."
 msgstr "tower 实例组不能被删除。"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:52
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:47
 msgid ""
 "There are no available playbook directories in {project_base_dir}.\n"
 "Either that directory is empty, or all of the contents are already\n"
 "assigned to other projects. Create a new directory there and make\n"
 "sure the playbook files can be read by the \"awx\" system user,\n"
-"or have {brandName} directly retrieve your playbooks from\n"
+"or have {0} directly retrieve your playbooks from\n"
 "source control using the Source Control Type option above."
 msgstr ""
+
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:52
+#~ msgid ""
+#~ "There are no available playbook directories in {project_base_dir}.\n"
+#~ "Either that directory is empty, or all of the contents are already\n"
+#~ "assigned to other projects. Create a new directory there and make\n"
+#~ "sure the playbook files can be read by the \"awx\" system user,\n"
+#~ "or have {brandName} directly retrieve your playbooks from\n"
+#~ "source control using the Source Control Type option above."
+#~ msgstr ""
 
 #: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:53
 #~ msgid "There are no available playbook directories in {project_base_dir}. Either that directory is empty, or all of the contents are already assigned to other projects. Create a new directory there and make sure the playbook files can be read by the \"awx\" system user, or have {brandName} directly retrieve your playbooks from source control using the Source Control Type option above."
@@ -8375,23 +8468,27 @@ msgstr "测试日志聚合器时出错。"
 #~ msgid "These approvals cannot be deleted due to insufficient permissions or a pending job status"
 #~ msgstr "由于权限不足或待处理的作业状态，无法删除这些批准"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:73
-msgid "These are the modules that {brandName} supports running commands against."
-msgstr "这些是 {brandName} 支持运行命令的模块。"
+#: components/AdHocCommands/AdHocDetailsStep.jsx:68
+msgid "These are the modules that {0} supports running commands against."
+msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:146
+#: components/AdHocCommands/AdHocDetailsStep.jsx:73
+#~ msgid "These are the modules that {brandName} supports running commands against."
+#~ msgstr "这些是 {brandName} 支持运行命令的模块。"
+
+#: components/AdHocCommands/AdHocDetailsStep.jsx:141
 msgid "These are the verbosity levels for standard out of the command run that are supported."
 msgstr "这些是支持的标准运行命令运行的详细程度。"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:129
+#: components/AdHocCommands/AdHocDetailsStep.jsx:124
 msgid "These arguments are used with the specified module."
 msgstr "这些参数与指定的模块一起使用。"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:118
+#: components/AdHocCommands/AdHocDetailsStep.jsx:113
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
 msgstr "这些参数与指定的模块一起使用。点击可以找到有关 {0} 的信息。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:395
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:391
 msgid "Third"
 msgstr "第三"
 
@@ -8483,7 +8580,7 @@ msgstr "除非设置了启用的变量，否则此字段会被忽略。如果启
 msgid "This field may not be blank"
 msgstr "此字段不得为空白"
 
-#: util/validators.jsx:100
+#: util/validators.jsx:120
 msgid "This field must be a number"
 msgstr "此字段必须是数字"
 
@@ -8491,16 +8588,16 @@ msgstr "此字段必须是数字"
 msgid "This field must be a number and have a value between {0} and {1}"
 msgstr "此字段必须是数字，且值介于 {0} 和 {1}"
 
-#: util/validators.jsx:40
+#: util/validators.jsx:60
 msgid "This field must be a number and have a value between {min} and {max}"
 msgstr "此字段必须是数字，且值介于 {min} 和 {max}"
 
-#: util/validators.jsx:140
+#: util/validators.jsx:160
 msgid "This field must be a regular expression"
 msgstr "此字段必须是正则表达式"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:48
-#: util/validators.jsx:84
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:49
+#: util/validators.jsx:104
 msgid "This field must be an integer"
 msgstr "此字段必须是整数。"
 
@@ -8508,11 +8605,11 @@ msgstr "此字段必须是整数。"
 msgid "This field must be at least {0} characters"
 msgstr "此字段必须至少为 {0} 个字符"
 
-#: util/validators.jsx:31
+#: util/validators.jsx:51
 msgid "This field must be at least {min} characters"
 msgstr "此字段必须至少为 {min} 个字符"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:51
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:52
 msgid "This field must be greater than 0"
 msgstr "此字段必须大于 0"
 
@@ -8520,12 +8617,12 @@ msgstr "此字段必须大于 0"
 #: screens/Template/shared/JobTemplateForm.jsx:150
 #: screens/User/shared/UserForm.jsx:80
 #: screens/User/shared/UserForm.jsx:91
-#: util/validators.jsx:4
-#: util/validators.jsx:49
+#: util/validators.jsx:5
+#: util/validators.jsx:69
 msgid "This field must not be blank"
 msgstr "此字段不能为空"
 
-#: util/validators.jsx:74
+#: util/validators.jsx:94
 msgid "This field must not contain spaces"
 msgstr "此字段不得包含空格"
 
@@ -8533,7 +8630,7 @@ msgstr "此字段不得包含空格"
 msgid "This field must not exceed {0} characters"
 msgstr "此字段不能超过 {0} 个字符"
 
-#: util/validators.jsx:22
+#: util/validators.jsx:42
 msgid "This field must not exceed {max} characters"
 msgstr "此字段不能超过 {max} 个字符"
 
@@ -8573,7 +8670,7 @@ msgstr ""
 msgid "This organization is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:225
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:260
 msgid "This project is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8620,12 +8717,12 @@ msgstr "此工作流没有配置任何节点。"
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:287
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:283
 msgid "Thu"
 msgstr "周四"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:292
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:433
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:288
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:429
 msgid "Thursday"
 msgstr "周四"
 
@@ -8776,6 +8873,8 @@ msgid "Top Pagination"
 msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:243
+#: screens/InstanceGroup/Instances/InstanceList.jsx:212
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:124
 msgid "Total Jobs"
 msgstr "作业总数"
 
@@ -8785,7 +8884,6 @@ msgid "Total Nodes"
 msgstr "节点总数"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:74
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:174
 msgid "Total jobs"
 msgstr "作业总数"
 
@@ -8794,7 +8892,7 @@ msgid "Track submodules"
 msgstr ""
 
 #: components/PromptDetail/PromptProjectDetail.jsx:43
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:75
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:85
 msgid "Track submodules latest commit on branch"
 msgstr ""
 
@@ -8813,12 +8911,12 @@ msgstr ""
 msgid "True"
 msgstr "True"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:267
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:263
 msgid "Tue"
 msgstr "周二"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:272
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:423
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:268
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:419
 msgid "Tuesday"
 msgstr "周二"
 
@@ -8849,7 +8947,8 @@ msgstr "Twilio"
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:55
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:241
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:68
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:159
+#: screens/InstanceGroup/Instances/InstanceList.jsx:210
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:120
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:79
 #: screens/Inventory/InventoryList/InventoryList.jsx:197
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:93
@@ -8860,9 +8959,9 @@ msgstr "Twilio"
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:114
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.jsx:68
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:155
-#: screens/Project/ProjectList/ProjectList.jsx:141
-#: screens/Project/ProjectList/ProjectList.jsx:170
-#: screens/Project/ProjectList/ProjectListItem.jsx:153
+#: screens/Project/ProjectList/ProjectList.jsx:180
+#: screens/Project/ProjectList/ProjectList.jsx:209
+#: screens/Project/ProjectList/ProjectListItem.jsx:210
 #: screens/Team/TeamRoles/TeamRoleListItem.jsx:17
 #: screens/Team/TeamRoles/TeamRolesList.jsx:182
 #: screens/Template/Survey/SurveyListItem.jsx:117
@@ -8885,7 +8984,7 @@ msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:84
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:48
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:111
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:78
 msgid "Unavailable"
 msgstr "不可用"
 
@@ -8893,6 +8992,10 @@ msgstr "不可用"
 #: screens/Setting/shared/RevertButton.jsx:62
 msgid "Undo"
 msgstr "撤消"
+
+#: screens/Job/JobOutput/JobOutput.jsx:827
+msgid "Unfollow"
+msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:129
 msgid "Unlimited"
@@ -8911,7 +9014,7 @@ msgstr "无法访问的主机数"
 msgid "Unreachable Hosts"
 msgstr "无法访问的主机"
 
-#: util/dates.jsx:89
+#: util/dates.jsx:93
 msgid "Unrecognized day string"
 msgstr "未识别的日字符串"
 
@@ -8920,7 +9023,7 @@ msgid "Unsaved changes modal"
 msgstr "未保存的修改 modal"
 
 #: components/PromptDetail/PromptProjectDetail.jsx:46
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:78
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:88
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:98
 msgid "Update Revision on Launch"
 msgstr "启动时更新修订"
@@ -8947,9 +9050,13 @@ msgstr "更新项目时更新"
 msgid "Update options"
 msgstr "更新选项"
 
+#: screens/Setting/SettingList.jsx:86
+msgid "Update settings pertaining to Jobs within {0}"
+msgstr ""
+
 #: screens/Setting/SettingList.jsx:91
-msgid "Update settings pertaining to Jobs within {brandName}"
-msgstr "更新 {brandName} 中与作业相关的设置"
+#~ msgid "Update settings pertaining to Jobs within {brandName}"
+#~ msgstr "更新 {brandName} 中与作业相关的设置"
 
 #: screens/Template/shared/WebhookSubForm.jsx:198
 msgid "Update webhook key"
@@ -8999,10 +9106,14 @@ msgstr ""
 #~ msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job:"
 #~ msgstr ""
 
+#: screens/InstanceGroup/Instances/InstanceList.jsx:214
+msgid "Used Capacity"
+msgstr ""
+
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:83
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:44
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:107
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:74
 msgid "Used capacity"
 msgstr "使用的容量"
 
@@ -9015,12 +9126,12 @@ msgstr "用户"
 msgid "User Details"
 msgstr "用户详情"
 
-#: screens/Setting/SettingList.jsx:120
+#: screens/Setting/SettingList.jsx:115
 #: screens/Setting/Settings.jsx:112
 msgid "User Interface"
 msgstr "用户界面"
 
-#: screens/Setting/SettingList.jsx:125
+#: screens/Setting/SettingList.jsx:120
 msgid "User Interface settings"
 msgstr "用户界面设置"
 
@@ -9056,8 +9167,8 @@ msgstr "未找到用户。"
 msgid "User tokens"
 msgstr "用户令牌"
 
-#: components/AddRole/AddResourceRole.jsx:124
-#: components/AddRole/AddResourceRole.jsx:139
+#: components/AddRole/AddResourceRole.jsx:22
+#: components/AddRole/AddResourceRole.jsx:37
 #: components/ResourceAccessList/ResourceAccessList.jsx:127
 #: components/ResourceAccessList/ResourceAccessList.jsx:180
 #: screens/Login/Login.jsx:200
@@ -9083,8 +9194,8 @@ msgstr "用户名"
 msgid "Username / password"
 msgstr ""
 
+#: components/AddRole/AddResourceRole.jsx:197
 #: components/AddRole/AddResourceRole.jsx:198
-#: components/AddRole/AddResourceRole.jsx:199
 #: routeConfig.jsx:99
 #: screens/ActivityStream/ActivityStream.jsx:179
 #: screens/Team/Teams.jsx:29
@@ -9113,7 +9224,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:55
 #: screens/Inventory/shared/InventoryForm.jsx:96
 #: screens/Inventory/shared/InventoryGroupForm.jsx:49
-#: screens/Inventory/shared/SmartInventoryForm.jsx:96
+#: screens/Inventory/shared/SmartInventoryForm.jsx:97
 #: screens/Job/JobDetail/JobDetail.jsx:339
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:354
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:221
@@ -9122,7 +9233,7 @@ msgstr "VMware vCenter"
 msgid "Variables"
 msgstr "变量"
 
-#: screens/Job/JobOutput/JobOutput.jsx:694
+#: screens/Job/JobOutput/JobOutput.jsx:750
 msgid "Variables Prompted"
 msgstr ""
 
@@ -9134,11 +9245,11 @@ msgstr "Vault 密码"
 msgid "Vault password | {credId}"
 msgstr "Vault 密码 | {credId}"
 
-#: screens/Job/JobOutput/JobOutput.jsx:699
+#: screens/Job/JobOutput/JobOutput.jsx:755
 msgid "Verbose"
 msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:136
+#: components/AdHocCommands/AdHocDetailsStep.jsx:131
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:147
 #: components/PromptDetail/PromptDetail.jsx:191
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:100
@@ -9378,7 +9489,7 @@ msgstr "查看所有令牌。"
 #~ msgid "View and edit your license information"
 #~ msgstr "查看并编辑您的许可证信息"
 
-#: screens/Setting/SettingList.jsx:132
+#: screens/Setting/SettingList.jsx:127
 msgid "View and edit your subscription information"
 msgstr ""
 
@@ -9414,7 +9525,7 @@ msgstr "视图"
 msgid "Visualizer"
 msgstr "Visualizer"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:47
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:42
 msgid "WARNING:"
 msgstr "警告："
 
@@ -9424,7 +9535,7 @@ msgid "Waiting"
 msgstr "等待"
 
 #: components/Workflow/WorkflowLegend.jsx:114
-#: screens/Job/JobOutput/JobOutput.jsx:701
+#: screens/Job/JobOutput/JobOutput.jsx:757
 msgid "Warning"
 msgstr "警告"
 
@@ -9440,6 +9551,7 @@ msgstr ""
 msgid "We were unable to locate subscriptions associated with this account."
 msgstr ""
 
+#: components/DetailList/LaunchedByDetail.jsx:53
 #: components/NotificationList/NotificationList.jsx:202
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:164
 msgid "Webhook"
@@ -9494,24 +9606,24 @@ msgstr "Webhook 服务可通过向此 URL 发出 POST 请求来使用此工作�
 msgid "Webhook services can use this as a shared secret."
 msgstr "Webhook 服务可以将此用作共享机密。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:277
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:273
 msgid "Wed"
 msgstr "周三"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:282
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:428
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:278
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:424
 msgid "Wednesday"
 msgstr "周三"
 
-#: components/Schedule/shared/ScheduleForm.jsx:163
+#: components/Schedule/shared/ScheduleForm.jsx:146
 msgid "Week"
 msgstr "周"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:449
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:445
 msgid "Weekday"
 msgstr "周中日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:454
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:450
 msgid "Weekend day"
 msgstr "周末日"
 
@@ -9682,11 +9794,11 @@ msgstr "写入"
 msgid "YAML:"
 msgstr "YAML："
 
-#: components/Schedule/shared/ScheduleForm.jsx:165
+#: components/Schedule/shared/ScheduleForm.jsx:148
 msgid "Year"
 msgstr "年"
 
-#: components/Search/Search.jsx:256
+#: components/Search/Search.jsx:257
 msgid "Yes"
 msgstr "是"
 
@@ -9759,7 +9871,6 @@ msgid "a new webhook url will be generated on save."
 msgstr "在保存时会生成一个新的 WEBHOOK url"
 
 #: screens/Host/HostGroups/HostGroupItem.jsx:45
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:214
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.jsx:35
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:107
 msgid "actions"
@@ -9784,10 +9895,10 @@ msgid "cancel delete"
 msgstr "取消删除"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:180
-msgid "capacity adjustment"
-msgstr ""
+#~ msgid "capacity adjustment"
+#~ msgstr ""
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:240
+#: components/AdHocCommands/AdHocDetailsStep.jsx:235
 msgid "command"
 msgstr "命令"
 
@@ -9807,8 +9918,8 @@ msgstr "确认解除关联"
 #~ msgstr "控制器实例"
 
 #: screens/Project/ProjectList/ProjectListItem.jsx:159
-msgid "copy to clipboard disabled"
-msgstr "复制到剪贴板被禁用"
+#~ msgid "copy to clipboard disabled"
+#~ msgstr "复制到剪贴板被禁用"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:145
 msgid "deletion error"
@@ -9835,7 +9946,7 @@ msgstr ""
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:100
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:267
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:152
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:196
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:231
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:169
 #: screens/User/UserDetail/UserDetail.jsx:84
 msgid "edit"
@@ -9865,12 +9976,12 @@ msgstr ""
 #~ msgid "groups"
 #~ msgstr "组"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:174
+#: components/AdHocCommands/AdHocDetailsStep.jsx:169
 msgid "here"
 msgstr "此处"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:125
-#: components/AdHocCommands/AdHocDetailsStep.jsx:194
+#: components/AdHocCommands/AdHocDetailsStep.jsx:120
+#: components/AdHocCommands/AdHocDetailsStep.jsx:189
 msgid "here."
 msgstr "此处。"
 
@@ -9879,20 +9990,20 @@ msgid "hosts"
 msgstr "主机"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:166
-msgid "instance counts"
-msgstr "实例数"
+#~ msgid "instance counts"
+#~ msgstr "实例数"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:207
-msgid "instance group used capacity"
-msgstr "实例组使用的容量"
+#~ msgid "instance group used capacity"
+#~ msgstr "实例组使用的容量"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:155
-msgid "instance host name"
-msgstr "实例主机名"
+#~ msgid "instance host name"
+#~ msgstr "实例主机名"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:158
-msgid "instance type"
-msgstr "实例类型"
+#~ msgid "instance type"
+#~ msgstr "实例类型"
 
 #: components/Lookup/HostListItem.jsx:30
 msgid "inventory"
@@ -9936,11 +10047,11 @@ msgstr "名称"
 msgid "new choice"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:465
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:461
 msgid "of"
 msgstr "的"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:238
+#: components/AdHocCommands/AdHocDetailsStep.jsx:233
 msgid "option to the"
 msgstr "选项"
 
@@ -9985,11 +10096,11 @@ msgstr "秒"
 msgid "seconds"
 msgstr "秒"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:62
+#: components/AdHocCommands/AdHocDetailsStep.jsx:57
 msgid "select module"
 msgstr "选择模块"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:135
+#: components/AdHocCommands/AdHocDetailsStep.jsx:130
 msgid "select verbosity"
 msgstr "选择详细程度"
 
@@ -10014,7 +10125,7 @@ msgstr "团队名称"
 msgid "timed out"
 msgstr "超时"
 
-#: components/AdHocCommands/AdHocDetailsStep.jsx:218
+#: components/AdHocCommands/AdHocDetailsStep.jsx:213
 msgid "toggle changes"
 msgstr "切换更改"
 
@@ -10090,7 +10201,7 @@ msgstr ""
 msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
-#: screens/Project/ProjectList/ProjectList.jsx:198
+#: screens/Project/ProjectList/ProjectList.jsx:237
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
@@ -10138,32 +10249,40 @@ msgstr ""
 msgid "{dateStr} by <0>{username}</0>"
 msgstr "{dateStr}（按 <0>{username}</0>）"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.jsx:187
+#: screens/InstanceGroup/Instances/InstanceListItem.jsx:130
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:192
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:188
 msgid "{intervalValue, plural, one {day} other {days}}"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:190
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:186
 msgid "{intervalValue, plural, one {hour} other {hours}}"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:188
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:184
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:196
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:192
 msgid "{intervalValue, plural, one {month} other {months}}"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:194
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:190
 msgid "{intervalValue, plural, one {week} other {weeks}}"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.jsx:198
+#: components/Schedule/shared/FrequencyDetailSubform.jsx:194
 msgid "{intervalValue, plural, one {year} other {years}}"
+msgstr ""
+
+#: components/Schedule/shared/DateTimePicker.jsx:49
+msgid "{label} date"
+msgstr ""
+
+#: components/Schedule/shared/DateTimePicker.jsx:57
+msgid "{label} time"
 msgstr ""
 
 #: components/PromptDetail/PromptDetail.jsx:43

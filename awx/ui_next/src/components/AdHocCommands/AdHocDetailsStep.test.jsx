@@ -2,9 +2,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { RootAPI } from '../../api';
 import DetailsStep from './AdHocDetailsStep';
 
 jest.mock('../../api/models/Credentials');
+jest.mock('../../api/models/Root');
 
 const verbosityOptions = [
   { key: -1, value: '', label: '', isDisabled: false },
@@ -31,6 +33,14 @@ const initialValues = {
 
 describe('<AdHocDetailsStep />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
+  });
 
   test('should mount properly', async () => {
     await act(async () => {

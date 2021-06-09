@@ -12,7 +12,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { I18nProvider } from '@lingui/react';
 import { i18n } from '@lingui/core';
 import { Card, PageSection } from '@patternfly/react-core';
-
 import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
 import { SessionProvider, useSession } from './contexts/Session';
 import AppContainer from './components/AppContainer';
@@ -20,15 +19,14 @@ import Background from './components/Background';
 import ContentError from './components/ContentError';
 import NotFound from './screens/NotFound';
 import Login from './screens/Login';
-
 import { isAuthenticated } from './util/auth';
 import { getLanguageWithoutRegionCode } from './util/language';
 import { dynamicActivate, locales } from './i18nLoader';
 import Metrics from './screens/Metrics';
-
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
 import { SESSION_REDIRECT_URL } from './constants';
+import { RootAPI } from './api';
 
 function ErrorFallback({ error }) {
   return (
@@ -113,9 +111,21 @@ function App() {
     // preferred language, default to one that has strings.
     language = 'en';
   }
+
   useEffect(() => {
     dynamicActivate(language);
   }, [language]);
+
+  useEffect(() => {
+    async function fetchBrandName() {
+      const {
+        data: { BRAND_NAME },
+      } = await RootAPI.readAssetVariables();
+
+      document.title = BRAND_NAME;
+    }
+    fetchBrandName();
+  }, []);
 
   const redirectURL = window.sessionStorage.getItem(SESSION_REDIRECT_URL);
   if (redirectURL) {
