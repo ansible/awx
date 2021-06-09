@@ -14,6 +14,7 @@ import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { formatDateString } from '../../util/dates';
+import { isJobRunning } from '../../util/jobs';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 import JobCancelButton from '../JobCancelButton';
 
@@ -32,7 +33,7 @@ function JobListItem({
   const jobTypes = {
     project_update: t`Source Control Update`,
     inventory_update: t`Inventory Sync`,
-    job: t`Playbook Run`,
+    job: job.job_type === 'check' ? t`Playbook Check` : t`Playbook Run`,
     ad_hoc_command: t`Command`,
     system_job: t`Management Job`,
     workflow_job: t`Workflow Job`,
@@ -202,10 +203,12 @@ function JobListItem({
                   dataCy={`job-${job.id}-project`}
                 />
               )}
-              <ExecutionEnvironmentDetail
-                executionEnvironment={execution_environment}
-                verifyMissingVirtualEnv={false}
-              />
+              {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
+                <ExecutionEnvironmentDetail
+                  executionEnvironment={execution_environment}
+                  verifyMissingVirtualEnv={false}
+                />
+              )}
               {credentials && credentials.length > 0 && (
                 <Detail
                   fullWidth

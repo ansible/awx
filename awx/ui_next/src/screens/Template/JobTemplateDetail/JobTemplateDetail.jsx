@@ -166,7 +166,6 @@ function JobTemplateDetail({ template }) {
   if (isLoadingInstanceGroups || isDeleteLoading) {
     return <ContentLoading />;
   }
-
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -212,7 +211,10 @@ function JobTemplateDetail({ template }) {
         )}
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
-          executionEnvironment={summary_fields?.execution_environment}
+          executionEnvironment={summary_fields?.resolved_environment}
+          helpText={t`The execution environment that will be used when launching
+          this job template. The resolved execution environment can be overridden by 
+          explicitly assigning a different one to this job template.`}
         />
         <Detail label={t`Source Control Branch`} value={template.scm_branch} />
         <Detail label={t`Playbook`} value={playbook} />
