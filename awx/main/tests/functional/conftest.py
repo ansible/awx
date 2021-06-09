@@ -824,5 +824,10 @@ def slice_job_factory(slice_jt_factory):
 
 
 @pytest.fixture
-def execution_environment():
-    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed_by_tower=True)
+def control_plane_execution_environment():
+    return ExecutionEnvironment.objects.create(name="Control Plane EE", managed_by_tower=True)
+
+
+@pytest.fixture
+def default_job_execution_environment():
+    return ExecutionEnvironment.objects.create(name="Default Job EE", managed_by_tower=False)

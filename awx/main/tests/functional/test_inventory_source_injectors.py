@@ -182,7 +182,8 @@ def create_reference_data(source_dir, env, content):
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
 def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory):
-    ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
+    ExecutionEnvironment.objects.create(name='Control Plane EE', managed_by_tower=True)
+    ExecutionEnvironment.objects.create(name='Default Job EE', managed_by_tower=False)
 
     injector = InventorySource.injectors[this_kind]
     if injector.plugin_name is None:
