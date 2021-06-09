@@ -23,6 +23,7 @@ import cachetools
 # AWX
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
+from awx.conf.fields import PrimaryKeyRelatedField
 from awx.conf.models import Setting
 from awx.conf.migrations._reencrypt import decrypt_field as old_decrypt_field
 
@@ -420,9 +421,9 @@ class SettingsWrapper(UserSettingsHolder):
             raise ImproperlyConfigured('Setting "{}" is read only.'.format(name))
 
         try:
-            data = field.to_representation(value)
+            data = None if value is None and isinstance(field, PrimaryKeyRelatedField) else field.to_representation(value)
             setting_value = field.run_validation(data)
-            db_value = field.to_representation(setting_value)
+            db_value = None if setting_value is None and isinstance(field, PrimaryKeyRelatedField) else field.to_representation(setting_value)
         except Exception as e:
             logger.exception('Unable to assign value "%r" to setting "%s".', value, name, exc_info=True)
             raise e
