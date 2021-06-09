@@ -41,7 +41,6 @@ function ScheduleEdit({
       end,
       frequency,
       interval,
-      startDateTime,
       timezone,
       occurences,
       runOn,
@@ -49,7 +48,6 @@ function ScheduleEdit({
       runOnTheMonth,
       runOnDayMonth,
       runOnDayNumber,
-      endDateTime,
       runOnTheOccurence,
       daysOfWeek,
       ...submitValues
@@ -98,6 +96,10 @@ function ScheduleEdit({
         ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
       };
+      delete requestData.startDate;
+      delete requestData.startTime;
+      delete requestData.endDate;
+      delete requestData.endTime;
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (!requestData.extra_data) {

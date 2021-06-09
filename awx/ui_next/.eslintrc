@@ -35,6 +35,8 @@
       {
         "markupOnly": true,
         "ignoreAttribute": [
+          "dateFieldName",
+          "timeFieldName",
           "to",
           "streamType",
           "path",
@@ -85,7 +87,7 @@
           "data-cy",
           "fieldName"
         ],
-        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
+        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg", "hh:mm AM/PM"],
         "ignoreComponent": [
           "AboutModal",
           "code",

@@ -2,15 +2,20 @@ import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
 import { getRRuleDayConstants } from '../../../util/dates';
 
+const parseTime = time => {
+  const [hour, minute, ampm] = time.split(/[: ]/);
+  const timeHour =
+    ampm === 'PM' && hour !== '12' ? `${parseInt(hour, 10) + 12}` : `${hour}`;
+
+  return [timeHour, minute];
+};
+
 export default function buildRuleObj(values) {
-  const [startDate, startTime] = values.startDateTime.split('T');
   // Dates are formatted like "YYYY-MM-DD"
-  const [startYear, startMonth, startDay] = startDate.split('-');
+  const [startYear, startMonth, startDay] = values.startDate.split('-');
   // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
   // have been specified
-  const [startHour = 0, startMinute = 0, startSecond = 0] = startTime.split(
-    ':'
-  );
+  const [startHour, startMinute] = parseTime(values.startTime);
 
   const ruleObj = {
     interval: values.interval,
@@ -20,8 +25,7 @@ export default function buildRuleObj(values) {
         parseInt(startMonth, 10) - 1,
         startDay,
         startHour,
-        startMinute,
-        startSecond
+        startMinute
       )
     ),
     tzid: values.timezone,
@@ -77,17 +81,16 @@ export default function buildRuleObj(values) {
         ruleObj.count = values.occurrences;
         break;
       case 'onDate': {
-        const [endDate, endTime] = values.endDateTime.split('T');
-        const [endYear, endMonth, endDay] = endDate.split('-');
-        const [endHour = 0, endMinute = 0, endSecond = 0] = endTime.split(':');
+        const [endYear, endMonth, endDay] = values.endDate.split('-');
+
+        const [endHour, endMinute] = parseTime(values.endTime);
         ruleObj.until = new Date(
           Date.UTC(
             endYear,
             parseInt(endMonth, 10) - 1,
             endDay,
             endHour,
-            endMinute,
-            endSecond
+            endMinute
           )
         );
         break;
