@@ -25,7 +25,7 @@ import InventorySourceListItem from './InventorySourceListItem';
 import useWsInventorySources from './useWsInventorySources';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
-const QS_CONFIG = getQSConfig('inventory_sources', {
+const QS_CONFIG = getQSConfig('inventory-sources', {
   page: 1,
   page_size: 20,
   order_by: 'name',
