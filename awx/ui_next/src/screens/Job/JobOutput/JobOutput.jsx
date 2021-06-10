@@ -228,11 +228,13 @@ function connectJobSocket({ type, id }, onMessage) {
   };
 
   ws.onclose = e => {
-    // eslint-disable-next-line no-console
-    console.debug('Socket closed. Reconnecting...', e);
-    setTimeout(() => {
-      connectJobSocket({ type, id }, onMessage);
-    }, 1000);
+    if (e.code !== 1000) {
+      // eslint-disable-next-line no-console
+      console.debug('Socket closed. Reconnecting...', e);
+      setTimeout(() => {
+        connectJobSocket({ type, id }, onMessage);
+      }, 1000);
+    }
   };
 
   ws.onerror = err => {
