@@ -212,6 +212,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
           )}
         </div>
       ),
+      nextButtonText: t`Next`,
       enableNext: selectedResource !== null,
     },
     {
@@ -246,6 +247,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
         </Fragment>
       ),
       enableNext: selectedResourceRows.length > 0,
+      nextButtonText: t`Next`,
       canJumpTo: maxEnabledStep >= 2,
     },
     {
@@ -269,12 +271,12 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
 
   const currentStep = steps.find(step => step.id === currentStepId);
 
-  // TODO: somehow internationalize steps and currentStep.nextButtonText
   return (
     <Wizard
       style={{ overflow: 'scroll' }}
       isOpen
       onNext={handleWizardNext}
+      onBack={step => setCurrentStepId(step.id)}
       onClose={onClose}
       onSave={handleWizardSave}
       onGoToStep={step => handleWizardGoToStep(step)}
