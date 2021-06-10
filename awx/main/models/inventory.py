@@ -805,7 +805,7 @@ class InventorySourceOptions(BaseModel):
         ('satellite6', _('Red Hat Satellite 6')),
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
-        ('tower', _('Ansible Tower')),
+        ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
     ]
 
@@ -1529,8 +1529,8 @@ class satellite6(PluginFileInjector):
         return ret
 
 
-class tower(PluginFileInjector):
-    plugin_name = 'tower'
+class controller(PluginFileInjector):
+    plugin_name = 'tower'  # TODO: relying on routing for now, update after EEs pick up revised collection
     base_injector = 'template'
     namespace = 'awx'
     collection = 'awx'

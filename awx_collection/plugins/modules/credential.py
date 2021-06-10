@@ -81,7 +81,7 @@ options:
         - Deprecated, please use credential_type
       required: False
       type: str
-      choices: ["aws", "tower", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
+      choices: ["aws", "controller", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
                 "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
     host:
       description:
@@ -292,7 +292,7 @@ from ..module_utils.controller_api import ControllerAPIModule
 
 KIND_CHOICES = {
     'aws': 'Amazon Web Services',
-    'tower': 'Ansible Tower',
+    'controller': 'Red Hat Ansible Automation Platform',
     'gce': 'Google Compute Engine',
     'azure_rm': 'Microsoft Azure Resource Manager',
     'openstack': 'OpenStack',
