@@ -198,4 +198,33 @@ describe('<InventorySourceListItem />', () => {
       'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
     );
   });
+
+  test('should render cancel button while job is running', () => {
+    const onSelect = jest.fn();
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <InventorySourceListItem
+            source={{
+              ...source,
+              status: 'running',
+              summary_fields: {
+                ...source.summary_fields,
+                current_job: {
+                  id: 1000,
+                  status: 'running',
+                },
+              },
+              custom_virtualenv: '/var/lib/awx/env',
+              execution_environment: null,
+            }}
+            isSelected={false}
+            onSelect={onSelect}
+            label="Source Bar"
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('JobCancelButton').length).toBe(1);
+  });
 });

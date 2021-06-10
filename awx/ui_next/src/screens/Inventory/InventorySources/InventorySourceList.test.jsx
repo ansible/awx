@@ -115,7 +115,6 @@ describe('<InventorySourceList />', () => {
 
   test('api calls should be made on mount', async () => {
     expect(InventoriesAPI.readSources).toHaveBeenCalledWith('1', {
-      not__source: '',
       order_by: 'name',
       page: 1,
       page_size: 20,
