@@ -55,6 +55,7 @@ describe('<HostForm />', () => {
     expect(wrapper.find('input#host-description').prop('value')).toEqual(
       'new bar'
     );
+    expect(wrapper.find('InventoryLookup').prop('isDisabled')).toEqual(false);
   });
 
   test('calls handleSubmit when form submitted', async () => {
@@ -83,5 +84,19 @@ describe('<HostForm />', () => {
       );
     });
     expect(wrapper.find('InventoryLookupField').length).toBe(0);
+  });
+
+  test('inventory lookup field should be disabled', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <HostForm
+          host={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          disableInventoryLookup
+        />
+      );
+    });
+    expect(wrapper.find('InventoryLookup').prop('isDisabled')).toEqual(true);
   });
 });
