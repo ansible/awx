@@ -43,7 +43,7 @@ def render():
     # The return value of this function is an argparse.ArgumentParser, which
     # the sphinxcontrib.autoprogram plugin crawls and generates an indexed
     # Sphinx document from.
-    for e in ('TOWER_HOST', 'TOWER_USERNAME', 'TOWER_PASSWORD'):
+    for e in ('CONTROLLER_HOST', 'CONTROLLER_USERNAME', 'CONTROLLER_PASSWORD'):
         if not os.environ.get(e):
             raise SystemExit('Please specify a valid {} for a real (running) installation.'.format(e))  # noqa
     cli = CLI()

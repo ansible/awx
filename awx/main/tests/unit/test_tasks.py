@@ -1794,14 +1794,14 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         safe_env = build_safe_env(env)
 
-        assert env['TOWER_HOST'] == 'https://tower.example.org'
-        assert env['TOWER_USERNAME'] == 'bob'
-        assert env['TOWER_PASSWORD'] == 'secret'
+        assert env['CONTROLLER_HOST'] == 'https://tower.example.org'
+        assert env['CONTROLLER_USERNAME'] == 'bob'
+        assert env['CONTROLLER_PASSWORD'] == 'secret'
         if verify:
-            assert env['TOWER_VERIFY_SSL'] == 'True'
+            assert env['CONTROLLER_VERIFY_SSL'] == 'True'
         else:
-            assert env['TOWER_VERIFY_SSL'] == 'False'
-        assert safe_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+            assert env['CONTROLLER_VERIFY_SSL'] == 'False'
+        assert safe_env['CONTROLLER_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_tower_source_ssl_verify_empty(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()

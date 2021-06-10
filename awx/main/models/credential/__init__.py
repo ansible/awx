@@ -1006,23 +1006,25 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
-    namespace='tower',
+    namespace='controller',
     kind='cloud',
-    name=ugettext_noop('Ansible Tower'),
+    name=ugettext_noop('Red Hat Ansible Automation Platform'),
     managed_by_tower=True,
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('Ansible Tower Hostname'),
+                'label': ugettext_noop('Red Hat Ansible Automation Platform'),
                 'type': 'string',
-                'help_text': ugettext_noop('The Ansible Tower base URL to authenticate with.'),
+                'help_text': ugettext_noop('Red Hat Ansible Automation Platform base URL to authenticate with.'),
             },
             {
                 'id': 'username',
                 'label': ugettext_noop('Username'),
                 'type': 'string',
-                'help_text': ugettext_noop('The Ansible Tower user to authenticate as.' 'This should not be set if an OAuth token is being used.'),
+                'help_text': ugettext_noop(
+                    'Red Hat Ansible Automation Platform username id to authenticate as.' 'This should not be set if an OAuth token is being used.'
+                ),
             },
             {
                 'id': 'password',
@@ -1048,6 +1050,11 @@ ManagedCredentialType(
             'TOWER_PASSWORD': '{{password}}',
             'TOWER_VERIFY_SSL': '{{verify_ssl}}',
             'TOWER_OAUTH_TOKEN': '{{oauth_token}}',
+            'CONTROLLER_HOST': '{{host}}',
+            'CONTROLLER_USERNAME': '{{username}}',
+            'CONTROLLER_PASSWORD': '{{password}}',
+            'CONTROLLER_VERIFY_SSL': '{{verify_ssl}}',
+            'CONTROLLER_OAUTH_TOKEN': '{{oauth_token}}',
         }
     },
 )
