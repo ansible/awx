@@ -77,17 +77,17 @@ A few of the most important ones are:
 ``-f, --conf.format``
     used to specify a custom output format (the default is json)
 
-``--conf.host, TOWER_HOST``
+``--conf.host, CONTROLLER_HOST``
     the full URL of the AWX/|RHAT| host (i.e., https://my.awx.example.org)
 
-``-k, --conf.insecure, TOWER_VERIFY_SSL``
+``-k, --conf.insecure, CONTROLLER_VERIFY_SSL``
     allows insecure server connections when using SSL
 
-``--conf.username, TOWER_USERNAME``
+``--conf.username, CONTROLLER_USERNAME``
     the AWX username to use for authentication
 
-``--conf.password, TOWER_PASSWORD``
+``--conf.password, CONTROLLER_PASSWORD``
     the AWX password to use for authentication
 
-``--conf.token, TOWER_OAUTH_TOKEN``
+``--conf.token, CONTROLLER_OAUTH_TOKEN``
     an OAuth2.0 token to use for authentication

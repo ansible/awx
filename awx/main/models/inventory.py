@@ -821,7 +821,7 @@ class InventorySourceOptions(BaseModel):
         ('satellite6', _('Red Hat Satellite 6')),
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
-        ('tower', _('Ansible Tower')),
+        ('tower', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
     ]
 

@@ -12,9 +12,9 @@ The preferred mechanism for authenticating with AWX and |RHAT| is by generating 
 
 .. code:: bash
 
-    TOWER_HOST=https://awx.example.org \
-        TOWER_USERNAME=alice \
-        TOWER_PASSWORD=secret \
+    CONTROLLER_HOST=https://awx.example.org \
+        CONTROLLER_USERNAME=alice \
+        CONTROLLER_PASSWORD=secret \
         awx login
 
 As a convenience, the ``awx login -f human`` command prints a shell-formatted token
@@ -22,15 +22,15 @@ value:
 
 .. code:: bash
 
-    export TOWER_OAUTH_TOKEN=6E5SXhld7AMOhpRveZsLJQsfs9VS8U
+    export CONTROLLER_OAUTH_TOKEN=6E5SXhld7AMOhpRveZsLJQsfs9VS8U
 
 By ingesting this token, you can run subsequent CLI commands without having to
 specify your username and password each time:
 
 .. code:: bash
 
-    export TOWER_HOST=https://awx.example.org
-    $(TOWER_USERNAME=alice TOWER_PASSWORD=secret awx login -f human)
+    export CONTROLLER_HOST=https://awx.example.org
+    $(CONTROLLER_USERNAME=alice CONTROLLER_PASSWORD=secret awx login -f human)
     awx config
 
 Working with OAuth2.0 Applications
@@ -43,7 +43,7 @@ application was created.
 
 .. code:: bash
 
-    TOWER_USERNAME=alice TOWER_PASSWORD=secret awx login \
+    CONTROLLER_USERNAME=alice CONTROLLER_PASSWORD=secret awx login \
         --conf.client_id <value> --conf.client_secret <value>
 
 
@@ -55,7 +55,7 @@ a read-only token, specify ``--scope read``:
 
 .. code:: bash
 
-    TOWER_USERNAME=alice TOWER_PASSWORD=secret \
+    CONTROLLER_USERNAME=alice CONTROLLER_PASSWORD=secret \
         awx login --conf.scope read
 
 Session Authentication
@@ -65,5 +65,5 @@ specify your username and password on every invocation:
 
 .. code:: bash
 
-    TOWER_USERNAME=alice TOWER_PASSWORD=secret awx jobs list
+    CONTROLLER_USERNAME=alice CONTROLLER_PASSWORD=secret awx jobs list
     awx --conf.username alice --conf.password secret jobs list

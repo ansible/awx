@@ -292,7 +292,7 @@ from ..module_utils.controller_api import ControllerAPIModule
 
 KIND_CHOICES = {
     'aws': 'Amazon Web Services',
-    'tower': 'Ansible Tower',
+    'tower': 'Red Hat Ansible Automation Platform',
     'gce': 'Google Compute Engine',
     'azure_rm': 'Microsoft Azure Resource Manager',
     'openstack': 'OpenStack',
