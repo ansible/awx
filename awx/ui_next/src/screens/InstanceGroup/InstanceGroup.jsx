@@ -13,7 +13,7 @@ import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import useRequest from '../../util/useRequest';
-import { InstanceGroupsAPI } from '../../api';
+import { InstanceGroupsAPI, SettingsAPI } from '../../api';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
@@ -31,12 +31,28 @@ function InstanceGroup({ setBreadcrumb }) {
     isLoading,
     error: contentError,
     request: fetchInstanceGroups,
-    result: instanceGroup,
+    result: { instanceGroup, defaultControlPlane, defaultExecution },
   } = useRequest(
     useCallback(async () => {
-      const { data } = await InstanceGroupsAPI.readDetail(id);
-      return data;
-    }, [id])
+      const [
+        { data },
+        {
+          data: {
+            DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+            DEFAULT_EXECUTION_QUEUE_NAME,
+          },
+        },
+      ] = await Promise.all([
+        InstanceGroupsAPI.readDetail(id),
+        SettingsAPI.readAll(),
+      ]);
+      return {
+        instanceGroup: data,
+        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
+      };
+    }, [id]),
+    { instanceGroup: {}, defaultControlPlane: '', defaultExecution: '' }
   );
 
   useEffect(() => {
@@ -115,7 +131,11 @@ function InstanceGroup({ setBreadcrumb }) {
             {instanceGroup && (
               <>
                 <Route path="/instance_groups/:id/edit">
-                  <InstanceGroupEdit instanceGroup={instanceGroup} />
+                  <InstanceGroupEdit
+                    instanceGroup={instanceGroup}
+                    defaultExecution={defaultExecution}
+                    defaultControlPlane={defaultControlPlane}
+                  />
                 </Route>
                 <Route path="/instance_groups/:id/details">
                   <InstanceGroupDetails instanceGroup={instanceGroup} />

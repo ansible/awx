@@ -11,6 +11,7 @@ import {
   OrganizationsAPI,
   InventoriesAPI,
   UnifiedJobTemplatesAPI,
+  SettingsAPI,
 } from '../../../api';
 import InstanceGroupList from './InstanceGroupList';
 
@@ -18,6 +19,7 @@ jest.mock('../../../api/models/InstanceGroups');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Inventories');
 jest.mock('../../../api/models/UnifiedJobTemplates');
+jest.mock('../../../api/models/Settings');
 
 const instanceGroups = {
   data: {
@@ -32,7 +34,7 @@ const instanceGroups = {
       },
       {
         id: 2,
-        name: 'tower',
+        name: 'controlplan',
         type: 'instance_group',
         url: '/api/v2/instance_groups/2',
         consumed_capacity: 42,
@@ -40,6 +42,14 @@ const instanceGroups = {
       },
       {
         id: 3,
+        name: 'default',
+        type: 'instance_group',
+        url: '/api/v2/instance_groups/2',
+        consumed_capacity: 42,
+        summary_fields: { user_capabilities: { edit: true, delete: true } },
+      },
+      {
+        id: 4,
         name: 'Bar',
         type: 'instance_group',
         url: '/api/v2/instance_groups/3',
@@ -47,11 +57,17 @@ const instanceGroups = {
         summary_fields: { user_capabilities: { edit: true, delete: false } },
       },
     ],
-    count: 3,
+    count: 4,
   },
 };
 
 const options = { data: { actions: { POST: true } } };
+const settings = {
+  data: {
+    DEFAULT_CONTROL_PLANE_QUEUE_NAME: 'controlplan',
+    DEFAULT_EXECUTION_QUEUE_NAME: 'default',
+  },
+};
 
 describe('<InstanceGroupList />', () => {
   let wrapper;
@@ -62,6 +78,7 @@ describe('<InstanceGroupList />', () => {
     UnifiedJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
     InstanceGroupsAPI.read.mockResolvedValue(instanceGroups);
     InstanceGroupsAPI.readOptions.mockResolvedValue(options);
+    SettingsAPI.readAll.mockResolvedValue(settings);
   });
 
   test('should have data fetched and render 3 rows', async () => {
@@ -69,7 +86,7 @@ describe('<InstanceGroupList />', () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
     await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
-    expect(wrapper.find('InstanceGroupListItem').length).toBe(3);
+    expect(wrapper.find('InstanceGroupListItem').length).toBe(4);
     expect(InstanceGroupsAPI.read).toBeCalled();
     expect(InstanceGroupsAPI.readOptions).toBeCalled();
   });
@@ -109,13 +126,13 @@ describe('<InstanceGroupList />', () => {
     );
   });
 
-  test('should not be able to delete tower instance group', async () => {
+  test('should not be able to delete controlplan or default instance group', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
     await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
 
-    const instanceGroupIndex = [0, 1, 2];
+    const instanceGroupIndex = [0, 1, 2, 3];
 
     instanceGroupIndex.forEach(element => {
       wrapper

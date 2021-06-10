@@ -4,7 +4,7 @@ import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 
-import { InstanceGroupsAPI } from '../../../api';
+import { InstanceGroupsAPI, SettingsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
@@ -25,7 +25,11 @@ const QS_CONFIG = getQSConfig('instance-group', {
   page_size: 20,
 });
 
-function modifyInstanceGroups(items = []) {
+function modifyInstanceGroups(
+  items = [],
+  defaultControlPlane,
+  defaultExecution
+) {
   return items.map(item => {
     const clonedItem = {
       ...item,
@@ -36,7 +40,7 @@ function modifyInstanceGroups(items = []) {
         },
       },
     };
-    if (clonedItem.name === 'tower') {
+    if (clonedItem.name === (defaultControlPlane || defaultExecution)) {
       clonedItem.summary_fields.user_capabilities.delete = false;
     }
     return clonedItem;
@@ -57,18 +61,32 @@ function InstanceGroupList() {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      defaultControlPlane,
+      defaultExecution,
     },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
 
-      const [response, responseActions] = await Promise.all([
+      const [
+        response,
+        responseActions,
+        {
+          data: {
+            DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+            DEFAULT_EXECUTION_QUEUE_NAME,
+          },
+        },
+      ] = await Promise.all([
         InstanceGroupsAPI.read(params),
         InstanceGroupsAPI.readOptions(),
+        SettingsAPI.readAll(),
       ]);
 
       return {
         instanceGroups: response.data.results,
+        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
         instanceGroupsCount: response.data.count,
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
@@ -100,7 +118,11 @@ function InstanceGroupList() {
     selectAll,
   } = useSelected(instanceGroups);
 
-  const modifiedSelected = modifyInstanceGroups(selected);
+  const modifiedSelected = modifyInstanceGroups(
+    selected,
+    defaultControlPlane,
+    defaultExecution
+  );
 
   const {
     isLoading: deleteLoading,
@@ -128,31 +150,25 @@ function InstanceGroupList() {
   const canAdd = actions && actions.POST;
 
   function cannotDelete(item) {
-    return !item.summary_fields.user_capabilities.delete;
+    return (
+      !item.summary_fields.user_capabilities.delete ||
+      item.name === defaultExecution ||
+      item.name === defaultControlPlane
+    );
   }
 
   const pluralizedItemName = t`Instance Groups`;
 
   let errorMessageDelete = '';
 
-  if (modifiedSelected.some(item => item.name === 'tower')) {
-    const itemsUnableToDelete = modifiedSelected
-      .filter(cannotDelete)
-      .filter(item => item.name !== 'tower')
-      .map(item => item.name)
-      .join(', ');
-
-    if (itemsUnableToDelete) {
-      if (modifiedSelected.some(cannotDelete)) {
-        errorMessageDelete = t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}. `;
-      }
-    }
-
-    if (errorMessageDelete.length > 0) {
-      errorMessageDelete = errorMessageDelete.concat('\n');
-    }
+  if (
+    modifiedSelected.some(
+      item =>
+        item.name === defaultControlPlane || item.name === defaultExecution
+    )
+  ) {
     errorMessageDelete = errorMessageDelete.concat(
-      t`The tower instance group cannot be deleted.`
+      t`The following Instance Group cannot be deleted`
     );
   }
 
@@ -220,6 +236,7 @@ function InstanceGroupList() {
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={handleDelete}
+                    cannotDelete={cannotDelete}
                     itemsToDelete={modifiedSelected}
                     pluralizedItemName={t`Instance Groups`}
                     errorMessage={errorMessageDelete}

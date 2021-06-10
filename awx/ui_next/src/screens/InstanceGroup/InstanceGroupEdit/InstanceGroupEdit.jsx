@@ -5,7 +5,11 @@ import { CardBody } from '../../../components/Card';
 import { InstanceGroupsAPI } from '../../../api';
 import InstanceGroupForm from '../shared/InstanceGroupForm';
 
-function InstanceGroupEdit({ instanceGroup }) {
+function InstanceGroupEdit({
+  instanceGroup,
+  defaultExecution,
+  defaultControlPlane,
+}) {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
   const detailsUrl = `/instance_groups/${instanceGroup.id}/details`;
@@ -27,6 +31,8 @@ function InstanceGroupEdit({ instanceGroup }) {
     <CardBody>
       <InstanceGroupForm
         instanceGroup={instanceGroup}
+        defaultExecution={defaultExecution}
+        defaultControlPlane={defaultControlPlane}
         onSubmit={handleSubmit}
         submitError={submitError}
         onCancel={handleCancel}
