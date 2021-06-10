@@ -357,4 +357,62 @@ describe('<_AddResourceRole />', () => {
       wrapper.find('SelectableCard[label="Users"]').prop('isSelected')
     ).toBe(true);
   });
+  test('should show correct button text', async () => {
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <AddResourceRole onClose={() => {}} onSave={() => {}} roles={roles} />,
+        { context: { network: { handleHttpError: () => {} } } }
+      );
+    });
+    wrapper.update();
+
+    // Step 1
+    const selectableCardWrapper = wrapper.find('SelectableCard');
+    expect(selectableCardWrapper.length).toBe(2);
+    act(() => wrapper.find('SelectableCard[label="Users"]').prop('onClick')());
+    wrapper.update();
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    expect(wrapper.find('Button[type="submit"]').text()).toBe('Next');
+
+    wrapper.update();
+
+    // Step 2
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    expect(wrapper.find('Chip').length).toBe(0);
+    act(() =>
+      wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
+    );
+    wrapper.update();
+    expect(
+      wrapper.find('CheckboxListItem[name="foo"]').prop('isSelected')
+    ).toBe(true);
+    expect(wrapper.find('Chip').length).toBe(1);
+    expect(wrapper.find('Button[type="submit"]').text()).toBe('Next');
+    act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
+    wrapper.update();
+
+    // Step 3
+    act(() =>
+      wrapper.find('Checkbox[aria-label="Admin"]').invoke('onChange')(true)
+    );
+    expect(wrapper.find('Button[type="submit"]').text()).toBe('Save');
+    wrapper.update();
+
+    // Go Back
+    await act(async () =>
+      wrapper.find('Button[variant="secondary"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('Button[type="submit"]').text()).toBe('Next');
+
+    // return to last step
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('Button[type="submit"]').text()).toBe('Save');
+  });
 });
