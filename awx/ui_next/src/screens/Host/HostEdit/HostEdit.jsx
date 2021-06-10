@@ -34,6 +34,7 @@ function HostEdit({ host }) {
         handleSubmit={handleSubmit}
         handleCancel={handleCancel}
         submitError={formError}
+        disableInventoryLookup
       />
     </CardBody>
   );
