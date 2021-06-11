@@ -525,7 +525,12 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         )
 
     def create_unified_job(self, **kwargs):
+        from awx.main.signals import disable_activity_stream
+
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
+        with disable_activity_stream():
+            workflow_job.execution_environment = workflow_job.resolve_execution_environment()
+            workflow_job.save()
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
