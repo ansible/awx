@@ -403,10 +403,7 @@ def test_teardown_dependency_store_cleared():
     g = G().create(f=True, e=True)
     f = g._dependency_store[F]
     e = g._dependency_store[E]
-    b = f._dependency_store[B]
-    d = e._dependency_store[D]
     c = e._dependency_store[C]
-    a = c._dependency_store[A]
 
     g.teardown()
 
@@ -443,10 +440,7 @@ def test_teardown_ds_cleared():
     g = G().create(f=True, e=True)
     f = g._dependency_store[F]
     e = g._dependency_store[E]
-    b = f._dependency_store[B]
-    d = e._dependency_store[D]
     c = e._dependency_store[C]
-    a = c._dependency_store[A]
 
     g.teardown()
 

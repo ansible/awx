@@ -1,6 +1,6 @@
 from contextlib import contextmanager, suppress
 
-from awxkit import api, utils, exceptions
+from awxkit import api, exceptions
 from awxkit.config import config
 
 
