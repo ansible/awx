@@ -17,7 +17,11 @@ describe('<OrganizationTeamListItem />', () => {
   test('should mount properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationTeamListItem team={team} detailUrl="/teams/1" />
+        <table>
+          <tbody>
+            <OrganizationTeamListItem team={team} detailUrl="/teams/1" />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('OrganizationTeamListItem').length).toBe(1);
@@ -26,10 +30,19 @@ describe('<OrganizationTeamListItem />', () => {
   test('should render proper data', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationTeamListItem team={team} detailUrl="/teams/1" />
+        <table>
+          <tbody>
+            <OrganizationTeamListItem team={team} detailUrl="/teams/1" />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find(`b[aria-label="team name"]`).text()).toBe('one');
+    expect(
+      wrapper
+        .find(`Td`)
+        .first()
+        .text()
+    ).toBe('one');
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
   });
 
@@ -37,7 +50,11 @@ describe('<OrganizationTeamListItem />', () => {
     team.summary_fields.user_capabilities.edit = false;
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationTeamListItem team={team} detailUrl="/teams/1" />
+        <table>
+          <tbody>
+            <OrganizationTeamListItem team={team} detailUrl="/teams/1" />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('PencilAltIcon').length).toBe(0);

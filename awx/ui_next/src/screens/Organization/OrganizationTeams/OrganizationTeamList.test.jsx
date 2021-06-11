@@ -93,7 +93,8 @@ describe('<OrganizationTeamList />', () => {
     });
   });
 
-  test('should pass fetched teams to PaginatedDatalist', async () => {
+  test('should pass fetched teams to PaginatedTable', async () => {
+    // expect.assertions(7);
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -103,10 +104,8 @@ describe('<OrganizationTeamList />', () => {
     await sleep(0);
     wrapper.update();
 
-    const list = wrapper.find('PaginatedDataList');
-    list.find('DataListCell').forEach((el, index) => {
-      expect(el.text()).toBe(listData.data.results[index].name);
-    });
+    const list = wrapper.find('PaginatedTable');
+    expect(list.prop('items')).toEqual(listData.data.results);
     expect(list.prop('itemCount')).toEqual(listData.data.count);
     expect(list.prop('qsConfig')).toEqual({
       namespace: 'team',

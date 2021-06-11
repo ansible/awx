@@ -7,7 +7,10 @@ import { Card } from '@patternfly/react-core';
 import { OrganizationsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest from '../../../util/useRequest';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import DatalistToolbar from '../../../components/DataListToolbar';
 
 import OrganizationExecEnvListItem from './OrganizationExecEnvListItem';
@@ -69,7 +72,7 @@ function OrganizationExecEnvList({ organization }) {
   return (
     <>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading}
           items={executionEnvironments}
@@ -98,32 +101,21 @@ function OrganizationExecEnvList({ organization }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: t`Name`,
-              key: 'name',
-            },
-            {
-              name: t`Image`,
-              key: 'image',
-            },
-            {
-              name: t`Created`,
-              key: 'created',
-            },
-            {
-              name: t`Modified`,
-              key: 'modified',
-            },
-          ]}
           renderToolbar={props => (
             <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
           )}
-          renderItem={executionEnvironment => (
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="image">{t`Image`}</HeaderCell>
+            </HeaderRow>
+          }
+          renderRow={(executionEnvironment, index) => (
             <OrganizationExecEnvListItem
               key={executionEnvironment.id}
               executionEnvironment={executionEnvironment}
               detailUrl={`/execution_environments/${executionEnvironment.id}`}
+              rowIndex={index}
             />
           )}
         />

@@ -50,18 +50,19 @@ describe('<SmartInventoryHostList />', () => {
   });
 
   test('should select and deselect all items', async () => {
+    expect.assertions(6);
     act(() => {
       wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toEqual(true);
     });
     act(() => {
       wrapper.find('DataListToolbar').invoke('onSelectAll')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toEqual(false);
     });
   });

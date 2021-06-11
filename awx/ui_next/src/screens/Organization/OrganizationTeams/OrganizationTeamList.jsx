@@ -4,7 +4,10 @@ import { useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { OrganizationsAPI } from '../../../api';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest from '../../../util/useRequest';
 import OrganizationTeamListItem from './OrganizationTeamListItem';
@@ -54,7 +57,7 @@ function OrganizationTeamList({ id }) {
   }, [fetchTeams]);
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       contentError={error}
       hasContentLoading={isLoading}
       items={teams}
@@ -76,15 +79,15 @@ function OrganizationTeamList({ id }) {
           key: 'modified_by__username__icontains',
         },
       ]}
-      toolbarSortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
-        },
-      ]}
       toolbarSearchableKeys={searchableKeys}
       toolbarRelatedSearchableKeys={relatedSearchableKeys}
-      renderItem={item => (
+      headerRow={
+        <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+          <HeaderCell>{t`Actions`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={item => (
         <OrganizationTeamListItem
           key={item.id}
           value={item.name}

@@ -5,57 +5,45 @@ import { string, bool, func } from 'prop-types';
 import { t } from '@lingui/macro';
 import 'styled-components/macro';
 
-import {
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-} from '@patternfly/react-core';
-import DataListCell from '../../../components/DataListCell';
+import { Tr, Td } from '@patternfly/react-table';
 import Sparkline from '../../../components/Sparkline';
 import { Host } from '../../../types';
 
-function SmartInventoryHostListItem({ detailUrl, host, isSelected, onSelect }) {
+function SmartInventoryHostListItem({
+  detailUrl,
+  host,
+  isSelected,
+  onSelect,
+  rowIndex,
+}) {
   const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
     ...job,
     type: 'job',
   }));
 
-  const labelId = `check-action-${host.id}`;
-
   return (
-    <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-host-${host.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link to={`${detailUrl}`}>
-                <b>{host.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="recentJobs">
-              <Sparkline jobs={recentPlaybookJobs} />
-            </DataListCell>,
-            <DataListCell key="inventory">
-              <>
-                <b css="margin-right: 24px">{t`Inventory`}</b>
-                <Link
-                  to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
-                >
-                  {host.summary_fields.inventory.name}
-                </Link>
-              </>
-            </DataListCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr id={`host-row-${host.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+      />
+      <Td dataLabel={t`Name`}>
+        <Link to={`${detailUrl}`}>{host.name}</Link>
+      </Td>
+      <Td dataLabel={t`Recent jobs`}>
+        <Sparkline jobs={recentPlaybookJobs} />
+      </Td>
+      <Td dataLabel={t`Inventory`}>
+        <Link
+          to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
+        >
+          {host.summary_fields.inventory.name}
+        </Link>
+      </Td>
+    </Tr>
   );
 }
 

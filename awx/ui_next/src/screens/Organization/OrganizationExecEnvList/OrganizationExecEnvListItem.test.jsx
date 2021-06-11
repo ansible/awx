@@ -19,10 +19,14 @@ describe('<OrganizationExecEnvListItem/>', () => {
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationExecEnvListItem
-          executionEnvironment={executionEnvironment}
-          detailUrl="execution_environments/1/details"
-        />
+        <table>
+          <tbody>
+            <OrganizationExecEnvListItem
+              executionEnvironment={executionEnvironment}
+              detailUrl="execution_environments/1/details"
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('OrganizationExecEnvListItem').length).toBe(1);
@@ -31,15 +35,20 @@ describe('<OrganizationExecEnvListItem/>', () => {
   test('should render the proper data', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <OrganizationExecEnvListItem
-          executionEnvironment={executionEnvironment}
-          detailUrl="execution_environments/1/details"
-        />
+        <table>
+          <tbody>
+            <OrganizationExecEnvListItem
+              executionEnvironment={executionEnvironment}
+              detailUrl="execution_environments/1/details"
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
       wrapper
-        .find('DataListCell[aria-label="Execution environment image"]')
+        .find('Td')
+        .at(1)
         .text()
     ).toBe(executionEnvironment.image);
   });
