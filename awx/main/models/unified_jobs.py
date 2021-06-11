@@ -717,6 +717,9 @@ class UnifiedJob(
         editable=False,
         help_text=_("The version of Ansible Core installed in the execution environment."),
     )
+    work_unit_id = models.CharField(
+        max_length=255, blank=True, default=None, editable=False, null=True, help_text=_("The Receptor work unit ID associated with this job.")
+    )
 
     def get_absolute_url(self, request=None):
         RealClass = self.get_real_instance_class()
