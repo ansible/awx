@@ -13,6 +13,11 @@ def get_control_plane_execution_environment():
 def get_default_execution_environment():
     if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
         return settings.DEFAULT_EXECUTION_ENVIRONMENT
+    installed_default = ExecutionEnvironment.objects.filter(
+        image__in=[ee['image'] for ee in settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS], organization=None, managed_by_tower=False
+    ).first()
+    if installed_default:
+        return installed_default
     return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=False).first()
 
 
