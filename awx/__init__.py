@@ -34,6 +34,7 @@ else:
     from django.db.backends.base import schema
     from django.db.models import indexes
     from django.db.backends.utils import names_digest
+    from django.db import connection
 
 
 if HAS_DJANGO is True:
@@ -148,6 +149,11 @@ def manage():
     # Now run the command (or display the version).
     from django.conf import settings
     from django.core.management import execute_from_command_line
+
+    # enforce the postgres version is equal to 12. if not, then terminate program with exit code of 1
+    if (connection.pg_version // 10000) < 12:
+        sys.stderr.write("Postgres version 12 is required\n")
+        sys.exit(1)
 
     if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'):  # pragma: no cover
         sys.stdout.write('%s\n' % __version__)
