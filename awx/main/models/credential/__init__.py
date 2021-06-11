@@ -1118,6 +1118,7 @@ ManagedCredentialType(
                 'label': ugettext_noop('Authentication URL'),
                 'type': 'string',
                 'help_text': ugettext_noop('Authentication endpoint for the container registry.'),
+                'default': 'quay.io',
             },
             {
                 'id': 'username',
