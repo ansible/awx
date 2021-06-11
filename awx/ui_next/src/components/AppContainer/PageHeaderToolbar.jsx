@@ -127,48 +127,44 @@ function PageHeaderToolbar({
             ]}
           />
         </PageHeaderToolsItem>
-        <Tooltip position="left" content={<div>{t`User`}</div>}>
-          <PageHeaderToolsItem>
-            <Dropdown
-              id="toolbar-user-dropdown"
-              isPlain
-              isOpen={isUserOpen}
-              position={DropdownPosition.right}
-              onSelect={handleUserSelect}
-              toggle={
-                <DropdownToggle onToggle={setIsUserOpen}>
-                  <UserIcon />
-                  {loggedInUser && (
-                    <span style={{ marginLeft: '10px' }}>
-                      {loggedInUser.username}
-                    </span>
-                  )}
-                </DropdownToggle>
-              }
-              dropdownItems={[
-                <DropdownItem
-                  key="user"
-                  aria-label={t`User details`}
-                  href={
-                    loggedInUser
-                      ? `#/users/${loggedInUser.id}/details`
-                      : '#/home'
-                  }
-                >
-                  {t`User Details`}
-                </DropdownItem>,
-                <DropdownItem
-                  key="logout"
-                  component="button"
-                  onClick={onLogoutClick}
-                  id="logout-button"
-                >
-                  {t`Logout`}
-                </DropdownItem>,
-              ]}
-            />
-          </PageHeaderToolsItem>
-        </Tooltip>
+        <PageHeaderToolsItem>
+          <Dropdown
+            id="toolbar-user-dropdown"
+            isPlain
+            isOpen={isUserOpen}
+            position={DropdownPosition.right}
+            onSelect={handleUserSelect}
+            toggle={
+              <DropdownToggle onToggle={setIsUserOpen}>
+                <UserIcon />
+                {loggedInUser && (
+                  <span style={{ marginLeft: '10px' }}>
+                    {loggedInUser.username}
+                  </span>
+                )}
+              </DropdownToggle>
+            }
+            dropdownItems={[
+              <DropdownItem
+                key="user"
+                aria-label={t`User details`}
+                href={
+                  loggedInUser ? `#/users/${loggedInUser.id}/details` : '#/home'
+                }
+              >
+                {t`User Details`}
+              </DropdownItem>,
+              <DropdownItem
+                key="logout"
+                component="button"
+                onClick={onLogoutClick}
+                id="logout-button"
+              >
+                {t`Logout`}
+              </DropdownItem>,
+            ]}
+          />
+        </PageHeaderToolsItem>
       </PageHeaderToolsGroup>
     </PageHeaderTools>
   );
