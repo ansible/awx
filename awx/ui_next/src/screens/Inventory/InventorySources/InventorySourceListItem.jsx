@@ -94,16 +94,18 @@ function InventorySourceListItem({
         <ActionsTd dataLabel={t`Actions`}>
           {['running', 'pending', 'waiting'].includes(source?.status) ? (
             <ActionItem visible={source.summary_fields.user_capabilities.start}>
-              <JobCancelButton
-                job={{
-                  type: 'inventory_update',
-                  id: source.summary_fields.last_job.id,
-                }}
-                errorTitle={t`Inventory Source Sync Error`}
-                errorMessage={t`Failed to cancel Inventory Source Sync`}
-                title={t`Cancel Inventory Source Sync`}
-                showIconButton
-              />
+              {source.summary_fields?.current_job?.id && (
+                <JobCancelButton
+                  job={{
+                    type: 'inventory_update',
+                    id: source.summary_fields.current_job.id,
+                  }}
+                  errorTitle={t`Inventory Source Sync Error`}
+                  errorMessage={t`Failed to cancel Inventory Source Sync`}
+                  title={t`Cancel Inventory Source Sync`}
+                  showIconButton
+                />
+              )}
             </ActionItem>
           ) : (
             <ActionItem
