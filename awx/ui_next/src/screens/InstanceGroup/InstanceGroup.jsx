@@ -52,7 +52,7 @@ function InstanceGroup({ setBreadcrumb }) {
         defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
       };
     }, [id]),
-    { instanceGroup: {}, defaultControlPlane: '', defaultExecution: '' }
+    { instanceGroup: null, defaultControlPlane: '', defaultExecution: '' }
   );
 
   useEffect(() => {

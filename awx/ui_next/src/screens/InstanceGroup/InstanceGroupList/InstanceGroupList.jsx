@@ -50,6 +50,30 @@ function modifyInstanceGroups(
 function InstanceGroupList() {
   const location = useLocation();
   const match = useRouteMatch();
+  const {
+    error: settingsError,
+    isloading: isLoadingSettings,
+    request: fetchSettings,
+    result: { defaultControlPlane, defaultExecution },
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: {
+          DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+          DEFAULT_EXECUTION_QUEUE_NAME,
+        },
+      } = await SettingsAPI.readAll();
+      return {
+        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
+      };
+    }, []),
+    { defaultControlPlane: '', defaultExecution: '' }
+  );
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const {
     error: contentError,
@@ -61,32 +85,18 @@ function InstanceGroupList() {
       actions,
       relatedSearchableKeys,
       searchableKeys,
-      defaultControlPlane,
-      defaultExecution,
     },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
 
-      const [
-        response,
-        responseActions,
-        {
-          data: {
-            DEFAULT_CONTROL_PLANE_QUEUE_NAME,
-            DEFAULT_EXECUTION_QUEUE_NAME,
-          },
-        },
-      ] = await Promise.all([
+      const [response, responseActions] = await Promise.all([
         InstanceGroupsAPI.read(params),
         InstanceGroupsAPI.readOptions(),
-        SettingsAPI.readAll(),
       ]);
 
       return {
         instanceGroups: response.data.results,
-        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
-        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
         instanceGroupsCount: response.data.count,
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
@@ -160,15 +170,17 @@ function InstanceGroupList() {
   const pluralizedItemName = t`Instance Groups`;
 
   let errorMessageDelete = '';
+  const notdeletedable = selected.filter(
+    i => i.name === defaultControlPlane || i.name === defaultExecution
+  );
 
-  if (
-    modifiedSelected.some(
-      item =>
-        item.name === defaultControlPlane || item.name === defaultExecution
-    )
-  ) {
-    errorMessageDelete = errorMessageDelete.concat(
-      t`The following Instance Group cannot be deleted`
+  if (notdeletedable.length) {
+    errorMessageDelete = (
+      <Plural
+        value={notdeletedable.length}
+        one="The following Instance Group cannot be deleted"
+        other="The following Instance Groups cannot be deleted"
+      />
     );
   }
 
@@ -215,8 +227,8 @@ function InstanceGroupList() {
       <PageSection>
         <Card>
           <PaginatedTable
-            contentError={contentError}
-            hasContentLoading={isLoading || deleteLoading}
+            contentError={contentError || settingsError}
+            hasContentLoading={isLoading || deleteLoading || isLoadingSettings}
             items={instanceGroups}
             itemCount={instanceGroupsCount}
             pluralizedItemName={pluralizedItemName}
