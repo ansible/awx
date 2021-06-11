@@ -16,33 +16,50 @@ describe('<ExecutionEnvironmentTemplateListItem/>', () => {
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentTemplateListItem
-          template={template}
-          detailUrl={`/templates/${template.type}/${template.id}/details`}
-        />
+        <table>
+          <tbody>
+            <ExecutionEnvironmentTemplateListItem
+              template={template}
+              detailUrl={`/templates/${template.type}/${template.id}/details`}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('ExecutionEnvironmentTemplateListItem').length).toBe(1);
-    expect(wrapper.find('DataListCell[aria-label="Name"]').text()).toBe(
-      template.name
-    );
     expect(
-      wrapper.find('DataListCell[aria-label="Template type"]').text()
+      wrapper
+        .find('Td')
+        .at(0)
+        .text()
+    ).toBe(template.name);
+    expect(
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
     ).toBe('Job Template');
   });
 
   test('should distinguish template types', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentTemplateListItem
-          template={{ ...template, type: 'workflow_job_template' }}
-          detailUrl={`/templates/${template.type}/${template.id}/details`}
-        />
+        <table>
+          <tbody>
+            <ExecutionEnvironmentTemplateListItem
+              template={{ ...template, type: 'workflow_job_template' }}
+              detailUrl={`/templates/${template.type}/${template.id}/details`}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('ExecutionEnvironmentTemplateListItem').length).toBe(1);
     expect(
-      wrapper.find('DataListCell[aria-label="Template type"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
     ).toBe('Workflow Job Template');
   });
 });

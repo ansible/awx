@@ -11,9 +11,11 @@ import useSelected from '../../../util/useSelected';
 import { HostsAPI, InventoriesAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -82,9 +84,13 @@ function HostGroupsList({ host }) {
     fetchGroups();
   }, [fetchGroups]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    groups
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(groups);
 
   const {
     isLoading: isDisassociateLoading,
@@ -105,7 +111,7 @@ function HostGroupsList({ host }) {
 
   const handleDisassociate = async () => {
     await disassociateHosts();
-    setSelected([]);
+    clearSelected();
   };
 
   const fetchGroupsToAssociate = useCallback(
@@ -146,13 +152,13 @@ function HostGroupsList({ host }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isDisassociateLoading}
         items={groups}
         itemCount={itemCount}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
             name: t`Name`,
@@ -168,15 +174,15 @@ function HostGroupsList({ host }) {
             key: 'modified_by__username__icontains',
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`Name`,
-            key: 'name',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={item => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(item, index) => (
           <HostGroupItem
             key={item.id}
             group={item}
@@ -184,6 +190,7 @@ function HostGroupsList({ host }) {
             inventoryId={item.summary_fields.inventory.id}
             isSelected={selected.some(row => row.id === item.id)}
             onSelect={() => handleSelect(item)}
+            rowIndex={index}
           />
         )}
         renderToolbar={props => (
@@ -191,9 +198,7 @@ function HostGroupsList({ host }) {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...groups] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd

@@ -122,46 +122,63 @@ describe('<HostGroupsList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')(
-        true
-      );
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')(true);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(true);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')(
-        false
-      );
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')(false);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('DataListCheck').forEach(el => {
+    expect.assertions(9);
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
   });
@@ -236,17 +253,18 @@ describe('<HostGroupsList />', () => {
   });
 
   test('expected api calls are made for multi-disassociation', async () => {
+    expect.assertions(11);
     expect(HostsAPI.disassociateGroup).toHaveBeenCalledTimes(0);
     expect(HostsAPI.readAllGroups).toHaveBeenCalledTimes(1);
-    expect(wrapper.find('DataListCheck').length).toBe(3);
-    wrapper.find('DataListCheck').forEach(el => {
+
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(true);
     });
     wrapper.find('button[aria-label="Disassociate"]').simulate('click');
