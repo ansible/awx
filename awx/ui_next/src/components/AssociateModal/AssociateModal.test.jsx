@@ -54,6 +54,7 @@ describe('<AssociateModal />', () => {
 
   test('should fetch and render list items', () => {
     expect(fetchRequest).toHaveBeenCalledTimes(1);
+    expect(optionsRequest).toHaveBeenCalledTimes(1);
     expect(wrapper.find('CheckboxListItem').length).toBe(3);
   });
 

@@ -141,8 +141,10 @@ function InstanceList() {
     [instanceGroupId]
   );
 
-  const readInstancesOptions = () =>
-    InstanceGroupsAPI.readInstanceOptions(instanceGroupId);
+  const readInstancesOptions = useCallback(
+    () => InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
+    [instanceGroupId]
+  );
 
   return (
     <>
