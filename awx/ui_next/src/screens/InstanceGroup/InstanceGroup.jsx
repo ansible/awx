@@ -31,16 +31,13 @@ function InstanceGroup({ setBreadcrumb }) {
     isLoading,
     error: contentError,
     request: fetchInstanceGroups,
-    result: { instanceGroup, defaultControlPlane, defaultExecution },
+    result: { instanceGroup, defaultControlPlane },
   } = useRequest(
     useCallback(async () => {
       const [
         { data },
         {
-          data: {
-            DEFAULT_CONTROL_PLANE_QUEUE_NAME,
-            DEFAULT_EXECUTION_QUEUE_NAME,
-          },
+          data: { DEFAULT_CONTROL_PLANE_QUEUE_NAME },
         },
       ] = await Promise.all([
         InstanceGroupsAPI.readDetail(id),
@@ -49,10 +46,9 @@ function InstanceGroup({ setBreadcrumb }) {
       return {
         instanceGroup: data,
         defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
-        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
       };
     }, [id]),
-    { instanceGroup: {}, defaultControlPlane: '', defaultExecution: '' }
+    { instanceGroup: null, defaultControlPlane: '' }
   );
 
   useEffect(() => {
@@ -133,12 +129,14 @@ function InstanceGroup({ setBreadcrumb }) {
                 <Route path="/instance_groups/:id/edit">
                   <InstanceGroupEdit
                     instanceGroup={instanceGroup}
-                    defaultExecution={defaultExecution}
                     defaultControlPlane={defaultControlPlane}
                   />
                 </Route>
                 <Route path="/instance_groups/:id/details">
-                  <InstanceGroupDetails instanceGroup={instanceGroup} />
+                  <InstanceGroupDetails
+                    defaultControlPlane={defaultControlPlane}
+                    instanceGroup={instanceGroup}
+                  />
                 </Route>
                 <Route path="/instance_groups/:id/instances">
                   <InstanceList />

@@ -56,7 +56,6 @@ describe('<InstanceGroupEdit>', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <InstanceGroupEdit
-          defaultExecution="default"
           defaultControlPlane="controlplane"
           instanceGroup={instanceGroupData}
         />,
@@ -77,7 +76,6 @@ describe('<InstanceGroupEdit>', () => {
     await act(async () => {
       towerWrapper = mountWithContexts(
         <InstanceGroupEdit
-          defaultExecution="default"
           defaultControlPlane="controlplane"
           instanceGroup={{ ...instanceGroupData, name: 'controlplane' }}
         />,
@@ -92,28 +90,6 @@ describe('<InstanceGroupEdit>', () => {
     expect(
       towerWrapper.find('input#instance-group-name').prop('value')
     ).toEqual('controlplane');
-  });
-
-  test('default instance group name can not be updated', async () => {
-    let towerWrapper;
-    await act(async () => {
-      towerWrapper = mountWithContexts(
-        <InstanceGroupEdit
-          defaultExecution="default"
-          defaultControlPlane="controlplane"
-          instanceGroup={{ ...instanceGroupData, name: 'default' }}
-        />,
-        {
-          context: { router: { history } },
-        }
-      );
-    });
-    expect(
-      towerWrapper.find('input#instance-group-name').prop('disabled')
-    ).toBeTruthy();
-    expect(
-      towerWrapper.find('input#instance-group-name').prop('value')
-    ).toEqual('default');
   });
 
   test('handleSubmit should call the api and redirect to details page', async () => {
