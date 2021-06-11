@@ -209,6 +209,29 @@ describe('<AdvancedSearch />', () => {
         .prop('onKeyDown')({ key: 'Enter', preventDefault: jest.fn });
     });
     wrapper.update();
+    expect(advancedSearchMock).toBeCalledWith('baz__name__icontains', 'bar');
+    jest.clearAllMocks();
+    act(() => {
+      wrapper.find('Select[aria-label="Key select"]').invoke('onCreateOption')(
+        'baz'
+      );
+    });
+    wrapper.update();
+    act(() => {
+      wrapper
+        .find('Select[aria-label="Related search type"]')
+        .invoke('onSelect')({}, 'search');
+      wrapper
+        .find('TextInputBase[aria-label="Advanced search value input"]')
+        .invoke('onChange')('bar');
+    });
+    wrapper.update();
+    act(() => {
+      wrapper
+        .find('TextInputBase[aria-label="Advanced search value input"]')
+        .prop('onKeyDown')({ key: 'Enter', preventDefault: jest.fn });
+    });
+    wrapper.update();
     expect(advancedSearchMock).toBeCalledWith('baz__search', 'bar');
   });
 
@@ -217,7 +240,7 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={advancedSearchMock}
-        searchableKeys={[]}
+        searchableKeys={['foo']}
         relatedSearchableKeys={[]}
       />
     );
@@ -230,6 +253,9 @@ describe('<AdvancedSearch />', () => {
         {},
         'foo'
       );
+    });
+    wrapper.update();
+    act(() => {
       wrapper.find('Select[aria-label="Lookup select"]').invoke('onSelect')(
         {},
         'exact'
@@ -253,7 +279,7 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={advancedSearchMock}
-        searchableKeys={[]}
+        searchableKeys={['foo']}
         relatedSearchableKeys={[]}
       />
     );
@@ -265,6 +291,9 @@ describe('<AdvancedSearch />', () => {
       wrapper.find('Select[aria-label="Key select"]').invoke('onCreateOption')(
         'foo'
       );
+    });
+    wrapper.update();
+    act(() => {
       wrapper.find('Select[aria-label="Lookup select"]').invoke('onSelect')(
         {},
         'exact'
@@ -305,6 +334,9 @@ describe('<AdvancedSearch />', () => {
       wrapper.find('Select[aria-label="Key select"]').invoke('onCreateOption')(
         'foo'
       );
+    });
+    wrapper.update();
+    act(() => {
       wrapper.find('Select[aria-label="Lookup select"]').invoke('onSelect')(
         {},
         'exact'
@@ -362,5 +394,35 @@ describe('<AdvancedSearch />', () => {
     expect(
       selectOptions.find('SelectOption[id="and-option-select"]').prop('value')
     ).toBe('and');
+  });
+
+  test('Remove search option from related search type', () => {
+    wrapper = mountWithContexts(
+      <AdvancedSearch
+        onSearch={jest.fn}
+        searchableKeys={['foo', 'bar']}
+        relatedSearchableKeys={['bar', 'baz']}
+        enableRelatedFuzzyFiltering={false}
+      />
+    );
+    act(() => {
+      wrapper.find('Select[aria-label="Key select"]').invoke('onCreateOption')(
+        'baz'
+      );
+    });
+    wrapper.update();
+    wrapper
+      .find('Select[aria-label="Related search type"] SelectToggle')
+      .simulate('click');
+    const selectOptions = wrapper.find(
+      'Select[aria-label="Related search type"] SelectOption'
+    );
+    expect(selectOptions).toHaveLength(2);
+    expect(
+      selectOptions.find('SelectOption[id="name-option-select"]').prop('value')
+    ).toBe('name__icontains');
+    expect(
+      selectOptions.find('SelectOption[id="id-option-select"]').prop('value')
+    ).toBe('id');
   });
 });

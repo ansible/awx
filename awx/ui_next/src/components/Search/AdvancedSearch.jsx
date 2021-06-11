@@ -1,7 +1,6 @@
 import 'styled-components/macro';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -33,6 +32,7 @@ function AdvancedSearch({
   relatedSearchableKeys,
   maxSelectHeight,
   enableNegativeFiltering,
+  enableRelatedFuzzyFiltering,
 }) {
   // TODO: blocked by pf bug, eventually separate these into two groups in the select
   // for now, I'm spreading set to get rid of duplicate keys...when they are grouped
@@ -48,7 +48,30 @@ function AdvancedSearch({
   const [lookupSelection, setLookupSelection] = useState(null);
   const [keySelection, setKeySelection] = useState(null);
   const [searchValue, setSearchValue] = useState('');
+  const [relatedSearchKeySelected, setRelatedSearchKeySelected] = useState(
+    false
+  );
   const config = useConfig();
+
+  useEffect(() => {
+    if (
+      keySelection &&
+      relatedSearchableKeys.indexOf(keySelection) > -1 &&
+      searchableKeys.indexOf(keySelection) === -1
+    ) {
+      setLookupSelection('name__icontains');
+      setRelatedSearchKeySelected(true);
+    } else {
+      setLookupSelection(null);
+      setRelatedSearchKeySelected(false);
+    }
+  }, [keySelection]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (lookupSelection === 'search') {
+      setPrefixSelection(null);
+    }
+  }, [lookupSelection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdvancedSearch = e => {
     // keeps page from fully reloading
@@ -56,22 +79,9 @@ function AdvancedSearch({
 
     if (searchValue) {
       const actualPrefix = prefixSelection === 'and' ? null : prefixSelection;
-      let actualSearchKey;
-      // TODO: once we are able to group options for the key typeahead, we will
-      // probably want to be able to which group a key was clicked in for duplicates,
-      // rather than checking to make sure it's not in both for this appending
-      // __search logic
-      if (
-        relatedSearchableKeys.indexOf(keySelection) > -1 &&
-        searchableKeys.indexOf(keySelection) === -1 &&
-        keySelection.indexOf('__') === -1
-      ) {
-        actualSearchKey = `${keySelection}__search`;
-      } else {
-        actualSearchKey = [actualPrefix, keySelection, lookupSelection]
-          .filter(val => !!val)
-          .join('__');
-      }
+      const actualSearchKey = [actualPrefix, keySelection, lookupSelection]
+        .filter(val => !!val)
+        .join('__');
       onSearch(actualSearchKey, searchValue);
       setSearchValue('');
     }
@@ -83,44 +93,211 @@ function AdvancedSearch({
     }
   };
 
+  const renderSetType = () => (
+    <Select
+      ouiaId="set-type-typeahead"
+      aria-label={t`Set type select`}
+      className="setTypeSelect"
+      variant={SelectVariant.typeahead}
+      typeAheadAriaLabel={t`Set type typeahead`}
+      onToggle={setIsPrefixDropdownOpen}
+      onSelect={(event, selection) => setPrefixSelection(selection)}
+      onClear={() => setPrefixSelection(null)}
+      selections={prefixSelection}
+      isOpen={isPrefixDropdownOpen}
+      placeholderText={t`Set type`}
+      maxHeight={maxSelectHeight}
+      noResultsFoundText={t`No results found`}
+      isDisabled={lookupSelection === 'search'}
+    >
+      <SelectOption
+        id="and-option-select"
+        key="and"
+        value="and"
+        description={t`Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected.`}
+      />
+      <SelectOption
+        id="or-option-select"
+        key="or"
+        value="or"
+        description={t`Returns results that satisfy this one or any other filters.`}
+      />
+      {enableNegativeFiltering && (
+        <SelectOption
+          id="not-option-select"
+          key="not"
+          value="not"
+          description={t`Returns results that have values other than this one as well as other filters.`}
+        />
+      )}
+    </Select>
+  );
+
+  const renderRelatedLookupType = () => (
+    <Select
+      ouiaId="set-lookup-typeahead"
+      aria-label={t`Related search type`}
+      className="lookupSelect"
+      variant={SelectVariant.typeahead}
+      typeAheadAriaLabel={t`Related search type typeahead`}
+      onToggle={setIsLookupDropdownOpen}
+      onSelect={(event, selection) => setLookupSelection(selection)}
+      selections={lookupSelection}
+      isOpen={isLookupDropdownOpen}
+      placeholderText={t`Related search type`}
+      maxHeight={maxSelectHeight}
+      noResultsFoundText={t`No results found`}
+    >
+      <SelectOption
+        id="name-option-select"
+        key="name__icontains"
+        value="name__icontains"
+        description={t`Fuzzy search on name field.`}
+      />
+      <SelectOption
+        id="id-option-select"
+        key="id"
+        value="id"
+        description={t`Exact search on id field.`}
+      />
+      {enableRelatedFuzzyFiltering && (
+        <SelectOption
+          id="search-option-select"
+          key="search"
+          value="search"
+          description={t`Fuzzy search on id, name or description fields.`}
+        />
+      )}
+    </Select>
+  );
+
+  const renderLookupType = () => (
+    <Select
+      ouiaId="set-lookup-typeahead"
+      aria-label={t`Lookup select`}
+      className="lookupSelect"
+      variant={SelectVariant.typeahead}
+      typeAheadAriaLabel={t`Lookup typeahead`}
+      onToggle={setIsLookupDropdownOpen}
+      onSelect={(event, selection) => setLookupSelection(selection)}
+      onClear={() => setLookupSelection(null)}
+      selections={lookupSelection}
+      isOpen={isLookupDropdownOpen}
+      placeholderText={t`Lookup type`}
+      maxHeight={maxSelectHeight}
+      noResultsFoundText={t`No results found`}
+    >
+      <SelectOption
+        id="exact-option-select"
+        key="exact"
+        value="exact"
+        description={t`Exact match (default lookup if not specified).`}
+      />
+      <SelectOption
+        id="iexact-option-select"
+        key="iexact"
+        value="iexact"
+        description={t`Case-insensitive version of exact.`}
+      />
+
+      <SelectOption
+        id="contains-option-select"
+        key="contains"
+        value="contains"
+        description={t`Field contains value.`}
+      />
+      <SelectOption
+        id="icontains-option-select"
+        key="icontains"
+        value="icontains"
+        description={t`Case-insensitive version of contains`}
+      />
+      <SelectOption
+        id="startswith-option-select"
+        key="startswith"
+        value="startswith"
+        description={t`Field starts with value.`}
+      />
+      <SelectOption
+        id="istartswith-option-select"
+        key="istartswith"
+        value="istartswith"
+        description={t`Case-insensitive version of startswith.`}
+      />
+      <SelectOption
+        id="endswith-option-select"
+        key="endswith"
+        value="endswith"
+        description={t`Field ends with value.`}
+      />
+      <SelectOption
+        id="iendswith-option-select"
+        key="iendswith"
+        value="iendswith"
+        description={t`Case-insensitive version of endswith.`}
+      />
+      <SelectOption
+        id="regex-option-select"
+        key="regex"
+        value="regex"
+        description={t`Field matches the given regular expression.`}
+      />
+      <SelectOption
+        id="iregex-option-select"
+        key="iregex"
+        value="iregex"
+        description={t`Case-insensitive version of regex.`}
+      />
+      <SelectOption
+        id="gt-option-select"
+        key="gt"
+        value="gt"
+        description={t`Greater than comparison.`}
+      />
+      <SelectOption
+        id="gte-option-select"
+        key="gte"
+        value="gte"
+        description={t`Greater than or equal to comparison.`}
+      />
+      <SelectOption
+        id="lt-option-select"
+        key="lt"
+        value="lt"
+        description={t`Less than comparison.`}
+      />
+      <SelectOption
+        id="lte-option-select"
+        key="lte"
+        value="lte"
+        description={t`Less than or equal to comparison.`}
+      />
+      <SelectOption
+        id="isnull-option-select"
+        key="isnull"
+        value="isnull"
+        description={t`Check whether the given field or related object is null; expects a boolean value.`}
+      />
+      <SelectOption
+        id="in-option-select"
+        key="in"
+        value="in"
+        description={t`Check whether the given field's value is present in the list provided; expects a comma-separated list of items.`}
+      />
+    </Select>
+  );
+
   return (
     <AdvancedGroup>
-      <Select
-        ouiaId="set-type-typeahead"
-        aria-label={t`Set type select`}
-        className="setTypeSelect"
-        variant={SelectVariant.typeahead}
-        typeAheadAriaLabel={t`Set type typeahead`}
-        onToggle={setIsPrefixDropdownOpen}
-        onSelect={(event, selection) => setPrefixSelection(selection)}
-        onClear={() => setPrefixSelection(null)}
-        selections={prefixSelection}
-        isOpen={isPrefixDropdownOpen}
-        placeholderText={t`Set type`}
-        maxHeight={maxSelectHeight}
-        noResultsFoundText={t`No results found`}
-      >
-        <SelectOption
-          id="and-option-select"
-          key="and"
-          value="and"
-          description={t`Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected.`}
-        />
-        <SelectOption
-          id="or-option-select"
-          key="or"
-          value="or"
-          description={t`Returns results that satisfy this one or any other filters.`}
-        />
-        {enableNegativeFiltering && (
-          <SelectOption
-            id="not-option-select"
-            key="not"
-            value="not"
-            description={t`Returns results that have values other than this one as well as other filters.`}
-          />
-        )}
-      </Select>
+      {lookupSelection === 'search' ? (
+        <Tooltip
+          content={t`Set type disabled for related search field fuzzy searches`}
+        >
+          {renderSetType()}
+        </Tooltip>
+      ) : (
+        renderSetType()
+      )}
       <Select
         ouiaId="set-key-typeahead"
         aria-label={t`Key select`}
@@ -148,118 +325,9 @@ function AdvancedSearch({
           </SelectOption>
         ))}
       </Select>
-      <Select
-        ouiaId="set-lookup-typeahead"
-        aria-label={t`Lookup select`}
-        className="lookupSelect"
-        variant={SelectVariant.typeahead}
-        typeAheadAriaLabel={t`Lookup typeahead`}
-        onToggle={setIsLookupDropdownOpen}
-        onSelect={(event, selection) => setLookupSelection(selection)}
-        onClear={() => setLookupSelection(null)}
-        selections={lookupSelection}
-        isOpen={isLookupDropdownOpen}
-        placeholderText={t`Lookup type`}
-        maxHeight={maxSelectHeight}
-        noResultsFoundText={t`No results found`}
-      >
-        <SelectOption
-          id="exact-option-select"
-          key="exact"
-          value="exact"
-          description={t`Exact match (default lookup if not specified).`}
-        />
-        <SelectOption
-          id="iexact-option-select"
-          key="iexact"
-          value="iexact"
-          description={t`Case-insensitive version of exact.`}
-        />
-        <SelectOption
-          id="contains-option-select"
-          key="contains"
-          value="contains"
-          description={t`Field contains value.`}
-        />
-        <SelectOption
-          id="icontains-option-select"
-          key="icontains"
-          value="icontains"
-          description={t`Case-insensitive version of contains`}
-        />
-        <SelectOption
-          id="startswith-option-select"
-          key="startswith"
-          value="startswith"
-          description={t`Field starts with value.`}
-        />
-        <SelectOption
-          id="istartswith-option-select"
-          key="istartswith"
-          value="istartswith"
-          description={t`Case-insensitive version of startswith.`}
-        />
-        <SelectOption
-          id="endswith-option-select"
-          key="endswith"
-          value="endswith"
-          description={t`Field ends with value.`}
-        />
-        <SelectOption
-          id="iendswith-option-select"
-          key="iendswith"
-          value="iendswith"
-          description={t`Case-insensitive version of endswith.`}
-        />
-        <SelectOption
-          id="regex-option-select"
-          key="regex"
-          value="regex"
-          description={t`Field matches the given regular expression.`}
-        />
-        <SelectOption
-          id="iregex-option-select"
-          key="iregex"
-          value="iregex"
-          description={t`Case-insensitive version of regex.`}
-        />
-        <SelectOption
-          id="gt-option-select"
-          key="gt"
-          value="gt"
-          description={t`Greater than comparison.`}
-        />
-        <SelectOption
-          id="gte-option-select"
-          key="gte"
-          value="gte"
-          description={t`Greater than or equal to comparison.`}
-        />
-        <SelectOption
-          id="lt-option-select"
-          key="lt"
-          value="lt"
-          description={t`Less than comparison.`}
-        />
-        <SelectOption
-          id="lte-option-select"
-          key="lte"
-          value="lte"
-          description={t`Less than or equal to comparison.`}
-        />
-        <SelectOption
-          id="isnull-option-select"
-          key="isnull"
-          value="isnull"
-          description={t`Check whether the given field or related object is null; expects a boolean value.`}
-        />
-        <SelectOption
-          id="in-option-select"
-          key="in"
-          value="in"
-          description={t`Check whether the given field's value is present in the list provided; expects a comma-separated list of items.`}
-        />
-      </Select>
+      {relatedSearchKeySelected
+        ? renderRelatedLookupType()
+        : renderLookupType()}
       <InputGroup>
         <TextInput
           data-cy="advanced-search-text-input"
@@ -303,6 +371,7 @@ AdvancedSearch.propTypes = {
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   maxSelectHeight: PropTypes.string,
   enableNegativeFiltering: PropTypes.bool,
+  enableRelatedFuzzyFiltering: PropTypes.bool,
 };
 
 AdvancedSearch.defaultProps = {
@@ -310,6 +379,7 @@ AdvancedSearch.defaultProps = {
   relatedSearchableKeys: [],
   maxSelectHeight: '300px',
   enableNegativeFiltering: true,
+  enableRelatedFuzzyFiltering: true,
 };
 
 export default AdvancedSearch;

@@ -7,9 +7,18 @@ export function toSearchParams(string = '') {
   if (string === '') {
     return {};
   }
-  return string
-    .replace(/^\?/, '')
-    .replace(/&/g, ' and ')
+
+  const readableParamsStr = string.replace(/^\?/, '').replace(/&/g, ' and ');
+  const orArr = readableParamsStr.split(/ or /);
+
+  if (orArr.length > 1) {
+    orArr.forEach((str, index) => {
+      orArr[index] = `or__${str}`;
+    });
+  }
+
+  return orArr
+    .join(' and ')
     .split(/ and | or /)
     .map(s => s.split('='))
     .reduce((searchParams, [k, v]) => {

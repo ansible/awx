@@ -82,6 +82,7 @@ const SmartInventoryFormFields = ({ inventory }) => {
         isValid={!hostFilterMeta.touched || !hostFilterMeta.error}
         isDisabled={!organizationField.value}
         enableNegativeFiltering={false}
+        enableRelatedFuzzyFiltering={false}
       />
       <InstanceGroupsLookup
         value={instanceGroupsField.value}

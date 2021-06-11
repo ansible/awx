@@ -33,6 +33,20 @@ describe('toSearchParams', () => {
     };
     expect(toSearchParams(string)).toEqual(paramsObject);
   });
+  test('should take a host filter string separated by or and return search params object with or', () => {
+    string = 'foo=bar or foo=baz';
+    paramsObject = {
+      or__foo: ['bar', 'baz'],
+    };
+    expect(toSearchParams(string)).toEqual(paramsObject);
+  });
+  test('should take a host filter string with or and return search params object with or', () => {
+    string = 'or__foo=1&or__foo=2';
+    paramsObject = {
+      or__foo: ['1', '2'],
+    };
+    expect(toSearchParams(string)).toEqual(paramsObject);
+  });
 });
 
 describe('toQueryString', () => {
@@ -107,6 +121,13 @@ describe('toHostFilter', () => {
     expect(toHostFilter(object)).toEqual(
       'name=foo or name__contains=bar or name__iexact=foo'
     );
+  });
+
+  test('should return a host filter with or conditional when value is array', () => {
+    const object = {
+      or__groups__id: ['1', '2'],
+    };
+    expect(toHostFilter(object)).toEqual('groups__id=1 or groups__id=2');
   });
 });
 

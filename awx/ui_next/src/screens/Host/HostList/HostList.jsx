@@ -1,9 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-
 import { HostsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -46,8 +44,15 @@ function HostList() {
     }
   });
 
-  const hasNonDefaultSearchParams =
-    Object.keys(nonDefaultSearchParams).length > 0;
+  const hasInvalidHostFilterKeys = () => {
+    const nonDefaultSearchKeys = Object.keys(nonDefaultSearchParams);
+    return (
+      nonDefaultSearchKeys.filter(searchKey => searchKey.startsWith('not__'))
+        .length > 0 ||
+      nonDefaultSearchKeys.filter(searchKey => searchKey.endsWith('__search'))
+        .length > 0
+    );
+  };
 
   const {
     result: { hosts, count, actions, relatedSearchableKeys, searchableKeys },
@@ -185,7 +190,11 @@ function HostList() {
                 ...(canAdd
                   ? [
                       <SmartInventoryButton
-                        isDisabled={!hasNonDefaultSearchParams}
+                        hasInvalidKeys={hasInvalidHostFilterKeys()}
+                        isDisabled={
+                          Object.keys(nonDefaultSearchParams).length === 0 ||
+                          hasInvalidHostFilterKeys()
+                        }
                         onClick={() => handleSmartInventoryClick()}
                       />,
                     ]

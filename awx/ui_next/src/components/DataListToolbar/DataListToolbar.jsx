@@ -40,6 +40,7 @@ function DataListToolbar({
   qsConfig,
   pagination,
   enableNegativeFiltering,
+  enableRelatedFuzzyFiltering,
 }) {
   const showExpandCollapse = onCompact && onExpand;
   const [isKebabOpen, setIsKebabOpen] = useState(false);
@@ -92,6 +93,7 @@ function DataListToolbar({
               onShowAdvancedSearch={onShowAdvancedSearch}
               onRemove={onRemove}
               enableNegativeFiltering={enableNegativeFiltering}
+              enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
             />
           </ToolbarItem>
           {sortColumns && (
@@ -173,6 +175,7 @@ DataListToolbar.propTypes = {
   onSort: PropTypes.func,
   additionalControls: PropTypes.arrayOf(PropTypes.node),
   enableNegativeFiltering: PropTypes.bool,
+  enableRelatedFuzzyFiltering: PropTypes.bool,
 };
 
 DataListToolbar.defaultProps = {
@@ -192,6 +195,7 @@ DataListToolbar.defaultProps = {
   onSort: null,
   additionalControls: [],
   enableNegativeFiltering: true,
+  enableRelatedFuzzyFiltering: true,
 };
 
 export default DataListToolbar;

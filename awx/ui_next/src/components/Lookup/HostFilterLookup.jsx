@@ -120,6 +120,7 @@ function HostFilterLookup({
   organizationId,
   value,
   enableNegativeFiltering,
+  enableRelatedFuzzyFiltering,
 }) {
   const history = useHistory();
   const location = useLocation();
@@ -370,6 +371,7 @@ function HostFilterLookup({
                 {...props}
                 fillWidth
                 enableNegativeFiltering={enableNegativeFiltering}
+                enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
               />
             )}
             toolbarSearchColumns={searchColumns}
@@ -404,6 +406,7 @@ HostFilterLookup.propTypes = {
   organizationId: number,
   value: string,
   enableNegativeFiltering: bool,
+  enableRelatedFuzzyFiltering: bool,
 };
 HostFilterLookup.defaultProps = {
   isValid: true,
@@ -412,6 +415,7 @@ HostFilterLookup.defaultProps = {
   organizationId: null,
   value: '',
   enableNegativeFiltering: true,
+  enableRelatedFuzzyFiltering: true,
 };
 
 export default withRouter(HostFilterLookup);
