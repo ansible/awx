@@ -115,28 +115,37 @@ function JobTemplateDetail({ template }) {
   );
   const generateCallBackUrl = `${window.location.origin + url}callback/`;
   const renderOptionsField =
-    become_enabled || host_config_key || allow_simultaneous || use_fact_cache;
+    become_enabled ||
+    host_config_key ||
+    allow_simultaneous ||
+    use_fact_cache ||
+    webhook_service;
 
   const renderOptions = (
     <TextList component={TextListVariants.ul}>
       {become_enabled && (
         <TextListItem component={TextListItemVariants.li}>
-          {t`Enable Privilege Escalation`}
+          {t`Privilege Escalation`}
         </TextListItem>
       )}
       {host_config_key && (
         <TextListItem component={TextListItemVariants.li}>
-          {t`Allow Provisioning Callbacks`}
+          {t`Provisioning Callbacks`}
         </TextListItem>
       )}
       {allow_simultaneous && (
         <TextListItem component={TextListItemVariants.li}>
-          {t`Enable Concurrent Jobs`}
+          {t`Concurrent Jobs`}
         </TextListItem>
       )}
       {use_fact_cache && (
         <TextListItem component={TextListItemVariants.li}>
-          {t`Use Fact Storage`}
+          {t`Fact Storage`}
+        </TextListItem>
+      )}
+      {webhook_service && (
+        <TextListItem component={TextListItemVariants.li}>
+          {t`Webhooks`}
         </TextListItem>
       )}
     </TextList>
@@ -258,9 +267,6 @@ function JobTemplateDetail({ template }) {
             }
           />
         )}
-        {renderOptionsField && (
-          <Detail label={t`Options`} value={renderOptions} />
-        )}
         <UserDateDetail
           label={t`Created`}
           date={created}
@@ -271,6 +277,9 @@ function JobTemplateDetail({ template }) {
           date={modified}
           user={summary_fields.modified_by}
         />
+        {renderOptionsField && (
+          <Detail fullWidth label={t`Enabled Options`} value={renderOptions} />
+        )}
         {summary_fields.credentials && summary_fields.credentials.length > 0 && (
           <Detail
             fullWidth

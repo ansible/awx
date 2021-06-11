@@ -60,12 +60,14 @@ describe('PromptInventorySourceDetail', () => {
     );
     expect(
       wrapper
-        .find('Detail[label="Options"]')
+        .find('Detail[label="Enabled Options"]')
         .containsAllMatchingElements([
-          <li>Overwrite</li>,
-          <li>Overwrite Variables</li>,
-          <li>Update on Launch</li>,
-          <li>Update on Project Update</li>,
+          <li>
+            Overwrite local groups and hosts from remote inventory source
+          </li>,
+          <li>Overwrite local variables from remote inventory source</li>,
+          <li>Update on launch</li>,
+          <li>Update on project update</li>,
         ])
     ).toEqual(true);
   });

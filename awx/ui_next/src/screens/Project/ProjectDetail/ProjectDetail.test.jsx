@@ -70,7 +70,7 @@ describe('<ProjectDetail />', () => {
     scm_refspec: 'refs/remotes/*',
     scm_clean: true,
     scm_delete_on_update: true,
-    scm_track_submodules: false,
+    scm_track_submodules: true,
     credential: 100,
     status: 'successful',
     organization: 10,
@@ -127,12 +127,13 @@ describe('<ProjectDetail />', () => {
     );
     expect(
       wrapper
-        .find('Detail[label="Options"]')
+        .find('Detail[label="Enabled Options"]')
         .containsAllMatchingElements([
-          <li>Clean</li>,
-          <li>Delete on Update</li>,
-          <li>Update Revision on Launch</li>,
-          <li>Allow Branch Override</li>,
+          <li>Discard local changes before syncing</li>,
+          <li>Delete the project before syncing</li>,
+          <li>Track submodules latest commit on branch</li>,
+          <li>Update revision on job launch</li>,
+          <li>Allow branch override</li>,
         ])
     ).toEqual(true);
   });
@@ -151,7 +152,7 @@ describe('<ProjectDetail />', () => {
     const wrapper = mountWithContexts(
       <ProjectDetail project={{ ...mockProject, ...mockOptions }} />
     );
-    expect(wrapper.find('Detail[label="Options"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Enabled Options"]').length).toBe(0);
   });
 
   test('should have proper number of delete detail requests', () => {
