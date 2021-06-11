@@ -67,6 +67,14 @@ class HasStatus(object):
         msg += '{0}-{1} has status of {2}, which is not in {3}.'.format(self.type.title(), self.id, self.status, status_list)
         if getattr(self, 'job_explanation', ''):
             msg += '\njob_explanation: {}'.format(bytes_to_str(self.job_explanation))
+        if getattr(self, 'execution_environment', ''):
+            msg += '\nexecution_environment: {}'.format(bytes_to_str(self.execution_environment))
+            if getattr(self, 'related', False):
+                ee = self.related.execution_environment.get()
+                msg += f'\nee_image: {ee.image}'
+                msg += f'\nee_credential: {ee.credential}'
+                msg += f'\nee_pull_option: {ee.pull}'
+                msg += f'\nee_summary_fields: {ee.summary_fields}'
         if getattr(self, 'result_traceback', ''):
             msg += '\nresult_traceback:\n{}'.format(bytes_to_str(self.result_traceback))
 
