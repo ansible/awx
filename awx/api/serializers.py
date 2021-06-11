@@ -768,6 +768,7 @@ class UnifiedJobSerializer(BaseSerializer):
             'result_traceback',
             'event_processing_finished',
             'launched_by',
+            'work_unit_id',
         )
 
         extra_kwargs = {
