@@ -377,10 +377,9 @@ describe('<ResourceAccessList/> for credential access', () => {
 
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() =>
-      wrapper.find('input[aria-label="Select row 1"]').invoke('onChange')(true)
-    );
+    act(() => wrapper.find('Tr#list-item-14').invoke('onClick')());
     wrapper.update();
+
     expect(
       wrapper.find('input[aria-label="Select row 1"]').prop('checked')
     ).toBe(true);
@@ -432,9 +431,7 @@ describe('<ResourceAccessList/> for credential access', () => {
 
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() =>
-      wrapper.find('input[aria-label="Select row 1"]').invoke('onChange')(true)
-    );
+    act(() => wrapper.find('Tr#list-item-14').invoke('onClick')());
     wrapper.update();
     expect(
       wrapper.find('input[aria-label="Select row 1"]').prop('checked')
@@ -490,9 +487,8 @@ describe('<ResourceAccessList/> for credential access', () => {
 
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() =>
-      wrapper.find('input[aria-label="Select row 1"]').invoke('onChange')(true)
-    );
+    act(() => wrapper.find('Tr#list-item-14').invoke('onClick')());
+
     wrapper.update();
     expect(
       wrapper.find('input[aria-label="Select row 1"]').prop('checked')
