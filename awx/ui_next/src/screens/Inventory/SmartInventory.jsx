@@ -28,25 +28,22 @@ function SmartInventory({ setBreadcrumb }) {
   const match = useRouteMatch('/inventories/smart_inventory/:id');
 
   const {
-    result: { inventory },
+    result: inventory,
     error: contentError,
     isLoading: hasContentLoading,
     request: fetchInventory,
   } = useRequest(
     useCallback(async () => {
       const { data } = await InventoriesAPI.readDetail(match.params.id);
-      return {
-        inventory: data,
-      };
+      return data;
     }, [match.params.id]),
-    {
-      inventory: null,
-    }
+
+    null
   );
 
   useEffect(() => {
     fetchInventory();
-  }, [fetchInventory]);
+  }, [fetchInventory, location.pathname]);
 
   useEffect(() => {
     if (inventory) {
