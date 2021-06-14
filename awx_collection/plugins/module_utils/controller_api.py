@@ -735,6 +735,7 @@ class ControllerAPIModule(ControllerModule):
                 self.json_output['msg'] = 'Job with id {0} failed'.format(object_name)
             else:
                 self.json_output['msg'] = 'The {0} - {1}, failed'.format(object_type, object_name)
+                self.json_output["job_data"] = result["json"]
             self.wait_output(result)
             self.fail_json(**self.json_output)
 
