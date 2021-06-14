@@ -230,4 +230,25 @@ describe('<UserForm />', () => {
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();
   });
+
+  test('should not show user type field', async () => {
+    const handleCancel = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserForm
+          user={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={handleCancel}
+        />,
+        {
+          context: {
+            config: {
+              me: { is_superuser: false },
+            },
+          },
+        }
+      );
+    });
+    expect(wrapper.find('FormGroup[label="User Type"]')).toHaveLength(0);
+  });
 });
