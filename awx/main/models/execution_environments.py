@@ -1,3 +1,8 @@
+from base64 import b64encode
+import json
+import os
+import stat
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -51,3 +56,20 @@ class ExecutionEnvironment(CommonModel):
 
     def get_absolute_url(self, request=None):
         return reverse('api:execution_environment_detail', kwargs={'pk': self.pk}, request=request)
+
+    def build_authfile(self, path):
+        if not self.credential:
+            return None
+        if not self.credential.has_inputs(field_names=('host', 'username', 'password')):
+            raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
+
+        authpath = f'{path}/auth.json'
+        with open(authpath, 'w') as authfile:
+            os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR)
+            host = self.credential.get_input('host')
+            username = self.credential.get_input('username')
+            password = self.credential.get_input('password')
+            token = f"{username}:{password}"
+            auth_data = {'auths': {host: {'auth': b64encode(token.encode('utf-8')).decode('utf-8')}}}
+            authfile.write(json.dumps(auth_data, indent=4))
+        return authpath

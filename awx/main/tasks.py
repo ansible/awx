@@ -791,23 +791,9 @@ class BaseTask(object):
             "container_options": ['--user=root'],
         }
 
-        if instance.execution_environment.credential:
-            cred = instance.execution_environment.credential
-            if cred.has_inputs(field_names=('host', 'username', 'password')):
-                path = os.path.split(private_data_dir)[0]
-                with open(path + '/auth.json', 'w') as authfile:
-                    os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR)
-
-                    host = cred.get_input('host')
-                    username = cred.get_input('username')
-                    password = cred.get_input('password')
-                    token = "{}:{}".format(username, password)
-                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('UTF-8')).decode('UTF-8')}}}
-                    authfile.write(json.dumps(auth_data, indent=4))
-                params["container_options"].append(f'--authfile={authfile.name}')
-            else:
-                raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
-
+        authpath = instance.execution_environment.build_authfile(private_data_dir)
+        if authpath is not None:
+            params["container_options"].append(f'--authfile={authpath}')
         pull = instance.execution_environment.pull
         if pull:
             params['container_options'].append(f'--pull={pull}')

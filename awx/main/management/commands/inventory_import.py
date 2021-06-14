@@ -2,12 +2,10 @@
 # All Rights Reserved.
 
 # Python
-from base64 import b64encode
 import json
 import logging
 import os
 import re
-import stat
 import subprocess
 import sys
 import time
@@ -79,24 +77,11 @@ class AnsibleInventoryLoader(object):
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
         ee = get_default_execution_environment()
         bargs.extend([ee.image])
-        cred = ee.credential
-        if cred.has_inputs(field_names=('host', 'username', 'password')):
-            path = functioning_dir(self.source)
-            with open(path + '/auth.json', 'w') as authfile:
-                os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR)
-
-                host = cred.get_input('host')
-                username = cred.get_input('username')
-                password = cred.get_input('password')
-                token = "{}:{}".format(username, password)
-                auth_data = {'auths': {host: {'auth': b64encode(token.encode('utf-8')).decode('utf-8')}}}
-                authfile.write(json.dumps(auth_data, indent=4))
-            bargs.append(f'--authfile={authfile.name}')
-        else:
-            raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
-        pull = ee.pull
-        if pull:
-            bargs.append(f'--pull={pull}')
+        authpath = ee.build_authfile(functioning_dir(self.source))
+        if authpath is not None:
+            bargs.append(f'--authfile={authpath}')
+        if ee.pull:
+            bargs.append(f'--pull={ee.pull}')
 
         bargs.extend(['ansible-inventory', '-i', self.source])
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])
