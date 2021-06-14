@@ -1,5 +1,24 @@
 # Changelog
 
+# 19.2.1 (June 14, 2021)
+
+- There are now 2 default Instance Groups: 'controlplane' and 'default' (https://github.com/ansible/awx/pull/10324)
+- Removed deprecated modules: `tower_send`, `tower_receive`, `tower_workflow_template` (https://github.com/ansible/awx/pull/9980)
+- Improved UI performance when a large amount of events are being emmitted by jobs (https://github.com/ansible/awx/pull/10053)
+- Settings UI Revert All button now issues a DELETE instead of PATCHing all fields (https://github.com/ansible/awx/pull/10376)
+- Fixed a bug with the schedule date/time picker in Firefox (https://github.com/ansible/awx/pull/10291)
+- UI now preselects the system default Galaxy credential when creating a new organization (https://github.com/ansible/awx/pull/10395)
+- Added favicon (https://github.com/ansible/awx/pull/10388)
+- Removed `not` option from smart inventory host filter search as it's not supported by the API (https://github.com/ansible/awx/pull/10380)
+- Added button to allow user to refetch project revision after project sync has finished (https://github.com/ansible/awx/pull/10334)
+- Fixed bug where extraneous CONFIG requests were made on logout (https://github.com/ansible/awx/pull/10379)
+- Fixed bug where users were unable to cancel inventory syncs (https://github.com/ansible/awx/pull/10346)
+- Added missing dashboard graph filters (https://github.com/ansible/awx/pull/10349)
+- Added support for typing in to single select lookup form fields (https://github.com/ansible/awx/pull/10257)
+- Fixed various bugs related to user sessions (https://github.com/ansible/awx/pull/9908)
+- Fixed bug where sorting in modals would close the modal (https://github.com/ansible/awx/pull/10215)
+- Added support for Red Hat Insights as an inventory source (https://github.com/ansible/awx/pull/8650)
+
 # 19.2.0 (June 1, 2021)
 - Fixed race condition that would sometimes cause jobs to error out at the very end of an otherwise successful run (https://github.com/ansible/receptor/pull/328)
 - Fixes bug where users were unable to click on text next to checkboxes in modals (https://github.com/ansible/awx/pull/10279)
