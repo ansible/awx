@@ -18,6 +18,9 @@ const workflowContext = {
   showTools: false,
 };
 
+function shouldFind(element) {
+  expect(wrapper.find(element)).toHaveLength(1);
+}
 describe('WorkflowOutputToolbar', () => {
   beforeAll(() => {
     const nodes = [
@@ -43,6 +46,13 @@ describe('WorkflowOutputToolbar', () => {
 
   afterAll(() => {
     wrapper.unmount();
+  });
+
+  test('should render correct toolbar item', () => {
+    shouldFind(`Button[ouiaId="edit-workflow"]`);
+    shouldFind('Button#workflow-output-toggle-legend');
+    shouldFind('Badge');
+    shouldFind('Button#workflow-output-toggle-tools');
   });
 
   test('Shows correct number of nodes', () => {
