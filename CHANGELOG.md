@@ -1,7 +1,5 @@
 # Changelog
 
-This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
-
 # 19.2.0 (June 1, 2021)
 - Fixed race condition that would sometimes cause jobs to error out at the very end of an otherwise successful run (https://github.com/ansible/receptor/pull/328)
 - Fixes bug where users were unable to click on text next to checkboxes in modals (https://github.com/ansible/awx/pull/10279)
