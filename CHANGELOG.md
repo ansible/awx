@@ -18,6 +18,7 @@
 - Fixed various bugs related to user sessions (https://github.com/ansible/awx/pull/9908)
 - Fixed bug where sorting in modals would close the modal (https://github.com/ansible/awx/pull/10215)
 - Added support for Red Hat Insights as an inventory source (https://github.com/ansible/awx/pull/8650)
+- Fixed bugs when selecting items in a list then sorting/paginating (https://github.com/ansible/awx/pull/10329)
 
 # 19.2.0 (June 1, 2021)
 - Fixed race condition that would sometimes cause jobs to error out at the very end of an otherwise successful run (https://github.com/ansible/receptor/pull/328)
