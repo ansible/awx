@@ -595,6 +595,9 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     def _get_related_jobs(self):
         return WorkflowJob.objects.filter(workflow_job_template=self)
 
+    def resolve_execution_environment(self):
+        return None  # EEs are not meaningful for workflows
+
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WebhookMixin):
     class Meta:
