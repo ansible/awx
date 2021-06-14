@@ -729,11 +729,12 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
         if self.is_detail_view:
             resolved_ee = obj.resolve_execution_environment()
-            summary_fields['resolved_environment'] = {
-                field: getattr(resolved_ee, field, None)
-                for field in SUMMARIZABLE_FK_FIELDS['execution_environment']
-                if getattr(resolved_ee, field, None) is not None
-            }
+            if resolved_ee is not None:
+                summary_fields['resolved_environment'] = {
+                    field: getattr(resolved_ee, field, None)
+                    for field in SUMMARIZABLE_FK_FIELDS['execution_environment']
+                    if getattr(resolved_ee, field, None) is not None
+                }
 
         return summary_fields
 
@@ -3425,6 +3426,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             'ask_limit_on_launch',
             'webhook_service',
             'webhook_credential',
+            '-execution_environment',
         )
 
     def get_related(self, obj):
@@ -3451,6 +3453,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             survey_spec=self.reverse('api:workflow_job_template_survey_spec', kwargs={'pk': obj.pk}),
             copy=self.reverse('api:workflow_job_template_copy', kwargs={'pk': obj.pk}),
         )
+        res.pop('execution_environment', None)  # EEs aren't meaningful for workflows
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         if obj.webhook_credential_id:
@@ -3502,6 +3505,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             'allow_simultaneous',
             'job_template',
             'is_sliced_job',
+            '-execution_environment',
             '-execution_node',
             '-event_processing_finished',
             '-controller_node',
@@ -3515,6 +3519,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
+        res.pop('execution_environment', None)  # EEs aren't meaningful for workflows
         if obj.workflow_job_template:
             res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail', kwargs={'pk': obj.workflow_job_template.pk})
             res['notifications'] = self.reverse('api:workflow_job_notifications_list', kwargs={'pk': obj.pk})
@@ -3539,7 +3544,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
     class Meta:
-        fields = ('*', '-execution_node', '-controller_node')
+        fields = ('*', '-execution_environment', '-execution_node', '-controller_node')
 
 
 class WorkflowJobCancelSerializer(WorkflowJobSerializer):

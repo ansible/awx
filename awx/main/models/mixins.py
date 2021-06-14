@@ -471,13 +471,6 @@ class ExecutionEnvironmentMixin(models.Model):
         template = getattr(self, 'unified_job_template', None)
         if template is not None and template.execution_environment is not None:
             return template.execution_environment
-        wf_node = getattr(self, 'unified_job_node', None)
-        while wf_node is not None:
-            wf_template = wf_node.workflow_job.workflow_job_template
-            # NOTE: sliced workflow_jobs have a null workflow_job_template
-            if wf_template and wf_template.execution_environment is not None:
-                return wf_template.execution_environment
-            wf_node = getattr(wf_node.workflow_job, 'unified_job_node', None)
         if getattr(self, 'project_id', None) and self.project.default_environment is not None:
             return self.project.default_environment
         if getattr(self, 'organization_id', None) and self.organization.default_environment is not None:
