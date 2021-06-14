@@ -143,32 +143,6 @@ describe('<UserTokenList />', () => {
     expect(wrapper.find('UserTokenList').length).toBe(1);
   });
 
-  test('edit button should be disabled', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(<UserTokenList />);
-    });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
-  });
-
-  test('should enable edit button', async () => {
-    UsersAPI.readTokens.mockResolvedValue(tokens);
-    await act(async () => {
-      wrapper = mountWithContexts(<UserTokenList />);
-    });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
-    expect(
-      wrapper.find('DataListCheck[id="select-token-3"]').props().checked
-    ).toBe(false);
-    await act(async () => {
-      wrapper.find('DataListCheck[id="select-token-3"]').invoke('onChange')(
-        true
-      );
-    });
-    wrapper.update();
-    expect(
-      wrapper.find('DataListCheck[id="select-token-3"]').props().checked
-    ).toBe(true);
-  });
   test('delete button should be disabled', async () => {
     UsersAPI.readTokens.mockResolvedValue(tokens);
     await act(async () => {
@@ -179,6 +153,7 @@ describe('<UserTokenList />', () => {
       true
     );
   });
+
   test('should select and then delete item properly', async () => {
     UsersAPI.readTokens.mockResolvedValue(tokens);
     await act(async () => {
@@ -190,13 +165,17 @@ describe('<UserTokenList />', () => {
     );
     await act(async () => {
       wrapper
-        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .find('.pf-c-table__check')
+        .at(2)
+        .find('input')
         .prop('onChange')(tokens.data.results[0]);
     });
     wrapper.update();
     expect(
       wrapper
-        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .find('.pf-c-table__check')
+        .at(2)
+        .find('input')
         .prop('checked')
     ).toBe(true);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
@@ -213,6 +192,7 @@ describe('<UserTokenList />', () => {
     wrapper.update();
     expect(TokensAPI.destroy).toHaveBeenCalledWith(3);
   });
+
   test('should select and then delete item properly', async () => {
     UsersAPI.readTokens.mockResolvedValue(tokens);
     TokensAPI.destroy.mockRejectedValue(
@@ -236,13 +216,17 @@ describe('<UserTokenList />', () => {
     );
     await act(async () => {
       wrapper
-        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .find('.pf-c-table__check')
+        .at(2)
+        .find('input')
         .prop('onChange')(tokens.data.results[0]);
     });
     wrapper.update();
     expect(
       wrapper
-        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .find('.pf-c-table__check')
+        .at(2)
+        .find('input')
         .prop('checked')
     ).toBe(true);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(

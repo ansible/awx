@@ -3,7 +3,11 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -68,9 +72,13 @@ function UserTokenList() {
     fetchTokens();
   }, [fetchTokens]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    tokens
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(tokens);
 
   const {
     isLoading: isDeleteLoading,
@@ -91,21 +99,21 @@ function UserTokenList() {
   );
   const handleDelete = async () => {
     await deleteTokens();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAdd = true;
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={error}
         hasContentLoading={isLoading || isDeleteLoading}
         items={tokens}
         itemCount={itemCount}
         pluralizedItemName={t`Tokens`}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
             name: t`Application name`,
@@ -147,9 +155,7 @@ function UserTokenList() {
             showSelectAll
             isAllSelected={isAllSelected}
             qsConfig={QS_CONFIG}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...tokens] : [])
-            }
+            onSelectAll={selectAll}
             additionalControls={[
               ...(canAdd
                 ? [
@@ -168,7 +174,14 @@ function UserTokenList() {
             ]}
           />
         )}
-        renderItem={token => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="application__name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="scope">{t`Scope`}</HeaderCell>
+            <HeaderCell sortKey="expires">{t`Expires`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(token, index) => (
           <UserTokensListItem
             key={token.id}
             token={token}
@@ -176,6 +189,7 @@ function UserTokenList() {
               handleSelect(token);
             }}
             isSelected={selected.some(row => row.id === token.id)}
+            rowIndex={index}
           />
         )}
         emptyStateControls={
