@@ -290,7 +290,9 @@ function JobTemplateDetail({ template }) {
                 totalChips={summary_fields.credentials.length}
               >
                 {summary_fields.credentials.map(c => (
-                  <CredentialChip key={c.id} credential={c} isReadOnly />
+                  <Link to={`/credentials/${c.id}/details`}>
+                    <CredentialChip key={c.id} credential={c} isReadOnly />
+                  </Link>
                 ))}
               </ChipGroup>
             }
