@@ -14,11 +14,9 @@ import { ApplicationsAPI } from '../../../api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import {
   ToolbarDeleteButton,
   ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import useSelected from '../../../util/useSelected';
 
 import ApplicationListItem from './ApplicationListItem';

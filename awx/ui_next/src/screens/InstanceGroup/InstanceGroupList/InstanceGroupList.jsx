@@ -11,8 +11,8 @@ import useSelected from '../../../util/useSelected';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';

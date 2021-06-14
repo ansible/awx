@@ -14,8 +14,8 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import DataListToolbar from '../../../components/DataListToolbar';

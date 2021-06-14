@@ -5,8 +5,8 @@ import { t } from '@lingui/macro';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { TokensAPI, ApplicationsAPI } from '../../../api';
 import ErrorDetail from '../../../components/ErrorDetail';

@@ -6,11 +6,9 @@ import { getQSConfig, parseQueryString } from '../../../util/qs';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import useSelected from '../../../util/useSelected';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { UsersAPI, TokensAPI } from '../../../api';

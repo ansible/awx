@@ -7,13 +7,11 @@ import { ExecutionEnvironmentsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
-import {
-  ToolbarDeleteButton,
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarDeleteButton,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';

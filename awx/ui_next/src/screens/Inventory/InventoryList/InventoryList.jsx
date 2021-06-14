@@ -8,10 +8,10 @@ import useSelected from '../../../util/useSelected';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsInventories from './useWsInventories';

@@ -10,8 +10,11 @@ import {
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
-import { ToolbarDeleteButton } from '../PaginatedDataList';
-import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+  ToolbarDeleteButton,
+} from '../PaginatedTable';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import useSelected from '../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../util/qs';

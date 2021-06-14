@@ -10,11 +10,9 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';

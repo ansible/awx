@@ -10,11 +10,9 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import useSelected from '../../../util/useSelected';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';

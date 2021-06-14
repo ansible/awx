@@ -6,8 +6,8 @@ import { WorkflowApprovalsAPI } from '../../../api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
