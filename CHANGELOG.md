@@ -4,7 +4,7 @@
 
 - There are now 2 default Instance Groups: 'controlplane' and 'default' (https://github.com/ansible/awx/pull/10324)
 - Removed deprecated modules: `tower_send`, `tower_receive`, `tower_workflow_template` (https://github.com/ansible/awx/pull/9980)
-- Improved UI performance when a large amount of events are being emmitted by jobs (https://github.com/ansible/awx/pull/10053)
+- Improved UI performance when a large amount of events are being emitted by jobs (https://github.com/ansible/awx/pull/10053)
 - Settings UI Revert All button now issues a DELETE instead of PATCHing all fields (https://github.com/ansible/awx/pull/10376)
 - Fixed a bug with the schedule date/time picker in Firefox (https://github.com/ansible/awx/pull/10291)
 - UI now preselects the system default Galaxy credential when creating a new organization (https://github.com/ansible/awx/pull/10395)
