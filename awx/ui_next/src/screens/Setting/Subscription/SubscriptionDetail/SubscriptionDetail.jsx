@@ -23,7 +23,7 @@ import {
 } from '../../../../util/dates';
 
 function SubscriptionDetail() {
-  const { license_info, version } = useConfig();
+  const { me = {}, license_info, version } = useConfig();
   const baseURL = '/settings/subscription';
   const tabsArray = [
     {
@@ -164,15 +164,17 @@ function SubscriptionDetail() {
             contact us.
           </Button>
         </Trans>
-        <CardActionsRow>
-          <Button
-            aria-label={t`edit`}
-            component={Link}
-            to="/settings/subscription/edit"
-          >
-            <Trans>Edit</Trans>
-          </Button>
-        </CardActionsRow>
+        {me.is_superuser && (
+          <CardActionsRow>
+            <Button
+              aria-label={t`edit`}
+              component={Link}
+              to="/settings/subscription/edit"
+            >
+              <Trans>Edit</Trans>
+            </Button>
+          </CardActionsRow>
+        )}
       </CardBody>
     </>
   );
