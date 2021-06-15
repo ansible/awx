@@ -80,6 +80,21 @@ describe('<InventoryHostGroupsList />', () => {
         },
       },
     });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
     const history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/1/hosts/3/groups'],
     });
@@ -109,6 +124,10 @@ describe('<InventoryHostGroupsList />', () => {
   test('should fetch groups from api and render them in the list', async () => {
     expect(HostsAPI.readAllGroups).toHaveBeenCalled();
     expect(wrapper.find('InventoryHostGroupItem').length).toBe(3);
+  });
+
+  test('should render Run Commands button', async () => {
+    expect(wrapper.find('AdHocCommands')).toHaveLength(1);
   });
 
   test('should check and uncheck the row item', async () => {
@@ -172,6 +191,27 @@ describe('<InventoryHostGroupsList />', () => {
     wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
+  });
+
+  test('should not render Run Commands button', async () => {
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryHostGroupsList />);
+    });
+    expect(wrapper.find('AdHocCommands')).toHaveLength(0);
   });
 
   test('should show content error when api throws error on initial render', async () => {

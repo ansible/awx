@@ -3,7 +3,7 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
-import { Button, DropdownItem } from '@patternfly/react-core';
+import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { InventoriesAPI, CredentialTypesAPI } from 'api';
@@ -14,7 +14,12 @@ import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 import ContentError from '../ContentError';
 
-function AdHocCommands({ adHocItems, hasListItems, onLaunchLoading }) {
+function AdHocCommands({
+  adHocItems,
+  hasListItems,
+  onLaunchLoading,
+  moduleOptions,
+}) {
   const history = useHistory();
   const { id } = useParams();
 
@@ -35,29 +40,21 @@ function AdHocCommands({ adHocItems, hasListItems, onLaunchLoading }) {
   }, [isKebabified, isWizardOpen, onKebabModalChange]);
 
   const {
-    result: {
-      moduleOptions,
-      credentialTypeId,
-      isAdHocDisabled,
-      organizationId,
-    },
+    result: { credentialTypeId, organizationId },
     request: fetchData,
     error: fetchError,
   } = useRequest(
     useCallback(async () => {
-      const [options, { data }, cred] = await Promise.all([
-        InventoriesAPI.readAdHocOptions(id),
+      const [{ data }, cred] = await Promise.all([
         InventoriesAPI.readDetail(id),
         CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
       return {
-        moduleOptions: options.data.actions.GET.module_name.choices,
         credentialTypeId: cred.data.results[0].id,
-        isAdHocDisabled: !options.data.actions.POST,
         organizationId: data.organization,
       };
     }, [id]),
-    { moduleOptions: [], isAdHocDisabled: true, organizationId: null }
+    { organizationId: null }
   );
   useEffect(() => {
     fetchData();
@@ -77,10 +74,6 @@ function AdHocCommands({ adHocItems, hasListItems, onLaunchLoading }) {
     )
   );
 
-  const { error, dismissError } = useDismissableError(
-    launchError || fetchError
-  );
-
   const handleSubmit = async values => {
     const { credential, execution_environment, ...remainingValues } = values;
     const newCredential = credential[0].id;
@@ -96,6 +89,10 @@ function AdHocCommands({ adHocItems, hasListItems, onLaunchLoading }) {
     isLaunchLoading,
     onLaunchLoading,
   ]);
+
+  const { error, dismissError } = useDismissableError(
+    launchError || fetchError
+  );
 
   if (error && isWizardOpen) {
     return (
@@ -123,27 +120,29 @@ function AdHocCommands({ adHocItems, hasListItems, onLaunchLoading }) {
     // render buttons for drop down and for toolbar
     // if modal is open render the modal
     <>
-      {isKebabified ? (
-        <DropdownItem
-          key="cancel-job"
-          isDisabled={isAdHocDisabled || !hasListItems}
-          component="button"
-          aria-label={t`Run Command`}
-          onClick={() => setIsWizardOpen(true)}
-        >
-          {t`Run Command`}
-        </DropdownItem>
-      ) : (
-        <Button
-          ouiaId="run-command-button"
-          variant="secondary"
-          aria-label={t`Run Command`}
-          onClick={() => setIsWizardOpen(true)}
-          isDisabled={isAdHocDisabled || !hasListItems}
-        >
-          {t`Run Command`}
-        </Button>
-      )}
+      <Tooltip content={t`Run ad hoc command`}>
+        {isKebabified ? (
+          <DropdownItem
+            key="cancel-job"
+            isDisabled={!hasListItems}
+            component="button"
+            aria-label={t`Run Command`}
+            onClick={() => setIsWizardOpen(true)}
+          >
+            {t`Run Command`}
+          </DropdownItem>
+        ) : (
+          <Button
+            ouiaId="run-command-button"
+            variant="secondary"
+            aria-label={t`Run Command`}
+            onClick={() => setIsWizardOpen(true)}
+            isDisabled={!hasListItems}
+          >
+            {t`Run Command`}
+          </Button>
+        )}
+      </Tooltip>
 
       {isWizardOpen && (
         <AdHocCommandsWizard

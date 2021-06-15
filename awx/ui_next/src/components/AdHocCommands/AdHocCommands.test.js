@@ -47,21 +47,6 @@ describe('<AdHocCommands />', () => {
         BRAND_NAME: 'AWX',
       },
     });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {
-            module_name: {
-              choices: [
-                ['command', 'command'],
-                ['shell', 'shell'],
-              ],
-            },
-          },
-          POST: {},
-        },
-      },
-    });
     CredentialTypesAPI.read.mockResolvedValue({
       data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
@@ -95,21 +80,6 @@ describe('<AdHocCommands />', () => {
   });
 
   test('should open the wizard', async () => {
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {
-            module_name: {
-              choices: [
-                ['command', 'command'],
-                ['foo', 'foo'],
-              ],
-            },
-            verbosity: { choices: [[1], [2]] },
-          },
-        },
-      },
-    });
     InventoriesAPI.readDetail.mockResolvedValue({ data: { organization: 1 } });
     CredentialTypesAPI.read.mockResolvedValue({
       data: { results: [{ id: 1 }] },
@@ -126,12 +96,21 @@ describe('<AdHocCommands />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
+          moduleOptions={[
+            ['command', 'command'],
+            ['foo', 'foo'],
+          ]}
           adHocItems={adHocItems}
           hasListItems
           onLaunchLoading={() => jest.fn()}
         />
       );
     });
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run Command"]',
+      el => el.length === 1
+    );
     await act(async () =>
       wrapper.find('button[aria-label="Run Command"]').prop('onClick')()
     );
@@ -167,18 +146,26 @@ describe('<AdHocCommands />', () => {
       },
     });
     ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
-      data: { actions: { GET: {} } },
+      data: { actions: { GET: {}, POST: {} } },
     });
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
           adHocItems={adHocItems}
           hasListItems
+          moduleOptions={[
+            ['command', 'command'],
+            ['foo', 'foo'],
+          ]}
           onLaunchLoading={() => jest.fn()}
         />
       );
     });
-
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run Command"]',
+      el => el.length === 1
+    );
     await act(async () =>
       wrapper.find('button[aria-label="Run Command"]').prop('onClick')()
     );
@@ -279,23 +266,6 @@ describe('<AdHocCommands />', () => {
         },
       })
     );
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {
-            module_name: {
-              choices: [
-                ['command', 'command'],
-                ['foo', 'foo'],
-              ],
-            },
-            verbosity: {
-              choices: [[1], [2]],
-            },
-          },
-        },
-      },
-    });
     InventoriesAPI.readDetail.mockResolvedValue({
       data: { organization: 1 },
     });
@@ -336,18 +306,26 @@ describe('<AdHocCommands />', () => {
       },
     });
     ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
-      data: { actions: { GET: {} } },
+      data: { actions: { GET: {}, POST: {} } },
     });
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
           adHocItems={adHocItems}
+          moduleOptions={[
+            ['command', 'command'],
+            ['foo', 'foo'],
+          ]}
           hasListItems
           onLaunchLoading={() => jest.fn()}
         />
       );
     });
-
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run Command"]',
+      el => el.length === 1
+    );
     await act(async () =>
       wrapper.find('button[aria-label="Run Command"]').prop('onClick')()
     );
@@ -427,45 +405,18 @@ describe('<AdHocCommands />', () => {
     await waitForElement(wrapper, 'ErrorDetail', el => el.length > 0);
   });
 
-  test('should disable run command button due to permissions', async () => {
-    InventoriesAPI.readHosts.mockResolvedValue({
-      data: { results: [], count: 0 },
-    });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: { module_name: { choices: [['module']] } },
-        },
-      },
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <AdHocCommands
-          adHocItems={adHocItems}
-          hasListItems
-          onLaunchLoading={() => jest.fn()}
-        />
-      );
-    });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const runCommandsButton = wrapper.find('button[aria-label="Run Command"]');
-    expect(runCommandsButton.prop('disabled')).toBe(true);
-  });
-
   test('should disable run command button due to lack of list items', async () => {
     InventoriesAPI.readHosts.mockResolvedValue({
       data: { results: [], count: 0 },
     });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: { module_name: { choices: [['module']] } },
-        },
-      },
-    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
+          moduleOptions={[
+            ['command', 'command'],
+            ['foo', 'foo'],
+          ]}
           adHocItems={adHocItems}
           hasListItems={false}
           onLaunchLoading={() => jest.fn()}
@@ -478,7 +429,7 @@ describe('<AdHocCommands />', () => {
   });
 
   test('should open alert modal when error on fetching data', async () => {
-    InventoriesAPI.readAdHocOptions.mockRejectedValue(
+    InventoriesAPI.readDetail.mockRejectedValue(
       new Error({
         response: {
           config: {
@@ -493,6 +444,10 @@ describe('<AdHocCommands />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
+          moduleOptions={[
+            ['command', 'command'],
+            ['foo', 'foo'],
+          ]}
           adHocItems={adHocItems}
           hasListItems
           onLaunchLoading={() => jest.fn()}

@@ -43,6 +43,8 @@ function InventoryGroupHostList() {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      moduleOptions,
+      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -50,12 +52,15 @@ function InventoryGroupHostList() {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, actionsResponse] = await Promise.all([
+      const [response, actionsResponse, options] = await Promise.all([
         GroupsAPI.readAllHosts(groupId, params),
         InventoriesAPI.readHostsOptions(inventoryId),
+        InventoriesAPI.readAdHocOptions(inventoryId),
       ]);
 
       return {
+        moduleOptions: options.data.actions.GET.module_name.choices,
+        isAdHocDisabled: !options.data.actions.POST,
         hosts: response.data.results,
         hostCount: response.data.count,
         actions: actionsResponse.data.actions,
@@ -68,6 +73,8 @@ function InventoryGroupHostList() {
       };
     }, [groupId, inventoryId, location.search]),
     {
+      moduleOptions: [],
+      isAdHocDisabled: true,
       hosts: [],
       hostCount: 0,
       actions: {},
@@ -225,11 +232,16 @@ function InventoryGroupHostList() {
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd ? [addButton] : []),
-              <AdHocCommands
-                adHocItems={selected}
-                hasListItems={hostCount > 0}
-                onLaunchLoading={setIsAdHocLaunchLoading}
-              />,
+              ...(!isAdHocDisabled
+                ? [
+                    <AdHocCommands
+                      adHocItems={selected}
+                      hasListItems={hostCount > 0}
+                      moduleOptions={moduleOptions}
+                      onLaunchLoading={setIsAdHocLaunchLoading}
+                    />,
+                  ]
+                : []),
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}
