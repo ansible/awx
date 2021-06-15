@@ -26,7 +26,7 @@ class DisabledPaginator(DjangoPaginator):
 class Pagination(pagination.PageNumberPagination):
 
     page_size_query_param = 'page_size'
-    max_page_size = settings.MAX_PAGE_SIZE
+    max_page_size = int(settings.MAX_PAGE_SIZE)
     count_disabled = False
 
     def get_next_link(self):
@@ -75,7 +75,7 @@ class LimitPagination(pagination.BasePagination):
     default_limit = api_settings.PAGE_SIZE
     limit_query_param = 'limit'
     limit_query_description = _('Number of results to return per page.')
-    max_page_size = settings.MAX_PAGE_SIZE
+    max_page_size = int(settings.MAX_PAGE_SIZE)
 
     def paginate_queryset(self, queryset, request, view=None):
         self.limit = self.get_limit(request)
