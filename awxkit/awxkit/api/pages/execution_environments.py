@@ -40,7 +40,7 @@ class ExecutionEnvironment(HasCreate, HasCopy, base.Base):
     def payload(self, name='', image=None, organization=None, credential=None, pull='', **kwargs):
         payload = PseudoNamespace(
             name=name or "EE - {}".format(random_title()),
-            image=image or random_title(10),
+            image=image or "example.invalid/component:tagname",
             organization=organization.id if organization else None,
             credential=credential.id if credential else None,
             pull=pull,

@@ -195,3 +195,95 @@ def vars_validate_or_raise(vars_str):
         return vars_str
     except ParseError as e:
         raise RestValidationError(str(e))
+
+
+def validate_container_image_name(value):
+    """
+    from https://github.com/distribution/distribution/blob/af8ac809336c2316c81b08605d92d94f8670ad15/reference/reference.go#L4
+
+    Grammar
+
+    reference                       := name [ ":" tag ] [ "@" digest ]
+    name                            := [domain '/'] path-component ['/' path-component]*
+    domain                          := domain-component ['.' domain-component]* [':' port-number]
+    domain-component                := /([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])/
+    port-number                     := /[0-9]+/
+    path-component                  := alpha-numeric [separator alpha-numeric]*
+    alpha-numeric                   := /[a-z0-9]+/
+    separator                       := /[_.]|__|[-]*/
+
+    tag                             := /[\w][\w.-]{0,127}/
+
+    digest                          := digest-algorithm ":" digest-hex
+    digest-algorithm                := digest-algorithm-component [ digest-algorithm-separator digest-algorithm-component ]*
+    digest-algorithm-separator      := /[+.-_]/
+    digest-algorithm-component      := /[A-Za-z][A-Za-z0-9]*/
+    digest-hex                      := /[0-9a-fA-F]{32,}/ ; At least 128 bit digest value
+
+    The regex below is the printed value of the following GO variable, which represents the 'reference' line above, i.e. the full image name + tag or digest
+    https://github.com/distribution/distribution/blob/af8ac809336c2316c81b08605d92d94f8670ad15/reference/regexp.go#L72
+    """
+    # fmt: off
+    regex = re.compile(r"""
+    ^
+    (                                          # name
+     (?:                                       # domain (optional)
+      (?:
+       [a-zA-Z0-9]                             # domain-component
+       |[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]
+      )
+      (?:
+        (?:
+         \.                                    # additional domain-components, separated by a dot
+         (?:
+          [a-zA-Z0-9]
+          |[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]
+         )
+        )+
+      )?
+      (?::[0-9]+)?                             # port number
+      /                                        # domain should end in slash
+     )?
+     [a-z0-9]+                                 # path-component
+     (?:
+      (?:
+       (?:
+        [_.]|__|[-]*                           # path-components can contain separators
+       )
+       [a-z0-9]+
+      )+
+     )?
+     (?:
+      (?:
+       /                                       # additional path-components, separated by a /
+       [a-z0-9]+
+       (?:
+        (?:
+         (?:
+          [_.]|__|[-]*
+         )
+         [a-z0-9]+
+        )+
+       )?
+      )+
+     )?
+    )                                          # name end
+    (?:
+      :                                        # tag (optional)
+      ([\w][\w.-]{0,127})                      # tag limited to 128 characters
+    )?
+    (?:
+     @                                         # digest (optional)
+      (
+       [A-Za-z][A-Za-z0-9]*                    # digest-algorithm-component, e.g. sha256
+        (?:                                    # additional digest-alorithm components, separated by [-_+.]
+         [-_+.][A-Za-z][A-Za-z0-9]*
+        )*
+        [:][0-9a-fA-F]{32,}                    # digest-hex
+       )
+    )?
+    $
+    """, re.VERBOSE)
+    # fmt: on
+    if not regex.fullmatch(value):
+        raise ValidationError(_(f"The container image name {value} is not valid"))

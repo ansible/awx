@@ -4,6 +4,7 @@ from awx.main.validators import (
     validate_certificate,
     validate_ssh_private_key,
     vars_validate_or_raise,
+    validate_container_image_name,
 )
 from awx.main.tests.data.ssh import (
     TEST_SSH_RSA1_KEY_DATA,
@@ -163,3 +164,39 @@ def test_valid_vars(var_str):
 def test_invalid_vars(var_str):
     with pytest.raises(RestValidationError):
         vars_validate_or_raise(var_str)
+
+
+@pytest.mark.parametrize(
+    ("image_name", "is_valid"),
+    [
+        ("localhost", True),
+        ("short", True),
+        ("simple/name", True),
+        ("ab/ab/ab/ab", True),
+        ("foo.com/", False),
+        ("", False),
+        ("localhost/foo", True),
+        ("3asdasdf3", True),
+        ("xn--7o8h.com/myimage", True),
+        ("Asdf.com/foo/bar", True),
+        ("Foo/FarB", False),
+        ("registry.com:8080/myapp:tag", True),
+        ("registry.com:8080/myapp@sha256:be178c0543eb17f5f3043021c9e5fcf30285e557a4fc309cce97ff9ca6182912", True),
+        ("registry.com:8080/myapp:tag2@sha256:be178c0543eb17f5f3043021c9e5fcf30285e557a4fc309cce97ff9ca6182912", True),
+        ("registry.com:8080/myapp@sha256:badbadbadbad", False),
+        ("registry.com:8080/myapp:invalid~tag", False),
+        ("bad_hostname.com:8080/myapp:tag", False),
+        ("localhost:8080@sha256:be178c0543eb17f5f3043021c9e5fcf30285e557a4fc309cce97ff9ca6182912", True),
+        ("localhost:8080/name@sha256:be178c0543eb17f5f3043021c9e5fcf30285e557a4fc309cce97ff9ca6182912", True),
+        ("localhost:http/name@sha256:be178c0543eb17f5f3043021c9e5fcf30285e557a4fc309cce97ff9ca6182912", False),
+        ("localhost@sha256:be178c0543eb17f5f3043021c9e5fcf30285e557a4fc309cce97ff9ca6182912", True),
+        ("registry.com:8080/myapp@bad", False),
+        ("registry.com:8080/myapp@2bad", False),
+    ],
+)
+def test_valid_container_image_name(image_name, is_valid):
+    if is_valid:
+        validate_container_image_name(image_name)
+    else:
+        with pytest.raises(ValidationError):
+            validate_container_image_name(image_name)
