@@ -37,5 +37,5 @@ Get Involved
 
 We welcome your feedback and ideas. Here's how to reach us with feedback and questions:
 
-- Join the `#ansible-awx` channel on webchat.freenode.net
+- Join the `#ansible-awx` channel on irc.libera.chat
 - Join the [mailing list](https://groups.google.com/forum/#!forum/awx-project) 
