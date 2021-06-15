@@ -77,7 +77,7 @@ class AnsibleInventoryLoader(object):
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
         ee = get_default_execution_environment()
         bargs.extend([ee.image])
-        authpath = ee.build_authfile(functioning_dir(self.source))
+        authpath = ee.build_authfile()
         if authpath is not None:
             bargs.append(f'--authfile={authpath}')
         if ee.pull:

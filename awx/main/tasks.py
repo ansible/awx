@@ -791,7 +791,7 @@ class BaseTask(object):
             "container_options": ['--user=root'],
         }
 
-        authpath = instance.execution_environment.build_authfile(private_data_dir)
+        authpath = instance.execution_environment.build_authfile()
         if authpath is not None:
             params["container_options"].append(f'--authfile={authpath}')
         pull = instance.execution_environment.pull
