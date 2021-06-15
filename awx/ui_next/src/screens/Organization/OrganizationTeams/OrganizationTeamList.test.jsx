@@ -94,7 +94,6 @@ describe('<OrganizationTeamList />', () => {
   });
 
   test('should pass fetched teams to PaginatedTable', async () => {
-    // expect.assertions(7);
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
