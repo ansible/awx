@@ -110,6 +110,38 @@ describe('<JobDetail />', () => {
     ).toHaveLength(1);
   });
 
+  test('should display module name and module arguments', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          type: 'ad_hoc_command',
+          module_name: 'command',
+          module_args: 'echo hello_world',
+          summary_fields: {
+            ...mockJobData.summary_fields,
+            credential: {
+              id: 2,
+              name: 'Machine cred',
+              description: '',
+              kind: 'ssh',
+              cloud: false,
+              kubernetes: false,
+              credential_type_id: 1,
+            },
+            source_workflow_job: {
+              id: 1234,
+              name: 'Test Source Workflow',
+            },
+          },
+        }}
+      />
+    );
+    assertDetail('Module Name', 'command');
+    assertDetail('Module Arguments', 'echo hello_world');
+    assertDetail('Job Type', 'Run Command');
+  });
+
   test('should show schedule that launched workflow job', async () => {
     wrapper = mountWithContexts(
       <JobDetail
