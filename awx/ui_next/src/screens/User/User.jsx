@@ -80,7 +80,7 @@ function User({ setBreadcrumb, me }) {
 
   let showCardHeader = true;
   if (
-    ['edit', 'add', 'tokens'].some(name => location.pathname.includes(name))
+    ['edit', 'add', 'tokens/'].some(name => location.pathname.includes(name))
   ) {
     showCardHeader = false;
   }
