@@ -23,7 +23,7 @@ These can become the global job default in certain circumstances.
 Installers should run the `awx-manage register_default_execution_environments` command to pre-populate
 the system with some EEs defined in settings. This will create:
 
- - a control plane EE - corresponding to the `CONTROL_PLANE_EXECUTION_ENVIRONMENT` setting
+ - the control plane EE - corresponding to the `CONTROL_PLANE_EXECUTION_ENVIRONMENT` setting
  - global job EEs - all images enumerated in the `GLOBAL_JOB_EXECUTION_ENVIRONMENTS` setting
 
 These EEs are critical for system function, so this command must be ran for AWX to be functional.
@@ -31,21 +31,21 @@ All EEs created by this command are global EEs.
 
 ### Project Update EE Precedence
 
-Project updates will always use the control plane execution environment.
+Project updates will always use the control plane EE.
 
 ### Job, Ad Hoc Commands, and inventory update EE Precedence
 
 Jobs will use the first available execution environment in this list:
 
-1. an EE from the template the spawned the job
+1. the `execution_environment` defined on the template (job template or inventory source) that spawned the job
 2. the `default_environment` defined on the project that the job uses
-3. the `default_environment` defined on the organization of the job (a direct API field)
+3. the `default_environment` defined on the organization of the job
 4. the `default_environment` defined on the organization of the inventory the job uses
-5. the current `DEFAULT_EXECUTION_ENVIRONMENT` setting
-6. Any images from the `GLOBAL_JOB_EXECUTION_ENVIRONMENTS` setting
-7. Any other global EEs (null organization)
+5. the current `DEFAULT_EXECUTION_ENVIRONMENT` setting (configurable at `/api/v2/settings/jobs/`)
+6. Any image from the `GLOBAL_JOB_EXECUTION_ENVIRONMENTS` setting
+7. Any other global EE
 
-If more than one EE fits a criteria (applies for 5 and 6), then the most recently created one will be used.
+If more than one EE fits a criteria (applies for 6 and 7), then the most recently created one will be used.
 
 ## Migrating from Custom Virtual Environments
 
