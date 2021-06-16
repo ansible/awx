@@ -274,10 +274,12 @@ function TemplateListItem({
                   dataCy={`template-${template.id}-project`}
                 />
               )}
-              <ExecutionEnvironmentDetail
-                virtualEnvironment={template.custom_virtualenv}
-                executionEnvironment={summaryFields?.execution_environment}
-              />
+              {template.type === 'job_template' && (
+                <ExecutionEnvironmentDetail
+                  virtualEnvironment={template.custom_virtualenv}
+                  executionEnvironment={summaryFields?.execution_environment}
+                />
+              )}
               <Detail
                 label={t`Last Modified`}
                 value={formatDateString(template.modified)}

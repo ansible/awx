@@ -37,10 +37,7 @@ function WorkflowJobTemplateAdd() {
     try {
       const {
         data: { id },
-      } = await WorkflowJobTemplatesAPI.create({
-        ...templatePayload,
-        execution_environment: values.execution_environment?.id,
-      });
+      } = await WorkflowJobTemplatesAPI.create(templatePayload);
       await Promise.all(await submitLabels(id, labels, organizationId));
       history.push(`/templates/workflow_job_template/${id}/visualizer`);
     } catch (err) {
