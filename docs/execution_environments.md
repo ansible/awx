@@ -59,5 +59,5 @@ dependencies out of the venvs and into EEs.
 
 Follow those in order, and read the help text to see what arguments are necessary.
 
-You may wish to save the output from export_custom_venv command to a file with the `-q`
-option, and then this can be a starting point for writing `ansible-builder` definition files.
+Output from the `awx-manage export_custom_venv -q ..` command can
+be a starting point for writing an `ansible-builder` definition file.
