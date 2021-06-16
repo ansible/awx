@@ -30,13 +30,15 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
   const [fileName, setFileName] = useState('');
   const [fileIsUploading, setFileIsUploading] = useState(false);
   const [subFormField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
+  const [passwordPromptsField] = useField(`passwordPrompts.${fieldOptions.id}`);
   const isValid = !(meta.touched && meta.error);
 
   const RevertReplaceButton = (
     <>
       {meta.initialValue &&
         meta.initialValue !== '' &&
-        !meta.initialValue.credential && (
+        !meta.initialValue.credential &&
+        !passwordPromptsField.value && (
           <Tooltip
             id={`credential-${fieldOptions.id}-replace-tooltip`}
             content={meta.value !== meta.initialValue ? t`Revert` : t`Replace`}
