@@ -30,6 +30,7 @@ from awx.api.versioning import reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
+from awx.main.utils.licensing import get_licenser
 
 logger = logging.getLogger('awx.api.views.root')
 
@@ -173,8 +174,6 @@ class ApiV2SubscriptionView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def post(self, request):
-        from awx.main.utils.common import get_licenser
-
         data = request.data.copy()
         if data.get('subscriptions_password') == '$encrypted$':
             data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
@@ -222,7 +221,6 @@ class ApiV2AttachView(APIView):
         user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
         pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
         if pool_id and user and pw:
-            from awx.main.utils.common import get_licenser
 
             data = request.data.copy()
             try:
@@ -263,8 +261,6 @@ class ApiV2ConfigView(APIView):
 
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
-
-        from awx.main.utils.common import get_licenser
 
         license_data = get_licenser().validate()
 
@@ -319,8 +315,6 @@ class ApiV2ConfigView(APIView):
         except Exception:
             logger.info(smart_text(u"Invalid JSON submitted for license."), extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
-
-        from awx.main.utils.common import get_licenser
 
         license_data = json.loads(data_actual)
         if 'license_key' in license_data:
