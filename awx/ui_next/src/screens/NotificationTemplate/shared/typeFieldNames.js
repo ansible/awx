@@ -7,6 +7,8 @@ const typeFieldNames = {
     'sender',
     'port',
     'timeout',
+    'use_ssl',
+    'use_tls',
   ],
   grafana: [
     'grafana_url',

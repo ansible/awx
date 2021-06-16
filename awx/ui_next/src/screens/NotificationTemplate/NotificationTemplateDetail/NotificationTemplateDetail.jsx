@@ -1,7 +1,12 @@
 import React, { useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-
-import { Button } from '@patternfly/react-core';
+import {
+  Button,
+  TextList,
+  TextListItem,
+  TextListItemVariants,
+  TextListVariants,
+} from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -30,6 +35,23 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
     summary_fields,
     messages,
   } = template;
+
+  const renderOptionsField = configuration.use_ssl || configuration.use_tls;
+
+  const renderOptions = (
+    <TextList component={TextListVariants.ul}>
+      {configuration.use_ssl && (
+        <TextListItem component={TextListItemVariants.li}>
+          {t`Use SSL`}
+        </TextListItem>
+      )}
+      {configuration.use_tls && (
+        <TextListItem component={TextListItemVariants.li}>
+          {t`Use TLS`}
+        </TextListItem>
+      )}
+    </TextList>
+  );
 
   const { request: deleteTemplate, isLoading, error: deleteError } = useRequest(
     useCallback(async () => {
@@ -104,11 +126,9 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
               value={configuration.timeout}
               dataCy="nt-detail-timeout"
             />
-            <Detail
-              label={t`Email Options`}
-              value={configuration.use_ssl ? t`Use SSL` : t`Use TLS`}
-              dataCy="nt-detail-email-options"
-            />
+            {renderOptionsField && (
+              <Detail label={t`Email Options`} value={renderOptions} />
+            )}
           </>
         )}
         {template.notification_type === 'grafana' && (

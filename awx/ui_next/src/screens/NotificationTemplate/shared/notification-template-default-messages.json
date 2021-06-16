@@ -1,0 +1,302 @@
+{
+  "type": "json",
+  "required": false,
+  "label": "Messages",
+  "help_text": "Optional custom messages for notification template.",
+  "filterable": true,
+  "default": {
+    "started": null,
+    "success": null,
+    "error": null,
+    "workflow_approval": null
+  },
+  "email": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": "{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_metadata }}"
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": "{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_metadata }}"
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": "{{ job_friendly_name }} #{{ job.id }} had status {{ job.status }}, view details at {{ url }}\n\n{{ job_metadata }}"
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" needs review. This approval node can be viewed at: {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}\n\n{{ job_metadata }}"
+      }
+    }
+  },
+  "slack": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": null
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": null
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": null
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": null
+      }
+    }
+  },
+  "twilio": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": null
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": null
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": null
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": null
+      }
+    }
+  },
+  "pagerduty": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": "{{ job_metadata }}"
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": "{{ job_metadata }}"
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": "{{ job_metadata }}"
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" needs review. This approval node can be viewed at: {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}\n\n{{ job_metadata }}"
+      }
+    }
+  },
+  "grafana": {
+    "started": {
+      "body": "{{ job_metadata }}",
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    },
+    "success": {
+      "body": "{{ job_metadata }}",
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    },
+    "error": {
+      "body": "{{ job_metadata }}",
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}"
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" needs review. This approval node can be viewed at: {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}\n\n{{ job_metadata }}"
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}\n\n{{ job_metadata }}"
+      }
+    }
+  },
+  "webhook": {
+    "started": {
+      "body": "{{ job_metadata }}"
+    },
+    "success": {
+      "body": "{{ job_metadata }}"
+    },
+    "error": {
+      "body": "{{ job_metadata }}"
+    },
+    "workflow_approval": {
+      "running": {
+        "body": {
+          "body": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}"
+        }
+      },
+      "approved": {
+        "body": {
+          "body": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}"
+        }
+      },
+      "timed_out": {
+        "body": {
+          "body": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}"
+        }
+      },
+      "denied": {
+        "body": {
+          "body": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}"
+        }
+      }
+    }
+  },
+  "mattermost": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": null
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": null
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": null
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": null
+      }
+    }
+  },
+  "rocketchat": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": null
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": null
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": null
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": null
+      }
+    }
+  },
+  "irc": {
+    "started": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "success": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "error": {
+      "message": "{{ job_friendly_name }} #{{ job.id }} '{{ job.name }}' {{ job.status }}: {{ url }}",
+      "body": null
+    },
+    "workflow_approval": {
+      "running": {
+        "message": "The approval node \"{{ approval_node_name }}\" needs review. This node can be viewed at: {{ workflow_url }}",
+        "body": null
+      },
+      "approved": {
+        "message": "The approval node \"{{ approval_node_name }}\" was approved. {{ workflow_url }}",
+        "body": null
+      },
+      "timed_out": {
+        "message": "The approval node \"{{ approval_node_name }}\" has timed out. {{ workflow_url }}",
+        "body": null
+      },
+      "denied": {
+        "message": "The approval node \"{{ approval_node_name }}\" was denied. {{ workflow_url }}",
+        "body": null
+      }
+    }
+  }
+}

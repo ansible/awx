@@ -15,7 +15,6 @@ import { FormSelect, FormSelectOption } from '@patternfly/react-core';
 function AnsibleSelect({
   id,
   data,
-
   isValid,
   onBlur,
   value,
