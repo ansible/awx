@@ -74,7 +74,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
 
     if (fieldOptions.secret) {
       return (
-        <>
+        <InputGroup>
           {RevertReplaceButton}
           <FileUpload
             {...subFormField}
@@ -89,7 +89,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
             allowEditingUploadedText
             validated={isValid ? 'default' : 'error'}
           />
-        </>
+        </InputGroup>
       );
     }
 
