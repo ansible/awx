@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
 import { CardBody } from '../../../components/Card';
-import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { InventoriesAPI } from '../../../api';
 import ContentLoading from '../../../components/ContentLoading';
 import InventoryForm from '../shared/InventoryForm';
 import { getAddedAndRemoved } from '../../../util/lists';
@@ -13,31 +13,19 @@ function InventoryEdit({ inventory }) {
   const [error, setError] = useState(null);
   const [associatedInstanceGroups, setInstanceGroups] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
-  const [credentialTypeId, setCredentialTypeId] = useState(null);
   const history = useHistory();
   const isMounted = useIsMounted();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [
-          {
-            data: { results: loadedInstanceGroups },
-          },
-          {
-            data: { results: loadedCredentialTypeId },
-          },
-        ] = await Promise.all([
-          InventoriesAPI.readInstanceGroups(inventory.id),
-          CredentialTypesAPI.read({
-            kind: 'insights',
-          }),
-        ]);
+        const {
+          data: { results: loadedInstanceGroups },
+        } = await InventoriesAPI.readInstanceGroups(inventory.id);
         if (!isMounted.current) {
           return;
         }
         setInstanceGroups(loadedInstanceGroups);
-        setCredentialTypeId(loadedCredentialTypeId[0].id);
       } catch (err) {
         setError(err);
       } finally {
@@ -48,7 +36,7 @@ function InventoryEdit({ inventory }) {
     };
     loadData();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [inventory.id, contentLoading, inventory, credentialTypeId]);
+  }, [inventory.id, contentLoading, inventory]);
 
   const handleCancel = () => {
     const url =
@@ -60,17 +48,9 @@ function InventoryEdit({ inventory }) {
   };
 
   const handleSubmit = async values => {
-    const {
-      instanceGroups,
-      insights_credential,
-      organization,
-      ...remainingValues
-    } = values;
+    const { instanceGroups, organization, ...remainingValues } = values;
     try {
       await InventoriesAPI.update(inventory.id, {
-        insights_credential: insights_credential
-          ? insights_credential.id
-          : null,
         organization: organization.id,
         ...remainingValues,
       });
@@ -109,7 +89,6 @@ function InventoryEdit({ inventory }) {
         onSubmit={handleSubmit}
         inventory={inventory}
         instanceGroups={associatedInstanceGroups}
-        credentialTypeId={credentialTypeId}
         submitError={error}
       />
     </CardBody>

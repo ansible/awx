@@ -1,53 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 import { CardBody } from '../../../components/Card';
-import ContentLoading from '../../../components/ContentLoading';
 
-import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { InventoriesAPI } from '../../../api';
 import InventoryForm from '../shared/InventoryForm';
 
 function InventoryAdd() {
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [credentialTypeId, setCredentialTypeId] = useState(null);
   const history = useHistory();
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const {
-          data: { results: loadedCredentialTypeId },
-        } = await CredentialTypesAPI.read({ kind: 'insights' });
-        setCredentialTypeId(loadedCredentialTypeId[0].id);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
-  }, [isLoading, credentialTypeId]);
 
   const handleCancel = () => {
     history.push('/inventories');
   };
 
   const handleSubmit = async values => {
-    const {
-      instanceGroups,
-      organization,
-      insights_credential,
-      ...remainingValues
-    } = values;
+    const { instanceGroups, organization, ...remainingValues } = values;
     try {
       const {
         data: { id: inventoryId },
       } = await InventoriesAPI.create({
         organization: organization.id,
-        insights_credential: insights_credential
-          ? insights_credential.id
-          : null,
         ...remainingValues,
       });
       if (instanceGroups) {
@@ -68,9 +41,6 @@ function InventoryAdd() {
     }
   };
 
-  if (isLoading) {
-    return <ContentLoading />;
-  }
   return (
     <PageSection>
       <Card>
@@ -78,7 +48,6 @@ function InventoryAdd() {
           <InventoryForm
             onCancel={handleCancel}
             onSubmit={handleSubmit}
-            credentialTypeId={credentialTypeId}
             submitError={error}
           />
         </CardBody>

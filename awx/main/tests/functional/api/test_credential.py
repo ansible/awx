@@ -5,7 +5,7 @@ import pytest
 
 from django.utils.encoding import smart_str
 
-from awx.main.models import AdHocCommand, Credential, CredentialType, Job, JobTemplate, Inventory, InventorySource, Project, WorkflowJobNode
+from awx.main.models import AdHocCommand, Credential, CredentialType, Job, JobTemplate, InventorySource, Project, WorkflowJobNode
 from awx.main.utils import decrypt_field
 from awx.api.versioning import reverse
 
@@ -857,7 +857,6 @@ def test_field_removal(put, organization, admin, credentialtype_ssh):
     'relation, related_obj',
     [
         ['ad_hoc_commands', AdHocCommand()],
-        ['insights_inventories', Inventory()],
         ['unifiedjobs', Job()],
         ['unifiedjobtemplates', JobTemplate()],
         ['unifiedjobtemplates', InventorySource(source='ec2')],

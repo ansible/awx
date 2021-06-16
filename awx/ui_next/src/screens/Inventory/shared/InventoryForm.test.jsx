@@ -25,10 +25,6 @@ const inventory = {
       copy: true,
       adhoc: true,
     },
-    insights_credential: {
-      id: 1,
-      name: 'Foo',
-    },
   },
   created: '2019-10-04T16:56:48.025455Z',
   modified: '2019-10-04T16:56:48.025468Z',
@@ -46,7 +42,6 @@ const inventory = {
   has_inventory_sources: false,
   total_inventory_sources: 0,
   inventory_sources_with_failures: 0,
-  insights_credential: null,
   pending_deletion: false,
 };
 
@@ -89,9 +84,6 @@ describe('<InventoryForm />', () => {
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Instance Groups"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="Insights Credential"]').length).toBe(
-      1
-    );
     expect(wrapper.find('VariablesField[label="Variables"]').length).toBe(1);
     expect(wrapper.find('CodeEditor').prop('value')).toEqual('---');
   });
@@ -107,12 +99,6 @@ describe('<InventoryForm />', () => {
       wrapper.find('input#inventory-name').simulate('change', {
         target: { value: 'new Foo', name: 'name' },
       });
-
-      wrapper.find('CredentialLookup').invoke('onBlur')();
-      wrapper.find('CredentialLookup').invoke('onChange')({
-        id: 10,
-        name: 'credential',
-      });
     });
     wrapper.update();
     expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
@@ -122,10 +108,6 @@ describe('<InventoryForm />', () => {
     expect(wrapper.find('input#inventory-name').prop('value')).toEqual(
       'new Foo'
     );
-    expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
-      id: 10,
-      name: 'credential',
-    });
   });
 
   test('should call handleCancel when Cancel button is clicked', async () => {

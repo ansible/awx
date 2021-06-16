@@ -165,15 +165,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             'admin_role',
         ]
     )
-    insights_credential = models.ForeignKey(
-        'Credential',
-        related_name='insights_inventories',
-        help_text=_('Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.'),
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        default=None,
-    )
     pending_deletion = models.BooleanField(
         default=False,
         editable=False,
@@ -367,13 +358,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     def root_groups(self):
         group_pks = self.groups.values_list('pk', flat=True)
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
-
-    def clean_insights_credential(self):
-        if self.kind == 'smart' and self.insights_credential:
-            raise ValidationError(_("Assignment not allowed for Smart Inventory"))
-        if self.insights_credential and self.insights_credential.credential_type.kind != 'insights':
-            raise ValidationError(_("Credential kind must be 'insights'."))
-        return self.insights_credential
 
     @transaction.atomic
     def schedule_deletion(self, user_id=None):

@@ -867,13 +867,11 @@ class InventoryAccess(BaseAccess):
         # If no data is specified, just checking for generic add permission?
         if not data:
             return Organization.accessible_objects(self.user, 'inventory_admin_role').exists()
-        return self.check_related('organization', Organization, data, role_field='inventory_admin_role') and self.check_related(
-            'insights_credential', Credential, data, role_field='use_role'
-        )
+        return self.check_related('organization', Organization, data, role_field='inventory_admin_role')
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.can_admin(obj, data) and self.check_related('insights_credential', Credential, data, obj=obj, role_field='use_role')
+        return self.can_admin(obj, data)
 
     @check_superuser
     def can_admin(self, obj, data):

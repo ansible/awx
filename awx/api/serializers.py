@@ -144,7 +144,6 @@ SUMMARIZABLE_FK_FIELDS = {
         'inventory_sources_with_failures',
         'organization_id',
         'kind',
-        'insights_credential_id',
     ),
     'host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
@@ -171,7 +170,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': ('id', 'name', 'is_container_group'),
-    'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'webhook_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -1661,7 +1659,6 @@ class InventorySerializer(BaseSerializerWithVariables):
             'has_inventory_sources',
             'total_inventory_sources',
             'inventory_sources_with_failures',
-            'insights_credential',
             'pending_deletion',
         )
 
@@ -1686,8 +1683,6 @@ class InventorySerializer(BaseSerializerWithVariables):
                 copy=self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
             )
         )
-        if obj.insights_credential:
-            res['insights_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.insights_credential.pk})
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
@@ -2636,7 +2631,6 @@ class CredentialSerializer(BaseSerializer):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
             for related_objects in (
                 'ad_hoc_commands',
-                'insights_inventories',
                 'unifiedjobs',
                 'unifiedjobtemplates',
                 'projects',

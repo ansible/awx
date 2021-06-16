@@ -60,13 +60,6 @@ export const relatedResourceDeleteRequests = {
     },
     {
       request: () =>
-        InventoriesAPI.read({
-          insights_credential: selected.id,
-        }),
-      label: t`Inventories`,
-    },
-    {
-      request: () =>
         InventorySourcesAPI.read({
           credentials__id: selected.id,
         }),

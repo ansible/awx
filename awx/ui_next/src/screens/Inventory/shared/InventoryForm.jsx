@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
-import { func, number, shape } from 'prop-types';
+import { func, shape } from 'prop-types';
 import { Form } from '@patternfly/react-core';
 import { VariablesField } from '../../../components/CodeEditor';
 import FormField, { FormSubmitError } from '../../../components/FormField';
@@ -9,13 +9,12 @@ import FormActionGroup from '../../../components/FormActionGroup';
 import { required } from '../../../util/validators';
 import InstanceGroupsLookup from '../../../components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
 } from '../../../components/FormLayout';
 
-function InventoryFormFields({ credentialTypeId, inventory }) {
+function InventoryFormFields({ inventory }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] = useField(
     'organization'
@@ -23,21 +22,10 @@ function InventoryFormFields({ credentialTypeId, inventory }) {
   const [instanceGroupsField, , instanceGroupsHelpers] = useField(
     'instanceGroups'
   );
-  const [insightsCredentialField, insightsCredentialMeta] = useField(
-    'insights_credential'
-  );
   const handleOrganizationUpdate = useCallback(
     value => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
-    },
-    [setFieldValue, setFieldTouched]
-  );
-
-  const handleCredentialUpdate = useCallback(
-    value => {
-      setFieldValue('insights_credential', value);
-      setFieldTouched('insights_credential', true, false);
     },
     [setFieldValue, setFieldTouched]
   );
@@ -69,17 +57,6 @@ function InventoryFormFields({ credentialTypeId, inventory }) {
         required
         autoPopulate={!inventory?.id}
         validate={required(t`Select a value for this field`)}
-      />
-      <CredentialLookup
-        helperTextInvalid={insightsCredentialMeta.error}
-        isValid={
-          !insightsCredentialMeta.touched || !insightsCredentialMeta.error
-        }
-        label={t`Insights Credential`}
-        credentialTypeId={credentialTypeId}
-        onChange={handleCredentialUpdate}
-        value={insightsCredentialField.value}
-        fieldName="insights_credential"
       />
       <InstanceGroupsLookup
         value={instanceGroupsField.value}
@@ -116,10 +93,6 @@ function InventoryForm({
       (inventory.summary_fields && inventory.summary_fields.organization) ||
       null,
     instanceGroups: instanceGroups || [],
-    insights_credential:
-      (inventory.summary_fields &&
-        inventory.summary_fields.insights_credential) ||
-      null,
   };
 
   return (
@@ -150,7 +123,6 @@ InventoryForm.propType = {
   handleCancel: func.isRequired,
   instanceGroups: shape(),
   inventory: shape(),
-  credentialTypeId: number.isRequired,
   submitError: shape(),
 };
 

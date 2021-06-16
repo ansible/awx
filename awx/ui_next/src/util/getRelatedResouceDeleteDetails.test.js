@@ -33,9 +33,6 @@ describe('delete details', () => {
     getRelatedResourceDeleteCounts(
       relatedResourceDeleteRequests.credential({ id: 1 })
     );
-    expect(InventoriesAPI.read).toBeCalledWith({
-      insights_credential: 1,
-    });
     expect(InventorySourcesAPI.read).toBeCalledWith({
       credentials__id: 1,
     });

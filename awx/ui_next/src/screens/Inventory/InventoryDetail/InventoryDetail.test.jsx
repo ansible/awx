@@ -22,10 +22,6 @@ const mockInventory = {
       copy: true,
       adhoc: true,
     },
-    insights_credential: {
-      id: 1,
-      name: 'Foo',
-    },
   },
   created: '2019-10-04T16:56:48.025455Z',
   modified: '2019-10-04T16:56:48.025468Z',
@@ -43,7 +39,6 @@ const mockInventory = {
   has_inventory_sources: false,
   total_inventory_sources: 0,
   inventory_sources_with_failures: 0,
-  insights_credential: null,
   pending_deletion: false,
 };
 
