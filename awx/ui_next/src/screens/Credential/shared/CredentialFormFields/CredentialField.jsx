@@ -106,6 +106,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
         isLoading={fileIsUploading}
         allowEditingUploadedText
         validated={isValid ? 'default' : 'error'}
+        isDisabled={false}
       />
     );
   }
