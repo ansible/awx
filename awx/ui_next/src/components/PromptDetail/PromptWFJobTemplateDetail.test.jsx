@@ -38,10 +38,10 @@ describe('PromptWFJobTemplateDetail', () => {
     );
     expect(
       wrapper
-        .find('Detail[label="Options"]')
+        .find('Detail[label="Enabled Options"]')
         .containsAllMatchingElements([
-          <li>Enable Concurrent Jobs</li>,
-          <li>Enable Webhooks</li>,
+          <li>Concurrent Jobs</li>,
+          <li>Webhooks</li>,
         ])
     ).toEqual(true);
     expect(

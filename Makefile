@@ -288,6 +288,11 @@ swagger: reports
 
 check: black
 
+api-lint:
+	BLACK_ARGS="--check" make black
+	flake8 awx
+	yamllint -s .
+
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/setup.py egg_info_dev
 	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link

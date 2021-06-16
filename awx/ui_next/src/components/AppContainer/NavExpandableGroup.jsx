@@ -27,7 +27,7 @@ class NavExpandableGroup extends Component {
   render() {
     const { groupId, groupTitle, routes } = this.props;
 
-    if (routes.length === 1) {
+    if (routes.length === 1 && groupId === 'settings') {
       const [{ path }] = routes;
       return (
         <NavItem itemId={groupId} isActive={this.isActivePath(path)} key={path}>

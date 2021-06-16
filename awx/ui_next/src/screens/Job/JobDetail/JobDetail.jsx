@@ -79,7 +79,7 @@ function JobDetail({ job }) {
     inventory_update: t`Inventory Sync`,
     job: job.job_type === 'check' ? t`Playbook Check` : t`Playbook Run`,
     ad_hoc_command: t`Command`,
-    management_job: t`Management Job`,
+    system_job: t`Management Job`,
     workflow_job: t`Workflow Job`,
   };
 
@@ -220,10 +220,12 @@ function JobDetail({ job }) {
         <Detail label={t`Playbook`} value={job.playbook} />
         <Detail label={t`Limit`} value={job.limit} />
         <Detail label={t`Verbosity`} value={VERBOSITY[job.verbosity]} />
-        <ExecutionEnvironmentDetail
-          executionEnvironment={executionEnvironment}
-          verifyMissingVirtualEnv={false}
-        />
+        {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
+          <ExecutionEnvironmentDetail
+            executionEnvironment={executionEnvironment}
+            verifyMissingVirtualEnv={false}
+          />
+        )}
         <Detail label={t`Execution Node`} value={job.execution_node} />
         {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail

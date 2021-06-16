@@ -3,7 +3,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import { ConfigAPI, MeAPI } from '../api';
+import { ConfigAPI, MeAPI, UsersAPI, OrganizationsAPI } from '../api';
 import useRequest, { useDismissableError } from '../util/useRequest';
 import AlertModal from '../components/AlertModal';
 import ErrorDetail from '../components/ErrorDetail';
@@ -35,9 +35,32 @@ export const ConfigProvider = ({ children }) => {
           },
         },
       ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
-      return { ...data, me };
+
+      const [
+        {
+          data: { count: adminOrgCount },
+        },
+        {
+          data: { count: notifAdminCount },
+        },
+        {
+          data: { count: execEnvAdminCount },
+        },
+      ] = await Promise.all([
+        UsersAPI.readAdminOfOrganizations(me?.id),
+        OrganizationsAPI.read({
+          page_size: 1,
+          role_level: 'notification_admin_role',
+        }),
+        OrganizationsAPI.read({
+          page_size: 1,
+          role_level: 'execution_environment_admin_role',
+        }),
+      ]);
+
+      return { ...data, me, adminOrgCount, notifAdminCount, execEnvAdminCount };
     }, []),
-    {}
+    { adminOrgCount: 0, notifAdminCount: 0, execEnvAdminCount: 0 }
   );
 
   const { error, dismissError } = useDismissableError(configError);
@@ -75,6 +98,17 @@ export const ConfigProvider = ({ children }) => {
       {children}
     </ConfigContext.Provider>
   );
+};
+
+export const useUserProfile = () => {
+  const config = useConfig();
+  return {
+    isSuperUser: !!config.me?.is_superuser,
+    isSystemAuditor: !!config.me?.is_system_auditor,
+    isOrgAdmin: config.adminOrgCount,
+    isNotificationAdmin: config.notifAdminCount,
+    isExecEnvAdmin: config.execEnvAdminCount,
+  };
 };
 
 export const useAuthorizedPath = () => {

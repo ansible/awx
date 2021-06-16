@@ -16,7 +16,9 @@ describe('PromptProjectDetail', () => {
 
   beforeAll(() => {
     wrapper = mountWithContexts(
-      <PromptProjectDetail resource={mockProject} />,
+      <PromptProjectDetail
+        resource={{ ...mockProject, scm_track_submodules: true }}
+      />,
       {
         context: { config },
       }
@@ -54,12 +56,13 @@ describe('PromptProjectDetail', () => {
     );
     expect(
       wrapper
-        .find('Detail[label="Options"]')
+        .find('Detail[label="Enabled Options"]')
         .containsAllMatchingElements([
-          <li>Clean</li>,
-          <li>Delete on Update</li>,
-          <li>Update Revision on Launch</li>,
-          <li>Allow Branch Override</li>,
+          <li>Discard local changes before syncing</li>,
+          <li>Delete the project before syncing</li>,
+          <li>Track submodules latest commit on branch</li>,
+          <li>Update revision on job launch</li>,
+          <li>Allow branch override</li>,
         ])
     ).toEqual(true);
   });

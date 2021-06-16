@@ -215,6 +215,7 @@ Lookup.propTypes = {
   fieldName: string.isRequired,
   validate: func,
   onDebounce: func,
+  isDisabled: bool,
 };
 
 Lookup.defaultProps = {
@@ -235,6 +236,7 @@ Lookup.defaultProps = {
   ),
   validate: () => undefined,
   onDebounce: () => undefined,
+  isDisabled: false,
 };
 
 export { Lookup as _Lookup };

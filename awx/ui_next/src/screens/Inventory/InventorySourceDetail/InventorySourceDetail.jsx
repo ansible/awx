@@ -1,9 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
-
-import { Button, List, ListItem } from '@patternfly/react-core';
+import {
+  Button,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+} from '@patternfly/react-core';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import { VariablesDetail } from '../../../components/CodeEditor';
@@ -19,7 +23,6 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
-import Popover from '../../../components/Popover';
 import useRequest from '../../../util/useRequest';
 import { InventorySourcesAPI } from '../../../api';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
@@ -112,71 +115,28 @@ function InventorySourceDetail({ inventorySource }) {
     update_on_project_update
   ) {
     optionsList = (
-      <List>
+      <TextList component={TextListVariants.ul}>
         {overwrite && (
-          <ListItem>
-            {t`Overwrite`}
-            <Popover
-              content={
-                <>
-                  {t`If checked, any hosts and groups that were
-          previously present on the external source but are now removed
-          will be removed from the inventory. Hosts and groups
-          that were not managed by the inventory source will be promoted
-          to the next manually created group or if there is no manually
-          created group to promote them into, they will be left in the "all"
-          default group for the inventory.`}
-                  <br />
-                  <br />
-                  {t`When not checked, local child
-          hosts and groups not found on the external source will remain
-          untouched by the inventory update process.`}
-                </>
-              }
-            />
-          </ListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Overwrite local groups and hosts from remote inventory source`}
+          </TextListItem>
         )}
         {overwrite_vars && (
-          <ListItem>
-            {t`Overwrite variables`}
-            <Popover
-              content={
-                <>
-                  {t`If checked, all variables for child groups
-                  and hosts will be removed and replaced by those found
-                  on the external source.`}
-                  <br />
-                  <br />
-                  {t`When not checked, a merge will be performed,
-                  combining local variables with those found on the
-                  external source.`}
-                </>
-              }
-            />
-          </ListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Overwrite local variables from remote inventory source`}
+          </TextListItem>
         )}
         {update_on_launch && (
-          <ListItem>
+          <TextListItem component={TextListItemVariants.li}>
             {t`Update on launch`}
-            <Popover
-              content={t`Each time a job runs using this inventory,
-        refresh the inventory from the selected source before
-        executing job tasks.`}
-            />
-          </ListItem>
+          </TextListItem>
         )}
         {update_on_project_update && (
-          <ListItem>
+          <TextListItem component={TextListItemVariants.li}>
             {t`Update on project update`}
-            <Popover
-              content={t`After every project update where the SCM revision
-        changes, refresh the inventory from the selected source
-        before executing job tasks. This is intended for static content,
-        like the Ansible inventory .ini file format.`}
-            />
-          </ListItem>
+          </TextListItem>
         )}
-      </List>
+      </TextList>
     );
   }
 
@@ -242,7 +202,7 @@ function InventorySourceDetail({ inventorySource }) {
           />
         )}
         {optionsList && (
-          <Detail fullWidth label={t`Options`} value={optionsList} />
+          <Detail fullWidth label={t`Enabled Options`} value={optionsList} />
         )}
         {source_vars && (
           <VariablesDetail

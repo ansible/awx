@@ -46,7 +46,7 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
         response['X-API-Total-Time'] = '%0.3fs' % total_time
         if settings.AWX_REQUEST_PROFILE:
             response['X-API-Profile-File'] = self.prof.stop()
-        perf_logger.info(
+        perf_logger.debug(
             f'request: {request}, response_time: {response["X-API-Total-Time"]}',
             extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=response["X-API-Total-Time"])),
         )

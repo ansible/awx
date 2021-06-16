@@ -111,7 +111,7 @@ describe('<CredentialDetail />', () => {
       'Privilege Escalation Password',
       'Prompt on launch'
     );
-    expect(wrapper.find(`Detail[label="Options"] ListItem`).text()).toEqual(
+    expect(wrapper.find(`Detail[label="Enabled Options"] li`).text()).toEqual(
       'Authorize'
     );
   });

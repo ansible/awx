@@ -21,3 +21,5 @@ sdb
 remote-pdb
 gprof2dot
 atomicwrites==1.4.0
+flake8
+yamllint

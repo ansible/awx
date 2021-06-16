@@ -1,9 +1,13 @@
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-
-import { Chip, List, ListItem } from '@patternfly/react-core';
+import {
+  Chip,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+} from '@patternfly/react-core';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { Detail } from '../DetailList';
@@ -26,10 +30,18 @@ function PromptWFJobTemplateDetail({ resource }) {
   let optionsList = '';
   if (allow_simultaneous || webhook_service) {
     optionsList = (
-      <List>
-        {allow_simultaneous && <ListItem>{t`Enable Concurrent Jobs`}</ListItem>}
-        {webhook_service && <ListItem>{t`Enable Webhooks`}</ListItem>}
-      </List>
+      <TextList component={TextListVariants.ul}>
+        {allow_simultaneous && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Concurrent Jobs`}
+          </TextListItem>
+        )}
+        {webhook_service && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Webhooks`}
+          </TextListItem>
+        )}
+      </TextList>
     );
   }
 
@@ -82,7 +94,7 @@ function PromptWFJobTemplateDetail({ resource }) {
           value={`${window.location.origin}${related.webhook_receiver}`}
         />
       )}
-      {optionsList && <Detail label={t`Options`} value={optionsList} />}
+      {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
       {summary_fields?.webhook_credential && (
         <Detail
           fullWidth

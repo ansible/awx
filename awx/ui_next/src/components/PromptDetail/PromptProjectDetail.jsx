@@ -1,10 +1,13 @@
 import React from 'react';
-
 import { t } from '@lingui/macro';
-import { List, ListItem } from '@patternfly/react-core';
+import {
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+} from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { Config } from '../../contexts/Config';
-
 import { Detail, DeletedDetail } from '../DetailList';
 import CredentialChip from '../CredentialChip';
 import { toTitleCase } from '../../util/strings';
@@ -36,17 +39,33 @@ function PromptProjectDetail({ resource }) {
     allow_override
   ) {
     optionsList = (
-      <List>
-        {scm_clean && <ListItem>{t`Clean`}</ListItem>}
-        {scm_delete_on_update && <ListItem>{t`Delete on Update`}</ListItem>}
+      <TextList component={TextListVariants.ul}>
+        {scm_clean && (
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Discard local changes before syncing`}</TextListItem>
+        )}
+        {scm_delete_on_update && (
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Delete the project before syncing`}</TextListItem>
+        )}
         {scm_track_submodules && (
-          <ListItem>{t`Track submodules latest commit on branch`}</ListItem>
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Track submodules latest commit on branch`}</TextListItem>
         )}
         {scm_update_on_launch && (
-          <ListItem>{t`Update Revision on Launch`}</ListItem>
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Update revision on job launch`}</TextListItem>
         )}
-        {allow_override && <ListItem>{t`Allow Branch Override`}</ListItem>}
-      </List>
+        {allow_override && (
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Allow branch override`}</TextListItem>
+        )}
+      </TextList>
     );
   }
 
@@ -90,7 +109,7 @@ function PromptProjectDetail({ resource }) {
           }
         />
       )}
-      {optionsList && <Detail label={t`Options`} value={optionsList} />}
+      {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
       <Detail
         label={t`Cache Timeout`}
         value={`${scm_update_cache_timeout} ${t`Seconds`}`}

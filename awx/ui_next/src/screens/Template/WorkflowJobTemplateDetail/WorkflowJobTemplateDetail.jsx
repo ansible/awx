@@ -58,12 +58,12 @@ function WorkflowJobTemplateDetail({ template }) {
     <TextList component={TextListVariants.ul}>
       {template.allow_simultaneous && (
         <TextListItem component={TextListItemVariants.li}>
-          {t`- Enable Concurrent Jobs`}
+          {t`Concurrent Jobs`}
         </TextListItem>
       )}
       {template.webhook_service && (
         <TextListItem component={TextListItemVariants.li}>
-          {t`- Enable Webhooks`}
+          {t`Webhooks`}
         </TextListItem>
       )}
     </TextList>
@@ -186,9 +186,6 @@ function WorkflowJobTemplateDetail({ template }) {
             }
           />
         )}
-        {renderOptionsField && (
-          <Detail label={t`Options`} value={renderOptions} />
-        )}
         <UserDateDetail
           label={t`Created`}
           date={created}
@@ -199,6 +196,9 @@ function WorkflowJobTemplateDetail({ template }) {
           date={modified}
           user={summary_fields.modified_by}
         />
+        {renderOptionsField && (
+          <Detail fullWidth label={t`Enabled Options`} value={renderOptions} />
+        )}
         {summary_fields.labels?.results?.length > 0 && (
           <Detail
             fullWidth

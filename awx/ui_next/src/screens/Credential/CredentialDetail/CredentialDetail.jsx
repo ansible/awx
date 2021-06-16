@@ -1,9 +1,14 @@
 import React, { Fragment, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { Button, List, ListItem } from '@patternfly/react-core';
+import {
+  Button,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+} from '@patternfly/react-core';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ContentError from '../../../components/ContentError';
@@ -134,15 +139,7 @@ function CredentialDetail({ credential }) {
     }
 
     if (type === 'boolean') {
-      return (
-        <Detail
-          dataCy={`credential-${id}-detail`}
-          id={`credential-${id}-detail`}
-          key={id}
-          label={t`Options`}
-          value={<List>{inputs[id] && <ListItem>{label}</ListItem>}</List>}
-        />
-      );
+      return null;
     }
 
     if (inputs[id] === '$encrypted$') {
@@ -187,6 +184,10 @@ function CredentialDetail({ credential }) {
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.credential(
     credential
+  );
+
+  const enabledBooleanFields = fields.filter(
+    ({ id, type }) => type === 'boolean' && inputs[id]
   );
 
   if (hasContentLoading) {
@@ -255,6 +256,20 @@ function CredentialDetail({ credential }) {
           date={modified}
           user={modified_by}
         />
+        {enabledBooleanFields.length > 0 && (
+          <Detail
+            label={t`Enabled Options`}
+            value={
+              <TextList component={TextListVariants.ul}>
+                {enabledBooleanFields.map(({ id, label }) => (
+                  <TextListItem key={id} component={TextListItemVariants.li}>
+                    {label}
+                  </TextListItem>
+                ))}
+              </TextList>
+            }
+          />
+        )}
       </DetailList>
       {Object.keys(inputSources).length > 0 && (
         <PluginFieldText>

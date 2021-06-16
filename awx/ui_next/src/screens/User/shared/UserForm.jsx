@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
+import { useConfig } from '../../../contexts/Config';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, {
@@ -16,7 +17,7 @@ import { FormColumnLayout } from '../../../components/FormLayout';
 
 function UserFormFields({ user }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-
+  const { me = {} } = useConfig();
   const ldapUser = user.ldap_dn;
   const socialAuthUser = user.auth?.length > 0;
   const externalAccount = user.external_account;
@@ -119,22 +120,24 @@ function UserFormFields({ user }) {
           validate={required(t`Select a value for this field`)}
         />
       )}
-      <FormGroup
-        fieldId="user-type"
-        helperTextInvalid={userTypeMeta.error}
-        isRequired
-        validated={
-          !userTypeMeta.touched || !userTypeMeta.error ? 'default' : 'error'
-        }
-        label={t`User Type`}
-      >
-        <AnsibleSelect
-          isValid={!userTypeMeta.touched || !userTypeMeta.error}
-          id="user-type"
-          data={userTypeOptions}
-          {...userTypeField}
-        />
-      </FormGroup>
+      {me.is_superuser && (
+        <FormGroup
+          fieldId="user-type"
+          helperTextInvalid={userTypeMeta.error}
+          isRequired
+          validated={
+            !userTypeMeta.touched || !userTypeMeta.error ? 'default' : 'error'
+          }
+          label={t`User Type`}
+        >
+          <AnsibleSelect
+            isValid={!userTypeMeta.touched || !userTypeMeta.error}
+            id="user-type"
+            data={userTypeOptions}
+            {...userTypeField}
+          />
+        </FormGroup>
+      )}
     </>
   );
 }

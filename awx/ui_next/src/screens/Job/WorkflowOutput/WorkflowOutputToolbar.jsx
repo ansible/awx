@@ -1,9 +1,14 @@
 import React, { useContext } from 'react';
-
+import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
-import { CompassIcon, WrenchIcon } from '@patternfly/react-icons';
+
+import {
+  CompassIcon,
+  WrenchIcon,
+  ProjectDiagramIcon,
+} from '@patternfly/react-icons';
 import styled from 'styled-components';
 import StatusIcon from '../../../components/StatusIcon';
 import {
@@ -58,11 +63,15 @@ const StatusIconWithMargin = styled(StatusIcon)`
 
 function WorkflowOutputToolbar({ job }) {
   const dispatch = useContext(WorkflowDispatchContext);
-
+  const history = useHistory();
   const { nodes, showLegend, showTools } = useContext(WorkflowStateContext);
 
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
-
+  const navToWorkflow = () => {
+    history.push(
+      `/templates/workflow_job_template/${job.unified_job_template}/visualizer`
+    );
+  };
   return (
     <Toolbar id="workflow-output-toolbar">
       <ToolbarJob>
@@ -70,6 +79,15 @@ function WorkflowOutputToolbar({ job }) {
         <b>{job.name}</b>
       </ToolbarJob>
       <ToolbarActions>
+        <ActionButton
+          ouiaId="edit-workflow"
+          aria-label={t`Edit workflow`}
+          id="edit-workflow"
+          variant="plain"
+          onClick={navToWorkflow}
+        >
+          <ProjectDiagramIcon />
+        </ActionButton>
         <div>{t`Total Nodes`}</div>
         <Badge isRead>{totalNodes}</Badge>
         <Tooltip content={t`Toggle Legend`} position="bottom">

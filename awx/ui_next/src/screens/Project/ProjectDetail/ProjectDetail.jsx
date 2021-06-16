@@ -5,8 +5,10 @@ import styled from 'styled-components';
 import {
   Button,
   ClipboardCopy,
-  List,
-  ListItem,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
   Tooltip,
 } from '@patternfly/react-core';
 import { Project } from '../../../types';
@@ -78,17 +80,33 @@ function ProjectDetail({ project }) {
     allow_override
   ) {
     optionsList = (
-      <List>
-        {scm_clean && <ListItem>{t`Clean`}</ListItem>}
-        {scm_delete_on_update && <ListItem>{t`Delete on Update`}</ListItem>}
+      <TextList component={TextListVariants.ul}>
+        {scm_clean && (
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Discard local changes before syncing`}</TextListItem>
+        )}
+        {scm_delete_on_update && (
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Delete the project before syncing`}</TextListItem>
+        )}
         {scm_track_submodules && (
-          <ListItem>{t`Track submodules latest commit on branch`}</ListItem>
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Track submodules latest commit on branch`}</TextListItem>
         )}
         {scm_update_on_launch && (
-          <ListItem>{t`Update Revision on Launch`}</ListItem>
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Update revision on job launch`}</TextListItem>
         )}
-        {allow_override && <ListItem>{t`Allow Branch Override`}</ListItem>}
-      </List>
+        {allow_override && (
+          <TextListItem
+            component={TextListItemVariants.li}
+          >{t`Allow branch override`}</TextListItem>
+        )}
+      </TextList>
     );
   }
 
@@ -196,7 +214,6 @@ function ProjectDetail({ project }) {
             }
           />
         )}
-        {optionsList && <Detail label={t`Options`} value={optionsList} />}
         <Detail
           label={t`Cache Timeout`}
           value={`${scm_update_cache_timeout} ${t`Seconds`}`}
@@ -212,7 +229,6 @@ function ProjectDetail({ project }) {
           )}
         </Config>
         <Detail label={t`Playbook Directory`} value={local_path} />
-
         <UserDateDetail
           label={t`Created`}
           date={created}
@@ -223,6 +239,9 @@ function ProjectDetail({ project }) {
           date={modified}
           user={summary_fields.modified_by}
         />
+        {optionsList && (
+          <Detail fullWidth label={t`Enabled Options`} value={optionsList} />
+        )}
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities?.edit && (

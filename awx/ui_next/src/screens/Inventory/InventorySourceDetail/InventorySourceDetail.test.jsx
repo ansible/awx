@@ -85,10 +85,10 @@ describe('InventorySourceDetail', () => {
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       '---\nfoo: bar'
     );
-    wrapper.find('Detail[label="Options"] li').forEach(option => {
+    wrapper.find('Detail[label="Enabled Options"] li').forEach(option => {
       expect([
-        'Overwrite',
-        'Overwrite variables',
+        'Overwrite local groups and hosts from remote inventory source',
+        'Overwrite local variables from remote inventory source',
         'Update on launch',
         'Update on project update',
       ]).toContain(option.text());

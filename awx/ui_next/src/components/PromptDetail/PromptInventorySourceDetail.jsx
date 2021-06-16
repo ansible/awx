@@ -1,9 +1,13 @@
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-
-import { Chip, List, ListItem } from '@patternfly/react-core';
+import {
+  Chip,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+} from '@patternfly/react-core';
 import { Detail, DeletedDetail } from '../DetailList';
 import { VariablesDetail } from '../CodeEditor';
 import CredentialChip from '../CredentialChip';
@@ -44,14 +48,28 @@ function PromptInventorySourceDetail({ resource }) {
     update_on_project_update
   ) {
     optionsList = (
-      <List>
-        {overwrite && <ListItem>{t`Overwrite`}</ListItem>}
-        {overwrite_vars && <ListItem>{t`Overwrite Variables`}</ListItem>}
-        {update_on_launch && <ListItem>{t`Update on Launch`}</ListItem>}
-        {update_on_project_update && (
-          <ListItem>{t`Update on Project Update`}</ListItem>
+      <TextList component={TextListVariants.ul}>
+        {overwrite && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Overwrite local groups and hosts from remote inventory source`}
+          </TextListItem>
         )}
-      </List>
+        {overwrite_vars && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Overwrite local variables from remote inventory source`}
+          </TextListItem>
+        )}
+        {update_on_launch && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Update on launch`}
+          </TextListItem>
+        )}
+        {update_on_project_update && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Update on project update`}
+          </TextListItem>
+        )}
+      </TextList>
     );
   }
 
@@ -162,7 +180,9 @@ function PromptInventorySourceDetail({ resource }) {
           }
         />
       )}
-      {optionsList && <Detail label={t`Options`} value={optionsList} />}
+      {optionsList && (
+        <Detail fullWidth label={t`Enabled Options`} value={optionsList} />
+      )}
       {source_vars && (
         <VariablesDetail
           label={t`Source Variables`}

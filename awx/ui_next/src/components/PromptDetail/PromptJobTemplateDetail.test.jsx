@@ -96,12 +96,13 @@ describe('PromptJobTemplateDetail', () => {
     ).toEqual(true);
     expect(
       wrapper
-        .find('Detail[label="Options"]')
+        .find('Detail[label="Enabled Options"]')
         .containsAllMatchingElements([
-          <li>Enable Privilege Escalation</li>,
-          <li>Allow Provisioning Callbacks</li>,
-          <li>Enable Concurrent Jobs</li>,
-          <li>Use Fact Storage</li>,
+          <li>Privilege Escalation</li>,
+          <li>Provisioning Callbacks</li>,
+          <li>Concurrent Jobs</li>,
+          <li>Fact Storage</li>,
+          <li>Webhooks</li>,
         ])
     ).toEqual(true);
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(

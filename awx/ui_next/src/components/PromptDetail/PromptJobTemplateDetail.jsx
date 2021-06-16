@@ -1,9 +1,13 @@
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-
-import { Chip, List, ListItem } from '@patternfly/react-core';
+import {
+  Chip,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+} from '@patternfly/react-core';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import Sparkline from '../Sparkline';
@@ -51,19 +55,37 @@ function PromptJobTemplateDetail({ resource }) {
     become_enabled ||
     host_config_key ||
     allow_simultaneous ||
-    use_fact_cache
+    use_fact_cache ||
+    webhook_service
   ) {
     optionsList = (
-      <List>
+      <TextList component={TextListVariants.ul}>
         {become_enabled && (
-          <ListItem>{t`Enable Privilege Escalation`}</ListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Privilege Escalation`}
+          </TextListItem>
         )}
         {host_config_key && (
-          <ListItem>{t`Allow Provisioning Callbacks`}</ListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Provisioning Callbacks`}
+          </TextListItem>
         )}
-        {allow_simultaneous && <ListItem>{t`Enable Concurrent Jobs`}</ListItem>}
-        {use_fact_cache && <ListItem>{t`Use Fact Storage`}</ListItem>}
-      </List>
+        {allow_simultaneous && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Concurrent Jobs`}
+          </TextListItem>
+        )}
+        {use_fact_cache && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Fact Storage`}
+          </TextListItem>
+        )}
+        {webhook_service && (
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Webhooks`}
+          </TextListItem>
+        )}
+      </TextList>
     );
   }
 
@@ -164,7 +186,7 @@ function PromptJobTemplateDetail({ resource }) {
           }
         />
       )}
-      {optionsList && <Detail label={t`Options`} value={optionsList} />}
+      {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
       {summary_fields?.credentials?.length > 0 && (
         <Detail
           fullWidth

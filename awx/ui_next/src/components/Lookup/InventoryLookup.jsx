@@ -31,6 +31,7 @@ function InventoryLookup({
   isOverrideDisabled,
   validate,
   fieldName,
+  isDisabled,
 }) {
   const {
     result: {
@@ -105,7 +106,7 @@ function InventoryLookup({
         label={t`Inventory`}
         promptId={promptId}
         promptName={promptName}
-        isDisabled={!canEdit}
+        isDisabled={!canEdit || isDisabled}
         tooltip={t`Select the inventory containing the hosts
             you want this job to manage.`}
       >
@@ -120,7 +121,7 @@ function InventoryLookup({
           fieldName={fieldName}
           validate={validate}
           isLoading={isLoading}
-          isDisabled={!canEdit}
+          isDisabled={!canEdit || isDisabled}
           qsConfig={QS_CONFIG}
           renderOptionsList={({ state, dispatch, canDelete }) => (
             <OptionsList
@@ -176,7 +177,7 @@ function InventoryLookup({
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
-        isDisabled={!canEdit}
+        isDisabled={!canEdit || isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -228,6 +229,7 @@ InventoryLookup.propTypes = {
   isOverrideDisabled: bool,
   validate: func,
   fieldName: string,
+  isDisabled: bool,
 };
 
 InventoryLookup.defaultProps = {
@@ -236,6 +238,7 @@ InventoryLookup.defaultProps = {
   isOverrideDisabled: false,
   validate: () => {},
   fieldName: 'inventory',
+  isDisabled: false,
 };
 
 export default withRouter(InventoryLookup);

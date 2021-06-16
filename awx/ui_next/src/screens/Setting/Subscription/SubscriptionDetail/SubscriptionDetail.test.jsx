@@ -71,6 +71,14 @@ describe('<SubscriptionDetail />', () => {
     assertDetail('Hosts remaining', '1000');
     assertDetail('Hosts automated', '12 since 3/2/2021, 7:43:48 PM');
 
+    expect(wrapper.find('Button[aria-label="edit"]').length).toBe(0);
+  });
+
+  test('should render edit button for system admin', () => {
+    wrapper = mountWithContexts(<SubscriptionDetail />, {
+      context: { ...config, me: { is_superuser: true } },
+    });
+
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(1);
   });
 });

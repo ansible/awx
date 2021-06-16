@@ -21,6 +21,7 @@ function ExecutionEnvironmentDetail({
   isDefaultEnvironment,
   virtualEnvironment,
   verifyMissingVirtualEnv,
+  helpText,
 }) {
   const label = isDefaultEnvironment
     ? t`Default Execution Environment`
@@ -37,6 +38,7 @@ function ExecutionEnvironmentDetail({
             {executionEnvironment.name}
           </Link>
         }
+        helpText={helpText}
         dataCy="execution-environment-detail"
       />
     );
@@ -95,6 +97,7 @@ ExecutionEnvironmentDetail.propTypes = {
   isDefaultEnvironment: bool,
   virtualEnvironment: string,
   verifyMissingVirtualEnv: bool,
+  helpText: string,
 };
 
 ExecutionEnvironmentDetail.defaultProps = {
@@ -102,6 +105,7 @@ ExecutionEnvironmentDetail.defaultProps = {
   executionEnvironment: null,
   virtualEnvironment: '',
   verifyMissingVirtualEnv: true,
+  helpText: '',
 };
 
 export default ExecutionEnvironmentDetail;
