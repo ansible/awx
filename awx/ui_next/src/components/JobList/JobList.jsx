@@ -235,7 +235,10 @@ function JobList({ defaultParams, showTypeColumn = false }) {
                 <ToolbarDeleteButton
                   key="delete"
                   onDelete={handleJobDelete}
-                  itemsToDelete={selected}
+                  itemsToDelete={selected.map(({ ...item }) => {
+                    item.name = `${item.id} - ${item.name}`;
+                    return item;
+                  })}
                   pluralizedItemName={t`Jobs`}
                   cannotDelete={item =>
                     isJobRunning(item.status) ||
