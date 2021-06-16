@@ -15,6 +15,10 @@ const InputGroup = styled(PFInputGroup)`
   padding-bottom: 5px;
 `;
 
+const HelperTextWrapper = styled.div`
+  font-size: var(--pf-c-form__label--FontSize);
+`;
+
 const CheckIcon = styled(PFCheckIcon)`
   color: var(--pf-c-button--m-plain--disabled--Color);
   ${props =>
@@ -53,9 +57,13 @@ function MultipleChoiceField({ label, tooltip }) {
       name="formattedChoices"
       id="formattedChoices"
       helperText={
-        !formattedChoicesField.value[0].choice.trim().length
-          ? t`Type answer then click checkbox on right to select answer as default.`
-          : t`Press 'Enter' to add more answer choices. One answer choice per line. `
+        <HelperTextWrapper>
+          {t`Type answer then click checkbox on right to select answer as
+          default.`}
+          <br />
+          {t`Press 'Enter' to add more answer choices. One answer
+          choice per line.`}
+        </HelperTextWrapper>
       }
       helperTextInvalid={formattedChoicesMeta.error}
       onBlur={e => {
