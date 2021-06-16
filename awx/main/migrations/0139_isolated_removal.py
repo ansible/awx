@@ -3,6 +3,16 @@
 from django.db import migrations, models
 
 
+def remove_iso_instances(apps, schema_editor):
+    Instance = apps.get_model('main', 'Instance')
+    Instance.objects.filter(rampart_groups__controller__isnull=False).delete()
+
+
+def remove_iso_groups(apps, schema_editor):
+    InstanceGroup = apps.get_model('main', 'InstanceGroup')
+    InstanceGroup.objects.filter(controller__isnull=False).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +20,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(remove_iso_instances),
+        migrations.RunPython(remove_iso_groups),
         migrations.RemoveField(
             model_name='instance',
             name='last_isolated_check',
