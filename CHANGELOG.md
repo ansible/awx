@@ -1,6 +1,6 @@
 # Changelog
 
-# 19.2.1 (June 14, 2021)
+# 19.2.1 (June 17, 2021)
 
 - There are now 2 default Instance Groups: 'controlplane' and 'default' (https://github.com/ansible/awx/pull/10324)
 - Removed deprecated modules: `tower_send`, `tower_receive`, `tower_workflow_template` (https://github.com/ansible/awx/pull/9980)
