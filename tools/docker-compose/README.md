@@ -37,6 +37,16 @@ Notable files:
 - [Docker Compose](https://docs.docker.com/compose/install/).
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) will need to be installed as we use it to template files needed for the docker-compose.
 
+### Tested Operating Systems
+
+The docker-compose development environment is regularly used and should work on x86_64 systems running:
+- Fedora (maintained versions)
+- Ubuntu LTS (18, 20)
+- Red Hat Enterprise Linux 8, CentOS Stream 8
+- Mac OS X
+
+Use on other platforms is untested, and may require local changes.
+
 ## Configuration
 
 In the  [`inventory` file](../inventory), set your `pg_password`, `broadcast_websocket_secret`, `secret_key`, and any other settings you need for your deployment.  
