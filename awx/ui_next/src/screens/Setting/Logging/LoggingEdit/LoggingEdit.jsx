@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
-import { Button, Form, Tooltip } from '@patternfly/react-core';
+import { Form } from '@patternfly/react-core';
 import { CardBody } from '../../../../components/Card';
 import ContentError from '../../../../components/ContentError';
 import ContentLoading from '../../../../components/ContentLoading';
@@ -18,10 +18,9 @@ import {
   ObjectField,
   RevertAllAlert,
   RevertFormActionGroup,
-  LoggingTestAlert,
 } from '../../shared';
 import useModal from '../../../../util/useModal';
-import useRequest, { useDismissableError } from '../../../../util/useRequest';
+import useRequest from '../../../../util/useRequest';
 import { formatJson } from '../../shared/settingUtils';
 import { SettingsAPI } from '../../../../api';
 
@@ -88,33 +87,6 @@ function LoggingEdit() {
     closeModal();
 
     history.push('/settings/logging/details');
-  };
-
-  const {
-    error: testLoggingError,
-    request: testLogging,
-    result: testSuccess,
-    setValue: setTestLogging,
-  } = useRequest(
-    useCallback(async () => {
-      const result = await SettingsAPI.createTest('logging', {});
-      return result;
-    }, []),
-    null
-  );
-
-  const {
-    error: testError,
-    dismissError: dismissTestError,
-  } = useDismissableError(testLoggingError);
-
-  const handleTest = async () => {
-    await testLogging();
-  };
-
-  const handleCloseAlert = () => {
-    setTestLogging(null);
-    dismissTestError();
   };
 
   const handleCancel = () => {
@@ -231,45 +203,12 @@ function LoggingEdit() {
                     onCancel={handleCancel}
                     onSubmit={formik.handleSubmit}
                     onRevert={toggleModal}
-                  >
-                    <Tooltip
-                      content={
-                        formik.dirty || !formik.values.LOG_AGGREGATOR_ENABLED
-                          ? t`Save and enable log aggregation before testing the log aggregator.`
-                          : t`Send a test log message to the configured log aggregator.`
-                      }
-                    >
-                      <div>
-                        <Button
-                          aria-label={t`Test logging`}
-                          ouiaId="test-logging-button"
-                          variant="secondary"
-                          type="button"
-                          onClick={handleTest}
-                          isDisabled={
-                            formik.dirty ||
-                            !formik.values.LOG_AGGREGATOR_ENABLED ||
-                            testSuccess ||
-                            testError
-                          }
-                        >
-                          {t`Test`}
-                        </Button>
-                      </div>
-                    </Tooltip>
-                  </RevertFormActionGroup>
+                  />
                 </FormColumnLayout>
                 {isModalOpen && (
                   <RevertAllAlert
                     onClose={closeModal}
                     onRevertAll={handleRevertAll}
-                  />
-                )}
-                {(testSuccess || testError) && (
-                  <LoggingTestAlert
-                    successResponse={testSuccess}
-                    errorResponse={testError}
-                    onClose={handleCloseAlert}
                   />
                 )}
               </Form>
