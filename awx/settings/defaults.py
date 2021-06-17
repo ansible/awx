@@ -680,10 +680,10 @@ RHV_INSTANCE_ID_VAR = 'id'
 # ---------------------
 # ----- Tower     -----
 # ---------------------
-TOWER_ENABLED_VAR = 'remote_tower_enabled'
-TOWER_ENABLED_VALUE = 'true'
-TOWER_EXCLUDE_EMPTY_GROUPS = True
-TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
+CONTROLLER_ENABLED_VAR = 'remote_tower_enabled'
+CONTROLLER_ENABLED_VALUE = 'true'
+CONTROLLER_EXCLUDE_EMPTY_GROUPS = True
+CONTROLLER_INSTANCE_ID_VAR = 'remote_tower_id'
 
 # ---------------------
 # ----- Foreman -----
