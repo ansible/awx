@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -99,7 +98,13 @@ function MultipleChoiceField({ question }) {
   const id = `survey-question-${question.variable}`;
   const isValid = !(meta.touched && meta.error);
 
-  const options = question.choices.split('\n');
+  let options = [];
+
+  if (typeof question.choices === 'string') {
+    options = question.choices.split('\n');
+  } else if (Array.isArray(question.choices)) {
+    options = [...question.choices];
+  }
 
   return (
     <FormGroup
@@ -119,7 +124,6 @@ function MultipleChoiceField({ question }) {
         selections={field.value}
         variant={SelectVariant.single}
         id={id}
-        isValid={isValid}
         isOpen={isOpen}
         placeholderText={t`Select an option`}
         onClear={() => {
@@ -144,6 +148,14 @@ function MultiSelectField({ question }) {
   const id = `survey-question-${question.variable}`;
   const hasActualValue = !question.required || meta.value?.length > 0;
   const isValid = !meta.touched || (!meta.error && hasActualValue);
+
+  let options = [];
+
+  if (typeof question.choices === 'string') {
+    options = question.choices.split('\n');
+  } else if (Array.isArray(question.choices)) {
+    options = [...question.choices];
+  }
 
   return (
     <FormGroup
@@ -176,7 +188,7 @@ function MultiSelectField({ question }) {
           helpers.setValue([]);
         }}
       >
-        {question.choices.split('\n').map(opt => (
+        {options.map(opt => (
           <SelectOption key={opt} value={opt} />
         ))}
       </Select>

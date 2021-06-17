@@ -348,7 +348,7 @@ export const SurveyQuestion = shape({
   min: number,
   max: number,
   default: string,
-  choices: string,
+  choices: oneOfType([string, arrayOf(string)]),
 });
 
 export const Survey = shape({
