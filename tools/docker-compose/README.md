@@ -43,7 +43,7 @@ The docker-compose development environment is regularly used and should work on 
 - Fedora (maintained versions)
 - Ubuntu LTS (18, 20)
 - Red Hat Enterprise Linux 8, CentOS Stream 8
-- Mac OS X
+- macOS 11
 
 Use on other platforms is untested, and may require local changes.
 
