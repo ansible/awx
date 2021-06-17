@@ -58,7 +58,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0147_validate_ee_image_field'),
+        ('main', '0149_remove_inventory_insights_credential'),
     ]
     operations = [
         migrations.RunPython(migrations.RunPython.noop, backwards),
