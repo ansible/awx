@@ -81,6 +81,7 @@ def test_default_cred_types():
         'azure_rm',
         'centrify_vault_kv',
         'conjur',
+        'controller',
         'galaxy_api_token',
         'gce',
         'github_token',
@@ -97,7 +98,6 @@ def test_default_cred_types():
         'scm',
         'ssh',
         'thycotic_dsv',
-        'tower',
         'vault',
         'vmware',
     ]
