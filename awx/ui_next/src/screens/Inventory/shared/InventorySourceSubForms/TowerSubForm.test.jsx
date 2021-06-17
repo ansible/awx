@@ -56,7 +56,7 @@ describe('<TowerSubForm />', () => {
   test('should make expected api calls', () => {
     expect(CredentialsAPI.read).toHaveBeenCalledTimes(1);
     expect(CredentialsAPI.read).toHaveBeenCalledWith({
-      credential_type__namespace: 'tower',
+      credential_type__namespace: 'controller',
       order_by: 'name',
       page: 1,
       page_size: 5,
