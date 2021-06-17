@@ -1778,8 +1778,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
         task.instance = inventory_update
-        tower = CredentialType.defaults['tower']()
-        inventory_update.source = 'tower'
+        tower = CredentialType.defaults['controller']()
+        inventory_update.source = 'controller'
         inputs = {'host': 'https://tower.example.org', 'username': 'bob', 'password': 'secret', 'verify_ssl': verify}
 
         def get_cred():
@@ -1806,8 +1806,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     def test_tower_source_ssl_verify_empty(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
         task.instance = inventory_update
-        tower = CredentialType.defaults['tower']()
-        inventory_update.source = 'tower'
+        tower = CredentialType.defaults['controller']()
+        inventory_update.source = 'controller'
         inputs = {
             'host': 'https://tower.example.org',
             'username': 'bob',
