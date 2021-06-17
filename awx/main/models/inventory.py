@@ -1545,13 +1545,7 @@ class insights(PluginFileInjector):
     collection = 'insights'
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
-    use_fqcn = 'true'
-
-    def inventory_as_dict(self, inventory_update, private_data_dir):
-        ret = super(insights, self).inventory_as_dict(inventory_update, private_data_dir)
-        # this inventory plugin requires the fully qualified inventory plugin name
-        ret['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
-        return ret
+    use_fqcn = True
 
 
 for cls in PluginFileInjector.__subclasses__():
