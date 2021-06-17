@@ -1006,7 +1006,7 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
-    namespace='tower',
+    namespace='controller',
     kind='cloud',
     name=ugettext_noop('Red Hat Ansible Automation Platform'),
     managed_by_tower=True,
