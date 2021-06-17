@@ -13,7 +13,7 @@ from awx.main.models import User, Team, Organization, Credential, CredentialType
 def galaxy_credential():
     galaxy_type = CredentialType.objects.create(kind='galaxy')
     cred = Credential(
-        created=now(), modified=now(), name='Ansible Galaxy', managed_by_tower=True, credential_type=galaxy_type, inputs={'url': 'https://galaxy.ansible.com/'}
+        created=now(), modified=now(), name='Ansible Galaxy', managed=True, credential_type=galaxy_type, inputs={'url': 'https://galaxy.ansible.com/'}
     )
     cred.save()
 

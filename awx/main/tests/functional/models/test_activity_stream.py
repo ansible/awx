@@ -121,7 +121,7 @@ def somecloud_type():
     return CredentialType.objects.create(
         kind='cloud',
         name='SomeCloud',
-        managed_by_tower=False,
+        managed=False,
         inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
         injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'}},
     )

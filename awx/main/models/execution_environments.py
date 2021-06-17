@@ -34,7 +34,7 @@ class ExecutionEnvironment(CommonModel):
         help_text=_("The full image location, including the container registry, image name, and version tag."),
         validators=[validate_container_image_name],
     )
-    managed_by_tower = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False)
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',

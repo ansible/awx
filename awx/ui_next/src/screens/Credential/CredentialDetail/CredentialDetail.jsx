@@ -63,7 +63,7 @@ function CredentialDetail({ credential }) {
     useCallback(async () => {
       const [
         {
-          data: { inputs: credentialTypeInputs, managed_by_tower },
+          data: { inputs: credentialTypeInputs, managed },
         },
         {
           data: { results: loadedInputSources },
@@ -74,7 +74,7 @@ function CredentialDetail({ credential }) {
       ]);
       return {
         fields: credentialTypeInputs.fields || [],
-        managedByTower: managed_by_tower,
+        managedByTower: managed,
         inputSources: loadedInputSources.reduce(
           (inputSourcesMap, inputSource) => {
             inputSourcesMap[inputSource.input_field_name] = inputSource;

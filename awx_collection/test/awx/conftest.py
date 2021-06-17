@@ -265,7 +265,7 @@ def silence_warning():
 
 @pytest.fixture
 def execution_environment():
-    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed_by_tower=False)
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed=False)
 
 
 @pytest.fixture(scope='session', autouse=True)

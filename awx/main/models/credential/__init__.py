@@ -92,7 +92,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         help_text=_('Specify the type of credential you want to create. Refer ' 'to the documentation for details on each type.'),
     )
-    managed_by_tower = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False)
     organization = models.ForeignKey(
         'Organization',
         null=True,
@@ -341,7 +341,7 @@ class CredentialType(CommonModelNameNotUnique):
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)
-    managed_by_tower = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False)
     namespace = models.CharField(max_length=1024, null=True, default=None, editable=False)
     inputs = CredentialTypeInputField(
         blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
@@ -355,7 +355,7 @@ class CredentialType(CommonModelNameNotUnique):
     @classmethod
     def from_db(cls, db, field_names, values):
         instance = super(CredentialType, cls).from_db(db, field_names, values)
-        if instance.managed_by_tower and instance.namespace:
+        if instance.managed and instance.namespace:
             native = ManagedCredentialType.registry[instance.namespace]
             instance.inputs = native.inputs
             instance.injectors = native.injectors
@@ -439,7 +439,7 @@ class CredentialType(CommonModelNameNotUnique):
                                  files)
         """
         if not self.injectors:
-            if self.managed_by_tower and credential.credential_type.namespace in dir(builtin_injectors):
+            if self.managed and credential.credential_type.namespace in dir(builtin_injectors):
                 injected_env = {}
                 getattr(builtin_injectors, credential.credential_type.namespace)(credential, injected_env, private_data_dir)
                 env.update(injected_env)
@@ -561,7 +561,7 @@ class ManagedCredentialType(SimpleNamespace):
             namespace=self.namespace,
             kind=self.kind,
             name=self.name,
-            managed_by_tower=True,
+            managed=True,
             inputs=self.inputs,
             injectors=self.injectors,
         )
@@ -606,7 +606,7 @@ ManagedCredentialType(
     namespace='scm',
     kind='scm',
     name=ugettext_noop('Source Control'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -621,7 +621,7 @@ ManagedCredentialType(
     namespace='vault',
     kind='vault',
     name=ugettext_noop('Vault'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'vault_password', 'label': ugettext_noop('Vault Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
@@ -647,7 +647,7 @@ ManagedCredentialType(
     namespace='net',
     kind='net',
     name=ugettext_noop('Network'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -687,7 +687,7 @@ ManagedCredentialType(
     namespace='aws',
     kind='cloud',
     name=ugettext_noop('Amazon Web Services'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Access Key'), 'type': 'string'},
@@ -718,7 +718,7 @@ ManagedCredentialType(
     namespace='openstack',
     kind='cloud',
     name=ugettext_noop('OpenStack'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -776,7 +776,7 @@ ManagedCredentialType(
     namespace='vmware',
     kind='cloud',
     name=ugettext_noop('VMware vCenter'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -801,7 +801,7 @@ ManagedCredentialType(
     namespace='satellite6',
     kind='cloud',
     name=ugettext_noop('Red Hat Satellite 6'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -826,7 +826,7 @@ ManagedCredentialType(
     namespace='gce',
     kind='cloud',
     name=ugettext_noop('Google Compute Engine'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -864,7 +864,7 @@ ManagedCredentialType(
     namespace='azure_rm',
     kind='cloud',
     name=ugettext_noop('Microsoft Azure Resource Manager'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -903,7 +903,7 @@ ManagedCredentialType(
     namespace='github_token',
     kind='token',
     name=ugettext_noop('GitHub Personal Access Token'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -922,7 +922,7 @@ ManagedCredentialType(
     namespace='gitlab_token',
     kind='token',
     name=ugettext_noop('GitLab Personal Access Token'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -941,7 +941,7 @@ ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=ugettext_noop('Insights'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -965,7 +965,7 @@ ManagedCredentialType(
     namespace='rhv',
     kind='cloud',
     name=ugettext_noop('Red Hat Virtualization'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'host', 'label': ugettext_noop('Host (Authentication URL)'), 'type': 'string', 'help_text': ugettext_noop('The host to authenticate with.')},
@@ -1009,7 +1009,7 @@ ManagedCredentialType(
     namespace='controller',
     kind='cloud',
     name=ugettext_noop('Red Hat Ansible Automation Platform'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {

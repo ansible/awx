@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
                     public_galaxy_credential = Credential(
                         name='Ansible Galaxy',
-                        managed_by_tower=True,
+                        managed=True,
                         credential_type=CredentialType.objects.get(kind='galaxy'),
                         inputs={'url': 'https://galaxy.ansible.com/'},
                     )
