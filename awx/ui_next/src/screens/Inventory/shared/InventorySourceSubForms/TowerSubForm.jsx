@@ -39,7 +39,7 @@ const TowerSubForm = ({ autoPopulateCredential }) => {
   return (
     <>
       <CredentialLookup
-        credentialTypeNamespace="tower"
+        credentialTypeNamespace="controller"
         label={t`Credential`}
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}

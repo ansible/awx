@@ -218,7 +218,7 @@ const InventorySourceFormFields = ({
                 tower: (
                   <TowerSubForm
                     autoPopulateCredential={
-                      !source?.id || source?.source !== 'tower'
+                      !source?.id || source?.source !== 'controller'
                     }
                   />
                 ),

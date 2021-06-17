@@ -37,7 +37,7 @@ describe('<InventorySourceForm />', () => {
                   ['satellite6', 'Red Hat Satellite 6'],
                   ['openstack', 'OpenStack'],
                   ['rhv', 'Red Hat Virtualization'],
-                  ['tower', 'Ansible Tower'],
+                  ['controller', 'Red Hat Ansible Automation Platform'],
                 ],
               },
             },
