@@ -75,7 +75,7 @@ def test_update_as_unauthorized_xfail(patch, delete):
 
 
 @pytest.mark.django_db
-def test_update_managed_by_tower_xfail(patch, delete, admin):
+def test_update_managed_xfail(patch, delete, admin):
     ssh = CredentialType.defaults['ssh']()
     ssh.save()
     url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
@@ -161,19 +161,19 @@ def test_create_as_admin(get, post, admin):
     assert response.data['results'][0]['name'] == 'Custom Credential Type'
     assert response.data['results'][0]['inputs'] == {}
     assert response.data['results'][0]['injectors'] == {}
-    assert response.data['results'][0]['managed_by_tower'] is False
+    assert response.data['results'][0]['managed'] is False
 
 
 @pytest.mark.django_db
-def test_create_managed_by_tower_readonly(get, post, admin):
+def test_create_managed_readonly(get, post, admin):
     response = post(
-        reverse('api:credential_type_list'), {'kind': 'cloud', 'name': 'Custom Credential Type', 'inputs': {}, 'injectors': {}, 'managed_by_tower': True}, admin
+        reverse('api:credential_type_list'), {'kind': 'cloud', 'name': 'Custom Credential Type', 'inputs': {}, 'injectors': {}, 'managed': True}, admin
     )
     assert response.status_code == 201
 
     response = get(reverse('api:credential_type_list'), admin)
     assert response.data['count'] == 1
-    assert response.data['results'][0]['managed_by_tower'] is False
+    assert response.data['results'][0]['managed'] is False
 
 
 @pytest.mark.django_db

@@ -642,7 +642,7 @@ class CredentialInputField(JSONSchemaField):
 
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema
-        if model_instance.credential_type.managed_by_tower is True and 'ssh_key_unlock' in defined_fields:
+        if model_instance.credential_type.managed is True and 'ssh_key_unlock' in defined_fields:
 
             # in order to properly test the necessity of `ssh_key_unlock`, we
             # need to know the real value of `ssh_key_data`; for a payload like:
@@ -711,7 +711,7 @@ class CredentialTypeInputField(JSONSchemaField):
         }
 
     def validate(self, value, model_instance):
-        if isinstance(value, dict) and 'dependencies' in value and not model_instance.managed_by_tower:
+        if isinstance(value, dict) and 'dependencies' in value and not model_instance.managed:
             raise django_exceptions.ValidationError(
                 _("'dependencies' is not supported for custom credentials."),
                 code='invalid',

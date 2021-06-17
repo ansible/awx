@@ -158,7 +158,7 @@ const mockCredentialResults = {
         description: '',
         kind: 'ssh',
         namespace: 'ssh',
-        managed_by_tower: true,
+        managed: true,
         inputs: {
           fields: [
             {
@@ -238,7 +238,7 @@ const mockCredentialResults = {
         description: '',
         kind: 'cloud',
         namespace: 'gce',
-        managed_by_tower: true,
+        managed: true,
         inputs: {
           fields: [
             {

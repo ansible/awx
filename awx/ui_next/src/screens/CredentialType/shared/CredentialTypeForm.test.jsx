@@ -34,7 +34,7 @@ const credentialType = {
   description: 'Jenkins Credential',
   kind: 'cloud',
   namespace: null,
-  managed_by_tower: false,
+  managed: false,
   inputs: JSON.stringify({
     fields: [
       {

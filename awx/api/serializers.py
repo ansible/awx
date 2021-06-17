@@ -1409,11 +1409,11 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ExecutionEnvironmentSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
-    managed_by_tower = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField()
 
     class Meta:
         model = ExecutionEnvironment
-        fields = ('*', 'organization', 'image', 'managed_by_tower', 'credential', 'pull')
+        fields = ('*', 'organization', 'image', 'managed', 'credential', 'pull')
 
     def get_related(self, obj):
         res = super(ExecutionEnvironmentSerializer, self).get_related(obj)
@@ -2481,14 +2481,14 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
 class CredentialTypeSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
-    managed_by_tower = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField()
 
     class Meta:
         model = CredentialType
-        fields = ('*', 'kind', 'namespace', 'name', 'managed_by_tower', 'inputs', 'injectors')
+        fields = ('*', 'kind', 'namespace', 'name', 'managed', 'inputs', 'injectors')
 
     def validate(self, attrs):
-        if self.instance and self.instance.managed_by_tower:
+        if self.instance and self.instance.managed:
             raise PermissionDenied(detail=_("Modifications not allowed for managed credential types"))
 
         old_inputs = {}
@@ -2520,8 +2520,8 @@ class CredentialTypeSerializer(BaseSerializer):
     def to_representation(self, data):
         value = super(CredentialTypeSerializer, self).to_representation(data)
 
-        # translate labels and help_text for credential fields "managed by Tower"
-        if value.get('managed_by_tower'):
+        # translate labels and help_text for credential fields "managed"
+        if value.get('managed'):
             value['name'] = _(value['name'])
             for field in value.get('inputs', {}).get('fields', []):
                 field['label'] = _(field['label'])
@@ -2540,11 +2540,11 @@ class CredentialTypeSerializer(BaseSerializer):
 class CredentialSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
-    managed_by_tower = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField()
 
     class Meta:
         model = Credential
-        fields = ('*', 'organization', 'credential_type', 'managed_by_tower', 'inputs', 'kind', 'cloud', 'kubernetes')
+        fields = ('*', 'organization', 'credential_type', 'managed', 'inputs', 'kind', 'cloud', 'kubernetes')
         extra_kwargs = {'credential_type': {'label': _('Credential Type')}}
 
     def to_representation(self, data):
@@ -2611,7 +2611,7 @@ class CredentialSerializer(BaseSerializer):
         return summary_dict
 
     def validate(self, attrs):
-        if self.instance and self.instance.managed_by_tower:
+        if self.instance and self.instance.managed:
             raise PermissionDenied(detail=_("Modifications not allowed for managed credentials"))
         return super(CredentialSerializer, self).validate(attrs)
 
@@ -4189,7 +4189,7 @@ class JobLaunchSerializer(BaseSerializer):
             elif field_name == 'credentials':
                 for cred in obj.credentials.all():
                     cred_dict = dict(id=cred.id, name=cred.name, credential_type=cred.credential_type.pk, passwords_needed=cred.passwords_needed)
-                    if cred.credential_type.managed_by_tower and 'vault_id' in cred.credential_type.defined_fields:
+                    if cred.credential_type.managed and 'vault_id' in cred.credential_type.defined_fields:
                         cred_dict['vault_id'] = cred.get_input('vault_id', default=None)
                     defaults_dict.setdefault(field_name, []).append(cred_dict)
             else:
@@ -4988,7 +4988,7 @@ class ActivityStreamSerializer(BaseSerializer):
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
             ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
             ('o_auth2_application', ('id', 'name', 'description')),
-            ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower')),
+            ('credential_type', ('id', 'name', 'description', 'kind', 'managed')),
             ('ad_hoc_command', ('id', 'name', 'status', 'limit')),
             ('workflow_approval', ('id', 'name', 'unified_job_id')),
         ]

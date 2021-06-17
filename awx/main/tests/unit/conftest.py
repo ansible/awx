@@ -12,7 +12,7 @@ from django.urls import URLResolver, URLPattern
 
 @pytest.fixture()
 def execution_environment():
-    return ExecutionEnvironment(name="test-ee", description="test-ee", managed_by_tower=True)
+    return ExecutionEnvironment(name="test-ee", description="test-ee", managed=True)
 
 
 @pytest.fixture(autouse=True)

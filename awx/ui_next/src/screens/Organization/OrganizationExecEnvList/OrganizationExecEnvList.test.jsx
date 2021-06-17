@@ -24,7 +24,7 @@ const executionEnvironments = {
         },
         organization: 1,
         image: 'https://localhost.com/image/disk',
-        managed_by_tower: false,
+        managed: false,
         credential: null,
       },
       {
@@ -36,7 +36,7 @@ const executionEnvironments = {
         },
         organization: 1,
         image: 'test/image123',
-        managed_by_tower: false,
+        managed: false,
         credential: null,
       },
       {
@@ -48,7 +48,7 @@ const executionEnvironments = {
         },
         organization: 1,
         image: 'test/test',
-        managed_by_tower: false,
+        managed: false,
         credential: null,
       },
     ],

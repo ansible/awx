@@ -60,7 +60,7 @@ describe('<OrganizationForm />', () => {
             type: 'credential',
             name: 'Ansible Galaxy',
             credential_type: 18,
-            managed_by_tower: true,
+            managed: true,
             kind: 'galaxy_api_token',
           }}
         />,

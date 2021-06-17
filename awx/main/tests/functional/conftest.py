@@ -266,7 +266,7 @@ def credentialtype_external():
 
     with mock.patch('awx.main.models.credential.CredentialType.plugin', new_callable=PropertyMock) as mock_plugin:
         mock_plugin.return_value = MockPlugin()
-        external_type = CredentialType(kind='external', managed_by_tower=True, name='External Service', inputs=external_type_inputs)
+        external_type = CredentialType(kind='external', managed=True, name='External Service', inputs=external_type_inputs)
         external_type.save()
         yield external_type
 
@@ -825,9 +825,9 @@ def slice_job_factory(slice_jt_factory):
 
 @pytest.fixture
 def control_plane_execution_environment():
-    return ExecutionEnvironment.objects.create(name="Control Plane EE", managed_by_tower=True)
+    return ExecutionEnvironment.objects.create(name="Control Plane EE", managed=True)
 
 
 @pytest.fixture
 def default_job_execution_environment():
-    return ExecutionEnvironment.objects.create(name="Default Job EE", managed_by_tower=False)
+    return ExecutionEnvironment.objects.create(name="Default Job EE", managed=False)

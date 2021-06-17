@@ -1368,7 +1368,7 @@ class PluginFileInjector(object):
         return env
 
     def _get_shared_env(self, inventory_update, private_data_dir, private_data_files):
-        """By default, we will apply the standard managed_by_tower injectors"""
+        """By default, we will apply the standard managed injectors"""
         injected_env = {}
         credential = inventory_update.get_cloud_credential()
         # some sources may have no credential, specifically ec2
@@ -1387,7 +1387,7 @@ class PluginFileInjector(object):
             args = []
             credential.credential_type.inject_credential(credential, injected_env, safe_env, args, private_data_dir)
             # NOTE: safe_env is handled externally to injector class by build_safe_env static method
-            # that means that managed_by_tower injectors must only inject detectable env keys
+            # that means that managed injectors must only inject detectable env keys
             # enforcement of this is accomplished by tests
         return injected_env
 

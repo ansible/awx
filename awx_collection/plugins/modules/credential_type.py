@@ -107,7 +107,7 @@ def main():
 
     # These will be passed into the create/updates
     credential_type_params = {
-        'managed_by_tower': False,
+        'managed': False,
     }
     if kind:
         credential_type_params['kind'] = kind

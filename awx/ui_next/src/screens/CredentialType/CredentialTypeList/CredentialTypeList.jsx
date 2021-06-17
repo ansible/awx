@@ -23,7 +23,7 @@ import CredentialTypeListItem from './CredentialTypeListItem';
 const QS_CONFIG = getQSConfig('credential-type', {
   page: 1,
   page_size: 20,
-  managed_by_tower: false,
+  managed: false,
 });
 
 function CredentialTypeList() {

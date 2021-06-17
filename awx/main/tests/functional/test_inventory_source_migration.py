@@ -37,7 +37,7 @@ def test_cloudforms_inventory_removal(inventory):
         name='Red Hat CloudForms',
         namespace='cloudforms',
         kind='cloud',
-        managed_by_tower=True,
+        managed=True,
         inputs={},
     )
     CredentialType.defaults['cloudforms']().save()

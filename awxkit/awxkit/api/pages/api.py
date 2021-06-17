@@ -82,8 +82,8 @@ class ApiV2(base.Base):
 
     def _export(self, _page, post_fields):
         # Drop any (credential_type) assets that are being managed by the instance.
-        if _page.json.get('managed_by_tower'):
-            log.debug("%s is managed by Tower, skipping.", _page.endpoint)
+        if _page.json.get('managed'):
+            log.debug("%s is managed, skipping.", _page.endpoint)
             return None
         if post_fields is None:  # Deprecated endpoint or insufficient permissions
             log.error("Object export failed: %s", _page.endpoint)
