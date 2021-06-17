@@ -1,10 +1,9 @@
 import 'styled-components/macro';
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Tooltip, Chip } from '@patternfly/react-core';
+import { Button, Popover, Tooltip, Chip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
-import { t } from '@lingui/macro';
-
+import { t, Trans } from '@lingui/macro';
 import {
   ExclamationTriangleIcon,
   PencilAltIcon,
@@ -12,24 +11,27 @@ import {
   RocketIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-
 import { ActionsTd, ActionItem } from '../PaginatedTable';
 import { DetailList, Detail, DeletedDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { timeOfDay, formatDateString } from '../../util/dates';
-
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 import { LaunchButton } from '../LaunchButton';
 import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 import CopyButton from '../CopyButton';
+import getDocsBaseUrl from '../../util/getDocsBaseUrl';
+import { useConfig } from '../../contexts/Config';
 
 const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
   margin-left: 18px;
+  cursor: pointer;
 `;
+
+ExclamationTriangleIconWarning.displayName = 'ExclamationTriangleIconWarning';
 
 function TemplateListItem({
   template,
@@ -39,9 +41,14 @@ function TemplateListItem({
   fetchTemplates,
   rowIndex,
 }) {
+  const config = useConfig();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const labelId = `check-action-${template.id}`;
+
+  const docsLink = `${getDocsBaseUrl(
+    config
+  )}/html/upgrade-migration-guide/upgrade_to_ees.html`;
 
   const copyTemplate = useCallback(async () => {
     if (template.type === 'job_template') {
@@ -139,13 +146,29 @@ function TemplateListItem({
           )}
           {missingExecutionEnvironment && (
             <span>
-              <Tooltip
+              <Popover
                 className="missing-execution-environment"
-                content={t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`}
+                headerContent={<div>{t`Execution Environment Missing`}</div>}
+                bodyContent={
+                  <div>
+                    <Trans>
+                      Custom virtual environment {template.custom_virtualenv}{' '}
+                      must be replaced by an execution environment. For more
+                      information about migrating to execution environments see{' '}
+                      <a
+                        href={docsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        the documentation.
+                      </a>
+                    </Trans>
+                  </div>
+                }
                 position="right"
               >
                 <ExclamationTriangleIconWarning />
-              </Tooltip>
+              </Popover>
             </span>
           )}
         </Td>

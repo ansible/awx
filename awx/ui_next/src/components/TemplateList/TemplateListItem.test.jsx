@@ -371,11 +371,8 @@ describe('<TemplateListItem />', () => {
         </tbody>
       </table>
     );
-    expect(
-      wrapper.find('.missing-execution-environment').prop('content')
-    ).toEqual(
-      'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
-    );
+
+    expect(wrapper.find('ExclamationTriangleIconWarning').length).toBe(1);
   });
 
   test('should render expected details in expanded section', async () => {
