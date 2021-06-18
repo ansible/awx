@@ -58,6 +58,7 @@ function PromptModalForm({
       : resource.extra_vars;
     setValue('extra_vars', mergeExtraVars(extraVars, surveyValues));
     setValue('scm_branch', values.scm_branch);
+    setValue('verbosity', values.verbosity);
 
     onSubmit(postValues);
   };
