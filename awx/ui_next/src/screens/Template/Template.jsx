@@ -72,16 +72,7 @@ function Template({ setBreadcrumb }) {
         surveyConfiguration = survey;
       }
       if (data.summary_fields.credentials) {
-        const params = {
-          page: 1,
-          page_size: 200,
-          order_by: 'name',
-        };
-        const {
-          data: { results },
-        } = await JobTemplatesAPI.readCredentials(data.id, params);
-
-        data.summary_fields.credentials = results;
+        data.summary_fields.credentials = defaultCredentials;
       }
 
       if (actions.data.actions.PUT) {
