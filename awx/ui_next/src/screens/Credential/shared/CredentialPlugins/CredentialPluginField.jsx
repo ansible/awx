@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-
+import { useLocation, useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -23,6 +23,8 @@ function CredentialPluginInput(props) {
   const [showPluginWizard, setShowPluginWizard] = useState(false);
   const [inputField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
+  const location = useLocation();
+  const history = useHistory();
 
   const disableFieldAndButtons =
     !!passwordPromptField.value ||
@@ -31,6 +33,11 @@ function CredentialPluginInput(props) {
       meta.initialValue !== '' &&
       meta.value === meta.initialValue
     );
+
+  const handlePluginWizardClose = () => {
+    setShowPluginWizard(false);
+    history.push(location.pathname);
+  };
 
   return (
     <>
@@ -73,7 +80,7 @@ function CredentialPluginInput(props) {
           initialValues={
             typeof inputField.value === 'object' ? inputField.value : {}
           }
-          onClose={() => setShowPluginWizard(false)}
+          onClose={() => handlePluginWizardClose()}
           onSubmit={val => {
             val.touched = true;
             helpers.setValue(val);
