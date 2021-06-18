@@ -32,7 +32,7 @@ def forwards(apps, schema_editor):
         tower_type.namespace = 'controller'  # if not done, will error setup_tower_managed_defaults
         tower_type.save(update_fields=['name', 'namespace'])
 
-    ModernCredentialType.setup_tower_managed_defaults()
+    ModernCredentialType.setup_tower_managed_defaults(apps)
 
 
 def backwards(apps, schema_editor):

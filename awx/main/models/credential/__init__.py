@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext_noop
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 
 # AWX
 from awx.api.versioning import reverse
@@ -395,9 +396,13 @@ class CredentialType(CommonModelNameNotUnique):
         return dict((k, functools.partial(v.create)) for k, v in ManagedCredentialType.registry.items())
 
     @classmethod
-    def setup_tower_managed_defaults(cls):
+    def setup_tower_managed_defaults(cls, apps=None):
+        if apps is not None:
+            ct_class = apps.get_model('main', 'CredentialType')
+        else:
+            ct_class = CredentialType
         for default in ManagedCredentialType.registry.values():
-            existing = CredentialType.objects.filter(name=default.name, kind=default.kind).first()
+            existing = ct_class.objects.filter(name=default.name, kind=default.kind).first()
             if existing is not None:
                 existing.namespace = default.namespace
                 existing.inputs = {}
@@ -405,7 +410,11 @@ class CredentialType(CommonModelNameNotUnique):
                 existing.save()
                 continue
             logger.debug(_("adding %s credential type" % default.name))
-            created = default.create()
+            params = default.get_creation_params()
+            if 'managed' not in [f.name for f in ct_class._meta.get_fields()]:
+                params['managed_by_tower'] = params.pop('managed')
+            params['created'] = params['modified'] = now()  # CreatedModifiedModel service
+            created = ct_class(**params)
             created.inputs = created.injectors = {}
             created.save()
 
@@ -556,8 +565,8 @@ class ManagedCredentialType(SimpleNamespace):
             )
         ManagedCredentialType.registry[namespace] = self
 
-    def create(self):
-        return CredentialType(
+    def get_creation_params(self):
+        return dict(
             namespace=self.namespace,
             kind=self.kind,
             name=self.name,
@@ -565,6 +574,9 @@ class ManagedCredentialType(SimpleNamespace):
             inputs=self.inputs,
             injectors=self.injectors,
         )
+
+    def create(self):
+        return CredentialType(**self.get_creation_params())
 
 
 ManagedCredentialType(

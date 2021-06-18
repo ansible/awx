@@ -19,7 +19,7 @@ def migrate_galaxy_settings(apps, schema_editor):
         # nothing to migrate
         return
     set_current_apps(apps)
-    ModernCredentialType.setup_tower_managed_defaults()
+    ModernCredentialType.setup_tower_managed_defaults(apps)
     CredentialType = apps.get_model('main', 'CredentialType')
     Credential = apps.get_model('main', 'Credential')
     Setting = apps.get_model('conf', 'Setting')
@@ -37,10 +37,15 @@ def migrate_galaxy_settings(apps, schema_editor):
     try:
         # Needed for old migrations
         public_galaxy_credential = Credential(
-            created=now(), modified=now(), name='Ansible Galaxy', managed_by_tower=True, credential_type=galaxy_type, inputs={'url': 'https://galaxy.ansible.com/'}
+            created=now(),
+            modified=now(),
+            name='Ansible Galaxy',
+            managed_by_tower=True,
+            credential_type=galaxy_type,
+            inputs={'url': 'https://galaxy.ansible.com/'},
         )
     except:
-        # This will make functionaly tests pass
+        # Needed for new migrations, tests
         public_galaxy_credential = Credential(
             created=now(), modified=now(), name='Ansible Galaxy', managed=True, credential_type=galaxy_type, inputs={'url': 'https://galaxy.ansible.com/'}
         )
