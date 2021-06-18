@@ -42,7 +42,7 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "controller", "insights" ]
       type: str
     source_path:
       description:
@@ -75,7 +75,7 @@ options:
     custom_virtualenv:
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
-        - Only compatible with older versions of AWX/Tower
+        - Only compatible with older versions of AWX/Controller
         - Deprecated, will be removed in the future
       type: str
     overwrite:
@@ -164,7 +164,7 @@ def main():
         #
         # How do we handle manual and file? The controller does not seem to be able to activate them
         #
-        source=dict(choices=["scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower"]),
+        source=dict(choices=["scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "controller", "insights"]),
         source_path=dict(),
         source_vars=dict(type='dict'),
         enabled_var=dict(),
