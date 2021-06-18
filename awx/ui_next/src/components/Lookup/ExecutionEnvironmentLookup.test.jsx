@@ -30,9 +30,9 @@ describe('ExecutionEnvironmentLookup', () => {
   let wrapper;
 
   beforeEach(() => {
-    ExecutionEnvironmentsAPI.read.mockResolvedValue(
-      mockedExecutionEnvironments
-    );
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: mockedExecutionEnvironments,
+    });
     ProjectsAPI.readDetail.mockResolvedValue({ data: { organization: 39 } });
   });
 
@@ -63,7 +63,7 @@ describe('ExecutionEnvironmentLookup', () => {
       );
     });
     wrapper.update();
-    expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledTimes(2);
+    expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledTimes(1);
     expect(wrapper.find('ExecutionEnvironmentLookup')).toHaveLength(1);
     expect(
       wrapper.find('FormGroup[label="Default Execution Environment"]').length
@@ -84,7 +84,7 @@ describe('ExecutionEnvironmentLookup', () => {
         </Formik>
       );
     });
-    expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledTimes(2);
+    expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledTimes(1);
     expect(
       wrapper.find('FormGroup[label="Default Execution Environment"]').length
     ).toBe(0);

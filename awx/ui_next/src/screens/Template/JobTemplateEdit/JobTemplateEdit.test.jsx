@@ -287,8 +287,8 @@ describe('<JobTemplateEdit />', () => {
       wrapper = mountWithContexts(
         <JobTemplateEdit template={mockJobTemplate} />
       );
-      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
+    wrapper.update();
     expect(wrapper.find('FormGroup[label="Host Config Key"]').length).toBe(1);
     expect(
       wrapper.find('FormGroup[label="Host Config Key"]').prop('isRequired')
@@ -301,8 +301,9 @@ describe('<JobTemplateEdit />', () => {
       wrapper = mountWithContexts(
         <JobTemplateEdit template={mockJobTemplate} />
       );
-      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
+    wrapper.update();
+
     const updatedTemplateData = {
       job_type: 'check',
       name: 'new name',

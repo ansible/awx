@@ -185,7 +185,7 @@ describe('<JobTemplateForm />', () => {
 
   test('should update form values on input changes', async () => {
     let wrapper;
-    await act(async () => {
+    await act(() => {
       wrapper = mountWithContexts(
         <JobTemplateForm
           template={mockData}
@@ -193,8 +193,9 @@ describe('<JobTemplateForm />', () => {
           handleCancel={jest.fn()}
         />
       );
-      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
+    wrapper.update();
+
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'new foo', name: 'name' },
@@ -308,6 +309,8 @@ describe('<JobTemplateForm />', () => {
         }
       );
     });
+    wrapper.update();
+
     act(() => {
       wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
         true,
@@ -392,6 +395,8 @@ describe('<JobTemplateForm />', () => {
         }
       );
     });
+    wrapper.update();
+
     expect(
       wrapper.find('TextInputBase#template-webhook_key').prop('value')
     ).toBe('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.');
@@ -399,6 +404,7 @@ describe('<JobTemplateForm />', () => {
       wrapper.find('Button[aria-label="Update webhook key"]').prop('isDisabled')
     ).toBe(true);
   });
+
   test('should call handleSubmit when Submit button is clicked', async () => {
     const handleSubmit = jest.fn();
     let wrapper;

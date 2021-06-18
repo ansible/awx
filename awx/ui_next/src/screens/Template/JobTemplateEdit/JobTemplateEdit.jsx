@@ -18,11 +18,7 @@ function JobTemplateEdit({ template }) {
 
   const detailsUrl = `/templates/${template.type}/${template.id}/details`;
 
-  const {
-    request: fetchProject,
-    error: fetchProjectError,
-    isLoading: projectLoading,
-  } = useRequest(
+  const { request: fetchProject, error: fetchProjectError } = useRequest(
     useCallback(async () => {
       await ProjectsAPI.readDetail(template.project);
     }, [template.project])
@@ -130,7 +126,7 @@ function JobTemplateEdit({ template }) {
   if (!canEdit) {
     return <Redirect to={detailsUrl} />;
   }
-  if (isLoading || projectLoading) {
+  if (isLoading) {
     return <ContentLoading />;
   }
 
