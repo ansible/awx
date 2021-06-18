@@ -84,6 +84,12 @@ function OrganizationDetail({ organization }) {
     return <ContentError error={contentError} />;
   }
 
+  const buildLinkURL = instance => {
+    return instance.is_container_group
+      ? '/instance_groups/container_group/'
+      : '/instance_groups/';
+  };
+
   return (
     <CardBody>
       <DetailList>
@@ -118,9 +124,11 @@ function OrganizationDetail({ organization }) {
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
-                  <Chip key={ig.id} isReadOnly>
-                    {ig.name}
-                  </Chip>
+                  <Link to={`${buildLinkURL(ig)}${ig.id}/details`}>
+                    <Chip key={ig.id} isReadOnly>
+                      {ig.name}
+                    </Chip>
+                  </Link>
                 ))}
               </ChipGroup>
             }
