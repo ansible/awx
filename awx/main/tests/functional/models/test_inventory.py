@@ -22,6 +22,8 @@ class TestInventoryScript:
         assert inventory.get_script_data(hostvars=True, towervars=True)['_meta']['hostvars']['ahost'] == {
             'remote_tower_enabled': 'true',
             'remote_tower_id': host.id,
+            'remote_host_enabled': 'true',
+            'remote_host_id': host.id,
         }
 
     def test_all_group(self, inventory):

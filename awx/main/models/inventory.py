@@ -306,7 +306,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             for host in hosts:
                 data['_meta']['hostvars'][host.name] = host.variables_dict
                 if towervars:
-                    tower_dict = dict(remote_tower_enabled=str(host.enabled).lower(), remote_tower_id=host.id)
+                    tower_dict = dict(
+                        remote_tower_enabled=str(host.enabled).lower(),
+                        remote_tower_id=host.id,
+                        remote_host_enabled=str(host.enabled).lower(),
+                        remote_host_id=host.id,
+                    )
                     data['_meta']['hostvars'][host.name].update(tower_dict)
 
         return data
