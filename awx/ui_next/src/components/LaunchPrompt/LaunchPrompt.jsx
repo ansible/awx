@@ -16,7 +16,6 @@ function PromptModalForm({
   onSubmit,
   resource,
   surveyConfig,
-  resourceDefaultCredentials,
 }) {
   const { setFieldTouched, values } = useFormikContext();
   const [showDescription, setShowDescription] = useState(false);
@@ -28,12 +27,7 @@ function PromptModalForm({
     visitStep,
     visitAllSteps,
     contentError,
-  } = useLaunchSteps(
-    launchConfig,
-    surveyConfig,
-    resource,
-    resourceDefaultCredentials
-  );
+  } = useLaunchSteps(launchConfig, surveyConfig, resource);
 
   const handleSubmit = () => {
     const postValues = {};

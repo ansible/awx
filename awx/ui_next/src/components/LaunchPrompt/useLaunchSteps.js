@@ -39,12 +39,7 @@ function showCredentialPasswordsStep(credentials = [], launchConfig) {
   return credentialPasswordStepRequired;
 }
 
-export default function useLaunchSteps(
-  launchConfig,
-  surveyConfig,
-  resource,
-  resourceDefaultCredentials
-) {
+export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
   const { touched, values: formikValues } = useFormikContext();
@@ -53,7 +48,7 @@ export default function useLaunchSteps(
     useCredentialsStep(
       launchConfig,
       resource,
-      resourceDefaultCredentials,
+      resource.summary_fields.credentials || [],
       true
     ),
     useCredentialPasswordsStep(

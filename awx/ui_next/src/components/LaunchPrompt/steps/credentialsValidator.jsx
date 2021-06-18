@@ -17,19 +17,18 @@ export default function credentialsValidator(
       if (
         !selectedCredentials.find(selectedCredential => {
           return (
-            (selectedCredential.credential_type ===
-              defaultCredential.credential_type &&
-              !selectedCredential.inputs.vault_id &&
-              !defaultCredential.inputs.vault_id) ||
-            (selectedCredential.inputs.vault_id &&
-              defaultCredential.inputs.vault_id &&
-              selectedCredential.inputs.vault_id ===
-                defaultCredential.inputs.vault_id)
+            (selectedCredential?.credential_type ===
+              defaultCredential?.credential_type &&
+              !selectedCredential.inputs?.vault_id &&
+              !defaultCredential.inputs?.vault_id) ||
+            (defaultCredential.inputs?.vault_id &&
+              selectedCredential.inputs?.vault_id ===
+                defaultCredential.inputs?.vault_id)
           );
         })
       ) {
         missingCredentialTypes.push(
-          defaultCredential.inputs.vault_id
+          defaultCredential.inputs?.vault_id
             ? `${defaultCredential.summary_fields.credential_type.name} | ${defaultCredential.inputs.vault_id}`
             : defaultCredential.summary_fields.credential_type.name
         );

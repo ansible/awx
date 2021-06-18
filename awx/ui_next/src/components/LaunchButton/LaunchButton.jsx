@@ -37,7 +37,6 @@ function LaunchButton({ resource, children, history }) {
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
   const [isLaunching, setIsLaunching] = useState(false);
-  const [resourceCredentials, setResourceCredentials] = useState([]);
   const [error, setError] = useState(null);
 
   const handleLaunch = async () => {
@@ -58,17 +57,6 @@ function LaunchButton({ resource, children, history }) {
         const { data } = await readSurvey;
 
         setSurveyConfig(data);
-      }
-
-      if (
-        launch.ask_credential_on_launch &&
-        resource.type === 'workflow_job_template'
-      ) {
-        const {
-          data: { results: jobTemplateCredentials },
-        } = await JobTemplatesAPI.readCredentials(resource.id);
-
-        setResourceCredentials(jobTemplateCredentials);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
@@ -184,7 +172,6 @@ function LaunchButton({ resource, children, history }) {
           resource={resource}
           onLaunch={launchWithParams}
           onCancel={() => setShowLaunchPrompt(false)}
-          resourceDefaultCredentials={resourceCredentials}
         />
       )}
     </Fragment>
