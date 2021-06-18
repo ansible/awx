@@ -103,7 +103,7 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-tower_token:
+controller_token:
   type: dict
   description: An Ansible Fact variable representing a token object which can be used for auth in subsequent modules. See examples for usage.
   contains:
@@ -114,6 +114,8 @@ tower_token:
       description: The numeric ID of the token created
       type: str
   returned: on successful create
+  aliases:
+    - tower_token
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -125,6 +127,7 @@ def return_token(module, last_response):
     # This method will return the entire token object we got back so that a user has access to the token
 
     module.json_output['ansible_facts'] = {
+        'controller_token': last_response,
         'tower_token': last_response,
     }
     module.exit_json(**module.json_output)

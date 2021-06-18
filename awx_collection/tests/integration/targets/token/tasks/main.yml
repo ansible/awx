@@ -63,21 +63,21 @@
 
     - name: Validate our token works by token
       job_list:
-        controller_oauthtoken: "{{ tower_token.token }}"
+        controller_oauthtoken: "{{ controller_token.token }}"
       register: job_list
 
     - name: Validate our token works by object
       job_list:
-        controller_oauthtoken: "{{ tower_token }}"
+        controller_oauthtoken: "{{ controller_token }}"
       register: job_list
 
   always:
     - name: Delete our Token with our own token
       token:
-        existing_token: "{{ tower_token }}"
-        controller_oauthtoken: "{{ tower_token }}"
+        existing_token: "{{ controller_token }}"
+        controller_oauthtoken: "{{ controller_token }}"
         state: absent
-      when: tower_token is defined
+      when: controller_token is defined
       register: results
 
     - assert:
@@ -99,10 +99,10 @@
   always:
     - name: Delete the second Token with our own token
       token:
-        existing_token_id: "{{ tower_token['id'] }}"
-        controller_oauthtoken: "{{ tower_token }}"
+        existing_token_id: "{{ controller_token['id'] }}"
+        controller_oauthtoken: "{{ controller_token }}"
         state: absent
-      when: tower_token is defined
+      when: controller_token is defined
       register: results
 
     - assert:
