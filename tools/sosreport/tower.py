@@ -1,7 +1,10 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-from sos.plugins import Plugin, RedHatPlugin, UbuntuPlugin
+try:
+    from sos.plugins import Plugin, RedHatPlugin, UbuntuPlugin
+except ImportError:
+    from sos.report.plugins import Plugin, RedHatPlugin, UbuntuPlugin
 
 SOSREPORT_TOWER_COMMANDS = [
     "awx-manage --version", # tower version
