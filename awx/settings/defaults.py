@@ -678,7 +678,7 @@ RHV_EXCLUDE_EMPTY_GROUPS = True
 RHV_INSTANCE_ID_VAR = 'id'
 
 # ---------------------
-# ----- Tower     -----
+# ----- Controller     -----
 # ---------------------
 CONTROLLER_ENABLED_VAR = 'remote_tower_enabled'
 CONTROLLER_ENABLED_VALUE = 'true'
