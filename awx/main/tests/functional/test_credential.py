@@ -74,34 +74,35 @@ GLqbpJyX2r3p/Rmo6mLY71SqpA==
 
 @pytest.mark.django_db
 def test_default_cred_types():
-    assert sorted(CredentialType.defaults.keys()) == [
-        'aim',
-        'aws',
-        'azure_kv',
-        'azure_rm',
-        'centrify_vault_kv',
-        'conjur',
-        'controller',
-        'galaxy_api_token',
-        'gce',
-        'github_token',
-        'gitlab_token',
-        'hashivault_kv',
-        'hashivault_ssh',
-        'insights',
-        'kubernetes_bearer_token',
-        'net',
-        'openstack',
-        'registry',
-        'rhv',
-        'satellite6',
-        'scm',
-        'ssh',
-        'thycotic_dsv',
-        'tower',
-        'vault',
-        'vmware',
-    ]
+    assert sorted(CredentialType.defaults.keys()) == sorted(
+        [
+            'aim',
+            'aws',
+            'azure_kv',
+            'azure_rm',
+            'centrify_vault_kv',
+            'conjur',
+            'controller',
+            'galaxy_api_token',
+            'gce',
+            'github_token',
+            'gitlab_token',
+            'hashivault_kv',
+            'hashivault_ssh',
+            'insights',
+            'kubernetes_bearer_token',
+            'net',
+            'openstack',
+            'registry',
+            'rhv',
+            'satellite6',
+            'scm',
+            'ssh',
+            'thycotic_dsv',
+            'vault',
+            'vmware',
+        ]
+    )
 
     for type_ in CredentialType.defaults.values():
         assert type_().managed is True
