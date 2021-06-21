@@ -114,8 +114,6 @@ controller_token:
       description: The numeric ID of the token created
       type: str
   returned: on successful create
-  aliases:
-    - tower_token
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
