@@ -43,9 +43,13 @@ def render():
     # The return value of this function is an argparse.ArgumentParser, which
     # the sphinxcontrib.autoprogram plugin crawls and generates an indexed
     # Sphinx document from.
-    for e in ('CONTROLLER_HOST', 'CONTROLLER_USERNAME', 'CONTROLLER_PASSWORD'):
-        if not os.environ.get(e):
-            raise SystemExit('Please specify a valid {} for a real (running) installation.'.format(e))  # noqa
+    for e in (
+        ('CONTROLLER_HOST', 'TOWER_HOST'),
+        ('CONTROLLER_USERNAME', 'TOWER_USERNAME'),
+        ('CONTROLLER_PASSWORD', 'TOWER_PASSWORD'),
+    ):
+        if not os.environ.get(e[0]) and not os.environ.get(e[1]):
+            raise SystemExit('Please specify a valid {} for a real (running) installation.'.format(e[0]))  # noqa
     cli = CLI()
     cli.parse_args(['awx', '--help'])
     cli.connect()
