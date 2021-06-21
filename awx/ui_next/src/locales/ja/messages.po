@@ -16,7 +16,7 @@ msgstr ""
 msgid "(Limited to first 10)"
 msgstr "(最初の 10 件に制限)"
 
-#: components/TemplateList/TemplateListItem.jsx:95
+#: components/TemplateList/TemplateListItem.jsx:97
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:162
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:93
 msgid "(Prompt on launch)"
@@ -132,15 +132,15 @@ msgstr ""
 msgid "ALL"
 msgstr ""
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:211
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:231
 msgid "API Service/Integration Key"
 msgstr "API サービス/統合キー"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:301
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:288
 msgid "API Token"
 msgstr "API トークン"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:316
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:303
 msgid "API service/integration key"
 msgstr "API サービス/統合キー"
 
@@ -171,12 +171,12 @@ msgstr "アクセス"
 msgid "Access Token Expiration"
 msgstr "アクセストークンの有効期限"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:275
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:431
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:295
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:418
 msgid "Account SID"
 msgstr "アカウント SID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:404
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:391
 msgid "Account token"
 msgstr "アカウントトークン"
 
@@ -189,7 +189,7 @@ msgstr "アクション"
 #: components/Schedule/ScheduleList/ScheduleList.jsx:168
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:111
 #: components/TemplateList/TemplateList.jsx:226
-#: components/TemplateList/TemplateListItem.jsx:175
+#: components/TemplateList/TemplateListItem.jsx:177
 #: screens/ActivityStream/ActivityStream.jsx:257
 #: screens/ActivityStream/ActivityStreamListItem.jsx:49
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:46
@@ -243,7 +243,7 @@ msgstr "アクション"
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:105
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:61
-#: components/TemplateList/TemplateListItem.jsx:254
+#: components/TemplateList/TemplateListItem.jsx:256
 #: screens/Host/HostDetail/HostDetail.jsx:77
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:212
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.jsx:45
@@ -656,7 +656,7 @@ msgstr "関連付けのロールエラー"
 msgid "Association modal"
 msgstr "関連付けモーダル"
 
-#: components/LaunchPrompt/steps/SurveyStep.jsx:138
+#: components/LaunchPrompt/steps/SurveyStep.jsx:164
 msgid "At least one value must be selected for this field."
 msgstr "このフィールドには、少なくとも 1 つの値を選択する必要があります。"
 
@@ -691,7 +691,7 @@ msgstr "Azure AD の設定"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:125
 #: components/AddRole/AddResourceRole.jsx:286
-#: components/LaunchPrompt/LaunchPrompt.jsx:133
+#: components/LaunchPrompt/LaunchPrompt.jsx:134
 #: components/Schedule/shared/SchedulePromptableFields.jsx:136
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:90
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:70
@@ -818,7 +818,7 @@ msgstr ""
 #~ msgid "Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. Together the base path and selected playbook directory provide the full path used to locate playbooks."
 #~ msgstr ""
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:456
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:443
 msgid "Basic auth password"
 msgstr "Basic 認証パスワード"
 
@@ -879,7 +879,7 @@ msgstr "キャッシュのタイムアウト (秒)"
 #: components/DisassociateButton/DisassociateButton.jsx:125
 #: components/FormActionGroup/FormActionGroup.jsx:24
 #: components/FormActionGroup/FormActionGroup.jsx:29
-#: components/LaunchPrompt/LaunchPrompt.jsx:134
+#: components/LaunchPrompt/LaunchPrompt.jsx:135
 #: components/Lookup/HostFilterLookup.jsx:350
 #: components/Lookup/Lookup.jsx:186
 #: components/PaginatedTable/ToolbarDeleteButton.jsx:281
@@ -998,7 +998,7 @@ msgstr ""
 msgid "Canceled"
 msgstr "取り消されました"
 
-#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:157
+#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:129
 msgid ""
 "Cannot enable log aggregator without providing\n"
 "logging aggregator host and logging aggregator type."
@@ -1056,8 +1056,8 @@ msgstr "変更済み"
 msgid "Changes"
 msgstr "変更"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:185
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:276
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:205
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:263
 msgid "Channel"
 msgstr "チャネル"
 
@@ -1107,7 +1107,7 @@ msgstr "モジュールの選択"
 msgid "Choose a source"
 msgstr "ソースの選択"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:499
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:486
 msgid "Choose an HTTP method"
 msgstr "HTTP メソッドの選択"
 
@@ -1130,8 +1130,8 @@ msgstr ""
 #~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:142
-msgid "Choose an email option"
-msgstr "メールオプションの選択"
+#~ msgid "Choose an email option"
+#~ msgstr "メールオプションの選択"
 
 #: components/AddRole/SelectRoleStep.jsx:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
@@ -1178,7 +1178,7 @@ msgstr "このボタンをクリックして、選択した認証情報と指定
 msgid "Click to create a new link to this node."
 msgstr "クリックして、このノードへの新しいリンクを作成します。"
 
-#: screens/Template/Survey/MultipleChoiceField.jsx:114
+#: screens/Template/Survey/MultipleChoiceField.jsx:122
 msgid "Click to toggle default value"
 msgstr ""
 
@@ -1191,11 +1191,11 @@ msgstr "クリックしてジョブの詳細を表示"
 msgid "Client ID"
 msgstr "クライアント ID"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:216
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:236
 msgid "Client Identifier"
 msgstr "クライアント識別子"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:324
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:311
 msgid "Client identifier"
 msgstr "クライアント識別子"
 
@@ -1328,7 +1328,7 @@ msgstr "コンテナーグループ"
 msgid "Container group not found."
 msgstr "コンテナーグループが見つかりません。"
 
-#: components/LaunchPrompt/LaunchPrompt.jsx:128
+#: components/LaunchPrompt/LaunchPrompt.jsx:129
 #: components/Schedule/shared/SchedulePromptableFields.jsx:131
 msgid "Content Loading"
 msgstr "コンテンツの読み込み"
@@ -1406,7 +1406,7 @@ msgstr "通知テンプレートのコピー"
 msgid "Copy Project"
 msgstr "プロジェクトのコピー"
 
-#: components/TemplateList/TemplateListItem.jsx:228
+#: components/TemplateList/TemplateListItem.jsx:230
 msgid "Copy Template"
 msgstr "テンプレートのコピー"
 
@@ -1424,7 +1424,7 @@ msgstr ""
 #~ msgstr "Copyright 2019 Red Hat, Inc."
 
 #: screens/Template/shared/JobTemplateForm.jsx:406
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:238
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:209
 msgid "Create"
 msgstr "作成"
 
@@ -1569,12 +1569,12 @@ msgstr "ユーザートークンの作成"
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:140
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:48
 #: screens/Job/JobDetail/JobDetail.jsx:328
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:315
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:105
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:335
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:111
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:233
 #: screens/Team/TeamDetail/TeamDetail.jsx:43
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:271
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:190
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:178
 #: screens/User/UserDetail/UserDetail.jsx:77
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:63
 #: screens/User/UserTokenList/UserTokenList.jsx:140
@@ -1707,7 +1707,7 @@ msgstr "認証情報タイプが見つかりません。"
 #: components/PromptDetail/PromptDetail.jsx:158
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:193
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:321
-#: components/TemplateList/TemplateListItem.jsx:310
+#: components/TemplateList/TemplateListItem.jsx:314
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:77
 #: routeConfig.jsx:68
 #: screens/ActivityStream/ActivityStream.jsx:162
@@ -1740,12 +1740,16 @@ msgstr "カスタム Pod 仕様"
 msgid "Custom virtual environment {0} must be replaced by an execution environment."
 msgstr ""
 
-#: components/TemplateList/TemplateListItem.jsx:152
+#: components/TemplateList/TemplateListItem.jsx:154
 msgid "Custom virtual environment {0} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
 msgstr ""
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:55
-msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment."
+#~ msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment."
+#~ msgstr ""
+
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:71
+msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
 msgstr ""
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:64
@@ -1803,7 +1807,7 @@ msgstr "12 月"
 msgid "Default"
 msgstr "デフォルト"
 
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:27
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:39
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:195
 msgid "Default Execution Environment"
 msgstr ""
@@ -1850,15 +1854,15 @@ msgstr "システムレベルの機能および関数の定義"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:76
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:99
 #: screens/Job/JobDetail/JobDetail.jsx:403
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:352
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:170
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:372
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:178
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:281
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:78
 #: screens/Team/TeamDetail/TeamDetail.jsx:66
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:410
 #: screens/Template/Survey/SurveyList.jsx:106
 #: screens/Template/Survey/SurveyToolbar.jsx:73
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:264
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:252
 #: screens/User/UserDetail/UserDetail.jsx:99
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:82
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:218
@@ -1904,11 +1908,11 @@ msgstr "ジョブの削除"
 msgid "Delete Job Template"
 msgstr "ジョブテンプレートの削除"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:348
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:368
 msgid "Delete Notification"
 msgstr "通知の削除"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:164
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:172
 msgid "Delete Organization"
 msgstr "組織の削除"
 
@@ -1944,7 +1948,7 @@ msgstr "ユーザートークンの削除"
 msgid "Delete Workflow Approval"
 msgstr "ワークフロー承認の削除"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:258
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:246
 msgid "Delete Workflow Job Template"
 msgstr "新規ワークフロージョブテンプレートの削除"
 
@@ -2065,7 +2069,7 @@ msgstr ""
 #: components/Schedule/ScheduleList/ScheduleList.jsx:190
 #: components/Schedule/shared/ScheduleForm.jsx:104
 #: components/TemplateList/TemplateList.jsx:195
-#: components/TemplateList/TemplateListItem.jsx:248
+#: components/TemplateList/TemplateListItem.jsx:250
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:67
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:128
 #: screens/Application/shared/ApplicationForm.jsx:61
@@ -2094,10 +2098,10 @@ msgstr ""
 #: screens/Inventory/shared/SmartInventoryForm.jsx:60
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:103
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.jsx:72
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:49
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:71
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:146
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.jsx:49
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:95
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:101
 #: screens/Organization/OrganizationList/OrganizationList.jsx:134
 #: screens/Organization/shared/OrganizationForm.jsx:65
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:160
@@ -2112,7 +2116,7 @@ msgstr ""
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:116
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:166
 #: screens/Template/shared/JobTemplateForm.jsx:246
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:132
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:115
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:65
 #: screens/User/UserOrganizations/UserOrganizationListItem.jsx:15
 #: screens/User/UserTeams/UserTeamList.jsx:188
@@ -2125,27 +2129,27 @@ msgstr ""
 msgid "Description"
 msgstr "説明"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:251
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:271
 msgid "Destination Channels"
 msgstr "送信先チャネル"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:161
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:181
 msgid "Destination Channels or Users"
 msgstr "送信先チャネルまたはユーザー"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:270
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:290
 msgid "Destination SMS Number(s)"
 msgstr "送信先 SMS 番号"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:421
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:408
 msgid "Destination SMS number(s)"
 msgstr "送信先 SMS 番号"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:372
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:359
 msgid "Destination channels"
 msgstr "送信先チャネル"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:239
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:226
 msgid "Destination channels or users"
 msgstr "送信先チャネルまたはユーザー"
 
@@ -2241,18 +2245,18 @@ msgstr "詳細"
 msgid "Details tab"
 msgstr "詳細タブ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:137
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:195
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:240
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:294
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:157
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:215
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:260
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:314
 msgid "Disable SSL Verification"
 msgstr "SSL 検証の無効化"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:197
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:250
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:289
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:360
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:469
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:184
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:237
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:276
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:347
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:456
 msgid "Disable SSL verification"
 msgstr "SSL 検証の無効化"
 
@@ -2337,7 +2341,7 @@ msgstr "出力のダウンロード"
 msgid "E-mail"
 msgstr "メール"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:133
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:123
 msgid "E-mail options"
 msgstr "メールオプション"
 
@@ -2384,11 +2388,11 @@ msgstr ""
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:230
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:120
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:155
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:339
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:341
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:359
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:361
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:132
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:153
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:157
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:161
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:165
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:254
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:80
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.jsx:84
@@ -2419,8 +2423,8 @@ msgstr ""
 #: screens/Team/TeamDetail/TeamDetail.jsx:55
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:379
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:381
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:234
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:236
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:222
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:224
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.jsx:208
 #: screens/User/UserDetail/UserDetail.jsx:88
 msgid "Edit"
@@ -2543,8 +2547,8 @@ msgstr "ソースの編集"
 msgid "Edit Team"
 msgstr "チームの編集"
 
-#: components/TemplateList/TemplateListItem.jsx:213
-#: components/TemplateList/TemplateListItem.jsx:219
+#: components/TemplateList/TemplateListItem.jsx:215
+#: components/TemplateList/TemplateListItem.jsx:221
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:100
 msgid "Edit Template"
 msgstr "テンプレートの編集"
@@ -2626,11 +2630,11 @@ msgstr "ジョブ実行の経過時間"
 msgid "Email"
 msgstr "メール"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:108
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:130
 msgid "Email Options"
 msgstr "メールオプション"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:274
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:245
 msgid "Enable Concurrent Jobs"
 msgstr "同時実行ジョブの有効化"
 
@@ -2638,7 +2642,7 @@ msgstr "同時実行ジョブの有効化"
 msgid "Enable Fact Storage"
 msgstr "ファクトストレージの有効化"
 
-#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:220
+#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:192
 msgid "Enable HTTPS certificate verification"
 msgstr "HTTPS 証明書の検証を有効化"
 
@@ -2649,12 +2653,12 @@ msgstr "HTTPS 証明書の検証を有効化"
 
 #: screens/Template/shared/JobTemplateForm.jsx:583
 #: screens/Template/shared/JobTemplateForm.jsx:586
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:254
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:257
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:225
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:228
 msgid "Enable Webhook"
 msgstr "Webhook の有効化"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:260
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:231
 msgid "Enable Webhook for this workflow job template."
 msgstr "このワークフローのジョブテンプレートの Webhook を有効にします。"
 
@@ -2662,11 +2666,11 @@ msgstr "このワークフローのジョブテンプレートの Webhook を有
 #~ msgid "Enable Webhooks"
 #~ msgstr "Webhook の有効化"
 
-#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:164
+#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:136
 msgid "Enable external logging"
 msgstr "外部ログの有効化"
 
-#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:196
+#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:168
 msgid "Enable log system tracking facts individually"
 msgstr "システムトラッキングファクトを個別に有効化"
 
@@ -2700,7 +2704,7 @@ msgstr "有効化"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:205
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:243
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:281
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:200
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:188
 msgid "Enabled Options"
 msgstr ""
 
@@ -2818,11 +2822,11 @@ msgstr "JSON または YAML 構文のいずれかを使用してインベント�
 #~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the documentation for example syntax"
 #~ msgstr ""
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:193
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:180
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "各行に、コンマなしでアノテーションタグを 1 つ入力してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:244
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:231
 msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
@@ -2833,7 +2837,7 @@ msgstr ""
 #~ msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
 #~ msgstr "各行に 1 つの IRC チャンネルまたはユーザー名を入力します。チャンネルのシャープ記号 (#) およびユーザーのアットマーク (@) 記号は不要です。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:377
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:364
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
@@ -2843,7 +2847,7 @@ msgstr ""
 #~ msgid "Enter one Slack channel per line. The pound symbol (#) is required for channels."
 #~ msgstr "各行に 1 つの Slack チャンネルを入力します。チャンネルにはシャープ記号 (#) が必要です。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:92
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:89
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
@@ -2853,7 +2857,7 @@ msgstr ""
 #~ msgid "Enter one email address per line to create a recipient list for this type of notification."
 #~ msgstr "各行に 1 つのメールアドレスを入力し、この通知タイプの受信者リストを作成します。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:426
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:413
 msgid ""
 "Enter one phone number per line to specify where to\n"
 "route SMS messages."
@@ -2863,7 +2867,7 @@ msgstr ""
 #~ msgid "Enter one phone number per line to specify where to route SMS messages."
 #~ msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのルート先を指定します。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:416
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:403
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
@@ -2927,7 +2931,6 @@ msgstr "JSON または YAML 構文のいずれかを使用して変数を入力�
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:133
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:268
 #: screens/Job/JobOutput/JobOutput.jsx:761
-#: screens/Setting/shared/LoggingTestAlert.jsx:35
 msgid "Error"
 msgstr "エラー"
 
@@ -2935,12 +2938,12 @@ msgstr "エラー"
 msgid "Error fetching updated project"
 msgstr ""
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:415
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:435
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:144
 msgid "Error message"
 msgstr "エラーメッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:424
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:444
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:153
 msgid "Error message body"
 msgstr "エラーメッセージボディー"
@@ -2958,7 +2961,7 @@ msgstr ""
 #: components/JobList/JobList.jsx:280
 #: components/JobList/JobList.jsx:291
 #: components/LaunchButton/LaunchButton.jsx:173
-#: components/LaunchPrompt/LaunchPrompt.jsx:71
+#: components/LaunchPrompt/LaunchPrompt.jsx:72
 #: components/NotificationList/NotificationList.jsx:246
 #: components/PaginatedTable/ToolbarDeleteButton.jsx:205
 #: components/ResourceAccessList/ResourceAccessList.jsx:234
@@ -2998,10 +3001,10 @@ msgstr ""
 #: screens/Inventory/shared/InventorySourceSyncButton.jsx:51
 #: screens/Login/Login.jsx:209
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:127
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:360
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:380
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:225
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:163
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:179
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:187
 #: screens/Organization/OrganizationList/OrganizationList.jsx:203
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:289
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:184
@@ -3014,7 +3017,7 @@ msgstr ""
 #: screens/Team/TeamRoles/TeamRolesList.jsx:259
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:419
 #: screens/Template/TemplateSurvey.jsx:130
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:272
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:260
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:167
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:182
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:307
@@ -3102,15 +3105,15 @@ msgid "Execute when the parent node results in a successful state."
 msgstr "親ノードが正常な状態になったときに実行します。"
 
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:85
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:28
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:74
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:40
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:103
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:175
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:197
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:144
 msgid "Execution Environment"
 msgstr ""
 
-#: components/TemplateList/TemplateListItem.jsx:149
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:68
+#: components/TemplateList/TemplateListItem.jsx:151
 msgid "Execution Environment Missing"
 msgstr ""
 
@@ -3140,7 +3143,7 @@ msgstr "実行ノード"
 #~ msgid "Execution environment image"
 #~ msgstr ""
 
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:80
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:109
 msgid "Execution environment is missing or deleted."
 msgstr ""
 
@@ -3332,7 +3335,7 @@ msgstr "インベントリーをコピーできませんでした。"
 msgid "Failed to copy project."
 msgstr "プロジェクトをコピーできませんでした。"
 
-#: components/TemplateList/TemplateListItem.jsx:233
+#: components/TemplateList/TemplateListItem.jsx:235
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:154
 msgid "Failed to copy template."
 msgstr "テンプレートをコピーできませんでした。"
@@ -3366,7 +3369,7 @@ msgstr "インベントリーを削除できませんでした。"
 msgid "Failed to delete job template."
 msgstr "ジョブテンプレートを削除できませんでした。"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:363
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:383
 msgid "Failed to delete notification."
 msgstr "通知を削除できませんでした。"
 
@@ -3455,7 +3458,7 @@ msgstr "1 人以上のユーザーを削除できませんでした。"
 msgid "Failed to delete one or more workflow approval."
 msgstr "1 つ以上のワークフロー承認を削除できませんでした。"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:182
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:190
 msgid "Failed to delete organization."
 msgstr "組織を削除できませんでした。"
 
@@ -3492,7 +3495,7 @@ msgstr "ユーザーを削除できませんでした。"
 msgid "Failed to delete workflow approval."
 msgstr "ワークフロー承認を削除できませんでした。"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:275
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:263
 msgid "Failed to delete workflow job template."
 msgstr "ワークフロージョブテンプレートを削除できませんでした。"
 
@@ -3603,11 +3606,11 @@ msgid "Failure"
 msgstr "失敗"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:68
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:138
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:167
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:197
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:242
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:296
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:158
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:187
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:217
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:262
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:316
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:88
 msgid "False"
 msgstr "False"
@@ -3765,7 +3768,7 @@ msgstr ""
 msgid "Fuzzy search on name field."
 msgstr ""
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:132
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:140
 #: screens/Organization/shared/OrganizationForm.jsx:102
 msgid "Galaxy Credentials"
 msgstr "Galaxy 認証情報"
@@ -3884,12 +3887,12 @@ msgstr "Google OAuth2"
 msgid "Grafana"
 msgstr "Grafana"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:170
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:157
 msgid "Grafana API key"
 msgstr "Grafana API キー"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:117
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:159
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:137
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:146
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -3927,13 +3930,13 @@ msgstr "グループタイプ"
 msgid "Groups"
 msgstr "グループ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:306
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:476
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:326
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:463
 msgid "HTTP Headers"
 msgstr "HTTP ヘッダー"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:301
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:490
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:321
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:477
 msgid "HTTP Method"
 msgstr "HTTP メソッド"
 
@@ -3945,7 +3948,7 @@ msgstr "ヘルプ"
 msgid "Hide"
 msgstr "非表示"
 
-#: components/LaunchPrompt/LaunchPrompt.jsx:110
+#: components/LaunchPrompt/LaunchPrompt.jsx:111
 #: components/Schedule/shared/SchedulePromptableFields.jsx:113
 msgid "Hide description"
 msgstr ""
@@ -3955,8 +3958,8 @@ msgstr ""
 msgid "Hipchat"
 msgstr "Hipchat"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:83
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:78
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:105
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:75
 msgid "Host"
 msgstr "ホスト"
 
@@ -4097,19 +4100,19 @@ msgstr "時間"
 msgid "ID"
 msgstr "ID"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:122
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:142
 msgid "ID of the Dashboard"
 msgstr "ダッシュボード ID"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:127
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:147
 msgid "ID of the Panel"
 msgstr "パネル ID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:177
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:164
 msgid "ID of the dashboard (optional)"
 msgstr "ダッシュボード ID (オプション)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:183
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:170
 msgid "ID of the panel (optional)"
 msgstr "パネル ID (オプション)"
 
@@ -4118,38 +4121,38 @@ msgstr "パネル ID (オプション)"
 msgid "IRC"
 msgstr "IRC"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:156
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:176
 msgid "IRC Nick"
 msgstr "IRC ニック"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:151
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:171
 msgid "IRC Server Address"
 msgstr "IRC サーバーアドレス"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:146
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:166
 msgid "IRC Server Port"
 msgstr "IRC サーバーポート"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:231
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:218
 msgid "IRC nick"
 msgstr "IRC ニック"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:223
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:210
 msgid "IRC server address"
 msgstr "IRC サーバーアドレス"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:209
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:196
 msgid "IRC server password"
 msgstr "IRC サーバーパスワード"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:214
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:201
 msgid "IRC server port"
 msgstr "IRC サーバーポート"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:190
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:235
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:282
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:353
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:210
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:255
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:269
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:340
 msgid "Icon URL"
 msgstr "アイコン URL"
 
@@ -4235,7 +4238,7 @@ msgstr ""
 #~ msgid "If enabled, simultaneous runs of this job template will be allowed."
 #~ msgstr ""
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:273
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:244
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
 msgstr "有効な場合は、このワークフロージョブテンプレートの同時実行が許可されます。"
 
@@ -4391,7 +4394,7 @@ msgstr "インスタンスグループ"
 #: screens/InstanceGroup/InstanceGroups.jsx:16
 #: screens/InstanceGroup/InstanceGroups.jsx:26
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:91
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:117
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:123
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:322
 msgid "Instance Groups"
 msgstr "インスタンスグループ"
@@ -4483,8 +4486,8 @@ msgstr "ソースを含むインベントリーはコピーできません。"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:134
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:77
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:287
-#: components/TemplateList/TemplateListItem.jsx:274
-#: components/TemplateList/TemplateListItem.jsx:284
+#: components/TemplateList/TemplateListItem.jsx:276
+#: components/TemplateList/TemplateListItem.jsx:286
 #: screens/Host/HostDetail/HostDetail.jsx:83
 #: screens/Host/HostList/HostList.jsx:167
 #: screens/Host/HostList/HostListItem.jsx:33
@@ -4496,7 +4499,7 @@ msgstr "ソースを含むインベントリーはコピーできません。"
 #: screens/Job/JobDetail/JobDetail.jsx:160
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:200
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:207
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:157
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:145
 msgid "Inventory"
 msgstr "インベントリー"
 
@@ -4691,7 +4694,7 @@ msgstr ""
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:283
 #: screens/Job/JobDetail/JobDetail.jsx:156
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:183
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:154
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:142
 #: screens/Template/shared/JobTemplateForm.jsx:251
 msgid "Job Type"
 msgstr "ジョブタイプ"
@@ -4824,12 +4827,12 @@ msgstr "ラベル名"
 #: components/JobList/JobListItem.jsx:228
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:209
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:114
-#: components/TemplateList/TemplateListItem.jsx:327
+#: components/TemplateList/TemplateListItem.jsx:331
 #: screens/Job/JobDetail/JobDetail.jsx:279
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:304
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:205
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:193
 #: screens/Template/shared/JobTemplateForm.jsx:392
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:224
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:195
 msgid "Labels"
 msgstr "ラベル"
 
@@ -4847,7 +4850,7 @@ msgstr "前回のログイン"
 
 #: components/PromptDetail/PromptDetail.jsx:137
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:272
-#: components/TemplateList/TemplateListItem.jsx:303
+#: components/TemplateList/TemplateListItem.jsx:307
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:105
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:43
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:165
@@ -4861,8 +4864,8 @@ msgstr "前回のログイン"
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:48
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:86
 #: screens/Job/JobDetail/JobDetail.jsx:332
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:320
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:110
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:340
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:116
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:238
 #: screens/Team/TeamDetail/TeamDetail.jsx:44
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:276
@@ -4884,7 +4887,7 @@ msgid "Last Name"
 msgstr "姓"
 
 #: components/TemplateList/TemplateList.jsx:225
-#: components/TemplateList/TemplateListItem.jsx:174
+#: components/TemplateList/TemplateListItem.jsx:176
 msgid "Last Ran"
 msgstr "最終実行日時"
 
@@ -4922,8 +4925,8 @@ msgstr ""
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:57
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:385
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:394
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:240
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:249
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:228
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:237
 msgid "Launch"
 msgstr "起動"
 
@@ -4931,7 +4934,7 @@ msgstr "起動"
 msgid "Launch Management Job"
 msgstr "管理ジョブの起動"
 
-#: components/TemplateList/TemplateListItem.jsx:194
+#: components/TemplateList/TemplateListItem.jsx:196
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:82
 msgid "Launch Template"
 msgstr "テンプレートの起動"
@@ -4945,7 +4948,7 @@ msgstr "テンプレートの起動"
 msgid "Launch management job"
 msgstr "管理ジョブの起動"
 
-#: components/TemplateList/TemplateListItem.jsx:202
+#: components/TemplateList/TemplateListItem.jsx:204
 msgid "Launch template"
 msgstr "テンプレートの起動"
 
@@ -4954,7 +4957,7 @@ msgstr "テンプレートの起動"
 msgid "Launch workflow"
 msgstr "ワークフローの起動"
 
-#: components/LaunchPrompt/LaunchPrompt.jsx:105
+#: components/LaunchPrompt/LaunchPrompt.jsx:106
 msgid "Launch | {0}"
 msgstr ""
 
@@ -5014,9 +5017,9 @@ msgstr "Less than or equal to の比較条件"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:311
 #: screens/Job/JobDetail/JobDetail.jsx:221
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:231
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:164
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:152
 #: screens/Template/shared/JobTemplateForm.jsx:441
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:173
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:156
 msgid "Limit"
 msgstr "制限"
 
@@ -5041,8 +5044,8 @@ msgid "Log In"
 msgstr "ログイン"
 
 #: screens/Setting/shared/LoggingTestAlert.jsx:14
-msgid "Log aggregator test sent successfully."
-msgstr "ログアグリゲーターのテストの送信に成功しました。"
+#~ msgid "Log aggregator test sent successfully."
+#~ msgstr "ログアグリゲーターのテストの送信に成功しました。"
 
 #: screens/Setting/Settings.jsx:93
 msgid "Logging"
@@ -5093,8 +5096,12 @@ msgid "Machine credential"
 msgstr "マシンの認証情報"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:67
-msgid "Managed by Tower"
+msgid "Managed"
 msgstr ""
+
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:67
+#~ msgid "Managed by Tower"
+#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:148
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:167
@@ -5151,7 +5158,7 @@ msgstr "3 月"
 msgid "Mattermost"
 msgstr "Mattermost"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:97
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:103
 #: screens/Organization/shared/OrganizationForm.jsx:72
 msgid "Max Hosts"
 msgstr "最大ホスト数"
@@ -5242,12 +5249,12 @@ msgstr "その他のシステム設定"
 msgid "Missing"
 msgstr "不明"
 
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:52
-#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:77
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:64
+#: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.jsx:106
 msgid "Missing resource"
 msgstr ""
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:195
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:183
 #: screens/User/UserTokenList/UserTokenList.jsx:144
 msgid "Modified"
 msgstr "修正済み"
@@ -5401,7 +5408,7 @@ msgstr "複数の選択オプション"
 #: components/Schedule/shared/ScheduleForm.jsx:96
 #: components/TemplateList/TemplateList.jsx:190
 #: components/TemplateList/TemplateList.jsx:223
-#: components/TemplateList/TemplateListItem.jsx:131
+#: components/TemplateList/TemplateListItem.jsx:133
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:18
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:37
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:49
@@ -5499,12 +5506,12 @@ msgstr "複数の選択オプション"
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:88
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:102
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.jsx:67
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:47
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:69
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:141
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:198
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:106
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.jsx:41
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:91
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:97
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:86
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:109
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.jsx:13
@@ -5541,7 +5548,7 @@ msgstr "複数の選択オプション"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:76
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/WorkflowJobTemplatesList.jsx:96
 #: screens/Template/shared/JobTemplateForm.jsx:238
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:124
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:107
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:60
 #: screens/User/UserOrganizations/UserOrganizationList.jsx:64
 #: screens/User/UserOrganizations/UserOrganizationListItem.jsx:10
@@ -5587,7 +5594,7 @@ msgstr "新規"
 #: components/AdHocCommands/AdHocCommandsWizard.jsx:92
 #: components/AddRole/AddResourceRole.jsx:215
 #: components/AddRole/AddResourceRole.jsx:250
-#: components/LaunchPrompt/LaunchPrompt.jsx:135
+#: components/LaunchPrompt/LaunchPrompt.jsx:136
 #: components/Schedule/shared/SchedulePromptableFields.jsx:138
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:66
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:59
@@ -5760,7 +5767,7 @@ msgstr ""
 #~ msgid "Notifcations"
 #~ msgstr "通知"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:256
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:276
 msgid "Notification Color"
 msgstr "通知の色"
 
@@ -5778,11 +5785,11 @@ msgstr "通知テンプレートテストは見つかりません。"
 msgid "Notification Templates"
 msgstr "通知テンプレート"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:68
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:90
 msgid "Notification Type"
 msgstr "通知タイプ"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:389
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:376
 msgid "Notification color"
 msgstr "通知の色"
 
@@ -5905,7 +5912,7 @@ msgid "Option Details"
 msgstr "オプションの詳細"
 
 #: screens/Template/shared/JobTemplateForm.jsx:395
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:227
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:198
 msgid ""
 "Optional labels that describe this job template,\n"
 "such as 'dev' or 'test'. Labels can be used to group and filter\n"
@@ -5927,7 +5934,7 @@ msgstr "必要に応じて、ステータスの更新を Webhook サービスに
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:62
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:67
 #: screens/Template/shared/JobTemplateForm.jsx:552
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:251
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:222
 msgid "Options"
 msgstr "オプション"
 
@@ -5942,7 +5949,7 @@ msgstr "オプション"
 #: components/PromptDetail/PromptProjectDetail.jsx:76
 #: components/PromptDetail/PromptProjectDetail.jsx:86
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:65
-#: components/TemplateList/TemplateListItem.jsx:261
+#: components/TemplateList/TemplateListItem.jsx:263
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:72
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:36
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:163
@@ -5956,8 +5963,8 @@ msgstr "オプション"
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:96
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:159
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:107
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:55
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:65
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:77
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:87
 #: screens/Project/ProjectDetail/ProjectDetail.jsx:163
 #: screens/Project/ProjectList/ProjectListItem.jsx:279
 #: screens/Project/ProjectList/ProjectListItem.jsx:290
@@ -6035,11 +6042,11 @@ msgstr ""
 msgid "Overwrite variables"
 msgstr "変数の上書き"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:502
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:489
 msgid "POST"
 msgstr "POST"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:503
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:490
 msgid "PUT"
 msgstr "PUT"
 
@@ -6048,11 +6055,11 @@ msgstr "PUT"
 msgid "Pagerduty"
 msgstr "Pagerduty"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:206
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:226
 msgid "Pagerduty Subdomain"
 msgstr "Pagerduty サブドメイン"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:308
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:295
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty サブドメイン"
 
@@ -6096,7 +6103,7 @@ msgid ""
 "documentation for example syntax."
 msgstr ""
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:248
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:219
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
@@ -6105,7 +6112,7 @@ msgstr "追加のコマンドライン変数を Playbook に渡します。こ�
 #~ msgstr ""
 
 #: screens/Login/Login.jsx:197
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:70
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:104
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:215
 #: screens/Template/Survey/SurveyQuestionForm.jsx:83
@@ -6306,8 +6313,8 @@ msgstr ""
 #~ msgid "Populate the hosts for this inventory by using a search filter. Example: ansible_facts.ansible_distribution:\"RedHat\". Refer to the Ansible Tower documentation for further syntax and examples."
 #~ msgstr ""
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:98
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:105
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:120
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:102
 msgid "Port"
 msgstr "ポート"
 
@@ -6315,9 +6322,15 @@ msgstr "ポート"
 msgid "Preconditions for running this node when there are multiple parents. Refer to the"
 msgstr ""
 
-#: screens/Template/Survey/MultipleChoiceField.jsx:58
-msgid "Press 'Enter' to add more answer choices. One answer choice per line."
+#: screens/Template/Survey/MultipleChoiceField.jsx:64
+msgid ""
+"Press 'Enter' to add more answer choices. One answer\n"
+"choice per line."
 msgstr ""
+
+#: screens/Template/Survey/MultipleChoiceField.jsx:58
+#~ msgid "Press 'Enter' to add more answer choices. One answer choice per line."
+#~ msgstr ""
 
 #: components/CodeEditor/CodeEditor.jsx:187
 msgid "Press Enter to edit. Press ESC to stop editing."
@@ -6350,7 +6363,7 @@ msgstr "権限昇格のパスワード"
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:105
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:138
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:146
-#: components/TemplateList/TemplateListItem.jsx:289
+#: components/TemplateList/TemplateListItem.jsx:291
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:173
 #: screens/Job/JobDetail/JobDetail.jsx:188
 #: screens/Job/JobDetail/JobDetail.jsx:203
@@ -6435,7 +6448,7 @@ msgstr "プロンプト値"
 #~ msgstr "プロンプト"
 
 #: screens/Template/shared/JobTemplateForm.jsx:444
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:176
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:159
 msgid ""
 "Provide a host pattern to further constrain\n"
 "the list of hosts that will be managed or affected by the\n"
@@ -6556,11 +6569,11 @@ msgstr "最近のテンプレートリストタブ"
 msgid "Recent jobs"
 msgstr ""
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:88
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:110
 msgid "Recipient List"
 msgstr "受信者リスト"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:86
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:83
 msgid "Recipient list"
 msgstr "受信者リスト"
 
@@ -6782,7 +6795,7 @@ msgstr "リソースが削除されました"
 msgid "Resources"
 msgstr "リソース"
 
-#: components/TemplateList/TemplateListItem.jsx:138
+#: components/TemplateList/TemplateListItem.jsx:140
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:58
 msgid "Resources are missing from this template."
 msgstr "リソースがこのテンプレートにありません。"
@@ -6927,7 +6940,7 @@ msgid "Run type"
 msgstr "実行タイプ"
 
 #: components/JobList/JobList.jsx:202
-#: components/TemplateList/TemplateListItem.jsx:110
+#: components/TemplateList/TemplateListItem.jsx:112
 #: components/Workflow/WorkflowNodeHelp.jsx:83
 msgid "Running"
 msgstr "実行中"
@@ -6967,7 +6980,7 @@ msgstr "ソーシャル"
 msgid "SSH password"
 msgstr "SSH パスワード"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:166
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:186
 msgid "SSL Connection"
 msgstr "SSL 接続"
 
@@ -7018,8 +7031,8 @@ msgid "Save & Exit"
 msgstr "保存して終了"
 
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:238
-msgid "Save and enable log aggregation before testing the log aggregator."
-msgstr "ログ集計機能をテストする前に、ログ集計を保存して有効にします。"
+#~ msgid "Save and enable log aggregation before testing the log aggregator."
+#~ msgstr "ログ集計機能をテストする前に、ログ集計を保存して有効にします。"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkModal.jsx:32
 msgid "Save link changes"
@@ -7146,7 +7159,7 @@ msgstr "グループの選択"
 msgid "Select Hosts"
 msgstr "ホストの選択"
 
-#: components/AnsibleSelect/AnsibleSelect.jsx:38
+#: components/AnsibleSelect/AnsibleSelect.jsx:37
 msgid "Select Input"
 msgstr "入力の選択"
 
@@ -7200,7 +7213,7 @@ msgstr ""
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch"
 msgstr "ワークフローにブランチを選択してください。このブランチは、ブランチを求めるジョブテンプレートノードすべてに適用されます。"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:198
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:181
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch."
 msgstr "ワークフローにブランチを選択してください。このブランチは、ブランチを求めるジョブテンプレートノードすべてに適用されます。"
 
@@ -7281,14 +7294,13 @@ msgstr ""
 #: screens/Inventory/shared/SmartInventoryForm.jsx:72
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.jsx:24
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.jsx:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:444
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:431
 #: screens/Project/shared/ProjectForm.jsx:193
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.jsx:39
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:35
 #: screens/Team/shared/TeamForm.jsx:49
 #: screens/Template/Survey/SurveyQuestionForm.jsx:30
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:145
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:128
 #: screens/User/shared/UserForm.jsx:120
 msgid "Select a value for this field"
 msgstr "このフィールドの値の選択"
@@ -7310,9 +7322,13 @@ msgstr ""
 msgid "Select an instance and a metric to show chart"
 msgstr ""
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:161
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:144
 msgid "Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory."
 msgstr "ワークフローのインベントリーを選択してください。このインベントリーが、インベントリーをプロンプトするすべてのジョブテンプレートノードに適用されます。"
+
+#: components/LaunchPrompt/steps/SurveyStep.jsx:128
+msgid "Select an option"
+msgstr ""
 
 #: screens/Project/shared/ProjectForm.jsx:204
 msgid "Select an organization before editing the default execution environment."
@@ -7359,6 +7375,10 @@ msgstr "リストから項目の選択"
 #: screens/Dashboard/DashboardGraph.jsx:123
 msgid "Select job type"
 msgstr "ジョブタイプの選択"
+
+#: components/LaunchPrompt/steps/SurveyStep.jsx:174
+msgid "Select option(s)"
+msgstr ""
 
 #: screens/Dashboard/DashboardGraph.jsx:95
 #: screens/Dashboard/DashboardGraph.jsx:96
@@ -7416,8 +7436,8 @@ msgstr "そのコマンドを実行するためにリモートホストへのア
 #~ msgstr "このインベントリーソースの実行に使用するカスタム Python 仮想環境を選択します。"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:217
-msgid "Select the default execution environment for this organization to run on."
-msgstr ""
+#~ msgid "Select the default execution environment for this organization to run on."
+#~ msgstr ""
 
 #: screens/Organization/shared/OrganizationForm.jsx:96
 #~ msgid "Select the default execution environment for this organization."
@@ -7488,7 +7508,7 @@ msgstr "{0} の選択"
 #: components/CheckboxListItem/CheckboxListItem.jsx:42
 #: components/OptionsList/OptionsList.jsx:49
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:75
-#: components/TemplateList/TemplateListItem.jsx:129
+#: components/TemplateList/TemplateListItem.jsx:131
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:94
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:112
 #: screens/Application/ApplicationTokens/ApplicationTokenListItem.jsx:26
@@ -7520,14 +7540,14 @@ msgid "Selected Category"
 msgstr "選択したカテゴリー"
 
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:239
-msgid "Send a test log message to the configured log aggregator."
-msgstr "設定済みのログアグリゲーターにテストログメッセージを送信します。"
+#~ msgid "Send a test log message to the configured log aggregator."
+#~ msgstr "設定済みのログアグリゲーターにテストログメッセージを送信します。"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:93
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:115
 msgid "Sender Email"
 msgstr "送信者のメール"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:97
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:94
 msgid "Sender e-mail"
 msgstr "送信者のメール"
 
@@ -7626,7 +7646,7 @@ msgstr "すべてのグループの表示"
 msgid "Show changes"
 msgstr "変更の表示"
 
-#: components/LaunchPrompt/LaunchPrompt.jsx:110
+#: components/LaunchPrompt/LaunchPrompt.jsx:111
 #: components/Schedule/shared/SchedulePromptableFields.jsx:113
 msgid "Show description"
 msgstr ""
@@ -7848,7 +7868,7 @@ msgstr "ソースコントロールの URL"
 msgid "Source Control Update"
 msgstr "ソースコントロールの更新"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:265
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:285
 msgid "Source Phone Number"
 msgstr "発信元の電話番号"
 
@@ -7861,7 +7881,7 @@ msgstr "ソース変数"
 msgid "Source Workflow Job"
 msgstr "ソースワークフローのジョブ"
 
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:195
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:178
 msgid "Source control branch"
 msgstr "ソースコントロールのブランチ"
 
@@ -7869,7 +7889,7 @@ msgstr "ソースコントロールのブランチ"
 msgid "Source details"
 msgstr "ソース詳細"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:411
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:398
 msgid "Source phone number"
 msgstr "発信元の電話番号"
 
@@ -7887,7 +7907,7 @@ msgstr "プロジェクトから取得"
 msgid "Sources"
 msgstr "ソース"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:478
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:465
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
@@ -7903,7 +7923,7 @@ msgstr ""
 #~ msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
 #~ msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:392
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:379
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
@@ -7954,12 +7974,12 @@ msgstr "開始時間"
 #~ msgid "Start date/time"
 #~ msgstr "開始日時"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:379
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:399
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:108
 msgid "Start message"
 msgstr "開始メッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:388
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:408
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:117
 msgid "Start message body"
 msgstr "開始メッセージのボディー"
@@ -8062,16 +8082,15 @@ msgstr "Subversion"
 
 #: components/NotificationList/NotificationListItem.jsx:65
 #: components/NotificationList/NotificationListItem.jsx:66
-#: screens/Setting/shared/LoggingTestAlert.jsx:35
 msgid "Success"
 msgstr "成功"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:397
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:417
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:126
 msgid "Success message"
 msgstr "成功メッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:406
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:426
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:135
 msgid "Success message body"
 msgstr "成功メッセージボディー"
@@ -8234,20 +8253,20 @@ msgstr ""
 #~ msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
 #~ msgstr "タグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分を実行する必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、Ansible Tower ドキュメントを参照してください。"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:132
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:152
 msgid "Tags for the Annotation"
 msgstr "アノテーションのタグ"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:189
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:176
 msgid "Tags for the annotation (optional)"
 msgstr "アノテーションのタグ (オプション)"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:175
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:225
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:289
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:262
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:339
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:461
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:195
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:245
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:309
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:249
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:326
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:448
 msgid "Target URL"
 msgstr "ターゲット URL"
 
@@ -8325,7 +8344,6 @@ msgstr "テンプレート"
 #: screens/Credential/shared/CredentialForm.jsx:335
 #: screens/Credential/shared/CredentialForm.jsx:341
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:80
-#: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:256
 msgid "Test"
 msgstr "テスト"
 
@@ -8338,8 +8356,8 @@ msgid "Test Notification"
 msgstr "テスト通知"
 
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:244
-msgid "Test logging"
-msgstr "ロギングのテスト"
+#~ msgid "Test logging"
+#~ msgstr "ロギングのテスト"
 
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:119
 msgid "Test notification"
@@ -8378,7 +8396,7 @@ msgstr ""
 msgid "The Grant type the user must use for acquire tokens for this application"
 msgstr "ユーザーがこのアプリケーションのトークンを取得するために使用する必要のある付与タイプです。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:122
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:119
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
@@ -8400,7 +8418,7 @@ msgstr ""
 #~ msgid "The amount of time (in seconds) to run before the job is canceled. Defaults to 0 for no job timeout."
 #~ msgstr "ジョブが取り消される前の実行時間 (秒数)。デフォルト値は 0 で、ジョブのタイムアウトがありません。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:164
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:151
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
@@ -8539,7 +8557,7 @@ msgstr ""
 #~ msgid "There are no available playbook directories in {project_base_dir}. Either that directory is empty, or all of the contents are already assigned to other projects. Create a new directory there and make sure the playbook files can be read by the \"awx\" system user, or have {brandName} directly retrieve your playbooks from source control using the Source Control Type option above."
 #~ msgstr ""
 
-#: screens/Template/Survey/MultipleChoiceField.jsx:31
+#: screens/Template/Survey/MultipleChoiceField.jsx:35
 msgid "There must be a value in at least one input"
 msgstr ""
 
@@ -8564,8 +8582,8 @@ msgid "There was an error saving the workflow."
 msgstr "ワークフローの保存中にエラーが発生しました。"
 
 #: screens/Setting/shared/LoggingTestAlert.jsx:19
-msgid "There was an error testing the log aggregator."
-msgstr "ログアグリゲーターのテスト中にエラーが発生しました。"
+#~ msgid "There was an error testing the log aggregator."
+#~ msgstr "ログアグリゲーターのテスト中にエラーが発生しました。"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:216
 #~ msgid "These approvals cannot be deleted due to insufficient permissions or a pending job status"
@@ -8687,7 +8705,7 @@ msgstr "このフィールドは空白ではありません"
 msgid "This field must be a number"
 msgstr "このフィールドは数字でなければなりません"
 
-#: components/LaunchPrompt/steps/useSurveyStep.jsx:110
+#: components/LaunchPrompt/steps/useSurveyStep.jsx:107
 msgid "This field must be a number and have a value between {0} and {1}"
 msgstr "このフィールドは、{0} から {1} の間の値である必要があります"
 
@@ -8704,7 +8722,7 @@ msgstr "このフィールドは正規表現である必要があります"
 msgid "This field must be an integer"
 msgstr "このフィールドは整数でなければなりません。"
 
-#: components/LaunchPrompt/steps/useSurveyStep.jsx:102
+#: components/LaunchPrompt/steps/useSurveyStep.jsx:99
 msgid "This field must be at least {0} characters"
 msgstr "このフィールドは、{0} 文字以上にする必要があります"
 
@@ -8716,7 +8734,7 @@ msgstr "このフィールドは、{min} 文字以上にする必要がありま
 msgid "This field must be greater than 0"
 msgstr "このフィールドは 0 より大きくなければなりません"
 
-#: components/LaunchPrompt/steps/useSurveyStep.jsx:114
+#: components/LaunchPrompt/steps/useSurveyStep.jsx:111
 #: screens/Template/shared/JobTemplateForm.jsx:150
 #: screens/User/shared/UserForm.jsx:81
 #: screens/User/shared/UserForm.jsx:92
@@ -8729,7 +8747,7 @@ msgstr "このフィールドは空白であってはなりません"
 msgid "This field must not contain spaces"
 msgstr "このフィールドにはスペースを含めることはできません"
 
-#: components/LaunchPrompt/steps/useSurveyStep.jsx:105
+#: components/LaunchPrompt/steps/useSurveyStep.jsx:102
 msgid "This field must not exceed {0} characters"
 msgstr "このフィールドは、{0} 文字内にする必要があります"
 
@@ -8769,7 +8787,7 @@ msgstr "この時だけ唯一、トークンの値と、関連する更新トー
 msgid "This job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:168
+#: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:176
 msgid "This organization is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8816,7 +8834,7 @@ msgstr ""
 msgid "This workflow does not have any nodes configured."
 msgstr "このワークフローには、ノードが構成されていません。"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:262
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:250
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8868,8 +8886,8 @@ msgid "Timed out"
 msgstr "タイムアウト"
 
 #: components/PromptDetail/PromptDetail.jsx:115
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:103
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:115
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:125
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:112
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:233
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:169
 #: screens/Template/shared/JobTemplateForm.jsx:489
@@ -8939,7 +8957,7 @@ msgstr "スケジュールの切り替え"
 msgid "Toggle tools"
 msgstr "ツールの切り替え"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:382
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:369
 #: screens/User/UserTokens/UserTokens.jsx:63
 msgid "Token"
 msgstr "トークン"
@@ -9005,11 +9023,11 @@ msgid "Trial"
 msgstr ""
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:68
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:138
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:167
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:197
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:242
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:296
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:158
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:187
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:217
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:262
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:316
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:88
 msgid "True"
 msgstr "True"
@@ -9038,7 +9056,7 @@ msgstr "Twilio"
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:94
 #: components/TemplateList/TemplateList.jsx:199
 #: components/TemplateList/TemplateList.jsx:224
-#: components/TemplateList/TemplateListItem.jsx:173
+#: components/TemplateList/TemplateListItem.jsx:175
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:85
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:154
 #: components/Workflow/WorkflowNodeHelp.jsx:136
@@ -9079,14 +9097,20 @@ msgid "Type"
 msgstr "タイプ"
 
 #: screens/Credential/shared/TypeInputsSubForm.jsx:25
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:44
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:45
 #: screens/Project/shared/ProjectForm.jsx:250
 msgid "Type Details"
 msgstr "タイプの詳細"
 
-#: screens/Template/Survey/MultipleChoiceField.jsx:57
-msgid "Type answer then click checkbox on right to select answer as default."
+#: screens/Template/Survey/MultipleChoiceField.jsx:61
+msgid ""
+"Type answer then click checkbox on right to select answer as\n"
+"default."
 msgstr ""
+
+#: screens/Template/Survey/MultipleChoiceField.jsx:57
+#~ msgid "Type answer then click checkbox on right to select answer as default."
+#~ msgstr ""
 
 #: components/HostForm/HostForm.jsx:61
 msgid "Unable to change inventory on a host"
@@ -9200,13 +9224,13 @@ msgstr ""
 #~ msgid "Use Fact Storage"
 #~ msgstr "ファクトストレージの使用"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:146
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:45
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:128
 msgid "Use SSL"
 msgstr "SSL の使用"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:145
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:50
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:133
 msgid "Use TLS"
 msgstr "TLS の使用"
 
@@ -9286,14 +9310,14 @@ msgstr "ユーザートークン"
 #: components/ResourceAccessList/ResourceAccessList.jsx:130
 #: components/ResourceAccessList/ResourceAccessList.jsx:183
 #: screens/Login/Login.jsx:200
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:78
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:180
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:230
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:284
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:67
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:270
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:347
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:450
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:100
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:200
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:250
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:304
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:64
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:257
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:334
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:437
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:95
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:207
 #: screens/User/UserDetail/UserDetail.jsx:60
@@ -9341,9 +9365,9 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/SmartInventoryForm.jsx:98
 #: screens/Job/JobDetail/JobDetail.jsx:341
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:367
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:221
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:209
 #: screens/Template/shared/JobTemplateForm.jsx:412
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:246
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:217
 msgid "Variables"
 msgstr "変数"
 
@@ -9637,8 +9661,8 @@ msgstr "スマートインベントリーホストの詳細の表示"
 msgid "Views"
 msgstr "ビュー"
 
-#: components/TemplateList/TemplateListItem.jsx:178
-#: components/TemplateList/TemplateListItem.jsx:184
+#: components/TemplateList/TemplateListItem.jsx:180
+#: components/TemplateList/TemplateListItem.jsx:186
 #: screens/Template/WorkflowJobTemplate.jsx:141
 msgid "Visualizer"
 msgstr "ビジュアライザー"
@@ -9682,14 +9706,14 @@ msgstr "Webhook"
 msgid "Webhook Credential"
 msgstr "Webhook の認証情報"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:179
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:167
 msgid "Webhook Credentials"
 msgstr "Webhook の認証情報"
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:175
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:90
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:257
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:175
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:163
 #: screens/Template/shared/WebhookSubForm.jsx:179
 msgid "Webhook Key"
 msgstr "Webhook キー"
@@ -9697,7 +9721,7 @@ msgstr "Webhook キー"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:168
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:89
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:247
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:166
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:154
 #: screens/Template/shared/WebhookSubForm.jsx:131
 msgid "Webhook Service"
 msgstr "Webhook サービス"
@@ -9705,14 +9729,14 @@ msgstr "Webhook サービス"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:171
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:93
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:253
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:171
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:159
 #: screens/Template/shared/WebhookSubForm.jsx:163
 #: screens/Template/shared/WebhookSubForm.jsx:173
 msgid "Webhook URL"
 msgstr "Webhook URL"
 
 #: screens/Template/shared/JobTemplateForm.jsx:655
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:282
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:253
 msgid "Webhook details"
 msgstr "Webhook の詳細"
 
@@ -9852,22 +9876,22 @@ msgstr "ワークフローのリンク"
 msgid "Workflow Template"
 msgstr "ワークフローテンプレート"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:433
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:453
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:162
 msgid "Workflow approved message"
 msgstr "ワークフロー承認メッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:445
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:465
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:171
 msgid "Workflow approved message body"
 msgstr "ワークフロー承認メッセージのボディー"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:457
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:477
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:180
 msgid "Workflow denied message"
 msgstr "ワークフロー拒否メッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:469
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:489
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:189
 msgid "Workflow denied message body"
 msgstr "ワークフロー拒否メッセージのボディー"
@@ -9889,22 +9913,22 @@ msgstr "ワークフローリンクモーダル"
 msgid "Workflow node view modal"
 msgstr "ワークフローノード表示モーダル"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:481
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:501
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:198
 msgid "Workflow pending message"
 msgstr "ワークフロー保留メッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:493
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:513
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:207
 msgid "Workflow pending message body"
 msgstr "ワークフロー保留メッセージのボディー"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:505
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:525
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:216
 msgid "Workflow timed out message"
 msgstr "ワークフローのタイムアウトメッセージ"
 
-#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:517
+#: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:537
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:225
 msgid "Workflow timed out message body"
 msgstr "ワークフローのタイムアウトメッセージのボディー"
@@ -10166,7 +10190,7 @@ msgstr "上に移動"
 #~ msgid "name"
 #~ msgstr "名前"
 
-#: screens/Template/Survey/MultipleChoiceField.jsx:73
+#: screens/Template/Survey/MultipleChoiceField.jsx:81
 msgid "new choice"
 msgstr ""
 
@@ -10232,7 +10256,7 @@ msgid "social login"
 msgstr "ソーシャルログイン"
 
 #: screens/Template/shared/JobTemplateForm.jsx:344
-#: screens/Template/shared/WorkflowJobTemplateForm.jsx:206
+#: screens/Template/shared/WorkflowJobTemplateForm.jsx:189
 msgid "source control branch"
 msgstr ""
 
@@ -10345,8 +10369,8 @@ msgid "{0, plural, one {You do not have permission to cancel the following job:}
 msgstr ""
 
 #: screens/Setting/shared/LoggingTestAlert.jsx:25
-msgid "{0}"
-msgstr "{0}"
+#~ msgid "{0}"
+#~ msgstr "{0}"
 
 #: screens/ActivityStream/ActivityStreamListItem.jsx:28
 msgid "{0} (deleted)"
@@ -10361,8 +10385,8 @@ msgid "{0} sources with sync failures."
 msgstr "{0} ソースが同期に失敗しました。"
 
 #: screens/Setting/shared/LoggingTestAlert.jsx:24
-msgid "{0}: {1}"
-msgstr "{0}: {1}"
+#~ msgid "{0}: {1}"
+#~ msgstr "{0}: {1}"
 
 #: components/AppContainer/AppContainer.jsx:55
 msgid "{brandName} logo"
