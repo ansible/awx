@@ -10,7 +10,7 @@ import JobTemplateForm from '../shared/JobTemplateForm';
 import ContentLoading from '../../../components/ContentLoading';
 import { CardBody } from '../../../components/Card';
 
-function JobTemplateEdit({ template }) {
+function JobTemplateEdit({ template, reloadTemplate }) {
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +64,7 @@ function JobTemplateEdit({ template }) {
         submitInstanceGroups(instanceGroups, initialInstanceGroups),
         submitCredentials(credentials),
       ]);
+      reloadTemplate();
       history.push(detailsUrl);
     } catch (error) {
       setFormSubmitError(error);

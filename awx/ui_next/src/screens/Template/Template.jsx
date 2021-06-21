@@ -97,7 +97,7 @@ function Template({ setBreadcrumb }) {
 
   useEffect(() => {
     loadTemplateAndRoles();
-  }, [loadTemplateAndRoles, location.pathname]);
+  }, [loadTemplateAndRoles]);
 
   useEffect(() => {
     if (template) {
@@ -205,7 +205,10 @@ function Template({ setBreadcrumb }) {
               />
             </Route>
             <Route key="edit" path="/templates/:templateType/:id/edit">
-              <JobTemplateEdit template={template} />
+              <JobTemplateEdit
+                template={template}
+                reloadTemplate={loadTemplateAndRoles}
+              />
             </Route>
             <Route key="access" path="/templates/:templateType/:id/access">
               <ResourceAccessList
