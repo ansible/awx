@@ -2623,7 +2623,7 @@ class CredentialSerializer(BaseSerializer):
         return ret
 
     def validate_organization(self, org):
-        if self.instance and self.instance.credential_type.kind == 'galaxy' and org is None:
+        if self.instance and (not self.instance.managed) and self.instance.credential_type.kind == 'galaxy' and org is None:
             raise serializers.ValidationError(_("Galaxy credentials must be owned by an Organization."))
         return org
 
