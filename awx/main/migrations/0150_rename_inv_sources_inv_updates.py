@@ -23,11 +23,16 @@ def forwards(apps, schema_editor):
     CredentialType = apps.get_model('main', 'CredentialType')
 
     tower_type = CredentialType.objects.filter(managed_by_tower=True, namespace='tower').first()
-    if tower_type is not None and not CredentialType.objects.filter(managed_by_tower=True, namespace='controller', kind='cloud').exists():
+    if tower_type is not None:
+        controller_type = CredentialType.objects.filter(managed_by_tower=True, namespace='controller', kind='cloud').first()
+        if controller_type:
+            # this gets created by prior migrations in upgrade scenarios
+            controller_type.delete()
+
         registry_type = ManagedCredentialType.registry.get('controller')
         if not registry_type:
             raise RuntimeError('Excpected to find controller credential, this may need to be edited in the future!')
-        logger.info('Renaming the Ansible Tower credential type for existing install')
+        logger.warn('Renaming the Ansible Tower credential type for existing install')
         tower_type.name = registry_type.name  # sensitive to translations
         tower_type.namespace = 'controller'  # if not done, will error setup_tower_managed_defaults
         tower_type.save(update_fields=['name', 'namespace'])
