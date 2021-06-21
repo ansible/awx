@@ -2,9 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import pytest
 from awx.main.tests.functional.conftest import _request
-from ansible.module_utils.six import PY2, string_types
+from ansible.module_utils.six import string_types
 import yaml
 import os
 import re
@@ -169,6 +168,8 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
     for root, dirs, files in os.walk(module_directory):
         if root == module_directory:
             for filename in files:
+                if os.path.islink(os.path.join(root, filename)):
+                    continue
                 # must begin with a letter a-z, and end in .py
                 if re.match(r'^[a-z].*.py$', filename):
                     module_name = filename[:-3]
