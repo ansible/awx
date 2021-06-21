@@ -72,11 +72,7 @@ describe('<ProjectsListItem />', () => {
       </table>
     );
 
-    expect(
-      wrapper.find('.missing-execution-environment').prop('content')
-    ).toEqual(
-      'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
-    );
+    expect(wrapper.find('ExclamationTrianglePopover').length).toBe(1);
   });
 
   test('launch button hidden from users without start capabilities', () => {
