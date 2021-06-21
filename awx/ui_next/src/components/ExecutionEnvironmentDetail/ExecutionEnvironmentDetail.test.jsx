@@ -57,9 +57,8 @@ describe('<ExecutionEnvironmentDetail/>', () => {
       'Execution Environment'
     );
     expect(executionEnvironment.find('dd').text()).toEqual('Missing resource');
-    expect(wrapper.find('Tooltip').prop('content')).toEqual(
-      `Custom virtual environment ${virtualEnvironment} must be replaced by an execution environment.`
-    );
+    expect(wrapper.find('ExclamationTrianglePopover').length).toBe(1);
+    expect(wrapper.find('Popover').length).toBe(1);
   });
 
   test('should display warning deleted execution environment', async () => {
