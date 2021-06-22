@@ -27,7 +27,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment }) {
     pull,
     organization,
     summary_fields,
-    managed_by_tower: managedByTower,
+    managed: managedByTower,
   } = executionEnvironment;
 
   const {
@@ -64,7 +64,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment }) {
           dataCy="execution-environment-detail-description"
         />
         <Detail
-          label={t`Managed by Tower`}
+          label={t`Managed`}
           value={managedByTower ? t`True` : t`False`}
           dataCy="execution-environment-managed-by-tower"
         />

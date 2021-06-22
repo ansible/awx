@@ -54,4 +54,4 @@ Colorized Output
 
 By default, |prog| prints colorized output using ANSI color codes.  To disable
 this functionality, specify ``--conf.color f`` or set the environment variable
-``TOWER_COLOR=f``.
+``CONTROLLER_COLOR=f``.

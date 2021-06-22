@@ -53,7 +53,7 @@ const executionEnvironment = {
   description: 'Foo',
   organization: null,
   image: 'https://localhost:90/12345/ma',
-  managed_by_tower: false,
+  managed: false,
   credential: 4,
 };
 
@@ -81,9 +81,9 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(
       wrapper.find('Detail[label="Credential"]').prop('value').props.children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
-    expect(
-      wrapper.find('Detail[label="Managed by Tower"]').prop('value')
-    ).toEqual('False');
+    expect(wrapper.find('Detail[label="Managed"]').prop('value')).toEqual(
+      'False'
+    );
     const dates = wrapper.find('UserDateDetail');
     expect(dates).toHaveLength(2);
     expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);
@@ -153,13 +153,13 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(history.location.pathname).toBe('/execution_environments');
   });
 
-  test('should render action buttons to ee managed by tower', async () => {
+  test('should render action buttons to managed ee', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <ExecutionEnvironmentDetails
           executionEnvironment={{
             ...executionEnvironment,
-            managed_by_tower: true,
+            managed: true,
           }}
         />
       );
@@ -178,9 +178,9 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(
       wrapper.find('Detail[label="Credential"]').prop('value').props.children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
-    expect(
-      wrapper.find('Detail[label="Managed by Tower"]').prop('value')
-    ).toEqual('True');
+    expect(wrapper.find('Detail[label="Managed"]').prop('value')).toEqual(
+      'True'
+    );
     const dates = wrapper.find('UserDateDetail');
     expect(dates).toHaveLength(2);
     expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);

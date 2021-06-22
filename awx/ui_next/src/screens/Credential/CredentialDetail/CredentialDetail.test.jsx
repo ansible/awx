@@ -67,7 +67,7 @@ describe('<CredentialDetail />', () => {
   test('should have proper number of delete detail requests', () => {
     expect(
       wrapper.find('DeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(6);
+    ).toHaveLength(5);
   });
 
   test('should render details', () => {

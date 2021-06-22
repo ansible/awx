@@ -144,7 +144,6 @@ SUMMARIZABLE_FK_FIELDS = {
         'inventory_sources_with_failures',
         'organization_id',
         'kind',
-        'insights_credential_id',
     ),
     'host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
@@ -171,7 +170,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': ('id', 'name', 'is_container_group'),
-    'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'webhook_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -768,6 +766,7 @@ class UnifiedJobSerializer(BaseSerializer):
             'result_traceback',
             'event_processing_finished',
             'launched_by',
+            'work_unit_id',
         )
 
         extra_kwargs = {
@@ -1410,11 +1409,11 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ExecutionEnvironmentSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
-    managed_by_tower = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField()
 
     class Meta:
         model = ExecutionEnvironment
-        fields = ('*', 'organization', 'image', 'managed_by_tower', 'credential', 'pull')
+        fields = ('*', 'organization', 'image', 'managed', 'credential', 'pull')
 
     def get_related(self, obj):
         res = super(ExecutionEnvironmentSerializer, self).get_related(obj)
@@ -1660,7 +1659,6 @@ class InventorySerializer(BaseSerializerWithVariables):
             'has_inventory_sources',
             'total_inventory_sources',
             'inventory_sources_with_failures',
-            'insights_credential',
             'pending_deletion',
         )
 
@@ -1685,8 +1683,6 @@ class InventorySerializer(BaseSerializerWithVariables):
                 copy=self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
             )
         )
-        if obj.insights_credential:
-            res['insights_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.insights_credential.pk})
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
@@ -2485,14 +2481,14 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
 class CredentialTypeSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
-    managed_by_tower = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField()
 
     class Meta:
         model = CredentialType
-        fields = ('*', 'kind', 'namespace', 'name', 'managed_by_tower', 'inputs', 'injectors')
+        fields = ('*', 'kind', 'namespace', 'name', 'managed', 'inputs', 'injectors')
 
     def validate(self, attrs):
-        if self.instance and self.instance.managed_by_tower:
+        if self.instance and self.instance.managed:
             raise PermissionDenied(detail=_("Modifications not allowed for managed credential types"))
 
         old_inputs = {}
@@ -2524,8 +2520,8 @@ class CredentialTypeSerializer(BaseSerializer):
     def to_representation(self, data):
         value = super(CredentialTypeSerializer, self).to_representation(data)
 
-        # translate labels and help_text for credential fields "managed by Tower"
-        if value.get('managed_by_tower'):
+        # translate labels and help_text for credential fields "managed"
+        if value.get('managed'):
             value['name'] = _(value['name'])
             for field in value.get('inputs', {}).get('fields', []):
                 field['label'] = _(field['label'])
@@ -2544,11 +2540,11 @@ class CredentialTypeSerializer(BaseSerializer):
 class CredentialSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
-    managed_by_tower = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField()
 
     class Meta:
         model = Credential
-        fields = ('*', 'organization', 'credential_type', 'managed_by_tower', 'inputs', 'kind', 'cloud', 'kubernetes')
+        fields = ('*', 'organization', 'credential_type', 'managed', 'inputs', 'kind', 'cloud', 'kubernetes')
         extra_kwargs = {'credential_type': {'label': _('Credential Type')}}
 
     def to_representation(self, data):
@@ -2615,7 +2611,7 @@ class CredentialSerializer(BaseSerializer):
         return summary_dict
 
     def validate(self, attrs):
-        if self.instance and self.instance.managed_by_tower:
+        if self.instance and self.instance.managed:
             raise PermissionDenied(detail=_("Modifications not allowed for managed credentials"))
         return super(CredentialSerializer, self).validate(attrs)
 
@@ -2627,7 +2623,7 @@ class CredentialSerializer(BaseSerializer):
         return ret
 
     def validate_organization(self, org):
-        if self.instance and self.instance.credential_type.kind == 'galaxy' and org is None:
+        if self.instance and (not self.instance.managed) and self.instance.credential_type.kind == 'galaxy' and org is None:
             raise serializers.ValidationError(_("Galaxy credentials must be owned by an Organization."))
         return org
 
@@ -2635,7 +2631,6 @@ class CredentialSerializer(BaseSerializer):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
             for related_objects in (
                 'ad_hoc_commands',
-                'insights_inventories',
                 'unifiedjobs',
                 'unifiedjobtemplates',
                 'projects',
@@ -4194,7 +4189,7 @@ class JobLaunchSerializer(BaseSerializer):
             elif field_name == 'credentials':
                 for cred in obj.credentials.all():
                     cred_dict = dict(id=cred.id, name=cred.name, credential_type=cred.credential_type.pk, passwords_needed=cred.passwords_needed)
-                    if cred.credential_type.managed_by_tower and 'vault_id' in cred.credential_type.defined_fields:
+                    if cred.credential_type.managed and 'vault_id' in cred.credential_type.defined_fields:
                         cred_dict['vault_id'] = cred.get_input('vault_id', default=None)
                     defaults_dict.setdefault(field_name, []).append(cred_dict)
             else:
@@ -4993,7 +4988,7 @@ class ActivityStreamSerializer(BaseSerializer):
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
             ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
             ('o_auth2_application', ('id', 'name', 'description')),
-            ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower')),
+            ('credential_type', ('id', 'name', 'description', 'kind', 'managed')),
             ('ad_hoc_command', ('id', 'name', 'status', 'limit')),
             ('workflow_approval', ('id', 'name', 'unified_job_id')),
         ]

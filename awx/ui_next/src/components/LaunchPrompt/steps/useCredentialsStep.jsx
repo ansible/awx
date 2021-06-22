@@ -11,7 +11,6 @@ export default function useCredentialsStep(
   launchConfig,
   resource,
   resourceDefaultCredentials,
-
   allowCredentialsWithPasswords = false
 ) {
   const [field, meta, helpers] = useField('credentials');
@@ -22,7 +21,6 @@ export default function useCredentialsStep(
   return {
     step: getStep(
       launchConfig,
-
       allowCredentialsWithPasswords,
       formError,
       resourceDefaultCredentials

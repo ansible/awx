@@ -175,12 +175,12 @@ def org_counts(since, **kwargs):
 def cred_type_counts(since, **kwargs):
     counts = {}
     for cred_type in models.CredentialType.objects.annotate(num_credentials=Count('credentials', distinct=True)).values(
-        'name', 'id', 'managed_by_tower', 'num_credentials'
+        'name', 'id', 'managed', 'num_credentials'
     ):
         counts[cred_type['id']] = {
             'name': cred_type['name'],
             'credential_count': cred_type['num_credentials'],
-            'managed_by_tower': cred_type['managed_by_tower'],
+            'managed': cred_type['managed'],
         }
     return counts
 

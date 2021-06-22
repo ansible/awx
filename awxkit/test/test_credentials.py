@@ -16,10 +16,10 @@ def set_config_cred_to_desired(config, location):
 
 
 class MockCredentialType(object):
-    def __init__(self, name, kind, managed_by_tower=True):
+    def __init__(self, name, kind, managed=True):
         self.name = name
         self.kind = kind
-        self.managed_by_tower = managed_by_tower
+        self.managed = managed
 
 
 @pytest.mark.parametrize(

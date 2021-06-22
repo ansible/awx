@@ -33,7 +33,6 @@ function Users() {
       [`/users/${user.id}/organizations`]: t`Organizations`,
       [`/users/${user.id}/tokens`]: t`Tokens`,
       [`/users/${user.id}/tokens/add`]: t`Create user token`,
-      [`/users/${user.id}/tokens/${token && token.id}`]: t`Application Name`,
       [`/users/${user.id}/tokens/${token && token.id}/details`]: t`Details`,
     });
   }, []);

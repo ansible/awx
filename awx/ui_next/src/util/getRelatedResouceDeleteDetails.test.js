@@ -33,9 +33,6 @@ describe('delete details', () => {
     getRelatedResourceDeleteCounts(
       relatedResourceDeleteRequests.credential({ id: 1 })
     );
-    expect(InventoriesAPI.read).toBeCalledWith({
-      insights_credential: 1,
-    });
     expect(InventorySourcesAPI.read).toBeCalledWith({
       credentials__id: 1,
     });
@@ -123,12 +120,10 @@ describe('delete details', () => {
 
   test('should return proper results', async () => {
     JobTemplatesAPI.read.mockResolvedValue({ data: { count: 1 } });
-
     InventorySourcesAPI.read.mockResolvedValue({ data: { count: 10 } });
     CredentialInputSourcesAPI.read.mockResolvedValue({ data: { count: 20 } });
     ExecutionEnvironmentsAPI.read.mockResolvedValue({ data: { count: 30 } });
     ProjectsAPI.read.mockResolvedValue({ data: { count: 2 } });
-    InventoriesAPI.read.mockResolvedValue({ data: { count: 3 } });
 
     const { results } = await getRelatedResourceDeleteCounts(
       relatedResourceDeleteRequests.credential({ id: 1 })
@@ -136,7 +131,6 @@ describe('delete details', () => {
     expect(results).toEqual({
       'Job Templates': 1,
       Projects: 2,
-      Inventories: 3,
       'Inventory Sources': 10,
       'Credential Input Sources': 20,
       'Execution Environments': 30,

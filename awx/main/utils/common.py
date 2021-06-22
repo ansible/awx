@@ -366,7 +366,7 @@ def get_allowed_fields(obj, serializer_mapping):
     fields_excluded = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(model_name, [])
     # see definition of from_db for CredentialType
     # injection logic of any managed types are incompatible with activity stream
-    if model_name == 'credentialtype' and obj.managed_by_tower and obj.namespace:
+    if model_name == 'credentialtype' and obj.managed and obj.namespace:
         fields_excluded.extend(['inputs', 'injectors'])
     if fields_excluded:
         allowed_fields = [f for f in allowed_fields if f not in fields_excluded]

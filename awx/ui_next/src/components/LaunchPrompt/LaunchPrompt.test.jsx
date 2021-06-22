@@ -7,6 +7,7 @@ import {
 import LaunchPrompt from './LaunchPrompt';
 import InventoryStep from './steps/InventoryStep';
 import CredentialsStep from './steps/CredentialsStep';
+import CredentialPasswordsStep from './steps/CredentialPasswordsStep';
 import OtherPromptsStep from './steps/OtherPromptsStep';
 import PreviewStep from './steps/PreviewStep';
 import {
@@ -27,6 +28,18 @@ const resource = {
   description: 'Foo Description',
   name: 'Foobar',
   type: 'job_template',
+  summary_fields: {
+    credentials: [
+      {
+        id: 5,
+        name: 'cred that prompts',
+        credential_type: 1,
+        inputs: {
+          password: 'ASK',
+        },
+      },
+    ],
+  },
 };
 const noop = () => {};
 
@@ -101,7 +114,12 @@ describe('LaunchPrompt', () => {
             summary_fields: {
               credentials: [
                 {
-                  id: 1,
+                  id: 5,
+                  name: 'cred that prompts',
+                  credential_type: 1,
+                  inputs: {
+                    password: 'ASK',
+                  },
                 },
               ],
             },
@@ -126,16 +144,6 @@ describe('LaunchPrompt', () => {
               },
             ],
           }}
-          resourceDefaultCredentials={[
-            {
-              id: 5,
-              name: 'cred that prompts',
-              credential_type: 1,
-              inputs: {
-                password: 'ASK',
-              },
-            },
-          ]}
         />
       );
     });
@@ -197,10 +205,13 @@ describe('LaunchPrompt', () => {
     const wizard = await waitForElement(wrapper, 'Wizard');
     const steps = wizard.prop('steps');
 
-    expect(steps).toHaveLength(2);
+    expect(steps).toHaveLength(3);
     expect(steps[0].name.props.children).toEqual('Credentials');
     expect(isElementOfType(steps[0].component, CredentialsStep)).toEqual(true);
-    expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
+    expect(
+      isElementOfType(steps[1].component, CredentialPasswordsStep)
+    ).toEqual(true);
+    expect(isElementOfType(steps[2].component, PreviewStep)).toEqual(true);
   });
 
   test('should add other prompts step', async () => {

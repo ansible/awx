@@ -6,8 +6,11 @@ import { Card } from '@patternfly/react-core';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
-import { ToolbarDeleteButton } from '../PaginatedDataList';
-import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+  ToolbarDeleteButton,
+} from '../PaginatedTable';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
@@ -232,7 +235,10 @@ function JobList({ defaultParams, showTypeColumn = false }) {
                 <ToolbarDeleteButton
                   key="delete"
                   onDelete={handleJobDelete}
-                  itemsToDelete={selected}
+                  itemsToDelete={selected.map(({ ...item }) => {
+                    item.name = `${item.id} - ${item.name}`;
+                    return item;
+                  })}
                   pluralizedItemName={t`Jobs`}
                   cannotDelete={item =>
                     isJobRunning(item.status) ||

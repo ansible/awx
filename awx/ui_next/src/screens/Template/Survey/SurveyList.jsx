@@ -14,7 +14,7 @@ import { CubesIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import ContentLoading from '../../../components/ContentLoading';
 import AlertModal from '../../../components/AlertModal';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
+import { ToolbarAddButton } from '../../../components/PaginatedTable';
 
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';

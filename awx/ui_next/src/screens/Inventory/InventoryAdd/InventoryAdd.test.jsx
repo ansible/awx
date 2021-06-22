@@ -7,7 +7,7 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../../testUtils/testUtils';
 
-import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { InventoriesAPI } from '../../../api';
 import InventoryAdd from './InventoryAdd';
 
 jest.mock('../../../api');
@@ -18,16 +18,6 @@ describe('<InventoryAdd />', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory({ initialEntries: ['/inventories'] });
-    CredentialTypesAPI.read.mockResolvedValue({
-      data: {
-        results: [
-          {
-            id: 14,
-            name: 'insights',
-          },
-        ],
-      },
-    });
     InventoriesAPI.create.mockResolvedValue({ data: { id: 13 } });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryAdd />, {
@@ -50,7 +40,6 @@ describe('<InventoryAdd />', () => {
       wrapper.find('InventoryForm').prop('onSubmit')({
         name: 'new Foo',
         organization: { id: 2 },
-        insights_credential: { id: 47 },
         instanceGroups,
       });
     });
@@ -58,7 +47,6 @@ describe('<InventoryAdd />', () => {
     expect(InventoriesAPI.create).toHaveBeenCalledWith({
       name: 'new Foo',
       organization: 2,
-      insights_credential: 47,
     });
     instanceGroups.map(IG =>
       expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(

@@ -165,15 +165,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             'admin_role',
         ]
     )
-    insights_credential = models.ForeignKey(
-        'Credential',
-        related_name='insights_inventories',
-        help_text=_('Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.'),
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        default=None,
-    )
     pending_deletion = models.BooleanField(
         default=False,
         editable=False,
@@ -315,7 +306,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             for host in hosts:
                 data['_meta']['hostvars'][host.name] = host.variables_dict
                 if towervars:
-                    tower_dict = dict(remote_tower_enabled=str(host.enabled).lower(), remote_tower_id=host.id)
+                    tower_dict = dict(
+                        remote_tower_enabled=str(host.enabled).lower(),
+                        remote_tower_id=host.id,
+                        remote_host_enabled=str(host.enabled).lower(),
+                        remote_host_id=host.id,
+                    )
                     data['_meta']['hostvars'][host.name].update(tower_dict)
 
         return data
@@ -367,13 +363,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     def root_groups(self):
         group_pks = self.groups.values_list('pk', flat=True)
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
-
-    def clean_insights_credential(self):
-        if self.kind == 'smart' and self.insights_credential:
-            raise ValidationError(_("Assignment not allowed for Smart Inventory"))
-        if self.insights_credential and self.insights_credential.credential_type.kind != 'insights':
-            raise ValidationError(_("Credential kind must be 'insights'."))
-        return self.insights_credential
 
     @transaction.atomic
     def schedule_deletion(self, user_id=None):
@@ -821,7 +810,7 @@ class InventorySourceOptions(BaseModel):
         ('satellite6', _('Red Hat Satellite 6')),
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
-        ('tower', _('Ansible Tower')),
+        ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
     ]
 
@@ -1384,7 +1373,7 @@ class PluginFileInjector(object):
         return env
 
     def _get_shared_env(self, inventory_update, private_data_dir, private_data_files):
-        """By default, we will apply the standard managed_by_tower injectors"""
+        """By default, we will apply the standard managed injectors"""
         injected_env = {}
         credential = inventory_update.get_cloud_credential()
         # some sources may have no credential, specifically ec2
@@ -1403,7 +1392,7 @@ class PluginFileInjector(object):
             args = []
             credential.credential_type.inject_credential(credential, injected_env, safe_env, args, private_data_dir)
             # NOTE: safe_env is handled externally to injector class by build_safe_env static method
-            # that means that managed_by_tower injectors must only inject detectable env keys
+            # that means that managed injectors must only inject detectable env keys
             # enforcement of this is accomplished by tests
         return injected_env
 
@@ -1545,8 +1534,8 @@ class satellite6(PluginFileInjector):
         return ret
 
 
-class tower(PluginFileInjector):
-    plugin_name = 'tower'
+class controller(PluginFileInjector):
+    plugin_name = 'tower'  # TODO: relying on routing for now, update after EEs pick up revised collection
     base_injector = 'template'
     namespace = 'awx'
     collection = 'awx'
@@ -1561,13 +1550,7 @@ class insights(PluginFileInjector):
     collection = 'insights'
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
-    use_fqcn = 'true'
-
-    def inventory_as_dict(self, inventory_update, private_data_dir):
-        ret = super(insights, self).inventory_as_dict(inventory_update, private_data_dir)
-        # this inventory plugin requires the fully qualified inventory plugin name
-        ret['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
-        return ret
+    use_fqcn = True
 
 
 for cls in PluginFileInjector.__subclasses__():

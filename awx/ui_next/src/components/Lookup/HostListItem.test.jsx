@@ -15,11 +15,25 @@ describe('HostListItem', () => {
     },
   };
   test('initially renders successfully', () => {
-    wrapper = mountWithContexts(<HostListItem item={mockInventory} />);
-    expect(wrapper.find('HostListItem').length).toBe(1);
-    expect(wrapper.find('DataListCell[aria-label="name"]').text()).toBe('Foo');
-    expect(wrapper.find('DataListCell[aria-label="inventory"]').text()).toBe(
-      'Bar'
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <HostListItem item={mockInventory} />
+        </tbody>
+      </table>
     );
+    expect(wrapper.find('HostListItem').length).toBe(1);
+    expect(
+      wrapper
+        .find('Td')
+        .at(0)
+        .text()
+    ).toBe('Foo');
+    expect(
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
+    ).toBe('Bar');
   });
 });

@@ -50,7 +50,7 @@ const executionEnvironment = {
   description: 'A simple EE',
   organization: 1,
   image: 'https://registry.com/image/container',
-  managed_by_tower: false,
+  managed: false,
   credential: 4,
 };
 
@@ -84,7 +84,7 @@ const globallyAvailableEE = {
   description: 'A simple EE',
   organization: null,
   image: 'https://registry.com/image/container',
-  managed_by_tower: false,
+  managed: false,
   credential: 4,
 };
 

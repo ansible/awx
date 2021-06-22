@@ -24,12 +24,16 @@ describe('<SmartInventoryHostListItem />', () => {
 
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <SmartInventoryHostListItem
-        detailUrl="/inventories/smart_inventory/1/hosts/2"
-        host={mockHost}
-        isSelected={false}
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <SmartInventoryHostListItem
+            detailUrl="/inventories/smart_inventory/1/hosts/2"
+            host={mockHost}
+            isSelected={false}
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
   });
 
@@ -38,10 +42,10 @@ describe('<SmartInventoryHostListItem />', () => {
   });
 
   test('should render expected row cells', () => {
-    const cells = wrapper.find('DataListCell');
-    expect(cells).toHaveLength(3);
-    expect(cells.at(0).text()).toEqual('Host Two');
-    expect(cells.at(1).find('Sparkline').length).toEqual(1);
-    expect(cells.at(2).text()).toContain('Inv 1');
+    const cells = wrapper.find('Td');
+    expect(cells).toHaveLength(4);
+    expect(cells.at(1).text()).toEqual('Host Two');
+    expect(cells.at(2).find('Sparkline').length).toEqual(1);
+    expect(cells.at(3).text()).toEqual('Inv 1');
   });
 });

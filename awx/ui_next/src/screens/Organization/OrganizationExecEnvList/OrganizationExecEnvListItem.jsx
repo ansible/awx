@@ -3,42 +3,18 @@ import { string } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import {
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-} from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 
-import DataListCell from '../../../components/DataListCell';
 import { ExecutionEnvironment } from '../../../types';
 
 function OrganizationExecEnvListItem({ executionEnvironment, detailUrl }) {
-  const labelId = `check-action-${executionEnvironment.id}`;
-
   return (
-    <DataListItem
-      key={executionEnvironment.id}
-      aria-labelledby={labelId}
-      id={`${executionEnvironment.id}`}
-    >
-      <DataListItemRow>
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name" aria-label={t`Execution environment name`}>
-              <Link to={`${detailUrl}`}>
-                <b>{executionEnvironment.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell
-              key="image"
-              aria-label={t`Execution environment image`}
-            >
-              {executionEnvironment.image}
-            </DataListCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr id={`ee-row-${executionEnvironment.id}`}>
+      <Td dataLabel={t`Name`}>
+        <Link to={`${detailUrl}`}>{executionEnvironment.name}</Link>
+      </Td>
+      <Td dataLabel={t`Image`}>{executionEnvironment.image}</Td>
+    </Tr>
   );
 }
 

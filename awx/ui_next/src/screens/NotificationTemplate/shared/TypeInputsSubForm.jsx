@@ -4,6 +4,7 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import {
+  FormCheckboxLayout,
   FormColumnLayout,
   FormFullWidthLayout,
   SubFormLayout,
@@ -56,10 +57,6 @@ TypeInputsSubForm.propTypes = {
 export default TypeInputsSubForm;
 
 function EmailFields() {
-  const [optionsField, optionsMeta] = useField({
-    name: 'emailOptions',
-    validate: required(t`Select a value for this field`),
-  });
   return (
     <>
       <FormField
@@ -123,29 +120,19 @@ function EmailFields() {
           notification stops trying to reach the host and times out. Ranges
           from 1 to 120 seconds.`}
       />
-      <FormGroup
-        fieldId="email-options"
-        helperTextInvalid={optionsMeta.error}
-        isRequired
-        validated={
-          !optionsMeta.touched || !optionsMeta.error ? 'default' : 'error'
-        }
-        label={t`E-mail options`}
-      >
-        <AnsibleSelect
-          {...optionsField}
-          id="email-options"
-          data={[
-            {
-              value: '',
-              key: '',
-              label: t`Choose an email option`,
-              isDisabled: true,
-            },
-            { value: 'tls', key: 'tls', label: t`Use TLS` },
-            { value: 'ssl', key: 'ssl', label: t`Use SSL` },
-          ]}
-        />
+      <FormGroup fieldId="email-options" label={t`E-mail options`}>
+        <FormCheckboxLayout>
+          <CheckboxField
+            id="option-use-ssl"
+            name="notification_configuration.use_ssl"
+            label={t`Use SSL`}
+          />
+          <CheckboxField
+            id="option-use-tls"
+            name="notification_configuration.use_tls"
+            label={t`Use TLS`}
+          />
+        </FormCheckboxLayout>
       </FormGroup>
     </>
   );

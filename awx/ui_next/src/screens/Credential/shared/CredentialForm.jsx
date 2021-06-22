@@ -245,37 +245,42 @@ function CredentialForm({
   };
 
   Object.values(credentialTypes).forEach(credentialType => {
-    const fields = credentialType.inputs.fields || [];
-    fields.forEach(
-      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
-        if (credential?.inputs && id in credential.inputs) {
-          if (ask_at_runtime) {
-            initialValues.passwordPrompts[id] =
-              credential.inputs[id] === 'ASK' || false;
-          }
-          initialValues.inputs[id] = credential.inputs[id];
-        } else {
-          switch (type) {
-            case 'string':
-              initialValues.inputs[id] = defaultValue || '';
-              break;
-            case 'boolean':
-              initialValues.inputs[id] = defaultValue || false;
-              break;
-            default:
-              break;
-          }
+    if (!credential.id || credential.credential_type === credentialType.id) {
+      const fields = credentialType.inputs.fields || [];
+      fields.forEach(
+        ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
+          if (credential?.inputs && id in credential.inputs) {
+            if (ask_at_runtime) {
+              initialValues.passwordPrompts[id] =
+                credential.inputs[id] === 'ASK' || false;
+              initialValues.inputs[id] =
+                credential.inputs[id] === 'ASK' ? '' : credential.inputs[id];
+            } else {
+              initialValues.inputs[id] = credential.inputs[id];
+            }
+          } else {
+            switch (type) {
+              case 'string':
+                initialValues.inputs[id] = defaultValue || '';
+                break;
+              case 'boolean':
+                initialValues.inputs[id] = defaultValue || false;
+                break;
+              default:
+                break;
+            }
 
-          if (choices) {
-            initialValues.inputs[id] = defaultValue;
-          }
+            if (choices) {
+              initialValues.inputs[id] = defaultValue;
+            }
 
-          if (ask_at_runtime) {
-            initialValues.passwordPrompts[id] = false;
+            if (ask_at_runtime) {
+              initialValues.passwordPrompts[id] = false;
+            }
           }
         }
-      }
-    );
+      );
+    }
   });
 
   Object.values(inputSources).forEach(inputSource => {

@@ -139,18 +139,6 @@ function WorkflowJobTemplateDetail({ template }) {
             value={scmBranch}
           />
         )}
-        {summary_fields?.execution_environment && (
-          <Detail
-            label={t`Execution Environment`}
-            value={
-              <Link
-                to={`/execution_environments/${summary_fields.execution_environment.id}/details`}
-              >
-                {summary_fields.execution_environment.name}
-              </Link>
-            }
-          />
-        )}
         <Detail label={t`Job Type`} value={toTitleCase(type)} />
         {summary_fields.inventory && (
           <Detail

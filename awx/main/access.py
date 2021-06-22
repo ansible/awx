@@ -867,13 +867,11 @@ class InventoryAccess(BaseAccess):
         # If no data is specified, just checking for generic add permission?
         if not data:
             return Organization.accessible_objects(self.user, 'inventory_admin_role').exists()
-        return self.check_related('organization', Organization, data, role_field='inventory_admin_role') and self.check_related(
-            'insights_credential', Credential, data, role_field='use_role'
-        )
+        return self.check_related('organization', Organization, data, role_field='inventory_admin_role')
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.can_admin(obj, data) and self.check_related('insights_credential', Credential, data, obj=obj, role_field='use_role')
+        return self.can_admin(obj, data)
 
     @check_superuser
     def can_admin(self, obj, data):
@@ -1038,7 +1036,7 @@ class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
 
         if not self.check_related('source_project', Project, data, role_field='use_role'):
             return False
@@ -1121,7 +1119,7 @@ class CredentialTypeAccess(BaseAccess):
     I can create when:
      - I'm a superuser:
     I can change when:
-     - I'm a superuser and the type is not "managed by Tower"
+     - I'm a superuser and the type is not "managed"
     """
 
     model = CredentialType
@@ -1207,7 +1205,7 @@ class CredentialAccess(BaseAccess):
     def get_user_capabilities(self, obj, **kwargs):
         user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
         user_capabilities['use'] = self.can_use(obj)
-        if getattr(obj, 'managed_by_tower', False) is True:
+        if getattr(obj, 'managed', False) is True:
             user_capabilities['edit'] = user_capabilities['delete'] = False
         return user_capabilities
 
@@ -1370,7 +1368,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
         return self.check_related('organization', Organization, data, obj=obj, mandatory=True, role_field='execution_environment_admin_role')
 
     def can_delete(self, obj):
-        if obj.managed_by_tower:
+        if obj.managed:
             raise PermissionDenied
         return self.can_change(obj, None)
 

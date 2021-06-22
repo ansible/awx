@@ -10,12 +10,10 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
-
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
-
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 
 const QS_CONFIG = getQSConfig('group', {

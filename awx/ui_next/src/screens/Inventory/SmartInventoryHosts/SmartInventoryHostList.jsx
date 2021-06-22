@@ -3,7 +3,10 @@ import { useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import SmartInventoryHostListItem from './SmartInventoryHostListItem';
 import useRequest from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
@@ -44,9 +47,13 @@ function SmartInventoryHostList({ inventory }) {
     }
   );
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    hosts
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(hosts);
 
   useEffect(() => {
     fetchHosts();
@@ -54,14 +61,14 @@ function SmartInventoryHostList({ inventory }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={hosts}
         itemCount={count}
         pluralizedItemName={t`Hosts`}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
+        clearSelected={clearSelected}
         toolbarSearchColumns={[
           {
             name: t`Name`,
@@ -77,20 +84,12 @@ function SmartInventoryHostList({ inventory }) {
             key: 'modified_by__username',
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`Name`,
-            key: 'name',
-          },
-        ]}
         renderToolbar={props => (
           <DataListToolbar
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...hosts] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={
               inventory?.summary_fields?.user_capabilities?.adhoc
@@ -105,13 +104,21 @@ function SmartInventoryHostList({ inventory }) {
             }
           />
         )}
-        renderItem={host => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Recent jobs`}</HeaderCell>
+            <HeaderCell>{t`Inventory`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(host, index) => (
           <SmartInventoryHostListItem
             key={host.id}
             host={host}
             detailUrl={`/inventories/smart_inventory/${inventory.id}/hosts/${host.id}/details`}
             isSelected={selected.some(row => row.id === host.id)}
             onSelect={() => handleSelect(host)}
+            rowIndex={index}
           />
         )}
       />

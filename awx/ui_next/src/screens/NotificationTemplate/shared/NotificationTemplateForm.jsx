@@ -118,10 +118,6 @@ function NotificationTemplateForm({
     );
   };
 
-  let emailOptions = '';
-  if (template.notification_type === 'email') {
-    emailOptions = template.notification_configuration?.use_ssl ? 'ssl' : 'tls';
-  }
   const messages = template.messages || { workflow_approval: {} };
   const defs = defaultMessages[template.notification_type || 'email'];
   const mergeDefaultMessages = (templ = {}, def) => {
@@ -144,7 +140,6 @@ function NotificationTemplateForm({
           ...template.notification_configuration,
           headers: headers ? JSON.stringify(headers, null, 2) : null,
         },
-        emailOptions,
         organization: template.summary_fields?.organization,
         messages: {
           started: { ...mergeDefaultMessages(messages.started, defs.started) },
@@ -235,10 +230,6 @@ function normalizeTypeFields(values) {
       stripped[fieldName] = values.notification_configuration[fieldName];
     }
   });
-  if (values.notification_type === 'email') {
-    stripped.use_ssl = values.emailOptions === 'ssl';
-    stripped.use_tls = !stripped.use_ssl;
-  }
   if (values.notification_type === 'webhook') {
     stripped.headers = stripped.headers ? JSON.parse(stripped.headers) : {};
   }

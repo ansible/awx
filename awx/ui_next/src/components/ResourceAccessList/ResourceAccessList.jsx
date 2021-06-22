@@ -5,8 +5,11 @@ import { RolesAPI, TeamsAPI, UsersAPI } from '../../api';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
-import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
-import { ToolbarAddButton } from '../PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+  ToolbarAddButton,
+} from '../PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';

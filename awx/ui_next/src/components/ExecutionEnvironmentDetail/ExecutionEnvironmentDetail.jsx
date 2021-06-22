@@ -1,20 +1,28 @@
 import React from 'react';
 import { bool, string } from 'prop-types';
 import { Link } from 'react-router-dom';
-
-import { t } from '@lingui/macro';
-import { Tooltip } from '@patternfly/react-core';
+import { t, Trans } from '@lingui/macro';
+import { Popover, Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
-
 import { ExclamationTriangleIcon as PFExclamationTriangleIcon } from '@patternfly/react-icons';
-
 import { Detail } from '../DetailList';
 import { ExecutionEnvironment } from '../../types';
+import getDocsBaseUrl from '../../util/getDocsBaseUrl';
+import { useConfig } from '../../contexts/Config';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
   margin-left: 18px;
+  cursor: pointer;
 `;
+
+const ExclamationTrianglePopover = styled(PFExclamationTriangleIcon)`
+  color: var(--pf-global--warning-color--100);
+  margin-left: 18px;
+  cursor: pointer;
+`;
+
+ExclamationTrianglePopover.displayName = 'ExclamationTrianglePopover';
 
 function ExecutionEnvironmentDetail({
   executionEnvironment,
@@ -23,6 +31,10 @@ function ExecutionEnvironmentDetail({
   verifyMissingVirtualEnv,
   helpText,
 }) {
+  const config = useConfig();
+  const docsLink = `${getDocsBaseUrl(
+    config
+  )}/html/upgrade-migration-guide/upgrade_to_ees.html`;
   const label = isDefaultEnvironment
     ? t`Default Execution Environment`
     : t`Execution Environment`;
@@ -51,12 +63,29 @@ function ExecutionEnvironmentDetail({
           <>
             {t`Missing resource`}
             <span>
-              <Tooltip
-                content={t`Custom virtual environment ${virtualEnvironment} must be replaced by an execution environment.`}
+              <Popover
+                className="missing-execution-environment"
+                headerContent={<div>{t`Execution Environment Missing`}</div>}
+                bodyContent={
+                  <div>
+                    <Trans>
+                      Custom virtual environment {virtualEnvironment} must be
+                      replaced by an execution environment. For more information
+                      about migrating to execution environments see{' '}
+                      <a
+                        href={docsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        the documentation.
+                      </a>
+                    </Trans>
+                  </div>
+                }
                 position="right"
               >
-                <ExclamationTriangleIcon />
-              </Tooltip>
+                <ExclamationTrianglePopover />
+              </Popover>
             </span>
           </>
         }

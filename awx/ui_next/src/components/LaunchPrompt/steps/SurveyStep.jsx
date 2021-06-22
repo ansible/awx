@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -10,7 +9,6 @@ import {
   SelectVariant,
 } from '@patternfly/react-core';
 import FormField from '../../FormField';
-import AnsibleSelect from '../../AnsibleSelect';
 import Popover from '../../Popover';
 import {
   required,
@@ -92,12 +90,22 @@ function NumberField({ question }) {
 }
 
 function MultipleChoiceField({ question }) {
-  const [field, meta] = useField({
+  const [field, meta, helpers] = useField({
     name: `survey_${question.variable}`,
     validate: question.required ? required(null) : null,
   });
+  const [isOpen, setIsOpen] = useState(false);
   const id = `survey-question-${question.variable}`;
   const isValid = !(meta.touched && meta.error);
+
+  let options = [];
+
+  if (typeof question.choices === 'string') {
+    options = question.choices.split('\n');
+  } else if (Array.isArray(question.choices)) {
+    options = [...question.choices];
+  }
+
   return (
     <FormGroup
       fieldId={id}
@@ -107,16 +115,26 @@ function MultipleChoiceField({ question }) {
       label={question.question_name}
       labelIcon={<Popover content={question.question_description} />}
     >
-      <AnsibleSelect
+      <Select
+        onToggle={setIsOpen}
+        onSelect={(event, option) => {
+          helpers.setValue(option);
+          setIsOpen(false);
+        }}
+        selections={field.value}
+        variant={SelectVariant.single}
         id={id}
-        isValid={isValid}
-        {...field}
-        data={question.choices.split('\n').map(opt => ({
-          key: opt,
-          value: opt,
-          label: opt,
-        }))}
-      />
+        isOpen={isOpen}
+        placeholderText={t`Select an option`}
+        onClear={() => {
+          helpers.setTouched(true);
+          helpers.setValue('');
+        }}
+      >
+        {options.map(opt => (
+          <SelectOption key={opt} value={opt} />
+        ))}
+      </Select>
     </FormGroup>
   );
 }
@@ -130,6 +148,14 @@ function MultiSelectField({ question }) {
   const id = `survey-question-${question.variable}`;
   const hasActualValue = !question.required || meta.value?.length > 0;
   const isValid = !meta.touched || (!meta.error && hasActualValue);
+
+  let options = [];
+
+  if (typeof question.choices === 'string') {
+    options = question.choices.split('\n');
+  } else if (Array.isArray(question.choices)) {
+    options = [...question.choices];
+  }
 
   return (
     <FormGroup
@@ -145,6 +171,7 @@ function MultiSelectField({ question }) {
       <Select
         variant={SelectVariant.typeaheadMulti}
         id={id}
+        placeholderText={!field.value.length && t`Select option(s)`}
         onToggle={setIsOpen}
         onSelect={(event, option) => {
           if (field?.value?.includes(option)) {
@@ -161,7 +188,7 @@ function MultiSelectField({ question }) {
           helpers.setValue([]);
         }}
       >
-        {question.choices.split('\n').map(opt => (
+        {options.map(opt => (
           <SelectOption key={opt} value={opt} />
         ))}
       </Select>

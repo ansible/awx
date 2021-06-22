@@ -6,7 +6,6 @@ import {
   WorkflowJobTemplatesAPI,
   OrganizationsAPI,
   LabelsAPI,
-  ExecutionEnvironmentsAPI,
   UsersAPI,
 } from '../../../api';
 import {
@@ -36,10 +35,6 @@ describe('<WorkflowJobTemplateAdd/>', () => {
           { name: 'Label 3', id: 3 },
         ],
       },
-    });
-
-    ExecutionEnvironmentsAPI.read.mockResolvedValueOnce({
-      data: { results: [{ id: 1, name: 'Foo', image: 'localhost.com' }] },
     });
 
     UsersAPI.readAdminOfOrganizations.mockResolvedValue({
@@ -94,11 +89,6 @@ describe('<WorkflowJobTemplateAdd/>', () => {
         .find('LabelSelect')
         .find('SelectToggle')
         .simulate('click');
-
-      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')({
-        id: 1,
-        name: 'Foo',
-      });
     });
 
     await act(async () => {
@@ -132,7 +122,6 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       webhook_credential: undefined,
       webhook_service: '',
       webhook_url: '',
-      execution_environment: 1,
     });
 
     expect(WorkflowJobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(1);

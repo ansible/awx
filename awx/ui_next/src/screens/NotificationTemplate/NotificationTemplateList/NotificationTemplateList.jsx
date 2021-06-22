@@ -13,11 +13,9 @@ import { NotificationTemplatesAPI } from '../../../api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';

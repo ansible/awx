@@ -3,64 +3,50 @@ import { bool, func, number, oneOfType, string } from 'prop-types';
 
 import { t } from '@lingui/macro';
 
-import {
-  Button,
-  DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
-
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { Group } from '../../../types';
 
-function HostGroupItem({ group, inventoryId, isSelected, onSelect }) {
+function HostGroupItem({ group, inventoryId, isSelected, onSelect, rowIndex }) {
   const labelId = `check-action-${group.id}`;
   const detailUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/details`;
   const editUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/edit`;
 
   return (
-    <DataListItem key={group.id} aria-labelledby={labelId} id={`${group.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          aria-labelledby={labelId}
-          id={`select-group-${group.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link to={`${detailUrl}`} id={labelId}>
-                <b>{group.name}</b>
-              </Link>
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={t`actions`}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`group-row-${group.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={t`Selected`}
+      />
+      <Td dataLabel={t`Name`}>
+        {' '}
+        <Link to={`${detailUrl}`} id={labelId}>
+          <b>{group.name}</b>
+        </Link>
+      </Td>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem
+          visible={group.summary_fields.user_capabilities.edit}
+          tooltip={t`Edit Group`}
         >
-          {group.summary_fields.user_capabilities.edit && (
-            <Tooltip content={t`Edit Group`} position="top">
-              <Button
-                ouiaId={`${group.id}-edit-button`}
-                variant="plain"
-                component={Link}
-                to={editUrl}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            ouiaId={`${group.id}-edit-button`}
+            variant="plain"
+            component={Link}
+            to={editUrl}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

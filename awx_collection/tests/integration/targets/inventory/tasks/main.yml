@@ -41,7 +41,6 @@
       inventory:
         name: "{{ inv_name1 }}"
         organization: Default
-        insights_credential: "{{ result.id }}"
         instance_groups:
           - "{{ group_name1 }}"
         state: present
@@ -55,7 +54,6 @@
       inventory:
         name: "{{ result.id }}"
         organization: Default
-        insights_credential: "{{ cred_name1 }}"
         state: present
       register: result
 

@@ -19,10 +19,7 @@ import {
   SubFormLayout,
 } from '../../../components/FormLayout';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import {
-  InventoryLookup,
-  ExecutionEnvironmentLookup,
-} from '../../../components/Lookup';
+import { InventoryLookup } from '../../../components/Lookup';
 import { VariablesField } from '../../../components/CodeEditor';
 import FormActionGroup from '../../../components/FormActionGroup';
 import ContentError from '../../../components/ContentError';
@@ -65,12 +62,6 @@ function WorkflowJobTemplateForm({
     'webhook_credential'
   );
 
-  const [
-    executionEnvironmentField,
-    executionEnvironmentMeta,
-    executionEnvironmentHelpers,
-  ] = useField('execution_environment');
-
   useEffect(() => {
     if (enableWebhooks) {
       webhookServiceHelpers.setValue(webhookServiceMeta.initialValue);
@@ -98,14 +89,6 @@ function WorkflowJobTemplateForm({
     value => {
       setFieldValue('inventory', value);
       setFieldTouched('inventory', true, false);
-    },
-    [setFieldValue, setFieldTouched]
-  );
-
-  const handleExecutionEnvironmentUpdate = useCallback(
-    value => {
-      setFieldValue('execution_environment', value);
-      setFieldTouched('execution_environment', true, false);
     },
     [setFieldValue, setFieldTouched]
   );
@@ -206,18 +189,6 @@ function WorkflowJobTemplateForm({
             aria-label={t`source control branch`}
           />
         </FieldWithPrompt>
-        <ExecutionEnvironmentLookup
-          helperTextInvalid={executionEnvironmentMeta.error}
-          isValid={
-            !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
-          }
-          onBlur={() => executionEnvironmentHelpers.setTouched()}
-          value={executionEnvironmentField.value}
-          onChange={handleExecutionEnvironmentUpdate}
-          tooltip={t`Select the default execution environment for this organization to run on.`}
-          globallyAvailable
-          organizationId={organizationField.value?.id}
-        />
       </FormColumnLayout>
       <FormFullWidthLayout>
         <FormGroup
@@ -332,8 +303,6 @@ const FormikApp = withFormik({
         ? `${urlOrigin}${template.related.webhook_receiver}`
         : '',
       webhook_key: template.webhook_key || '',
-      execution_environment:
-        template.summary_fields?.execution_environment || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

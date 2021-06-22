@@ -2,9 +2,11 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { TokensAPI, ApplicationsAPI } from '../../../api';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -67,9 +69,13 @@ function ApplicationTokenList() {
     fetchTokens();
   }, [fetchTokens]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    tokens
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    selectAll,
+    clearSelected,
+  } = useSelected(tokens);
   const {
     isLoading: deleteLoading,
     deletionError,
@@ -90,19 +96,18 @@ function ApplicationTokenList() {
 
   const handleDelete = async () => {
     await handleDeleteApplications();
-    setSelected([]);
+    clearSelected();
   };
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={error}
         hasContentLoading={isLoading || deleteLoading}
         items={tokens}
         itemCount={itemCount}
         pluralizedItemName={t`Tokens`}
         qsConfig={QS_CONFIG}
-        onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
             name: t`Name`,
@@ -110,28 +115,7 @@ function ApplicationTokenList() {
             isDefault: true,
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`Name`,
-            key: 'user__username',
-          },
-          {
-            name: t`Scope`,
-            key: 'scope',
-          },
-          {
-            name: t`Expiration`,
-            key: 'expires',
-          },
-          {
-            name: t`Created`,
-            key: 'created',
-          },
-          {
-            name: t`Modified`,
-            key: 'modified',
-          },
-        ]}
+        clearSelected={clearSelected}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
@@ -139,9 +123,7 @@ function ApplicationTokenList() {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
-              setSelected(isSelected ? [...tokens] : [])
-            }
+            onSelectAll={selectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               <ToolbarDeleteButton
@@ -153,7 +135,14 @@ function ApplicationTokenList() {
             ]}
           />
         )}
-        renderItem={token => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="user__username">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="scope">{t`Scope`}</HeaderCell>
+            <HeaderCell sortKey="expires">{t`Expires`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(token, index) => (
           <ApplicationTokenListItem
             key={token.id}
             value={token.name}
@@ -161,6 +150,7 @@ function ApplicationTokenList() {
             detailUrl={`/users/${token.summary_fields.user.id}/details`}
             onSelect={() => handleSelect(token)}
             isSelected={selected.some(row => row.id === token.id)}
+            rowIndex={index}
           />
         )}
       />

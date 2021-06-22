@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext_noop
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 
 # AWX
 from awx.api.versioning import reverse
@@ -92,7 +93,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         help_text=_('Specify the type of credential you want to create. Refer ' 'to the documentation for details on each type.'),
     )
-    managed_by_tower = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False)
     organization = models.ForeignKey(
         'Organization',
         null=True,
@@ -341,7 +342,7 @@ class CredentialType(CommonModelNameNotUnique):
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)
-    managed_by_tower = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False)
     namespace = models.CharField(max_length=1024, null=True, default=None, editable=False)
     inputs = CredentialTypeInputField(
         blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
@@ -355,7 +356,7 @@ class CredentialType(CommonModelNameNotUnique):
     @classmethod
     def from_db(cls, db, field_names, values):
         instance = super(CredentialType, cls).from_db(db, field_names, values)
-        if instance.managed_by_tower and instance.namespace:
+        if instance.managed and instance.namespace:
             native = ManagedCredentialType.registry[instance.namespace]
             instance.inputs = native.inputs
             instance.injectors = native.injectors
@@ -395,9 +396,13 @@ class CredentialType(CommonModelNameNotUnique):
         return dict((k, functools.partial(v.create)) for k, v in ManagedCredentialType.registry.items())
 
     @classmethod
-    def setup_tower_managed_defaults(cls):
+    def setup_tower_managed_defaults(cls, apps=None):
+        if apps is not None:
+            ct_class = apps.get_model('main', 'CredentialType')
+        else:
+            ct_class = CredentialType
         for default in ManagedCredentialType.registry.values():
-            existing = CredentialType.objects.filter(name=default.name, kind=default.kind).first()
+            existing = ct_class.objects.filter(name=default.name, kind=default.kind).first()
             if existing is not None:
                 existing.namespace = default.namespace
                 existing.inputs = {}
@@ -405,7 +410,11 @@ class CredentialType(CommonModelNameNotUnique):
                 existing.save()
                 continue
             logger.debug(_("adding %s credential type" % default.name))
-            created = default.create()
+            params = default.get_creation_params()
+            if 'managed' not in [f.name for f in ct_class._meta.get_fields()]:
+                params['managed_by_tower'] = params.pop('managed')
+            params['created'] = params['modified'] = now()  # CreatedModifiedModel service
+            created = ct_class(**params)
             created.inputs = created.injectors = {}
             created.save()
 
@@ -439,7 +448,7 @@ class CredentialType(CommonModelNameNotUnique):
                                  files)
         """
         if not self.injectors:
-            if self.managed_by_tower and credential.credential_type.namespace in dir(builtin_injectors):
+            if self.managed and credential.credential_type.namespace in dir(builtin_injectors):
                 injected_env = {}
                 getattr(builtin_injectors, credential.credential_type.namespace)(credential, injected_env, private_data_dir)
                 env.update(injected_env)
@@ -556,15 +565,18 @@ class ManagedCredentialType(SimpleNamespace):
             )
         ManagedCredentialType.registry[namespace] = self
 
-    def create(self):
-        return CredentialType(
+    def get_creation_params(self):
+        return dict(
             namespace=self.namespace,
             kind=self.kind,
             name=self.name,
-            managed_by_tower=True,
+            managed=True,
             inputs=self.inputs,
             injectors=self.injectors,
         )
+
+    def create(self):
+        return CredentialType(**self.get_creation_params())
 
 
 ManagedCredentialType(
@@ -606,7 +618,7 @@ ManagedCredentialType(
     namespace='scm',
     kind='scm',
     name=ugettext_noop('Source Control'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -621,7 +633,7 @@ ManagedCredentialType(
     namespace='vault',
     kind='vault',
     name=ugettext_noop('Vault'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'vault_password', 'label': ugettext_noop('Vault Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
@@ -647,7 +659,7 @@ ManagedCredentialType(
     namespace='net',
     kind='net',
     name=ugettext_noop('Network'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -687,7 +699,7 @@ ManagedCredentialType(
     namespace='aws',
     kind='cloud',
     name=ugettext_noop('Amazon Web Services'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Access Key'), 'type': 'string'},
@@ -718,7 +730,7 @@ ManagedCredentialType(
     namespace='openstack',
     kind='cloud',
     name=ugettext_noop('OpenStack'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -776,7 +788,7 @@ ManagedCredentialType(
     namespace='vmware',
     kind='cloud',
     name=ugettext_noop('VMware vCenter'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -801,7 +813,7 @@ ManagedCredentialType(
     namespace='satellite6',
     kind='cloud',
     name=ugettext_noop('Red Hat Satellite 6'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -826,7 +838,7 @@ ManagedCredentialType(
     namespace='gce',
     kind='cloud',
     name=ugettext_noop('Google Compute Engine'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -864,7 +876,7 @@ ManagedCredentialType(
     namespace='azure_rm',
     kind='cloud',
     name=ugettext_noop('Microsoft Azure Resource Manager'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -903,7 +915,7 @@ ManagedCredentialType(
     namespace='github_token',
     kind='token',
     name=ugettext_noop('GitHub Personal Access Token'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -922,7 +934,7 @@ ManagedCredentialType(
     namespace='gitlab_token',
     kind='token',
     name=ugettext_noop('GitLab Personal Access Token'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {
@@ -941,7 +953,7 @@ ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=ugettext_noop('Insights'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
@@ -965,7 +977,7 @@ ManagedCredentialType(
     namespace='rhv',
     kind='cloud',
     name=ugettext_noop('Red Hat Virtualization'),
-    managed_by_tower=True,
+    managed=True,
     inputs={
         'fields': [
             {'id': 'host', 'label': ugettext_noop('Host (Authentication URL)'), 'type': 'string', 'help_text': ugettext_noop('The host to authenticate with.')},
@@ -1006,23 +1018,25 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
-    namespace='tower',
+    namespace='controller',
     kind='cloud',
-    name=ugettext_noop('Ansible Tower'),
-    managed_by_tower=True,
+    name=ugettext_noop('Red Hat Ansible Automation Platform'),
+    managed=True,
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('Ansible Tower Hostname'),
+                'label': ugettext_noop('Red Hat Ansible Automation Platform'),
                 'type': 'string',
-                'help_text': ugettext_noop('The Ansible Tower base URL to authenticate with.'),
+                'help_text': ugettext_noop('Red Hat Ansible Automation Platform base URL to authenticate with.'),
             },
             {
                 'id': 'username',
                 'label': ugettext_noop('Username'),
                 'type': 'string',
-                'help_text': ugettext_noop('The Ansible Tower user to authenticate as.' 'This should not be set if an OAuth token is being used.'),
+                'help_text': ugettext_noop(
+                    'Red Hat Ansible Automation Platform username id to authenticate as.' 'This should not be set if an OAuth token is being used.'
+                ),
             },
             {
                 'id': 'password',
@@ -1048,6 +1062,11 @@ ManagedCredentialType(
             'TOWER_PASSWORD': '{{password}}',
             'TOWER_VERIFY_SSL': '{{verify_ssl}}',
             'TOWER_OAUTH_TOKEN': '{{oauth_token}}',
+            'CONTROLLER_HOST': '{{host}}',
+            'CONTROLLER_USERNAME': '{{username}}',
+            'CONTROLLER_PASSWORD': '{{password}}',
+            'CONTROLLER_VERIFY_SSL': '{{verify_ssl}}',
+            'CONTROLLER_OAUTH_TOKEN': '{{oauth_token}}',
         }
     },
 )

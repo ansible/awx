@@ -1,35 +1,20 @@
 import 'styled-components/macro';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  Tooltip,
-} from '@patternfly/react-core';
-import { t } from '@lingui/macro';
-
+import { Button, Tooltip } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import {
   ExclamationTriangleIcon,
   PencilAltIcon,
   RocketIcon,
 } from '@patternfly/react-icons';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
 
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { LaunchButton } from '../../../components/LaunchButton';
 import Sparkline from '../../../components/Sparkline';
 import { toTitleCase } from '../../../util/strings';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: repeat(2, 40px);
-`;
 
 const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
@@ -41,8 +26,8 @@ function ProjectJobTemplateListItem({
   isSelected,
   onSelect,
   detailUrl,
+  rowIndex,
 }) {
-  const labelId = `check-action-${template.id}`;
   const canLaunch = template.summary_fields.user_capabilities.start;
 
   const missingResourceIcon =
@@ -57,90 +42,75 @@ function ProjectJobTemplateListItem({
     !template.execution_environment;
 
   return (
-    <DataListItem aria-labelledby={labelId} id={`${template.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-jobTemplate-${template.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="divider">
-              <span>
-                <Link to={`${detailUrl}`}>
-                  <b>{template.name}</b>
-                </Link>
-              </span>
-              {missingResourceIcon && (
-                <span>
-                  <Tooltip
-                    content={t`Resources are missing from this template.`}
-                    position="right"
-                  >
-                    <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
-                  </Tooltip>
-                </span>
-              )}
-              {missingExecutionEnvironment && (
-                <span>
-                  <Tooltip
-                    content={t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`}
-                    position="right"
-                    className="missing-execution-environment"
-                  >
-                    <ExclamationTriangleIconWarning />
-                  </Tooltip>
-                </span>
-              )}
-            </DataListCell>,
-            <DataListCell key="type">
-              {toTitleCase(template.type)}
-            </DataListCell>,
-            <DataListCell key="sparkline">
-              <Sparkline jobs={template.summary_fields.recent_jobs} />
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={t`actions`}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`template-row-${template.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+      />
+      <Td dataLabel={t`Name`}>
+        <Link to={`${detailUrl}`}>
+          {template.name}
+          {missingResourceIcon && (
+            <Tooltip
+              content={t`Resources are missing from this template.`}
+              position="right"
+            >
+              <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
+            </Tooltip>
+          )}
+          {missingExecutionEnvironment && (
+            <Tooltip
+              content={t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`}
+              position="right"
+              className="missing-execution-environment"
+            >
+              <ExclamationTriangleIconWarning />
+            </Tooltip>
+          )}
+        </Link>
+      </Td>
+      <Td dataLabel={t`Type`}>{toTitleCase(template.type)}</Td>
+      <Td dataLabel={t`Recent jobs`}>
+        <Sparkline jobs={template.summary_fields.recent_jobs} />
+      </Td>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem
+          visible={canLaunch && template.type === 'job_template'}
+          tooltip={t`Launch Template`}
         >
-          {canLaunch && template.type === 'job_template' && (
-            <Tooltip content={t`Launch Template`} position="top">
-              <LaunchButton resource={template}>
-                {({ handleLaunch, isLaunching }) => (
-                  <Button
-                    ouiaId={`${template.id}-launch-button`}
-                    css="grid-column: 1"
-                    variant="plain"
-                    onClick={handleLaunch}
-                    isDisabled={isLaunching}
-                  >
-                    <RocketIcon />
-                  </Button>
-                )}
-              </LaunchButton>
-            </Tooltip>
-          )}
-          {template.summary_fields.user_capabilities.edit && (
-            <Tooltip content={t`Edit Template`} position="top">
+          <LaunchButton resource={template}>
+            {({ handleLaunch, isLaunching }) => (
               <Button
-                ouiaId={`${template.id}-edit-button`}
-                css="grid-column: 2"
+                ouiaId={`${template.id}-launch-button`}
+                css="grid-column: 1"
                 variant="plain"
-                component={Link}
-                to={`/templates/${template.type}/${template.id}/edit`}
+                onClick={handleLaunch}
+                isDisabled={isLaunching}
               >
-                <PencilAltIcon />
+                <RocketIcon />
               </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+            )}
+          </LaunchButton>
+        </ActionItem>
+        <ActionItem
+          visible={template.summary_fields.user_capabilities.edit}
+          tooltip={t`Edit Template`}
+        >
+          <Button
+            ouiaId={`${template.id}-edit-button`}
+            css="grid-column: 2"
+            variant="plain"
+            component={Link}
+            to={`/templates/${template.type}/${template.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

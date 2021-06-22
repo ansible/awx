@@ -1,58 +1,37 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import {
-  Button,
-  DataListAction,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 
 function OrganizationTeamListItem({ team, detailUrl }) {
-  const labelId = `check-action-${team.id}`;
-
   return (
-    <DataListItem aria-labelledby={labelId} id={`${team.id}`}>
-      <DataListItemRow>
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="divider">
-              <span>
-                <Link to={`${detailUrl}/details`}>
-                  <b aria-label={t`team name`}>{team.name}</b>
-                </Link>
-              </span>
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={t`actions`}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`team-row-${team.id}`}>
+      <Td dataLabel={t`Name`}>
+        <Link to={`${detailUrl}/details`}>{team.name}</Link>
+      </Td>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem
+          visible={team.summary_fields.user_capabilities.edit}
+          tooltip={t`Edit Team`}
         >
-          {team.summary_fields.user_capabilities.edit && (
-            <Tooltip content={t`Edit Team`} position="top">
-              <Button
-                ouiaId={`${team.id}-edit-button`}
-                aria-label={t`Edit Team`}
-                css="grid-column: 2"
-                variant="plain"
-                component={Link}
-                to={`${detailUrl}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            ouiaId={`${team.id}-edit-button`}
+            aria-label={t`Edit Team`}
+            css="grid-column: 2"
+            variant="plain"
+            component={Link}
+            to={`${detailUrl}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

@@ -43,7 +43,7 @@ describe('<CredentialList />', () => {
   test('should have proper number of delete detail requests', () => {
     expect(
       wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(6);
+    ).toHaveLength(5);
   });
 
   test('should fetch credentials from api and render the in the list', () => {

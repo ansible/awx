@@ -5,8 +5,8 @@ import { t } from '@lingui/macro';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DataListToolbar from '../../../components/DataListToolbar';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AssociateModal from '../../../components/AssociateModal';

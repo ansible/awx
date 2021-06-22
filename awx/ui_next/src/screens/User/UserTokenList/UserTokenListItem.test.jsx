@@ -39,7 +39,13 @@ describe('<UserTokenListItem />', () => {
   let wrapper;
   test('should mount properly', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<UserTokenListItem token={token} />);
+      wrapper = mountWithContexts(
+        <table>
+          <tbody>
+            <UserTokenListItem token={token} />
+          </tbody>
+        </table>
+      );
     });
     expect(wrapper.find('UserTokenListItem').length).toBe(1);
   });
@@ -47,62 +53,101 @@ describe('<UserTokenListItem />', () => {
   test('should render application access token row properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <UserTokenListItem isSelected={false} token={token} />
+        <table>
+          <tbody>
+            <UserTokenListItem isSelected={false} token={token} />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find('DataListCheck').prop('checked')).toBe(false);
-    expect(wrapper.find('PFDataListCell[aria-label="Token type"]').text()).toBe(
-      'Application access token'
-    );
     expect(
-      wrapper.find('PFDataListCell[aria-label="Application name"]').text()
-    ).toContain('Foobar app');
-    expect(wrapper.find('PFDataListCell[aria-label="Scope"]').text()).toContain(
-      'Read'
-    );
+      wrapper
+        .find('Td')
+        .first()
+        .prop('select').isSelected
+    ).toBe(false);
     expect(
-      wrapper.find('PFDataListCell[aria-label="Expiration"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
+    ).toBe('Foobar app');
+    expect(
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
+    ).toContain('Read');
+    expect(
+      wrapper
+        .find('Td')
+        .at(3)
+        .text()
     ).toContain('10/25/3019, 3:06:43 PM');
   });
 
   test('should render personal access token row properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <UserTokenListItem
-          isSelected={false}
-          token={{
-            ...token,
-            refresh_token: null,
-            application: null,
-            scope: 'write',
-            summary_fields: {
-              user: token.summary_fields.user,
-            },
-          }}
-        />
+        <table>
+          <tbody>
+            <UserTokenListItem
+              isSelected={false}
+              token={{
+                ...token,
+                refresh_token: null,
+                application: null,
+                scope: 'write',
+                summary_fields: {
+                  user: token.summary_fields.user,
+                },
+              }}
+            />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find('DataListCheck').prop('checked')).toBe(false);
-    expect(wrapper.find('PFDataListCell[aria-label="Token type"]').text()).toBe(
-      'Personal access token'
-    );
     expect(
-      wrapper.find('PFDataListCell[aria-label="Application name"]').text()
-    ).toBe('');
-    expect(wrapper.find('PFDataListCell[aria-label="Scope"]').text()).toContain(
-      'Write'
-    );
+      wrapper
+        .find('Td')
+        .first()
+        .prop('select').isSelected
+    ).toBe(false);
     expect(
-      wrapper.find('PFDataListCell[aria-label="Expiration"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
+    ).toEqual('Personal access token');
+    expect(
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
+    ).toEqual('Write');
+    expect(
+      wrapper
+        .find('Td')
+        .at(3)
+        .text()
     ).toContain('10/25/3019, 3:06:43 PM');
   });
 
   test('should be checked', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <UserTokenListItem isSelected token={token} />
+        <table>
+          <tbody>
+            <UserTokenListItem isSelected token={token} />
+          </tbody>
+        </table>
       );
     });
-    expect(wrapper.find('DataListCheck').prop('checked')).toBe(true);
+    expect(
+      wrapper
+        .find('Td')
+        .first()
+        .prop('select').isSelected
+    ).toBe(true);
   });
 });

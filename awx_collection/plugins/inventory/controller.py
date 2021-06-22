@@ -176,6 +176,7 @@ class InventoryModule(BaseInventoryPlugin):
             for key in ('version', 'ansible_version'):
                 server_data[key] = config_data.get(key, 'unknown')
             self.inventory.set_variable('all', 'tower_metadata', server_data)
+            self.inventory.set_variable('all', 'controller_metadata', server_data)
 
         # Clean up the inventory.
         self.inventory.reconcile_inventory()

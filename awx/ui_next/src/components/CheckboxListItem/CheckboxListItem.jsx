@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
@@ -28,6 +29,7 @@ const CheckboxListItem = ({
       ouiaId={`list-item-${itemId}`}
       id={`list-item-${itemId}`}
       onClick={handleRowClick}
+      css="cursor: default"
     >
       <Td
         id={`check-action-item-${itemId}`}

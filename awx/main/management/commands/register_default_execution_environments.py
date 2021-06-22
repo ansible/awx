@@ -76,7 +76,7 @@ class Command(BaseCommand):
             }
             registry_cred, cred_created = Credential.objects.get_or_create(
                 name="Default Execution Environment Registry Credential",
-                managed_by_tower=True,
+                managed=True,
                 credential_type=registry_cred_type[0],
                 defaults={'inputs': inputs},
             )
@@ -114,7 +114,7 @@ class Command(BaseCommand):
         # Create the control plane execution environment that is used for project updates and system jobs
         ee = settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT
         _this_ee, cp_created = ExecutionEnvironment.objects.get_or_create(
-            name="Control Plane Execution Environment", defaults={'image': ee, 'managed_by_tower': True, 'credential': registry_cred}
+            name="Control Plane Execution Environment", defaults={'image': ee, 'managed': True, 'credential': registry_cred}
         )
         if cp_created:
             changed = True

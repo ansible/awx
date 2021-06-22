@@ -15,10 +15,10 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import UserRolesListItem from './UserRolesListItem';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';

@@ -104,6 +104,18 @@ describe('toHostFilter', () => {
     );
   });
 
+  test('should return a host filter with escaped string', () => {
+    const object = {
+      or__description__contains: 'bar biz',
+      enabled: 'true',
+      name__contains: 'x',
+      or__name: 'foo',
+    };
+    expect(toHostFilter(object)).toEqual(
+      'enabled=true and name__contains=x or description__contains="bar biz" or name=foo'
+    );
+  });
+
   test('should return a host filter with and conditional', () => {
     const object = {
       enabled: 'true',

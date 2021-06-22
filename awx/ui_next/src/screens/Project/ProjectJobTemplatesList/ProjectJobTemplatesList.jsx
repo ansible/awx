@@ -7,10 +7,12 @@ import { JobTemplatesAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
@@ -70,9 +72,13 @@ function ProjectJobTemplatesList() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    jobTemplates
-  );
+  const {
+    selected,
+    isAllSelected,
+    handleSelect,
+    clearSelected,
+    selectAll,
+  } = useSelected(jobTemplates);
 
   const {
     isLoading: isDeleteLoading,
@@ -94,7 +100,7 @@ function ProjectJobTemplatesList() {
 
   const handleTemplateDelete = async () => {
     await deleteTemplates();
-    setSelected([]);
+    clearSelected();
   };
 
   const canAddJT =
@@ -107,14 +113,14 @@ function ProjectJobTemplatesList() {
   return (
     <>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isDeleteLoading || isLoading}
           items={jobTemplates}
           itemCount={itemCount}
           pluralizedItemName={t`Job templates`}
           qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
+          clearSelected={clearSelected}
           toolbarSearchColumns={[
             {
               name: t`Name`,
@@ -130,32 +136,6 @@ function ProjectJobTemplatesList() {
               key: 'modified_by__username__icontains',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: t`Inventory`,
-              key: 'job_template__inventory__id',
-            },
-            {
-              name: t`Last job run`,
-              key: 'last_job_run',
-            },
-            {
-              name: t`Modified`,
-              key: 'modified',
-            },
-            {
-              name: t`Name`,
-              key: 'name',
-            },
-            {
-              name: t`Project`,
-              key: 'jobtemplate__project__id',
-            },
-            {
-              name: t`Type`,
-              key: 'type',
-            },
-          ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
@@ -163,9 +143,7 @@ function ProjectJobTemplatesList() {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={isSelected =>
-                setSelected(isSelected ? [...jobTemplates] : [])
-              }
+              onSelectAll={selectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAddJT ? [addButton] : []),
@@ -178,7 +156,15 @@ function ProjectJobTemplatesList() {
               ]}
             />
           )}
-          renderItem={template => (
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="type">{t`Type`}</HeaderCell>
+              <HeaderCell>{t`Recent jobs`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
+            </HeaderRow>
+          }
+          renderRow={(template, index) => (
             <ProjectTemplatesListItem
               key={template.id}
               value={template.name}
@@ -186,6 +172,7 @@ function ProjectJobTemplatesList() {
               detailUrl={`/templates/${template.type}/${template.id}/details`}
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
+              rowIndex={index}
             />
           )}
           emptyStateControls={canAddJT && addButton}

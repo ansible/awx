@@ -17,13 +17,19 @@ export function toSearchParams(string = '') {
     });
   }
 
+  const unescapeString = v => {
+    //  This is necessary when editing a string that was initially
+    //  escaped to allow white space
+    return v.replace(/"/g, '');
+  };
+
   return orArr
     .join(' and ')
     .split(/ and | or /)
     .map(s => s.split('='))
     .reduce((searchParams, [k, v]) => {
       const key = decodeURIComponent(k);
-      const value = decodeURIComponent(v);
+      const value = decodeURIComponent(unescapeString(v));
       if (searchParams[key] === undefined) {
         searchParams[key] = value;
       } else if (Array.isArray(searchParams[key])) {
@@ -62,6 +68,27 @@ export function toQueryString(config, searchParams = {}) {
 }
 
 /**
+ * Escape a string with double quote in case there was a white space
+ * @param {string} value A string to be parsed
+ * @return {string}  string
+ */
+const escapeString = value => {
+  if (verifySpace(value)) {
+    return `"${value}"`;
+  }
+  return value;
+};
+
+/**
+ * Verify whether a string has white spaces
+ * @param {string} value A string to be parsed
+ * @return {bool} true if a string has white spaces
+ */
+const verifySpace = value => {
+  return value.trim().indexOf(' ') >= 0;
+};
+
+/**
  * Convert params object to host filter string
  * @param {object} searchParams A string or array of strings keyed by query param key
  * @return {string} Host filter string
@@ -71,9 +98,9 @@ export function toHostFilter(searchParams = {}) {
     .sort()
     .flatMap(key => {
       if (Array.isArray(searchParams[key])) {
-        return searchParams[key].map(val => `${key}=${val}`);
+        return searchParams[key].map(val => `${key}=${escapeString(val)}`);
       }
-      return `${key}=${searchParams[key]}`;
+      return `${key}=${escapeString(searchParams[key])}`;
     });
 
   const filteredSearchParams = flattenSearchParams.filter(

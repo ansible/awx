@@ -5,7 +5,7 @@ from awx.main.models import CredentialType
 
 
 def update_cyberark_aim_name(apps, schema_editor):
-    CredentialType.setup_tower_managed_defaults()
+    CredentialType.setup_tower_managed_defaults(apps)
     aim_types = apps.get_model('main', 'CredentialType').objects.filter(namespace='aim').order_by('id')
 
     if aim_types.count() == 2:

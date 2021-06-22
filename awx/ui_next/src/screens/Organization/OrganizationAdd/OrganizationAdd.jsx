@@ -23,7 +23,7 @@ function OrganizationAdd() {
         data: { results },
       } = await CredentialsAPI.read({
         credential_type__kind: 'galaxy',
-        managed_by_tower: true,
+        managed: true,
       });
 
       return results[0] || null;

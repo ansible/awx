@@ -79,7 +79,7 @@ credential_type_name_to_config_kind_map = {
     'amazon web services': 'aws',
     'container registry': 'registry',
     'ansible galaxy/automation hub api token': 'galaxy',
-    'ansible tower': 'tower',
+    'red hat ansible automation platform': 'controller',
     'google compute engine': 'gce',
     'insights': 'insights',
     'openshift or kubernetes api bearer token': 'kubernetes',
@@ -102,7 +102,7 @@ config_kind_to_credential_type_name_map = {kind: name for name, kind in credenti
 def kind_and_config_cred_from_credential_type(credential_type):
     kind = ''
 
-    if not credential_type.managed_by_tower:
+    if not credential_type.managed:
         return kind, PseudoNamespace()
     try:
         if credential_type.kind == 'net':
@@ -144,7 +144,7 @@ class CredentialType(HasCreate, base.Base):
     NATURAL_KEY = ('name', 'kind')
 
     def silent_delete(self):
-        if not self.managed_by_tower:
+        if not self.managed:
             return super(CredentialType, self).silent_delete()
 
     def payload(self, kind='cloud', **kwargs):
@@ -245,7 +245,7 @@ class Credential(HasCopy, HasCreate, base.Base):
                         inputs = config.credentials.cloud['openstack']
             else:
                 credential_type_name = config_kind_to_credential_type_name_map[kind]
-            credential_type = CredentialTypes(self.connection).get(managed_by_tower=True, name__icontains=credential_type_name).results.pop()
+            credential_type = CredentialTypes(self.connection).get(managed=True, name__icontains=credential_type_name).results.pop()
 
         credential_type, organization, user, team = filter_by_class((credential_type, CredentialType), (organization, Organization), (user, User), (team, Team))
         if not any((user, team, organization)):

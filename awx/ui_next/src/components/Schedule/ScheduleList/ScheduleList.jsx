@@ -6,9 +6,13 @@ import { t } from '@lingui/macro';
 import { SchedulesAPI } from '../../../api';
 import AlertModal from '../../AlertModal';
 import ErrorDetail from '../../ErrorDetail';
-import PaginatedTable, { HeaderRow, HeaderCell } from '../../PaginatedTable';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+  ToolbarAddButton,
+  ToolbarDeleteButton,
+} from '../../PaginatedTable';
 import DataListToolbar from '../../DataListToolbar';
-import { ToolbarAddButton, ToolbarDeleteButton } from '../../PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../../util/qs';

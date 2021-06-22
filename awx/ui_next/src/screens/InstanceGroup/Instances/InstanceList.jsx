@@ -8,8 +8,8 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AssociateModal from '../../../components/AssociateModal';
 import AlertModal from '../../../components/AlertModal';

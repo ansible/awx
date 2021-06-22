@@ -588,8 +588,8 @@ class TestGenericRun:
 @pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
     def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
-        ExecutionEnvironment.objects.create(name='Control Plane EE', managed_by_tower=True)
-        ExecutionEnvironment.objects.create(name='Default Job EE', managed_by_tower=False)
+        ExecutionEnvironment.objects.create(name='Control Plane EE', managed=True)
+        ExecutionEnvironment.objects.create(name='Default Job EE', managed=False)
 
         adhoc_job.module_args = '{{ ansible_ssh_pass }}'
         adhoc_job.websocket_emit_status = mock.Mock()
@@ -1095,7 +1095,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
             injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'}},
         )
@@ -1108,7 +1108,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
             injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token}}'}},
         )
@@ -1123,7 +1123,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
             injectors={'env': {'TURBO_BUTTON': '{{turbo_button}}'}},
         )
@@ -1140,7 +1140,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
             injectors={'env': {'JOB_ID': 'reserved'}},
         )
@@ -1155,7 +1155,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'password', 'label': 'Password', 'type': 'string', 'secret': True}]},
             injectors={'env': {'MY_CLOUD_PRIVATE_VAR': '{{password}}'}},
         )
@@ -1175,7 +1175,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
             injectors={'extra_vars': {'api_token': '{{api_token}}'}},
         )
@@ -1194,7 +1194,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
             injectors={'extra_vars': {'turbo_button': '{{turbo_button}}'}},
         )
@@ -1213,7 +1213,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
             injectors={'extra_vars': {'turbo_button': '{% if turbo_button %}FAST!{% else %}SLOW!{% endif %}'}},
         )
@@ -1234,7 +1234,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'password', 'label': 'Password', 'type': 'string', 'secret': True}]},
             injectors={'extra_vars': {'password': '{{password}}'}},
         )
@@ -1252,7 +1252,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
             injectors={'file': {'template': '[mycloud]\n{{api_token}}'}, 'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}},
         )
@@ -1269,7 +1269,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': []},
             injectors={'file': {'template': value}, 'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}},
         )
@@ -1288,7 +1288,7 @@ class TestJobCredentials(TestJobExecution):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
-            managed_by_tower=False,
+            managed=False,
             inputs={'fields': [{'id': 'cert', 'label': 'Certificate', 'type': 'string'}, {'id': 'key', 'label': 'Key', 'type': 'string'}]},
             injectors={
                 'file': {'template.cert': '[mycert]\n{{cert}}', 'template.key': '[mykey]\n{{key}}'},
@@ -1778,8 +1778,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
         task.instance = inventory_update
-        tower = CredentialType.defaults['tower']()
-        inventory_update.source = 'tower'
+        tower = CredentialType.defaults['controller']()
+        inventory_update.source = 'controller'
         inputs = {'host': 'https://tower.example.org', 'username': 'bob', 'password': 'secret', 'verify_ssl': verify}
 
         def get_cred():
@@ -1794,20 +1794,20 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         safe_env = build_safe_env(env)
 
-        assert env['TOWER_HOST'] == 'https://tower.example.org'
-        assert env['TOWER_USERNAME'] == 'bob'
-        assert env['TOWER_PASSWORD'] == 'secret'
+        assert env['CONTROLLER_HOST'] == 'https://tower.example.org'
+        assert env['CONTROLLER_USERNAME'] == 'bob'
+        assert env['CONTROLLER_PASSWORD'] == 'secret'
         if verify:
-            assert env['TOWER_VERIFY_SSL'] == 'True'
+            assert env['CONTROLLER_VERIFY_SSL'] == 'True'
         else:
-            assert env['TOWER_VERIFY_SSL'] == 'False'
-        assert safe_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+            assert env['CONTROLLER_VERIFY_SSL'] == 'False'
+        assert safe_env['CONTROLLER_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_tower_source_ssl_verify_empty(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
         task.instance = inventory_update
-        tower = CredentialType.defaults['tower']()
-        inventory_update.source = 'tower'
+        tower = CredentialType.defaults['controller']()
+        inventory_update.source = 'controller'
         inputs = {
             'host': 'https://tower.example.org',
             'username': 'bob',
@@ -1921,7 +1921,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_
 def test_managed_injector_redaction(injector_cls):
     """See awx.main.models.inventory.PluginFileInjector._get_shared_env
     The ordering within awx.main.tasks.BaseTask and contract with build_env
-    requires that all managed_by_tower injectors are safely redacted by the
+    requires that all managed injectors are safely redacted by the
     static method build_safe_env without having to employ the safe namespace
     as in inject_credential
 

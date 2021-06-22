@@ -15,12 +15,12 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  ToolbarAddButton,
 } from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import TeamRoleListItem from './TeamRoleListItem';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {

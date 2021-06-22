@@ -57,10 +57,6 @@ options:
       description:
         - The host_filter field. Only useful when C(kind=smart).
       type: str
-    insights_credential:
-      description:
-        - Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.
-      type: str
     instance_groups:
       description:
         - list of Instance Groups for this Organization to run on.
@@ -110,7 +106,6 @@ def main():
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
-        insights_credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -126,7 +121,6 @@ def main():
     state = module.params.get('state')
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
-    insights_credential = module.params.get('insights_credential')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
@@ -161,8 +155,6 @@ def main():
         inventory_fields['description'] = description
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
-    if insights_credential is not None:
-        inventory_fields['insights_credential'] = module.resolve_name_to_id('credentials', insights_credential)
 
     association_fields = {}
 

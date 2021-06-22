@@ -81,6 +81,7 @@ def test_default_cred_types():
         'azure_rm',
         'centrify_vault_kv',
         'conjur',
+        'controller',
         'galaxy_api_token',
         'gce',
         'github_token',
@@ -97,19 +98,19 @@ def test_default_cred_types():
         'scm',
         'ssh',
         'thycotic_dsv',
-        'tower',
         'vault',
         'vmware',
     ]
+
     for type_ in CredentialType.defaults.values():
-        assert type_().managed_by_tower is True
+        assert type_().managed is True
 
 
 @pytest.mark.django_db
 def test_credential_creation(organization_factory):
     org = organization_factory('test').organization
     type_ = CredentialType(
-        kind='cloud', name='SomeCloud', managed_by_tower=True, inputs={'fields': [{'id': 'username', 'label': 'Username for SomeCloud', 'type': 'string'}]}
+        kind='cloud', name='SomeCloud', managed=True, inputs={'fields': [{'id': 'username', 'label': 'Username for SomeCloud', 'type': 'string'}]}
     )
     type_.save()
 
@@ -286,7 +287,7 @@ def test_credential_get_input(organization_factory):
     type_ = CredentialType(
         kind='vault',
         name='somevault',
-        managed_by_tower=True,
+        managed=True,
         inputs={
             'fields': [
                 {

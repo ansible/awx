@@ -8,7 +8,10 @@ import { ExecutionEnvironmentsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest from '../../../util/useRequest';
 import DatalistToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+} from '../../../components/PaginatedTable';
 
 import ExecutionEnvironmentTemplateListItem from './ExecutionEnvironmentTemplateListItem';
 
@@ -74,7 +77,7 @@ function ExecutionEnvironmentTemplateList({ executionEnvironment }) {
   return (
     <>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading}
           items={templates}
@@ -106,24 +109,16 @@ function ExecutionEnvironmentTemplateList({ executionEnvironment }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: t`Name`,
-              key: 'name',
-            },
-            {
-              name: t`Created`,
-              key: 'created',
-            },
-            {
-              name: t`Modified`,
-              key: 'modified',
-            },
-          ]}
           renderToolbar={props => (
             <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
           )}
-          renderItem={template => (
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell>{t`Type`}</HeaderCell>
+            </HeaderRow>
+          }
+          renderRow={template => (
             <ExecutionEnvironmentTemplateListItem
               key={template.id}
               template={template}

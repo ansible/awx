@@ -4,6 +4,7 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import NotificationTemplateForm from './NotificationTemplateForm';
 
 jest.mock('../../../api/models/NotificationTemplates');
+jest.mock('../../../api/models/Organizations');
 
 const template = {
   id: 3,
@@ -50,16 +51,19 @@ const defaultMessages = {
 };
 
 describe('<NotificationTemplateForm />', () => {
-  test('should render form fields', () => {
-    const wrapper = mountWithContexts(
-      <NotificationTemplateForm
-        template={template}
-        defaultMessages={defaultMessages}
-        detailUrl="/notification_templates/3/detail"
-        onSubmit={jest.fn()}
-        onCancel={jest.fn()}
-      />
-    );
+  let wrapper;
+  test('should render form fields', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <NotificationTemplateForm
+          template={template}
+          defaultMessages={defaultMessages}
+          detailUrl="/notification_templates/3/detail"
+          onSubmit={jest.fn()}
+          onCancel={jest.fn()}
+        />
+      );
+    });
 
     expect(wrapper.find('input#notification-name').prop('value')).toEqual(
       'Test Notification'
@@ -77,26 +81,48 @@ describe('<NotificationTemplateForm />', () => {
     expect(
       wrapper.find('CustomMessagesSubForm').prop('defaultMessages')
     ).toEqual(defaultMessages);
+
+    expect(wrapper.find('input#option-use-ssl').length).toBe(0);
+    expect(wrapper.find('input#option-use-tls').length).toBe(0);
+
+    await act(async () => {
+      wrapper.find('AnsibleSelect#notification-type').invoke('onChange')(
+        {
+          target: {
+            name: 'notification_type',
+            value: 'email',
+          },
+        },
+        'email'
+      );
+    });
+
+    wrapper.update();
+
+    expect(wrapper.find('input#option-use-ssl').length).toBe(1);
+    expect(wrapper.find('input#option-use-tls').length).toBe(1);
   });
 
-  test('should render custom messages fields', () => {
-    const wrapper = mountWithContexts(
-      <NotificationTemplateForm
-        template={{
-          ...template,
-          messages: {
-            started: {
-              message: 'Started',
-              body: null,
+  test('should render custom messages fields', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <NotificationTemplateForm
+          template={{
+            ...template,
+            messages: {
+              started: {
+                message: 'Started',
+                body: null,
+              },
             },
-          },
-        }}
-        defaultMessages={defaultMessages}
-        detailUrl="/notification_templates/3/detail"
-        onSubmit={jest.fn()}
-        onCancel={jest.fn()}
-      />
-    );
+          }}
+          defaultMessages={defaultMessages}
+          detailUrl="/notification_templates/3/detail"
+          onSubmit={jest.fn()}
+          onCancel={jest.fn()}
+        />
+      );
+    });
 
     expect(
       wrapper
@@ -108,21 +134,23 @@ describe('<NotificationTemplateForm />', () => {
 
   test('should submit', async () => {
     const handleSubmit = jest.fn();
-    const wrapper = mountWithContexts(
-      <NotificationTemplateForm
-        template={{
-          ...template,
-          notification_configuration: {
-            channels: ['#foo'],
-            token: 'abc123',
-          },
-        }}
-        defaultMessages={defaultMessages}
-        detailUrl="/notification_templates/3/detail"
-        onSubmit={handleSubmit}
-        onCancel={jest.fn()}
-      />
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <NotificationTemplateForm
+          template={{
+            ...template,
+            notification_configuration: {
+              channels: ['#foo'],
+              token: 'abc123',
+            },
+          }}
+          defaultMessages={defaultMessages}
+          detailUrl="/notification_templates/3/detail"
+          onSubmit={handleSubmit}
+          onCancel={jest.fn()}
+        />
+      );
+    });
 
     await act(async () => {
       wrapper.find('FormActionGroup').invoke('onSubmit')();

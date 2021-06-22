@@ -22,6 +22,8 @@ class TestInventoryScript:
         assert inventory.get_script_data(hostvars=True, towervars=True)['_meta']['hostvars']['ahost'] == {
             'remote_tower_enabled': 'true',
             'remote_tower_id': host.id,
+            'remote_host_enabled': 'true',
+            'remote_host_id': host.id,
         }
 
     def test_all_group(self, inventory):
@@ -104,7 +106,7 @@ class TestActiveCount:
 
     def test_active_count_minus_tower(self, inventory):
         inventory.hosts.create(name='locally-managed-host')
-        source = inventory.inventory_sources.create(name='tower-source', source='tower')
+        source = inventory.inventory_sources.create(name='tower-source', source='controller')
         source.hosts.create(name='remotely-managed-host', inventory=inventory)
         assert Host.objects.active_count() == 1
 
@@ -210,7 +212,7 @@ class TestInventorySourceInjectors:
             ('rhv', 'ovirt.ovirt.ovirt'),
             ('satellite6', 'theforeman.foreman.foreman'),
             ('insights', 'redhatinsights.insights.insights'),
-            ('tower', 'awx.awx.tower'),
+            ('controller', 'awx.awx.tower'),
         ],
     )
     def test_plugin_proper_names(self, source, proper_name):

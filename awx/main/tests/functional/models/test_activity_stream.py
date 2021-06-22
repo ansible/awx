@@ -121,7 +121,7 @@ def somecloud_type():
     return CredentialType.objects.create(
         kind='cloud',
         name='SomeCloud',
-        managed_by_tower=False,
+        managed=False,
         inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
         injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'}},
     )
@@ -271,10 +271,10 @@ def test_cluster_node_long_node_name(inventory, project):
 @pytest.mark.django_db
 def test_credential_defaults_idempotency():
     CredentialType.setup_tower_managed_defaults()
-    old_inputs = CredentialType.objects.get(name='Ansible Tower', kind='cloud').inputs
+    old_inputs = CredentialType.objects.get(name='Red Hat Ansible Automation Platform', kind='cloud').inputs
     prior_count = ActivityStream.objects.count()
     # this is commonly re-ran in migrations, and no changes should be shown
     # because inputs and injectors are not actually tracked in the database
     CredentialType.setup_tower_managed_defaults()
-    assert CredentialType.objects.get(name='Ansible Tower', kind='cloud').inputs == old_inputs
+    assert CredentialType.objects.get(name='Red Hat Ansible Automation Platform', kind='cloud').inputs == old_inputs
     assert ActivityStream.objects.count() == prior_count

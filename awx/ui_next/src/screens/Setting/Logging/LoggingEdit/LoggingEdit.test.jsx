@@ -188,22 +188,6 @@ describe('<LoggingEdit />', () => {
     ).toHaveLength(1);
   });
 
-  test('should display successful toast when test button is clicked', async () => {
-    SettingsAPI.createTest.mockResolvedValue({});
-    expect(SettingsAPI.createTest).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('LoggingTestAlert')).toHaveLength(0);
-    await act(async () => {
-      wrapper.find('button[aria-label="Test logging"]').invoke('onClick')();
-    });
-    wrapper.update();
-    await waitForElement(wrapper, 'LoggingTestAlert');
-    expect(SettingsAPI.createTest).toHaveBeenCalledTimes(1);
-    await act(async () => {
-      wrapper.find('AlertActionCloseButton button').invoke('onClick')();
-    });
-    await waitForElement(wrapper, 'LoggingTestAlert', el => el.length === 0);
-  });
-
   test('should successfully send default values to api on form revert all', async () => {
     expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);

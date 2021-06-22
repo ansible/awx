@@ -6,7 +6,6 @@ import {
   WorkflowJobTemplatesAPI,
   OrganizationsAPI,
   LabelsAPI,
-  ExecutionEnvironmentsAPI,
   UsersAPI,
   InventoriesAPI,
 } from '../../../api';
@@ -21,7 +20,6 @@ jest.mock('../../../util/useDebounce');
 jest.mock('../../../api/models/WorkflowJobTemplates');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Labels');
-jest.mock('../../../api/models/ExecutionEnvironments');
 jest.mock('../../../api/models/Users');
 jest.mock('../../../api/models/Inventories');
 
@@ -30,12 +28,6 @@ const mockTemplate = {
   name: 'Foo',
   description: 'Foo description',
   summary_fields: {
-    execution_environment: {
-      id: 1,
-      name: 'Default EE',
-      description: '',
-      image: 'quay.io/ansible/awx-ee',
-    },
     inventory: { id: 1, name: 'Inventory 1' },
     organization: { id: 1, name: 'Organization 1' },
     labels: {
@@ -48,17 +40,7 @@ const mockTemplate = {
   scm_branch: 'devel',
   limit: '5000',
   variables: '---',
-  execution_environment: 1,
 };
-
-const mockExecutionEnvironment = [
-  {
-    id: 1,
-    name: 'Default EE',
-    description: '',
-    image: 'quay.io/ansible/awx-ee',
-  },
-];
 
 describe('<WorkflowJobTemplateEdit/>', () => {
   let wrapper;
@@ -89,16 +71,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       data: { results: [{ id: 1, name: 'Default' }], count: 1 },
     });
     OrganizationsAPI.readOptions.mockResolvedValue({
-      data: { actions: { GET: {}, POST: {} } },
-    });
-
-    ExecutionEnvironmentsAPI.read.mockResolvedValue({
-      data: {
-        results: mockExecutionEnvironment,
-        count: 1,
-      },
-    });
-    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
 
@@ -150,9 +122,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         .find('SelectToggle')
         .simulate('click');
       wrapper.update();
-      wrapper.find('TextInput#execution-environments-input').invoke('onChange')(
-        ''
-      );
       wrapper.find('input#wfjt-description').simulate('change', {
         target: { value: 'main', name: 'scm_branch' },
       });
@@ -208,7 +177,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       ask_limit_on_launch: false,
       ask_scm_branch_on_launch: false,
       ask_variables_on_launch: false,
-      execution_environment: null,
     });
     wrapper.update();
     await expect(WorkflowJobTemplatesAPI.disassociateLabel).toBeCalledWith(6, {
@@ -255,12 +223,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       name: 'Foo',
       description: 'Foo description',
       summary_fields: {
-        execution_environment: {
-          id: 1,
-          name: 'Default EE',
-          description: '',
-          image: 'quay.io/ansible/awx-ee',
-        },
         inventory: { id: 1, name: 'Inventory 1' },
         labels: {
           results: [
@@ -272,7 +234,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       scm_branch: 'devel',
       limit: '5000',
       variables: '---',
-      execution_environment: 1,
     };
 
     let newWrapper;
@@ -319,7 +280,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       ask_scm_branch_on_launch: false,
       ask_variables_on_launch: false,
       description: 'bar',
-      execution_environment: 1,
       extra_vars: '---',
       inventory: 1,
       limit: '5000',

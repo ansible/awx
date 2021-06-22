@@ -30,13 +30,15 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
   const [fileName, setFileName] = useState('');
   const [fileIsUploading, setFileIsUploading] = useState(false);
   const [subFormField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
+  const [passwordPromptsField] = useField(`passwordPrompts.${fieldOptions.id}`);
   const isValid = !(meta.touched && meta.error);
 
   const RevertReplaceButton = (
     <>
       {meta.initialValue &&
         meta.initialValue !== '' &&
-        !meta.initialValue.credential && (
+        !meta.initialValue.credential &&
+        !passwordPromptsField.value && (
           <Tooltip
             id={`credential-${fieldOptions.id}-replace-tooltip`}
             content={meta.value !== meta.initialValue ? t`Revert` : t`Replace`}
@@ -72,7 +74,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
 
     if (fieldOptions.secret) {
       return (
-        <>
+        <InputGroup>
           {RevertReplaceButton}
           <FileUpload
             {...subFormField}
@@ -87,7 +89,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
             allowEditingUploadedText
             validated={isValid ? 'default' : 'error'}
           />
-        </>
+        </InputGroup>
       );
     }
 
@@ -104,6 +106,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
         isLoading={fileIsUploading}
         allowEditingUploadedText
         validated={isValid ? 'default' : 'error'}
+        isDisabled={false}
       />
     );
   }

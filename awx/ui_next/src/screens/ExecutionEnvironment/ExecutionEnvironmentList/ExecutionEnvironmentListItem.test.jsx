@@ -23,7 +23,7 @@ describe('<ExecutionEnvironmentListItem/>', () => {
     summary_fields: {
       user_capabilities: { edit: true, copy: true, delete: true },
     },
-    managed_by_tower: false,
+    managed: false,
   };
 
   test('should mount successfully', async () => {
@@ -146,7 +146,7 @@ describe('<ExecutionEnvironmentListItem/>', () => {
     expect(wrapper.find('CopyButton').length).toBe(0);
   });
 
-  test('should not render the pencil action for ee managed by tower', async () => {
+  test('should not render the pencil action for managed ee', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <table>
@@ -155,7 +155,7 @@ describe('<ExecutionEnvironmentListItem/>', () => {
               executionEnvironment={{
                 ...executionEnvironment,
                 summary_fields: { user_capabilities: { edit: false } },
-                managed_by_tower: true,
+                managed: true,
               }}
               detailUrl="execution_environments/1/details"
               isSelected={false}

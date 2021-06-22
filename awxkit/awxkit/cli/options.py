@@ -45,7 +45,7 @@ def pk_or_name(v2, model_name, value, page=None):
         identity = UNIQUENESS_RULES[model_name][-1]
 
     # certain related fields follow a pattern of <foo>_<model> e.g.,
-    # insights_credential, target_credential etc...
+    # target_credential etc...
     if not page and '_' in model_name:
         return pk_or_name(v2, model_name.split('_')[-1], value, page)
 

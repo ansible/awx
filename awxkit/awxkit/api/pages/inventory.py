@@ -59,14 +59,12 @@ class Inventory(HasCopy, HasCreate, HasInstanceGroups, HasVariables, base.Base):
             organization=organization.id,
         )
 
-        optional_fields = ('host_filter', 'insights_credential', 'kind', 'variables')
+        optional_fields = ('host_filter', 'kind', 'variables')
 
         update_payload(payload, optional_fields, kwargs)
 
         if 'variables' in payload and isinstance(payload.variables, dict):
             payload.variables = json.dumps(payload.variables)
-        if 'insights_credential' in payload and isinstance(payload.insights_credential, Credential):
-            payload.insights_credential = payload.insights_credential.id
 
         return payload
 

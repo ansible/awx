@@ -708,7 +708,7 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         fields_to_check = ['name', 'description', 'organization', 'image', 'credential']
-        if instance.managed_by_tower and request.user.can_access(models.ExecutionEnvironment, 'change', instance):
+        if instance.managed and request.user.can_access(models.ExecutionEnvironment, 'change', instance):
             for field in fields_to_check:
                 left = getattr(instance, field, None)
                 right = request.data.get(field, None)
@@ -1306,7 +1306,7 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.managed_by_tower:
+        if instance.managed:
             raise PermissionDenied(detail=_("Deletion not allowed for managed credential types"))
         if instance.credentials.exists():
             raise PermissionDenied(detail=_("Credential types that are in use cannot be deleted"))
@@ -1421,7 +1421,7 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.managed_by_tower:
+        if instance.managed:
             raise PermissionDenied(detail=_("Deletion not allowed for managed credentials"))
         return super(CredentialDetail, self).destroy(request, *args, **kwargs)
 

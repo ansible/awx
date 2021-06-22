@@ -38,7 +38,7 @@ const mockCredentialResults = {
         description: '',
         kind: 'ssh',
         namespace: 'ssh',
-        managed_by_tower: true,
+        managed: true,
         inputs: {
           fields: [
             {

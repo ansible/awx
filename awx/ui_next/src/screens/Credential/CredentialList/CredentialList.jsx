@@ -7,13 +7,11 @@ import useSelected from '../../../util/useSelected';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
-import {
-  ToolbarAddButton,
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
+  ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';

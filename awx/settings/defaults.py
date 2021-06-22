@@ -185,7 +185,7 @@ DEFAULT_EXECUTION_ENVIRONMENT = None
 GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE 0.3.0', 'image': 'quay.io/ansible/awx-ee:0.3.0'}]
 # This setting controls which EE will be used for project updates.
 # The awx-manage register_default_execution_environments command reads this setting and registers the EE
-# This image is distinguished from others by having "managed_by_tower" set to True and users have limited
+# This image is distinguished from others by having "managed" set to True and users have limited
 # ability to modify it through the API.
 # If a registry credential is needed to pull the image, that can be provided to the awx-manage command
 CONTROL_PLANE_EXECUTION_ENVIRONMENT = 'quay.io/ansible/awx-ee:0.3.0'
@@ -427,6 +427,7 @@ CELERYBEAT_SCHEDULE = {
     'gather_analytics': {'task': 'awx.main.tasks.gather_analytics', 'schedule': timedelta(minutes=5)},
     'task_manager': {'task': 'awx.main.scheduler.tasks.run_task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
     'k8s_reaper': {'task': 'awx.main.tasks.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
+    'receptor_reaper': {'task': 'awx.main.tasks.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.cleanup_execution_environment_images', 'schedule': timedelta(hours=3)},
 }
@@ -677,12 +678,12 @@ RHV_EXCLUDE_EMPTY_GROUPS = True
 RHV_INSTANCE_ID_VAR = 'id'
 
 # ---------------------
-# ----- Tower     -----
+# ----- Controller     -----
 # ---------------------
-TOWER_ENABLED_VAR = 'remote_tower_enabled'
-TOWER_ENABLED_VALUE = 'true'
-TOWER_EXCLUDE_EMPTY_GROUPS = True
-TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
+CONTROLLER_ENABLED_VAR = 'remote_tower_enabled'
+CONTROLLER_ENABLED_VALUE = 'true'
+CONTROLLER_EXCLUDE_EMPTY_GROUPS = True
+CONTROLLER_INSTANCE_ID_VAR = 'remote_tower_id'
 
 # ---------------------
 # ----- Foreman -----

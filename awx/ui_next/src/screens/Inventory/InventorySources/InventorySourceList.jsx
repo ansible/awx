@@ -12,11 +12,9 @@ import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from '../../../components/PaginatedTable';
 import useSelected from '../../../util/useSelected';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import AlertModal from '../../../components/AlertModal/AlertModal';

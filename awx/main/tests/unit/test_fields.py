@@ -93,7 +93,7 @@ def test_custom_error_messages(schema, given, message):
     ],
 )
 def test_cred_type_input_schema_validity(input_, valid):
-    type_ = CredentialType(kind='cloud', name='SomeCloud', managed_by_tower=True, inputs=input_)
+    type_ = CredentialType(kind='cloud', name='SomeCloud', managed=True, inputs=input_)
     field = CredentialType._meta.get_field('inputs')
     if valid is False:
         with pytest.raises(ValidationError):
@@ -151,7 +151,7 @@ def test_cred_type_injectors_schema(injectors, valid):
     type_ = CredentialType(
         kind='cloud',
         name='SomeCloud',
-        managed_by_tower=True,
+        managed=True,
         inputs={
             'fields': [
                 {'id': 'username', 'type': 'string', 'label': '_'},
@@ -190,7 +190,7 @@ def test_credential_creation_validation_failure(inputs):
     type_ = CredentialType(
         kind='cloud',
         name='SomeCloud',
-        managed_by_tower=True,
+        managed=True,
         inputs={
             'fields': [{'id': 'username', 'label': 'Username for SomeCloud', 'type': 'string'}, {'id': 'flag', 'label': 'Some Boolean Flag', 'type': 'boolean'}]
         },

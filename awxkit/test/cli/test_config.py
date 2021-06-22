@@ -7,7 +7,7 @@ from awxkit import config
 
 def test_host_from_environment():
     cli = CLI()
-    cli.parse_args(['awx'], env={'TOWER_HOST': 'https://xyz.local'})
+    cli.parse_args(['awx'], env={'CONTROLLER_HOST': 'https://xyz.local'})
     with pytest.raises(ConnectionError):
         cli.connect()
     assert config.base_url == 'https://xyz.local'
@@ -23,7 +23,7 @@ def test_host_from_argv():
 
 def test_username_and_password_from_environment():
     cli = CLI()
-    cli.parse_args(['awx'], env={'TOWER_USERNAME': 'mary', 'TOWER_PASSWORD': 'secret'})
+    cli.parse_args(['awx'], env={'CONTROLLER_USERNAME': 'mary', 'CONTROLLER_PASSWORD': 'secret'})
     with pytest.raises(ConnectionError):
         cli.connect()
 
@@ -43,7 +43,7 @@ def test_username_and_password_argv():
 
 def test_config_precedence():
     cli = CLI()
-    cli.parse_args(['awx', '--conf.username', 'mary', '--conf.password', 'secret'], env={'TOWER_USERNAME': 'IGNORE', 'TOWER_PASSWORD': 'IGNORE'})
+    cli.parse_args(['awx', '--conf.username', 'mary', '--conf.password', 'secret'], env={'CONTROLLER_USERNAME': 'IGNORE', 'CONTROLLER_PASSWORD': 'IGNORE'})
     with pytest.raises(ConnectionError):
         cli.connect()
 

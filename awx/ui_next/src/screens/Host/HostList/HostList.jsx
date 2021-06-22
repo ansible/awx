@@ -6,13 +6,11 @@ import { HostsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import {
-  ToolbarAddButton,
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
+  ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';

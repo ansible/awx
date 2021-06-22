@@ -11,7 +11,8 @@ jest.mock('react-router-dom', () => ({
 
 describe('<Users />', () => {
   test('initially renders successfully', () => {
-    mountWithContexts(<Users />);
+    const wrapper = mountWithContexts(<Users />);
+    wrapper.unmount();
   });
 
   test('should display a breadcrumb heading', () => {
