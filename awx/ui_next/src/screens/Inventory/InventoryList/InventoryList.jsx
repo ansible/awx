@@ -169,6 +169,18 @@ function InventoryList() {
               isDefault: true,
             },
             {
+              name: t`Inventory Type`,
+              key: 'or__kind',
+              options: [
+                ['', t`Inventory`],
+                ['smart', t`Smart Inventory`],
+              ],
+            },
+            {
+              name: t`Organization`,
+              key: 'organization__name',
+            },
+            {
               name: t`Description`,
               key: 'description__icontains',
             },
