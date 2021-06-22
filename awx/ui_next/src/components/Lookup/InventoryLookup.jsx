@@ -69,7 +69,7 @@ function InventoryLookup({
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => {
-          if (key === 'kind' && hideSmartInventories) {
+          if (['kind', 'host_filter'].includes(key) && hideSmartInventories) {
             return false;
           }
           return actionsResponse.data.actions?.GET[key].filterable;
