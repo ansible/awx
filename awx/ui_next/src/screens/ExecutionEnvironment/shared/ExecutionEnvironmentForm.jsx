@@ -74,7 +74,10 @@ function ExecutionEnvironmentFormFields({
             : null
         }
         autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
-        isDisabled={!!isOrgLookupDisabled && isGloballyAvailable.current}
+        isDisabled={
+          (!!isOrgLookupDisabled && isGloballyAvailable.current) ||
+          executionEnvironment?.managed
+        }
         validate={
           !me?.is_superuser
             ? required(t`Select a value for this field`)
@@ -93,6 +96,7 @@ function ExecutionEnvironmentFormFields({
         type="text"
         validate={required(null)}
         isRequired
+        isDisabled={executionEnvironment?.managed || false}
       />
       <FormField
         id="execution-environment-image"
@@ -101,6 +105,7 @@ function ExecutionEnvironmentFormFields({
         type="text"
         validate={required(null)}
         isRequired
+        isDisabled={executionEnvironment?.managed || false}
         tooltip={
           <span>
             {t`The full image location, including the container registry, image name, and version tag.`}
@@ -142,6 +147,7 @@ function ExecutionEnvironmentFormFields({
         label={t`Description`}
         name="description"
         type="text"
+        isDisabled={executionEnvironment?.managed || false}
       />
       {isOrgLookupDisabled && isGloballyAvailable.current ? (
         <Tooltip
@@ -162,6 +168,7 @@ function ExecutionEnvironmentFormFields({
         onChange={onCredentialChange}
         value={credentialField.value}
         tooltip={t`Credential to authenticate with a protected container registry.`}
+        isDisabled={executionEnvironment?.managed || false}
       />
     </>
   );

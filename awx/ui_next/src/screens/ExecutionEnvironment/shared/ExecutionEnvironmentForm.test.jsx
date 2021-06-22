@@ -271,4 +271,46 @@ describe('<ExecutionEnvironmentForm/>', () => {
     newWrapper.update();
     expect(newWrapper.find('OrganizationLookup').prop('value')).toEqual(null);
   });
+
+  test('should disable edition for managed EEs, except pull option', async () => {
+    let newWrapper;
+    await act(async () => {
+      newWrapper = mountWithContexts(
+        <ExecutionEnvironmentForm
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+          executionEnvironment={{ ...executionEnvironment, managed: true }}
+          options={mockOptions}
+          me={mockMe}
+        />
+      );
+    });
+    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    expect(newWrapper.find('OrganizationLookup').prop('isDisabled')).toEqual(
+      true
+    );
+    expect(newWrapper.find('CredentialLookup').prop('isDisabled')).toEqual(
+      true
+    );
+    expect(
+      newWrapper
+        .find('TextInputBase[id="execution-environment-name"]')
+        .prop('isDisabled')
+    ).toEqual(true);
+    expect(
+      newWrapper
+        .find('TextInputBase[id="execution-environment-description"]')
+        .prop('isDisabled')
+    ).toEqual(true);
+    expect(
+      newWrapper
+        .find('TextInputBase[id="execution-environment-image"]')
+        .prop('isDisabled')
+    ).toEqual(true);
+    expect(
+      newWrapper
+        .find('FormSelect[id="container-pull-options"]')
+        .prop('isDisabled')
+    ).toEqual(false);
+  });
 });
