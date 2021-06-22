@@ -29,22 +29,24 @@ const QS_CONFIG = getQSConfig('credentials', {
 });
 
 function CredentialLookup({
-  helperTextInvalid,
-  label,
-  isValid,
-  onBlur,
-  onChange,
-  required,
+  autoPopulate,
   credentialTypeId,
   credentialTypeKind,
   credentialTypeNamespace,
-  value,
-  tooltip,
-  isDisabled,
-  autoPopulate,
-  multiple,
-  validate,
+  draggable,
   fieldName,
+  helperTextInvalid,
+  isDisabled,
+  isValid,
+  label,
+  modalDescription,
+  multiple,
+  onBlur,
+  onChange,
+  required,
+  tooltip,
+  validate,
+  value,
 }) {
   const history = useHistory();
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
@@ -174,6 +176,7 @@ function CredentialLookup({
         qsConfig={QS_CONFIG}
         isDisabled={isDisabled}
         multiple={multiple}
+        modalDescription={modalDescription}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}
@@ -208,7 +211,11 @@ function CredentialLookup({
             name="credential"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+            sortSelectedItems={selectedItems =>
+              dispatch({ type: 'SET_SELECTED_ITEMS', selectedItems })
+            }
             multiple={multiple}
+            draggable={draggable}
           />
         )}
       />

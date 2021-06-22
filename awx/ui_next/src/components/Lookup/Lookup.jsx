@@ -49,6 +49,7 @@ function Lookup(props) {
     onDebounce,
     fieldName,
     validate,
+    modalDescription,
   } = props;
   const [typedText, setTypedText] = useState('');
   const debounceRequest = useDebounce(onDebounce, 1000);
@@ -166,6 +167,7 @@ function Lookup(props) {
         aria-label={t`Lookup modal`}
         isOpen={isModalOpen}
         onClose={closeModal}
+        description={state?.selectedItems?.length > 0 && modalDescription}
         actions={[
           <Button
             ouiaId="modal-select-button"
@@ -204,6 +206,7 @@ const Item = shape({
 Lookup.propTypes = {
   id: string,
   header: string,
+  modalDescription: string,
   onChange: func.isRequired,
   value: oneOfType([Item, arrayOf(Item)]),
   multiple: bool,
@@ -224,6 +227,7 @@ Lookup.defaultProps = {
   value: null,
   multiple: false,
   required: false,
+  modalDescription: '',
   onBlur: () => {},
   renderItemChip: ({ item, removeItem, canDelete }) => (
     <Chip

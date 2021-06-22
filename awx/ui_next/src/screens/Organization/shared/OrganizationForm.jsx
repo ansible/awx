@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
@@ -106,7 +106,20 @@ function OrganizationFormFields({
         onChange={handleCredentialUpdate}
         value={galaxyCredentialsField.value}
         multiple
+        draggable
         fieldName="galaxy_credentials"
+        modalDescription={
+          <>
+            <b>
+              <Trans>Selected</Trans>
+            </b>
+            <br />
+            <Trans>
+              Note: The order of these credentials sets precedence for the sync
+              and lookup of the content.
+            </Trans>
+          </>
+        }
       />
     </>
   );

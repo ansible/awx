@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 
 import CheckboxCard from './CheckboxCard';
-import SelectedList from '../SelectedList';
+import { SelectedList } from '../SelectedList';
 
 function RolesStep({
   onRolesClick,
