@@ -434,28 +434,42 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       );
     }
 
+    const eventPromise = getJobModel(job.type).readEvents(job.id, {
+      ...params,
+      ...parseQueryString(QS_CONFIG, location.search),
+    });
+
+    let countRequest;
+    if (isJobRunning(job?.status)) {
+      // If the job is running, it means we're using limit-offset pagination. Requests
+      // with limit-offset pagination won't return a total event count for performance
+      // reasons. In this situation, we derive the remote row count by using the highest
+      // counter available in the database.
+      countRequest = async () => {
+        const {
+          data: { results: lastEvents = [] },
+        } = await getJobModel(job.type).readEvents(job.id, {
+          order_by: '-counter',
+          limit: 1,
+        });
+        return lastEvents.length >= 1 ? lastEvents[0].counter : 0;
+      };
+    } else {
+      countRequest = async () => {
+        const {
+          data: { count: eventCount },
+        } = await eventPromise;
+        return eventCount;
+      };
+    }
+
     try {
       const [
         {
           data: { results: fetchedEvents = [] },
         },
-        {
-          data: { results: lastEvents = [] },
-        },
-      ] = await Promise.all([
-        getJobModel(job.type).readEvents(job.id, {
-          ...params,
-          ...parseQueryString(QS_CONFIG, location.search),
-        }),
-        getJobModel(job.type).readEvents(job.id, {
-          order_by: '-counter',
-          limit: 1,
-        }),
-      ]);
-      let count = 0;
-      if (lastEvents.length >= 1 && lastEvents[0]?.counter) {
-        count = lastEvents[0]?.counter;
-      }
+        count,
+      ] = await Promise.all([eventPromise, countRequest()]);
 
       if (isMounted.current) {
         let countOffset = 0;

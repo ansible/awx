@@ -13,6 +13,22 @@ import mockFilteredJobEventsData from './data.filtered_job_events.json';
 
 jest.mock('../../../api');
 
+const applyJobEventMock = mockJobEvents => {
+  const mockReadEvents = async (jobId, params) => {
+    const [...results] = mockJobEvents.results;
+    if (params.order_by && params.order_by.includes('-')) {
+      results.reverse();
+    }
+    return {
+      data: {
+        results,
+        count: mockJobEvents.count,
+      },
+    };
+  };
+  JobsAPI.readEvents = jest.fn().mockImplementation(mockReadEvents);
+};
+
 const generateChattyRows = () => {
   const rows = [
     '',
@@ -82,24 +98,13 @@ const originalOffsetWidth = Object.getOwnPropertyDescriptor(
 describe('<JobOutput />', () => {
   let wrapper;
   const mockJob = mockJobData;
-  const mockJobEvents = mockJobEventsData;
+
   beforeEach(() => {
-    JobsAPI.readEvents = (jobId, params) => {
-      const [...results] = mockJobEvents.results;
-      if (params.order_by && params.order_by.includes('-')) {
-        results.reverse();
-      }
-      return {
-        data: {
-          results,
-        },
-      };
-    };
+    applyJobEventMock(mockJobEventsData);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully', async () => {
@@ -141,7 +146,7 @@ describe('<JobOutput />', () => {
     });
     wrapper.update();
     jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(jobEvents.length - 1).prop('stdout')).toBe(
+    expect(jobEvents.at(jobEvents.length - 2).prop('stdout')).toBe(
       '\r\nPLAY RECAP *********************************************************************\r\n\u001b[0;32mlocalhost\u001b[0m                  : \u001b[0;32mok=1   \u001b[0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   \r\n'
     );
     await act(async () => {
@@ -149,10 +154,10 @@ describe('<JobOutput />', () => {
     });
     wrapper.update();
     jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(1).prop('stdout')).toBe(
+    expect(jobEvents.at(0).prop('stdout')).toBe(
       '\u001b[0;32mok: [localhost] => (item=76) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 76"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
-    expect(jobEvents.at(2).prop('stdout')).toBe(
+    expect(jobEvents.at(1).prop('stdout')).toBe(
       '\u001b[0;32mok: [localhost] => (item=77) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 77"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
     await act(async () => {
@@ -169,7 +174,7 @@ describe('<JobOutput />', () => {
     });
     wrapper.update();
     jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(jobEvents.length - 1).prop('stdout')).toBe(
+    expect(jobEvents.at(jobEvents.length - 2).prop('stdout')).toBe(
       '\r\nPLAY RECAP *********************************************************************\r\n\u001b[0;32mlocalhost\u001b[0m                  : \u001b[0;32mok=1   \u001b[0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   \r\n'
     );
     Object.defineProperty(
@@ -266,11 +271,7 @@ describe('<JobOutput />', () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    JobsAPI.readEvents = jest.fn();
-    JobsAPI.readEvents.mockClear();
-    JobsAPI.readEvents.mockResolvedValueOnce({
-      data: mockFilteredJobEventsData,
-    });
+    applyJobEventMock(mockFilteredJobEventsData);
     await act(async () => {
       wrapper.find(searchTextInput).instance().value = '99';
       wrapper.find(searchTextInput).simulate('change');
@@ -281,14 +282,13 @@ describe('<JobOutput />', () => {
     });
     wrapper.update();
     expect(JobsAPI.readEvents).toHaveBeenCalled();
-    // TODO: Fix these assertions
-    // const jobEvents = wrapper.find('JobEvent');
-    // expect(jobEvents.at(0).prop('stdout')).toBe(
-    //  '\u001b[0;32mok: [localhost] => (item=99) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 99"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    // );
-    // expect(jobEvents.at(1).prop('stdout')).toBe(
-    //  '\u001b[0;32mok: [localhost] => (item=199) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 199"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    // );
+    const jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(0).prop('stdout')).toBe(
+      '\u001b[0;32mok: [localhost] => (item=99) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 99"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
+    );
+    expect(jobEvents.at(1).prop('stdout')).toBe(
+      '\u001b[0;32mok: [localhost] => (item=199) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 199"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
+    );
   });
 
   test('should throw error', async () => {
