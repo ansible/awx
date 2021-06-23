@@ -98,7 +98,11 @@ function SurveyListItem({
           dataListCells={[
             <DataListCell key="name">
               <>
-                <Link to={`survey/edit?question_variable=${question.variable}`}>
+                <Link
+                  to={`survey/edit?question_variable=${encodeURIComponent(
+                    question.variable
+                  )}`}
+                >
                   {question.question_name}
                 </Link>
                 {question.required && (

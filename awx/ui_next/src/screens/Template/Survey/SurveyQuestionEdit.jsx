@@ -15,7 +15,9 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
   const match = useRouteMatch();
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
-  const questionVariable = queryParams.get('question_variable');
+  const questionVariable = decodeURIComponent(
+    queryParams.get('question_variable')
+  );
 
   if (!survey) {
     return <ContentLoading />;
