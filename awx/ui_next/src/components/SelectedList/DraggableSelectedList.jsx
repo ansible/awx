@@ -88,9 +88,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
                 <DataListItemCells
                   dataListCells={[
                     <DataListCell key={label}>
-                      <span id={rowPosition}>
-                        {`${rowPosition}. ${label}`}
-                      </span>
+                      <span id={rowPosition}>{`${rowPosition}. ${label}`}</span>
                     </DataListCell>,
                   ]}
                 />
