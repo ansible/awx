@@ -35,7 +35,7 @@ class TestDependentInventoryUpdate:
                 task.post_run_hook(proj_update, 'successful')
                 assert not inv_update_mck.called
 
-    def test_dependent_inventory_updates(self, scm_inventory_source):
+    def test_dependent_inventory_updates(self, scm_inventory_source, default_instance_group):
         task = RunProjectUpdate()
         scm_inventory_source.scm_last_revision = ''
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
@@ -47,7 +47,7 @@ class TestDependentInventoryUpdate:
                 iu_run_mock.assert_called_once_with(inv_update.id)
                 assert inv_update.source_project_update_id == proj_update.pk
 
-    def test_dependent_inventory_project_cancel(self, project, inventory):
+    def test_dependent_inventory_project_cancel(self, project, inventory, default_instance_group):
         """
         Test that dependent inventory updates exhibit good behavior on cancel
         of the source project update
