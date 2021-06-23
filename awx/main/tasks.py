@@ -87,7 +87,7 @@ from awx.main.exceptions import AwxTaskError, PostRunError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
-from awx.main.utils import (
+from awx.main.utils.common import (
     update_scm_url,
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
@@ -97,6 +97,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
     cleanup_new_process,
+    create_partition,
 )
 from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
@@ -1791,6 +1792,7 @@ class RunJob(BaseTask):
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
+            create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
             job = self.update_model(job.pk, project_update=local_project_sync)
@@ -2081,6 +2083,7 @@ class RunProjectUpdate(BaseTask):
                     )
                 )
             try:
+                create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
                 inv_update_class().run(local_inv_update.id)
             except Exception:
                 logger.exception('{} Unhandled exception updating dependent SCM inventory sources.'.format(project_update.log_format))

@@ -40,11 +40,12 @@ class TestDependentInventoryUpdate:
         scm_inventory_source.scm_last_revision = ''
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
         with mock.patch.object(RunInventoryUpdate, 'run') as iu_run_mock:
-            task._update_dependent_inventories(proj_update, [scm_inventory_source])
-            assert InventoryUpdate.objects.count() == 1
-            inv_update = InventoryUpdate.objects.first()
-            iu_run_mock.assert_called_once_with(inv_update.id)
-            assert inv_update.source_project_update_id == proj_update.pk
+            with mock.patch('awx.main.tasks.create_partition'):
+                task._update_dependent_inventories(proj_update, [scm_inventory_source])
+                assert InventoryUpdate.objects.count() == 1
+                inv_update = InventoryUpdate.objects.first()
+                iu_run_mock.assert_called_once_with(inv_update.id)
+                assert inv_update.source_project_update_id == proj_update.pk
 
     def test_dependent_inventory_project_cancel(self, project, inventory):
         """
@@ -63,8 +64,9 @@ class TestDependentInventoryUpdate:
             ProjectUpdate.objects.all().update(cancel_flag=True)
 
         with mock.patch.object(RunInventoryUpdate, 'run') as iu_run_mock:
-            iu_run_mock.side_effect = user_cancels_project
-            task._update_dependent_inventories(proj_update, [is1, is2])
-            # Verify that it bails after 1st update, detecting a cancel
-            assert is2.inventory_updates.count() == 0
-            iu_run_mock.assert_called_once()
+            with mock.patch('awx.main.tasks.create_partition'):
+                iu_run_mock.side_effect = user_cancels_project
+                task._update_dependent_inventories(proj_update, [is1, is2])
+                # Verify that it bails after 1st update, detecting a cancel
+                assert is2.inventory_updates.count() == 0
+                iu_run_mock.assert_called_once()
