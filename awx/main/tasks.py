@@ -2072,12 +2072,20 @@ class RunProjectUpdate(BaseTask):
                 if InventoryUpdate.objects.filter(inventory_source=inv_src, status__in=ACTIVE_STATES).exists():
                     logger.debug('Skipping SCM inventory update for `{}` because ' 'another update is already active.'.format(inv_src.name))
                     continue
+
+                if settings.IS_K8S:
+                    instance_group = InventoryUpdate(inventory_source=inv_src).preferred_instance_groups[0]
+                    execution_node = None
+                else:
+                    instance_group = project_update.instance_group
+                    execution_node = project_update.execution_node
+
                 local_inv_update = inv_src.create_inventory_update(
                     _eager_fields=dict(
                         launch_type='scm',
                         status='running',
-                        instance_group=project_update.instance_group,
-                        execution_node=project_update.execution_node,
+                        instance_group=instance_group,
+                        execution_node=execution_node,
                         source_project_update=project_update,
                         celery_task_id=project_update.celery_task_id,
                     )
