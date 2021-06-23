@@ -61,6 +61,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
     <>
       <DataList
         aria-label={t`Draggable list to reorder and remove selected items.`}
+        data-cy="draggable-list"
         itemOrder={orderedList}
         onDragCancel={onDragCancel}
         onDragFinish={onDragFinish}
@@ -81,13 +82,14 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
                     Press enter to confirm the drag, or any other key to
                     cancel the drag operation.`}
                     aria-pressed="false"
+                    data-cy={`reorder-${label}`}
                   />
                 </DataListControl>
                 <DataListItemCells
                   dataListCells={[
                     <DataListCell key={label}>
                       <span id={rowPosition}>
-                        {rowPosition}. {label}
+                        {`${rowPosition}. ${label}`}
                       </span>
                     </DataListCell>,
                   ]}
@@ -97,7 +99,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
                     onClick={() => removeItem(label)}
                     variant="plain"
                     aria-label={t`Remove`}
-                    ouiaId="draggable-list-remove"
+                    ouiaId={`draggable-list-remove-${label}`}
                   >
                     <TimesIcon />
                   </Button>
