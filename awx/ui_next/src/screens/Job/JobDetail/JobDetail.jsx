@@ -67,6 +67,7 @@ function JobDetail({ job }) {
     workflow_job_template: workflowJobTemplate,
     labels,
     project,
+    project_update: projectUpdate,
     source_workflow_job,
     execution_environment: executionEnvironment,
   } = job.summary_fields;
@@ -101,6 +102,25 @@ function JobDetail({ job }) {
       <Link to={`/instance_groups/container_group/${item.id}`}>
         {item.name}
       </Link>
+    );
+  };
+
+  const buildProjectDetailValue = () => {
+    if (projectUpdate) {
+      return (
+        <StatusDetailValue>
+          <Link to={`/jobs/project/${projectUpdate.id}`}>
+            <StatusIcon status={project.status} />
+          </Link>
+          <Link to={`/projects/${project.id}`}>{project.name}</Link>
+        </StatusDetailValue>
+      );
+    }
+    return (
+      <StatusDetailValue>
+        <StatusIcon status={project.status} />
+        <Link to={`/projects/${project.id}`}>{project.name}</Link>
+      </StatusDetailValue>
     );
   };
 
@@ -199,15 +219,7 @@ function JobDetail({ job }) {
           />
         )}
         {project && (
-          <Detail
-            label={t`Project`}
-            value={
-              <StatusDetailValue>
-                {project.status && <StatusIcon status={project.status} />}
-                <Link to={`/projects/${project.id}`}>{project.name}</Link>
-              </StatusDetailValue>
-            }
-          />
+          <Detail label={t`Project`} value={buildProjectDetailValue()} />
         )}
         {scmBranch && (
           <Detail
