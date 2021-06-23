@@ -7,7 +7,7 @@ readonly CMDNAME=$(basename "$0")
 
 readonly MIN_SLEEP=0.5
 readonly MAX_SLEEP=30
-readonly ATTEMPTS=10
+readonly ATTEMPTS=30
 readonly TIMEOUT=60
 
 log_message() { echo "[${CMDNAME}]" "$@" >&2; }
