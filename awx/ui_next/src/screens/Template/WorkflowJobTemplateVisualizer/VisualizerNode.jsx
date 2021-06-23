@@ -35,10 +35,13 @@ const NodeContents = styled.div`
   padding: 0px 10px;
   background-color: ${props =>
     props.isInvalidLinkTarget ? '#D7D7D7' : '#FFFFFF'};
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const NodeResourceName = styled.p`
-  margin-top: 20px;
   overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
