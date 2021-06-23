@@ -8,6 +8,8 @@
   set_fact:
     wfjt_name1: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}"
     wfjt_name2: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}-2"
+    demo_project_name: "AWX-Collection-tests-workflow_launch--proj-{{ test_id }}"
+    jt1_name: "AWX-Collection-tests-workflow_launch--jt1-{{ test_id }}"
     approval_node_name: "AWX-Collection-tests-workflow_launch_approval_node-{{ test_id }}"
 
 - block:
@@ -233,6 +235,62 @@
         timeout: 120
         job_type: "workflow_jobs"
 
+
+    - name: Create a Demo Project
+      project:
+        name: "{{ demo_project_name }}"
+        organization: Default
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks.git
+        scm_credential: "{{ scm_cred_name }}"
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a Sliced Job Template
+      job_template:
+        name: "{{ jt1_name }}"
+        project: "{{ demo_project_name }}"
+        inventory: Demo Inventory
+        playbook: test_set_stats.yml
+        job_slice_count: 2
+        job_type: run
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add a sliced job node
+      workflow_job_template_node:
+        workflow_job_template: "{{ wfjt_name2 }}"
+        unified_job_template: "{{ jt1_name }}"
+        identifier: stats
+
+    - name: Run the workflow without waiting This should pause waiting for approval
+      workflow_launch:
+        workflow_template: "{{ wfjt_name2 }}"
+        wait: false
+      ignore_errors: true
+      register: wfjt_info
+
+    - name: Wait for a workflow node to finish
+      workflow_node_slice_aggregator:
+        workflow_job_id: "{{wfjt_info.id}}"
+        name: "{{ jt1_name }}"
+        timeout: 960
+      register: node_lookup_results
+
+    - assert:
+        that:
+          - node_lookup_results.artifacts.float == 1.0
+          - node_lookup_results.artifacts.integer == 123
+          - node_lookup_results.artifacts.boolean
+
   always:
     - name: Clean up test workflow
       workflow_job_template:
@@ -241,3 +299,31 @@
       with_items:
         - "{{ wfjt_name1 }}"
         - "{{ wfjt_name2 }}"
+
+    - name: Delete the Job Template
+      job_template:
+        name: "{{ jt1_name }}"
+        project: "{{ demo_project_name }}"
+        inventory: Demo Inventory
+        playbook: hello_world.yml
+        job_type: run
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Delete the Demo Project
+      project:
+        name: "{{ demo_project_name }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+        scm_credential: "{{ scm_cred_name }}"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"

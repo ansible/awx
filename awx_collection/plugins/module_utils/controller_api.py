@@ -707,7 +707,7 @@ class ControllerAPIModule(ControllerModule):
         else:
             return True
 
-    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=10):
+    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=10, auto_exit=True):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
@@ -737,7 +737,10 @@ class ControllerAPIModule(ControllerModule):
                 self.json_output['msg'] = 'The {0} - {1}, failed'.format(object_type, object_name)
                 self.json_output["job_data"] = result["json"]
             self.wait_output(result)
-            self.fail_json(**self.json_output)
+            if auto_exit:
+                self.fail_json(**self.json_output)
+            else:
+                return result
 
         self.wait_output(result)
 
@@ -775,6 +778,7 @@ class ControllerAPIModule(ControllerModule):
                 url=result["json"]["results"][0]["related"]["job"],
                 object_name=object_name,
                 object_type=object_type,
+                auto_exit=False,
                 timeout=revised_timeout,
                 interval=interval,
             )
