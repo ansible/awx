@@ -12,7 +12,15 @@ import {
 import { EyeIcon, EyeSlashIcon } from '@patternfly/react-icons';
 
 function PasswordInput(props) {
-  const { autocomplete, id, name, validate, isRequired, isDisabled } = props;
+  const {
+    autocomplete,
+    id,
+    name,
+    validate,
+    isFieldGroupValid,
+    isRequired,
+    isDisabled,
+  } = props;
   const [inputType, setInputType] = useState('password');
   const [field, meta] = useField({ name, validate });
 
@@ -44,7 +52,7 @@ function PasswordInput(props) {
         value={field.value === '$encrypted$' ? '' : field.value}
         isDisabled={isDisabled}
         isRequired={isRequired}
-        validated={isValid ? 'default' : 'error'}
+        validated={isValid || isFieldGroupValid ? 'default' : 'error'}
         type={inputType}
         onChange={(_, event) => {
           field.onChange(event);
