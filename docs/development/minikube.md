@@ -66,10 +66,11 @@ In the root of awx-operator:
 ```
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
-    -e tower_image=quay.io/awx/awx_kube_devel \
-    -e tower_image_version=devel \
-    -e tower_image_pull_policy=Always \
-    -e tower_ingress_type=ingress
+    -e image=quay.io/awx/awx_kube_devel \
+    -e image_version=devel \
+    -e image_pull_policy=Always \
+    -e service_type=nodeport \
+    -e namespace=default
 ```
 
 ### Custom AWX Development Image for Kubernetes
