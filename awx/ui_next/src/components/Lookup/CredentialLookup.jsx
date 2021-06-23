@@ -33,10 +33,10 @@ function CredentialLookup({
   credentialTypeId,
   credentialTypeKind,
   credentialTypeNamespace,
-  draggable,
   fieldName,
   helperTextInvalid,
   isDisabled,
+  isSelectedDraggable,
   isValid,
   label,
   modalDescription,
@@ -215,7 +215,7 @@ function CredentialLookup({
               dispatch({ type: 'SET_SELECTED_ITEMS', selectedItems })
             }
             multiple={multiple}
-            draggable={draggable}
+            isSelectedDraggable={isSelectedDraggable}
           />
         )}
       />

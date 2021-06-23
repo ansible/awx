@@ -24,11 +24,11 @@ const RemoveActionSection = styled(DataListAction)`
 
 function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
   const [liveText, setLiveText] = useState('');
-  const [id, setId] = React.useState('');
+  const [id, setId] = useState('');
 
   const onDragStart = newId => {
     setId(newId);
-    setLiveText(t`Dragging tarted for item id: ${newId}.`);
+    setLiveText(t`Dragging started for item id: ${newId}.`);
   };
 
   const onDragMove = (oldIndex, newIndex) => {

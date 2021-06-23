@@ -106,7 +106,7 @@ function OrganizationFormFields({
         onChange={handleCredentialUpdate}
         value={galaxyCredentialsField.value}
         multiple
-        draggable
+        isSelectedDraggable
         fieldName="galaxy_credentials"
         modalDescription={
           <>

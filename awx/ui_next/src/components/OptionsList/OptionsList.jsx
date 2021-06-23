@@ -26,9 +26,9 @@ function OptionsList({
   contentError,
   deselectItem,
   displayKey,
-  draggable,
   header,
   isLoading,
+  isSelectedDraggable,
   multiple,
   name,
   optionCount,
@@ -46,7 +46,7 @@ function OptionsList({
 }) {
   let selectionPreview = null;
   if (value.length > 0) {
-    if (draggable) {
+    if (isSelectedDraggable) {
       selectionPreview = (
         <DraggableSelectedList
           onRemove={deselectItem}
@@ -116,7 +116,7 @@ const Item = shape({
 OptionsList.propTypes = {
   deselectItem: func.isRequired,
   displayKey: string,
-  draggable: bool,
+  isSelectedDraggable: bool,
   multiple: bool,
   optionCount: number.isRequired,
   options: arrayOf(Item).isRequired,
@@ -128,7 +128,7 @@ OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
 };
 OptionsList.defaultProps = {
-  draggable: false,
+  isSelectedDraggable: false,
   multiple: false,
   renderItemChip: null,
   searchColumns: [],
