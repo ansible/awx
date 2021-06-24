@@ -20,6 +20,7 @@ function SmartInventoryAdd() {
       } = await InventoriesAPI.create(values);
 
       /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      // Resolve Promises sequentially to maintain order and avoid race condition
       for (const group of groupsToAssociate) {
         await InventoriesAPI.associateInstanceGroup(invId, group.id);
       }

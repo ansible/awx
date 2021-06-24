@@ -65,6 +65,7 @@ function JobTemplateAdd() {
 
   async function submitInstanceGroups(templateId, addedGroups = []) {
     /* eslint-disable no-await-in-loop, no-restricted-syntax */
+    // Resolve Promises sequentially to maintain order and avoid race condition
     for (const group of addedGroups) {
       await JobTemplatesAPI.associateInstanceGroup(templateId, group.id);
     }

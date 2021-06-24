@@ -30,6 +30,7 @@ const InstanceGroupsMixin = parent =>
 
     async orderInstanceGroups(resourceId, current, original) {
       /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      // Resolve Promises sequentially to maintain order and avoid race condition
       if (!isEqual(current, original)) {
         for (const group of original) {
           await this.disassociateInstanceGroup(resourceId, group.id);
