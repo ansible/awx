@@ -2178,8 +2178,6 @@ class RunProjectUpdate(BaseTask):
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
         project_path = instance.project.get_project_path(check_if_exists=False)
-        if not os.path.exists(project_path):
-            os.makedirs(project_path)  # used as container mount
 
         self.acquire_lock(instance)
 
@@ -2191,6 +2189,9 @@ class RunProjectUpdate(BaseTask):
                     self.original_branch = git_repo.head.commit
                 else:
                     self.original_branch = git_repo.active_branch
+
+        if not os.path.exists(project_path):
+            os.makedirs(project_path)  # used as container mount
 
         stage_path = os.path.join(instance.get_cache_path(), 'stage')
         if os.path.exists(stage_path):
