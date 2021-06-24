@@ -43,6 +43,7 @@ pygerduty
 pyparsing
 python3-saml
 python-dsv-sdk
+python-tss-sdk==0.0.6
 python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
 receptorctl==1.0.0
