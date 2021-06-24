@@ -1268,11 +1268,17 @@ class BaseTask(object):
             for k, v in self.safe_env.items():
                 if k in job_env:
                     job_env[k] = v
-            self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
+            from awx.main.signals import disable_activity_stream  # Circular import
+
+            with disable_activity_stream():
+                self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
         elif status_data['status'] == 'error':
             result_traceback = status_data.get('result_traceback', None)
             if result_traceback:
-                self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
+                from awx.main.signals import disable_activity_stream  # Circular import
+
+                with disable_activity_stream():
+                    self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
 
     @with_path_cleanup
     def run(self, pk, **kwargs):
