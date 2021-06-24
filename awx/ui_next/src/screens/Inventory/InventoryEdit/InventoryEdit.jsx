@@ -6,7 +6,6 @@ import { CardBody } from '../../../components/Card';
 import { InventoriesAPI } from '../../../api';
 import ContentLoading from '../../../components/ContentLoading';
 import InventoryForm from '../shared/InventoryForm';
-import { getAddedAndRemoved } from '../../../util/lists';
 import useIsMounted from '../../../util/useIsMounted';
 
 function InventoryEdit({ inventory }) {
@@ -54,20 +53,12 @@ function InventoryEdit({ inventory }) {
         organization: organization.id,
         ...remainingValues,
       });
-      if (instanceGroups) {
-        const { added, removed } = getAddedAndRemoved(
-          associatedInstanceGroups,
-          instanceGroups
-        );
+      await InventoriesAPI.orderInstanceGroups(
+        inventory.id,
+        instanceGroups,
+        associatedInstanceGroups
+      );
 
-        const associatePromises = added.map(async ig =>
-          InventoriesAPI.associateInstanceGroup(inventory.id, ig.id)
-        );
-        const disassociatePromises = removed.map(async ig =>
-          InventoriesAPI.disassociateInstanceGroup(inventory.id, ig.id)
-        );
-        await Promise.all([...associatePromises, ...disassociatePromises]);
-      }
       const url =
         history.location.pathname.search('smart') > -1
           ? `/inventories/smart_inventory/${inventory.id}/details`

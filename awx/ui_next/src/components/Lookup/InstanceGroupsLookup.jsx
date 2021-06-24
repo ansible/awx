@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { arrayOf, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from '../../api';
 import { InstanceGroup } from '../../types';
@@ -82,6 +82,18 @@ function InstanceGroupsLookup({
         multiple
         required={required}
         isLoading={isLoading}
+        modalDescription={
+          <>
+            <b>
+              <Trans>Selected</Trans>
+            </b>
+            <br />
+            <Trans>
+              Note: The order in which these are selected sets the execution
+              precedence.
+            </Trans>
+          </>
+        }
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}
@@ -113,6 +125,10 @@ function InstanceGroupsLookup({
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+            sortSelectedItems={selectedItems =>
+              dispatch({ type: 'SET_SELECTED_ITEMS', selectedItems })
+            }
+            isSelectedDraggable
           />
         )}
       />

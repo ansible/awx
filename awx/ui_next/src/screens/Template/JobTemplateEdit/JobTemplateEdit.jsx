@@ -61,8 +61,12 @@ function JobTemplateEdit({ template, reloadTemplate }) {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
         submitLabels(labels, template?.organization),
-        submitInstanceGroups(instanceGroups, initialInstanceGroups),
         submitCredentials(credentials),
+        JobTemplatesAPI.orderInstanceGroups(
+          template.id,
+          instanceGroups,
+          initialInstanceGroups
+        ),
       ]);
       reloadTemplate();
       history.push(detailsUrl);
@@ -91,17 +95,6 @@ function JobTemplateEdit({ template, reloadTemplate }) {
       ...associationPromises,
     ]);
     return results;
-  };
-
-  const submitInstanceGroups = async (groups, initialGroups) => {
-    const { added, removed } = getAddedAndRemoved(initialGroups, groups);
-    const disassociatePromises = await removed.map(group =>
-      JobTemplatesAPI.disassociateInstanceGroup(template.id, group.id)
-    );
-    const associatePromises = await added.map(group =>
-      JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
-    );
-    return Promise.all([...disassociatePromises, ...associatePromises]);
   };
 
   const submitCredentials = async newCredentials => {

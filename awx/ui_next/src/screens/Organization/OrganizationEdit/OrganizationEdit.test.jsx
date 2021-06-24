@@ -54,18 +54,34 @@ describe('<OrganizationEdit />', () => {
       name: 'new name',
       description: 'new description',
     };
+    const newInstanceGroups = [
+      {
+        name: 'mock three',
+        id: 3,
+      },
+      {
+        name: 'mock four',
+        id: 4,
+      },
+    ];
+    const oldInstanceGroups = [
+      {
+        name: 'mock two',
+        id: 2,
+      },
+    ];
+
     await act(async () => {
       wrapper.find('OrganizationForm').invoke('onSubmit')(
         updatedOrgData,
-        [3, 4],
-        [2]
+        newInstanceGroups,
+        oldInstanceGroups
       );
     });
-    expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(1, 3);
-    expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(1, 4);
-    expect(OrganizationsAPI.disassociateInstanceGroup).toHaveBeenCalledWith(
-      1,
-      2
+    expect(OrganizationsAPI.orderInstanceGroups).toHaveBeenCalledWith(
+      mockData.id,
+      newInstanceGroups,
+      oldInstanceGroups
     );
   });
 

@@ -258,7 +258,14 @@ describe('<OrganizationForm />', () => {
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
     });
-    expect(onSubmit).toHaveBeenCalledWith(mockDataForm, [3], [2]);
+    expect(onSubmit).toHaveBeenCalledWith(
+      mockDataForm,
+      [
+        { name: 'One', id: 1 },
+        { name: 'Three', id: 3 },
+      ],
+      mockInstanceGroups
+    );
   });
 
   test('onSubmit does not get called if max_hosts value is out of range', async () => {
@@ -332,8 +339,8 @@ describe('<OrganizationForm />', () => {
         max_hosts: 0,
         default_environment: null,
       },
-      [],
-      []
+      mockInstanceGroups,
+      mockInstanceGroups
     );
   });
 

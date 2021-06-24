@@ -15,7 +15,6 @@ import {
   InstanceGroupsLookup,
   ExecutionEnvironmentLookup,
 } from '../../../components/Lookup';
-import { getAddedAndRemoved } from '../../../util/lists';
 import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
@@ -143,19 +142,13 @@ function OrganizationForm({
   };
 
   const handleSubmit = values => {
-    const { added, removed } = getAddedAndRemoved(
-      initialInstanceGroups,
-      instanceGroups
-    );
-    const addedIds = added.map(({ id }) => id);
-    const removedIds = removed.map(({ id }) => id);
     if (
       typeof values.max_hosts !== 'number' ||
       values.max_hosts === 'undefined'
     ) {
       values.max_hosts = 0;
     }
-    onSubmit(values, addedIds, removedIds);
+    onSubmit(values, instanceGroups, initialInstanceGroups);
   };
 
   useEffect(() => {

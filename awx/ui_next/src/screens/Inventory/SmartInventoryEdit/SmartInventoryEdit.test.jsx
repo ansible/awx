@@ -104,8 +104,7 @@ describe('<SmartInventoryEdit />', () => {
       });
     });
     expect(InventoriesAPI.update).toHaveBeenCalledTimes(1);
-    expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledTimes(1);
-    expect(InventoriesAPI.disassociateInstanceGroup).toHaveBeenCalledTimes(1);
+    expect(InventoriesAPI.orderInstanceGroups).toHaveBeenCalledTimes(1);
   });
 
   test('successful form submission should trigger redirect to details', async () => {

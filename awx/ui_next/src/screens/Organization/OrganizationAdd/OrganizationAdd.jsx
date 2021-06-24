@@ -41,13 +41,11 @@ function OrganizationAdd() {
         ...values,
         default_environment: values.default_environment?.id,
       });
-      await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(response.id, id)
-        )
-      );
       /* eslint-disable no-await-in-loop, no-restricted-syntax */
       // Resolve Promises sequentially to maintain order and avoid race condition
+      for (const group of groupsToAssociate) {
+        await OrganizationsAPI.associateInstanceGroup(response.id, group.id);
+      }
       for (const credential of values.galaxy_credentials) {
         await OrganizationsAPI.associateGalaxyCredential(
           response.id,

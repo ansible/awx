@@ -26,16 +26,12 @@ function OrganizationEdit({ organization }) {
         ...values,
         default_environment: values.default_environment?.id || null,
       });
-      await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(organization.id, id)
-        )
+      await OrganizationsAPI.orderInstanceGroups(
+        organization.id,
+        groupsToAssociate,
+        groupsToDisassociate
       );
-      await Promise.all(
-        groupsToDisassociate.map(id =>
-          OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
-        )
-      );
+
       /* eslint-disable no-await-in-loop, no-restricted-syntax */
       // Resolve Promises sequentially to avoid race condition
       if (

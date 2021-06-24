@@ -19,11 +19,11 @@ function SmartInventoryAdd() {
         data: { id: invId },
       } = await InventoriesAPI.create(values);
 
-      await Promise.all(
-        groupsToAssociate.map(({ id }) =>
-          InventoriesAPI.associateInstanceGroup(invId, id)
-        )
-      );
+      /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      for (const group of groupsToAssociate) {
+        await InventoriesAPI.associateInstanceGroup(invId, group.id);
+      }
+      /* eslint-enable no-await-in-loop, no-restricted-syntax */
       return invId;
     }, [])
   );
