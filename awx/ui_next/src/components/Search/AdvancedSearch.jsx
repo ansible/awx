@@ -24,6 +24,10 @@ const AdvancedGroup = styled.div`
     display: grid;
     grid-gap: var(--pf-c-toolbar__expandable-content--m-expanded--GridRowGap);
   }
+
+  & .pf-c-select {
+    min-width: 150px;
+  }
 `;
 
 function AdvancedSearch({

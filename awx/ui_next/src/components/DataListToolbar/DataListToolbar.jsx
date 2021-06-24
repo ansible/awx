@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
 import {
   Checkbox,
   Toolbar,
-  ToolbarContent,
+  ToolbarContent as PFToolbarContent,
   ToolbarGroup,
   ToolbarItem,
   ToolbarToggleGroup,
   Dropdown,
+  DropdownPosition,
   KebabToggle,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
@@ -18,6 +20,12 @@ import Search from '../Search';
 import Sort from '../Sort';
 import { SearchColumns, SortColumns, QSConfig } from '../../types';
 import { KebabifiedProvider } from '../../contexts/Kebabified';
+
+const ToolbarContent = styled(PFToolbarContent)`
+  & > .pf-c-toolbar__content-section {
+    flex-wrap: nowrap;
+  }
+`;
 
 function DataListToolbar({
   itemCount,
@@ -46,6 +54,11 @@ function DataListToolbar({
   const [isKebabOpen, setIsKebabOpen] = useState(false);
   const [isKebabModalOpen, setIsKebabModalOpen] = useState(false);
   const [isAdvancedSearchShown, setIsAdvancedSearchShown] = useState(false);
+
+  const viewportWidth =
+    window.innerWidth || document.documentElement.clientWidth;
+  const dropdownPosition =
+    viewportWidth >= 992 ? DropdownPosition.right : DropdownPosition.left;
 
   const onShowAdvancedSearch = shown => {
     setIsAdvancedSearchShown(shown);
@@ -135,6 +148,7 @@ function DataListToolbar({
                   />
                 }
                 isOpen={isKebabOpen}
+                position={dropdownPosition}
                 isPlain
                 dropdownItems={additionalControls}
               />
