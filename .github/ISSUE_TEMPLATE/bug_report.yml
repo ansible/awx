@@ -1,0 +1,135 @@
+---
+name: Bug Report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are for **concrete, actionable bugs and feature requests** only. For debugging help or technical support, please use:
+        - The #ansible-awx channel on irc.libera.chat
+        - https://groups.google.com/forum/#!forum/awx-project
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Please confirm the following
+      options:
+        - label: I agree to follow this project's [code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+          required: true
+        - label: I have checked the [current issues](https://github.com/ansible/awx/issues) for duplicates.
+          required: true
+        - label: I understand that AWX is open source software provided for free and that I am not entitled to status updates or other assurances.
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the problem.
+    validations:
+      required: false
+
+  - type: input
+    id: awx-version
+    attributes:
+      label: AWX version
+      description: What version of AWX are you running?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: awx-install-method
+    attributes:
+      label: Installation method
+      description: How did you install AWX?
+      multiple: false
+      options:
+        - kubernetes
+        - openshift
+        - minishift
+        - docker on linux
+        - docker for mac
+        - boot2docker
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modified-architecture
+    attributes:
+      label: Modifications
+      description: >-
+       Have you modified the installation, deployment topology, or container images in any way? If yes, please
+       explain in the "additional information" field at the bottom of the form.
+      multiple: false
+      options:
+        - "no"
+        - "yes"
+    validations:
+      required: true
+
+  - type: input
+    id: ansible-version
+    attributes:
+      label: Ansible version
+      description: What version of Ansible are you running?
+    validations:
+      required: false
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+      description: What operating system are you using?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Web browser
+      description: Which browsers are affected?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Edge
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        Starting from a new installation of the system, describe exactly how a developer or quality engineer can reproduce the bug
+        on infrastructure that isn't yours. Include any and all resources created, input values, test users, roles assigned, playbooks used, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-results
+    attributes:
+      label: Expected results
+      description: What did you expect to happpen when running the steps above?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-results
+    attributes:
+      label: Actual results
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional information
+      description: Include any relevant log output, links to sosreport, database dumps, screenshots, or other information.
+    validations:
+      required: false
