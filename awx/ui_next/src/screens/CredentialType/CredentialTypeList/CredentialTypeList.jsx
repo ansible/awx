@@ -203,16 +203,18 @@ function CredentialTypeList() {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        aria-label={t`Deletion error`}
-        isOpen={deletionError}
-        onClose={clearDeletionError}
-        title={t`Error`}
-        variant="error"
-      >
-        {t`Failed to delete one or more credential types.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          aria-label={t`Deletion error`}
+          isOpen={deletionError}
+          onClose={clearDeletionError}
+          title={t`Error`}
+          variant="error"
+        >
+          {t`Failed to delete one or more credential types.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </>
   );
 }

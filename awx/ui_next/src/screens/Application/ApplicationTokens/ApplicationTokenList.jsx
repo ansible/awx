@@ -154,15 +154,17 @@ function ApplicationTokenList() {
           />
         )}
       />
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more tokens.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more tokens.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </>
   );
 }

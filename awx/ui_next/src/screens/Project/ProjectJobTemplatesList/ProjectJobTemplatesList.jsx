@@ -178,15 +178,17 @@ function ProjectJobTemplatesList() {
           emptyStateControls={canAddJT && addButton}
         />
       </Card>
-      <AlertModal
-        isOpen={deletionError}
-        variant="danger"
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more job templates.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more job templates.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </>
   );
 }

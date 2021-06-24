@@ -139,7 +139,6 @@ function InventoryDetail({ inventory }) {
           </DeleteButton>
         )}
       </CardActionsRow>
-      {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
       {error && (
         <AlertModal
           isOpen={error}

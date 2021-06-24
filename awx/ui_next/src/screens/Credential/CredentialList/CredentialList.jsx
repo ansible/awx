@@ -188,16 +188,18 @@ function CredentialList() {
           )}
         />
       </Card>
-      <AlertModal
-        aria-label={t`Deletion Error`}
-        isOpen={deletionError}
-        variant="error"
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more credentials.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          aria-label={t`Deletion Error`}
+          isOpen={deletionError}
+          variant="error"
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more credentials.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </PageSection>
   );
 }

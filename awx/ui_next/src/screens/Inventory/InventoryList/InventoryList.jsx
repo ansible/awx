@@ -255,16 +255,18 @@ function InventoryList() {
           emptyStateControls={canAdd && addButton}
         />
       </Card>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        aria-label={t`Deletion Error`}
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more inventories.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          aria-label={t`Deletion Error`}
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more inventories.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </PageSection>
   );
 }

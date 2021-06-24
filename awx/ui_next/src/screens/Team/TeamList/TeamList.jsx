@@ -192,15 +192,17 @@ function TeamList() {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more teams.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more teams.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </>
   );
 }

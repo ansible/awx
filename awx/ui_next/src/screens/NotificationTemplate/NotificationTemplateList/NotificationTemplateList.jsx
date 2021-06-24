@@ -219,15 +219,18 @@ function NotificationTemplatesList() {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more notification template.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more notification template.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
+
       <AlertGroup data-cy={alertGroupDataCy} isToast>
         {testToasts
           .filter(notification => notification.status !== 'pending')

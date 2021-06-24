@@ -261,16 +261,18 @@ function InstanceGroupList() {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        aria-label={t`Deletion error`}
-        isOpen={deletionError}
-        onClose={clearDeletionError}
-        title={t`Error`}
-        variant="error"
-      >
-        {t`Failed to delete one or more instance groups.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          aria-label={t`Deletion error`}
+          isOpen={deletionError}
+          onClose={clearDeletionError}
+          title={t`Error`}
+          variant="error"
+        >
+          {t`Failed to delete one or more instance groups.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </>
   );
 }

@@ -267,16 +267,18 @@ function TemplateList({ defaultParams }) {
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}
         />
       </Card>
-      <AlertModal
-        aria-label={t`Deletion Error`}
-        isOpen={deletionError}
-        variant="error"
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more templates.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          aria-label={t`Deletion Error`}
+          isOpen={deletionError}
+          variant="error"
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more templates.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </>
   );
 }

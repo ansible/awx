@@ -121,15 +121,17 @@ function ManagementJobList() {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        isOpen={Boolean(launchError)}
-        variant="error"
-        title={t`Error!`}
-        onClose={() => setLaunchError(null)}
-      >
-        {t`Failed to launch job.`}
-        <ErrorDetail error={launchError} />
-      </AlertModal>
+      {launchError && (
+        <AlertModal
+          isOpen={Boolean(launchError)}
+          variant="error"
+          title={t`Error!`}
+          onClose={() => setLaunchError(null)}
+        >
+          {t`Failed to launch job.`}
+          <ErrorDetail error={launchError} />
+        </AlertModal>
+      )}
     </>
   );
 }
