@@ -29,7 +29,7 @@ function HostDetail({ host }) {
     variables,
     summary_fields: {
       inventory,
-      recent_jobs,
+      recent_jobs: recentJobs,
       created_by,
       modified_by,
       user_capabilities,
@@ -66,17 +66,13 @@ function HostDetail({ host }) {
     );
   }
 
-  const recentPlaybookJobs = recent_jobs.map(job => ({ ...job, type: 'job' }));
   return (
     <CardBody>
       <HostToggle host={host} css="padding-bottom: 40px" />
       <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} dataCy="host-name" />
-        {recentPlaybookJobs?.length > 0 && (
-          <Detail
-            label={t`Activity`}
-            value={<Sparkline jobs={recentPlaybookJobs} />}
-          />
+        {recentJobs?.length > 0 && (
+          <Detail label={t`Activity`} value={<Sparkline jobs={recentJobs} />} />
         )}
         <Detail label={t`Description`} value={description} />
         <Detail
