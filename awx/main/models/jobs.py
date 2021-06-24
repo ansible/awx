@@ -1246,7 +1246,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @property
     def preferred_instance_groups(self):
-        return self.global_instance_groups
+        return self.control_plane_instance_group
 
     '''
     JobNotificationMixin
