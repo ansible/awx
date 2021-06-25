@@ -33,13 +33,13 @@ tss_inputs = {
             'type': 'int',
         },
     ],
-    'required': ['server_url', 'secret_id', 'username', 'password'],
+    'required': ['server_url', 'username', 'password', 'secret_id'],
 }
 
 
-authorizer = PasswordGrantAuthorizer(
-    f"{tss_inputs['fields'][0]}", f"{tss_inputs['fields'][1]}", f"{tss_inputs['fields'][2]}"  # server_url  # username  # password
-)
+def tss_backend(**kwargs):
+    authorizer = PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])
+    return SecretServer(authorizer).get_secret(kwargs['secret_id'])
 
 
-tss_plugin = CredentialPlugin('Thycotic Secret Server', inputs=tss_inputs, backend=SecretServer(authorizer).get_secret(tss_inputs['metadata'][0]))
+tss_plugin = CredentialPlugin('Thycotic Secret Server', inputs=tss_inputs, backend=tss_backend)
