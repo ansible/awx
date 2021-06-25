@@ -3006,7 +3006,8 @@ class AWXReceptorJob:
                 if state_name == 'Succeeded':
                     return res
 
-                raise RuntimeError(detail)
+                if self.task.instance.result_traceback is None:
+                    raise RuntimeError(detail)
 
         return res
 
