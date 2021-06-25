@@ -25,10 +25,11 @@ const SplitLayout = styled(PageSection)`
   }
 `;
 const Card = styled(_Card)`
-  display: inline-block;
-  break-inside: avoid;
-  margin-bottom: 24px;
-  width: 100%;
+  && {
+    display: inline-block;
+    margin-bottom: 24px;
+    width: 100%;
+  }
 `;
 const CardHeader = styled(_CardHeader)`
   && {
