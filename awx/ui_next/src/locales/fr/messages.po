@@ -951,8 +951,8 @@ msgstr "Version non sensible à la casse de startswith."
 msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
-msgstr "Changez PROJECTS_ROOT lors du déploiement de\n"
-"{brandName} pour modifier cet emplacement."
+msgstr "Changer PROJECT_ROOTS quand tu deploie\n"
+"{brandNAME} pour changer cette cible."
 
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:43
 msgid "Changed"
