@@ -421,7 +421,7 @@ class ControllerAPIModule(ControllerModule):
     def copy_item(self, existing_item, copy_from_name_or_id, new_item_name, endpoint=None, item_type='unknown', copy_lookup_data=None):
 
         if existing_item is not None:
-            self.warn(msg="A {0} with the name {1} already exists.".format(item_type, new_item_name))
+            self.warn("A {0} with the name {1} already exists.".format(item_type, new_item_name))
             self.json_output['changed'] = False
             self.json_output['copied'] = False
             return existing_item
