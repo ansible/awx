@@ -10,7 +10,7 @@ import {
 } from 'prop-types';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
-import SelectedList from '../SelectedList';
+import { SelectedList, DraggableSelectedList } from '../SelectedList';
 import CheckboxListItem from '../CheckboxListItem';
 import DataListToolbar from '../DataListToolbar';
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
@@ -23,28 +23,39 @@ const ModalList = styled.div`
 `;
 
 function OptionsList({
-  value,
   contentError,
-  options,
-  optionCount,
-  searchColumns,
-  sortColumns,
-  searchableKeys,
-  relatedSearchableKeys,
-  multiple,
+  deselectItem,
+  displayKey,
   header,
+  isLoading,
+  isSelectedDraggable,
+  multiple,
   name,
+  optionCount,
+  options,
   qsConfig,
   readOnly,
-  selectItem,
-  deselectItem,
+  relatedSearchableKeys,
   renderItemChip,
-  isLoading,
-  displayKey,
+  searchColumns,
+  searchableKeys,
+  selectItem,
+  sortColumns,
+  sortSelectedItems,
+  value,
 }) {
-  return (
-    <ModalList>
-      {value.length > 0 && (
+  let selectionPreview = null;
+  if (value.length > 0) {
+    if (isSelectedDraggable) {
+      selectionPreview = (
+        <DraggableSelectedList
+          onRemove={deselectItem}
+          onRowDrag={sortSelectedItems}
+          selected={value}
+        />
+      );
+    } else {
+      selectionPreview = (
         <SelectedList
           label={t`Selected`}
           selected={value}
@@ -53,7 +64,13 @@ function OptionsList({
           renderItemChip={renderItemChip}
           displayKey={displayKey}
         />
-      )}
+      );
+    }
+  }
+
+  return (
+    <ModalList>
+      {selectionPreview}
       <PaginatedTable
         contentError={contentError}
         items={options}
@@ -99,6 +116,7 @@ const Item = shape({
 OptionsList.propTypes = {
   deselectItem: func.isRequired,
   displayKey: string,
+  isSelectedDraggable: bool,
   multiple: bool,
   optionCount: number.isRequired,
   options: arrayOf(Item).isRequired,
@@ -110,6 +128,7 @@ OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
 };
 OptionsList.defaultProps = {
+  isSelectedDraggable: false,
   multiple: false,
   renderItemChip: null,
   searchColumns: [],

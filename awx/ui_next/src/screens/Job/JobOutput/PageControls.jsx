@@ -4,7 +4,6 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { Button as PFButton } from '@patternfly/react-core';
 import {
-  PlusIcon,
   AngleDoubleUpIcon,
   AngleDoubleDownIcon,
   AngleUpIcon,
@@ -17,6 +16,7 @@ const Wrapper = styled.div`
   height: 35px;
   outline: 1px solid #d7d7d7;
   width: 100%;
+  justify-content: flex-end;
 `;
 
 const Button = styled(PFButton)`
@@ -31,14 +31,6 @@ const PageControls = ({
   onScrollPrevious,
 }) => (
   <Wrapper>
-    <Button
-      ouiaId="job-output-expand-collapse-lines-button"
-      aria-label={t`Toggle expand/collapse event lines`}
-      variant="plain"
-      css="margin-right: auto"
-    >
-      <PlusIcon />
-    </Button>
     <Button
       ouiaId="job-output-scroll-previous-button"
       aria-label={t`Scroll previous`}

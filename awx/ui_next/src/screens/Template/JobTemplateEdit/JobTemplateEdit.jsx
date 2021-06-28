@@ -10,7 +10,7 @@ import JobTemplateForm from '../shared/JobTemplateForm';
 import ContentLoading from '../../../components/ContentLoading';
 import { CardBody } from '../../../components/Card';
 
-function JobTemplateEdit({ template }) {
+function JobTemplateEdit({ template, reloadTemplate }) {
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,11 +18,7 @@ function JobTemplateEdit({ template }) {
 
   const detailsUrl = `/templates/${template.type}/${template.id}/details`;
 
-  const {
-    request: fetchProject,
-    error: fetchProjectError,
-    isLoading: projectLoading,
-  } = useRequest(
+  const { request: fetchProject, error: fetchProjectError } = useRequest(
     useCallback(async () => {
       await ProjectsAPI.readDetail(template.project);
     }, [template.project])
@@ -65,9 +61,14 @@ function JobTemplateEdit({ template }) {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
         submitLabels(labels, template?.organization),
-        submitInstanceGroups(instanceGroups, initialInstanceGroups),
         submitCredentials(credentials),
+        JobTemplatesAPI.orderInstanceGroups(
+          template.id,
+          instanceGroups,
+          initialInstanceGroups
+        ),
       ]);
+      reloadTemplate();
       history.push(detailsUrl);
     } catch (error) {
       setFormSubmitError(error);
@@ -96,17 +97,6 @@ function JobTemplateEdit({ template }) {
     return results;
   };
 
-  const submitInstanceGroups = async (groups, initialGroups) => {
-    const { added, removed } = getAddedAndRemoved(initialGroups, groups);
-    const disassociatePromises = await removed.map(group =>
-      JobTemplatesAPI.disassociateInstanceGroup(template.id, group.id)
-    );
-    const associatePromises = await added.map(group =>
-      JobTemplatesAPI.associateInstanceGroup(template.id, group.id)
-    );
-    return Promise.all([...disassociatePromises, ...associatePromises]);
-  };
-
   const submitCredentials = async newCredentials => {
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.credentials,
@@ -130,7 +120,7 @@ function JobTemplateEdit({ template }) {
   if (!canEdit) {
     return <Redirect to={detailsUrl} />;
   }
-  if (isLoading || projectLoading) {
+  if (isLoading) {
     return <ContentLoading />;
   }
 

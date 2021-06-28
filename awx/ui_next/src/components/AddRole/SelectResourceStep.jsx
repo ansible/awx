@@ -6,7 +6,7 @@ import useRequest from '../../util/useRequest';
 import { SearchColumns, SortColumns } from '../../types';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
-import SelectedList from '../SelectedList';
+import { SelectedList } from '../SelectedList';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 

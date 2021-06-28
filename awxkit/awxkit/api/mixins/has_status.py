@@ -47,11 +47,16 @@ class HasStatus(object):
         return self.wait_until_status(self.started_statuses, interval=interval, timeout=timeout)
 
     def failure_output_details(self):
+        msg = ''
         if getattr(self, 'result_stdout', ''):
             output = bytes_to_str(self.result_stdout)
             if output:
-                return '\nstdout:\n{}'.format(output)
-        return ''
+                msg = '\nstdout:\n{}'.format(output)
+        if getattr(self, 'job_explanation', ''):
+            msg += '\njob_explanation: {}'.format(bytes_to_str(self.job_explanation))
+        if getattr(self, 'result_traceback', ''):
+            msg += '\nresult_traceback:\n{}'.format(bytes_to_str(self.result_traceback))
+        return msg
 
     def assert_status(self, status_list, msg=None):
         if isinstance(status_list, str):
@@ -65,8 +70,6 @@ class HasStatus(object):
         else:
             msg += '\n'
         msg += '{0}-{1} has status of {2}, which is not in {3}.'.format(self.type.title(), self.id, self.status, status_list)
-        if getattr(self, 'job_explanation', ''):
-            msg += '\njob_explanation: {}'.format(bytes_to_str(self.job_explanation))
         if getattr(self, 'execution_environment', ''):
             msg += '\nexecution_environment: {}'.format(bytes_to_str(self.execution_environment))
             if getattr(self, 'related', False):
@@ -75,19 +78,17 @@ class HasStatus(object):
                 msg += f'\nee_credential: {ee.credential}'
                 msg += f'\nee_pull_option: {ee.pull}'
                 msg += f'\nee_summary_fields: {ee.summary_fields}'
-        if getattr(self, 'result_traceback', ''):
-            msg += '\nresult_traceback:\n{}'.format(bytes_to_str(self.result_traceback))
 
         msg += self.failure_output_details()
 
         if getattr(self, 'job_explanation', '').startswith('Previous Task Failed'):
             try:
                 data = json.loads(self.job_explanation.replace('Previous Task Failed: ', ''))
-                dep_output = self.connection.get(
-                    '{0}/api/v2/{1}s/{2}/stdout/'.format(self.endpoint.split('/api')[0], data['job_type'], data['job_id']),
-                    query_parameters=dict(format='txt_download'),
-                ).content
-                msg += '\nDependency output:\n{}'.format(bytes_to_str(dep_output))
+                dependency = self.walk('/api/v2/{0}s/{1}/'.format(data['job_type'], data['job_id']))
+                if hasattr(dependency, 'failure_output_details'):
+                    msg += '\nDependency output:\n{}'.format(dependency.failure_output_details())
+                else:
+                    msg += '\nDependency info:\n{}'.format(dependency)
             except Exception as e:
                 msg += '\nFailed to obtain dependency stdout: {}'.format(e)
 

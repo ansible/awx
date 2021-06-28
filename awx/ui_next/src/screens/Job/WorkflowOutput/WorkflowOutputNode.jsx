@@ -11,10 +11,7 @@ import { secondsToHHMMSS } from '../../../util/dates';
 import { constants as wfConstants } from '../../../components/Workflow/WorkflowUtils';
 
 const NodeG = styled.g`
-  cursor: ${props =>
-    props.job && props.job.type !== 'workflow_approval'
-      ? 'pointer'
-      : 'default'};
+  cursor: ${props => (props.job ? 'pointer' : 'default')};
 `;
 
 const JobTopLine = styled.div`
@@ -90,8 +87,10 @@ function WorkflowOutputNode({ mouseEnter, mouseLeave, node }) {
   }
 
   const handleNodeClick = () => {
-    if (job && job.type !== 'workflow_aproval') {
-      history.push(`/jobs/${job.id}/details`);
+    if (job) {
+      const basePath =
+        job.type !== 'workflow_approval' ? 'jobs' : 'workflow_approvals';
+      history.push(`/${basePath}/${job.id}/details`);
     }
   };
 

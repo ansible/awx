@@ -95,6 +95,12 @@ describe('<OrganizationAdd />', () => {
       description: 'new description',
       galaxy_credentials: [],
     };
+    const mockInstanceGroups = [
+      {
+        name: 'mock ig',
+        id: 3,
+      },
+    ];
     OrganizationsAPI.create.mockResolvedValueOnce({
       data: {
         id: 5,
@@ -109,7 +115,10 @@ describe('<OrganizationAdd />', () => {
       wrapper = mountWithContexts(<OrganizationAdd />);
     });
     await waitForElement(wrapper, 'button[aria-label="Save"]');
-    await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3]);
+    await wrapper.find('OrganizationForm').prop('onSubmit')(
+      orgData,
+      mockInstanceGroups
+    );
     expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(5, 3);
   });
 

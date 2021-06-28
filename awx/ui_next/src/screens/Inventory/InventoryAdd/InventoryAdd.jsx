@@ -23,12 +23,12 @@ function InventoryAdd() {
         organization: organization.id,
         ...remainingValues,
       });
-      if (instanceGroups) {
-        const associatePromises = instanceGroups.map(async ig =>
-          InventoriesAPI.associateInstanceGroup(inventoryId, ig.id)
-        );
-        await Promise.all(associatePromises);
+      /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      // Resolve Promises sequentially to maintain order and avoid race condition
+      for (const group of instanceGroups) {
+        await InventoriesAPI.associateInstanceGroup(inventoryId, group.id);
       }
+      /* eslint-enable no-await-in-loop, no-restricted-syntax */
       const url = history.location.pathname.startsWith(
         '/inventories/smart_inventory'
       )

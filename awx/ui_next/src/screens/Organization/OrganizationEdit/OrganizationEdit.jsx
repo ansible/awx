@@ -3,8 +3,13 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
 import { OrganizationsAPI } from '../../../api';
-import { getAddedAndRemoved } from '../../../util/lists';
 import OrganizationForm from '../shared/OrganizationForm';
+
+const isEqual = (array1, array2) =>
+  array1.length === array2.length &&
+  array1.every((element, index) => {
+    return element.id === array2[index].id;
+  });
 
 function OrganizationEdit({ organization }) {
   const detailsUrl = `/organizations/${organization.id}/details`;
@@ -17,43 +22,35 @@ function OrganizationEdit({ organization }) {
     groupsToDisassociate
   ) => {
     try {
-      const {
-        added: addedCredentials,
-        removed: removedCredentials,
-      } = getAddedAndRemoved(
-        organization.galaxy_credentials,
-        values.galaxy_credentials
-      );
-
-      const addedCredentialIds = addedCredentials.map(({ id }) => id);
-      const removedCredentialIds = removedCredentials.map(({ id }) => id);
-
       await OrganizationsAPI.update(organization.id, {
         ...values,
         default_environment: values.default_environment?.id || null,
       });
-      await Promise.all(
-        groupsToAssociate
-          .map(id =>
-            OrganizationsAPI.associateInstanceGroup(organization.id, id)
-          )
-          .concat(
-            addedCredentialIds.map(id =>
-              OrganizationsAPI.associateGalaxyCredential(organization.id, id)
-            )
-          )
-      );
-      await Promise.all(
+      await OrganizationsAPI.orderInstanceGroups(
+        organization.id,
+        groupsToAssociate,
         groupsToDisassociate
-          .map(id =>
-            OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
-          )
-          .concat(
-            removedCredentialIds.map(id =>
-              OrganizationsAPI.disassociateGalaxyCredential(organization.id, id)
-            )
-          )
       );
+
+      /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      // Resolve Promises sequentially to avoid race condition
+      if (
+        !isEqual(organization.galaxy_credentials, values.galaxy_credentials)
+      ) {
+        for (const credential of organization.galaxy_credentials) {
+          await OrganizationsAPI.disassociateGalaxyCredential(
+            organization.id,
+            credential.id
+          );
+        }
+        for (const credential of values.galaxy_credentials) {
+          await OrganizationsAPI.associateGalaxyCredential(
+            organization.id,
+            credential.id
+          );
+        }
+      }
+      /* eslint-enable no-await-in-loop, no-restricted-syntax */
       history.push(detailsUrl);
     } catch (error) {
       setFormError(error);

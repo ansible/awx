@@ -4,13 +4,14 @@ import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 
-import { InstanceGroupsAPI } from '../../../api';
+import { InstanceGroupsAPI, SettingsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -25,7 +26,11 @@ const QS_CONFIG = getQSConfig('instance-group', {
   page_size: 20,
 });
 
-function modifyInstanceGroups(items = []) {
+function modifyInstanceGroups(
+  items = [],
+  defaultControlPlane,
+  defaultExecution
+) {
   return items.map(item => {
     const clonedItem = {
       ...item,
@@ -36,16 +41,44 @@ function modifyInstanceGroups(items = []) {
         },
       },
     };
-    if (clonedItem.name === 'tower') {
+    if (clonedItem.name === (defaultControlPlane || defaultExecution)) {
       clonedItem.summary_fields.user_capabilities.delete = false;
     }
     return clonedItem;
   });
 }
 
-function InstanceGroupList() {
+function InstanceGroupList({
+  isKubernetes,
+  isSettingsRequestLoading,
+  settingsRequestError,
+}) {
   const location = useLocation();
   const match = useRouteMatch();
+  const {
+    error: protectedItemsError,
+    isloading: isLoadingProtectedItems,
+    request: fetchProtectedItems,
+    result: { defaultControlPlane, defaultExecution },
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: {
+          DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+          DEFAULT_EXECUTION_QUEUE_NAME,
+        },
+      } = await SettingsAPI.readAll();
+      return {
+        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
+      };
+    }, []),
+    { defaultControlPlane: '', defaultExecution: '' }
+  );
+
+  useEffect(() => {
+    fetchProtectedItems();
+  }, [fetchProtectedItems]);
 
   const {
     error: contentError,
@@ -100,7 +133,11 @@ function InstanceGroupList() {
     selectAll,
   } = useSelected(instanceGroups);
 
-  const modifiedSelected = modifyInstanceGroups(selected);
+  const modifiedSelected = modifyInstanceGroups(
+    selected,
+    defaultControlPlane,
+    defaultExecution
+  );
 
   const {
     isLoading: deleteLoading,
@@ -128,63 +165,66 @@ function InstanceGroupList() {
   const canAdd = actions && actions.POST;
 
   function cannotDelete(item) {
-    return !item.summary_fields.user_capabilities.delete;
+    return (
+      !item.summary_fields.user_capabilities.delete ||
+      item.name === defaultExecution ||
+      item.name === defaultControlPlane
+    );
   }
 
   const pluralizedItemName = t`Instance Groups`;
 
   let errorMessageDelete = '';
+  const notdeletedable = selected.filter(
+    i => i.name === defaultControlPlane || i.name === defaultExecution
+  );
 
-  if (modifiedSelected.some(item => item.name === 'tower')) {
-    const itemsUnableToDelete = modifiedSelected
-      .filter(cannotDelete)
-      .filter(item => item.name !== 'tower')
-      .map(item => item.name)
-      .join(', ');
-
-    if (itemsUnableToDelete) {
-      if (modifiedSelected.some(cannotDelete)) {
-        errorMessageDelete = t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}. `;
-      }
-    }
-
-    if (errorMessageDelete.length > 0) {
-      errorMessageDelete = errorMessageDelete.concat('\n');
-    }
-    errorMessageDelete = errorMessageDelete.concat(
-      t`The tower instance group cannot be deleted.`
+  if (notdeletedable.length) {
+    errorMessageDelete = (
+      <Plural
+        value={notdeletedable.length}
+        one="The following Instance Group cannot be deleted"
+        other="The following Instance Groups cannot be deleted"
+      />
     );
   }
 
   const addContainerGroup = t`Add container group`;
   const addInstanceGroup = t`Add instance group`;
 
-  const addButton = (
-    <AddDropDownButton
-      ouiaId="add-instance-group-button"
-      key="add"
-      dropdownItems={[
-        <DropdownItem
-          ouiaId="add-container-group-item"
-          to="/instance_groups/container_group/add"
-          component={Link}
-          key={addContainerGroup}
-          aria-label={addContainerGroup}
-        >
-          {addContainerGroup}
-        </DropdownItem>,
-        <DropdownItem
-          ouiaId="add-instance-group-item"
-          to="/instance_groups/add"
-          component={Link}
-          key={addInstanceGroup}
-          aria-label={addInstanceGroup}
-        >
-          {addInstanceGroup}
-        </DropdownItem>,
-      ]}
-    />
-  );
+  const addButton =
+    !isSettingsRequestLoading && !isKubernetes ? (
+      <AddDropDownButton
+        ouiaId="add-instance-group-button"
+        key="add"
+        dropdownItems={[
+          <DropdownItem
+            ouiaId="add-container-group-item"
+            to="/instance_groups/container_group/add"
+            component={Link}
+            key={addContainerGroup}
+            aria-label={addContainerGroup}
+          >
+            {addContainerGroup}
+          </DropdownItem>,
+          <DropdownItem
+            ouiaId="add-instance-group-item"
+            to="/instance_groups/add"
+            component={Link}
+            key={addInstanceGroup}
+            aria-label={addInstanceGroup}
+          >
+            {addInstanceGroup}
+          </DropdownItem>,
+        ]}
+      />
+    ) : (
+      <ToolbarAddButton
+        key="add"
+        ouiaId="add-container-group-button"
+        linkTo={`${match.url}/container_group/add`}
+      />
+    );
 
   const getDetailUrl = item => {
     return item.is_container_group
@@ -199,8 +239,15 @@ function InstanceGroupList() {
       <PageSection>
         <Card>
           <PaginatedTable
-            contentError={contentError}
-            hasContentLoading={isLoading || deleteLoading}
+            contentError={
+              contentError || settingsRequestError || protectedItemsError
+            }
+            hasContentLoading={
+              isLoading ||
+              deleteLoading ||
+              isSettingsRequestLoading ||
+              isLoadingProtectedItems
+            }
             items={instanceGroups}
             itemCount={instanceGroupsCount}
             pluralizedItemName={pluralizedItemName}
@@ -220,6 +267,7 @@ function InstanceGroupList() {
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={handleDelete}
+                    cannotDelete={cannotDelete}
                     itemsToDelete={modifiedSelected}
                     pluralizedItemName={t`Instance Groups`}
                     errorMessage={errorMessageDelete}

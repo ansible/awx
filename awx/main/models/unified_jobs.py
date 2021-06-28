@@ -1437,7 +1437,12 @@ class UnifiedJob(
     def global_instance_groups(self):
         from awx.main.models.ha import InstanceGroup
 
-        default_instance_groups = InstanceGroup.objects.filter(name__in=[settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME])
+        default_instance_group_names = [settings.DEFAULT_EXECUTION_QUEUE_NAME]
+
+        if not settings.IS_K8S:
+            default_instance_group_names.append(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+
+        default_instance_groups = InstanceGroup.objects.filter(name__in=default_instance_group_names)
 
         return list(default_instance_groups)
 

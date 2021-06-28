@@ -710,8 +710,12 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
         fields_to_check = ['name', 'description', 'organization', 'image', 'credential']
         if instance.managed and request.user.can_access(models.ExecutionEnvironment, 'change', instance):
             for field in fields_to_check:
+                if kwargs.get('partial') and field not in request.data:
+                    continue
                 left = getattr(instance, field, None)
-                right = request.data.get(field, None)
+                if hasattr(left, 'id'):
+                    left = left.id
+                right = request.data.get(field)
                 if left != right:
                     raise PermissionDenied(_("Only the 'pull' field can be edited for managed execution environments."))
         return super().update(request, *args, **kwargs)

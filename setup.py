@@ -154,7 +154,7 @@ setup(
                     "tools/scripts/ansible-tower-setup",
                 ],
             ),
-            ("%s" % sosconfig, ["tools/sosreport/tower.py"]),
+            ("%s" % sosconfig, ["tools/sosreport/controller.py"]),
         ]
     ),
     options={

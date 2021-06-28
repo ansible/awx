@@ -106,17 +106,10 @@ describe('<InventoryEdit />', () => {
       });
     });
     await sleep(0);
-    instanceGroups.map(IG =>
-      expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(
-        1,
-        IG.id
-      )
-    );
-    associatedInstanceGroups.map(async aIG =>
-      expect(InventoriesAPI.disassociateInstanceGroup).toHaveBeenCalledWith(
-        1,
-        aIG.id
-      )
+    expect(InventoriesAPI.orderInstanceGroups).toHaveBeenCalledWith(
+      mockInventory.id,
+      instanceGroups,
+      associatedInstanceGroups
     );
   });
 });

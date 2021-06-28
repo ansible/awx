@@ -6,6 +6,7 @@ import { Button, Label } from '@patternfly/react-core';
 
 import { VariablesDetail } from '../../../components/CodeEditor';
 import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import DeleteButton from '../../../components/DeleteButton';
 import {
@@ -18,7 +19,7 @@ import { jsonToYaml, isJsonString } from '../../../util/yaml';
 import { InstanceGroupsAPI } from '../../../api';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
-function ContainerGroupDetails({ instanceGroup }) {
+function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -102,7 +103,8 @@ function ContainerGroupDetails({ instanceGroup }) {
               {t`Edit`}
             </Button>
           )}
-        {instanceGroup.summary_fields.user_capabilities &&
+        {name !== defaultExecution &&
+          instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
               ouiaId="container-group-detail-delete-button"
@@ -123,7 +125,9 @@ function ContainerGroupDetails({ instanceGroup }) {
           onClose={dismissError}
           title={t`Error`}
           variant="error"
-        />
+        >
+          <ErrorDetail error={error} />
+        </AlertModal>
       )}
     </CardBody>
   );

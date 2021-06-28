@@ -72,16 +72,7 @@ function Template({ setBreadcrumb }) {
         surveyConfiguration = survey;
       }
       if (data.summary_fields.credentials) {
-        const params = {
-          page: 1,
-          page_size: 200,
-          order_by: 'name',
-        };
-        const {
-          data: { results },
-        } = await JobTemplatesAPI.readCredentials(data.id, params);
-
-        data.summary_fields.credentials = results;
+        data.summary_fields.credentials = defaultCredentials;
       }
 
       if (actions.data.actions.PUT) {
@@ -106,7 +97,7 @@ function Template({ setBreadcrumb }) {
 
   useEffect(() => {
     loadTemplateAndRoles();
-  }, [loadTemplateAndRoles, location.pathname]);
+  }, [loadTemplateAndRoles]);
 
   useEffect(() => {
     if (template) {
@@ -214,7 +205,10 @@ function Template({ setBreadcrumb }) {
               />
             </Route>
             <Route key="edit" path="/templates/:templateType/:id/edit">
-              <JobTemplateEdit template={template} />
+              <JobTemplateEdit
+                template={template}
+                reloadTemplate={loadTemplateAndRoles}
+              />
             </Route>
             <Route key="access" path="/templates/:templateType/:id/access">
               <ResourceAccessList

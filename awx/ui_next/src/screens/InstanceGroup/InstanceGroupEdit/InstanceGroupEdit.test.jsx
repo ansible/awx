@@ -55,7 +55,10 @@ describe('<InstanceGroupEdit>', () => {
     history = createMemoryHistory();
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupEdit instanceGroup={instanceGroupData} />,
+        <InstanceGroupEdit
+          defaultControlPlane="controlplane"
+          instanceGroup={instanceGroupData}
+        />,
         {
           context: { router: { history } },
         }
@@ -68,12 +71,13 @@ describe('<InstanceGroupEdit>', () => {
     wrapper.unmount();
   });
 
-  test('tower instance group name can not be updated', async () => {
+  test('controlplane instance group name can not be updated', async () => {
     let towerWrapper;
     await act(async () => {
       towerWrapper = mountWithContexts(
         <InstanceGroupEdit
-          instanceGroup={{ ...instanceGroupData, name: 'tower' }}
+          defaultControlPlane="controlplane"
+          instanceGroup={{ ...instanceGroupData, name: 'controlplane' }}
         />,
         {
           context: { router: { history } },
@@ -85,7 +89,7 @@ describe('<InstanceGroupEdit>', () => {
     ).toBeTruthy();
     expect(
       towerWrapper.find('input#instance-group-name').prop('value')
-    ).toEqual('tower');
+    ).toEqual('controlplane');
   });
 
   test('handleSubmit should call the api and redirect to details page', async () => {

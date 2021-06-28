@@ -7,6 +7,7 @@ import { Button } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
+import ErrorDetail from '../../../components/ErrorDetail';
 import DeleteButton from '../../../components/DeleteButton';
 import {
   Detail,
@@ -22,7 +23,7 @@ const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
 `;
 
-function InstanceGroupDetails({ instanceGroup }) {
+function InstanceGroupDetails({ instanceGroup, defaultControlPlane }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -110,7 +111,7 @@ function InstanceGroupDetails({ instanceGroup }) {
               {t`Edit`}
             </Button>
           )}
-        {name !== 'tower' &&
+        {name !== defaultControlPlane &&
           instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
@@ -132,7 +133,9 @@ function InstanceGroupDetails({ instanceGroup }) {
           onClose={dismissError}
           title={t`Error`}
           variant="error"
-        />
+        >
+          <ErrorDetail error={error} />
+        </AlertModal>
       )}
     </CardBody>
   );

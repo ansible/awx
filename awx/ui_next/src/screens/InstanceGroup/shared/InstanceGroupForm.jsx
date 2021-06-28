@@ -10,8 +10,9 @@ import FormActionGroup from '../../../components/FormActionGroup';
 import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 
-function InstanceGroupFormFields() {
+function InstanceGroupFormFields({ defaultControlPlane }) {
   const [instanceGroupNameField, ,] = useField('name');
+
   return (
     <>
       <FormField
@@ -21,7 +22,7 @@ function InstanceGroupFormFields() {
         type="text"
         validate={required(null)}
         isRequired
-        isDisabled={instanceGroupNameField.value === 'tower'}
+        isDisabled={instanceGroupNameField.value === defaultControlPlane}
       />
       <FormField
         id="instance-group-policy-instance-minimum"
@@ -50,6 +51,7 @@ function InstanceGroupFormFields() {
 
 function InstanceGroupForm({
   instanceGroup = {},
+
   onSubmit,
   onCancel,
   submitError,

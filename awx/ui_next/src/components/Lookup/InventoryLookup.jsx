@@ -7,7 +7,7 @@ import { Inventory } from '../../types';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
 import useRequest from '../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../util/qs';
+import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 import FieldWithPrompt from '../FieldWithPrompt';
 
@@ -32,6 +32,7 @@ function InventoryLookup({
   validate,
   fieldName,
   isDisabled,
+  hideSmartInventories,
 }) {
   const {
     result: {
@@ -47,8 +48,15 @@ function InventoryLookup({
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
+      const inventoryKindParams = hideSmartInventories
+        ? { not__kind: 'smart' }
+        : {};
       const [{ data }, actionsResponse] = await Promise.all([
-        InventoriesAPI.read(params),
+        InventoriesAPI.read(
+          mergeParams(params, {
+            ...inventoryKindParams,
+          })
+        ),
         InventoriesAPI.readOptions(),
       ]);
 
@@ -60,7 +68,12 @@ function InventoryLookup({
         ).map(val => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter(key => {
+          if (['kind', 'host_filter'].includes(key) && hideSmartInventories) {
+            return false;
+          }
+          return actionsResponse.data.actions?.GET[key].filterable;
+        }),
         canEdit:
           Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };
@@ -230,6 +243,7 @@ InventoryLookup.propTypes = {
   validate: func,
   fieldName: string,
   isDisabled: bool,
+  hideSmartInventories: bool,
 };
 
 InventoryLookup.defaultProps = {
@@ -239,6 +253,7 @@ InventoryLookup.defaultProps = {
   validate: () => {},
   fieldName: 'inventory',
   isDisabled: false,
+  hideSmartInventories: false,
 };
 
 export default withRouter(InventoryLookup);

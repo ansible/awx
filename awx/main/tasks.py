@@ -87,7 +87,7 @@ from awx.main.exceptions import AwxTaskError, PostRunError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
-from awx.main.utils import (
+from awx.main.utils.common import (
     update_scm_url,
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
@@ -97,6 +97,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
     cleanup_new_process,
+    create_partition,
 )
 from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
@@ -1267,11 +1268,17 @@ class BaseTask(object):
             for k, v in self.safe_env.items():
                 if k in job_env:
                     job_env[k] = v
-            self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
+            from awx.main.signals import disable_activity_stream  # Circular import
+
+            with disable_activity_stream():
+                self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
         elif status_data['status'] == 'error':
             result_traceback = status_data.get('result_traceback', None)
             if result_traceback:
-                self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
+                from awx.main.signals import disable_activity_stream  # Circular import
+
+                with disable_activity_stream():
+                    self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
 
     @with_path_cleanup
     def run(self, pk, **kwargs):
@@ -1791,6 +1798,7 @@ class RunJob(BaseTask):
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
+            create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
             job = self.update_model(job.pk, project_update=local_project_sync)
@@ -2070,17 +2078,24 @@ class RunProjectUpdate(BaseTask):
                 if InventoryUpdate.objects.filter(inventory_source=inv_src, status__in=ACTIVE_STATES).exists():
                     logger.debug('Skipping SCM inventory update for `{}` because ' 'another update is already active.'.format(inv_src.name))
                     continue
+
+                if settings.IS_K8S:
+                    instance_group = InventoryUpdate(inventory_source=inv_src).preferred_instance_groups[0]
+                else:
+                    instance_group = project_update.instance_group
+
                 local_inv_update = inv_src.create_inventory_update(
                     _eager_fields=dict(
                         launch_type='scm',
                         status='running',
-                        instance_group=project_update.instance_group,
+                        instance_group=instance_group,
                         execution_node=project_update.execution_node,
                         source_project_update=project_update,
                         celery_task_id=project_update.celery_task_id,
                     )
                 )
             try:
+                create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
                 inv_update_class().run(local_inv_update.id)
             except Exception:
                 logger.exception('{} Unhandled exception updating dependent SCM inventory sources.'.format(project_update.log_format))
@@ -2161,8 +2176,6 @@ class RunProjectUpdate(BaseTask):
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
         project_path = instance.project.get_project_path(check_if_exists=False)
-        if not os.path.exists(project_path):
-            os.makedirs(project_path)  # used as container mount
 
         self.acquire_lock(instance)
 
@@ -2174,6 +2187,9 @@ class RunProjectUpdate(BaseTask):
                     self.original_branch = git_repo.head.commit
                 else:
                     self.original_branch = git_repo.active_branch
+
+        if not os.path.exists(project_path):
+            os.makedirs(project_path)  # used as container mount
 
         stage_path = os.path.join(instance.get_cache_path(), 'stage')
         if os.path.exists(stage_path):
@@ -2988,7 +3004,8 @@ class AWXReceptorJob:
                 if state_name == 'Succeeded':
                     return res
 
-                raise RuntimeError(detail)
+                if self.task.instance.result_traceback is None:
+                    raise RuntimeError(detail)
 
         return res
 

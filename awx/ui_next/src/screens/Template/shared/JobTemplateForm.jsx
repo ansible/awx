@@ -56,7 +56,7 @@ function JobTemplateForm({
   setFieldTouched,
   submitError,
   validateField,
-  isOverrideDisabledLookup,
+  isOverrideDisabledLookup, // TODO: this is a confusing variable name
 }) {
   const [contentError, setContentError] = useState(false);
   const [allowCallbacks, setAllowCallbacks] = useState(
@@ -123,7 +123,10 @@ function JobTemplateForm({
         setFieldValue('instanceGroups', [...data.results]);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setFieldValue, template])
+    }, [setFieldValue, template]),
+    {
+      isLoading: true,
+    }
   );
 
   useEffect(() => {

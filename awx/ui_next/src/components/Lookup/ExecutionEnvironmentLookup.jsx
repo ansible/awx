@@ -41,7 +41,7 @@ function ExecutionEnvironmentLookup({
   const {
     request: fetchProject,
     error: fetchProjectError,
-    isLoading: fetchProjectLoading,
+    isLoading: isProjectLoading,
     result: project,
   } = useRequest(
     useCallback(async () => {
@@ -53,6 +53,7 @@ function ExecutionEnvironmentLookup({
     }, [projectId]),
     {
       project: null,
+      isLoading: true,
     }
   );
 
@@ -72,6 +73,12 @@ function ExecutionEnvironmentLookup({
     isLoading,
   } = useRequest(
     useCallback(async () => {
+      if (isProjectLoading) {
+        return {
+          executionEnvironments: [],
+          count: 0,
+        };
+      }
       const params = parseQueryString(QS_CONFIG, location.search);
       const globallyAvailableParams = globallyAvailable
         ? { or__organization__isnull: 'True' }
@@ -105,7 +112,14 @@ function ExecutionEnvironmentLookup({
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [location, globallyAvailable, organizationId, projectId, project]),
+    }, [
+      location,
+      globallyAvailable,
+      organizationId,
+      projectId,
+      project,
+      isProjectLoading,
+    ]),
     {
       executionEnvironments: [],
       count: 0,
@@ -149,7 +163,7 @@ function ExecutionEnvironmentLookup({
         fieldName={fieldName}
         validate={validate}
         qsConfig={QS_CONFIG}
-        isLoading={isLoading || fetchProjectLoading}
+        isLoading={isLoading || isProjectLoading}
         isDisabled={isDisabled}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList

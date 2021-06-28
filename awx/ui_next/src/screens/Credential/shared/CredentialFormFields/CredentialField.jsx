@@ -26,7 +26,12 @@ const FileUpload = styled(PFFileUpload)`
   flex-grow: 1;
 `;
 
-function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
+function CredentialInput({
+  fieldOptions,
+  isFieldGroupValid,
+  credentialKind,
+  ...rest
+}) {
   const [fileName, setFileName] = useState('');
   const [fileIsUploading, setFileIsUploading] = useState(false);
   const [subFormField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
@@ -116,6 +121,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
       <>
         {RevertReplaceButton}
         <PasswordInput
+          isFieldGroupValid={isFieldGroupValid}
           {...subFormField}
           id={`credential-${fieldOptions.id}`}
           {...rest}
@@ -169,7 +175,9 @@ function CredentialField({ credentialType, fieldOptions }) {
     name: `inputs.${fieldOptions.id}`,
     validate: validateField(),
   });
-  const isValid = !(meta.touched && meta.error);
+  const isValid =
+    !(meta.touched && meta.error) ||
+    formikValues.passwordPrompts[fieldOptions.id];
 
   if (fieldOptions.choices) {
     const selectOptions = fieldOptions.choices.map(choice => {
@@ -235,7 +243,10 @@ function CredentialField({ credentialType, fieldOptions }) {
       isRequired={isRequired}
       validated={isValid ? 'default' : 'error'}
     >
-      <CredentialInput fieldOptions={fieldOptions} />
+      <CredentialInput
+        isFieldGroupValid={isValid}
+        fieldOptions={fieldOptions}
+      />
     </CredentialPluginField>
   );
 }

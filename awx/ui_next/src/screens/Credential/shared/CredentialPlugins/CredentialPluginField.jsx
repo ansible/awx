@@ -98,15 +98,23 @@ function CredentialPluginField(props) {
   const [, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
 
-  const invalidHelperTextToDisplay = meta.error && meta.touched && (
-    <div
-      className={css(styles.formHelperText, styles.modifiers.error)}
-      id={`${fieldOptions.id}-helper`}
-      aria-live="polite"
-    >
-      {meta.error}
-    </div>
-  );
+  let invalidHelperTextToDisplay;
+
+  if (meta.error && meta.touched) {
+    invalidHelperTextToDisplay = (
+      <div
+        className={css(styles.formHelperText, styles.modifiers.error)}
+        id={`${fieldOptions.id}-helper`}
+        aria-live="polite"
+      >
+        {meta.error}
+      </div>
+    );
+  }
+
+  if (fieldOptions.id === 'vault_password' && passwordPromptField.value) {
+    invalidHelperTextToDisplay = null;
+  }
 
   useEffect(() => {
     if (passwordPromptField.value) {
@@ -119,8 +127,6 @@ function CredentialPluginField(props) {
     <>
       {fieldOptions.ask_at_runtime ? (
         <FieldWithPrompt
-          fieldId={`credential-${fieldOptions.id}`}
-          helperTextInvalid={meta.error}
           isRequired={isRequired}
           label={fieldOptions.label}
           promptId={`credential-prompt-${fieldOptions.id}`}

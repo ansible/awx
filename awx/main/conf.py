@@ -692,6 +692,15 @@ register(
     unit=_('seconds'),
 )
 
+register(
+    'IS_K8S',
+    field_class=fields.BooleanField,
+    read_only=True,
+    category=_('System'),
+    category_slug='system',
+    help_text=_('Indicates whether the instance is part of a kubernetes-based deployment.'),
+)
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):

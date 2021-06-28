@@ -109,8 +109,9 @@ describe('<JobTemplateAdd />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobTemplateAdd />);
-      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
+    wrapper.update();
+
     expect(wrapper.find('input#template-description').text()).toBe(
       defaultProps.description
     );

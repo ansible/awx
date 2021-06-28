@@ -18,7 +18,7 @@ import useIsMounted from './useIsMounted';
 export default function useRequest(makeRequest, initialValue) {
   const [result, setResult] = useState(initialValue);
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(initialValue?.isLoading || false);
   const isMounted = useIsMounted();
 
   return {

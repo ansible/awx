@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
@@ -15,7 +15,6 @@ import {
   InstanceGroupsLookup,
   ExecutionEnvironmentLookup,
 } from '../../../components/Lookup';
-import { getAddedAndRemoved } from '../../../util/lists';
 import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
@@ -106,7 +105,20 @@ function OrganizationFormFields({
         onChange={handleCredentialUpdate}
         value={galaxyCredentialsField.value}
         multiple
+        isSelectedDraggable
         fieldName="galaxy_credentials"
+        modalDescription={
+          <>
+            <b>
+              <Trans>Selected</Trans>
+            </b>
+            <br />
+            <Trans>
+              Note: The order of these credentials sets precedence for the sync
+              and lookup of the content.
+            </Trans>
+          </>
+        }
       />
     </>
   );
@@ -130,19 +142,13 @@ function OrganizationForm({
   };
 
   const handleSubmit = values => {
-    const { added, removed } = getAddedAndRemoved(
-      initialInstanceGroups,
-      instanceGroups
-    );
-    const addedIds = added.map(({ id }) => id);
-    const removedIds = removed.map(({ id }) => id);
     if (
       typeof values.max_hosts !== 'number' ||
       values.max_hosts === 'undefined'
     ) {
       values.max_hosts = 0;
     }
-    onSubmit(values, addedIds, removedIds);
+    onSubmit(values, instanceGroups, initialInstanceGroups);
   };
 
   useEffect(() => {

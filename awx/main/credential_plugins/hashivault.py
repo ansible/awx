@@ -63,7 +63,15 @@ base_inputs = {
             'id': 'secret_path',
             'label': _('Path to Secret'),
             'type': 'string',
-            'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/'),
+            'help_text': _(
+                (
+                    'The path to the secret stored in the secret backend e.g, /some/secret/. It is recommended'
+                    ' that you use the secret backend field to identify the storage backend and to use this field'
+                    ' for locating a specific secret within that store. However, if you prefer to fully identify'
+                    ' both the secret backend and one of its secrets using only this field, join their locations'
+                    ' into a single path without any additional separators, e.g, /location/of/backend/some/secret.'
+                )
+            ),
         },
         {
             'id': 'auth_path',

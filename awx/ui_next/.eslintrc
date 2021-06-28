@@ -63,6 +63,7 @@
           "aria-labelledby",
           "aria-hidden",
           "aria-controls",
+          "aria-pressed",
           "sortKey",
           "ouiaId",
           "credentialTypeNamespace",

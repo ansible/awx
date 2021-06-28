@@ -63,11 +63,13 @@ function JobTemplateAdd() {
     return Promise.all([...associationPromises]);
   }
 
-  function submitInstanceGroups(templateId, addedGroups = []) {
-    const associatePromises = addedGroups.map(group =>
-      JobTemplatesAPI.associateInstanceGroup(templateId, group.id)
-    );
-    return Promise.all(associatePromises);
+  async function submitInstanceGroups(templateId, addedGroups = []) {
+    /* eslint-disable no-await-in-loop, no-restricted-syntax */
+    // Resolve Promises sequentially to maintain order and avoid race condition
+    for (const group of addedGroups) {
+      await JobTemplatesAPI.associateInstanceGroup(templateId, group.id);
+    }
+    /* eslint-enable no-await-in-loop, no-restricted-syntax */
   }
 
   function submitCredentials(templateId, credentials = []) {
