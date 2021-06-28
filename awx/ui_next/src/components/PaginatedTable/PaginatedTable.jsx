@@ -39,6 +39,9 @@ function PaginatedTable({
   const { search, pathname } = useLocation();
   const history = useHistory();
   const location = useLocation();
+  if (!pluralizedItemName) {
+    pluralizedItemName = t`Items`;
+  }
 
   useEffect(() => {
     clearSelected();
@@ -198,7 +201,7 @@ PaginatedTable.defaultProps = {
   toolbarSearchColumns: [],
   toolbarSearchableKeys: [],
   toolbarRelatedSearchableKeys: [],
-  pluralizedItemName: 'Items',
+  pluralizedItemName: null,
   showPageSizeOptions: true,
   renderToolbar: props => <DataListToolbar {...props} />,
   ouiaId: null,
