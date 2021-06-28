@@ -1,5 +1,10 @@
 # Changelog
 
+# 19.2.2 (June 28, 2021)
+
+- Fixed bug where symlinks pointing to directories were not preserved (https://github.com/ansible/ansible-runner/pull/736)
+- Various bugfixes found during testing (https://github.com/ansible/awx/pull/10532)
+
 # 19.2.1 (June 17, 2021)
 
 - There are now 2 default Instance Groups: 'controlplane' and 'default' (https://github.com/ansible/awx/pull/10324)
