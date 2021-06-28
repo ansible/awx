@@ -1,0 +1,47 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    ee_name: "AWX-Collection-tests-ee-{{ test_id }}"
+
+- block:
+    - name: Add an EE
+      execution_environment:
+        name: "{{ ee_name }}"
+        description: "EE for Testing"
+        image: quay.io/ansible/awx-ee
+        pull: always
+        organization: Default
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Associate the Test EE with Default Org (this should fail)
+      execution_environment:
+        name: "{{ ee_name }}"
+        organization: Some Org
+        image: quay.io/ansible/awx-ee
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "result is failed"
+
+  always:
+    - name: Delete the Test EE
+      execution_environment:
+        name: "{{ ee_name }}"
+        state: absent
+        image: quay.io/ansible/awx-ee
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
