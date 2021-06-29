@@ -1086,8 +1086,11 @@ def cleanup_new_process(func):
 
     @wraps(func)
     def wrapper_cleanup_new_process(*args, **kwargs):
+        from awx.conf.settings import SettingsWrapper  # noqa
+
         django_connection.close()
         django_cache.close()
+        SettingsWrapper.initialize()
         return func(*args, **kwargs)
 
     return wrapper_cleanup_new_process
