@@ -25,6 +25,7 @@ def test_create_project(run_module, admin_user, organization, silence_warning):
     result.pop('invocation')
     assert result == {'name': 'foo', 'id': proj.id}
 
+
 @pytest.mark.django_db
 def test_create_project_copy_from(run_module, admin_user, organization, silence_warning):
     ''' Test the copy_from functionality'''
