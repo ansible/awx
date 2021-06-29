@@ -4,7 +4,7 @@ import json
 import yaml
 
 from awxkit.api.pages import Page
-from awxkit.api.pages.users import Users, User
+from awxkit.api.pages.users import Users
 from awxkit.cli import CLI
 from awxkit.cli.format import format_response
 from awxkit.cli.resource import Import

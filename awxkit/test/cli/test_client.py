@@ -1,5 +1,3 @@
-from io import StringIO
-
 import pytest
 from requests.exceptions import ConnectionError
 
