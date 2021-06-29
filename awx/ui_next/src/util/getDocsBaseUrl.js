@@ -4,5 +4,5 @@ export default function getDocsBaseUrl(config) {
   if (licenseType && licenseType !== 'open') {
     version = config?.version ? config.version.split('-')[0] : 'latest';
   }
-  return `https://docs.ansible.com/ansible-tower/${version}`;
+  return `https://docs.ansible.com/automation-controller/${version}`;
 }

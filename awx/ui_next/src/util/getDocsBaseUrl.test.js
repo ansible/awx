@@ -9,7 +9,9 @@ describe('getDocsBaseUrl', () => {
       version: '18.0.0',
     });
 
-    expect(result).toEqual('https://docs.ansible.com/ansible-tower/latest');
+    expect(result).toEqual(
+      'https://docs.ansible.com/automation-controller/latest'
+    );
   });
 
   it('should return current version for enterprise license', () => {
@@ -20,7 +22,9 @@ describe('getDocsBaseUrl', () => {
       version: '4.0.0',
     });
 
-    expect(result).toEqual('https://docs.ansible.com/ansible-tower/4.0.0');
+    expect(result).toEqual(
+      'https://docs.ansible.com/automation-controller/4.0.0'
+    );
   });
 
   it('should strip version info after hyphen', () => {
@@ -31,7 +35,9 @@ describe('getDocsBaseUrl', () => {
       version: '4.0.0-beta',
     });
 
-    expect(result).toEqual('https://docs.ansible.com/ansible-tower/4.0.0');
+    expect(result).toEqual(
+      'https://docs.ansible.com/automation-controller/4.0.0'
+    );
   });
 
   it('should return latest version if license info missing', () => {
@@ -39,6 +45,8 @@ describe('getDocsBaseUrl', () => {
       version: '18.0.0',
     });
 
-    expect(result).toEqual('https://docs.ansible.com/ansible-tower/latest');
+    expect(result).toEqual(
+      'https://docs.ansible.com/automation-controller/latest'
+    );
   });
 });
