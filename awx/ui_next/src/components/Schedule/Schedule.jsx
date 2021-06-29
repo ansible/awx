@@ -69,6 +69,19 @@ function Schedule({
     },
   ];
 
+  if (!isLoading && error) {
+    return (
+      <ContentError isNotFound error={error}>
+        {error.response && error.response.status === 404 && (
+          <span>
+            {t`Schedule not found.`}{' '}
+            <Link to={`${pathRoot}schedules`}>{t`View Schedules`}</Link>
+          </span>
+        )}
+      </ContentError>
+    );
+  }
+
   if (isLoading || !schedule?.summary_fields?.unified_job_template?.id) {
     return <ContentLoading />;
   }
