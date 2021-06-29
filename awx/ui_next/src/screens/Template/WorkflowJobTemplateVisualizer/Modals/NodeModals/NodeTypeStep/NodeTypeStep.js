@@ -1,6 +1,5 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
-
 import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
 import { useField } from 'formik';
@@ -24,6 +23,7 @@ import { useConfig } from 'contexts/Config';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
+import SystemJobTemplatesList from './SystemJobTemplatesList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
 
 const NodeTypeErrorAlert = styled(Alert)`
@@ -100,6 +100,12 @@ function NodeTypeStep() {
                 isDisabled: false,
               },
               {
+                key: 'system_job_template',
+                value: 'system_job_template',
+                label: t`Management Job`,
+                isDisabled: false,
+              },
+              {
                 key: 'workflow_job_template',
                 value: 'workflow_job_template',
                 label: t`Workflow Job Template`,
@@ -133,6 +139,12 @@ function NodeTypeStep() {
       )}
       {nodeTypeField.value === 'inventory_source' && (
         <InventorySourcesList
+          nodeResource={nodeResourceField.value}
+          onUpdateNodeResource={nodeResourceHelpers.setValue}
+        />
+      )}
+      {nodeTypeField.value === 'system_job_template' && (
+        <SystemJobTemplatesList
           nodeResource={nodeResourceField.value}
           onUpdateNodeResource={nodeResourceHelpers.setValue}
         />

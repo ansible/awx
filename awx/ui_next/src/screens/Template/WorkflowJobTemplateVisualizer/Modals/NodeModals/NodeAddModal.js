@@ -56,7 +56,13 @@ function NodeAddModal() {
       ) {
         node.promptValues = values;
       }
+      if (values?.nodeType === 'system_job_template') {
+        node.promptValues = {
+          extra_data: values?.extra_data,
+        };
+      }
     }
+
     dispatch({
       type: 'CREATE_NODE',
       node,

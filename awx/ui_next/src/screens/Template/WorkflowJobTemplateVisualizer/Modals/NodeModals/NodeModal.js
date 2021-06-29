@@ -1,7 +1,6 @@
 import 'styled-components/macro';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import yaml from 'js-yaml';
@@ -12,6 +11,7 @@ import {
   WizardFooter,
   Form,
 } from '@patternfly/react-core';
+import AlertModal from 'components/AlertModal';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 
@@ -27,12 +27,10 @@ import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import Wizard from 'components/Wizard';
 import AlertModal from 'components/AlertModal';
 import useWorkflowNodeSteps from './useWorkflowNodeSteps';
-
 import NodeNextButton from './NodeNextButton';
 
 function NodeModalForm({
   askLinkType,
-
   onSave,
   title,
   credentialError,
@@ -66,7 +64,6 @@ function NodeModalForm({
   } = useWorkflowNodeSteps(
     launchConfig,
     surveyConfig,
-
     values.nodeResource,
     askLinkType,
     resourceDefaultCredentials
@@ -98,7 +95,18 @@ function NodeModalForm({
       }
       values.extra_data = extraVars && parseVariableField(extraVars);
       delete values.extra_vars;
+    } else if (
+      values.nodeType === 'system_job_template' &&
+      ['cleanup_activitystream', 'cleanup_jobs'].includes(
+        values?.nodeResource?.job_type
+      )
+    ) {
+      values.extra_data = {
+        days: values?.daysToKeep,
+      };
     }
+
+    delete values.daysToKeep;
     onSave(values, launchConfig);
   };
 
@@ -351,6 +359,7 @@ const NodeModal = ({ onSave, askLinkType, title }) => {
       initialValues={{
         approvalName: '',
         approvalDescription: '',
+        daysToKeep: 30,
         timeoutMinutes: 0,
         timeoutSeconds: 0,
         convergence: 'any',

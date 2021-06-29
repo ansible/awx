@@ -57,6 +57,12 @@ export function minLength(min) {
 
 export function minMaxValue(min, max) {
   return (value) => {
+    if (!Number.isFinite(min) && value > max) {
+      return t`This field must be a number and have a value less than ${max}`;
+    }
+    if (!Number.isFinite(max) && value < min) {
+      return t`This field must be a number and have a value greater than ${min}`;
+    }
     if (value < min || value > max) {
       return t`This field must be a number and have a value between ${min} and ${max}`;
     }

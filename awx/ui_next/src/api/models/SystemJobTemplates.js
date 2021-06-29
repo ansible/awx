@@ -10,12 +10,6 @@ class SystemJobTemplates extends Mixins {
     this.baseUrl = '/api/v2/system_job_templates/';
   }
 
-  readDetail(id) {
-    const path = `${this.baseUrl}${id}/`;
-
-    return this.http.get(path).then(({ data }) => data);
-  }
-
   launch(id, data) {
     return this.http.post(`${this.baseUrl}${id}/launch/`, data);
   }

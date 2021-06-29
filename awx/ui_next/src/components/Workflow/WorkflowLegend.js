@@ -104,6 +104,10 @@ function WorkflowLegend() {
           <span>{t`Project Sync`}</span>
         </li>
         <li>
+          <NodeTypeLetter>M</NodeTypeLetter>
+          <span>{t`Management Job`}</span>
+        </li>
+        <li>
           <NodeTypeLetter>
             <PauseIcon />
           </NodeTypeLetter>
