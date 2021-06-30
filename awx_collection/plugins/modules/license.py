@@ -58,7 +58,8 @@ def main():
     json_output = {'changed': False}
 
     try:
-        manifest = base64.b64encode(open(module.params.get('manifest'), 'rb').read())
+        with open(module.params.get('manifest'), 'rb') as fid:
+            manifest = base64.b64encode(fid.read())
     except OSError as e:
         module.fail_json(msg=str(e))
 

@@ -223,12 +223,12 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
     longest_module_name = 0
     longest_option_name = 0
     longest_endpoint = 0
-    for module in option_comparison:
-        if len(option_comparison[module]['module_name']) > longest_module_name:
-            longest_module_name = len(option_comparison[module]['module_name'])
-        if len(option_comparison[module]['endpoint']) > longest_endpoint:
-            longest_endpoint = len(option_comparison[module]['endpoint'])
-        for option in option_comparison[module]['api_options'], option_comparison[module]['module_options']:
+    for module, module_value in option_comparison.items():
+        if len(module_value['module_name']) > longest_module_name:
+            longest_module_name = len(module_value['module_name'])
+        if len(module_value['endpoint']) > longest_endpoint:
+            longest_endpoint = len(module_value['endpoint'])
+        for option in module_value['api_options'], module_value['module_options']:
             if len(option) > longest_option_name:
                 longest_option_name = len(option)
 
