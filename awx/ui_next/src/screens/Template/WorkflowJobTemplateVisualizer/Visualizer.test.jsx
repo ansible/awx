@@ -12,9 +12,7 @@ import workflowReducer from '../../../components/Workflow/workflowReducer';
 
 jest.mock('../../../components/Workflow/workflowReducer');
 
-const realWorkflowReducer = jest.requireActual(
-  '../../../components/Workflow/workflowReducer'
-).default;
+const realWorkflowReducer = jest.requireActual('../../../components/Workflow/workflowReducer').default;
 
 jest.mock('../../../api');
 
