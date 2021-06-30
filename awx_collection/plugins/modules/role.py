@@ -216,11 +216,11 @@ def main():
     resource_param_keys = ('user', 'team', 'lookup_organization')
 
     resources = {}
-    for resource_group in resource_list_param_keys:
+    for resource_group, old_name in resource_list_param_keys.items():
         if module.params.get(resource_group) is not None:
             resources.setdefault(resource_group, []).extend(module.params.get(resource_group))
-        if module.params.get(resource_list_param_keys[resource_group]) is not None:
-            resources.setdefault(resource_group, []).append(module.params.get(resource_list_param_keys[resource_group]))
+        if module.params.get(old_name) is not None:
+            resources.setdefault(resource_group, []).append(module.params.get(old_name))
     for resource_group in resource_param_keys:
         if module.params.get(resource_group) is not None:
             resources[resource_group] = module.params.get(resource_group)
@@ -251,8 +251,8 @@ def main():
 
     # Lookup Resources
     resource_data = {}
-    for key in resources:
-        for resource in resources[key]:
+    for key, value in resources.items():
+        for resource in value:
             # Attempt to look up project based on the provided name or ID and lookup data
             if key in resources:
                 if key == 'organizations':
@@ -265,8 +265,8 @@ def main():
     # build association agenda
     associations = {}
     for actor_type, actor in actor_data.items():
-        for key in resource_data:
-            for resource in resource_data[key]:
+        for key, value in resource_data.items():
+            for resource in value:
                 resource_roles = resource['summary_fields']['object_roles']
                 if role_field not in resource_roles:
                     available_roles = ', '.join(list(resource_roles.keys()))

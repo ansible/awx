@@ -128,9 +128,9 @@ def main():
 
     # Create a datastructure to pass into our job launch
     post_data = {}
-    for key in optional_args.keys():
-        if optional_args[key]:
-            post_data[key] = optional_args[key]
+    for arg_name, arg_value in optional_args.items():
+        if arg_value:
+            post_data[arg_name] = arg_value
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if inventory:
@@ -154,8 +154,8 @@ def main():
     }
 
     param_errors = []
-    for variable_name in check_vars_to_prompts:
-        if variable_name in post_data and not workflow_job_template[check_vars_to_prompts[variable_name]]:
+    for variable_name, prompt in check_vars_to_prompts.items():
+        if variable_name in post_data and not workflow_job_template[prompt]:
             param_errors.append("The field {0} was specified but the workflow job template does not allow for it to be overridden".format(variable_name))
     # Check if Either ask_variables_on_launch, or survey_enabled is enabled for use of extra vars.
     if module.params.get('extra_vars') and not (workflow_job_template['ask_variables_on_launch'] or workflow_job_template['survey_enabled']):
