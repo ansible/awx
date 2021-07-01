@@ -4,7 +4,6 @@ import { t } from '@lingui/macro';
 import {
   Switch,
   Route,
-  withRouter,
   Redirect,
   Link,
   useParams,
@@ -207,5 +206,5 @@ function Project({ setBreadcrumb }) {
   );
 }
 
-export default withRouter(Project);
+export default Project;
 export { Project as _Project };

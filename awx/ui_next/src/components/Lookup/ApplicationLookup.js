@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { func, node, string } from 'prop-types';
-import { withRouter, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ApplicationsAPI } from 'api';
@@ -151,4 +151,4 @@ ApplicationLookup.defaultProps = {
   fieldName: 'application',
 };
 
-export default withRouter(ApplicationLookup);
+export default ApplicationLookup;

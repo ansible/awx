@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import {
   Route,
-  withRouter,
   Switch,
   Redirect,
   Link,
@@ -173,5 +172,5 @@ function Job({ setBreadcrumb }) {
   );
 }
 
-export default withRouter(Job);
+export default Job;
 export { Job as _Job };

@@ -4,7 +4,6 @@ import { t } from '@lingui/macro';
 import {
   Switch,
   Route,
-  withRouter,
   Redirect,
   Link,
   useLocation,
@@ -235,5 +234,5 @@ function Organization({ setBreadcrumb, me }) {
   );
 }
 
-export default withRouter(Organization);
+export default Organization;
 export { Organization as _Organization };

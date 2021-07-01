@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory, useLocation, withRouter } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
@@ -952,4 +952,4 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 }
 
 export { JobOutput as _JobOutput };
-export default withRouter(JobOutput);
+export default JobOutput;
