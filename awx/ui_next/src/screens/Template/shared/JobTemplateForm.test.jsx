@@ -194,7 +194,8 @@ describe('<JobTemplateForm />', () => {
         />
       );
     });
-    wrapper.update();
+
+    await waitForElement(wrapper, 'Spinner', el => el.length === 0);
 
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
