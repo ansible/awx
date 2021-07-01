@@ -62,9 +62,9 @@ const getNodeToEditDefaultValues = (
 
   if (nodeToEdit?.fullUnifiedJobTemplate?.type === 'system_job_template') {
     if (
-      nodeToEdit.isEdited &&
+      nodeToEdit?.promptValues?.extra_data &&
       Object.prototype.hasOwnProperty.call(
-        nodeToEdit?.promptValues?.extra_data,
+        nodeToEdit.promptValues.extra_data,
         'days'
       )
     ) {
@@ -73,8 +73,9 @@ const getNodeToEditDefaultValues = (
         10
       );
     } else if (
+      nodeToEdit?.originalNodeObject?.extra_data &&
       Object.prototype.hasOwnProperty.call(
-        nodeToEdit?.originalNodeObject?.extra_data,
+        nodeToEdit.originalNodeObject.extra_data,
         'days'
       )
     ) {
