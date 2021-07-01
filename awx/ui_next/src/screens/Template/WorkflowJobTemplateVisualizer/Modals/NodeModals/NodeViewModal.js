@@ -136,7 +136,11 @@ function NodeViewModal({ readOnly }) {
     if (promptValues) {
       overrides = promptValues;
 
-      if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
+      if (
+        launchConfig.ask_variables_on_launch ||
+        launchConfig.survey_enabled ||
+        fullUnifiedJobTemplate.type === 'system_job_template'
+      ) {
         overrides.extra_vars = jsonToYaml(
           JSON.stringify(promptValues.extra_data)
         );
@@ -150,7 +154,11 @@ function NodeViewModal({ readOnly }) {
       if (launchConfig.ask_scm_branch_on_launch) {
         overrides.scm_branch = originalNodeObject.scm_branch;
       }
-      if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
+      if (
+        launchConfig.ask_variables_on_launch ||
+        launchConfig.survey_enabled ||
+        fullUnifiedJobTemplate.type === 'system_job_template'
+      ) {
         overrides.extra_vars = jsonToYaml(
           JSON.stringify(originalNodeObject.extra_data)
         );
