@@ -60,50 +60,29 @@ describe('<AdHocCommandsWizard/>', () => {
     expect(wrapper.find('AdHocCommandsWizard').length).toBe(1);
   });
 
-  test('next and nav item should be disabled', async () => {
-    await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
-    expect(
-      wrapper.find('WizardNavItem[content="Details"]').prop('isCurrent')
-    ).toBe(true);
-    expect(
-      wrapper.find('WizardNavItem[content="Details"]').prop('isDisabled')
-    ).toBe(false);
-    expect(
-      wrapper
-        .find('WizardNavItem[content="Machine credential"]')
-        .prop('isDisabled')
-    ).toBe(true);
-    expect(
-      wrapper
-        .find('WizardNavItem[content="Machine credential"]')
-        .prop('isCurrent')
-    ).toBe(false);
-    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
-  });
+  test('launch button should be disabled', async () => {
+    waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
 
-  test('next button should become active, and should navigate to the next step', async () => {
-    await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
-
-    await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
-        {},
-        'command'
-      );
-      wrapper.find('input#module_args').simulate('change', {
-        target: { value: 'foo', name: 'module_args' },
-      });
-      wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
-    });
-    wrapper.update();
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
       false
     );
-    await act(async () =>
-      wrapper.find('Button[type="submit"]').prop('onClick')()
+    act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
+    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
+      false
     );
-
     wrapper.update();
+    act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
+    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
+      false
+    );
+    wrapper.update();
+    act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
+    wrapper.update();
+
+    expect(wrapper.find('AdHocPreviewStep').prop('hasErrors')).toBe(true);
+    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
   });
+
   test('launch button should become active', async () => {
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
       data: {
@@ -184,7 +163,7 @@ describe('<AdHocCommandsWizard/>', () => {
 
     await waitForElement(wrapper, 'OptionsList', el => el.length > 0);
     expect(wrapper.find('CheckboxListItem').length).toBe(2);
-    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
+
     await act(async () => {
       wrapper
         .find('td#check-action-item-1')
@@ -197,12 +176,16 @@ describe('<AdHocCommandsWizard/>', () => {
     expect(
       wrapper.find('CheckboxListItem[label="Cred 1"]').prop('isSelected')
     ).toBe(true);
-    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
-      false
-    );
 
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    wrapper.update();
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
+      false
     );
 
     expect(onLaunch).toHaveBeenCalledWith({

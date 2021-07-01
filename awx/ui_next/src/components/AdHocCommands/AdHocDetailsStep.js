@@ -1,6 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
@@ -41,12 +40,14 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
 
   const argumentsRequired =
     moduleNameField.value === 'command' || moduleNameField.value === 'shell';
-  const [, argumentsMeta, argumentsHelpers] = useField({
+  const [argumentsField, argumentsMeta, argumentsHelpers] = useField({
     name: 'module_args',
     validate: argumentsRequired && required(null),
   });
 
-  const isValid = !argumentsMeta.error || !argumentsMeta.touched;
+  const isValid = argumentsRequired
+    ? (!argumentsMeta.error || !argumentsMeta.touched) && argumentsField.value
+    : true;
 
   return (
     <Form>
@@ -103,10 +104,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
             label={t`Arguments`}
             validated={isValid ? 'default' : 'error'}
             onBlur={() => argumentsHelpers.setTouched(true)}
-            isRequired={
-              moduleNameField.value === 'command' ||
-              moduleNameField.value === 'shell'
-            }
+            isRequired={argumentsRequired}
             tooltip={
               moduleNameField.value ? (
                 <>
@@ -249,7 +247,6 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
           </FormColumnLayout>
 
           <VariablesField
-            css="margin: 20px 0"
             id="extra_vars"
             name="extra_vars"
             value={JSON.stringify(variablesField.value)}
