@@ -3088,8 +3088,8 @@ class AWXReceptorJob:
             pod_spec_override = parse_yaml_or_json(self.task.instance.instance_group.pod_spec_override)
         pod_spec = {**default_pod_spec, **pod_spec_override}
 
-        pod_spec['spec']['containers'][0]['image'] = ee.image
-        pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
+        if pod_spec['spec']['containers'][0]['image'] is None or pod_spec['spec']['containers'][0]['image'] == "":
+            pod_spec['spec']['containers'][0]['image'] = ee.image
 
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
