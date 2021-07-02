@@ -15,8 +15,8 @@ describe('<JobDetail />', () => {
     expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
     expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
   }
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

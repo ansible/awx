@@ -16,6 +16,7 @@ export function required(message) {
     return undefined;
   };
 }
+
 export function validateTime() {
   return value => {
     const timeRegex = new RegExp(

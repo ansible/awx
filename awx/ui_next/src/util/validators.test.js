@@ -1,3 +1,5 @@
+import { i18n } from '@lingui/core';
+import en from '../locales/en/messages';
 import {
   required,
   minLength,
@@ -13,6 +15,12 @@ import {
 } from './validators';
 
 describe('validators', () => {
+  beforeAll(() => {
+    i18n.loadLocaleData({ en: { plurals: en } });
+    i18n.load({ en });
+    i18n.activate('en');
+  });
+
   test('required returns undefined if value given', () => {
     expect(required(null)('some value')).toBeUndefined();
     expect(required('oops')('some value')).toBeUndefined();
@@ -169,6 +177,7 @@ describe('validators', () => {
   test('bob has email', () => {
     expect(requiredEmail()('bob@localhost')).toBeUndefined();
   });
+
   test('validate time validates properly', () => {
     expect(validateTime()('12:15 PM')).toBeUndefined();
     expect(validateTime()('1:15 PM')).toBeUndefined();

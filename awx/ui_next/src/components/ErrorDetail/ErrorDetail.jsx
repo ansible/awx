@@ -36,6 +36,10 @@ function ErrorDetail({ error }) {
   const { response } = error;
   const [isExpanded, setIsExpanded] = useState(false);
 
+  if (!error) {
+    return null;
+  }
+
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
@@ -84,7 +88,10 @@ function ErrorDetail({ error }) {
 }
 
 ErrorDetail.propTypes = {
-  error: PropTypes.instanceOf(Error).isRequired,
+  error: PropTypes.instanceOf(Error),
+};
+ErrorDetail.defaultProps = {
+  error: null,
 };
 
 export default ErrorDetail;

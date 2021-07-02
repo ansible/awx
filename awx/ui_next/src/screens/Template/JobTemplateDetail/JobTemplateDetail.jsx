@@ -222,7 +222,7 @@ function JobTemplateDetail({ template }) {
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.resolved_environment}
           helpText={t`The execution environment that will be used when launching
-          this job template. The resolved execution environment can be overridden by 
+          this job template. The resolved execution environment can be overridden by
           explicitly assigning a different one to this job template.`}
         />
         <Detail label={t`Source Control Branch`} value={template.scm_branch} />
@@ -290,7 +290,7 @@ function JobTemplateDetail({ template }) {
                 totalChips={summary_fields.credentials.length}
               >
                 {summary_fields.credentials.map(c => (
-                  <Link to={`/credentials/${c.id}/details`}>
+                  <Link to={`/credentials/${c.id}/details`} key={c.id}>
                     <CredentialChip key={c.id} credential={c} isReadOnly />
                   </Link>
                 ))}

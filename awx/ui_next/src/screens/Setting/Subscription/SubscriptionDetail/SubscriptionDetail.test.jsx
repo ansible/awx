@@ -76,7 +76,12 @@ describe('<SubscriptionDetail />', () => {
 
   test('should render edit button for system admin', () => {
     wrapper = mountWithContexts(<SubscriptionDetail />, {
-      context: { ...config, me: { is_superuser: true } },
+      context: {
+        config: {
+          ...config,
+          me: { is_superuser: true },
+        },
+      },
     });
 
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(1);
