@@ -184,7 +184,8 @@ function Template({ setBreadcrumb }) {
 
   const showCardHeader = !(
     location.pathname.endsWith('edit') ||
-    location.pathname.includes('schedules/')
+    location.pathname.includes('schedules/') ||
+    location.pathname.includes('survey/')
   );
 
   return (
