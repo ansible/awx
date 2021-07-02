@@ -31,7 +31,7 @@ const NodeTypeErrorAlert = styled(Alert)`
 `;
 
 const TimeoutInput = styled(TextInput)`
-  width: 200px;
+  width: 200px !important;
   :not(:first-of-type) {
     margin-left: 20px;
   }
@@ -43,7 +43,7 @@ const TimeoutLabel = styled.p`
   min-width: fit-content;
 `;
 
-function NodeTypeStep() {
+function NodeTypeStep({ isIdentifierRequired }) {
   const [nodeTypeField, , nodeTypeHelpers] = useField('nodeType');
   const [nodeResourceField, nodeResourceMeta, nodeResourceHelpers] =
     useField('nodeResource');
@@ -157,105 +157,117 @@ function NodeTypeStep() {
       )}
       <Form css="margin-top: 20px;">
         <FormColumnLayout>
-          {nodeTypeField.value === 'workflow_approval_template' && (
-            <FormFullWidthLayout>
-              <FormField
-                name="approvalName"
-                id="approval-name"
-                isRequired
-                validate={required(null)}
-                validated={isValid ? 'default' : 'error'}
-                label={t`Name`}
-              />
-              <FormField
-                name="approvalDescription"
-                id="approval-description"
-                label={t`Description`}
-              />
-              <FormGroup
-                label={t`Timeout`}
-                fieldId="approval-timeout"
-                name="timeout"
-              >
-                <div css="display: flex;align-items: center;">
-                  <TimeoutInput
-                    {...timeoutMinutesField}
-                    aria-label={t`Timeout minutes`}
-                    id="approval-timeout-minutes"
-                    min="0"
-                    onChange={(value, event) => {
-                      timeoutMinutesField.onChange(event);
-                    }}
-                    step="1"
-                    type="number"
-                  />
-                  <TimeoutLabel>
-                    <Trans>min</Trans>
-                  </TimeoutLabel>
-                  <TimeoutInput
-                    {...timeoutSecondsField}
-                    aria-label={t`Timeout seconds`}
-                    id="approval-timeout-seconds"
-                    min="0"
-                    onChange={(value, event) => {
-                      timeoutSecondsField.onChange(event);
-                    }}
-                    step="1"
-                    type="number"
-                  />
-                  <TimeoutLabel>
-                    <Trans>sec</Trans>
-                  </TimeoutLabel>
-                </div>
-              </FormGroup>
-            </FormFullWidthLayout>
-          )}
-          <FormGroup
-            fieldId="convergence"
-            label={t`Convergence`}
-            isRequired
-            labelIcon={
-              <Popover
-                content={
-                  <>
-                    {t`Preconditions for running this node when there are multiple parents. Refer to the`}{' '}
-                    <a
-                      href={`${getDocsBaseUrl(
-                        config
-                      )}/html/userguide/workflow_templates.html#convergence-node`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {t`documentation`}
-                    </a>{' '}
-                    {t`for more info.`}
-                  </>
-                }
-              />
-            }
-          >
-            <Select
-              variant={SelectVariant.single}
-              isOpen={isConvergenceOpen}
-              selections={convergenceField.value}
-              onToggle={setIsConvergenceOpen}
-              onSelect={(event, selection) => {
-                convergenceFieldHelpers.setValue(selection);
-                setIsConvergenceOpen(false);
-              }}
-              aria-label={t`Convergence select`}
-              typeAheadAriaLabel={t`Convergence select`}
-              className="convergenceSelect"
-              ouiaId="convergenceSelect"
+          <FormFullWidthLayout>
+            {nodeTypeField.value === 'workflow_approval_template' && (
+              <>
+                <FormField
+                  name="approvalName"
+                  id="approval-name"
+                  isRequired
+                  validate={required(null)}
+                  validated={isValid ? 'default' : 'error'}
+                  label={t`Name`}
+                />
+                <FormField
+                  name="approvalDescription"
+                  id="approval-description"
+                  label={t`Description`}
+                />
+                <FormGroup
+                  label={t`Timeout`}
+                  fieldId="approval-timeout"
+                  name="timeout"
+                >
+                  <div css="display: flex;align-items: center;">
+                    <TimeoutInput
+                      {...timeoutMinutesField}
+                      aria-label={t`Timeout minutes`}
+                      id="approval-timeout-minutes"
+                      min="0"
+                      onChange={(value, event) => {
+                        timeoutMinutesField.onChange(event);
+                      }}
+                      step="1"
+                      type="number"
+                    />
+                    <TimeoutLabel>
+                      <Trans>min</Trans>
+                    </TimeoutLabel>
+                    <TimeoutInput
+                      {...timeoutSecondsField}
+                      aria-label={t`Timeout seconds`}
+                      id="approval-timeout-seconds"
+                      min="0"
+                      onChange={(value, event) => {
+                        timeoutSecondsField.onChange(event);
+                      }}
+                      step="1"
+                      type="number"
+                    />
+                    <TimeoutLabel>
+                      <Trans>sec</Trans>
+                    </TimeoutLabel>
+                  </div>
+                </FormGroup>
+              </>
+            )}
+            <FormGroup
+              fieldId="convergence"
+              label={t`Convergence`}
+              isRequired
+              labelIcon={
+                <Popover
+                  content={
+                    <>
+                      {t`Preconditions for running this node when there are multiple parents. Refer to the`}{' '}
+                      <a
+                        href={`${getDocsBaseUrl(
+                          config
+                        )}/html/userguide/workflow_templates.html#convergence-node`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t`documentation`}
+                      </a>{' '}
+                      {t`for more info.`}
+                    </>
+                  }
+                />
+              }
             >
-              <SelectOption key="any" value="any" id="select-option-any">
-                {t`Any`}
-              </SelectOption>
-              <SelectOption key="all" value="all" id="select-option-all">
-                {t`All`}
-              </SelectOption>
-            </Select>
-          </FormGroup>
+              <Select
+                variant={SelectVariant.single}
+                isOpen={isConvergenceOpen}
+                selections={convergenceField.value}
+                onToggle={setIsConvergenceOpen}
+                onSelect={(event, selection) => {
+                  convergenceFieldHelpers.setValue(selection);
+                  setIsConvergenceOpen(false);
+                }}
+                aria-label={t`Convergence select`}
+                typeAheadAriaLabel={t`Convergence select`}
+                className="convergenceSelect"
+                ouiaId="convergenceSelect"
+              >
+                <SelectOption key="any" value="any" id="select-option-any">
+                  {t`Any`}
+                </SelectOption>
+                <SelectOption key="all" value="all" id="select-option-all">
+                  {t`All`}
+                </SelectOption>
+              </Select>
+            </FormGroup>
+            <FormField
+              id="node-alias"
+              name="identifier"
+              aria-label={t`Node Alias`}
+              label={t`Node Alias`}
+              tooltip={t`If specified, this field will be shown on the node instead of the resource name when viewing the workflow`}
+              isRequired={isIdentifierRequired}
+              validate={isIdentifierRequired ? required(null) : null}
+              validated={isValid ? 'default' : 'error'}
+            />
+          </FormFullWidthLayout>
         </FormColumnLayout>
       </Form>
     </>

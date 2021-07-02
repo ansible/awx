@@ -1,6 +1,5 @@
 import React, { useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
-
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
 import {
@@ -18,6 +17,7 @@ import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { WorkflowJobTemplateNodesAPI } from 'api';
 import { constants as wfConstants } from 'components/Workflow/WorkflowUtils';
+import { stringIsUUID } from 'util/strings';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
@@ -168,6 +168,23 @@ function VisualizerNode({
     }
   };
 
+  let nodeName;
+
+  if (
+    node?.identifier ||
+    (node?.originalNodeObject?.identifier &&
+      !stringIsUUID(node.originalNodeObject.identifier))
+  ) {
+    nodeName = node?.identifier
+      ? node?.identifier
+      : node?.originalNodeObject?.identifier;
+  } else {
+    nodeName =
+      node?.fullUnifiedJobTemplate?.name ||
+      node?.originalNodeObject?.summary_fields?.unified_job_template?.name ||
+      t`DELETED`;
+  }
+
   const viewDetailsAction = (
     <WorkflowActionTooltipItem
       id="node-details"
@@ -305,10 +322,7 @@ function VisualizerNode({
         >
           <NodeContents isInvalidLinkTarget={node.isInvalidLinkTarget}>
             <NodeResourceName id={`node-${node.id}-name`}>
-              {node?.fullUnifiedJobTemplate?.name ||
-                node?.originalNodeObject?.summary_fields?.unified_job_template
-                  ?.name ||
-                t`DELETED`}
+              {nodeName}
             </NodeResourceName>
           </NodeContents>
         </foreignObject>

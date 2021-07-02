@@ -18,6 +18,7 @@ function NodeEditModal() {
       timeoutMinutes,
       timeoutSeconds,
       convergence,
+      identifier,
       ...rest
     } = values;
     let node;
@@ -30,11 +31,13 @@ function NodeEditModal() {
           timeout: Number(timeoutMinutes) * 60 + Number(timeoutSeconds),
           type: 'workflow_approval_template',
         },
+        identifier,
       };
     } else {
       node = {
         nodeResource,
         all_parents_must_converge: convergence === 'all',
+        identifier,
       };
       if (nodeType === 'job_template' || nodeType === 'workflow_job_template') {
         node.promptValues = {

@@ -68,15 +68,19 @@ const workflowContext = {
         name: 'Foo JT',
         type: 'job_template',
       },
+      identifier: 'node 2',
     },
     {
       id: 3,
+      identifier: 'node 3',
     },
     {
       id: 4,
+      identifier: 'node 4',
     },
     {
       id: 5,
+      identifier: 'node 5',
     },
   ],
   showLegend: false,
@@ -183,9 +187,15 @@ describe('VisualizerGraph', () => {
       .first()
       .simulate('mouseenter');
     expect(wrapper.find('WorkflowNodeHelp')).toHaveLength(1);
-    expect(wrapper.find('WorkflowNodeHelp').contains(<b>Name</b>)).toEqual(
-      true
-    );
+    expect(
+      wrapper.find('WorkflowNodeHelp').contains(<b>Node Alias</b>)
+    ).toEqual(true);
+    expect(
+      wrapper.find('WorkflowNodeHelp').containsMatchingElement(<dd>node 2</dd>)
+    ).toEqual(true);
+    expect(
+      wrapper.find('WorkflowNodeHelp').contains(<b>Resource Name</b>)
+    ).toEqual(true);
     expect(
       wrapper.find('WorkflowNodeHelp').containsMatchingElement(<dd>Foo JT</dd>)
     ).toEqual(true);
