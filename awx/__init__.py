@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import time
 import sys
 import warnings
 
@@ -35,6 +36,7 @@ else:
     from django.db.models import indexes
     from django.db.backends.utils import names_digest
     from django.db import connection
+    from django.db.utils import OperationalError
 
 
 if HAS_DJANGO is True:
@@ -152,6 +154,19 @@ def manage():
 
     # enforce the postgres version is equal to 12. if not, then terminate program with exit code of 1
     if not MODE == 'development':
+        # wait for connection to the database
+        sys.stdout.write("Wainting for connection to database\n")
+        connected = False
+        while not connected:
+            try:
+                connection.ensure_connection()
+                connected = True
+            except OperationalError:
+                sys.stdout.write("No connection available\n")
+                time.sleep(1)
+
+        sys.stdout.write("Connection established\n")
+
         if (connection.pg_version // 10000) < 12:
             sys.stderr.write("Postgres version 12 is required\n")
             sys.exit(1)
