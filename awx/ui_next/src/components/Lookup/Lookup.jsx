@@ -7,6 +7,7 @@ import {
   number,
   oneOfType,
   shape,
+  node,
 } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { useField } from 'formik';
@@ -206,7 +207,7 @@ const Item = shape({
 Lookup.propTypes = {
   id: string,
   header: string,
-  modalDescription: string,
+  modalDescription: oneOfType([string, node]),
   onChange: func.isRequired,
   value: oneOfType([Item, arrayOf(Item)]),
   multiple: bool,

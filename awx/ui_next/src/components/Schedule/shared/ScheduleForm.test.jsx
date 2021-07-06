@@ -168,6 +168,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('ContentError').length).toBe(1);
     });
   });
+
   describe('Cancel', () => {
     test('should make the appropriate callback', async () => {
       const handleCancel = jest.fn();
@@ -226,8 +227,10 @@ describe('<ScheduleForm />', () => {
       expect(handleCancel).toHaveBeenCalledTimes(1);
     });
   });
+
   describe('Prompted Schedule', () => {
     let promptWrapper;
+
     beforeEach(async () => {
       SchedulesAPI.readZoneInfo.mockResolvedValue({
         data: [
@@ -284,8 +287,8 @@ describe('<ScheduleForm />', () => {
         el => el.length > 0
       );
     });
+
     afterEach(() => {
-      promptWrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -375,6 +378,7 @@ describe('<ScheduleForm />', () => {
       promptWrapper.update();
       expect(promptWrapper.find('Wizard').length).toBe(0);
     });
+
     test('should render prompt button with disabled save button', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -423,6 +427,7 @@ describe('<ScheduleForm />', () => {
       );
     });
   });
+
   describe('Add', () => {
     beforeAll(async () => {
       SchedulesAPI.readZoneInfo.mockResolvedValue({
@@ -473,9 +478,7 @@ describe('<ScheduleForm />', () => {
       });
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
-    afterAll(() => {
-      wrapper.unmount();
-    });
+
     test('initially renders expected fields and values', () => {
       const now = new Date();
       const closestQuarterHour = new Date(
@@ -503,6 +506,7 @@ describe('<ScheduleForm />', () => {
         'none'
       );
     });
+
     test('correct frequency details fields and values shown when frequency changed to minute', async () => {
       const runFrequencySelect = wrapper.find(
         'FormGroup[label="Run frequency"] FormSelect'
@@ -526,6 +530,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
     });
+
     test('correct frequency details fields and values shown when frequency changed to hour', async () => {
       const runFrequencySelect = wrapper.find(
         'FormGroup[label="Run frequency"] FormSelect'
@@ -549,6 +554,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
     });
+
     test('correct frequency details fields and values shown when frequency changed to day', async () => {
       const runFrequencySelect = wrapper.find(
         'FormGroup[label="Run frequency"] FormSelect'
@@ -572,6 +578,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
     });
+
     test('correct frequency details fields and values shown when frequency changed to week', async () => {
       const runFrequencySelect = wrapper.find(
         'FormGroup[label="Run frequency"] FormSelect'
@@ -595,6 +602,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
     });
+
     test('correct frequency details fields and values shown when frequency changed to month', async () => {
       const runFrequencySelect = wrapper.find(
         'FormGroup[label="Run frequency"] FormSelect'
@@ -629,6 +637,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('select#schedule-run-on-day-month').length).toBe(0);
       expect(wrapper.find('select#schedule-run-on-the-month').length).toBe(0);
     });
+
     test('correct frequency details fields and values shown when frequency changed to year', async () => {
       const runFrequencySelect = wrapper.find(
         'FormGroup[label="Run frequency"] FormSelect'
@@ -663,6 +672,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('select#schedule-run-on-day-month').length).toBe(1);
       expect(wrapper.find('select#schedule-run-on-the-month').length).toBe(1);
     });
+
     test('occurrences field properly shown when end after selection is made', async () => {
       await act(async () => {
         wrapper
@@ -690,6 +700,7 @@ describe('<ScheduleForm />', () => {
       });
       wrapper.update();
     });
+
     test('error shown when end date/time comes before start date/time', async () => {
       await act(async () => {
         wrapper
@@ -728,6 +739,7 @@ describe('<ScheduleForm />', () => {
         'Please select an end date/time that comes after the start date/time.'
       );
     });
+
     test('error shown when on day number is not between 1 and 31', async () => {
       act(() => {
         wrapper.find('select[id="schedule-frequency"]').invoke('onChange')(
@@ -761,6 +773,7 @@ describe('<ScheduleForm />', () => {
       );
     });
   });
+
   describe('Edit', () => {
     beforeEach(async () => {
       SchedulesAPI.readZoneInfo.mockResolvedValue({
@@ -773,12 +786,12 @@ describe('<ScheduleForm />', () => {
 
       SchedulesAPI.readCredentials.mockResolvedValue(credentials);
     });
+
     afterEach(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
-    test('should  make API calls to fetch credentials, launch configuration, and survey configuration', async () => {
+    test('should make API calls to fetch credentials, launch configuration, and survey configuration', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleForm
@@ -906,6 +919,7 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      wrapper.update();
       expect(wrapper.find('ScheduleForm').length).toBe(1);
       defaultFieldsVisible();
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(0);
@@ -920,6 +934,7 @@ describe('<ScheduleForm />', () => {
         'none'
       );
     });
+
     test('initially renders expected fields and values with existing schedule that runs every 10 minutes', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -941,6 +956,8 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      wrapper.update();
+
       expect(wrapper.find('ScheduleForm').length).toBe(1);
       defaultFieldsVisible();
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
@@ -959,6 +976,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
     });
+
     test('initially renders expected fields and values with existing schedule that runs every hour 10 times', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -981,6 +999,8 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      wrapper.update();
+
       expect(wrapper.find('ScheduleForm').length).toBe(1);
       defaultFieldsVisible();
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
@@ -1000,6 +1020,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
       expect(wrapper.find('input#schedule-occurrences').prop('value')).toBe(10);
     });
+
     test('initially renders expected fields and values with existing schedule that runs every day', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -1021,25 +1042,28 @@ describe('<ScheduleForm />', () => {
             }}
           />
         );
-        expect(wrapper.find('ScheduleForm').length).toBe(1);
-        defaultFieldsVisible();
-        expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(0);
-
-        nonRRuleValuesMatch();
-        expect(wrapper.find('select#schedule-frequency').prop('value')).toBe(
-          'day'
-        );
-        expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
-        expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
-        expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
-        expect(wrapper.find('input#schedule-run-every').prop('value')).toBe(1);
       });
+      wrapper.update();
+
+      expect(wrapper.find('ScheduleForm').length).toBe(1);
+      defaultFieldsVisible();
+      expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(0);
+
+      nonRRuleValuesMatch();
+      expect(wrapper.find('select#schedule-frequency').prop('value')).toBe(
+        'day'
+      );
+      expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
+      expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
+      expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
+      expect(wrapper.find('input#schedule-run-every').prop('value')).toBe(1);
     });
+
     test('initially renders expected fields and values with existing schedule that runs every week on m/w/f until Jan 1, 2020', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -1062,6 +1086,8 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      wrapper.update();
+
       expect(wrapper.find('ScheduleForm').length).toBe(1);
       defaultFieldsVisible();
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
@@ -1107,6 +1133,7 @@ describe('<ScheduleForm />', () => {
         wrapper.find('TimePicker[aria-label="End time"]').prop('value')
       ).toBe('1:00 AM');
     });
+
     test('initially renders expected fields and values with existing schedule that runs every month on the last weekday', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -1128,37 +1155,43 @@ describe('<ScheduleForm />', () => {
             }}
           />
         );
-        expect(wrapper.find('ScheduleForm').length).toBe(1);
-        defaultFieldsVisible();
-        expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
-
-        nonRRuleValuesMatch();
-        expect(wrapper.find('select#schedule-frequency').prop('value')).toBe(
-          'month'
-        );
-        expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
-        expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
-        expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
-        expect(wrapper.find('input#schedule-run-every').prop('value')).toBe(1);
-        expect(wrapper.find('input#schedule-run-on-day').prop('checked')).toBe(
-          false
-        );
-        expect(wrapper.find('input#schedule-run-on-the').prop('checked')).toBe(
-          true
-        );
-        expect(
-          wrapper.find('select#schedule-run-on-the-occurrence').prop('value')
-        ).toBe(-1);
-        expect(
-          wrapper.find('select#schedule-run-on-the-day').prop('value')
-        ).toBe('weekday');
       });
+      wrapper.update();
+
+      expect(wrapper.find('ScheduleForm').length).toBe(1);
+      defaultFieldsVisible();
+
+      expect(wrapper.find('ScheduleForm').length).toBe(1);
+      defaultFieldsVisible();
+      expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
+
+      nonRRuleValuesMatch();
+      expect(wrapper.find('select#schedule-frequency').prop('value')).toBe(
+        'month'
+      );
+      expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
+      expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
+      expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
+      expect(wrapper.find('input#schedule-run-every').prop('value')).toBe(1);
+      expect(wrapper.find('input#schedule-run-on-day').prop('checked')).toBe(
+        false
+      );
+      expect(wrapper.find('input#schedule-run-on-the').prop('checked')).toBe(
+        true
+      );
+      expect(
+        wrapper.find('select#schedule-run-on-the-occurrence').prop('value')
+      ).toBe(-1);
+      expect(wrapper.find('select#schedule-run-on-the-day').prop('value')).toBe(
+        'weekday'
+      );
     });
+
     test('initially renders expected fields and values with existing schedule that runs every year on the May 6', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -1180,36 +1213,38 @@ describe('<ScheduleForm />', () => {
             }}
           />
         );
-        expect(wrapper.find('ScheduleForm').length).toBe(1);
-        defaultFieldsVisible();
-        expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);
-        expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
-        expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
-
-        nonRRuleValuesMatch();
-        expect(wrapper.find('select#schedule-frequency').prop('value')).toBe(
-          'year'
-        );
-        expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
-        expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
-        expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
-        expect(wrapper.find('input#schedule-run-every').prop('value')).toBe(1);
-        expect(wrapper.find('input#schedule-run-on-day').prop('checked')).toBe(
-          true
-        );
-        expect(wrapper.find('input#schedule-run-on-the').prop('checked')).toBe(
-          false
-        );
-        expect(
-          wrapper.find('select#schedule-run-on-day-month').prop('value')
-        ).toBe(5);
-        expect(
-          wrapper.find('input#schedule-run-on-day-number').prop('value')
-        ).toBe(6);
       });
+      wrapper.update();
+
+      expect(wrapper.find('ScheduleForm').length).toBe(1);
+      defaultFieldsVisible();
+      expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
+      expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
+
+      nonRRuleValuesMatch();
+      expect(wrapper.find('select#schedule-frequency').prop('value')).toBe(
+        'year'
+      );
+      expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
+      expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
+      expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
+      expect(wrapper.find('input#schedule-run-every').prop('value')).toBe(1);
+      expect(wrapper.find('input#schedule-run-on-day').prop('checked')).toBe(
+        true
+      );
+      expect(wrapper.find('input#schedule-run-on-the').prop('checked')).toBe(
+        false
+      );
+      expect(
+        wrapper.find('select#schedule-run-on-day-month').prop('value')
+      ).toBe(5);
+      expect(
+        wrapper.find('input#schedule-run-on-day-number').prop('value')
+      ).toBe(6);
     });
   });
 });

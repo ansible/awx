@@ -1,10 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { RRule } from 'rrule';
-import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import {
   SchedulesAPI,
   InventoriesAPI,
@@ -191,12 +188,13 @@ describe('<ScheduleEdit />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    wrapper.update();
   });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
+
   test('Successfully creates a schedule with repeat frequency: None (run once)', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -210,6 +208,7 @@ describe('<ScheduleEdit />', () => {
         timezone: 'America/New_York',
       });
     });
+
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run once schedule',
@@ -218,6 +217,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200325T100000 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
+
   test('Successfully creates a schedule with 10 minute repeat frequency after 10 occurrences', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -241,6 +241,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200325T103000 RRULE:INTERVAL=10;FREQ=MINUTELY;COUNT=10',
     });
   });
+
   test('Successfully creates a schedule with hourly repeat frequency ending on a specific date/time', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -256,6 +257,7 @@ describe('<ScheduleEdit />', () => {
         timezone: 'America/New_York',
       });
     });
+
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run every hour until date',
@@ -264,6 +266,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=HOURLY;UNTIL=20200326T104500',
     });
   });
+
   test('Successfully creates a schedule with daily repeat frequency', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -308,6 +311,7 @@ describe('<ScheduleEdit />', () => {
       rrule: `DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=${RRule.MO},${RRule.WE},${RRule.FR}`,
     });
   });
+
   test('Successfully creates a schedule with monthly repeat frequency on the first day of the month', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -333,6 +337,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200401T104500 RRULE:INTERVAL=1;FREQ=MONTHLY;BYMONTHDAY=1',
     });
   });
+
   test('Successfully creates a schedule with monthly repeat frequency on the last tuesday of the month', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -362,6 +367,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200331T110000 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=-1;BYDAY=TU',
     });
   });
+
   test('Successfully creates a schedule with yearly repeat frequency on the first day of March', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -388,6 +394,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200301T000000 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=1',
     });
   });
+
   test('Successfully creates a schedule with yearly repeat frequency on the second Friday in April', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -416,6 +423,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=2;BYDAY=FR;BYMONTH=4',
     });
   });
+
   test('Successfully creates a schedule with yearly repeat frequency on the first weekday in October', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
@@ -653,6 +661,7 @@ describe('<ScheduleEdit />', () => {
         'DTSTART;TZID=America/New_York:20200402T184500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
+
   test('should submit survey with default values properly, without opening prompt wizard', async () => {
     let scheduleSurveyWrapper;
     await act(async () => {
@@ -741,6 +750,8 @@ describe('<ScheduleEdit />', () => {
         />
       );
     });
+    scheduleSurveyWrapper.update();
+
     await act(async () => {
       scheduleSurveyWrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
@@ -753,6 +764,7 @@ describe('<ScheduleEdit />', () => {
         timezone: 'America/New_York',
       });
     });
+
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run once schedule',
