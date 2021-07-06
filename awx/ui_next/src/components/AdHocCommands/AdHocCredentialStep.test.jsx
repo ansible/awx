@@ -23,6 +23,9 @@ describe('<AdHocCredentialStep />', () => {
         count: 2,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>

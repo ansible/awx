@@ -153,6 +153,10 @@ describe('<AdHocCommands />', () => {
         count: 5,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
+
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
       data: {
         results: [
@@ -310,6 +314,10 @@ describe('<AdHocCommands />', () => {
         count: 5,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
+
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
       data: {
         results: [
