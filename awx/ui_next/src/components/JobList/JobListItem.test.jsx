@@ -22,6 +22,8 @@ const mockJob = {
   started: '2019-08-08T19:24:18.329589Z',
   finished: '2019-08-08T19:24:50.119995Z',
   status: 'successful',
+  job_slice_number: 1,
+  job_slice_count: 3,
 };
 
 describe('<JobListItem />', () => {
@@ -41,8 +43,14 @@ describe('<JobListItem />', () => {
     );
   });
 
+  function assertDetail(label, value) {
+    expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+    expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+  }
+
   test('initially renders successfully', () => {
     expect(wrapper.find('JobListItem').length).toBe(1);
+    assertDetail('Job Slice', '1/3');
   });
 
   test('launch button shown to users with launch capabilities', () => {

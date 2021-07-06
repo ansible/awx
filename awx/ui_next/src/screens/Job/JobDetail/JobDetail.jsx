@@ -258,6 +258,10 @@ function JobDetail({ job }) {
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
+        {job.type === 'workflow_job' && job.is_sliced_job && (
+          <Detail label={t`Job Slice Parent`} value={t`True`} />
+        )}
+
         {credential && (
           <Detail
             label={t`Machine Credential`}

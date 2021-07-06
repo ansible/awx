@@ -50,6 +50,12 @@ function JobListItem({
     workflow_job_template,
   } = job.summary_fields;
 
+  const {
+    job_slice_number: jobSliceNumber,
+    job_slice_count: jobSliceCount,
+    is_sliced_job: isSlicedJob,
+  } = job;
+
   return (
     <>
       <Tr id={`job-row-${job.id}`}>
@@ -243,6 +249,16 @@ function JobListItem({
                   label={t`Explanation`}
                   value={job.job_explanation}
                 />
+              )}
+              {typeof jobSliceNumber === 'number' &&
+                typeof jobSliceCount === 'number' && (
+                  <Detail
+                    label={t`Job Slice`}
+                    value={`${jobSliceNumber}/${jobSliceCount}`}
+                  />
+                )}
+              {job.type === 'workflow_job' && isSlicedJob && (
+                <Detail label={t`Job Slice Parent`} value={t`True`} />
               )}
             </DetailList>
           </ExpandableRowContent>
