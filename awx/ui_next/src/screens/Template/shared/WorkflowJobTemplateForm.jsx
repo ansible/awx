@@ -141,7 +141,7 @@ function WorkflowJobTemplateForm({
           <InventoryLookup
             promptId="wfjt-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
-            tooltip={t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`}
+            tooltip={t`Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory.`}
             fieldId="wfjt-inventory"
             isPromptableField
             value={inventoryField.value}
