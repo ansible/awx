@@ -407,6 +407,11 @@ def main():
             collection_name="awx.awx",
             msg='The kind parameter has been deprecated, please use credential_type instead',
             version="4.0.0")
+        if kind == 'tower':
+            module.deprecate(
+                collection_name="awx.awx",
+                msg='The server replaces the tower type with controller type in version 4.0, and playbooks must be updated',
+                version="4.0.0")
 
     cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
     if organization:
