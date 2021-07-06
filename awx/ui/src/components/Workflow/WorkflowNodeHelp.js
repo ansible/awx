@@ -38,11 +38,17 @@ function WorkflowNodeHelp({ node }) {
   const unifiedJobTemplate =
     node?.fullUnifiedJobTemplate ||
     node?.originalNodeObject?.summary_fields?.unified_job_template;
-  const identifier =
-    node?.identifier ||
-    (!stringIsUUID(node?.originalNodeObject?.identifier)
-      ? node.originalNodeObject.identifier
-      : null);
+  let identifier = null;
+  if (node?.identifier) {
+    ({ identifier } = node);
+  } else if (
+    node?.originalNodeObject?.identifier &&
+    !stringIsUUID(node.originalNodeObject.identifier)
+  ) {
+    ({
+      originalNodeObject: { identifier },
+    } = node);
+  }
   if (unifiedJobTemplate || job) {
     const type = unifiedJobTemplate
       ? unifiedJobTemplate.unified_job_type || unifiedJobTemplate.type
