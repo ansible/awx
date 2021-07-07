@@ -2,14 +2,12 @@ import React, { useEffect, useCallback } from 'react';
 import { string, number, shape, arrayOf } from 'prop-types';
 import * as d3 from 'd3';
 import { t } from '@lingui/macro';
-
 import { PageContextConsumer } from '@patternfly/react-core';
-
 import ChartTooltip from './ChartTooltip';
 
 function LineChart({ id, data, height, pageContext, jobStatus }) {
   const { isNavOpen } = pageContext;
-
+console.log(d3)
   // Methods
   const draw = useCallback(() => {
     const margin = { top: 15, right: 15, bottom: 35, left: 70 };
@@ -155,8 +153,8 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
           .axisBottom(x)
           .tickValues(ticks)
           .tickSize(-height)
-          .tickFormat(d3.timeFormat('%-m/%-d')) // "1/19"
-      ) // "Jan-01"
+          .tickFormat(d3.timeFormat('%-m/%-d')) // “1/19”
+      ) // “Jan-01"
       .selectAll('line')
       .attr('stroke', '#d7d7d7');
 
@@ -184,15 +182,14 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
       // show vertical line
       vertical.transition().style('opacity', '1');
     };
-
-    const handleMouseMove = function mouseMove(...params) {
-      const intersectX = params[2][params[1]].cx.baseVal.value;
-      vertical.attr('d', () => `M${intersectX},${height} ${intersectX},${0}`);
+    const handleMouseMove = function mouseMove(event) {
+      const [pointerX] = d3.pointer(event);
+      vertical.attr('d', () => `M${pointerX},${height} ${pointerX},${0}`);
     };
 
     const handleMouseOut = () => {
       // hide tooltip
-      tooltip.handleMouseOut();
+      // tooltip.handleMouseOut();
       // hide vertical line
       vertical.transition().style('opacity', 0);
     };
