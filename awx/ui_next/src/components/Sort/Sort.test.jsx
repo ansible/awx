@@ -1,11 +1,19 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { shallow } from 'enzyme';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 
-import Sort from './Sort';
+import Sort, { _Sort as SortUnwrapped } from './Sort';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    pathname: '/organizations',
+  }),
+}));
 
 describe('<Sort />', () => {
   let sort;
@@ -16,7 +24,7 @@ describe('<Sort />', () => {
     }
   });
 
-  test('it triggers the expected callbacks', () => {
+  test('should trigger onSort callback', () => {
     const qsConfig = {
       namespace: 'item',
       defaultParams: { page: 1, page_size: 5, order_by: 'name' },
@@ -150,71 +158,79 @@ describe('<Sort />', () => {
     expect(onSort).toBeCalledWith('bar', 'ascending');
   });
 
-  test('It displays correct sort icon', () => {
-    const forwardNumericIconSelector = 'SortNumericDownIcon';
-    const reverseNumericIconSelector = 'SortNumericDownAltIcon';
-    const forwardAlphaIconSelector = 'SortAlphaDownIcon';
-    const reverseAlphaIconSelector = 'SortAlphaDownAltIcon';
-
+  test('should display numeric descending icon', () => {
     const qsConfigNumDown = {
       namespace: 'item',
       defaultParams: { page: 1, page_size: 5, order_by: '-id' },
       integerFields: ['page', 'page_size', 'id'],
     };
+    const numericColumns = [{ name: 'ID', key: 'id' }];
+
+    const wrapper = shallow(
+      <SortUnwrapped
+        qsConfig={qsConfigNumDown}
+        columns={numericColumns}
+        onSort={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('SortNumericDownAltIcon')).toHaveLength(1);
+  });
+
+  test('should display numeric ascending icon', () => {
     const qsConfigNumUp = {
       namespace: 'item',
       defaultParams: { page: 1, page_size: 5, order_by: 'id' },
       integerFields: ['page', 'page_size', 'id'],
     };
+    const numericColumns = [{ name: 'ID', key: 'id' }];
+
+    const wrapper = shallow(
+      <SortUnwrapped
+        qsConfig={qsConfigNumUp}
+        columns={numericColumns}
+        onSort={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('SortNumericDownIcon')).toHaveLength(1);
+  });
+
+  test('should display alphanumeric descending icon', () => {
     const qsConfigAlphaDown = {
       namespace: 'item',
       defaultParams: { page: 1, page_size: 5, order_by: '-name' },
       integerFields: ['page', 'page_size'],
     };
-    const qsConfigAlphaUp = {
+    const alphaColumns = [{ name: 'Name', key: 'name' }];
+
+    const wrapper = shallow(
+      <SortUnwrapped
+        qsConfig={qsConfigAlphaDown}
+        columns={alphaColumns}
+        onSort={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('SortAlphaDownAltIcon')).toHaveLength(1);
+  });
+
+  test('should display alphanumeric ascending icon', () => {
+    const qsConfigAlphaDown = {
       namespace: 'item',
       defaultParams: { page: 1, page_size: 5, order_by: 'name' },
       integerFields: ['page', 'page_size'],
     };
-
-    const numericColumns = [{ name: 'ID', key: 'id' }];
     const alphaColumns = [{ name: 'Name', key: 'name' }];
-    const onSort = jest.fn();
 
-    sort = mountWithContexts(
-      <Sort
-        qsConfig={qsConfigNumDown}
-        columns={numericColumns}
-        onSort={onSort}
-      />
-    );
-
-    const reverseNumericIcon = sort.find(reverseNumericIconSelector);
-    expect(reverseNumericIcon.length).toBe(1);
-
-    sort = mountWithContexts(
-      <Sort qsConfig={qsConfigNumUp} columns={numericColumns} onSort={onSort} />
-    );
-
-    const forwardNumericIcon = sort.find(forwardNumericIconSelector);
-    expect(forwardNumericIcon.length).toBe(1);
-
-    sort = mountWithContexts(
-      <Sort
+    const wrapper = shallow(
+      <SortUnwrapped
         qsConfig={qsConfigAlphaDown}
         columns={alphaColumns}
-        onSort={onSort}
+        onSort={jest.fn()}
       />
     );
 
-    const reverseAlphaIcon = sort.find(reverseAlphaIconSelector);
-    expect(reverseAlphaIcon.length).toBe(1);
-
-    sort = mountWithContexts(
-      <Sort qsConfig={qsConfigAlphaUp} columns={alphaColumns} onSort={onSort} />
-    );
-
-    const forwardAlphaIcon = sort.find(forwardAlphaIconSelector);
-    expect(forwardAlphaIcon.length).toBe(1);
+    expect(wrapper.find('SortAlphaDownIcon')).toHaveLength(1);
   });
 });

@@ -11,19 +11,19 @@ describe('<InventoryRelatedGroupListItem />', () => {
 
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <InventoryRelatedGroupListItem
-        detailUrl="/group/1"
-        editUrl="/group/1"
-        group={mockGroup}
-        isSelected={false}
-        onSelect={() => {}}
-        rowIndex={0}
-      />
+      <table>
+        <tbody>
+          <InventoryRelatedGroupListItem
+            detailUrl="/group/1"
+            editUrl="/group/1"
+            group={mockGroup}
+            isSelected={false}
+            onSelect={() => {}}
+            rowIndex={0}
+          />
+        </tbody>
+      </table>
     );
-  });
-
-  afterEach(() => {
-    wrapper.unmount();
   });
 
   test('should display expected row item content', () => {
@@ -36,14 +36,18 @@ describe('<InventoryRelatedGroupListItem />', () => {
 
   test('edit button hidden from users without edit capabilities', () => {
     wrapper = mountWithContexts(
-      <InventoryRelatedGroupListItem
-        detailUrl="/group/1"
-        editUrl="/group/1"
-        group={mockRelatedGroups.results[2]}
-        isSelected={false}
-        onSelect={() => {}}
-        rowIndex={0}
-      />
+      <table>
+        <tbody>
+          <InventoryRelatedGroupListItem
+            detailUrl="/group/1"
+            editUrl="/group/1"
+            group={mockRelatedGroups.results[2]}
+            isSelected={false}
+            onSelect={() => {}}
+            rowIndex={0}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });

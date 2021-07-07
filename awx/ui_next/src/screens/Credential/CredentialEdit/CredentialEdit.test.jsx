@@ -350,10 +350,6 @@ describe('<CredentialEdit />', () => {
       });
     });
 
-    afterEach(() => {
-      wrapper.unmount();
-    });
-
     test('initially renders successfully', async () => {
       expect(wrapper.find('CredentialEdit').length).toBe(1);
     });

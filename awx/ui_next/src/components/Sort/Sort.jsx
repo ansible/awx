@@ -147,4 +147,7 @@ Sort.defaultProps = {
   onSort: null,
 };
 
-export default withRouter(Sort);
+export { Sort as _Sort };
+const Wrapped = withRouter(Sort);
+Wrapped.displayName = 'Sort';
+export default Wrapped;

@@ -32,9 +32,7 @@ describe('<InventoryHost />', () => {
   let history;
 
   beforeEach(async () => {
-    InventoriesAPI.readHostDetail.mockResolvedValue({
-      data: { ...mockHost },
-    });
+    InventoriesAPI.readHostDetail.mockResolvedValue(mockHost);
 
     await act(async () => {
       wrapper = mountWithContexts(

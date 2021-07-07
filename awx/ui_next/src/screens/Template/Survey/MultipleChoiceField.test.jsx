@@ -13,9 +13,9 @@ describe('<MultipleChoiceField/>', () => {
         <Formik
           initialValues={{
             formattedChoices: [
-              { choice: 'apollo', isDefault: true },
-              { choice: 'alex', isDefault: true },
-              { choice: 'athena', isDefault: false },
+              { id: 1, choice: 'apollo', isDefault: true },
+              { id: 2, choice: 'alex', isDefault: true },
+              { id: 3, choice: 'athena', isDefault: false },
             ],
             type: 'multiselect',
           }}

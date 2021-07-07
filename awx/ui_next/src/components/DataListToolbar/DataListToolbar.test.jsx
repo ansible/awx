@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { shallow } from 'enzyme';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import DataListToolbar from './DataListToolbar';
 import AddDropDownButton from '../AddDropDownButton/AddDropDownButton';
@@ -100,6 +101,7 @@ describe('<DataListToolbar />', () => {
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSort={onSort}
+        onSearch={() => {}}
       />
     );
     const sortDropdownToggle = toolbar.find(sortDropdownToggleSelector);
@@ -122,6 +124,7 @@ describe('<DataListToolbar />', () => {
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSort={onSort}
+        onSearch={() => {}}
       />
     );
     toolbar.update();
@@ -155,92 +158,28 @@ describe('<DataListToolbar />', () => {
     searchDropdownItems.at(0).simulate('click', mockedSearchEvent);
   });
 
-  test('it displays correct sort icon', () => {
-    const NUM_QS_CONFIG = {
+  test('should render sort icon', () => {
+    const qsConfig = {
       namespace: 'organization',
       dateFields: ['modified', 'created'],
       defaultParams: { page: 1, page_size: 5, order_by: 'id' },
       integerFields: ['page', 'page_size', 'id'],
     };
+    const sortColumns = [{ name: 'Name', key: 'name' }];
 
-    const NUM_DESC_QS_CONFIG = {
-      namespace: 'organization',
-      dateFields: ['modified', 'created'],
-      defaultParams: { page: 1, page_size: 5, order_by: '-id' },
-      integerFields: ['page', 'page_size', 'id'],
-    };
-
-    const ALPH_QS_CONFIG = {
-      namespace: 'organization',
-      dateFields: ['modified', 'created'],
-      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
-      integerFields: ['page', 'page_size', 'id'],
-    };
-
-    const ALPH_DESC_QS_CONFIG = {
-      namespace: 'organization',
-      dateFields: ['modified', 'created'],
-      defaultParams: { page: 1, page_size: 5, order_by: '-name' },
-      integerFields: ['page', 'page_size', 'id'],
-    };
-
-    const forwardNumericIconSelector = 'SortNumericDownIcon';
-    const reverseNumericIconSelector = 'SortNumericDownAltIcon';
-    const forwardAlphaIconSelector = 'SortAlphaDownIcon';
-    const reverseAlphaIconSelector = 'SortAlphaDownAltIcon';
-
-    const numericColumns = [{ name: 'ID', key: 'id' }];
-
-    const alphaColumns = [{ name: 'Name', key: 'name' }];
-
-    const searchColumns = [
-      { name: 'Name', key: 'name', isDefault: true },
-      { name: 'ID', key: 'id' },
-    ];
-
-    toolbar = mountWithContexts(
+    const wrapper = shallow(
       <DataListToolbar
-        qsConfig={NUM_DESC_QS_CONFIG}
-        searchColumns={searchColumns}
-        sortColumns={numericColumns}
+        qsConfig={qsConfig}
+        searchColumns={[{ name: 'ID', key: 'id' }]}
+        sortColumns={sortColumns}
+        onSort={onSort}
       />
     );
 
-    const reverseNumericIcon = toolbar.find(reverseNumericIconSelector);
-    expect(reverseNumericIcon.length).toBe(1);
-
-    toolbar = mountWithContexts(
-      <DataListToolbar
-        qsConfig={NUM_QS_CONFIG}
-        searchColumns={searchColumns}
-        sortColumns={numericColumns}
-      />
-    );
-
-    const forwardNumericIcon = toolbar.find(forwardNumericIconSelector);
-    expect(forwardNumericIcon.length).toBe(1);
-
-    toolbar = mountWithContexts(
-      <DataListToolbar
-        qsConfig={ALPH_DESC_QS_CONFIG}
-        searchColumns={searchColumns}
-        sortColumns={alphaColumns}
-      />
-    );
-
-    const reverseAlphaIcon = toolbar.find(reverseAlphaIconSelector);
-    expect(reverseAlphaIcon.length).toBe(1);
-
-    toolbar = mountWithContexts(
-      <DataListToolbar
-        qsConfig={ALPH_QS_CONFIG}
-        searchColumns={searchColumns}
-        sortColumns={alphaColumns}
-      />
-    );
-
-    const forwardAlphaIcon = toolbar.find(forwardAlphaIconSelector);
-    expect(forwardAlphaIcon.length).toBe(1);
+    const sort = wrapper.find('Sort');
+    expect(sort.prop('qsConfig')).toEqual(qsConfig);
+    expect(sort.prop('columns')).toEqual(sortColumns);
+    expect(sort.prop('onSort')).toEqual(onSort);
   });
 
   test('should render additionalControls', () => {

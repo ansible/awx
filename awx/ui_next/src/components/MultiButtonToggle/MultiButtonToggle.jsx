@@ -10,6 +10,7 @@ const SmallButton = styled(Button)`
     font-size: var(--pf-global--FontSize--xs);
   }
 `;
+SmallButton.displayName = 'SmallButton';
 
 function MultiButtonToggle({ buttons, value, onChange, name }) {
   const setValue = newValue => {

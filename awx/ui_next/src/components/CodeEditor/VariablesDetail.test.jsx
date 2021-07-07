@@ -8,7 +8,7 @@ jest.mock('../../api');
 describe('<VariablesDetail>', () => {
   test('should render readonly CodeEditor', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value="---foo: bar" label="Variables" />
+      <VariablesDetail value="---foo: bar" label="Variables" name="test" />
     );
     const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input).toHaveLength(1);
@@ -19,7 +19,7 @@ describe('<VariablesDetail>', () => {
 
   test('should detect JSON', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value='{"foo": "bar"}' label="Variables" />
+      <VariablesDetail value='{"foo": "bar"}' label="Variables" name="test" />
     );
     const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input).toHaveLength(1);
@@ -28,7 +28,7 @@ describe('<VariablesDetail>', () => {
 
   test('should format JSON', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value='{"foo": "bar"}' label="Variables" />
+      <VariablesDetail value='{"foo": "bar"}' label="Variables" name="test" />
     );
     const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input).toHaveLength(1);
@@ -37,7 +37,7 @@ describe('<VariablesDetail>', () => {
 
   test('should convert between modes', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value="---foo: bar" label="Variables" />
+      <VariablesDetail value="---foo: bar" label="Variables" name="test" />
     );
     wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     const input = wrapper.find('VariablesDetail___StyledCodeEditor');
@@ -52,7 +52,7 @@ describe('<VariablesDetail>', () => {
 
   test('should render label and value --- when there are no values', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value="" label="Variables" />
+      <VariablesDetail value="" label="Variables" name="test" />
     );
     expect(wrapper.find('VariablesDetail___StyledCodeEditor').length).toBe(1);
     expect(wrapper.find('.pf-c-form__label').text()).toBe('Variables');
@@ -60,7 +60,7 @@ describe('<VariablesDetail>', () => {
 
   test('should update value if prop changes', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value="---foo: bar" label="Variables" />
+      <VariablesDetail value="---foo: bar" label="Variables" name="test" />
     );
     act(() => {
       wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
@@ -76,7 +76,7 @@ describe('<VariablesDetail>', () => {
 
   test('should default yaml value to "---"', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value="" label="Variables" />
+      <VariablesDetail value="" label="Variables" name="test" />
     );
     const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input.prop('value')).toEqual('---');
@@ -84,7 +84,7 @@ describe('<VariablesDetail>', () => {
 
   test('should default empty json to "{}"', () => {
     const wrapper = mountWithContexts(
-      <VariablesDetail value="" label="Variables" />
+      <VariablesDetail value="" label="Variables" name="test" />
     );
     act(() => {
       wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
