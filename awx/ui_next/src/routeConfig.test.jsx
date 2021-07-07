@@ -90,6 +90,7 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
       '/notification_templates',
       '/instance_groups',
       '/applications',
@@ -117,7 +118,9 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
       '/notification_templates',
+      '/applications',
       '/execution_environments',
     ]);
   });
@@ -139,6 +142,8 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
+      '/applications',
       '/execution_environments',
     ]);
   });
@@ -160,6 +165,8 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
+      '/applications',
       '/execution_environments',
     ]);
   });
@@ -185,7 +192,9 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
       '/notification_templates',
+      '/applications',
       '/execution_environments',
     ]);
   });
@@ -211,6 +220,7 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
       '/notification_templates',
       '/instance_groups',
       '/applications',
@@ -239,6 +249,7 @@ describe('getRouteConfig', () => {
       '/organizations',
       '/users',
       '/teams',
+      '/credential_types',
       '/notification_templates',
       '/instance_groups',
       '/applications',

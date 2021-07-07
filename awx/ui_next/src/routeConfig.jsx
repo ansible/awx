@@ -171,9 +171,7 @@ function getRouteConfig(userProfile = {}) {
     return routeConfig;
   deleteRouteGroup('settings');
   deleteRoute('management_jobs');
-  deleteRoute('credential_types');
   if (userProfile?.isOrgAdmin) return routeConfig;
-  deleteRoute('applications');
   deleteRoute('instance_groups');
   if (!userProfile?.isNotificationAdmin) deleteRoute('notification_templates');
 
