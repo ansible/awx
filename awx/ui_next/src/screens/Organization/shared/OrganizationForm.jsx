@@ -115,7 +115,7 @@ function OrganizationFormFields({
             <br />
             <Trans>
               Note: The order of these credentials sets precedence for the sync
-              and lookup of the content.
+              and lookup of the content. Select more than one to enable drag.
             </Trans>
           </>
         }
