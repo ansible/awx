@@ -290,7 +290,7 @@ const FormikApp = withFormik({
       organization: template?.summary_fields?.organization || null,
       labels: template.summary_fields?.labels?.results || [],
       extra_vars: template.extra_vars || '---',
-      limit: template.limit || null,
+      limit: template.limit || '',
       scm_branch: template.scm_branch || '',
       allow_simultaneous: template.allow_simultaneous || false,
       webhook_credential: template?.summary_fields?.webhook_credential || null,
