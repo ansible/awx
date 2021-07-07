@@ -256,7 +256,10 @@ def main():
     if ee is not None:
         inventory_source_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
     if source_project is not None:
-        inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
+        source_project_object = module.get_one('projects', name_or_id=source_project, data=lookup_data)
+        if not source_project_object:
+            module.fail_json(msg='The specified source project, {0}, was not found.'.format(lookup_data))
+        inventory_source_fields['source_project'] = source_project_object['id']
 
     OPTIONAL_VARS = (
         'description',
