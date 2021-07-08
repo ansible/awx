@@ -381,6 +381,7 @@ describe('<TemplateListItem />', () => {
         <tbody>
           <TemplateListItem
             isSelected={false}
+            isExpanded
             detailUrl="/templates/job_template/1/details"
             template={{
               ...mockJobTemplateData,
@@ -390,15 +391,7 @@ describe('<TemplateListItem />', () => {
         </tbody>
       </table>
     );
-    expect(
-      wrapper
-        .find('Tr')
-        .last()
-        .prop('isExpanded')
-    ).toBe(false);
-    await act(async () =>
-      wrapper.find('button[aria-label="Details"]').simulate('click')
-    );
+
     wrapper.update();
     expect(
       wrapper

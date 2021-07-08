@@ -17,6 +17,7 @@ import PaginatedTable, {
 } from '../PaginatedTable';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import useSelected from '../../util/useSelected';
+import useExpanded from '../../util/useExpanded';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useWsTemplates from '../../util/useWsTemplates';
 import AddDropDownButton from '../AddDropDownButton';
@@ -96,6 +97,10 @@ function TemplateList({ defaultParams }) {
     selectAll,
     clearSelected,
   } = useSelected(templates);
+
+  const { expanded, isAllExpanded, handleExpand, expandAll } = useExpanded(
+    templates
+  );
 
   const {
     isLoading: isDeleteLoading,
@@ -229,9 +234,10 @@ function TemplateList({ defaultParams }) {
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
-              showSelectAll
               isAllSelected={isAllSelected}
               onSelectAll={selectAll}
+              isAllExpanded={isAllExpanded}
+              onExpandAll={expandAll}
               qsConfig={qsConfig}
               additionalControls={[
                 ...(canAddJT || canAddWFJT ? [addButton] : []),
@@ -259,6 +265,8 @@ function TemplateList({ defaultParams }) {
               template={template}
               detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
+              isExpanded={expanded.some(row => row.id === template.id)}
+              onExpand={() => handleExpand(template)}
               isSelected={selected.some(row => row.id === template.id)}
               fetchTemplates={fetchTemplates}
               rowIndex={index}

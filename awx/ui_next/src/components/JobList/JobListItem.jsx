@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -20,6 +20,8 @@ import JobCancelButton from '../JobCancelButton';
 
 const Dash = styled.span``;
 function JobListItem({
+  isExpanded,
+  onExpand,
   job,
   rowIndex,
   isSelected,
@@ -28,7 +30,6 @@ function JobListItem({
   isSuperUser = false,
 }) {
   const labelId = `check-action-${job.id}`;
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const jobTypes = {
     project_update: t`Source Control Update`,
@@ -57,7 +58,7 @@ function JobListItem({
           expand={{
             rowIndex: job.id,
             isExpanded,
-            onToggle: () => setIsExpanded(!isExpanded),
+            onToggle: onExpand,
           }}
         />
         <Td

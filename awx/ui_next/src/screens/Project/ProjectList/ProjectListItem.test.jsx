@@ -393,6 +393,7 @@ describe('<ProjectsListItem />', () => {
         <tbody>
           <ProjectsListItem
             rowIndex={1}
+            isExpanded
             isSelected={false}
             detailUrl="/project/1"
             onSelect={() => {}}
@@ -431,16 +432,7 @@ describe('<ProjectsListItem />', () => {
         </tbody>
       </table>
     );
-    expect(
-      wrapper
-        .find('Tr')
-        .last()
-        .prop('isExpanded')
-    ).toBe(false);
-    await act(async () =>
-      wrapper.find('button[aria-label="Details"]').simulate('click')
-    );
-    wrapper.update();
+
     expect(
       wrapper
         .find('Tr')

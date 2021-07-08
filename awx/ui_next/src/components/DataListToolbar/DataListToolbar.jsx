@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
 import {
+  Button,
   Checkbox,
   Toolbar,
   ToolbarContent as PFToolbarContent,
@@ -14,7 +15,11 @@ import {
   DropdownPosition,
   KebabToggle,
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import {
+  AngleDownIcon,
+  AngleRightIcon,
+  SearchIcon,
+} from '@patternfly/react-icons';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
@@ -28,14 +33,16 @@ const ToolbarContent = styled(PFToolbarContent)`
 `;
 
 function DataListToolbar({
+  isAllExpanded,
+  onExpandAll,
   itemCount,
   clearAllFilters,
   searchColumns,
   searchableKeys,
   relatedSearchableKeys,
   sortColumns,
-  showSelectAll,
   isAllSelected,
+  onSelectAll,
   isCompact,
   onSort,
   onSearch,
@@ -43,7 +50,6 @@ function DataListToolbar({
   onRemove,
   onCompact,
   onExpand,
-  onSelectAll,
   additionalControls,
   qsConfig,
   pagination,
@@ -70,7 +76,6 @@ function DataListToolbar({
       setIsKebabOpen(false);
     }
   }, [isKebabModalOpen]);
-
   return (
     <Toolbar
       id={`${qsConfig.namespace}-list-toolbar`}
@@ -79,7 +84,27 @@ function DataListToolbar({
       clearFiltersButtonText={t`Clear all filters`}
     >
       <ToolbarContent>
-        {showSelectAll && (
+        {onExpandAll && (
+          <ToolbarGroup>
+            <ToolbarItem>
+              <Button
+                onClick={() => {
+                  onExpandAll(!isAllExpanded);
+                }}
+                aria-label={t`Expand all rows`}
+                ouiaId="expand-all-rows"
+                variant="plain"
+              >
+                {isAllExpanded ? (
+                  <AngleDownIcon aria-label={t`Is expanded`} />
+                ) : (
+                  <AngleRightIcon aria-label={t`Is not expanded`} />
+                )}
+              </Button>
+            </ToolbarItem>
+          </ToolbarGroup>
+        )}
+        {onSelectAll && (
           <ToolbarGroup>
             <ToolbarItem>
               <Checkbox
@@ -178,7 +203,6 @@ DataListToolbar.propTypes = {
   searchableKeys: PropTypes.arrayOf(PropTypes.string),
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns,
-  showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
   onCompact: PropTypes.func,
@@ -198,7 +222,6 @@ DataListToolbar.defaultProps = {
   relatedSearchableKeys: [],
   sortColumns: null,
   clearAllFilters: null,
-  showSelectAll: false,
   isAllSelected: false,
   isCompact: false,
   onCompact: null,
