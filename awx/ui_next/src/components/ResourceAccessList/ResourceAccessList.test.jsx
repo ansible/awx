@@ -133,7 +133,6 @@ describe('<ResourceAccessList />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

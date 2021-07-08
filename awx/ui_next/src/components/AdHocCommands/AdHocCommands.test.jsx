@@ -76,8 +76,8 @@ describe('<AdHocCommands />', () => {
     });
   });
   let wrapper;
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -43,7 +43,6 @@ describe('<ScreenHeader />', () => {
     expect(breadcrumbItem.first().text()).toBe('Foo');
     expect(breadcrumbItem.last().text()).toBe('One');
     expect(breadcrumbHeading.text()).toBe('Bar');
-    breadcrumbWrapper.unmount();
   });
 
   test('renders breadcrumb items defined in breadcrumbConfig', () => {
@@ -66,7 +65,6 @@ describe('<ScreenHeader />', () => {
       expect(breadcrumbWrapper.find('BreadcrumbItem')).toHaveLength(
         crumbLength
       );
-      breadcrumbWrapper.unmount();
     });
   });
 });

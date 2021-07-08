@@ -1,60 +1,16 @@
 import React from 'react';
-import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { shallow } from 'enzyme';
 import Credentials from './Credentials';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<Credentials />', () => {
-  let wrapper;
+  test('should set breadcrumb config', () => {
+    const wrapper = shallow(<Credentials />);
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
-  test('initially renders successfully', () => {
-    wrapper = mountWithContexts(<Credentials />);
-  });
-
-  test('should display credential list breadcrumb heading', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/credentials'],
+    const header = wrapper.find('ScreenHeader');
+    expect(header.prop('streamType')).toEqual('credential');
+    expect(header.prop('breadcrumbConfig')).toEqual({
+      '/credentials': 'Credentials',
+      '/credentials/add': 'Create New Credential',
     });
-
-    wrapper = mountWithContexts(<Credentials />, {
-      context: {
-        router: {
-          history,
-          route: {
-            location: history.location,
-          },
-        },
-      },
-    });
-
-    expect(wrapper.find('Crumb').length).toBe(0);
-    expect(wrapper.find('Title').text()).toBe('Credentials');
-  });
-
-  test('should display create new credential breadcrumb heading', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/credentials/add'],
-    });
-
-    wrapper = mountWithContexts(<Credentials />, {
-      context: {
-        router: {
-          history,
-          route: {
-            location: history.location,
-          },
-        },
-      },
-    });
-
-    expect(wrapper.find('Crumb').length).toBe(2);
-    expect(wrapper.find('Title').text()).toBe('Create New Credential');
   });
 });

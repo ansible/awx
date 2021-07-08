@@ -485,7 +485,6 @@ describe('<CredentialEdit />', () => {
       });
       wrapper.update();
       expect(wrapper.find('ContentError').length).toBe(1);
-      wrapper.unmount();
     });
   });
 });

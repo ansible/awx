@@ -33,9 +33,9 @@ describe('<AdHocExecutionEnvironmentStep />', () => {
       );
     });
   });
+
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should mount properly', async () => {

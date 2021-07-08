@@ -38,7 +38,6 @@ describe('ExecutionEnvironmentLookup', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render successfully', async () => {

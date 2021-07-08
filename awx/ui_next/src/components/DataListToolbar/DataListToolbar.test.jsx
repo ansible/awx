@@ -15,13 +15,6 @@ describe('<DataListToolbar />', () => {
     integerFields: ['page', 'page_size'],
   };
 
-  afterEach(() => {
-    if (toolbar) {
-      toolbar.unmount();
-      toolbar = null;
-    }
-  });
-
   const onSearch = jest.fn();
   const onReplaceSearch = jest.fn();
   const onSort = jest.fn();

@@ -26,7 +26,6 @@ describe('InventoryLookup', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render successfully and fetch data', async () => {

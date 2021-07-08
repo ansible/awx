@@ -15,9 +15,6 @@ const fieldOptions = {
 
 describe('<CredentialField />', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
   test('renders correctly without initial value', () => {
     wrapper = mountWithContexts(
       <Formik
@@ -42,6 +39,7 @@ describe('<CredentialField />', () => {
     expect(wrapper.find('KeyIcon').length).toBe(1);
     expect(wrapper.find('PficonHistoryIcon').length).toBe(0);
   });
+
   test('renders correctly with initial value', () => {
     wrapper = mountWithContexts(
       <Formik
@@ -68,6 +66,7 @@ describe('<CredentialField />', () => {
     expect(wrapper.find('KeyIcon').length).toBe(1);
     expect(wrapper.find('PficonHistoryIcon').length).toBe(1);
   });
+
   test('replace/revert button behaves as expected', async () => {
     wrapper = mountWithContexts(
       <Formik

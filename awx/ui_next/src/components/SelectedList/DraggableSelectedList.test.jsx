@@ -6,8 +6,8 @@ describe('<DraggableSelectedList />', () => {
   let wrapper;
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
+
   test('should render expected rows', () => {
     const mockSelected = [
       {

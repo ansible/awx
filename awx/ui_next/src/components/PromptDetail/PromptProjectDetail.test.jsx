@@ -25,10 +25,6 @@ describe('PromptProjectDetail', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('should render successfully', () => {
     expect(wrapper.find('PromptProjectDetail')).toHaveLength(1);
   });

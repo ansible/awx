@@ -21,10 +21,6 @@ describe('<NotificationListItem canToggleNotifications />', () => {
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.unmount();
-      wrapper = null;
-    }
     jest.clearAllMocks();
   });
 

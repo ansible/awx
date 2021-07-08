@@ -36,7 +36,6 @@ describe('ApplicationLookup', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render successfully', async () => {

@@ -113,12 +113,11 @@ describe('<Schedule />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
-  afterAll(() => {
-    wrapper.unmount();
-  });
+
   test('renders successfully', async () => {
     expect(wrapper.length).toBe(1);
   });
+
   test('expect all tabs to exist, including Back to Schedules', async () => {
     expect(
       wrapper.find('button[link="/templates/job_template/1/schedules"]').length

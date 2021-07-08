@@ -6,10 +6,6 @@ import FieldWithPrompt from './FieldWithPrompt';
 describe('FieldWithPrompt', () => {
   let wrapper;
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('Required asterisk and Popover hidden when not required and tooltip not provided', () => {
     wrapper = mountWithContexts(
       <Formik

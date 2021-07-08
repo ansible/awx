@@ -52,10 +52,6 @@ describe('ScheduleList', () => {
       wrapper.update();
     });
 
-    afterEach(() => {
-      wrapper.unmount();
-    });
-
     test('should fetch schedules from api and render the list', () => {
       expect(loadSchedules).toHaveBeenCalled();
       expect(wrapper.find('ScheduleListItem').length).toBe(5);

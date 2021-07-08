@@ -40,7 +40,6 @@ describe('<DisassociateButton />', () => {
 
     afterAll(() => {
       jest.clearAllMocks();
-      wrapper.unmount();
     });
 
     test('should render button', () => {

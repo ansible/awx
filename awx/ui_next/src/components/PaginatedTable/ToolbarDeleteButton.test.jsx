@@ -40,8 +40,8 @@ describe('<ToolbarDeleteButton />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
+
   test('should render button', () => {
     wrapper = mountWithContexts(
       <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[]} />

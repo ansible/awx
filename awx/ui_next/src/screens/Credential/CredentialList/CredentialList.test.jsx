@@ -33,7 +33,6 @@ describe('<CredentialList />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully', () => {

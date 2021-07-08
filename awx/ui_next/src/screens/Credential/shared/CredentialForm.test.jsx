@@ -95,15 +95,15 @@ describe('<CredentialForm />', () => {
         );
       });
     });
-    afterAll(() => {
-      wrapper.unmount();
-    });
+
     test('should display form fields on add properly', async () => {
       addFieldExpects();
     });
+
     test('should hide Test button initially', () => {
       expect(wrapper.find('Button[children="Test"]').length).toBe(0);
     });
+
     test('should update form values', async () => {
       // name and description change
       await act(async () => {
@@ -135,6 +135,7 @@ describe('<CredentialForm />', () => {
         name: 'organization',
       });
     });
+
     test('should display cred type subform when scm type select has a value', async () => {
       await act(async () => {
         await wrapper
@@ -218,6 +219,7 @@ describe('<CredentialForm />', () => {
         wrapper.find('textarea#credential-ssh_key_data').prop('value')
       ).toBe('');
     });
+
     test('should update field when RSA Private Key file uploaded', async () => {
       await act(async () => {
         wrapper.find('FileUpload#credential-ssh_key_data').invoke('onChange')(
@@ -232,6 +234,7 @@ describe('<CredentialForm />', () => {
         '-----BEGIN PRIVATE KEY-----\\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\\n-----END PRIVATE KEY-----\\n'
       );
     });
+
     test('should show error when error thrown parsing JSON', async () => {
       await act(async () => {
         await wrapper
@@ -295,9 +298,6 @@ describe('<CredentialForm />', () => {
   });
 
   describe('Edit', () => {
-    afterEach(() => {
-      wrapper.unmount();
-    });
     test('Initially renders successfully', async () => {
       await act(async () => {
         wrapper = mountWithContexts(

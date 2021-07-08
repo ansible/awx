@@ -15,6 +15,5 @@ describe('<ExpandCollapse />', () => {
       />
     );
     expect(wrapper.length).toBe(1);
-    wrapper.unmount();
   });
 });

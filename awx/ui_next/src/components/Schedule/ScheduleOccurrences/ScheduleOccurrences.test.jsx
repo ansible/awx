@@ -15,15 +15,15 @@ describe('<ScheduleOccurrences>', () => {
         />
       );
     });
-    afterAll(() => {
-      wrapper.unmount();
-    });
+
     test('Local option initially set', async () => {
       expect(wrapper.find('MultiButtonToggle').props().value).toBe('local');
     });
+
     test('It renders the correct number of dates', async () => {
       expect(wrapper.find('dd').children().length).toBe(2);
     });
+
     test('Clicking UTC button toggles the dates to utc', async () => {
       wrapper.find('button[aria-label="UTC"]').simulate('click');
       expect(wrapper.find('MultiButtonToggle').props().value).toBe('utc');
@@ -44,6 +44,7 @@ describe('<ScheduleOccurrences>', () => {
       ).toBe('3/30/2020, 4:00:00 AM');
     });
   });
+
   describe('Only one date passed in', () => {
     test('Component should not render chldren', async () => {
       wrapper = mountWithContexts(
@@ -55,7 +56,6 @@ describe('<ScheduleOccurrences>', () => {
         />
       );
       expect(wrapper.find('ScheduleOccurrences').children().length).toBe(0);
-      wrapper.unmount();
     });
   });
 });

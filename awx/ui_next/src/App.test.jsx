@@ -31,6 +31,5 @@ describe('<App />', () => {
     });
     expect(wrapper.length).toBe(1);
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 });
