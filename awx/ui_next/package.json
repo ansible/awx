@@ -16,7 +16,7 @@
     "axios": "^0.21.1",
     "babel-plugin-macros": "^3.0.1",
     "codemirror": "^5.47.0",
-    "d3": "^5.12.0",
+    "d3": "^6.7.0",
     "dagre": "^0.8.4",
     "formik": "^2.1.2",
     "has-ansi": "^3.0.0",
