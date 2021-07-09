@@ -4,10 +4,6 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import InstanceGroups from './InstanceGroups';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<InstanceGroups/>', () => {
   let pageWrapper;
   let pageSections;
@@ -15,10 +11,6 @@ describe('<InstanceGroups/>', () => {
   beforeEach(() => {
     pageWrapper = mountWithContexts(<InstanceGroups />);
     pageSections = pageWrapper.find('PageSection');
-  });
-
-  afterEach(() => {
-    pageWrapper.unmount();
   });
 
   test('initially renders without crashing', () => {

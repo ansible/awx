@@ -7,10 +7,6 @@ import Count from './Count';
 describe('<Count />', () => {
   let pageWrapper;
 
-  afterEach(() => {
-    pageWrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
     pageWrapper = mountWithContexts(<Count link="foo" />);
     expect(pageWrapper.length).toBe(1);

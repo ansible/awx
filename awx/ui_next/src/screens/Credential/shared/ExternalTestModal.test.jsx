@@ -30,7 +30,7 @@ const credential = {
 
 describe('<ExternalTestModal />', () => {
   let wrapper;
-  afterEach(() => wrapper.unmount());
+
   test('should display metadata fields correctly', async () => {
     wrapper = mountWithContexts(
       <ExternalTestModal
@@ -46,6 +46,7 @@ describe('<ExternalTestModal />', () => {
     expect(wrapper.find('input#credential-secret_key').length).toBe(1);
     expect(wrapper.find('input#credential-secret_version').length).toBe(1);
   });
+
   test('should make the test request correctly when testing an existing credential', async () => {
     wrapper = mountWithContexts(
       <ExternalTestModal
@@ -85,6 +86,7 @@ describe('<ExternalTestModal />', () => {
       },
     });
   });
+
   test('should make the test request correctly when testing a new credential', async () => {
     wrapper = mountWithContexts(
       <ExternalTestModal
@@ -123,6 +125,7 @@ describe('<ExternalTestModal />', () => {
       },
     });
   });
+
   test('should display the alert after a successful test', async () => {
     CredentialTypesAPI.test.mockResolvedValue({});
     wrapper = mountWithContexts(
@@ -148,6 +151,7 @@ describe('<ExternalTestModal />', () => {
     expect(wrapper.find('Alert').length).toBe(1);
     expect(wrapper.find('Alert').props().variant).toBe('success');
   });
+
   test('should display the alert after a failed test', async () => {
     CredentialTypesAPI.test.mockRejectedValue({
       inputs: `HTTP 404

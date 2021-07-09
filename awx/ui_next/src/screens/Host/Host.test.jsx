@@ -37,10 +37,6 @@ describe('<Host />', () => {
     });
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('should render expected tabs', async () => {
     const expectedTabs = ['Details', 'Facts', 'Groups', 'Completed Jobs'];
     wrapper.find('RoutedTabs li').forEach((tab, index) => {

@@ -1,41 +1,28 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
+import { shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import Hosts from './Hosts';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
+jest.mock('../../api');
 
 describe('<Hosts />', () => {
-  test('initially renders successfully', () => {
-    mountWithContexts(<Hosts />);
-  });
-
   test('should display a breadcrumb heading', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/hosts'],
-    });
-    const match = { path: '/hosts', url: '/hosts', isExact: true };
+    const wrapper = shallow(<Hosts />);
 
-    const wrapper = mountWithContexts(<Hosts />, {
-      context: {
-        router: {
-          history,
-          route: {
-            location: history.location,
-            match,
-          },
-        },
-      },
+    const header = wrapper.find('ScreenHeader');
+    expect(header.prop('streamType')).toEqual('host');
+    expect(header.prop('breadcrumbConfig')).toEqual({
+      '/hosts': 'Hosts',
+      '/hosts/add': 'Create New Host',
     });
-    expect(wrapper.find('Title').length).toBe(1);
-    wrapper.unmount();
   });
 
-  test('should render Host component', () => {
+  test('should render Host component', async () => {
+    let wrapper;
     const history = createMemoryHistory({
       initialEntries: ['/hosts/1'],
     });
@@ -46,11 +33,12 @@ describe('<Hosts />', () => {
       isExact: true,
     };
 
-    const wrapper = mountWithContexts(<Hosts />, {
-      context: { router: { history, route: { match } } },
+    await act(async () => {
+      wrapper = await mountWithContexts(<Hosts />, {
+        context: { router: { history, route: { match } } },
+      });
     });
 
     expect(wrapper.find('Host').length).toBe(1);
-    wrapper.unmount();
   });
 });
