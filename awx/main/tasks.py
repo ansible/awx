@@ -141,11 +141,6 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 logger = logging.getLogger('awx.main.tasks')
 
 
-class InvalidVirtualenvError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-
 def dispatch_startup():
     startup_logger = logging.getLogger('awx.main.tasks')
     startup_logger.debug("Syncing Schedules")
@@ -1424,9 +1419,6 @@ class BaseTask(object):
                 # ensure failure notification sends even if playbook_on_stats event is not triggered
                 handle_success_and_failure_notifications.apply_async([self.instance.job.id])
 
-        except InvalidVirtualenvError as e:
-            extra_update_fields['job_explanation'] = e.message
-            logger.error('{} {}'.format(self.instance.log_format, e.message))
         except Exception:
             # this could catch programming or file system errors
             extra_update_fields['result_traceback'] = traceback.format_exc()
