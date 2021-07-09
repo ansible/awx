@@ -4,13 +4,11 @@ import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { AllHtmlEntities } from 'html-entities';
+import { encode } from 'html-entities';
 import StatusIcon from '../../../components/StatusIcon';
 import { DetailList, Detail } from '../../../components/DetailList';
 import ContentEmpty from '../../../components/ContentEmpty';
 import CodeEditor from '../../../components/CodeEditor';
-
-const entities = new AllHtmlEntities();
 
 const HostNameDetailValue = styled.div`
   align-items: center;
@@ -19,7 +17,7 @@ const HostNameDetailValue = styled.div`
   grid-template-columns: auto auto;
 `;
 
-const processEventStatus = event => {
+const processEventStatus = (event) => {
   let status = null;
   if (event.event === 'runner_on_unreachable') {
     status = 'unreachable';
@@ -45,21 +43,21 @@ const processEventStatus = event => {
   return status;
 };
 
-const processCodeEditorValue = value => {
+const processCodeEditorValue = (value) => {
   let codeEditorValue;
   if (value === undefined) {
     codeEditorValue = false;
   } else if (value === '') {
     codeEditorValue = ' ';
   } else if (typeof value === 'string') {
-    codeEditorValue = entities.encode(value);
+    codeEditorValue = encode(value);
   } else {
     codeEditorValue = value;
   }
   return codeEditorValue;
 };
 
-const processStdOutValue = hostEvent => {
+const processStdOutValue = (hostEvent) => {
   const taskAction = hostEvent?.event_data?.taskAction;
   const res = hostEvent?.event_data?.res;
 
