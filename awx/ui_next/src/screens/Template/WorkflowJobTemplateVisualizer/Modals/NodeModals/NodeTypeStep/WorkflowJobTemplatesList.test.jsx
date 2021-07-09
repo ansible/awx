@@ -15,9 +15,7 @@ const onUpdateNodeResource = jest.fn();
 
 describe('WorkflowJobTemplatesList', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
+
   test('Row selected when nodeResource id matches row id and clicking new row makes expected callback', async () => {
     WorkflowJobTemplatesAPI.read.mockResolvedValueOnce({
       data: {
@@ -76,6 +74,7 @@ describe('WorkflowJobTemplatesList', () => {
       url: '/api/v2/workflow_job_templates/2',
     });
   });
+
   test('Error shown when read() request errors', async () => {
     WorkflowJobTemplatesAPI.read.mockRejectedValue(new Error());
     await act(async () => {

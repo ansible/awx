@@ -16,7 +16,6 @@ jest.mock('../../api/models/Users');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-
   useHistory: () => ({ push: jest.fn(), location: { pathname: {} } }),
 }));
 // TODO: Once error handling is functional in

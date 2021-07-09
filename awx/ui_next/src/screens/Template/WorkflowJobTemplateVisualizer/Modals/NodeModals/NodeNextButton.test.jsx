@@ -28,10 +28,6 @@ describe('NodeNextButton', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('Button text matches', () => {
     expect(wrapper.find('button').text()).toBe(buttonText);
   });

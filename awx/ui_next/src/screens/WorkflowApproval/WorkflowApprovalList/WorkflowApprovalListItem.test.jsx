@@ -9,9 +9,6 @@ jest.mock('../../../api/models/WorkflowApprovals');
 
 describe('<WorkflowApprovalListItem />', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
 
   test('should display never expires status', () => {
     wrapper = mountWithContexts(
@@ -28,6 +25,7 @@ describe('<WorkflowApprovalListItem />', () => {
     );
     expect(wrapper.find('Label[children="Never expires"]').length).toBe(1);
   });
+
   test('should display timed out status', () => {
     wrapper = mountWithContexts(
       <table>
@@ -47,6 +45,7 @@ describe('<WorkflowApprovalListItem />', () => {
     );
     expect(wrapper.find('Label[children="Timed out"]').length).toBe(1);
   });
+
   test('should display canceled status', () => {
     wrapper = mountWithContexts(
       <table>
@@ -66,6 +65,7 @@ describe('<WorkflowApprovalListItem />', () => {
     );
     expect(wrapper.find('Label[children="Canceled"]').length).toBe(1);
   });
+
   test('should display approved status', () => {
     wrapper = mountWithContexts(
       <table>
@@ -93,6 +93,7 @@ describe('<WorkflowApprovalListItem />', () => {
     );
     expect(wrapper.find('Label[children="Approved"]').length).toBe(1);
   });
+
   test('should display denied status', () => {
     wrapper = mountWithContexts(
       <table>

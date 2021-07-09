@@ -8,15 +8,14 @@ const workflowApproval = mockWorkflowApprovals.results[0];
 
 describe('<WorkflowApprovalStatus />', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
+
   test('shows no expiration when approval status is pending and no approval_expiration', () => {
     wrapper = mountWithContexts(
       <WorkflowApprovalStatus workflowApproval={workflowApproval} />
     );
     expect(wrapper.text()).toBe('Never expires');
   });
+
   test('shows expiration date/time when approval status is pending and approval_expiration present', () => {
     wrapper = mountWithContexts(
       <WorkflowApprovalStatus
@@ -30,6 +29,7 @@ describe('<WorkflowApprovalStatus />', () => {
       `Expires on ${formatDateString('2020-10-10T17:13:12.067947Z')}`
     );
   });
+
   test('shows when an approval has timed out', () => {
     wrapper = mountWithContexts(
       <WorkflowApprovalStatus
@@ -42,6 +42,7 @@ describe('<WorkflowApprovalStatus />', () => {
     );
     expect(wrapper.find('Label').text()).toBe('Timed out');
   });
+
   test('shows when an approval has canceled', () => {
     wrapper = mountWithContexts(
       <WorkflowApprovalStatus
@@ -54,6 +55,7 @@ describe('<WorkflowApprovalStatus />', () => {
     );
     expect(wrapper.find('Label').text()).toBe('Canceled');
   });
+
   test('shows when an approval has approved', () => {
     wrapper = mountWithContexts(
       <WorkflowApprovalStatus
@@ -73,6 +75,7 @@ describe('<WorkflowApprovalStatus />', () => {
     );
     expect(wrapper.find('Label').text()).toBe('Approved');
   });
+
   test('shows when an approval has denied', () => {
     wrapper = mountWithContexts(
       <WorkflowApprovalStatus

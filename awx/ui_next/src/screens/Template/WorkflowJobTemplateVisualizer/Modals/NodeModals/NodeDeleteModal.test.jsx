@@ -32,10 +32,6 @@ describe('NodeDeleteModal', () => {
       );
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('Mounts successfully', () => {
       expect(wrapper.length).toBe(1);
     });
@@ -63,6 +59,7 @@ describe('NodeDeleteModal', () => {
       });
     });
   });
+
   describe('Node without unified job template', () => {
     test('Mounts successfully', () => {
       wrapper = mountWithContexts(
@@ -79,7 +76,6 @@ describe('NodeDeleteModal', () => {
         </WorkflowDispatchContext.Provider>
       );
       expect(wrapper.length).toBe(1);
-      wrapper.unmount();
     });
   });
 });

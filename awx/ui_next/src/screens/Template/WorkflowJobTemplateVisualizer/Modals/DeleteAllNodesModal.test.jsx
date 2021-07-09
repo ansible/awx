@@ -15,10 +15,6 @@ describe('DeleteAllNodesModal', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('Delete All button dispatches as expected', () => {
     wrapper.find('button#confirm-delete-all-nodes').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({

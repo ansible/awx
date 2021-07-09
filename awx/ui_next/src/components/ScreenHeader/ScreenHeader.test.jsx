@@ -5,10 +5,6 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import ScreenHeader from './ScreenHeader';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<ScreenHeader />', () => {
   let breadcrumbWrapper;
   let breadcrumb;

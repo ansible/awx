@@ -50,10 +50,11 @@ describe('<WorkflowJobTemplate />', () => {
       },
     });
   });
+
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
+
   test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -61,6 +62,7 @@ describe('<WorkflowJobTemplate />', () => {
       );
     });
   });
+
   test('When component mounts API is called and the response is put in state', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -70,6 +72,7 @@ describe('<WorkflowJobTemplate />', () => {
     expect(WorkflowJobTemplatesAPI.readDetail).toBeCalled();
     expect(OrganizationsAPI.read).toBeCalled();
   });
+
   test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -84,6 +87,7 @@ describe('<WorkflowJobTemplate />', () => {
     );
     expect(tabs.at(3).text()).toEqual('Notifications');
   });
+
   test('notifications tab hidden with reduced permissions', async () => {
     OrganizationsAPI.read.mockResolvedValue({
       data: {
@@ -135,6 +139,7 @@ describe('<WorkflowJobTemplate />', () => {
 
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
+
   test('should call to get webhook key', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/templates/workflow_job_template/1/foobar'],
@@ -161,6 +166,7 @@ describe('<WorkflowJobTemplate />', () => {
     });
     expect(WorkflowJobTemplatesAPI.readWebhookKey).toHaveBeenCalled();
   });
+
   test('should not call to get webhook key', async () => {
     WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValueOnce(
       {

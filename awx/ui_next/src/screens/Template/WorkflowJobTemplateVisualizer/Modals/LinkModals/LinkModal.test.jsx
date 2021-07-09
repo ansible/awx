@@ -27,10 +27,6 @@ describe('LinkModal', () => {
       );
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('Dropdown defaults to success when adding new link', () => {
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('success');
     });
@@ -57,6 +53,7 @@ describe('LinkModal', () => {
       expect(onConfirm).toHaveBeenCalledWith('always');
     });
   });
+
   describe('Editing existing link', () => {
     test('Dropdown defaults to existing link type when editing link', () => {
       wrapper = mountWithContexts(
@@ -79,7 +76,6 @@ describe('LinkModal', () => {
         </WorkflowDispatchContext.Provider>
       );
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('failure');
-      wrapper.unmount();
     });
   });
 });

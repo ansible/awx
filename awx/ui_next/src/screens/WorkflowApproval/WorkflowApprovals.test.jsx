@@ -11,10 +11,6 @@ import mockWorkflowApprovals from './data.workflowApprovals.json';
 
 jest.mock('../../api');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<WorkflowApprovals />', () => {
   beforeEach(() => {
     WorkflowApprovalsAPI.read.mockResolvedValue({
@@ -70,6 +66,5 @@ describe('<WorkflowApprovals />', () => {
 
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('Title').length).toBe(1);
-    wrapper.unmount();
   });
 });

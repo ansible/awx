@@ -62,9 +62,6 @@ describe('VisualizerLink', () => {
       </WorkflowDispatchContext.Provider>
     );
   });
-  afterAll(() => {
-    wrapper.unmount();
-  });
 
   test('Displays action tooltip on hover and updates help text on hover', () => {
     expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);

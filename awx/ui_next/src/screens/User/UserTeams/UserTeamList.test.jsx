@@ -118,7 +118,6 @@ describe('<UserTeamList />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should load and render teams', async () => {
