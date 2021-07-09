@@ -171,7 +171,7 @@ def test_conflicting_name_and_id(run_module, admin_user):
     """
     org_by_id = Organization.objects.create(name='foo')
     slug = str(org_by_id.id)
-    org_by_name = Organization.objects.create(name=slug)
+    Organization.objects.create(name=slug)
     result = run_module('team', {'name': 'foo_team', 'description': 'fooin around', 'organization': slug}, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     team = Team.objects.filter(name='foo_team').first()
@@ -189,7 +189,7 @@ def test_multiple_lookup(run_module, admin_user):
         scm_type='git',
         scm_url="https://github.com/ansible/ansible-tower-samples",
     )
-    proj2 = Project.objects.create(
+    Project.objects.create(
         name='foo',
         organization=org2,
         scm_type='git',

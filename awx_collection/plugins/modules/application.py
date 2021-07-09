@@ -89,8 +89,6 @@ EXAMPLES = '''
       - http://tower.com/api/v2/
 '''
 
-import time
-
 from ..module_utils.controller_api import ControllerAPIModule
 
 
@@ -128,9 +126,6 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(application)
-
-    # Attempt to look up associated field items the user specified.
-    association_fields = {}
 
     # Create the data that gets sent for create and update
     application_fields = {

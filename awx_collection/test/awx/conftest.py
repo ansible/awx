@@ -31,7 +31,7 @@ try:
     # Because awxkit will be a directory at the root of this makefile and we are using python3, import awxkit will work even if its not installed.
     # However, awxkit will not contain api whih causes a stack failure down on line 170 when we try to mock it.
     # So here we are importing awxkit.api to prevent that. Then you only get an error on tests for awxkit functionality.
-    import awxkit.api
+    import awxkit.api  # noqa
 
     HAS_AWX_KIT = True
 except ImportError:
@@ -245,6 +245,15 @@ def vault_credential(organization):
     ct = CredentialType.defaults['vault']()
     ct.save()
     return Credential.objects.create(credential_type=ct, name='vault-cred', inputs={'vault_id': 'foo', 'vault_password': 'pas4word'})
+
+
+@pytest.fixture
+def kube_credential():
+    ct = CredentialType.defaults['kubernetes_bearer_token']()
+    ct.save()
+    return Credential.objects.create(
+        credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False}
+    )
 
 
 @pytest.fixture

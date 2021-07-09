@@ -96,7 +96,6 @@ EXAMPLES = '''
     credential: 'all'
 '''
 
-from os import environ
 import logging
 from ansible.module_utils.six.moves import StringIO
 from ..module_utils.awxkit import ControllerAWXKitModule

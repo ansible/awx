@@ -232,9 +232,6 @@ def wait_for_project_update(module, last_request):
         if not wait:
             module.exit_json(**module.json_output)
 
-        # Grab our start time to compare against for the timeout
-        start = time.time()
-
         # Invoke wait function
         result_final = module.wait_on_url(
             url=result['json']['url'], object_name=module.get_item_name(last_request), object_type='Project Update', timeout=timeout, interval=interval
@@ -293,12 +290,10 @@ def main():
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
     default_ee = module.params.get('default_environment')
-    custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
     state = module.params.get('state')
     wait = module.params.get('wait')
     update_project = module.params.get('update_project')
-    interval = module.params.get('interval')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     lookup_data = {}
