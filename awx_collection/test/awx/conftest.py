@@ -248,6 +248,15 @@ def vault_credential(organization):
 
 
 @pytest.fixture
+def kube_credential():
+    ct = CredentialType.defaults['kubernetes_bearer_token']()
+    ct.save()
+    return Credential.objects.create(
+        credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False}
+    )
+
+
+@pytest.fixture
 def silence_deprecation():
     """The deprecation warnings are stored in a global variable
     they will create cross-test interference. Use this to turn them off.
