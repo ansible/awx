@@ -81,7 +81,7 @@ options:
         - Deprecated, please use credential_type
       required: False
       type: str
-      choices: ["aws", "controller", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
+      choices: ["aws", "tower", "controller", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
                 "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
     host:
       description:
