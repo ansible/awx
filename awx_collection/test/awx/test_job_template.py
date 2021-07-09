@@ -194,7 +194,6 @@ def test_job_template_with_wrong_survey_spec(run_module, admin_user, project, in
     assert result.get('failed', True)
     assert result.get('msg') == "Failed to update survey: Field 'description' is missing from survey spec."
 
-    assert jt.survey_spec == survey_spec
     assert ActivityStream.objects.count() == prior_ct
 
 
