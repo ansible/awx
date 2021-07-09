@@ -730,10 +730,6 @@ describe('<ScheduleForm />', () => {
         );
       });
 
-      await act(async () => {
-        wrapper.find('DatePicker[aria-label="End date"]').simulate('blur');
-      });
-
       wrapper.update();
       expect(wrapper.find('#schedule-End-datetime-helper').text()).toBe(
         'Please select an end date/time that comes after the start date/time.'
