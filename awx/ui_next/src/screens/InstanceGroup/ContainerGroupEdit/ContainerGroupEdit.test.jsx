@@ -113,7 +113,6 @@ describe('<ContainerGroupEdit/>', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully', async () => {

@@ -37,7 +37,6 @@ describe('<UIDetail />', () => {
   });
 
   afterAll(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -13,10 +13,6 @@ describe('<HostStatusBar />', () => {
     wrapper = mountWithContexts(<HostStatusBar counts={mockCounts} />);
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
     expect(wrapper.length).toBe(1);
   });

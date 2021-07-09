@@ -108,7 +108,6 @@ describe('<HostGroupsList />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully', () => {

@@ -1,37 +1,16 @@
 import React from 'react';
-import { createMemoryHistory } from 'history';
-
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-
-import Projects from './Projects';
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
+import { shallow } from 'enzyme';
+import { _Projects as Projects } from './Projects';
 
 describe('<Projects />', () => {
-  test('initially renders successfully', () => {
-    mountWithContexts(<Projects />);
-  });
-
   test('should display a breadcrumb heading', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/projects'],
-    });
-    const match = { path: '/projects', url: '/projects', isExact: true };
+    const wrapper = shallow(<Projects />);
 
-    const wrapper = mountWithContexts(<Projects />, {
-      context: {
-        router: {
-          history,
-          route: {
-            location: history.location,
-            match,
-          },
-        },
-      },
+    const header = wrapper.find('ScreenHeader');
+    expect(header.prop('streamType')).toBe('project');
+    expect(header.prop('breadcrumbConfig')).toEqual({
+      '/projects': 'Projects',
+      '/projects/add': 'Create New Project',
     });
-    expect(wrapper.find('Title').length).toBe(1);
-    wrapper.unmount();
   });
 });

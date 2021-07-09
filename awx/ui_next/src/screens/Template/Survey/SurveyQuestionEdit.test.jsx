@@ -55,10 +55,6 @@ describe('<SurveyQuestionEdit />', () => {
       });
     });
 
-    afterEach(() => {
-      wrapper.unmount();
-    });
-
     test('should render form', () => {
       expect(wrapper.find('SurveyQuestionForm')).toHaveLength(1);
     });
@@ -149,8 +145,6 @@ describe('<SurveyQuestionEdit />', () => {
       expect(history.location.pathname).toEqual(
         '/templates/job_templates/1/survey'
       );
-
-      wrapper.unmount();
     });
   });
 });

@@ -21,7 +21,6 @@ describe('<InventorySourceSyncButton />', () => {
     );
   });
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

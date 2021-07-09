@@ -26,10 +26,6 @@ describe('<InventoryGroupHostListItem />', () => {
     );
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('should display expected row item content', () => {
     expect(wrapper.find('b').text()).toContain(
       '.host-000001.group-00000.dummy'

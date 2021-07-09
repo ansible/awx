@@ -54,7 +54,6 @@ describe('<SAMLDetail />', () => {
   });
 
   afterAll(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

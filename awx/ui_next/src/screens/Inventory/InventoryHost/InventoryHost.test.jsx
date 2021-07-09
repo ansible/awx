@@ -41,10 +41,6 @@ describe('<InventoryHost />', () => {
     });
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('should render expected tabs', async () => {
     const expectedTabs = [
       'Back to Hosts',

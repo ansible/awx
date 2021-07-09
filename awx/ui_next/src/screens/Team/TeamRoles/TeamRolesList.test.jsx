@@ -175,7 +175,6 @@ describe('<TeamRolesList />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
   test('should render properly', async () => {
     TeamsAPI.readRoles.mockResolvedValue(roles);

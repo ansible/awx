@@ -12,6 +12,5 @@ describe('RevertFormActionGroup', () => {
       />
     );
     expect(wrapper).toHaveLength(1);
-    wrapper.unmount();
   });
 });

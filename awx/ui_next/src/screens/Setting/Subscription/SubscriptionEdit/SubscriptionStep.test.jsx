@@ -29,7 +29,6 @@ describe('<SubscriptionStep />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders without crashing', async () => {

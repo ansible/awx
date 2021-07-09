@@ -23,6 +23,7 @@ describe('<WebhookSubForm />', () => {
     webhook_service: 'github',
     webhook_key: 'webhook key',
   };
+
   beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['templates/job_template/51/edit'],
@@ -51,13 +52,11 @@ describe('<WebhookSubForm />', () => {
       );
     });
   });
+
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
-  test('mounts properly', () => {
-    expect(wrapper.length).toBe(1);
-  });
+
   test('should render initial values properly', () => {
     waitForElement(wrapper, 'Lookup__ChipHolder', el => el.lenth > 0);
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('github');
@@ -73,6 +72,7 @@ describe('<WebhookSubForm />', () => {
       'Github credential'
     );
   });
+
   test('should make other credential type available', async () => {
     CredentialsAPI.read.mockResolvedValue({
       data: { results: [{ id: 13, name: 'GitLab credential' }] },
@@ -93,6 +93,7 @@ describe('<WebhookSubForm />', () => {
         .prop('value')
     ).toBe('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.');
   });
+
   test('should have disabled button to update webhook key', async () => {
     let newWrapper;
     await act(async () => {

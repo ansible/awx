@@ -30,7 +30,6 @@ describe('<Settings />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

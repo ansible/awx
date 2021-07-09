@@ -33,10 +33,6 @@ describe('<TeamDetail />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('initially renders successfully', async () => {
     await waitForElement(wrapper, 'TeamDetail');
   });

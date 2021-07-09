@@ -29,7 +29,6 @@ describe('<SmartInventoryHost />', () => {
   let history;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

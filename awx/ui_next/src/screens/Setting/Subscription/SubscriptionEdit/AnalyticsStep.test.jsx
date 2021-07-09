@@ -29,7 +29,6 @@ describe('<AnalyticsStep />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders without crashing', async () => {

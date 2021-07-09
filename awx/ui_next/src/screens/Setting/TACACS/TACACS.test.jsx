@@ -22,7 +22,6 @@ describe('<TACACS />', () => {
   let wrapper;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

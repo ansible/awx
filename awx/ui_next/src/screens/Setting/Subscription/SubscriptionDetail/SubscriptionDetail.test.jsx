@@ -44,10 +44,6 @@ describe('<SubscriptionDetail />', () => {
     });
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
     expect(wrapper.find('SubscriptionDetail').length).toBe(1);
   });

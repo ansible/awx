@@ -8,6 +8,13 @@ import {
 import SmartInventoryHosts from './SmartInventoryHosts';
 
 jest.mock('../../../api');
+jest.mock('./SmartInventoryHostList', () => {
+  const SmartInventoryHostList = () => <div />;
+  return {
+    __esModule: true,
+    default: SmartInventoryHostList,
+  };
+});
 
 describe('<SmartInventoryHosts />', () => {
   test('should render smart inventory host list', () => {
@@ -26,8 +33,10 @@ describe('<SmartInventoryHosts />', () => {
       }
     );
     expect(wrapper.find('SmartInventoryHostList').length).toBe(1);
+    expect(wrapper.find('SmartInventoryHostList').prop('inventory')).toEqual({
+      id: 1,
+    });
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render smart inventory host details', async () => {
@@ -51,6 +60,5 @@ describe('<SmartInventoryHosts />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('SmartInventoryHost').length).toBe(1);
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 });

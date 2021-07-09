@@ -95,7 +95,6 @@ describe('<InventoryRelatedGroupList />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully ', () => {

@@ -34,7 +34,6 @@ describe('<LoggingDetail />', () => {
   });
 
   afterAll(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

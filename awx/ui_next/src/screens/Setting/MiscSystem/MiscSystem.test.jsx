@@ -20,7 +20,6 @@ describe('<MiscSystem />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

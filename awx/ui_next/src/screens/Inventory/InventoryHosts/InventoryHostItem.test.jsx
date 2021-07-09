@@ -44,10 +44,6 @@ describe('<InventoryHostItem />', () => {
     );
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('edit button shown to users with edit capabilities', () => {
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });

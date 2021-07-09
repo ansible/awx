@@ -37,7 +37,6 @@ describe('<JobsDetail />', () => {
   });
 
   afterAll(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

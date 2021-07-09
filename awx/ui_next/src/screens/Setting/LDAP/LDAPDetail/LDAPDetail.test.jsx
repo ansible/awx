@@ -46,7 +46,6 @@ describe('<LDAPDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 

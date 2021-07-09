@@ -24,7 +24,6 @@ describe('<Subscription />', () => {
   let wrapper;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

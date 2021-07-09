@@ -29,7 +29,6 @@ describe('<UIEdit />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 
