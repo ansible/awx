@@ -4,7 +4,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import Inventory, Credential
+from awx.main.models import Inventory
 
 
 @pytest.mark.django_db

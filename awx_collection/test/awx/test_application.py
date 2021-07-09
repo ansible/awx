@@ -5,7 +5,7 @@ __metaclass__ = type
 import pytest
 
 from awx.main.models import Organization
-from awx.main.models.oauth import OAuth2AccessToken, OAuth2Application
+from awx.main.models.oauth import OAuth2Application
 
 
 @pytest.mark.django_db

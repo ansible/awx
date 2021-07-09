@@ -78,8 +78,6 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
-import time
 
 
 def main():
@@ -125,9 +123,6 @@ def main():
 
     if not wait:
         module.exit_json(**module.json_output)
-
-    # Grab our start time to compare against for the timeout
-    start = time.time()
 
     # Invoke wait function
     result = module.wait_on_url(

@@ -91,7 +91,6 @@ from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from datetime import datetime
 from dateutil import rrule
-from distutils.version import LooseVersion
 
 try:
     import pytz

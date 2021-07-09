@@ -555,8 +555,6 @@ def create_schema_nodes(module, response, schema, workflow_id):
 
         # Start Approval Node creation process
         if workflow_node['unified_job_template']['type'] == 'workflow_approval':
-            new_fields = {}
-
             for field_name in (
                 'name',
                 'description',
@@ -627,7 +625,6 @@ def create_schema_nodes_association(module, response, schema, workflow_id):
                         if sub_obj is None:
                             module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
                         id_list.append(sub_obj['id'])
-                        temp = sub_obj['id']
                     if id_list:
                         association_fields[association] = id_list
 

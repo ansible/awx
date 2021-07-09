@@ -70,7 +70,6 @@ RETURN = """
 
 
 from ..module_utils.controller_api import ControllerAPIModule
-import time
 
 
 def main():
@@ -91,10 +90,7 @@ def main():
     timeout = module.params.get("timeout")
     interval = module.params.get("interval")
 
-    node_url = "workflow_jobs/{0}/workflow_nodes/?job__name={1}".format(workflow_job_id, name)
-    # Attempt to look up workflow job node based on the provided id
-
-    result = module.wait_on_workflow_node_url(
+    module.wait_on_workflow_node_url(
         url="workflow_jobs/{0}/workflow_nodes/".format(workflow_job_id),
         object_name=name,
         object_type="Workflow Node",

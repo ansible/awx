@@ -151,7 +151,7 @@ def main():
         module.fail_json(msg='Unable to wait on ' + job_type.rstrip("s") + ' {0}; that ID does not exist.'.format(job_id))
 
     # Invoke wait function
-    result = module.wait_on_url(url=job['url'], object_name=job_id, object_type='legacy_job_wait', timeout=timeout, interval=interval)
+    module.wait_on_url(url=job['url'], object_name=job_id, object_type='legacy_job_wait', timeout=timeout, interval=interval)
 
     module.exit_json(**module.json_output)
 

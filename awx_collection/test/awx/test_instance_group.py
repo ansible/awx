@@ -5,7 +5,6 @@ __metaclass__ = type
 import pytest
 
 from awx.main.models import InstanceGroup, Instance
-from awx.main.tests.functional.conftest import kube_credential, credentialtype_kube
 
 
 @pytest.mark.django_db
