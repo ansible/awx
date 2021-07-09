@@ -64,6 +64,46 @@ describe('<MiscAuthenticationEdit />', () => {
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
+  test('should enable edit login redirect once alert is confirmed', async () => {
+    expect(
+      wrapper.find('TextInput#LOGIN_REDIRECT_OVERRIDE').prop('isDisabled')
+    ).toBe(true);
+    await act(async () =>
+      wrapper
+        .find('Button[ouiaId="confirm-edit-login-redirect"]')
+        .simulate('click')
+    );
+    wrapper.update();
+    const modal = wrapper.find('AlertModal');
+    expect(modal).toHaveLength(1);
+    expect(modal.prop('isOpen')).toEqual(true);
+    await act(async () =>
+      modal
+        .find('Button[aria-label="confirm edit login redirect"]')
+        .simulate('click')
+    );
+    wrapper.update();
+    expect(
+      wrapper.find('TextInput#LOGIN_REDIRECT_OVERRIDE').prop('isDisabled')
+    ).toBe(false);
+
+    await act(async () => {
+      wrapper.find('TextInput#LOGIN_REDIRECT_OVERRIDE').invoke('onChange')(
+        null,
+        {
+          target: {
+            name: 'LOGIN_REDIRECT_OVERRIDE',
+            value: 'bar',
+          },
+        }
+      );
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('TextInput#LOGIN_REDIRECT_OVERRIDE').prop('value')
+    ).toEqual('bar');
+  });
+
   test('initially renders without crashing', async () => {
     expect(wrapper.find('MiscAuthenticationEdit').length).toBe(1);
   });

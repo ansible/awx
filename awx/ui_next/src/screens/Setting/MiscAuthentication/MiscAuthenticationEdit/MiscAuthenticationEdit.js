@@ -16,6 +16,7 @@ import {
   BooleanField,
   InputField,
   ObjectField,
+  InputAlertField,
 } from '../../shared/SharedFields';
 import { RevertAllAlert, RevertFormActionGroup } from '../../shared';
 import { formatJson, pluck } from '../../shared/settingUtils';
@@ -211,7 +212,7 @@ function MiscAuthenticationEdit() {
                   name="ALLOW_OAUTH2_FOR_EXTERNAL_USERS"
                   config={authentication.ALLOW_OAUTH2_FOR_EXTERNAL_USERS}
                 />
-                <InputField
+                <InputAlertField
                   name="LOGIN_REDIRECT_OVERRIDE"
                   config={authentication.LOGIN_REDIRECT_OVERRIDE}
                 />

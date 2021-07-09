@@ -9,6 +9,7 @@ import {
   ChoiceField,
   EncryptedField,
   FileUploadField,
+  InputAlertField,
   InputField,
   ObjectField,
   TextAreaField,
@@ -156,6 +157,30 @@ describe('Setting form fields', () => {
     });
     wrapper.update();
     expect(wrapper.find('TextInputBase').prop('value')).toEqual(0);
+  });
+
+  test('InputAlertField initially renders disable TextInput', async () => {
+    const wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          text: '',
+        }}
+      >
+        {() => (
+          <InputAlertField
+            name="text"
+            config={{
+              label: 'test',
+              help_text: 'test',
+              default: '',
+            }}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('TextInput')).toHaveLength(1);
+    expect(wrapper.find('TextInput').prop('value')).toEqual('');
+    expect(wrapper.find('TextInput').prop('isDisabled')).toBe(true);
   });
 
   test('TextAreaField renders the expected content', async () => {

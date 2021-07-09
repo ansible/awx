@@ -7,4 +7,5 @@ export {
   EncryptedField,
   InputField,
   ObjectField,
+  InputAlertField,
 } from './SharedFields';
