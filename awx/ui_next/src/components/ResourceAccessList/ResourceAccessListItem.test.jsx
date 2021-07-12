@@ -50,5 +50,8 @@ describe('<ResourceAccessListItem />', () => {
     });
 
     waitForElement(wrapper, 'ResourceAccessListItem', el => el.length > 0);
+
+    expect(wrapper.find('Td[dataLabel="First name"]').text()).toBe('jane');
+    expect(wrapper.find('Td[dataLabel="Last name"]').text()).toBe('brown');
   });
 });

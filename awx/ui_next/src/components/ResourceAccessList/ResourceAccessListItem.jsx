@@ -64,7 +64,7 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
         )}
       </Td>
       <Td dataLabel={t`First name`}>{accessRecord.first_name}</Td>
-      <Td dataLabel={t`Last name`}>{accessRecord.first_name}</Td>
+      <Td dataLabel={t`Last name`}>{accessRecord.last_name}</Td>
       <Td dataLabel={t`Roles`}>
         <DetailList stacked>
           {userRoles.length > 0 && (
