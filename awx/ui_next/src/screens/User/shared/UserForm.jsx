@@ -60,6 +60,19 @@ function UserFormFields({ user }) {
   return (
     <>
       <FormField
+        id="user-first-name"
+        label={t`First Name`}
+        name="first_name"
+        type="text"
+      />
+      <FormField
+        id="user-last-name"
+        label={t`Last Name`}
+        name="last_name"
+        type="text"
+      />
+      <FormField id="user-email" label={t`Email`} name="email" type="text" />
+      <FormField
         id="user-username"
         label={t`Username`}
         name="username"
@@ -69,7 +82,6 @@ function UserFormFields({ user }) {
         }
         isRequired={!ldapUser && !externalAccount}
       />
-      <FormField id="user-email" label={t`Email`} name="email" type="text" />
       {!ldapUser && !(socialAuthUser && externalAccount) && (
         <>
           <PasswordField
@@ -96,30 +108,7 @@ function UserFormFields({ user }) {
           />
         </>
       )}
-      <FormField
-        id="user-first-name"
-        label={t`First Name`}
-        name="first_name"
-        type="text"
-      />
-      <FormField
-        id="user-last-name"
-        label={t`Last Name`}
-        name="last_name"
-        type="text"
-      />
-      {!user.id && (
-        <OrganizationLookup
-          helperTextInvalid={organizationMeta.error}
-          isValid={!organizationMeta.touched || !organizationMeta.error}
-          onBlur={() => organizationHelpers.setTouched()}
-          onChange={handleOrganizationUpdate}
-          value={organizationField.value}
-          required
-          autoPopulate={!user?.id}
-          validate={required(t`Select a value for this field`)}
-        />
-      )}
+
       {me.is_superuser && (
         <FormGroup
           fieldId="user-type"
@@ -137,6 +126,19 @@ function UserFormFields({ user }) {
             {...userTypeField}
           />
         </FormGroup>
+      )}
+
+      {!user.id && (
+        <OrganizationLookup
+          helperTextInvalid={organizationMeta.error}
+          isValid={!organizationMeta.touched || !organizationMeta.error}
+          onBlur={() => organizationHelpers.setTouched()}
+          onChange={handleOrganizationUpdate}
+          value={organizationField.value}
+          required
+          autoPopulate={!user?.id}
+          validate={required(t`Select a value for this field`)}
+        />
       )}
     </>
   );

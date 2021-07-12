@@ -948,7 +948,6 @@ class UserSerializer(BaseSerializer):
             '*',
             '-name',
             '-description',
-            '-modified',
             'username',
             'first_name',
             'last_name',

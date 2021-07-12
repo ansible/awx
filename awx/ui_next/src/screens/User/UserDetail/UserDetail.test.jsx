@@ -30,6 +30,7 @@ describe('<UserDetail />', () => {
     assertDetail('User Type', 'System Administrator');
     assertDetail('Last Login', `11/4/2019, 11:12:36 PM`);
     assertDetail('Created', `10/28/2019, 3:01:07 PM`);
+    assertDetail('Last Modified', `7/12/2021, 7:08:33 PM`);
     assertDetail('Type', `SOCIAL`);
   });
 

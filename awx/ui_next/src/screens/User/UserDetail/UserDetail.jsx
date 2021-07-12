@@ -22,6 +22,7 @@ function UserDetail({ user }) {
     last_name,
     last_login,
     created,
+    modified,
     is_superuser,
     is_system_auditor,
     summary_fields,
@@ -56,14 +57,14 @@ function UserDetail({ user }) {
   return (
     <CardBody>
       <DetailList>
+        <Detail label={t`First Name`} value={`${first_name}`} />
+        <Detail label={t`Last Name`} value={`${last_name}`} />
+        <Detail label={t`Email`} value={email} />
         <Detail
           label={t`Username`}
           value={username}
           dataCy="user-detail-username"
         />
-        <Detail label={t`Email`} value={email} />
-        <Detail label={t`First Name`} value={`${first_name}`} />
-        <Detail label={t`Last Name`} value={`${last_name}`} />
         <Detail label={t`User Type`} value={`${user_type}`} />
         {userAuthType && (
           <Detail
@@ -75,6 +76,9 @@ function UserDetail({ user }) {
           <Detail label={t`Last Login`} value={formatDateString(last_login)} />
         )}
         <Detail label={t`Created`} value={formatDateString(created)} />
+        {modified && (
+          <Detail label={t`Last Modified`} value={formatDateString(modified)} />
+        )}
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities &&
