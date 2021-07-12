@@ -192,7 +192,6 @@ function InventoryRelatedGroupList() {
         renderToolbar={props => (
           <DataListToolbar
             {...props}
-            showSelectAll
             isAllSelected={isAllSelected}
             onSelectAll={isSelected =>
               setSelected(isSelected ? [...groups] : [])
