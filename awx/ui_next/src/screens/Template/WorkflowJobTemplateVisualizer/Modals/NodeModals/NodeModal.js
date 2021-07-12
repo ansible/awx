@@ -102,7 +102,7 @@ function NodeModalForm({
       )
     ) {
       values.extra_data = {
-        days: values?.daysToKeep,
+        days: parseInt(values?.daysToKeep, 10),
       };
     }
 
