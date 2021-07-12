@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 from decimal import Decimal
+import random
 
 from django.core.validators import MinValueValidator
 from django.db import models, connection
