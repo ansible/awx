@@ -106,7 +106,7 @@ from awx.main.utils.common import (
     get_cpu_capacity,
     get_system_task_capacity,
 )
-from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
+from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -407,6 +407,7 @@ def cleanup_execution_environment_images():
             process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
             if process.returncode != 0:
                 logger.debug(f"Failed to delete image {image_name}")
+
 
 @task(queue=get_local_queuename)
 def check_heartbeat(node):
@@ -2834,6 +2835,7 @@ class RunAdHocCommand(BaseTask):
         params = super(RunAdHocCommand, self).build_execution_environment_params(instance)
         params['process_isolation'] = False if MODE == 'development' else True
         return params
+
 
 @task(queue=get_local_queuename)
 class RunSystemJob(BaseTask):
