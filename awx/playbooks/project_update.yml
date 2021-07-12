@@ -192,7 +192,7 @@
           environment:
             ANSIBLE_FORCE_COLOR: false
             GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
-          loop: "{{ requirements_files.files | selectattr('path','match','.*/roles/requirements.yml$') | list }}"
+          loop: "{{ requirements_files.files | selectattr('path','match','.*/roles/requirements.ya?ml$') | list }}"
           loop_control:
             label: "{{ item.path }}"
       when: roles_enabled|bool
@@ -216,7 +216,7 @@
             # Put the local tmp directory in same volume as collection destination
             # otherwise, files cannot be moved accross volumes and will cause error
             ANSIBLE_LOCAL_TEMP: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/tmp"
-          loop: "{{ requirements_files.files | selectattr('path','match','.*/collections/requirements.yml$') | list }}"
+          loop: "{{ requirements_files.files | selectattr('path','match','.*/collections/requirements.ya?ml$') | list }}"
           loop_control:
             label: "{{ item.path }}"
 
