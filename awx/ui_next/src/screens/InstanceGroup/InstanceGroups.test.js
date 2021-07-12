@@ -1,21 +1,18 @@
 import React from 'react';
-
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { shallow } from 'enzyme';
 
 import InstanceGroups from './InstanceGroups';
 
 describe('<InstanceGroups/>', () => {
-  let pageWrapper;
-  let pageSections;
+  test('should set breadcrumbs', () => {
+    const wrapper = shallow(<InstanceGroups />);
 
-  beforeEach(() => {
-    pageWrapper = mountWithContexts(<InstanceGroups />);
-    pageSections = pageWrapper.find('PageSection');
-  });
-
-  test('initially renders without crashing', () => {
-    expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(1);
-    expect(pageSections.first().props().variant).toBe('light');
+    const header = wrapper.find('ScreenHeader');
+    expect(header.prop('streamType')).toEqual('instance_group');
+    expect(header.prop('breadcrumbConfig')).toEqual({
+      '/instance_groups': 'Instance Groups',
+      '/instance_groups/add': 'Create new instance group',
+      '/instance_groups/container_group/add': 'Create new container group',
+    });
   });
 });

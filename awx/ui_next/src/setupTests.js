@@ -16,6 +16,7 @@ export const asyncFlush = () => new Promise(resolve => setImmediate(resolve));
 
 let hasConsoleError = false;
 let hasConsoleWarn = false;
+let networkRequestUrl = false;
 const { error, warn } = global.console;
 
 global.console = {
@@ -26,8 +27,10 @@ global.console = {
   // fail tests that log errors.
   // adapted from https://github.com/facebook/jest/issues/6121#issuecomment-708330601
   error: (...args) => {
-    hasConsoleError = true;
-    error(...args);
+    if (!networkRequestUrl) {
+      hasConsoleError = true;
+      error(...args);
+    }
   },
   warn: (...args) => {
     hasConsoleWarn = true;
@@ -35,7 +38,41 @@ global.console = {
   },
 };
 
+const logNetworkRequestError = url => {
+  networkRequestUrl = url || true;
+  return {
+    status: 200,
+    data: {},
+  };
+};
+jest.mock('axios', () => {
+  const axiosActual = jest.requireActual('axios');
+  return {
+    ...axiosActual,
+    create: () => ({
+      get: logNetworkRequestError,
+      post: logNetworkRequestError,
+      delete: logNetworkRequestError,
+      put: logNetworkRequestError,
+      patch: logNetworkRequestError,
+      options: logNetworkRequestError,
+      interceptors: {
+        response: {
+          use: () => {},
+        },
+      },
+    }),
+  };
+});
+
 afterEach(() => {
+  if (networkRequestUrl) {
+    const url = networkRequestUrl;
+    networkRequestUrl = false;
+    throw new Error(
+      `Network request was attempted to URL ${url} — API should be stubbed using jest.mock()`
+    );
+  }
   if (hasConsoleError) {
     hasConsoleError = false;
     throw new Error('Error logged to console');

@@ -5,13 +5,10 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import UserTokens from './UserTokens';
 
+jest.mock('../../../api');
+
 describe('<UserTokens />', () => {
   let wrapper;
-
-  test('renders successfully', () => {
-    wrapper = mountWithContexts(<UserTokens />);
-    expect(wrapper.length).toBe(1);
-  });
 
   test('shows Application information modal after successful creation', async () => {
     const history = createMemoryHistory({

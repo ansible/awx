@@ -2,6 +2,14 @@ import React from 'react';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import SettingList from './SettingList';
 
+jest.mock('../../api');
+jest.mock('../../util/useBrandName', () => ({
+  __esModule: true,
+  default: () => ({
+    current: 'AWX',
+  }),
+}));
+
 describe('<SettingList />', () => {
   let wrapper;
   beforeEach(() => {

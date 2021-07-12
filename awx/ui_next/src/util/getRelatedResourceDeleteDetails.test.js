@@ -23,6 +23,9 @@ jest.mock('../api/models/WorkflowJobTemplates');
 jest.mock('../api/models/WorkflowJobTemplateNodes');
 jest.mock('../api/models/CredentialInputSources');
 jest.mock('../api/models/ExecutionEnvironments');
+jest.mock('../api/models/Applications');
+jest.mock('../api/models/NotificationTemplates');
+jest.mock('../api/models/Teams');
 
 describe('delete details', () => {
   afterEach(() => {
