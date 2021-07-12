@@ -7,6 +7,7 @@ import {
   Button as _Button,
   Chip,
   DataListAction as _DataListAction,
+  DataListCell,
   DataListCheck,
   DataListItemCells,
   DataListItemRow,
@@ -16,7 +17,6 @@ import {
 } from '@patternfly/react-core';
 import { CaretDownIcon, CaretUpIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
 import ChipGroup from '../../../components/ChipGroup';
 
 const DataListAction = styled(_DataListAction)`
