@@ -25,7 +25,7 @@ function DaysToKeepStep() {
         isRequired
         validate={combine(validators)}
         validated={!(meta.touched && meta.error) ? 'default' : 'error'}
-        label={t`Days to keep`}
+        label={t`Days of data to be retained`}
       />
     </Form>
   );
