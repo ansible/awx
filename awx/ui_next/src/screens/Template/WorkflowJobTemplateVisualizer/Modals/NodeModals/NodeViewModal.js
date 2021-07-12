@@ -139,7 +139,8 @@ function NodeViewModal({ readOnly }) {
       if (
         launchConfig.ask_variables_on_launch ||
         launchConfig.survey_enabled ||
-        fullUnifiedJobTemplate.type === 'system_job_template'
+        (fullUnifiedJobTemplate.type === 'system_job_template' &&
+          promptValues.extra_data)
       ) {
         overrides.extra_vars = jsonToYaml(
           JSON.stringify(promptValues.extra_data)
