@@ -1,0 +1,81 @@
+---
+- name: Create _sources directory
+  file:
+    path: "{{ sources_dest }}"
+    state: 'directory'
+    mode: '0700'
+
+# Linux block
+- block:
+    - name: Download Minikube
+      get_url:
+        url: "{{ minikube_url_linux }}"
+        dest: "{{ sources_dest }}/minikube"
+        mode: 0755
+
+    - name: Download Kubectl
+      get_url:
+        url: "{{ kubectl_url_linux }}"
+        dest: "{{ sources_dest }}/kubectl"
+        mode: 0755
+  when:
+    - ansible_architecture == "x86_64"
+    - ansible_system == "Linux"
+
+# MacOS block
+- block:
+    - name: Download Minikube
+      get_url:
+        url: "{{ minikube_url_macos }}"
+        dest: "{{ sources_dest }}/minikube"
+        mode: 0755
+
+    - name: Download Kubectl
+      get_url:
+        url: "{{ kubectl_url_macos }}"
+        dest: "{{ sources_dest }}/kubectl"
+        mode: 0755
+  when:
+    - ansible_architecture == "x86_64"
+    - ansible_system == "Darwin"
+
+- name: Starting Minikube
+  shell: "{{ sources_dest }}/minikube start --driver={{ driver }} --install-addons=true --addons=ingress"
+
+- name: Create ServiceAccount and clusterRoleBinding
+  k8s:
+    apply: true
+    definition: "{{ lookup('template', 'rbac.yml.j2') }}"
+
+- name: Retrieve serviceAccount secret name
+  k8s_info:
+    kind: ServiceAccount
+    namespace: '{{ minikube_service_account_namespace }}'
+    name: '{{ minikube_service_account_name }}'
+  register: service_account
+
+- name: Register serviceAccount secret name
+  set_fact:
+    _service_account_secret_name: '{{ service_account["resources"][0]["secrets"][0]["name"] }}'
+  when:
+    - service_account["resources"][0]["secrets"] | length
+    - '"name" in service_account["resources"][0]["secrets"][0]'
+
+- name: Retrieve bearer_token from serviceAccount secret
+  k8s_info:
+    kind: Secret
+    namespace: '{{ minikube_service_account_namespace }}'
+    name: '{{ _service_account_secret_name }}'
+  register: _service_account_secret
+
+- name: Load Minikube Bearer Token
+  set_fact:
+    service_account_token: '{{ _service_account_secret["resources"][0]["data"]["token"] | b64decode }}'
+  when:
+    - _service_account_secret["resources"][0]["data"] | length
+
+- name: Render minikube credential JSON template
+  template:
+    src: bootstrap_minikube.py.j2
+    dest: "{{ sources_dest }}/bootstrap_minikube.py"
+    mode: '0600'

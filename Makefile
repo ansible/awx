@@ -467,12 +467,19 @@ awx/projects:
 
 COMPOSE_UP_OPTS ?=
 CLUSTER_NODE_COUNT ?= 1
+MINIKUBE_CONTAINER_GROUP ?= false
 
 docker-compose-sources: .git/hooks/pre-commit
+	@if [ $(MINIKUBE_CONTAINER_GROUP) ]; then\
+	    ansible-playbook -i tools/docker-compose/inventory tools/docker-compose-minikube/deploy.yml; \
+	fi;
+
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
-	    -e cluster_node_count=$(CLUSTER_NODE_COUNT)
+	    -e cluster_node_count=$(CLUSTER_NODE_COUNT) \
+	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
+
 
 docker-compose: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
@@ -498,6 +505,10 @@ detect-schema-change: genschema
 docker-compose-clean: awx/projects
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
 
+docker-compose-container-group-clean:
+	tools/docker-compose-minikube/_sources/minikube delete
+	rm -rf tools/docker-compose-minikube/_sources/
+
 # Base development image build
 docker-compose-build:
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True
@@ -509,7 +520,7 @@ docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	docker images | grep "awx_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
 
-docker-clean-volumes: docker-compose-clean
+docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 	docker volume rm tools_awx_db
 
 docker-refresh: docker-clean docker-compose
@@ -523,6 +534,9 @@ docker-compose-cluster-elk: docker-auth awx/projects docker-compose-sources
 
 prometheus:
 	docker run -u0 --net=tools_default --link=`docker ps | egrep -o "tools_awx(_run)?_([^ ]+)?"`:awxweb --volume `pwd`/tools/prometheus:/prometheus --name prometheus -d -p 0.0.0.0:9090:9090 prom/prometheus --web.enable-lifecycle --config.file=/prometheus/prometheus.yml
+
+docker-compose-container-group:
+	MINIKUBE_CONTAINER_GROUP=true make docker-compose
 
 clean-elk:
 	docker stop tools_kibana_1

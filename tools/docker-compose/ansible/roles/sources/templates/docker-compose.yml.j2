@@ -21,6 +21,9 @@ services:
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
+{% if minikube_container_group|bool %}
+      MINIKUBE_CONTAINER_GROUP: "true"
+{% endif %}
     links:
       - postgres
       - redis_{{ container_postfix }}
@@ -47,6 +50,7 @@ services:
       - "8888:8888"  # jupyter notebook
       - "8013:8013"  # http
       - "8043:8043"  # https
+      - "2222:2222"  # receptor foo node
 {% endif %}
   redis_{{ container_postfix }}:
     image: redis:latest
@@ -98,3 +102,9 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
+{% if minikube_container_group|bool %}
+networks:
+  default:
+    external:
+      name: minikube
+{% endif %}
