@@ -22,13 +22,20 @@ wait_for() {
     local rc=1
     local attempt=1
     local next_sleep="${MIN_SLEEP}"
+    local check=1
 
     while true; do
         log_message "Attempt ${attempt} of ${ATTEMPTS}"
 
         timeout "${TIMEOUT}" \
-                /bin/bash -c "! awx-manage showmigrations | grep '\[ \]'" &>/dev/null \
-            && return || rc=$?
+                /bin/bash -c "awx-manage check" &>/dev/null
+        check=$?
+
+        if [ $check -eq 0 ]; then
+            timeout "${TIMEOUT}" \
+                    /bin/bash -c "! awx-manage showmigrations | grep '\[ \]'" &>/dev/null \
+                && return || rc=$?
+        fi
 
         (( ++attempt > ATTEMPTS )) && break
 

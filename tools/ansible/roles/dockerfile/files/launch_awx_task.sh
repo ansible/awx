@@ -13,6 +13,6 @@ if [ -n "${AWX_KUBE_DEVEL}" ]; then
     export SDB_NOTIFY_HOST=$MY_POD_IP
 fi
 
-wait-for-migrations
+wait-for-migrations || exit 1
 
 supervisord -c /etc/supervisord_task.conf
