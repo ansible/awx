@@ -96,6 +96,11 @@ class Inventory(HasCopy, HasCreate, HasInstanceGroups, HasVariables, base.Base):
 
         poll_until(_wait, interval=1, timeout=60)
 
+    def silent_delete(self):
+        r = super(Inventory, self).silent_delete()
+        self.wait_until_deleted()
+        return r
+
     def update_inventory_sources(self, wait=False):
         response = self.related.update_inventory_sources.post()
         source_ids = [entry['inventory_source'] for entry in response if entry['status'] == 'started']
