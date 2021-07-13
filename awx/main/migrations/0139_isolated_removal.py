@@ -11,11 +11,8 @@ def remove_iso_instances(apps, schema_editor):
 
 def remove_iso_groups(apps, schema_editor):
     InstanceGroup = apps.get_model('main', 'InstanceGroup')
-    UnifiedJob = apps.get_model('main', 'UnifiedJob')
     with transaction.atomic():
-        for ig in InstanceGroup.objects.filter(controller__isnull=False):
-            UnifiedJob.objects.filter(instance_group=ig).update(instance_group=None)
-            ig.delete()
+        InstanceGroup.objects.filter(controller__isnull=False).delete()
 
 
 class Migration(migrations.Migration):
