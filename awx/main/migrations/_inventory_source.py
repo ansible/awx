@@ -1,6 +1,7 @@
 import logging
 
 from django.utils.encoding import smart_text
+from django.utils.timezone import now
 
 from awx.main.utils.common import set_current_apps
 from awx.main.utils.common import parse_yaml_or_json
@@ -96,6 +97,21 @@ def delete_custom_inv_source(apps, schema_editor):
     set_current_apps(apps)
     InventorySource = apps.get_model('main', 'InventorySource')
     InventoryUpdate = apps.get_model('main', 'InventoryUpdate')
+    Schedule = apps.get_model('main', 'Schedule')
+
+    saved_time = now()
+
+    # We cannot allow polymorphic.SET_NULL relationships to exist before we delete any InventorySources or InventoryUpdates or Schedules
+    # so we do this hack of updating modified time so we can keep track of which schedules to delete (b/c we nulled the relationships)
+    Schedule.objects.filter(unified_job_template__inventorysource__source='custom').update(modified=saved_time)
+    InventoryUpdate.objects.filter(source='custom', schedule__isnull=False).update(schedule=None)
+    InventorySource.objects.filter(source='custom', next_schedule__isnull=False).update(next_schedule=None)
+
+    # safe to delete Schedule objects with no schedule or next_schedule pointers from UJ or UJT tables
+    ct, deletions = Schedule.objects.filter(modified=saved_time).delete()
+    if ct:
+        logger.info('deleted {} custom inventory source schedules: {}'.format(ct, deletions))
+
     ct, deletions = InventoryUpdate.objects.filter(source='custom').delete()
     if ct:
         logger.info('deleted {}'.format((ct, deletions)))

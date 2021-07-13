@@ -87,6 +87,9 @@ function CredentialInput({
             id={`credential-${fieldOptions.id}`}
             type="text"
             filename={fileName}
+            filenamePlaceholder={t`Drag a file here or browse to upload`}
+            browseButtonText={t`Browse…`}
+            clearButtonText={t`Clear`}
             onChange={handleFileChange}
             onReadStarted={() => setFileIsUploading(true)}
             onReadFinished={() => setFileIsUploading(false)}
@@ -105,6 +108,9 @@ function CredentialInput({
         id={`credential-${fieldOptions.id}`}
         type="text"
         filename={fileName}
+        filenamePlaceholder={t`Drag a file here or browse to upload`}
+        browseButtonText={t`Browse…`}
+        clearButtonText={t`Clear`}
         onChange={handleFileChange}
         onReadStarted={() => setFileIsUploading(true)}
         onReadFinished={() => setFileIsUploading(false)}
