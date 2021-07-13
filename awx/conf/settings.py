@@ -25,7 +25,6 @@ from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
 from awx.conf.fields import PrimaryKeyRelatedField
 from awx.conf.models import Setting
-from awx.conf.migrations._reencrypt import decrypt_field as old_decrypt_field
 
 # FIXME: Gracefully handle when settings are accessed before the database is
 # ready (or during migrations).
@@ -299,13 +298,7 @@ class SettingsWrapper(UserSettingsHolder):
                 continue
             if self.registry.is_setting_encrypted(setting.key):
                 setting_ids[setting.key] = setting.id
-                try:
-                    value = decrypt_field(setting, 'value')
-                except ValueError as e:
-                    # TODO: Remove in Tower 3.3
-                    logger.debug('encountered error decrypting field: %s - attempting fallback to old', e)
-                    value = old_decrypt_field(setting, 'value')
-
+                value = decrypt_field(setting, 'value')
             else:
                 value = setting.value
             settings_to_cache[setting.key] = get_cache_value(value)
