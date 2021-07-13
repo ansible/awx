@@ -1,7 +1,7 @@
 from .plugin import CredentialPlugin
 from django.utils.translation import ugettext_lazy as _
 
-from thycotic.secrets.server import SecretServerV1 as SecretServer, PasswordGrantAuthorizer
+from thycotic.secrets.server import SecretServer, PasswordGrantAuthorizer
 
 tss_inputs = {
     'fields': [
