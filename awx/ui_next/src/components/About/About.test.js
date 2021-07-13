@@ -5,7 +5,7 @@ import About from './About';
 jest.mock('../../hooks/useBrandName', () => ({
   __esModule: true,
   default: () => ({
-    current: 'AWX',
+    current: { brandName: 'AWX', componentName: '' },
   }),
 }));
 
