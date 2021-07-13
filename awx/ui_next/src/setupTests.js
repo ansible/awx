@@ -46,9 +46,7 @@ const logNetworkRequestError = url => {
   };
 };
 jest.mock('axios', () => {
-  const axiosActual = jest.requireActual('axios');
   return {
-    ...axiosActual,
     create: () => ({
       get: logNetworkRequestError,
       post: logNetworkRequestError,
