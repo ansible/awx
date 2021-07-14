@@ -31,7 +31,7 @@ function About({ version, isOpen, onClose }) {
     <AboutModal
       isOpen={isOpen}
       onClose={onClose}
-      productName={`Ansible ${brandName.current}`}
+      productName={brandName.current}
       trademark={`${copyright} ${new Date().getFullYear()} ${redHatInc}`}
       brandImageSrc="/static/media/logo-header.svg"
       brandImageAlt={t`Brand Image`}
