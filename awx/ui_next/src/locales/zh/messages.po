@@ -47,7 +47,7 @@ msgstr "/ (project root)"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:106
 #: screens/Template/shared/JobTemplateForm.jsx:214
 msgid "0 (Normal)"
-msgstr "0（普通）"
+msgstr "0（正常）"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:105
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:82
@@ -378,7 +378,7 @@ msgstr "高级"
 
 #: components/Search/AdvancedSearch.jsx:353
 msgid "Advanced search documentation"
-msgstr ""
+msgstr "高级文档搜索"
 
 #: components/Search/AdvancedSearch.jsx:335
 msgid "Advanced search value input"
@@ -424,7 +424,7 @@ msgstr "作业作业类型"
 
 #: screens/Dashboard/DashboardGraph.jsx:159
 msgid "All jobs"
-msgstr ""
+msgstr "所有作业"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:106
 msgid "Allow Branch Override"
