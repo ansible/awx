@@ -134,6 +134,28 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         grace_period = 120
         return self.modified < ref_time - timedelta(seconds=grace_period)
 
+    def refresh_capacity(self):
+        cpu = get_cpu_capacity()
+        mem = get_mem_capacity()
+        if self.enabled:
+            self.capacity = get_system_task_capacity(self.capacity_adjustment)
+        else:
+            self.capacity = 0
+
+        try:
+            # if redis is down for some reason, that means we can't persist
+            # playbook event data; we should consider this a zero capacity event
+            redis.Redis.from_url(settings.BROKER_URL).ping()
+        except redis.ConnectionError:
+            self.capacity = 0
+
+        self.cpu = cpu[0]
+        self.memory = mem[0]
+        self.cpu_capacity = cpu[1]
+        self.mem_capacity = mem[1]
+        self.version = awx_application_version
+        self.save(update_fields=['capacity', 'version', 'modified', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+
     def is_receptor(self):
         return self.version.startswith('ansible-runner-')
 
@@ -183,6 +205,11 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         return sum([inst.capacity for inst in self.instances.all()])
 
     @property
+    def execution_capacity(self):
+        # TODO: update query to exclude based on node_type field
+        return sum([inst.capacity for inst in self.instances.exclude(version__startswith='ansible-runner-')])
+
+    @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(status__in=('running', 'waiting'), instance_group=self).count()
 
@@ -204,6 +231,9 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def fit_task_to_most_remaining_capacity_instance(task, instances):
         instance_most_capacity = None
         for i in instances:
+            # TODO: change this to check if "execution" is in node_type field
+            if not i.version.startswith('ansible-runner'):
+                continue
             if i.remaining_capacity >= task.task_impact and (
                 instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
             ):
