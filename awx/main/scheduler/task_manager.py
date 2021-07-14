@@ -75,6 +75,7 @@ class TaskManager:
         instances_partial = [
             SimpleNamespace(
                 obj=instance,
+                version=instance.version,
                 remaining_capacity=instance.remaining_capacity,
                 capacity=instance.capacity,
                 jobs_running=instance.jobs_running,
@@ -86,7 +87,7 @@ class TaskManager:
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
-            self.graph[rampart_group.name] = dict(graph=DependencyGraph(), capacity_total=rampart_group.capacity, consumed_capacity=0, instances=[])
+            self.graph[rampart_group.name] = dict(graph=DependencyGraph(), capacity_total=rampart_group.execution_capacity, consumed_capacity=0, instances=[])
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
