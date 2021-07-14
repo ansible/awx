@@ -56,7 +56,7 @@ function getStep(launchConfig, formError, resource) {
               ouiaId="InventoryStep-alert"
               variant="warning"
               isInline
-              title={t`This inventory is applied to all job template nodes within this workflow (${resource.name}) that prompt for an inventory.`}
+              title={t`This inventory is applied to all workflow nodes within this workflow (${resource.name}) that prompt for an inventory.`}
             />
           ) : null
         }
