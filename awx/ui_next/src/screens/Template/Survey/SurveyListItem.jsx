@@ -1,7 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
 import { t } from '@lingui/macro';
-
 import { Link } from 'react-router-dom';
 import {
   Button as _Button,
@@ -14,8 +13,13 @@ import {
   DataListItem,
   Stack,
   StackItem,
+  Tooltip,
 } from '@patternfly/react-core';
-import { CaretDownIcon, CaretUpIcon } from '@patternfly/react-icons';
+import {
+  CaretDownIcon,
+  CaretUpIcon,
+  PencilAltIcon,
+} from '@patternfly/react-icons';
 import styled from 'styled-components';
 import ChipGroup from '../../../components/ChipGroup';
 
@@ -27,11 +31,13 @@ const DataListAction = styled(_DataListAction)`
     padding-bottom: 0;
   }
 `;
+
 const Button = styled(_Button)`
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 0;
 `;
+
 const Required = styled.span`
   color: var(--pf-global--danger-color--100);
   margin-left: var(--pf-global--spacer--xs);
@@ -41,10 +47,13 @@ const Label = styled.b`
   margin-right: 20px;
 `;
 
+const EditSection = styled(_DataListAction)``;
+
+const EditButton = styled(_Button)``;
+
 function SurveyListItem({
   canEdit,
   question,
-
   isLast,
   isFirst,
   isChecked,
@@ -116,7 +125,6 @@ function SurveyListItem({
                 )}
               </>
             </DataListCell>,
-
             <DataListCell key="type">
               <Label>{t`Type`}</Label>
               {question.type}
@@ -146,9 +154,27 @@ function SurveyListItem({
             </DataListCell>,
           ]}
         />
+        <EditSection aria-label={t`actions`}>
+          {canEdit && (
+            <EditButton variant="plain">
+              <Tooltip content={t`Edit Survey`} position="top">
+                <EditButton
+                  ouiaId={`edit-survey-${question.variable}`}
+                  aria-label={t`edit survey`}
+                  variant="plain"
+                  component={Link}
+                  to={`survey/edit?question_variable=${encodeURIComponent(
+                    question.variable
+                  )}`}
+                >
+                  <PencilAltIcon />
+                </EditButton>
+              </Tooltip>
+            </EditButton>
+          )}
+        </EditSection>
       </DataListItemRow>
     </DataListItem>
   );
 }
-
 export default SurveyListItem;

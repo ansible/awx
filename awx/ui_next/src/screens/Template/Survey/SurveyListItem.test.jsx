@@ -4,7 +4,13 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import SurveyListItem from './SurveyListItem';
 
 describe('<SurveyListItem />', () => {
-  const item = { question_name: 'Foo', default: 'Bar', type: 'text', id: 1 };
+  const item = {
+    question_name: 'Foo',
+    variable: 'buzz',
+    default: 'Bar',
+    type: 'text',
+    id: 1,
+  };
   test('renders successfully', () => {
     let wrapper;
     act(() => {
@@ -122,13 +128,7 @@ describe('<SurveyListItem />', () => {
     let wrapper;
     act(() => {
       wrapper = mountWithContexts(
-        <SurveyListItem
-          question={item}
-          canAddAndDelete={false}
-          isChecked={false}
-          isFirst
-          isLast
-        />
+        <SurveyListItem canEdit={false} question={item} isChecked={false} />
       );
     });
     expect(wrapper.find('button[aria-label="move up"]').prop('disabled')).toBe(
@@ -137,5 +137,19 @@ describe('<SurveyListItem />', () => {
     expect(
       wrapper.find('button[aria-label="move down"]').prop('disabled')
     ).toBe(true);
+    expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
+  });
+
+  test('edit button shown to users with edit capabilities', () => {
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyListItem canEdit question={item} isChecked={false} />
+      );
+    });
+    expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
+    expect(wrapper.find('Button[ouiaId="edit-survey-buzz"]').prop('to')).toBe(
+      'survey/edit?question_variable=buzz'
+    );
   });
 });
