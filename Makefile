@@ -174,11 +174,6 @@ init:
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
 	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;\
-	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
-		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
-		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
-		$(MANAGEMENT_COMMAND) generate_isolated_key > /awx_devel/awx/main/isolated/authorized_keys; \
-	fi;
 	if [ ! -f /etc/receptor/certs/awx.key ]; then \
 		rm -f /etc/receptor/certs/*; \
 		receptor --cert-init commonname="AWX Test CA" bits=2048 outcert=/etc/receptor/certs/ca.crt outkey=/etc/receptor/certs/ca.key; \
