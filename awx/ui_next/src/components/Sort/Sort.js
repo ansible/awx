@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { useLocation, withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -147,7 +147,4 @@ Sort.defaultProps = {
   onSort: null,
 };
 
-export { Sort as _Sort };
-const Wrapped = withRouter(Sort);
-Wrapped.displayName = 'Sort';
-export default Wrapped;
+export default Sort;

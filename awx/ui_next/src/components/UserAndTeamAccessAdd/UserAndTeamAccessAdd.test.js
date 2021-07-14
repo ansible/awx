@@ -202,13 +202,6 @@ describe('<UserAndTeamAccessAdd/>', () => {
       })
     );
 
-    jest.mock('react-router-dom', () => ({
-      ...jest.requireActual('react-router-dom'),
-      useParams: () => ({
-        id: 'a',
-      }),
-    }));
-
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,

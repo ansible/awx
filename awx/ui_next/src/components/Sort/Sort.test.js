@@ -6,7 +6,7 @@ import {
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 
-import Sort, { _Sort as SortUnwrapped } from './Sort';
+import Sort from './Sort';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -167,7 +167,7 @@ describe('<Sort />', () => {
     const numericColumns = [{ name: 'ID', key: 'id' }];
 
     const wrapper = shallow(
-      <SortUnwrapped
+      <Sort
         qsConfig={qsConfigNumDown}
         columns={numericColumns}
         onSort={jest.fn()}
@@ -186,7 +186,7 @@ describe('<Sort />', () => {
     const numericColumns = [{ name: 'ID', key: 'id' }];
 
     const wrapper = shallow(
-      <SortUnwrapped
+      <Sort
         qsConfig={qsConfigNumUp}
         columns={numericColumns}
         onSort={jest.fn()}
@@ -205,7 +205,7 @@ describe('<Sort />', () => {
     const alphaColumns = [{ name: 'Name', key: 'name' }];
 
     const wrapper = shallow(
-      <SortUnwrapped
+      <Sort
         qsConfig={qsConfigAlphaDown}
         columns={alphaColumns}
         onSort={jest.fn()}
@@ -224,7 +224,7 @@ describe('<Sort />', () => {
     const alphaColumns = [{ name: 'Name', key: 'name' }];
 
     const wrapper = shallow(
-      <SortUnwrapped
+      <Sort
         qsConfig={qsConfigAlphaDown}
         columns={alphaColumns}
         onSort={jest.fn()}
