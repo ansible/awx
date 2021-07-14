@@ -106,20 +106,15 @@ class Tooltip {
       .text(t`Never`);
   }
 
-  handleMouseOver = (d) => {
+  handleMouseOver = (event, data) => {
     let success = 0;
     let fail = 0;
     let total = 0;
-    const x =
-      d3.event.pageX -
-      d3.select(this.svg).node().getBoundingClientRect().x +
-      10;
-    const y =
-      d3.event.pageY -
-      d3.select(this.svg).node().getBoundingClientRect().y -
-      10;
+    const [x, y] = d3.pointer(event);
+    const tooltipPointerX = x + 75;
+
     const formatTooltipDate = d3.timeFormat('%m/%d');
-    if (!d) {
+    if (!event) {
       return;
     }
 
@@ -129,19 +124,19 @@ class Tooltip {
       .node()
       .getBoundingClientRect().width;
     const overflow = 100 - (toolTipWidth / chartWidth) * 100;
-    const flipped = overflow < (x / chartWidth) * 100;
-    if (d) {
-      success = d.RAN || 0;
-      fail = d.FAIL || 0;
-      total = d.TOTAL || 0;
-      this.date.text(formatTooltipDate(d.DATE || null));
+    const flipped = overflow < (tooltipPointerX / chartWidth) * 100;
+    if (data) {
+      success = data.RAN || 0;
+      fail = data.FAIL || 0;
+      total = data.TOTAL || 0;
+      this.date.text(formatTooltipDate(data.DATE || null));
     }
 
-    if (d && d.data) {
-      success = d.data.RAN || 0;
-      fail = d.data.FAIL || 0;
-      total = d.data.TOTAL || 0;
-      this.date.text(formatTooltipDate(d.data.DATE || null));
+    if (data) {
+      success = data.RAN || 0;
+      fail = data.FAIL || 0;
+      total = data.TOTAL || 0;
+      this.date.text(formatTooltipDate(data.DATE || null));
     }
 
     this.jobs.text(`${total} ${this.label}`);
@@ -162,7 +157,7 @@ class Tooltip {
     }
 
     this.boundingBox.attr('width', adjustedWidth);
-    this.toolTipBase.attr('transform', `translate(${x}, ${y})`);
+    this.toolTipBase.attr('transform', `translate(${tooltipPointerX}, ${y})`);
     if (flipped) {
       this.toolTipPoint.attr('transform', 'translate(-20, -10) rotate(45)');
       this.boundingBox.attr('x', -adjustedWidth - 20);

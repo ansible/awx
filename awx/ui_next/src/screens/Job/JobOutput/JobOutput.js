@@ -11,7 +11,7 @@ import {
 } from 'react-virtualized';
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
-import { AllHtmlEntities } from 'html-entities';
+import { encode } from 'html-entities';
 import {
   Button,
   Toolbar,
@@ -78,7 +78,6 @@ const ansi = new Ansi({
     15: '#FFF',
   },
 });
-const entities = new AllHtmlEntities();
 
 function getTimestamp({ created }) {
   const date = new Date(created);
@@ -121,7 +120,7 @@ function replaceStyleAttrs(html) {
 }
 
 function getLineTextHtml({ created, event, start_line, stdout }) {
-  const sanitized = entities.encode(stdout);
+  const sanitized = encode(stdout);
   let lineCssMap = {};
   const lineTextHtml = [];
 
