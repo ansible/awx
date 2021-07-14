@@ -65,9 +65,6 @@ function InstanceListItem({
   const labelId = `check-action-${instance.id}`;
 
   function usedCapacity(item) {
-    if (!item.is_receptor) {
-         return ``;
-     }
     if (item.enabled) {
       return (
         <Progress
