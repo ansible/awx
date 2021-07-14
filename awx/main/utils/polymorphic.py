@@ -15,4 +15,6 @@ def build_polymorphic_ctypes_map(cls):
 
 
 def SET_NULL(collector, field, sub_objs, using):
-    return models.SET_NULL(collector, field, sub_objs.non_polymorphic(), using)
+    if hasattr(sub_objs, 'non_polymorphic'):
+        sub_objs = sub_objs.non_polymorphic()
+    return models.SET_NULL(collector, field, sub_objs, using)
