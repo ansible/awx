@@ -5,6 +5,7 @@ import json
 from awxkit.api.pages import Credential, Organization, Project, UnifiedJob, UnifiedJobTemplate
 from awxkit.utils import filter_by_class, random_title, update_payload, not_provided, PseudoNamespace, poll_until
 from awxkit.api.mixins import DSAdapter, HasCreate, HasInstanceGroups, HasNotifications, HasVariables, HasCopy
+from awxkit.config import config
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
 from . import base
@@ -95,6 +96,20 @@ class Inventory(HasCopy, HasCreate, HasInstanceGroups, HasVariables, base.Base):
                 return True
 
         poll_until(_wait, interval=1, timeout=60)
+
+    def silent_delete(self):
+        try:
+            if not config.prevent_teardown:
+                r = self.delete()
+                self.wait_until_deleted()
+                return r
+        except (exc.NoContent, exc.NotFound, exc.Forbidden):
+            pass
+        except (exc.BadRequest, exc.Conflict) as e:
+            if 'Resource is being used' in e.msg:
+                pass
+            else:
+                raise e
 
     def update_inventory_sources(self, wait=False):
         response = self.related.update_inventory_sources.post()
