@@ -30,7 +30,7 @@ import {
   SubFormLayout,
 } from '../../../components/FormLayout';
 import { VariablesField } from '../../../components/CodeEditor';
-import { required } from '../../../util/validators';
+import { required, combine, maxLength } from '../../../util/validators';
 import { JobTemplate } from '../../../types';
 import {
   InventoryLookup,
@@ -239,7 +239,7 @@ function JobTemplateForm({
           name="name"
           type="text"
           label={t`Name`}
-          validate={required(null)}
+          validate={combine([required(null), maxLength(512)])}
           isRequired
         />
         <FormField
