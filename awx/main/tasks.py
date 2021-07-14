@@ -102,7 +102,6 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
     create_partition,
-    get_mem_capacity,
     get_cpu_capacity,
     get_system_task_capacity,
 )
@@ -422,15 +421,6 @@ def discover_receptor_nodes():
         hostname = ad['NodeID']
         commands = ad['WorkCommands'] or []
         if 'ansible-runner' not in commands:
-            if 'local' in commands:
-                # this node is strictly a control plane node, and does not
-                # provide ansible-runner as a work command
-                (changed, instance) = Instance.objects.register(hostname=hostname)
-                if changed:
-                    logger.info("Registered tower control node '{}'".format(hostname))
-                instance.capacity = instance.cpu = instance.memory = instance.cpu_capacity = instance.mem_capacity = 0  # noqa
-                instance.version = get_awx_version()
-                instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
             continue
         (changed, instance) = Instance.objects.register(hostname=hostname)
         was_lost = instance.is_lost(ref_time=nowtime)
@@ -454,7 +444,7 @@ def discover_receptor_nodes():
                 # if the instance *was* lost, but has appeared again,
                 # attempt to re-establish the initial capacity and version
                 # check
-                logger.warning('Attempting to rejoin the cluster as instance {}.'.format(hostname))
+                logger.warning('Execution node attempting to rejoin as instance {}.'.format(hostname))
                 check_heartbeat.apply_async([hostname])
 
 
@@ -463,6 +453,7 @@ def cluster_node_heartbeat():
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
     instance_list = list(Instance.objects.all())
+    this_inst = None
     lost_instances = []
 
     (changed, instance) = Instance.objects.get_or_register()
@@ -473,10 +464,35 @@ def cluster_node_heartbeat():
 
     for inst in list(instance_list):
         if inst.hostname == settings.CLUSTER_HOST_ID:
+            this_inst = inst
             instance_list.remove(inst)
         elif inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
+
+    if this_inst:
+        startup_event = this_inst.is_lost(ref_time=nowtime)
+        this_inst.refresh_capacity()
+        if startup_event:
+            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
+            return
+    else:
+        raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+    # IFF any node has a greater version than we do, then we'll shutdown services
+    for other_inst in instance_list:
+        if other_inst.version == "" or other_inst.version.startswith('ansible-runner'):
+            continue
+        if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
+            logger.error(
+                "Host {} reports version {}, but this node {} is at {}, shutting down".format(
+                    other_inst.hostname, other_inst.version, this_inst.hostname, this_inst.version
+                )
+            )
+            # Shutdown signal will set the capacity to zero to ensure no Jobs get added to this instance.
+            # The heartbeat task will reset the capacity to the system capacity after upgrade.
+            stop_local_services(communicate=False)
+            raise RuntimeError("Shutting down.")
+
     for other_inst in lost_instances:
         try:
             reaper.reap(other_inst)
