@@ -17,10 +17,6 @@ describe('UnsavedChangesModal', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('Exit Without Saving button dispatches as expected', () => {
     wrapper.find('button#confirm-exit-without-saving').simulate('click');
     expect(onExit).toHaveBeenCalled();

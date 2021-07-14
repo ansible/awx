@@ -37,10 +37,6 @@ describe('<SmartInventoryHostListItem />', () => {
     );
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('should render expected row cells', () => {
     const cells = wrapper.find('Td');
     expect(cells).toHaveLength(4);

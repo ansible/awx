@@ -98,7 +98,6 @@ describe('<ProjectForm />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

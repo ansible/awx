@@ -1,39 +1,15 @@
 import React from 'react';
-import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { shallow } from 'enzyme';
 import AllSchedules from './AllSchedules';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<AllSchedules />', () => {
-  let wrapper;
+  test('should set breadcrumb config', () => {
+    const wrapper = shallow(<AllSchedules />);
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
-  test('initially renders successfully', () => {
-    wrapper = mountWithContexts(<AllSchedules />);
-  });
-
-  test('should display schedule list breadcrumb heading', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/schedules'],
+    const header = wrapper.find('ScreenHeader');
+    expect(header.prop('streamType')).toEqual('schedule');
+    expect(header.prop('breadcrumbConfig')).toEqual({
+      '/schedules': 'Schedules',
     });
-
-    wrapper = mountWithContexts(<AllSchedules />, {
-      context: {
-        router: {
-          history,
-          route: {
-            location: history.location,
-          },
-        },
-      },
-    });
-
-    expect(wrapper.find('Title').text()).toBe('Schedules');
   });
 });

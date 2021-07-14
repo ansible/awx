@@ -10,10 +10,6 @@ jest.mock('../../../api');
 describe('<CredentialListItem />', () => {
   let wrapper;
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('edit button shown to users with edit capabilities', () => {
     wrapper = mountWithContexts(
       <table>

@@ -14,10 +14,6 @@ describe('PageHeaderToolbar', () => {
   const onAboutClick = jest.fn();
   const onLogoutClick = jest.fn();
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('expected content is rendered on initialization', async () => {
     await act(async () => {
       wrapper = mountWithContexts(

@@ -22,7 +22,6 @@ describe('<SmartInventory />', () => {
   let wrapper;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

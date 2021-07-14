@@ -124,7 +124,7 @@ function OrganizationDetail({ organization }) {
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
-                  <Link to={`${buildLinkURL(ig)}${ig.id}/details`}>
+                  <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
                     <Chip key={ig.id} isReadOnly>
                       {ig.name}
                     </Chip>

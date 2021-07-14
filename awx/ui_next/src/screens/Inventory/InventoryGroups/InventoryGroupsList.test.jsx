@@ -96,7 +96,6 @@ describe('<InventoryGroupsList />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should fetch groups from api and render them in the list', async () => {
@@ -201,7 +200,6 @@ describe('<InventoryGroupsList/> error handling', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should show content error when api throws error on initial render', async () => {

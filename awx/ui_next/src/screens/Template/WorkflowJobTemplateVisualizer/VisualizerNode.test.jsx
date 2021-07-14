@@ -73,12 +73,11 @@ describe('VisualizerNode', () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
-    afterAll(() => {
-      wrapper.unmount();
-    });
+
     test('Displays unified job template name inside node', () => {
       expect(wrapper.find('NodeResourceName').text()).toBe('Automation JT');
     });
+
     test('Displays action tooltip on hover and updates help text on hover', () => {
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
       wrapper.find('g').simulate('mouseenter');
@@ -234,9 +233,7 @@ describe('VisualizerNode', () => {
         </WorkflowDispatchContext.Provider>
       );
     });
-    afterAll(() => {
-      wrapper.unmount();
-    });
+
     test('Displays correct help text when hovering over node while adding link', () => {
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
       wrapper.find('g').simulate('mouseenter');
@@ -248,6 +245,7 @@ describe('VisualizerNode', () => {
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
       expect(updateHelpText).toHaveBeenCalledWith(null);
     });
+
     test('Dispatches properly when node is clicked', () => {
       wrapper
         .find('foreignObject')
@@ -259,6 +257,7 @@ describe('VisualizerNode', () => {
       });
     });
   });
+
   describe('Node without unified job template', () => {
     test('Displays DELETED text inside node when unified job template is missing', () => {
       const wrapper = mountWithContexts(
@@ -279,6 +278,7 @@ describe('VisualizerNode', () => {
       expect(wrapper.find('NodeResourceName').text()).toBe('DELETED');
     });
   });
+
   describe('Node without full unified job template', () => {
     let wrapper;
     beforeEach(() => {
@@ -336,9 +336,7 @@ describe('VisualizerNode', () => {
         </WorkflowDispatchContext.Provider>
       );
     });
-    afterEach(() => {
-      wrapper.unmount();
-    });
+
     test('Attempts to fetch full unified job template on view', async () => {
       wrapper.find('g').simulate('mouseenter');
       await act(async () => {
@@ -348,6 +346,7 @@ describe('VisualizerNode', () => {
       });
       expect(JobTemplatesAPI.readDetail).toHaveBeenCalledWith(7);
     });
+
     test('Displays error fetching full unified job template', async () => {
       JobTemplatesAPI.readDetail.mockRejectedValueOnce(
         new Error({
@@ -371,6 +370,7 @@ describe('VisualizerNode', () => {
       wrapper.update();
       expect(wrapper.find('AlertModal').length).toBe(1);
     });
+
     test('Attempts to fetch credentials on view', async () => {
       JobTemplatesAPI.readDetail.mockResolvedValueOnce({
         data: {

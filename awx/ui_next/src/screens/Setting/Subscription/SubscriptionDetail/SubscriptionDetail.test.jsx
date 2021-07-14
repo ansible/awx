@@ -44,10 +44,6 @@ describe('<SubscriptionDetail />', () => {
     });
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
     expect(wrapper.find('SubscriptionDetail').length).toBe(1);
   });
@@ -76,7 +72,12 @@ describe('<SubscriptionDetail />', () => {
 
   test('should render edit button for system admin', () => {
     wrapper = mountWithContexts(<SubscriptionDetail />, {
-      context: { ...config, me: { is_superuser: true } },
+      context: {
+        config: {
+          ...config,
+          me: { is_superuser: true },
+        },
+      },
     });
 
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(1);

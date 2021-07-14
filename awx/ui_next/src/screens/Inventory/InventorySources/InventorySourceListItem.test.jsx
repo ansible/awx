@@ -23,7 +23,6 @@ const source = {
 describe('<InventorySourceListItem />', () => {
   let wrapper;
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -299,7 +299,10 @@ describe('<JobTemplateEdit />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <JobTemplateEdit template={mockJobTemplate} />
+        <JobTemplateEdit
+          template={mockJobTemplate}
+          reloadTemplate={jest.fn()}
+        />
       );
     });
     wrapper.update();

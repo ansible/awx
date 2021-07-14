@@ -22,10 +22,6 @@ describe('<OutputToolbar />', () => {
     );
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
     expect(wrapper.length).toBe(1);
   });

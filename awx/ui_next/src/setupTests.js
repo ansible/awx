@@ -14,12 +14,37 @@ require('@nteract/mockument');
 // eslint-disable-next-line import/prefer-default-export
 export const asyncFlush = () => new Promise(resolve => setImmediate(resolve));
 
-// this ensures that debug messages don't get logged out to the console
-// while tests are running i.e. websocket connect/disconnect
+let hasConsoleError = false;
+let hasConsoleWarn = false;
+const { error, warn } = global.console;
+
 global.console = {
   ...console,
+  // this ensures that debug messages don't get logged out to the console
+  // while tests are running i.e. websocket connect/disconnect
   debug: jest.fn(),
+  // fail tests that log errors.
+  // adapted from https://github.com/facebook/jest/issues/6121#issuecomment-708330601
+  error: (...args) => {
+    hasConsoleError = true;
+    error(...args);
+  },
+  warn: (...args) => {
+    hasConsoleWarn = true;
+    warn(...args);
+  },
 };
+
+afterEach(() => {
+  if (hasConsoleError) {
+    hasConsoleError = false;
+    throw new Error('Error logged to console');
+  }
+  if (hasConsoleWarn) {
+    hasConsoleWarn = false;
+    throw new Error('Warning logged to console');
+  }
+});
 
 // This global variable is part of our Content Security Policy framework
 // and so this mock ensures that we don't encounter a reference error

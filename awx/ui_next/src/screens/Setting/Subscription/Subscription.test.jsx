@@ -24,7 +24,6 @@ describe('<Subscription />', () => {
   let wrapper;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 
@@ -41,6 +40,8 @@ describe('<Subscription />', () => {
           config: {
             license_info: {
               license_type: 'enterprise',
+              automated_instances: '1',
+              automated_since: '1614714228',
             },
           },
         },

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { oneOfType, string, arrayOf } from 'prop-types';
 import { matchPath, Link, withRouter } from 'react-router-dom';
 import { NavExpandable, NavItem } from '@patternfly/react-core';
 
@@ -58,9 +58,9 @@ class NavExpandableGroup extends Component {
 }
 
 NavExpandableGroup.propTypes = {
-  groupId: PropTypes.string.isRequired,
-  groupTitle: PropTypes.element.isRequired,
-  routes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  groupId: string.isRequired,
+  groupTitle: oneOfType([PropTypes.element, string]).isRequired,
+  routes: arrayOf(PropTypes.object).isRequired,
 };
 
 export default withRouter(NavExpandableGroup);

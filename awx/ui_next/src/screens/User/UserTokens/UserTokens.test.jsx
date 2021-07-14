@@ -8,10 +8,6 @@ import UserTokens from './UserTokens';
 describe('<UserTokens />', () => {
   let wrapper;
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('renders successfully', () => {
     wrapper = mountWithContexts(<UserTokens />);
     expect(wrapper.length).toBe(1);

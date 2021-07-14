@@ -4,9 +4,7 @@ import CredentialPluginTestAlert from './CredentialPluginTestAlert';
 
 describe('<CredentialPluginTestAlert />', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
+
   test('renders expected content when test is successful', () => {
     wrapper = mountWithContexts(
       <CredentialPluginTestAlert
@@ -20,6 +18,7 @@ describe('<CredentialPluginTestAlert />', () => {
       'Test passed'
     );
   });
+
   test('renders expected content when test fails with the expected return string formatting', () => {
     wrapper = mountWithContexts(
       <CredentialPluginTestAlert
@@ -41,6 +40,7 @@ describe('<CredentialPluginTestAlert />', () => {
       'HTTP 404: not found'
     );
   });
+
   test('renders expected content when test fails without the expected return string formatting', () => {
     wrapper = mountWithContexts(
       <CredentialPluginTestAlert

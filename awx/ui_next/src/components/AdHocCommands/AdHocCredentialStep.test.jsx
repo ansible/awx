@@ -36,7 +36,6 @@ describe('<AdHocCredentialStep />', () => {
   });
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should mount properly', async () => {

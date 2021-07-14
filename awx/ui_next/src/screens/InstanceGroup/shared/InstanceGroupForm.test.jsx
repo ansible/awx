@@ -60,7 +60,6 @@ describe('<InstanceGroupForm/>', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('Initially renders successfully', () => {

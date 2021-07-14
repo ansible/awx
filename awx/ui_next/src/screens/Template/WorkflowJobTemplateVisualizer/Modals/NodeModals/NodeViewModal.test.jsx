@@ -85,7 +85,6 @@ describe('NodeViewModal', () => {
 
     afterAll(() => {
       jest.resetAllMocks();
-      wrapper.unmount();
     });
 
     test('should render prompt detail', () => {
@@ -151,7 +150,6 @@ describe('NodeViewModal', () => {
       expect(JobTemplatesAPI.readWebhookKey).not.toHaveBeenCalledWith();
       expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
       expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -169,7 +167,6 @@ describe('NodeViewModal', () => {
       });
       waitForLoaded(wrapper);
       expect(wrapper.find('ContentError').length).toBe(1);
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -186,7 +183,6 @@ describe('NodeViewModal', () => {
       });
       waitForLoaded(wrapper);
       expect(wrapper.find('Button#node-view-edit-button').length).toBe(1);
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -203,7 +199,6 @@ describe('NodeViewModal', () => {
       });
       waitForLoaded(wrapper);
       expect(wrapper.find('Button#node-view-edit-button').length).toBe(0);
-      wrapper.unmount();
       jest.clearAllMocks();
     });
   });
@@ -237,7 +232,6 @@ describe('NodeViewModal', () => {
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
-      wrapper.unmount();
       jest.clearAllMocks();
     });
   });
@@ -271,7 +265,6 @@ describe('NodeViewModal', () => {
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
-      wrapper.unmount();
       jest.clearAllMocks();
     });
   });
@@ -305,7 +298,6 @@ describe('NodeViewModal', () => {
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
-      wrapper.unmount();
       jest.clearAllMocks();
     });
   });

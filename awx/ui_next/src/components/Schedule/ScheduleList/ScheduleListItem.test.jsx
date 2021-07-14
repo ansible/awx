@@ -64,10 +64,6 @@ describe('ScheduleListItem', () => {
       );
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('Name correctly shown with correct link', () => {
       expect(
         wrapper
@@ -149,10 +145,6 @@ describe('ScheduleListItem', () => {
       );
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('Name correctly shown with correct link', () => {
       expect(
         wrapper
@@ -215,10 +207,6 @@ describe('ScheduleListItem', () => {
           </tbody>
         </table>
       );
-    });
-
-    afterAll(() => {
-      wrapper.unmount();
     });
 
     test('should show missing resource icon', () => {

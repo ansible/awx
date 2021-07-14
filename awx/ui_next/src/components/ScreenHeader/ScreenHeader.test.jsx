@@ -5,10 +5,6 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import ScreenHeader from './ScreenHeader';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<ScreenHeader />', () => {
   let breadcrumbWrapper;
   let breadcrumb;
@@ -43,7 +39,6 @@ describe('<ScreenHeader />', () => {
     expect(breadcrumbItem.first().text()).toBe('Foo');
     expect(breadcrumbItem.last().text()).toBe('One');
     expect(breadcrumbHeading.text()).toBe('Bar');
-    breadcrumbWrapper.unmount();
   });
 
   test('renders breadcrumb items defined in breadcrumbConfig', () => {
@@ -66,7 +61,6 @@ describe('<ScreenHeader />', () => {
       expect(breadcrumbWrapper.find('BreadcrumbItem')).toHaveLength(
         crumbLength
       );
-      breadcrumbWrapper.unmount();
     });
   });
 });

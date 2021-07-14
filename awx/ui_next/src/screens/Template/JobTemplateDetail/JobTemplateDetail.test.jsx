@@ -37,6 +37,7 @@ describe('<JobTemplateDetail />', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   test('should render successfully with missing summary fields', async () => {
     await act(async () => {
       wrapper = mountWithContexts(

@@ -16,10 +16,6 @@ describe('RunStep', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('Default selected card matches default link type when present', () => {
     expect(wrapper.find('#link-type-success').props().isSelected).toBe(true);
     expect(wrapper.find('#link-type-failure').props().isSelected).toBe(false);

@@ -99,10 +99,6 @@ describe('<CredentialPluginPrompt />', () => {
       });
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('should render Wizard with all steps', async () => {
       const wizard = await waitForElement(wrapper, 'Wizard');
       const steps = wizard.prop('steps');
@@ -119,15 +115,18 @@ describe('<CredentialPluginPrompt />', () => {
         wrapper.find('Radio').filterWhere(radio => radio.isChecked).length
       ).toBe(0);
     });
+
     test('next button disabled until credential selected', () => {
       expect(wrapper.find('Button[children="Next"]').prop('isDisabled')).toBe(
         true
       );
     });
+
     test('clicking cancel button calls correct function', () => {
       wrapper.find('Button[children="Cancel"]').simulate('click');
       expect(onClose).toHaveBeenCalledTimes(1);
     });
+
     test('clicking credential row enables next button', async () => {
       await waitForElement(wrapper, 'CheckboxListItem', el => el.length > 0);
       await act(async () => {
@@ -207,9 +206,7 @@ describe('<CredentialPluginPrompt />', () => {
         );
       });
     });
-    afterAll(() => {
-      wrapper.unmount();
-    });
+
     test('should render Wizard with all steps', async () => {
       const wizard = await waitForElement(wrapper, 'Wizard');
       const steps = wizard.prop('steps');
@@ -218,6 +215,7 @@ describe('<CredentialPluginPrompt />', () => {
       expect(steps[0].name).toEqual('Credential');
       expect(steps[1].name).toEqual('Metadata');
     });
+
     test('credentials step renders correctly', async () => {
       await waitForElement(wrapper, 'CheckboxListItem', el => el.length > 0);
 
@@ -233,6 +231,7 @@ describe('<CredentialPluginPrompt />', () => {
         false
       );
     });
+
     test('metadata step renders correctly', async () => {
       await act(async () => {
         wrapper.find('Button[children="Next"]').simulate('click');
@@ -247,6 +246,7 @@ describe('<CredentialPluginPrompt />', () => {
         wrapper.find('input#credential-secret_version').prop('value')
       ).toBe('9000');
     });
+
     test('clicking Test button makes correct call', async () => {
       await act(async () => {
         wrapper.find('Button[children="Test"]').simulate('click');

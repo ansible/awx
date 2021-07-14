@@ -44,10 +44,6 @@ describe('WorkflowOutputToolbar', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('should render correct toolbar item', () => {
     shouldFind(`Button[ouiaId="edit-workflow"]`);
     shouldFind('Button#workflow-output-toggle-legend');

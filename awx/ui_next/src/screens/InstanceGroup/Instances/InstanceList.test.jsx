@@ -134,7 +134,6 @@ describe('<InstanceList/>', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should have data fetched', () => {

@@ -17,8 +17,8 @@ describe('JobTemplatesList', () => {
   let wrapper;
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
+
   test('Row selected when nodeResource id matches row id and clicking new row makes expected callback', async () => {
     JobTemplatesAPI.read.mockResolvedValueOnce({
       data: {
@@ -81,6 +81,7 @@ describe('JobTemplatesList', () => {
       project: 2,
     });
   });
+
   test('Error shown when read() request errors', async () => {
     JobTemplatesAPI.read.mockRejectedValue(new Error());
     JobTemplatesAPI.readOptions.mockResolvedValue({

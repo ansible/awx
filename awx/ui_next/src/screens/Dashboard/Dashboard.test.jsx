@@ -7,9 +7,6 @@ import { DashboardAPI } from '../../api';
 import Dashboard from './Dashboard';
 
 jest.mock('../../api');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
 
 describe('<Dashboard />', () => {
   let pageWrapper;
@@ -22,10 +19,6 @@ describe('<Dashboard />', () => {
       graphRequest.mockResolvedValue({});
       pageWrapper = mountWithContexts(<Dashboard />);
     });
-  });
-
-  afterEach(() => {
-    pageWrapper.unmount();
   });
 
   test('initially renders without crashing', () => {

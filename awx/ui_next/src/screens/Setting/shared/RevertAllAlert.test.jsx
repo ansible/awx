@@ -8,6 +8,5 @@ describe('RevertAllAlert', () => {
       <RevertAllAlert onClose={() => {}} onRevertAll={() => {}} />
     );
     expect(wrapper).toHaveLength(1);
-    wrapper.unmount();
   });
 });

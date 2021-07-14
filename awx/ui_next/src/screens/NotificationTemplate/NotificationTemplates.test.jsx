@@ -2,26 +2,21 @@ import React from 'react';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import NotificationTemplates from './NotificationTemplates';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
+jest.mock('./NotificationTemplateList', () => {
+  const NotificationTemplateList = () => <div />;
+  return {
+    __esModule: true,
+    default: NotificationTemplateList,
+  };
+});
 
 describe('<NotificationTemplates />', () => {
-  let pageWrapper;
-  let pageSections;
-
-  beforeEach(() => {
-    pageWrapper = mountWithContexts(<NotificationTemplates />);
-    pageSections = pageWrapper.find('PageSection');
-  });
-
-  afterEach(() => {
-    pageWrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
-    expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
+    const wrapper = mountWithContexts(<NotificationTemplates />);
+
+    const pageSections = wrapper.find('PageSection');
+    expect(pageSections).toHaveLength(1);
     expect(pageSections.first().props().variant).toBe('light');
+    expect(wrapper.find('NotificationTemplateList')).toHaveLength(1);
   });
 });

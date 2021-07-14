@@ -7,9 +7,6 @@ import { DashboardAPI } from '../../api';
 import DashboardGraph from './DashboardGraph';
 
 jest.mock('../../api');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
 
 describe('<DashboardGraph/>', () => {
   let pageWrapper;
@@ -24,9 +21,6 @@ describe('<DashboardGraph/>', () => {
     });
   });
 
-  afterEach(() => {
-    pageWrapper.unmount();
-  });
   test('renders month-based/all job type chart by default', () => {
     expect(graphRequest).toHaveBeenCalledWith({
       job_type: 'all',

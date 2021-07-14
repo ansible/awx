@@ -13,10 +13,6 @@ describe('<ExecutionEnvironments/>', () => {
     pageSections = pageWrapper.find('PageSection');
   });
 
-  afterEach(() => {
-    pageWrapper.unmount();
-  });
-
   test('initially renders without crashing', () => {
     expect(pageWrapper.length).toBe(1);
     expect(pageSections.length).toBe(1);

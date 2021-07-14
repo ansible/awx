@@ -115,7 +115,6 @@ describe('WorkflowOutput', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
     delete window.SVGElement.prototype.getBBox;
     delete window.SVGElement.prototype.getBoundingClientRect;
     delete window.SVGElement.prototype.height;

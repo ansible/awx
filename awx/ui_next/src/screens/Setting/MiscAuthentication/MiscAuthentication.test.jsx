@@ -20,7 +20,6 @@ describe('<MiscAuthentication />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

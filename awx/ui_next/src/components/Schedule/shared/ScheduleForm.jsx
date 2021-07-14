@@ -178,7 +178,6 @@ function ScheduleForm({
   hasDaysToKeepField,
   handleCancel,
   handleSubmit,
-
   schedule,
   submitError,
   resource,
@@ -234,8 +233,14 @@ function ScheduleForm({
     {
       zonesOptions: [],
       credentials: [],
+      isLoading: true,
     }
   );
+
+  useEffect(() => {
+    loadScheduleData();
+  }, [loadScheduleData]);
+
   const missingRequiredInventory = useCallback(() => {
     let missingInventory = false;
     if (
@@ -356,10 +361,6 @@ function ScheduleForm({
     missingRequiredInventory,
     hasCredentialsThatPrompt,
   ]);
-
-  useEffect(() => {
-    loadScheduleData();
-  }, [loadScheduleData]);
 
   let showPromptButton = false;
 

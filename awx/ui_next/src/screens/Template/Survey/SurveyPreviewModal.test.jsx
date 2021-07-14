@@ -75,12 +75,6 @@ describe('<SurveyPreviewModal />', () => {
     });
     waitForElement(wrapper, 'Form');
   });
-  afterAll(() => {
-    wrapper.unmount();
-  });
-  test('renders successfully', async () => {
-    expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
-  });
 
   test('Renders proper fields', async () => {
     const question1 = wrapper.find('FormGroup[label="Text Question"]');

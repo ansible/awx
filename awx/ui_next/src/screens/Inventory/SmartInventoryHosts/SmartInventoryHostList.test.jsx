@@ -37,7 +37,6 @@ describe('<SmartInventoryHostList />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully', () => {

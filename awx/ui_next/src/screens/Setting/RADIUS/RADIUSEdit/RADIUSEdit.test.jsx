@@ -29,7 +29,6 @@ describe('<RADIUSEdit />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

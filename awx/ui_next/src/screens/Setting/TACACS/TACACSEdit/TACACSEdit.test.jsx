@@ -31,7 +31,6 @@ describe('<TACACSEdit />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

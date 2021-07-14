@@ -61,6 +61,7 @@ const defaultContexts = {
   session: {
     isSessionExpired: false,
     logout: () => {},
+    setAuthRedirectTo: () => {},
   },
 };
 

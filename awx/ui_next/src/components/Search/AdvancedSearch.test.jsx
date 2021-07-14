@@ -7,7 +7,6 @@ describe('<AdvancedSearch />', () => {
   let wrapper;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

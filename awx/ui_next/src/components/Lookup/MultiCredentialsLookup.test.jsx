@@ -122,7 +122,6 @@ describe('<Formik><MultiCredentialsLookup /></Formik>', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should load credential types', async () => {

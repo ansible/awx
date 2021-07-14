@@ -41,10 +41,6 @@ describe('<JobListItem />', () => {
     );
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('initially renders successfully', () => {
     expect(wrapper.find('JobListItem').length).toBe(1);
   });
@@ -116,10 +112,6 @@ describe('<JobListItem with failed job />', () => {
       </table>,
       { context: { router: { history } } }
     );
-  });
-
-  afterEach(() => {
-    wrapper.unmount();
   });
 
   test('launch button shown to users with launch capabilities', () => {

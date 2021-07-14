@@ -72,7 +72,6 @@ describe('<InventorySourceAdd />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('new form displays primary form fields', async () => {

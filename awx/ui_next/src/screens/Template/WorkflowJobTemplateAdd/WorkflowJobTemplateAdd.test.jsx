@@ -116,7 +116,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       description: '',
       extra_vars: '---',
       inventory: undefined,
-      limit: null,
+      limit: '',
       organization: undefined,
       scm_branch: '',
       webhook_credential: undefined,

@@ -20,10 +20,14 @@ describe('<TeamRoleListItem/>', () => {
 
   test('should mount properly', () => {
     wrapper = mountWithContexts(
-      <TeamRoleListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <TeamRoleListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
 
     expect(wrapper.length).toBe(1);
@@ -31,10 +35,14 @@ describe('<TeamRoleListItem/>', () => {
 
   test('should render proper list item data', () => {
     wrapper = mountWithContexts(
-      <TeamRoleListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <TeamRoleListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Td[dataLabel="Resource Name"]').text()).toBe(
       'template delete project'
@@ -47,20 +55,28 @@ describe('<TeamRoleListItem/>', () => {
 
   test('should render deletable chip', () => {
     wrapper = mountWithContexts(
-      <TeamRoleListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <TeamRoleListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Chip').prop('isReadOnly')).toBe(false);
   });
   test('should render read only chip', () => {
     role.summary_fields.user_capabilities.unattach = false;
     wrapper = mountWithContexts(
-      <TeamRoleListItem
-        role={role}
-        detailUrl="/templates/job_template/15/details"
-      />
+      <table>
+        <tbody>
+          <TeamRoleListItem
+            role={role}
+            detailUrl="/templates/job_template/15/details"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Chip').prop('isReadOnly')).toBe(true);
   });

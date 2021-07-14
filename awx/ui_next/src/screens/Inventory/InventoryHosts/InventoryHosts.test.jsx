@@ -3,6 +3,14 @@ import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventoryHosts from './InventoryHosts';
 
+jest.mock('./InventoryHostList', () => {
+  const InventoryHostList = () => <div />;
+  return {
+    __esModule: true,
+    default: InventoryHostList,
+  };
+});
+
 describe('<InventoryHosts />', () => {
   test('should render inventory host list', () => {
     const history = createMemoryHistory({
@@ -20,6 +28,5 @@ describe('<InventoryHosts />', () => {
     });
 
     expect(wrapper.find('InventoryHostList').length).toBe(1);
-    wrapper.unmount();
   });
 });

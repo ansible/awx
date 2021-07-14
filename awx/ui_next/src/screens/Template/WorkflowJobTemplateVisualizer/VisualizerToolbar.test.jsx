@@ -54,10 +54,6 @@ describe('VisualizerToolbar', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('Shows correct number of nodes', () => {
     // The start node (id=1) and deleted nodes (isDeleted=true) should be ignored
     expect(wrapper.find('Badge').text()).toBe('1');

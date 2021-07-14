@@ -29,14 +29,11 @@ describe('<SmartInventoryHost />', () => {
   let history;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 
   test('should render expected tabs', async () => {
-    InventoriesAPI.readHostDetail.mockResolvedValue({
-      data: { ...mockHost },
-    });
+    InventoriesAPI.readHostDetail.mockResolvedValue(mockHost);
     await act(async () => {
       wrapper = mountWithContexts(
         <SmartInventoryHost
@@ -73,9 +70,7 @@ describe('<SmartInventoryHost />', () => {
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
-    InventoriesAPI.readHostDetail.mockResolvedValue({
-      data: { ...mockHost },
-    });
+    InventoriesAPI.readHostDetail.mockResolvedValue(mockHost);
     history = createMemoryHistory({
       initialEntries: ['/inventories/smart_inventory/1/hosts/1/foobar'],
     });

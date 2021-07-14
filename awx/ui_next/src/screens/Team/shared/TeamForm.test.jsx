@@ -30,7 +30,6 @@ describe('<TeamForm />', () => {
   };
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

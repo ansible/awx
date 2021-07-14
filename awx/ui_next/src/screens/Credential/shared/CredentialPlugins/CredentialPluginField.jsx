@@ -128,6 +128,7 @@ function CredentialPluginField(props) {
       {fieldOptions.ask_at_runtime ? (
         <FieldWithPrompt
           isRequired={isRequired}
+          fieldId={`credential-${fieldOptions.id}`}
           label={fieldOptions.label}
           promptId={`credential-prompt-${fieldOptions.id}`}
           promptName={`passwordPrompts.${fieldOptions.id}`}

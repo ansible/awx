@@ -15,9 +15,7 @@ const onUpdateNodeResource = jest.fn();
 
 describe('ProjectsList', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
+
   test('Row selected when nodeResource id matches row id and clicking new row makes expected callback', async () => {
     ProjectsAPI.read.mockResolvedValueOnce({
       data: {
@@ -70,6 +68,7 @@ describe('ProjectsList', () => {
       url: '/api/v2/projects/2',
     });
   });
+
   test('Error shown when read() request errors', async () => {
     ProjectsAPI.read.mockRejectedValue(new Error());
     await act(async () => {

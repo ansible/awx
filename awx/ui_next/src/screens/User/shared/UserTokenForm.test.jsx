@@ -28,9 +28,7 @@ const applications = {
 };
 describe('<UserTokenForm />', () => {
   let wrapper;
-  beforeEach(() => {});
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

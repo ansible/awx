@@ -15,9 +15,6 @@ const onUpdateNodeResource = jest.fn();
 
 describe('InventorySourcesList', () => {
   let wrapper;
-  afterEach(() => {
-    wrapper.unmount();
-  });
   test('Row selected when nodeResource id matches row id and clicking new row makes expected callback', async () => {
     InventorySourcesAPI.read.mockResolvedValueOnce({
       data: {
@@ -74,6 +71,7 @@ describe('InventorySourcesList', () => {
       url: '/api/v2/inventory_sources/2',
     });
   });
+
   test('Error shown when read() request errors', async () => {
     InventorySourcesAPI.read.mockRejectedValue(new Error());
     await act(async () => {

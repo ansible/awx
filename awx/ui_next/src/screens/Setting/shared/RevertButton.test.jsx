@@ -7,10 +7,6 @@ import RevertButton from './RevertButton';
 describe('RevertButton', () => {
   let wrapper;
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('button text should display "Revert"', async () => {
     wrapper = mountWithContexts(
       <Formik

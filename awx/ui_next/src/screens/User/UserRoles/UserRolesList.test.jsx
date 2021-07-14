@@ -94,6 +94,7 @@ const roles = {
 };
 
 describe('<UserRolesList />', () => {
+  let wrapper;
   beforeEach(() => {
     UsersAPI.readOptions.mockResolvedValue({
       data: {
@@ -102,11 +103,11 @@ describe('<UserRolesList />', () => {
       },
     });
   });
-  let wrapper;
+
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
+
   test('should render properly', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
 

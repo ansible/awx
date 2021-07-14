@@ -32,10 +32,6 @@ describe('LinkDeleteModal', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('Confirm button dispatches as expected', () => {
     wrapper.find('button#confirm-link-removal').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({

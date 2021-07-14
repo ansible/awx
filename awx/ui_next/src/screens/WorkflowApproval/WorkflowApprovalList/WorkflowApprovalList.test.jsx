@@ -29,7 +29,6 @@ describe('<WorkflowApprovalList />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -1,22 +1,23 @@
 import React from 'react';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { shallow } from 'enzyme';
 import About from './About';
 
-describe('<About />', () => {
-  let aboutWrapper;
-  let closeButton;
-  const onClose = jest.fn();
-  test('initially renders without crashing', () => {
-    aboutWrapper = mountWithContexts(<About isOpen onClose={onClose} />);
-    expect(aboutWrapper.length).toBe(1);
-    aboutWrapper.unmount();
-  });
+jest.mock('../../util/useBrandName', () => ({
+  __esModule: true,
+  default: () => ({
+    current: 'AWX',
+  }),
+}));
 
-  test('close button calls onClose handler', () => {
-    aboutWrapper = mountWithContexts(<About isOpen onClose={onClose} />);
-    closeButton = aboutWrapper.find('AboutModalBoxCloseButton Button');
-    closeButton.simulate('click');
-    expect(onClose).toBeCalled();
-    aboutWrapper.unmount();
+describe('<About />', () => {
+  test('should render AboutModal', () => {
+    const onClose = jest.fn();
+    const wrapper = shallow(<About isOpen onClose={onClose} />);
+
+    const modal = wrapper.find('AboutModal');
+    expect(modal).toHaveLength(1);
+    expect(modal.prop('onClose')).toEqual(onClose);
+    expect(modal.prop('productName')).toEqual('AWX');
+    expect(modal.prop('isOpen')).toEqual(true);
   });
 });

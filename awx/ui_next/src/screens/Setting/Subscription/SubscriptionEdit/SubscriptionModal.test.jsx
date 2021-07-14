@@ -54,7 +54,6 @@ describe('<SubscriptionModal />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders without crashing', async () => {

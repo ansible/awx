@@ -68,7 +68,6 @@ describe('<InstanceGroupEdit>', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('controlplane instance group name can not be updated', async () => {

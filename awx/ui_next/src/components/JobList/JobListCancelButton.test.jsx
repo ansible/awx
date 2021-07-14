@@ -5,9 +5,6 @@ import JobListCancelButton from './JobListCancelButton';
 describe('<JobListCancelButton />', () => {
   let wrapper;
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
   test('should be disabled when no rows are selected', () => {
     wrapper = mountWithContexts(<JobListCancelButton jobsToCancel={[]} />);
     expect(wrapper.find('JobListCancelButton button').props().disabled).toBe(

@@ -27,7 +27,6 @@ describe('<UserForm />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -8,9 +8,6 @@ jest.mock('../../api');
 let wrapper;
 
 describe('<CopyButton/>', () => {
-  afterEach(() => {
-    wrapper.unmount();
-  });
   test('should mount properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -24,6 +21,7 @@ describe('<CopyButton/>', () => {
     });
     expect(wrapper.find('CopyButton').length).toBe(1);
   });
+
   test('should call the correct function on button click', async () => {
     const copyItem = jest.fn();
     await act(async () => {

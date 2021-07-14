@@ -1,4 +1,5 @@
 import React from 'react';
+import { shallow } from 'enzyme';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import HostEventModal from './HostEventModal';
 
@@ -62,53 +63,53 @@ const jsonValue = `{
   ]
 }`;
 
-let detailsSection;
-let jsonSection;
-let standardOutSection;
-let standardErrorSection;
-
-const findSections = wrapper => {
-  detailsSection = wrapper.find('section').at(0);
-  jsonSection = wrapper.find('section').at(1);
-  standardOutSection = wrapper.find('section').at(2);
-  standardErrorSection = wrapper.find('section').at(3);
-};
+// let detailsSection;
+// let jsonSection;
+// let standardOutSection;
+// let standardErrorSection;
+//
+// const findSections = wrapper => {
+//   detailsSection = wrapper.find('section').at(0);
+//   jsonSection = wrapper.find('section').at(1);
+//   standardOutSection = wrapper.find('section').at(2);
+//   standardErrorSection = wrapper.find('section').at(3);
+// };
 
 describe('HostEventModal', () => {
   test('initially renders successfully', () => {
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} />
     );
     expect(wrapper).toHaveLength(1);
   });
 
   test('should render all tabs', () => {
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
 
-    /* eslint-disable react/button-has-type */
-    expect(wrapper.find('Tabs TabButton').length).toEqual(4);
+    expect(wrapper.find('Tabs Tab').length).toEqual(4);
   });
 
-  test('should show details tab content on mount', () => {
-    const wrapper = mountWithContexts(
+  test('should initially show details tab', () => {
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
-    findSections(wrapper);
-    expect(detailsSection.find('TextList').length).toBe(1);
+    expect(wrapper.find('Tabs').prop('activeKey')).toEqual(0);
+    expect(wrapper.find('Detail')).toHaveLength(5);
 
-    function assertDetail(label, value) {
-      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+    function assertDetail(index, label, value) {
+      const detail = wrapper.find('Detail').at(index);
+      expect(detail.prop('label')).toEqual(label);
+      expect(detail.prop('value')).toEqual(value);
     }
 
-    // StatusIcon adds visibly hidden accessibility text " changed "
-    assertDetail('Host Name', ' changed foo');
-    assertDetail('Play', 'all');
-    assertDetail('Task', 'command');
-    assertDetail('Module', 'command');
-    assertDetail('Command', 'free-m');
+    const detail = wrapper.find('Detail').first();
+    expect(detail.prop('value').props.children).toEqual([null, 'foo']);
+    assertDetail(1, 'Play', 'all');
+    assertDetail(2, 'Task', 'command');
+    assertDetail(3, 'Module', 'command');
+    assertDetail(4, 'Command', hostEvent.event_data.res.cmd);
   });
 
   test('should display successful host status icon', () => {
@@ -180,34 +181,30 @@ describe('HostEventModal', () => {
   });
 
   test('should display JSON tab content on tab click', () => {
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
 
-    findSections(wrapper);
-    expect(jsonSection.find('EmptyState').length).toBe(1);
-    wrapper.find('button[aria-label="JSON tab"]').simulate('click');
-    findSections(wrapper);
-    expect(jsonSection.find('CodeEditor').length).toBe(1);
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 1);
+    wrapper.update();
 
-    const codeEditor = jsonSection.find('CodeEditor');
+    const codeEditor = wrapper.find('CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(jsonValue);
   });
 
   test('should display Standard Out tab content on tab click', () => {
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
 
-    findSections(wrapper);
-    expect(standardOutSection.find('EmptyState').length).toBe(1);
-    wrapper.find('button[aria-label="Standard out tab"]').simulate('click');
-    findSections(wrapper);
-    expect(standardOutSection.find('CodeEditor').length).toBe(1);
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 2);
+    wrapper.update();
 
-    const codeEditor = standardOutSection.find('CodeEditor');
+    const codeEditor = wrapper.find('CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(hostEvent.event_data.res.stdout);
@@ -222,28 +219,27 @@ describe('HostEventModal', () => {
         },
       },
     };
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEventError} onClose={() => {}} isOpen />
     );
-    findSections(wrapper);
-    expect(standardErrorSection.find('EmptyState').length).toBe(1);
-    wrapper.find('button[aria-label="Standard error tab"]').simulate('click');
-    findSections(wrapper);
-    expect(standardErrorSection.find('CodeEditor').length).toBe(1);
 
-    const codeEditor = standardErrorSection.find('CodeEditor');
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 3);
+    wrapper.update();
+
+    const codeEditor = wrapper.find('CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(' ');
   });
 
-  test('should call onClose when close button is clicked', () => {
+  test('should pass onClose to Modal', () => {
     const onClose = jest.fn();
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={onClose} isOpen />
     );
-    wrapper.find('button[aria-label="Close"]').simulate('click');
-    expect(onClose).toBeCalled();
+
+    expect(wrapper.find('Modal').prop('onClose')).toEqual(onClose);
   });
 
   test('should render standard out of debug task', () => {
@@ -258,12 +254,17 @@ describe('HostEventModal', () => {
         },
       },
     };
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={debugTaskAction} onClose={() => {}} isOpen />
     );
-    wrapper.find('button[aria-label="Standard out tab"]').simulate('click');
-    findSections(wrapper);
-    const codeEditor = standardOutSection.find('CodeEditor');
+
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 2);
+    wrapper.update();
+
+    const codeEditor = wrapper.find('CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('foo bar');
   });
 
@@ -277,12 +278,17 @@ describe('HostEventModal', () => {
         },
       },
     };
-    const wrapper = mountWithContexts(
+    const wrapper = shallow(
       <HostEventModal hostEvent={yumTaskAction} onClose={() => {}} isOpen />
     );
-    wrapper.find('button[aria-label="Standard out tab"]').simulate('click');
-    findSections(wrapper);
-    const codeEditor = standardOutSection.find('CodeEditor');
+
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 2);
+    wrapper.update();
+
+    const codeEditor = wrapper.find('CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('baz');
   });
 });

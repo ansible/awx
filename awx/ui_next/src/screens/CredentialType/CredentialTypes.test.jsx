@@ -4,10 +4,6 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import CredentialTypes from './CredentialTypes';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<CredentialTypes/>', () => {
   let pageWrapper;
   let pageSections;
@@ -15,10 +11,6 @@ describe('<CredentialTypes/>', () => {
   beforeEach(() => {
     pageWrapper = mountWithContexts(<CredentialTypes />);
     pageSections = pageWrapper.find('PageSection');
-  });
-
-  afterEach(() => {
-    pageWrapper.unmount();
   });
 
   test('initially renders without crashing', () => {

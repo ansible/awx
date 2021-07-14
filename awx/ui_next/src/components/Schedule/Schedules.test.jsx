@@ -19,6 +19,7 @@ describe('<Schedules />', () => {
           jobTemplate={jobTemplate}
           loadSchedules={() => {}}
           loadScheduleOptions={() => {}}
+          apiModel={{ createSchedule: () => {} }}
         />,
 
         {

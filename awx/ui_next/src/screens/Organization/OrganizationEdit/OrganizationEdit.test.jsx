@@ -39,7 +39,9 @@ describe('<OrganizationEdit />', () => {
       description: 'new description',
       default_environment: null,
     };
-    wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);
+    await act(async () => {
+      wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);
+    });
 
     expect(OrganizationsAPI.update).toHaveBeenCalledWith(1, updatedOrgData);
   });

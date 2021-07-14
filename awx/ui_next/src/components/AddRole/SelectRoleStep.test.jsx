@@ -34,6 +34,7 @@ describe('<SelectRoleStep />', () => {
       name: 'foo',
     },
   ];
+
   test('initially renders without crashing', () => {
     wrapper = shallowWithContexts(
       <SelectRoleStep
@@ -43,8 +44,8 @@ describe('<SelectRoleStep />', () => {
       />
     );
     expect(wrapper.length).toBe(1);
-    wrapper.unmount();
   });
+
   test('clicking role fires onRolesClick callback', () => {
     const onRolesClick = jest.fn();
     wrapper = mountWithContexts(
@@ -63,6 +64,5 @@ describe('<SelectRoleStep />', () => {
       name: 'Project Admin',
       description: 'Can manage all projects of the organization',
     });
-    wrapper.unmount();
   });
 });

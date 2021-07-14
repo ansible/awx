@@ -24,7 +24,6 @@ describe('ListHeader', () => {
       />
     );
     expect(wrapper.length).toBe(1);
-    wrapper.unmount();
   });
 
   test('should navigate when DataListToolbar calls onSort prop', async () => {

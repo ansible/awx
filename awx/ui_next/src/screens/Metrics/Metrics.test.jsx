@@ -33,7 +33,6 @@ describe('<Metrics/>', () => {
     });
   });
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
   test('should mound properly', () => {

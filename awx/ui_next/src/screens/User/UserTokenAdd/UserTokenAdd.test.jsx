@@ -22,9 +22,9 @@ const onSuccessfulAdd = jest.fn();
 
 describe('<UserTokenAdd />', () => {
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
+
   test('handleSubmit should post to api', async () => {
     await act(async () => {
       wrapper = mountWithContexts(

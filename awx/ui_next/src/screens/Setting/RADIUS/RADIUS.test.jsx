@@ -23,7 +23,6 @@ describe('<RADIUS />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -4,10 +4,6 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import ManagementJobs from './ManagementJobs';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
 describe('<ManagementJobs />', () => {
   let pageWrapper;
   let pageSections;
@@ -15,10 +11,6 @@ describe('<ManagementJobs />', () => {
   beforeEach(() => {
     pageWrapper = mountWithContexts(<ManagementJobs />);
     pageSections = pageWrapper.find('PageSection');
-  });
-
-  afterEach(() => {
-    pageWrapper.unmount();
   });
 
   test('renders ok', () => {
