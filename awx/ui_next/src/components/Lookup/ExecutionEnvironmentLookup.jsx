@@ -155,7 +155,7 @@ function ExecutionEnvironmentLookup({
     <>
       <Lookup
         id="execution-environments"
-        header={t`Execution Environments`}
+        header={t`Execution Environment`}
         value={value}
         onBlur={onBlur}
         onChange={onChange}

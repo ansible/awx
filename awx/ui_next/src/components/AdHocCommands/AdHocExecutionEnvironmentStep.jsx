@@ -88,8 +88,8 @@ function AdHocExecutionEnvironmentStep({ organizationId }) {
     <Form>
       <FormGroup
         fieldId="execution_enviroment"
-        label={t`Execution Environments`}
-        aria-label={t`Execution Environments`}
+        label={t`Execution Environment`}
+        aria-label={t`Execution Environment`}
         labelIcon={
           <Popover
             content={t`Select the Execution Environment you want this command to run inside.`}
