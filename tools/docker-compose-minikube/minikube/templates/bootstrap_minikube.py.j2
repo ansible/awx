@@ -1,0 +1,44 @@
+# Create Openshift/Kubernetes credential for Minikube
+# This script gets called by the bootstrap_development process
+# awx-manage shell < bootstrap_minikube.py
+
+from awx.main.utils.encryption import encrypt_field
+from awx.main.models import Credential, CredentialType, InstanceGroup
+from django.conf import settings
+
+NAME = 'Minikube'
+
+POD_SPEC = """apiVersion: v1
+kind: Pod
+metadata:
+  namespace: {{ minikube_service_account_namespace }}
+spec:
+  containers:
+    - image: 'quay.io/ansible/awx-ee:devel'
+      name: worker
+      args:
+        - ansible-runner
+        - worker
+        - '--private-data-dir=/runner'"""
+
+# Creates Minikube credential
+if not Credential.objects.filter(name=NAME).count():
+    cred = Credential()
+    cred.name = NAME
+    cred.credential_type = CredentialType.objects.get(name='OpenShift or Kubernetes API Bearer Token')
+    cred.description = 'Minikube Devel'
+    cred.inputs['host'] =  'https://minikube:8443'
+    cred.inputs['verify_ssl'] =  False
+    cred.inputs['bearer_token'] = '{{ service_account_token }}'
+    encrypt_field(cred, 'bearer_token', secret_key=settings.SECRET_KEY)
+    cred.save()
+
+# Create Container Group for Minikube
+if not InstanceGroup.objects.filter(name=NAME).count():
+    ccgrp = InstanceGroup()
+    ccgrp.name = NAME
+    ccgrp.credential = cred
+    ccgrp.pod_spec_override = POD_SPEC
+    ccgrp.is_container_group = True
+    ccgrp.save()
+

@@ -34,3 +34,8 @@ awx-manage register_default_execution_environments
 mkdir -p /awx_devel/awx/public/static
 mkdir -p /awx_devel/awx/ui/static
 mkdir -p /awx_devel/awx/ui_next/build/static
+
+# Create resource entries when using Minikube
+if [[ -n "$MINIKUBE_CONTAINER_GROUP" ]]; then
+    awx-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
+fi
