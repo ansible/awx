@@ -43,7 +43,7 @@ This will allow the UI to implement whatever fields necessary, because
 any custom fields (think 'image' or 'namespace') can be "serialized" as valid
 `Pod` JSON or YAML. A full list of options can be found in the Kubernetes
 documentation
-[here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#pod-v1-core).
+[here](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/).
 
 ```bash
 cat > api_request.json <<EOF
