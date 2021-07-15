@@ -182,7 +182,7 @@ DEFAULT_EXECUTION_ENVIRONMENT = None
 # Should be ordered from highest to lowest precedence.
 # The awx-manage register_default_execution_environments command reads this setting and registers the EE(s)
 # If a registry credential is needed to pull the image, that can be provided to the awx-manage command
-GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE 0.3.0', 'image': 'quay.io/ansible/awx-ee:0.3.0'}]
+GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE 0.5.0', 'image': 'quay.io/ansible/awx-ee:0.5.0'}]
 # This setting controls which EE will be used for project updates.
 # The awx-manage register_default_execution_environments command reads this setting and registers the EE
 # This image is distinguished from others by having "managed" set to True and users have limited
