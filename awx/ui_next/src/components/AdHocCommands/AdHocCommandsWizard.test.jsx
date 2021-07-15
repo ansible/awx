@@ -126,6 +126,9 @@ describe('<AdHocCommandsWizard/>', () => {
         count: 2,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
     await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
 
     await act(async () => {
@@ -245,6 +248,9 @@ describe('<AdHocCommandsWizard/>', () => {
         },
       })
     );
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
     await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
 
     await act(async () => {

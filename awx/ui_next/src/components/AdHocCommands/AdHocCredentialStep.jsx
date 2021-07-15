@@ -27,23 +27,45 @@ function AdHocCredentialStep({ credentialTypeId, onEnableLaunch }) {
     error,
     isLoading,
     request: fetchCredentials,
-    result: { credentials, credentialCount },
+    result: {
+      credentials,
+      credentialCount,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
 
-      const {
-        data: { results, count },
-      } = await CredentialsAPI.read(
-        mergeParams(params, { credential_type: credentialTypeId })
-      );
+      const [
+        {
+          data: { results, count },
+        },
+        actionsResponse,
+      ] = await Promise.all([
+        CredentialsAPI.read(
+          mergeParams(params, { credential_type: credentialTypeId })
+        ),
+        CredentialsAPI.readOptions(),
+      ]);
 
       return {
         credentials: results,
         credentialCount: count,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [credentialTypeId, history.location.search]),
-    { credentials: [], credentialCount: 0 }
+    {
+      credentials: [],
+      credentialCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
+    }
   );
 
   useEffect(() => {
@@ -84,6 +106,8 @@ function AdHocCredentialStep({ credentialTypeId, onEnableLaunch }) {
           header={t`Machine Credential`}
           readOnly
           qsConfig={QS_CONFIG}
+          relatedSearchableKeys={relatedSearchableKeys}
+          searchableKeys={searchableKeys}
           searchColumns={[
             {
               name: t`Name`,
