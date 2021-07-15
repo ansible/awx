@@ -94,7 +94,7 @@ const BooleanField = ({
         variant="danger"
         aria-label={modalTitle}
         onClose={() => {
-          helpers.setValue(false);
+          setIsModalOpen(false);
         }}
         actions={[
           <Button
