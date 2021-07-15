@@ -216,7 +216,6 @@ function MiscAuthenticationEdit() {
                 <InputField
                   name="LOGIN_REDIRECT_OVERRIDE"
                   config={authentication.LOGIN_REDIRECT_OVERRIDE}
-                  type="url"
                 />
                 <InputField
                   name="ACCESS_TOKEN_EXPIRE_SECONDS"
