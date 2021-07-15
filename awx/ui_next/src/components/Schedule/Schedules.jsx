@@ -1,6 +1,6 @@
 import React from 'react';
-
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
+
 import Schedule from './Schedule';
 import ScheduleAdd from './ScheduleAdd';
 import ScheduleList from './ScheduleList';
@@ -19,6 +19,7 @@ function Schedules({
 
   // For some management jobs that delete data, we want to provide an additional
   // field on the scheduler for configuring the number of days to retain.
+
   const hasDaysToKeepField = [
     'cleanup_activitystream',
     'cleanup_jobs',
