@@ -129,6 +129,13 @@ function HostFilterLookup({
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const searchColumns = buildSearchColumns();
 
+  const parseRelatedSearchFields = searchFields => {
+    if (searchFields.indexOf('__search') !== -1) {
+      return searchFields.slice(0, -8);
+    }
+    return searchFields;
+  };
+
   const {
     result: { count, hosts, relatedSearchableKeys, searchableKeys },
     error: contentError,
@@ -147,9 +154,9 @@ function HostFilterLookup({
         return {
           count: data.count,
           hosts: data.results,
-          relatedSearchableKeys: (
-            actions?.related_search_fields || []
-          ).map(val => val.slice(0, -8)),
+          relatedSearchableKeys: (actions?.related_search_fields || []).map(
+            parseRelatedSearchFields
+          ),
           searchableKeys: Object.keys(actions?.actions.GET || {}).filter(
             key => actions.actions?.GET[key].filterable
           ),
