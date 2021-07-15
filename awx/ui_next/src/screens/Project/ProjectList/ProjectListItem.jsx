@@ -38,6 +38,8 @@ const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
 `;
 
 function ProjectListItem({
+  isExpanded,
+  onExpand,
   project,
   isSelected,
   onSelect,
@@ -46,7 +48,6 @@ function ProjectListItem({
   rowIndex,
   onRefreshRow,
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   ProjectListItem.propTypes = {
     project: Project.isRequired,
@@ -165,7 +166,7 @@ function ProjectListItem({
           expand={{
             rowIndex,
             isExpanded,
-            onToggle: () => setIsExpanded(!isExpanded),
+            onToggle: onExpand,
           }}
         />
         <Td

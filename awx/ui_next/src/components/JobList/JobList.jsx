@@ -17,6 +17,7 @@ import useRequest, {
 } from '../../util/useRequest';
 import { useConfig } from '../../contexts/Config';
 import useSelected from '../../util/useSelected';
+import useExpanded from '../../util/useExpanded';
 import { isJobRunning, getJobModel } from '../../util/jobs';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
@@ -96,6 +97,10 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     selectAll,
     clearSelected,
   } = useSelected(jobs);
+
+  const { expanded, isAllExpanded, handleExpand, expandAll } = useExpanded(
+    jobs
+  );
 
   const {
     error: cancelJobsError,
@@ -227,7 +232,8 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
-              showSelectAll
+              isAllExpanded={isAllExpanded}
+              onExpandAll={expandAll}
               isAllSelected={isAllSelected}
               onSelectAll={selectAll}
               qsConfig={qsConfig}
@@ -264,6 +270,8 @@ function JobList({ defaultParams, showTypeColumn = false }) {
             <JobListItem
               key={job.id}
               job={job}
+              isExpanded={expanded.some(row => row.id === job.id)}
+              onExpand={() => handleExpand(job)}
               isSuperUser={me?.is_superuser}
               showTypeColumn={showTypeColumn}
               onSelect={() => handleSelect(job)}

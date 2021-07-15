@@ -18,6 +18,7 @@ import PaginatedTable, {
 } from '../../../components/PaginatedTable';
 import useWsProjects from './useWsProjects';
 import useSelected from '../../../util/useSelected';
+import useExpanded from '../../../util/useExpanded';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 
@@ -102,6 +103,10 @@ function ProjectList() {
     selectAll,
     clearSelected,
   } = useSelected(projects);
+
+  const { expanded, isAllExpanded, handleExpand, expandAll } = useExpanded(
+    projects
+  );
 
   const {
     isLoading: isDeleteLoading,
@@ -212,7 +217,8 @@ function ProjectList() {
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
-                showSelectAll
+                isAllExpanded={isAllExpanded}
+                onExpandAll={expandAll}
                 isAllSelected={isAllSelected}
                 onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
@@ -244,6 +250,8 @@ function ProjectList() {
             )}
             renderRow={(project, index) => (
               <ProjectListItem
+                isExpanded={expanded.some(row => row.id === project.id)}
+                onExpand={() => handleExpand(project)}
                 fetchProjects={fetchProjects}
                 key={project.id}
                 project={project}

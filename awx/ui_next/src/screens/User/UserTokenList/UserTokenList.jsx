@@ -150,7 +150,6 @@ function UserTokenList() {
         renderToolbar={props => (
           <DataListToolbar
             {...props}
-            showSelectAll
             isAllSelected={isAllSelected}
             qsConfig={QS_CONFIG}
             onSelectAll={selectAll}

@@ -34,6 +34,8 @@ const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
 ExclamationTriangleIconWarning.displayName = 'ExclamationTriangleIconWarning';
 
 function TemplateListItem({
+  isExpanded,
+  onExpand,
   template,
   isSelected,
   onSelect,
@@ -42,7 +44,6 @@ function TemplateListItem({
   rowIndex,
 }) {
   const config = useConfig();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const labelId = `check-action-${template.id}`;
 
@@ -119,7 +120,7 @@ function TemplateListItem({
           expand={{
             rowIndex,
             isExpanded,
-            onToggle: () => setIsExpanded(!isExpanded),
+            onToggle: onExpand,
           }}
         />
         <Td

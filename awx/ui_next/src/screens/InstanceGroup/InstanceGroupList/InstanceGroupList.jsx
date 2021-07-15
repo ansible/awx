@@ -258,7 +258,6 @@ function InstanceGroupList({
             renderToolbar={props => (
               <DatalistToolbar
                 {...props}
-                showSelectAll
                 isAllSelected={isAllSelected}
                 onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}

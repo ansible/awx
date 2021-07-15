@@ -91,11 +91,7 @@ function ManagementJobList() {
               },
             ]}
             renderToolbar={props => (
-              <DatalistToolbar
-                {...props}
-                showSelectAll={false}
-                qsConfig={QS_CONFIG}
-              />
+              <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>

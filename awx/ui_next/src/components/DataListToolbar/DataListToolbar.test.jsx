@@ -19,6 +19,7 @@ describe('<DataListToolbar />', () => {
   const onReplaceSearch = jest.fn();
   const onSort = jest.fn();
   const onSelectAll = jest.fn();
+  const onExpandAll = jest.fn();
 
   test('it triggers the expected callbacks', () => {
     const searchColumns = [
@@ -284,5 +285,62 @@ describe('<DataListToolbar />', () => {
     expect(newToolbar.find('div[aria-label="add instance group"]').length).toBe(
       1
     );
+  });
+
+  test('should handle expanded rows', async () => {
+    const searchColumns = [
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+    ];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
+
+    const newtoolbar = mountWithContexts(
+      <DataListToolbar
+        qsConfig={QS_CONFIG}
+        isAllSelected={false}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
+        onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        showSelectAll
+        showExpandAll
+        isAllExpanded={false}
+        onExpandAll={onExpandAll}
+      />
+    );
+    await act(async () =>
+      newtoolbar.find('Button[aria-label="Expand all rows"]').prop('onClick')()
+    );
+    expect(newtoolbar.find('AngleRightIcon')).toHaveLength(1);
+    expect(newtoolbar.find('AngleDownIcon')).toHaveLength(0);
+    expect(onExpandAll).toBeCalledWith(true);
+  });
+
+  test('should render angle down icon', async () => {
+    const searchColumns = [
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+    ];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
+
+    const newtoolbar = mountWithContexts(
+      <DataListToolbar
+        qsConfig={QS_CONFIG}
+        isAllSelected={false}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
+        onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        showSelectAll
+        showExpandAll
+        isAllExpanded
+        onExpandAll={onExpandAll}
+      />
+    );
+
+    expect(newtoolbar.find('AngleDownIcon')).toHaveLength(1);
+    expect(newtoolbar.find('AngleRightIcon')).toHaveLength(0);
   });
 });
