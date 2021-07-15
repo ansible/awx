@@ -76,6 +76,8 @@ describe('<JobDetail />', () => {
       mockJobData.summary_fields.execution_environment.name
     );
 
+    assertDetail('Job Slice', '0/1');
+
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`
     );
@@ -354,5 +356,115 @@ describe('<JobDetail />', () => {
     expect(
       wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
     ).toHaveLength(1);
+  });
+
+  test('should render workflow job details', () => {
+    const workFlowJob = {
+      id: 15,
+      type: 'workflow_job',
+      url: '/api/v2/workflow_jobs/15/',
+      related: {
+        created_by: '/api/v2/users/1/',
+        modified_by: '/api/v2/users/1/',
+        unified_job_template: '/api/v2/job_templates/9/',
+        job_template: '/api/v2/job_templates/9/',
+        workflow_nodes: '/api/v2/workflow_jobs/15/workflow_nodes/',
+        labels: '/api/v2/workflow_jobs/15/labels/',
+        activity_stream: '/api/v2/workflow_jobs/15/activity_stream/',
+        relaunch: '/api/v2/workflow_jobs/15/relaunch/',
+        cancel: '/api/v2/workflow_jobs/15/cancel/',
+      },
+      summary_fields: {
+        organization: {
+          id: 1,
+          name: 'Default',
+          description: '',
+        },
+        inventory: {
+          id: 1,
+          name: 'Demo Inventory',
+          description: '',
+          has_active_failures: false,
+          total_hosts: 4,
+          hosts_with_active_failures: 0,
+          total_groups: 0,
+          has_inventory_sources: false,
+          total_inventory_sources: 0,
+          inventory_sources_with_failures: 0,
+          organization_id: 1,
+          kind: '',
+        },
+        job_template: {
+          id: 9,
+          name: 'Sliced Job Template',
+          description: '',
+        },
+        unified_job_template: {
+          id: 9,
+          name: 'Sliced Job Template',
+          description: '',
+          unified_job_type: 'job',
+        },
+        created_by: {
+          id: 1,
+          username: 'admin',
+          first_name: '',
+          last_name: '',
+        },
+        modified_by: {
+          id: 1,
+          username: 'admin',
+          first_name: '',
+          last_name: '',
+        },
+        user_capabilities: {
+          delete: true,
+          start: true,
+        },
+        labels: {
+          count: 0,
+          results: [],
+        },
+      },
+      created: '2021-07-06T19:40:17.654030Z',
+      modified: '2021-07-06T19:40:17.964699Z',
+      name: 'Sliced Job Template',
+      description: '',
+      unified_job_template: 9,
+      launch_type: 'manual',
+      status: 'successful',
+      failed: false,
+      started: '2021-07-06T19:40:17.962019Z',
+      finished: '2021-07-06T19:40:42.238563Z',
+      canceled_on: null,
+      elapsed: 24.277,
+      job_explanation: '',
+      launched_by: {
+        id: 1,
+        name: 'admin',
+        type: 'user',
+        url: '/api/v2/users/1/',
+      },
+      work_unit_id: null,
+      workflow_job_template: null,
+      extra_vars: '{}',
+      allow_simultaneous: false,
+      job_template: 9,
+      is_sliced_job: true,
+      inventory: 1,
+      limit: '',
+      scm_branch: '',
+      webhook_service: '',
+      webhook_credential: null,
+      webhook_guid: '',
+    };
+    wrapper = mountWithContexts(<JobDetail job={workFlowJob} />);
+    assertDetail('Status', ' successful Successful');
+    assertDetail('Started', '7/6/2021, 7:40:17 PM');
+    assertDetail('Finished', '7/6/2021, 7:40:42 PM');
+    assertDetail('Job Template', 'Sliced Job Template');
+    assertDetail('Job Type', 'Workflow Job');
+    assertDetail('Inventory', 'Demo Inventory');
+    assertDetail('Job Slice Parent', 'True');
   });
 });
