@@ -90,7 +90,7 @@ function InstanceGroupsLookup({
             <br />
             <Trans>
               Note: The order in which these are selected sets the execution
-              precedence.
+              precedence. Select more than one to enable drag.
             </Trans>
           </>
         }

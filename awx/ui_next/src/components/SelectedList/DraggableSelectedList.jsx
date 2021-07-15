@@ -25,10 +25,12 @@ const RemoveActionSection = styled(DataListAction)`
 function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
   const [liveText, setLiveText] = useState('');
   const [id, setId] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   const onDragStart = newId => {
     setId(newId);
     setLiveText(t`Dragging started for item id: ${newId}.`);
+    setIsDragging(true);
   };
 
   const onDragMove = (oldIndex, newIndex) => {
@@ -39,6 +41,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
 
   const onDragCancel = () => {
     setLiveText(t`Dragging cancelled. List is unchanged.`);
+    setIsDragging(false);
   };
 
   const onDragFinish = newItemOrder => {
@@ -46,6 +49,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
       selected.find(i => i.name === item)
     );
     onRowDrag(selectedItems);
+    setIsDragging(false);
   };
 
   const removeItem = item => {
@@ -56,7 +60,8 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
     return null;
   }
 
-  const orderedList = selected.map(item => item.name);
+  const orderedList = selected.map(item => item?.name);
+
   return (
     <>
       <DataList
@@ -83,6 +88,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
                     cancel the drag operation.`}
                     aria-pressed="false"
                     data-cy={`reorder-${label}`}
+                    isDisabled={selected.length === 1}
                   />
                 </DataListControl>
                 <DataListItemCells
@@ -98,6 +104,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
                     variant="plain"
                     aria-label={t`Remove`}
                     ouiaId={`draggable-list-remove-${label}`}
+                    isDisabled={isDragging}
                   >
                     <TimesIcon />
                   </Button>
