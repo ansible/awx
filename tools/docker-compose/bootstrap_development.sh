@@ -37,5 +37,5 @@ mkdir -p /awx_devel/awx/ui_next/build/static
 
 # Create resource entries when using Minikube
 if [[ -n "$MINIKUBE_CONTAINER_GROUP" ]]; then
-    awx-manage shell_plus --quiet < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
+    awx-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
 fi

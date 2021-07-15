@@ -1,8 +1,10 @@
 # Create Openshift/Kubernetes credential for Minikube
 # This script gets called by the bootstrap_development process
-# awx-manage shell_plus --quiet < bootstrap_minikube.py
+# awx-manage shell < bootstrap_minikube.py
 
 from awx.main.utils.encryption import encrypt_field
+from awx.main.models import Credential, CredentialType, InstanceGroup
+from django.conf import settings
 
 NAME = 'Minikube'
 
