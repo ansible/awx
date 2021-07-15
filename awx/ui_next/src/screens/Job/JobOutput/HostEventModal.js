@@ -17,7 +17,7 @@ const HostNameDetailValue = styled.div`
   grid-template-columns: auto auto;
 `;
 
-const processEventStatus = (event) => {
+const processEventStatus = event => {
   let status = null;
   if (event.event === 'runner_on_unreachable') {
     status = 'unreachable';
@@ -43,7 +43,7 @@ const processEventStatus = (event) => {
   return status;
 };
 
-const processCodeEditorValue = (value) => {
+const processCodeEditorValue = value => {
   let codeEditorValue;
   if (value === undefined) {
     codeEditorValue = false;
@@ -57,7 +57,7 @@ const processCodeEditorValue = (value) => {
   return codeEditorValue;
 };
 
-const processStdOutValue = (hostEvent) => {
+const processStdOutValue = hostEvent => {
   const taskAction = hostEvent?.event_data?.taskAction;
   const res = hostEvent?.event_data?.res;
 
