@@ -123,7 +123,7 @@ jobs:
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
             --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /start_tests.sh detect-schema-change
-  ui:
+  ui-lint:
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -143,7 +143,31 @@ jobs:
         run: |
           DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
 
-      - name: Run UI Linters and Tests
+      - name: Run UI Linters
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} make ui-zuul-lint-and-test
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} make ui-lint
+  ui-test:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Log in to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pre-pull image to warm build cache
+        run: |
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+
+      - name: Build image
+        run: |
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
+
+      - name: Run UI Tests
+        run: |
+          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} make ui-test

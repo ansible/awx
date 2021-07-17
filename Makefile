@@ -418,10 +418,13 @@ ui-devel-instrumented: awx/ui_next/node_modules
 ui-devel-test: awx/ui_next/node_modules
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start
 
-ui-zuul-lint-and-test:
+ui-lint:
 	$(NPM_BIN) --prefix awx/ui_next install
 	$(NPM_BIN) run --prefix awx/ui_next lint
 	$(NPM_BIN) run --prefix awx/ui_next prettier-check
+
+ui-test:
+	$(NPM_BIN) --prefix awx/ui_next install
 	$(NPM_BIN) run --prefix awx/ui_next test -- --coverage --watchAll=false
 
 
