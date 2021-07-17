@@ -19,12 +19,12 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
 
       - name: Push image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker push ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
