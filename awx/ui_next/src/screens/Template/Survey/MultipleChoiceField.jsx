@@ -9,7 +9,7 @@ import {
 } from '@patternfly/react-core';
 import PFCheckIcon from '@patternfly/react-icons/dist/js/icons/check-icon';
 import styled from 'styled-components';
-import Popover from '../../../components/Popover';
+import Popover from 'components/Popover';
 
 const InputGroup = styled(PFInputGroup)`
   padding-bottom: 5px;

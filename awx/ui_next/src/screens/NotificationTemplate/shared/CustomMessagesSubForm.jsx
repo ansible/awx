@@ -4,13 +4,10 @@ import React, { useEffect, useRef } from 'react';
 import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import { Switch, Text } from '@patternfly/react-core';
-import {
-  FormFullWidthLayout,
-  SubFormLayout,
-} from '../../../components/FormLayout';
-import CodeEditorField from '../../../components/CodeEditor/CodeEditorField';
-import { useConfig } from '../../../contexts/Config';
-import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
+import { FormFullWidthLayout, SubFormLayout } from 'components/FormLayout';
+import CodeEditorField from 'components/CodeEditor/CodeEditorField';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 
 function CustomMessagesSubForm({ defaultMessages, type }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');

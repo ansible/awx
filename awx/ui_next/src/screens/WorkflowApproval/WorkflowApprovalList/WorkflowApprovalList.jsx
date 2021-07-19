@@ -2,22 +2,22 @@ import React, { useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-import { WorkflowApprovalsAPI } from '../../../api';
+import { WorkflowApprovalsAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import DataListToolbar from '../../../components/DataListToolbar';
-import WorkflowApprovalListItem from './WorkflowApprovalListItem';
+} from 'components/PaginatedTable';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import DataListToolbar from 'components/DataListToolbar';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+} from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import WorkflowApprovalListItem from './WorkflowApprovalListItem';
 import useWsWorkflowApprovals from './useWsWorkflowApprovals';
 import WorkflowApprovalListApproveButton from './WorkflowApprovalListApproveButton';
 import WorkflowApprovalListDenyButton from './WorkflowApprovalListDenyButton';

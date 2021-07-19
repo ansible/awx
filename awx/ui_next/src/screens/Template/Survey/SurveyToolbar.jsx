@@ -13,7 +13,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ToolbarAddButton } from '../../../components/PaginatedTable';
+import { ToolbarAddButton } from 'components/PaginatedTable';
 
 const Toolbar = styled(_Toolbar)`
   margin-left: 52px;

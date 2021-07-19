@@ -4,16 +4,16 @@ import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { useConfig } from '../../../contexts/Config';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import { useConfig } from 'contexts/Config';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import FormField, {
   PasswordField,
   FormSubmitError,
-} from '../../../components/FormField';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import { required } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
+} from 'components/FormField';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import { required } from 'util/validators';
+import { FormColumnLayout } from 'components/FormLayout';
 
 function UserFormFields({ user }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();

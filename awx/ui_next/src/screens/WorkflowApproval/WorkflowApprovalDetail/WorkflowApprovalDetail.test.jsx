@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { WorkflowApprovalsAPI } from 'api';
+import { formatDateString } from 'util/dates';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { WorkflowApprovalsAPI } from '../../../api';
-import { formatDateString } from '../../../util/dates';
 import WorkflowApprovalDetail from './WorkflowApprovalDetail';
 import mockWorkflowApprovals from '../data.workflowApprovals.json';
 

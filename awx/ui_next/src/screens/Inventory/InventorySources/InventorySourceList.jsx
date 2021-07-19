@@ -6,22 +6,22 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
+} from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { InventoriesAPI, InventorySourcesAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import useSelected from '../../../util/useSelected';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import AlertModal from '../../../components/AlertModal/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
+} from 'components/PaginatedTable';
+import useSelected from 'util/useSelected';
+import DatalistToolbar from 'components/DataListToolbar';
+import AlertModal from 'components/AlertModal/AlertModal';
+import ErrorDetail from 'components/ErrorDetail/ErrorDetail';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import InventorySourceListItem from './InventorySourceListItem';
 import useWsInventorySources from './useWsInventorySources';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('inventory-sources', {
   page: 1,

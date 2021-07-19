@@ -3,9 +3,9 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
+} from 'contexts/Workflow';
+import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI } from '../../../api';
 import VisualizerNode from './VisualizerNode';
 import { asyncFlush } from '../../../setupTests';
 

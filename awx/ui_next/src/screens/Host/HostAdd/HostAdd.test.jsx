@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { HostsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import HostAdd from './HostAdd';
-import { HostsAPI } from '../../../api';
 
 jest.mock('../../../api');
 

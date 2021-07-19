@@ -4,17 +4,17 @@ import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { SystemJobTemplatesAPI } from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { SystemJobTemplatesAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import { useConfig } from '../../../contexts/Config';
-import { parseQueryString, getQSConfig } from '../../../util/qs';
-import useRequest from '../../../util/useRequest';
+} from 'components/PaginatedTable';
+import { useConfig } from 'contexts/Config';
+import { parseQueryString, getQSConfig } from 'util/qs';
+import useRequest from 'util/useRequest';
 
 import ManagementJobListItem from './ManagementJobListItem';
 

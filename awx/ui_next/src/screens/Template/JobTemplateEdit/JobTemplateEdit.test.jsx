@@ -2,10 +2,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-import {
   CredentialsAPI,
   CredentialTypesAPI,
   JobTemplatesAPI,
@@ -15,9 +11,13 @@ import {
   ExecutionEnvironmentsAPI,
   InstanceGroupsAPI,
   RootAPI,
-} from '../../../api';
+} from 'api';
+import useDebounce from 'util/useDebounce';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import JobTemplateEdit from './JobTemplateEdit';
-import useDebounce from '../../../util/useDebounce';
 
 jest.mock('../../../util/useDebounce');
 jest.mock('../../../api/models/Credentials');

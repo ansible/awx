@@ -5,15 +5,15 @@ import { RRule } from 'rrule';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
-import { CardBody } from '../../Card';
-import { SchedulesAPI } from '../../../api';
-import buildRuleObj from '../shared/buildRuleObj';
-import ScheduleForm from '../shared/ScheduleForm';
-import { getAddedAndRemoved } from '../../../util/lists';
+import { SchedulesAPI } from 'api';
+import { getAddedAndRemoved } from 'util/lists';
 
-import { parseVariableField } from '../../../util/yaml';
-import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
-import getSurveyValues from '../../../util/prompt/getSurveyValues';
+import { parseVariableField } from 'util/yaml';
+import mergeExtraVars from 'util/prompt/mergeExtraVars';
+import getSurveyValues from 'util/prompt/getSurveyValues';
+import ScheduleForm from '../shared/ScheduleForm';
+import buildRuleObj from '../shared/buildRuleObj';
+import { CardBody } from '../../Card';
 
 function ScheduleEdit({
   hasDaysToKeepField,

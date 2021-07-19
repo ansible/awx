@@ -19,13 +19,13 @@ import {
 } from '@patternfly/react-table';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 
-import { ConfigAPI } from '../../../../api';
-import { formatDateStringUTC } from '../../../../util/dates';
-import useRequest from '../../../../util/useRequest';
-import useSelected from '../../../../util/useSelected';
-import ErrorDetail from '../../../../components/ErrorDetail';
-import ContentEmpty from '../../../../components/ContentEmpty';
-import ContentLoading from '../../../../components/ContentLoading';
+import { ConfigAPI } from 'api';
+import { formatDateStringUTC } from 'util/dates';
+import useRequest from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import ErrorDetail from 'components/ErrorDetail';
+import ContentEmpty from 'components/ContentEmpty';
+import ContentLoading from 'components/ContentLoading';
 
 function SubscriptionModal({
   subscriptionCreds = {},

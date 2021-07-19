@@ -5,10 +5,10 @@ import { t, Trans } from '@lingui/macro';
 import { Popover, Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { ExclamationTriangleIcon as PFExclamationTriangleIcon } from '@patternfly/react-icons';
+import { ExecutionEnvironment } from 'types';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import { Detail } from '../DetailList';
-import { ExecutionEnvironment } from '../../types';
-import getDocsBaseUrl from '../../util/getDocsBaseUrl';
-import { useConfig } from '../../contexts/Config';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);

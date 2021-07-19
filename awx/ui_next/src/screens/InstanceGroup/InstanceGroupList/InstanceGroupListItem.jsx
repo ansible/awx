@@ -13,8 +13,8 @@ import {
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { InstanceGroup } from '../../../types';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { InstanceGroup } from 'types';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);

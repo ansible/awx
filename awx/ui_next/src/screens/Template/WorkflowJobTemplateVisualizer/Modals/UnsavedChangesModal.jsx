@@ -3,7 +3,7 @@ import { Button, Modal } from '@patternfly/react-core';
 
 import { t, Trans } from '@lingui/macro';
 import { func } from 'prop-types';
-import { WorkflowDispatchContext } from '../../../../contexts/Workflow';
+import { WorkflowDispatchContext } from 'contexts/Workflow';
 
 function UnsavedChangesModal({ onSaveAndExit, onExit }) {
   const dispatch = useContext(WorkflowDispatchContext);

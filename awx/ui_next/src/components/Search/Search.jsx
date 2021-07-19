@@ -18,8 +18,8 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { parseQueryString } from '../../util/qs';
-import { QSConfig, SearchColumns } from '../../types';
+import { parseQueryString } from 'util/qs';
+import { QSConfig, SearchColumns } from 'types';
 import AdvancedSearch from './AdvancedSearch';
 
 const NoOptionDropdown = styled.div`

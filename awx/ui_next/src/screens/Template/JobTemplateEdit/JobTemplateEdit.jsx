@@ -2,13 +2,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 
-import { JobTemplate } from '../../../types';
-import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
-import { getAddedAndRemoved } from '../../../util/lists';
-import useRequest from '../../../util/useRequest';
+import { JobTemplate } from 'types';
+import { JobTemplatesAPI, ProjectsAPI } from 'api';
+import { getAddedAndRemoved } from 'util/lists';
+import useRequest from 'util/useRequest';
+import ContentLoading from 'components/ContentLoading';
+import { CardBody } from 'components/Card';
 import JobTemplateForm from '../shared/JobTemplateForm';
-import ContentLoading from '../../../components/ContentLoading';
-import { CardBody } from '../../../components/Card';
 
 function JobTemplateEdit({ template, reloadTemplate }) {
   const history = useHistory();

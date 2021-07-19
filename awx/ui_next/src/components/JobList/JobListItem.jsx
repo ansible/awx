@@ -6,6 +6,8 @@ import { Button, Chip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { formatDateString } from 'util/dates';
+import { isJobRunning } from 'util/jobs';
 import { ActionsTd, ActionItem } from '../PaginatedTable';
 import { LaunchButton, ReLaunchDropDown } from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
@@ -13,8 +15,6 @@ import { DetailList, Detail, LaunchedByDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
-import { formatDateString } from '../../util/dates';
-import { isJobRunning } from '../../util/jobs';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 import JobCancelButton from '../JobCancelButton';
 

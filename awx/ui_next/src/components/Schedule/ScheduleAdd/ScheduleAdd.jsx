@@ -5,15 +5,15 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
-import { CardBody } from '../../Card';
-import { parseVariableField } from '../../../util/yaml';
+import { parseVariableField } from 'util/yaml';
 
-import buildRuleObj from '../shared/buildRuleObj';
+import { SchedulesAPI } from 'api';
+import mergeExtraVars from 'util/prompt/mergeExtraVars';
+import getSurveyValues from 'util/prompt/getSurveyValues';
+import { getAddedAndRemoved } from 'util/lists';
 import ScheduleForm from '../shared/ScheduleForm';
-import { SchedulesAPI } from '../../../api';
-import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
-import getSurveyValues from '../../../util/prompt/getSurveyValues';
-import { getAddedAndRemoved } from '../../../util/lists';
+import buildRuleObj from '../shared/buildRuleObj';
+import { CardBody } from '../../Card';
 
 function ScheduleAdd({
   resource,

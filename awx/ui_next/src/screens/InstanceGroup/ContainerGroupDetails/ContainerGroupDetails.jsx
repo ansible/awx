@@ -4,20 +4,16 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Label } from '@patternfly/react-core';
 
-import { VariablesDetail } from '../../../components/CodeEditor';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { jsonToYaml, isJsonString } from '../../../util/yaml';
-import { InstanceGroupsAPI } from '../../../api';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+import { VariablesDetail } from 'components/CodeEditor';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { jsonToYaml, isJsonString } from 'util/yaml';
+import { InstanceGroupsAPI } from 'api';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
   const { id, name } = instanceGroup;

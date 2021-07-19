@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { Tr, Td } from '@patternfly/react-table';
 
-import { ExecutionEnvironment } from '../../../types';
+import { ExecutionEnvironment } from 'types';
 
 function OrganizationExecEnvListItem({ executionEnvironment, detailUrl }) {
   return (

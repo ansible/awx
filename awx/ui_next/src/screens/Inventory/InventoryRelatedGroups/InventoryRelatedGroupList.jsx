@@ -4,23 +4,23 @@ import { t } from '@lingui/macro';
 import { useParams, useLocation, Link } from 'react-router-dom';
 
 import { DropdownItem } from '@patternfly/react-core';
-import { GroupsAPI, InventoriesAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
-import useSelected from '../../../util/useSelected';
+import { GroupsAPI, InventoriesAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import useSelected from 'util/useSelected';
 
-import DataListToolbar from '../../../components/DataListToolbar';
+import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
-} from '../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
+import AddDropDownButton from 'components/AddDropDownButton';
+import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import AssociateModal from 'components/AssociateModal';
+import DisassociateButton from 'components/DisassociateButton';
 import InventoryGroupRelatedGroupListItem from './InventoryRelatedGroupListItem';
-import AddDropDownButton from '../../../components/AddDropDownButton';
-import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AssociateModal from '../../../components/AssociateModal';
-import DisassociateButton from '../../../components/DisassociateButton';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,

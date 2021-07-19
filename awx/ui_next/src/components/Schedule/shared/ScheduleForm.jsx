@@ -11,8 +11,12 @@ import {
   Title,
   ActionGroup,
 } from '@patternfly/react-core';
-import { Config } from '../../../contexts/Config';
-import { SchedulesAPI } from '../../../api';
+import { Config } from 'contexts/Config';
+import { SchedulesAPI } from 'api';
+import { dateToInputDateTime } from 'util/dates';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
+import { parseVariableField } from 'util/yaml';
 import AnsibleSelect from '../../AnsibleSelect';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
@@ -22,10 +26,6 @@ import {
   SubFormLayout,
   FormFullWidthLayout,
 } from '../../FormLayout';
-import { dateToInputDateTime } from '../../../util/dates';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
-import { parseVariableField } from '../../../util/yaml';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
 import DateTimePicker from './DateTimePicker';

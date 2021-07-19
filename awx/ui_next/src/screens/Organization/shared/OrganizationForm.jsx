@@ -5,19 +5,19 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { t, Trans } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '../../../api';
-import { useConfig } from '../../../contexts/Config';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import { OrganizationsAPI } from 'api';
+import { useConfig } from 'contexts/Config';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import FormField, { FormSubmitError } from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import {
   InstanceGroupsLookup,
   ExecutionEnvironmentLookup,
-} from '../../../components/Lookup';
-import { required, minMaxValue } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
-import CredentialLookup from '../../../components/Lookup/CredentialLookup';
+} from 'components/Lookup';
+import { required, minMaxValue } from 'util/validators';
+import { FormColumnLayout } from 'components/FormLayout';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
 
 function OrganizationFormFields({
   instanceGroups,

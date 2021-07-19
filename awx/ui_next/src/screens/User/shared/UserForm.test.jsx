@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { UsersAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import UserForm from './UserForm';
-import { UsersAPI } from '../../../api';
 import mockData from '../data.user.json';
 
 jest.mock('../../../api');

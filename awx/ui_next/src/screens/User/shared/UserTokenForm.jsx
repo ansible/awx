@@ -2,13 +2,13 @@ import React, { useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import ApplicationLookup from '../../../components/Lookup/ApplicationLookup';
-import Popover from '../../../components/Popover';
-import { required } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import ApplicationLookup from 'components/Lookup/ApplicationLookup';
+import Popover from 'components/Popover';
+import { required } from 'util/validators';
+import { FormColumnLayout } from 'components/FormLayout';
 
 function UserTokenFormFields() {
   const { setFieldValue, setFieldTouched } = useFormikContext();

@@ -3,9 +3,9 @@ import { act } from 'react-dom/test-utils';
 
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import TemplateSurvey from './TemplateSurvey';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 import mockJobTemplateData from './shared/data.job_template.json';
 import mockWorkflowJobTemplateData from './shared/data.workflow_job_template.json';
 

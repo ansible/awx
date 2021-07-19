@@ -10,13 +10,13 @@ import {
   useParams,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
+import { SchedulesAPI } from 'api';
+import useRequest from 'util/useRequest';
 import RoutedTabs from '../RoutedTabs';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import ScheduleDetail from './ScheduleDetail';
 import ScheduleEdit from './ScheduleEdit';
-import { SchedulesAPI } from '../../api';
-import useRequest from '../../util/useRequest';
 
 function Schedule({
   setBreadcrumb,

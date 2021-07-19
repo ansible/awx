@@ -4,14 +4,14 @@ import { Link, useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
 import { Button, Label } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import { DetailList, Detail } from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { formatDateString } from '../../../util/dates';
-import { UsersAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import { formatDateString } from 'util/dates';
+import { UsersAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
 
 function UserDetail({ user }) {
   const {

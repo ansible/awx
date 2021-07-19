@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { act } from 'react-dom/test-utils';
+import { ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ProjectsListItem from './ProjectListItem';
-import { ProjectsAPI } from '../../../api';
 
 jest.mock('../../../api/models/Projects');
 

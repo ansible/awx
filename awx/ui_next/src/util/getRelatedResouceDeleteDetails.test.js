@@ -1,8 +1,4 @@
 import {
-  getRelatedResourceDeleteCounts,
-  relatedResourceDeleteRequests,
-} from './getRelatedResourceDeleteDetails';
-import {
   InventoriesAPI,
   InventorySourcesAPI,
   JobTemplatesAPI,
@@ -12,7 +8,11 @@ import {
   CredentialsAPI,
   ExecutionEnvironmentsAPI,
   CredentialInputSourcesAPI,
-} from '../api';
+} from 'api';
+import {
+  getRelatedResourceDeleteCounts,
+  relatedResourceDeleteRequests,
+} from './getRelatedResourceDeleteDetails';
 
 jest.mock('../api/models/Credentials');
 jest.mock('../api/models/Inventories');

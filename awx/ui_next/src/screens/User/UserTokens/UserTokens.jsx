@@ -9,8 +9,8 @@ import {
   ClipboardCopyVariant,
   Modal,
 } from '@patternfly/react-core';
-import { formatDateString } from '../../../util/dates';
-import { Detail, DetailList } from '../../../components/DetailList';
+import { formatDateString } from 'util/dates';
+import { Detail, DetailList } from 'components/DetailList';
 import UserTokenAdd from '../UserTokenAdd';
 import UserTokenList from '../UserTokenList';
 import UserToken from '../UserToken';

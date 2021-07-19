@@ -3,12 +3,12 @@ import { string, func, bool, oneOfType, number } from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
-import { ExecutionEnvironmentsAPI, ProjectsAPI } from '../../api';
-import { ExecutionEnvironment } from '../../types';
-import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
+import { ExecutionEnvironmentsAPI, ProjectsAPI } from 'api';
+import { ExecutionEnvironment } from 'types';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import useRequest from 'util/useRequest';
 import Popover from '../Popover';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
 
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';

@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import PlaybookSelect from './PlaybookSelect';
-import { ProjectsAPI } from '../../../api';
 
 jest.mock('../../../api');
 

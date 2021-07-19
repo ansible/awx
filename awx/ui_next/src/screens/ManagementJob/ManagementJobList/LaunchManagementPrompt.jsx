@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Button, TextInput, Tooltip } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 
-import AlertModal from '../../../components/AlertModal';
+import AlertModal from 'components/AlertModal';
 
 const MAX_RETENTION = 99999;
 

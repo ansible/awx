@@ -1,7 +1,9 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { t, Trans } from '@lingui/macro';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import {
   OptionsField,
   SourceVarsField,
@@ -10,8 +12,6 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
-import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
-import { useConfig } from '../../../../contexts/Config';
 
 const EC2SubForm = () => {
   const { setFieldValue, setFieldTouched } = useFormikContext();

@@ -6,14 +6,14 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
 import { Alert, ToolbarItem } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import AnsibleSelect from '../../AnsibleSelect';
 import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';
 import CredentialChip from '../../CredentialChip';
 import ContentError from '../../ContentError';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest from '../../../util/useRequest';
 import credentialsValidator from './credentialsValidator';
 
 const CredentialErrorAlert = styled(Alert)`

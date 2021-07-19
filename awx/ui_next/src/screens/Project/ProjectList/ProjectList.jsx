@@ -2,25 +2,25 @@ import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-import { ProjectsAPI } from '../../../api';
+import { ProjectsAPI } from 'api';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import AlertModal from '../../../components/AlertModal';
-import DataListToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'util/useRequest';
+import AlertModal from 'components/AlertModal';
+import DataListToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
+import useSelected from 'util/useSelected';
+import useExpanded from 'util/useExpanded';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import useWsProjects from './useWsProjects';
-import useSelected from '../../../util/useSelected';
-import useExpanded from '../../../util/useExpanded';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import ProjectListItem from './ProjectListItem';
 

@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import useRequest from '../../../util/useRequest';
-import { CredentialsAPI, OrganizationsAPI } from '../../../api';
-import { CardBody } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
+import useRequest from 'util/useRequest';
+import { CredentialsAPI, OrganizationsAPI } from 'api';
+import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import OrganizationForm from '../shared/OrganizationForm';
 
 function OrganizationAdd() {

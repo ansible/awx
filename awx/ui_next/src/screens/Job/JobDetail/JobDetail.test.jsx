@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { JobsAPI, ProjectUpdatesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../../testUtils/testUtils';
 import JobDetail from './JobDetail';
-import { JobsAPI, ProjectUpdatesAPI } from '../../../api';
 import mockJobData from '../shared/data.job.json';
 
 jest.mock('../../../api');

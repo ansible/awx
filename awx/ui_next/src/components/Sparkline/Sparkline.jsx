@@ -5,10 +5,10 @@ import { Link as _Link } from 'react-router-dom';
 import { Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
+import { formatDateString } from 'util/dates';
+import { Job } from 'types';
 import StatusIcon from '../StatusIcon';
-import { formatDateString } from '../../util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
-import { Job } from '../../types';
 
 /* eslint-disable react/jsx-pascal-case */
 const Link = styled(props => <_Link {...props} />)`

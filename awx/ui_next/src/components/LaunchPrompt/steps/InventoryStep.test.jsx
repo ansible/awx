@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
+import { InventoriesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventoryStep from './InventoryStep';
-import { InventoriesAPI } from '../../../api';
 
 jest.mock('../../../api/models/Inventories');
 

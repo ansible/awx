@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
+import { ExecutionEnvironmentsAPI, ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ExecutionEnvironmentLookup from './ExecutionEnvironmentLookup';
-import { ExecutionEnvironmentsAPI, ProjectsAPI } from '../../api';
 
 jest.mock('../../api');
 

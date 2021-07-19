@@ -7,10 +7,10 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import { Td, Tr } from '@patternfly/react-table';
-import { ActionItem, ActionsTd } from '../../../components/PaginatedTable';
-import HostToggle from '../../../components/HostToggle';
-import Sparkline from '../../../components/Sparkline';
-import { Host } from '../../../types';
+import { ActionItem, ActionsTd } from 'components/PaginatedTable';
+import HostToggle from 'components/HostToggle';
+import Sparkline from 'components/Sparkline';
+import { Host } from 'types';
 
 function InventoryGroupHostListItem({
   detailUrl,

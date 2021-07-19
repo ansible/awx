@@ -6,12 +6,12 @@ import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import { timeOfDay } from '../../../util/dates';
-import { InventoriesAPI } from '../../../api';
-import { Inventory } from '../../../types';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import CopyButton from '../../../components/CopyButton';
-import StatusLabel from '../../../components/StatusLabel';
+import { timeOfDay } from 'util/dates';
+import { InventoriesAPI } from 'api';
+import { Inventory } from 'types';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import CopyButton from 'components/CopyButton';
+import StatusLabel from 'components/StatusLabel';
 
 function InventoryListItem({
   inventory,

@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
-import { getRRuleDayConstants } from '../../../util/dates';
+import { getRRuleDayConstants } from 'util/dates';
 
 const parseTime = time => {
   const [hour, minute, ampm] = time.split(/[: ]/);

@@ -4,26 +4,23 @@ import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
 import { func, shape, arrayOf } from 'prop-types';
 import { Form } from '@patternfly/react-core';
-import { InstanceGroup } from '../../../types';
-import { VariablesField } from '../../../components/CodeEditor';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import FormActionGroup from '../../../components/FormActionGroup';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../components/FormLayout';
+import { InstanceGroup } from 'types';
+import { VariablesField } from 'components/CodeEditor';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import FormActionGroup from 'components/FormActionGroup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
 import {
   toHostFilter,
   toSearchParams,
-} from '../../../components/Lookup/shared/HostFilterUtils';
-import HostFilterLookup from '../../../components/Lookup/HostFilterLookup';
-import InstanceGroupsLookup from '../../../components/Lookup/InstanceGroupsLookup';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
-import { InventoriesAPI } from '../../../api';
+} from 'components/Lookup/shared/HostFilterUtils';
+import HostFilterLookup from 'components/Lookup/HostFilterLookup';
+import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
+import { InventoriesAPI } from 'api';
 
 const SmartInventoryFormFields = ({ inventory }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();

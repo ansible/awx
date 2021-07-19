@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { NotificationTemplatesAPI, JobTemplatesAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { NotificationTemplatesAPI, JobTemplatesAPI } from '../../api';
 import NotificationList from './NotificationList';
 
 jest.mock('../../api');

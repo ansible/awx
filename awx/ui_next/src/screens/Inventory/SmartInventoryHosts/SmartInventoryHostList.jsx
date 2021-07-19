@@ -2,18 +2,18 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import DataListToolbar from '../../../components/DataListToolbar';
+import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
+import useRequest from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { InventoriesAPI } from 'api';
+import { Inventory } from 'types';
+import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
 import SmartInventoryHostListItem from './SmartInventoryHostListItem';
-import useRequest from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI } from '../../../api';
-import { Inventory } from '../../../types';
-import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,

@@ -3,19 +3,15 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { TokensAPI } from '../../../api';
-import { formatDateString } from '../../../util/dates';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { toTitleCase } from '../../../util/strings';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import { TokensAPI } from 'api';
+import { formatDateString } from 'util/dates';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { toTitleCase } from 'util/strings';
 
 function UserTokenDetail({ token }) {
   const {

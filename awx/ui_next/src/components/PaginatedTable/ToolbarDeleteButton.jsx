@@ -18,9 +18,9 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
+import { KebabifiedContext } from 'contexts/Kebabified';
+import { getRelatedResourceDeleteCounts } from 'util/getRelatedResourceDeleteDetails';
 import AlertModal from '../AlertModal';
-import { KebabifiedContext } from '../../contexts/Kebabified';
-import { getRelatedResourceDeleteCounts } from '../../util/getRelatedResourceDeleteDetails';
 
 import ErrorDetail from '../ErrorDetail';
 

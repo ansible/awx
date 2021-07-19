@@ -1,16 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { InventoriesAPI, OrganizationsAPI, InstanceGroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import SmartInventoryAdd from './SmartInventoryAdd';
-import {
-  InventoriesAPI,
-  OrganizationsAPI,
-  InstanceGroupsAPI,
-} from '../../../api';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

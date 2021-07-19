@@ -25,11 +25,11 @@ import {
   GithubIcon,
   UserCircleIcon,
 } from '@patternfly/react-icons';
-import useRequest, { useDismissableError } from '../../util/useRequest';
-import { AuthAPI, RootAPI } from '../../api';
-import AlertModal from '../../components/AlertModal';
-import ErrorDetail from '../../components/ErrorDetail';
-import { useSession } from '../../contexts/Session';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { AuthAPI, RootAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import { useSession } from 'contexts/Session';
 import { SESSION_REDIRECT_URL } from '../../constants';
 
 const loginLogoSrc = '/static/media/logo-login.svg';

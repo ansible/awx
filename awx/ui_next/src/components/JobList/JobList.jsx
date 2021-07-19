@@ -3,6 +3,16 @@ import { useLocation } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 
 import { Card } from '@patternfly/react-core';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from 'util/useRequest';
+import { useConfig } from 'contexts/Config';
+import useSelected from 'util/useSelected';
+import useExpanded from 'util/useExpanded';
+import { isJobRunning, getJobModel } from 'util/jobs';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { UnifiedJobsAPI } from 'api';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
@@ -11,19 +21,9 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarDeleteButton,
 } from '../PaginatedTable';
-import useRequest, {
-  useDeleteItems,
-  useDismissableError,
-} from '../../util/useRequest';
-import { useConfig } from '../../contexts/Config';
-import useSelected from '../../util/useSelected';
-import useExpanded from '../../util/useExpanded';
-import { isJobRunning, getJobModel } from '../../util/jobs';
-import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
 import JobListCancelButton from './JobListCancelButton';
 import useWsJobs from './useWsJobs';
-import { UnifiedJobsAPI } from '../../api';
 
 function JobList({ defaultParams, showTypeColumn = false }) {
   const qsConfig = getQSConfig(

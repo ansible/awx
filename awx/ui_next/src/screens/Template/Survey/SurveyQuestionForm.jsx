@@ -3,17 +3,17 @@ import { func, string, bool, number, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { FormColumnLayout } from '../../../components/FormLayout';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import { FormColumnLayout } from 'components/FormLayout';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
-} from '../../../components/FormField';
-import { useConfig } from '../../../contexts/Config';
-import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import Popover from '../../../components/Popover';
+} from 'components/FormField';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import AnsibleSelect from 'components/AnsibleSelect';
+import Popover from 'components/Popover';
 import {
   required,
   noWhiteSpace,
@@ -21,7 +21,7 @@ import {
   maxLength,
   integer,
   number as numberValidator,
-} from '../../../util/validators';
+} from 'util/validators';
 import MultipleChoiceField from './MultipleChoiceField';
 
 function AnswerTypeField() {

@@ -4,18 +4,14 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Label } from '@patternfly/react-core';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { toTitleCase } from '../../../util/strings';
-import { ExecutionEnvironmentsAPI } from '../../../api';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { toTitleCase } from 'util/strings';
+import { ExecutionEnvironmentsAPI } from 'api';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 function ExecutionEnvironmentDetails({ executionEnvironment }) {
   const history = useHistory();

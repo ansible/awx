@@ -5,19 +5,19 @@ import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '@patternfly/react-core';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import ErrorDetail from '../../../components/ErrorDetail';
-import DeleteButton from '../../../components/DeleteButton';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ErrorDetail from 'components/ErrorDetail';
+import DeleteButton from 'components/DeleteButton';
 import {
   Detail,
   DetailList,
   UserDateDetail,
   DetailBadge,
-} from '../../../components/DetailList';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { InstanceGroupsAPI } from '../../../api';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+} from 'components/DetailList';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { InstanceGroupsAPI } from 'api';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);

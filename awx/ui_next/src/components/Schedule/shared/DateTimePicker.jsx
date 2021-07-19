@@ -9,7 +9,7 @@ import {
   FormGroup,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { required, validateTime, combine } from '../../../util/validators';
+import { required, validateTime, combine } from 'util/validators';
 
 const DateTimeGroup = styled.span`
   display: flex;

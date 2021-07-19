@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { ActionGroup, Button } from '@patternfly/react-core';
-import { FormFullWidthLayout } from '../../../components/FormLayout';
+import { FormFullWidthLayout } from 'components/FormLayout';
 
 const RevertFormActionGroup = ({ children, onCancel, onRevert, onSubmit }) => {
   return (

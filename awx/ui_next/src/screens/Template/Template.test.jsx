@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { JobTemplatesAPI, OrganizationsAPI } from '../../api';
+import { JobTemplatesAPI, OrganizationsAPI } from 'api';
 
 import {
   mountWithContexts,

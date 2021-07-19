@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ConfigAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
-import { ConfigAPI } from '../../../../api';
 import SubscriptionModal from './SubscriptionModal';
 
 jest.mock('../../../../api');

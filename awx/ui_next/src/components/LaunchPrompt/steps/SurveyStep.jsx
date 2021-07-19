@@ -8,8 +8,6 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import FormField from '../../FormField';
-import Popover from '../../Popover';
 import {
   required,
   minMaxValue,
@@ -17,8 +15,10 @@ import {
   minLength,
   integer,
   combine,
-} from '../../../util/validators';
-import { Survey } from '../../../types';
+} from 'util/validators';
+import { Survey } from 'types';
+import FormField from '../../FormField';
+import Popover from '../../Popover';
 
 function SurveyStep({ surveyConfig }) {
   const fieldTypes = {

@@ -4,14 +4,14 @@ import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '../../../api';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest from '../../../util/useRequest';
+import { OrganizationsAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import DatalistToolbar from '../../../components/DataListToolbar';
+} from 'components/PaginatedTable';
+import DatalistToolbar from 'components/DataListToolbar';
 
 import OrganizationExecEnvListItem from './OrganizationExecEnvListItem';
 

@@ -6,6 +6,8 @@ import { TableComposable, Tbody } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { useLocation, useHistory } from 'react-router-dom';
 
+import { parseQueryString, updateQueryString } from 'util/qs';
+import { QSConfig, SearchColumns } from 'types';
 import ListHeader from '../ListHeader';
 import ContentEmpty from '../ContentEmpty';
 import ContentError from '../ContentError';
@@ -13,9 +15,6 @@ import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
 import LoadingSpinner from '../LoadingSpinner';
-
-import { parseQueryString, updateQueryString } from '../../util/qs';
-import { QSConfig, SearchColumns } from '../../types';
 
 function PaginatedTable({
   contentError,

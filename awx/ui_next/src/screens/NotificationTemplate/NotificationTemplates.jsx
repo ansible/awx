@@ -2,10 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import NotificationTemplateList from './NotificationTemplateList';
 import NotificationTemplateAdd from './NotificationTemplateAdd';
 import NotificationTemplate from './NotificationTemplate';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
 function NotificationTemplates() {
   const match = useRouteMatch();

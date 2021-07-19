@@ -14,12 +14,12 @@ import {
   SelectOption,
 } from '@patternfly/react-core';
 
+import { MetricsAPI, InstancesAPI } from 'api';
+import useRequest from 'util/useRequest';
+import ContentEmpty from 'components/ContentEmpty';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import ContentError from 'components/ContentError';
 import LineChart from './LineChart';
-import { MetricsAPI, InstancesAPI } from '../../api';
-import useRequest from '../../util/useRequest';
-import ContentEmpty from '../../components/ContentEmpty';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
-import ContentError from '../../components/ContentError';
 
 let count = [0];
 

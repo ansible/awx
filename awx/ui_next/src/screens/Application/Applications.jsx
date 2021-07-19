@@ -9,11 +9,11 @@ import {
   ClipboardCopyVariant,
   Modal,
 } from '@patternfly/react-core';
+import ScreenHeader from 'components/ScreenHeader';
+import { Detail, DetailList } from 'components/DetailList';
 import ApplicationsList from './ApplicationsList';
 import ApplicationAdd from './ApplicationAdd';
 import Application from './Application';
-import ScreenHeader from '../../components/ScreenHeader';
-import { Detail, DetailList } from '../../components/DetailList';
 
 const ApplicationAlert = styled(Alert)`
   margin-bottom: 20px;

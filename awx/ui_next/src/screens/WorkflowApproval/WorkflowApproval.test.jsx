@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { WorkflowApprovalsAPI } from '../../api';
+import { WorkflowApprovalsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

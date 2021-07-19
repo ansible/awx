@@ -4,10 +4,10 @@ import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
 import { SearchPlusIcon } from '@patternfly/react-icons';
 
-import { formatDateString } from '../../util/dates';
+import { formatDateString } from 'util/dates';
 
-import { DetailList, Detail } from '../../components/DetailList';
-import { VariablesDetail } from '../../components/CodeEditor';
+import { DetailList, Detail } from 'components/DetailList';
+import { VariablesDetail } from 'components/CodeEditor';
 
 function ActivityStreamDetailButton({ streamItem, user, description }) {
   const [isOpen, setIsOpen] = useState(false);

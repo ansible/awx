@@ -3,9 +3,9 @@ import React from 'react';
 import { en } from 'make-plural/plurals';
 import { I18nProvider } from '@lingui/react';
 import { i18n } from '@lingui/core';
+import { WorkflowStateContext } from 'contexts/Workflow';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import english from '../../locales/en/messages';
-import { WorkflowStateContext } from '../../contexts/Workflow';
 import WorkflowStartNode from './WorkflowStartNode';
 
 const nodePositions = {

@@ -4,9 +4,9 @@ import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
+} from 'contexts/Workflow';
+import { getAddedAndRemoved } from 'util/lists';
 import NodeModal from './NodeModal';
-import { getAddedAndRemoved } from '../../../../../util/lists';
 
 function NodeAddModal() {
   const dispatch = useContext(WorkflowDispatchContext);

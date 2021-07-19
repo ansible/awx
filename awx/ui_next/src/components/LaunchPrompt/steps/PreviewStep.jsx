@@ -6,10 +6,8 @@ import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 
 import yaml from 'js-yaml';
-import mergeExtraVars, {
-  maskPasswords,
-} from '../../../util/prompt/mergeExtraVars';
-import getSurveyValues from '../../../util/prompt/getSurveyValues';
+import mergeExtraVars, { maskPasswords } from 'util/prompt/mergeExtraVars';
+import getSurveyValues from 'util/prompt/getSurveyValues';
 import PromptDetail from '../../PromptDetail';
 
 const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`

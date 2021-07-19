@@ -7,11 +7,11 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { Host } from '../../../types';
-import HostToggle from '../../../components/HostToggle';
-import { DetailList, Detail } from '../../../components/DetailList';
-import Sparkline from '../../../components/Sparkline';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { Host } from 'types';
+import HostToggle from 'components/HostToggle';
+import { DetailList, Detail } from 'components/DetailList';
+import Sparkline from 'components/Sparkline';
 
 function HostListItem({ host, isSelected, onSelect, detailUrl, rowIndex }) {
   const labelId = `check-action-${host.id}`;

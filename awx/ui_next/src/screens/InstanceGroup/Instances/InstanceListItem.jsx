@@ -11,15 +11,15 @@ import {
 } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import InstanceToggle from '../../../components/InstanceToggle';
-import { Instance } from '../../../types';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import useDebounce from '../../../util/useDebounce';
-import { InstancesAPI } from '../../../api';
-import { useConfig } from '../../../contexts/Config';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import InstanceToggle from 'components/InstanceToggle';
+import { Instance } from 'types';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import useDebounce from 'util/useDebounce';
+import { InstancesAPI } from 'api';
+import { useConfig } from 'contexts/Config';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);

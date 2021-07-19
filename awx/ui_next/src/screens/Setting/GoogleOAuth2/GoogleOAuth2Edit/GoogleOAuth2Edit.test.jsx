@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsProvider } from 'contexts/Settings';
+import { SettingsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
-import { SettingsProvider } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import GoogleOAuth2Edit from './GoogleOAuth2Edit';
 

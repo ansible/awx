@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useHistory, useParams } from 'react-router-dom';
 import { Card } from '@patternfly/react-core';
-import { GroupsAPI } from '../../../api';
+import { GroupsAPI } from 'api';
 
 import InventoryGroupForm from '../shared/InventoryGroupForm';
 

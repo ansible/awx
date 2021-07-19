@@ -6,10 +6,10 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
 
-import { SystemJobTemplatesAPI } from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
+import { SystemJobTemplatesAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 import LaunchManagementPrompt from './LaunchManagementPrompt';
 
 function ManagementJobListItem({

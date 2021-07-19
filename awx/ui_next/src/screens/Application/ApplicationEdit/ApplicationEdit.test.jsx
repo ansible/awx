@@ -2,9 +2,9 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { createMemoryHistory } from 'history';
+import { ApplicationsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
-import { ApplicationsAPI } from '../../../api';
 import ApplicationEdit from './ApplicationEdit';
 
 jest.mock('../../../api/models/Applications');

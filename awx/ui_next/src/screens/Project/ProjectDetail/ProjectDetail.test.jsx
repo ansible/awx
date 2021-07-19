@@ -2,15 +2,15 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-import {
   ProjectsAPI,
   JobTemplatesAPI,
   WorkflowJobTemplatesAPI,
   InventorySourcesAPI,
-} from '../../../api';
+} from 'api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import ProjectDetail from './ProjectDetail';
 
 jest.mock('../../../api');

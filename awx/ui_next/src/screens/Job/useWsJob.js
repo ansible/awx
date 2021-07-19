@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from '../../util/useWebsocket';
-import { getJobModel } from '../../util/jobs';
+import useWebsocket from 'util/useWebsocket';
+import { getJobModel } from 'util/jobs';
 
 export default function useWsJob(initialJob) {
   const [job, setJob] = useState(initialJob);

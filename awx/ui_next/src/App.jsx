@@ -16,21 +16,21 @@ import {
   ConfigProvider,
   useAuthorizedPath,
   useUserProfile,
-} from './contexts/Config';
-import { SessionProvider, useSession } from './contexts/Session';
-import AppContainer from './components/AppContainer';
-import Background from './components/Background';
-import ContentError from './components/ContentError';
-import NotFound from './screens/NotFound';
-import Login from './screens/Login';
-import { isAuthenticated } from './util/auth';
-import { getLanguageWithoutRegionCode } from './util/language';
+} from 'contexts/Config';
+import { SessionProvider, useSession } from 'contexts/Session';
+import AppContainer from 'components/AppContainer';
+import Background from 'components/Background';
+import ContentError from 'components/ContentError';
+import NotFound from 'screens/NotFound';
+import Login from 'screens/Login';
+import { isAuthenticated } from 'util/auth';
+import { getLanguageWithoutRegionCode } from 'util/language';
+import Metrics from 'screens/Metrics';
+import SubscriptionEdit from 'screens/Setting/Subscription/SubscriptionEdit';
+import { RootAPI } from 'api';
 import { dynamicActivate, locales } from './i18nLoader';
-import Metrics from './screens/Metrics';
 import getRouteConfig from './routeConfig';
-import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
 import { SESSION_REDIRECT_URL } from './constants';
-import { RootAPI } from './api';
 
 function ErrorFallback({ error }) {
   return (

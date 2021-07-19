@@ -11,7 +11,7 @@ import 'ace-builds/src-noconflict/theme-github';
 
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import debounce from '../../util/debounce';
+import debounce from 'util/debounce';
 
 config.set('loadWorkerFromBlob', false);
 

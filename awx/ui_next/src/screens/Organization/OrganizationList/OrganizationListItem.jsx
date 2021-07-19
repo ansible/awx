@@ -10,9 +10,9 @@ import {
   ExclamationTriangleIcon as PFExclamationTriangleIcon,
   PencilAltIcon,
 } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 
-import { Organization } from '../../../types';
+import { Organization } from 'types';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);

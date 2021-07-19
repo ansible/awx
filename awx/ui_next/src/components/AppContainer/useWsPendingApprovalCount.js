@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from '../../util/useWebsocket';
-import useThrottle from '../../util/useThrottle';
+import useWebsocket from 'util/useWebsocket';
+import useThrottle from 'util/useThrottle';
 
 export default function useWsPendingApprovalCount(
   initialCount,

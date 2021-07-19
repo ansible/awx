@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
-import { formatDateString, formatDateStringUTC } from '../../../util/dates';
+import { formatDateString, formatDateStringUTC } from 'util/dates';
 import { DetailName, DetailValue } from '../../DetailList';
 import MultiButtonToggle from '../../MultiButtonToggle';
 

@@ -8,25 +8,21 @@ import {
   TextListVariants,
   TextListItemVariants,
 } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import { VariablesDetail } from '../../../components/CodeEditor';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import CredentialChip from '../../../components/CredentialChip';
-import DeleteButton from '../../../components/DeleteButton';
-import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import { VariablesDetail } from 'components/CodeEditor';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import CredentialChip from 'components/CredentialChip';
+import DeleteButton from 'components/DeleteButton';
+import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import useRequest from 'util/useRequest';
+import { InventorySourcesAPI } from 'api';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import useIsMounted from 'util/useIsMounted';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import useRequest from '../../../util/useRequest';
-import { InventorySourcesAPI } from '../../../api';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
-import useIsMounted from '../../../util/useIsMounted';
 
 function InventorySourceDetail({ inventorySource }) {
   const {

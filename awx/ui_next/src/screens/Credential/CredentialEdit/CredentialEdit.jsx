@@ -1,19 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { CardBody } from '../../../components/Card';
+import { CardBody } from 'components/Card';
 import {
   CredentialsAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
   OrganizationsAPI,
   UsersAPI,
-} from '../../../api';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
+} from 'api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import useRequest from 'util/useRequest';
+import { useConfig } from 'contexts/Config';
+import { Credential } from 'types';
 import CredentialForm from '../shared/CredentialForm';
-import useRequest from '../../../util/useRequest';
-import { useConfig } from '../../../contexts/Config';
-import { Credential } from '../../../types';
 
 function CredentialEdit({ credential }) {
   const history = useHistory();

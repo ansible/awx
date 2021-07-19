@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { RolesAPI, TeamsAPI, UsersAPI } from '../../api';
+import { RolesAPI, TeamsAPI, UsersAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest, { useDeleteItems } from 'util/useRequest';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
@@ -10,8 +12,6 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
 } from '../PaginatedTable';
-import { getQSConfig, parseQueryString } from '../../util/qs';
-import useRequest, { useDeleteItems } from '../../util/useRequest';
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
 import ResourceAccessListItem from './ResourceAccessListItem';
 import ErrorDetail from '../ErrorDetail';

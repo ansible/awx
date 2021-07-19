@@ -1,6 +1,6 @@
 import React from 'react';
+import { formatDateString } from 'util/dates';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { formatDateString } from '../../../util/dates';
 import WorkflowApprovalStatus from './WorkflowApprovalStatus';
 import mockWorkflowApprovals from '../data.workflowApprovals.json';
 

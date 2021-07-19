@@ -4,15 +4,12 @@ import { t, Trans } from '@lingui/macro';
 import { useField } from 'formik';
 import { Link } from 'react-router-dom';
 import { FormGroup } from '@patternfly/react-core';
-import { minMaxValue, regExp } from '../../../../util/validators';
-import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { VariablesField } from '../../../../components/CodeEditor';
-import FormField, { CheckboxField } from '../../../../components/FormField';
-import {
-  FormFullWidthLayout,
-  FormCheckboxLayout,
-} from '../../../../components/FormLayout';
-import Popover from '../../../../components/Popover';
+import { minMaxValue, regExp } from 'util/validators';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { VariablesField } from 'components/CodeEditor';
+import FormField, { CheckboxField } from 'components/FormField';
+import { FormFullWidthLayout, FormCheckboxLayout } from 'components/FormLayout';
+import Popover from 'components/Popover';
 
 export const SourceVarsField = ({ popoverContent }) => {
   const jsonExample = `

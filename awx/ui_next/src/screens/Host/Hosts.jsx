@@ -3,8 +3,8 @@ import { Route, Switch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import { Config } from '../../contexts/Config';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
+import { Config } from 'contexts/Config';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 
 import HostList from './HostList';
 import HostAdd from './HostAdd';

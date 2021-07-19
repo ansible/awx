@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Card, PageSection } from '@patternfly/react-core';
 import { useHistory } from 'react-router-dom';
 
-import { ExecutionEnvironmentsAPI } from '../../../api';
-import { Config } from '../../../contexts/Config';
-import { CardBody } from '../../../components/Card';
+import { ExecutionEnvironmentsAPI } from 'api';
+import { Config } from 'contexts/Config';
+import { CardBody } from 'components/Card';
 import ExecutionEnvironmentForm from '../shared/ExecutionEnvironmentForm';
 
 function ExecutionEnvironmentAdd() {

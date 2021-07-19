@@ -5,11 +5,11 @@ import { func, bool, arrayOf } from 'prop-types';
 import { t, Plural } from '@lingui/macro';
 import { Button, Radio, DropdownItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { KebabifiedContext } from '../../../contexts/Kebabified';
-import { GroupsAPI, InventoriesAPI } from '../../../api';
-import { Group } from '../../../types';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
+import { KebabifiedContext } from 'contexts/Kebabified';
+import { GroupsAPI, InventoriesAPI } from 'api';
+import { Group } from 'types';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
 
 const ListItem = styled.li`
   display: flex;

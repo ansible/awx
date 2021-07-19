@@ -2,17 +2,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-
-import {
   InstanceGroupsAPI,
   OrganizationsAPI,
   InventoriesAPI,
   UnifiedJobTemplatesAPI,
   SettingsAPI,
-} from '../../../api';
+} from 'api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+
 import InstanceGroupList from './InstanceGroupList';
 
 jest.mock('../../../api/models/InstanceGroups');

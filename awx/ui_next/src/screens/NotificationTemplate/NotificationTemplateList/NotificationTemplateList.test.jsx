@@ -4,7 +4,7 @@ import {
   NotificationsAPI,
   NotificationTemplatesAPI,
   OrganizationsAPI,
-} from '../../../api';
+} from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import NotificationTemplateList from './NotificationTemplateList';
 

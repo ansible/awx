@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from '../../../util/useWebsocket';
+import useWebsocket from 'util/useWebsocket';
 
 export default function useWsInventorySources(initialSources) {
   const [sources, setSources] = useState(initialSources);

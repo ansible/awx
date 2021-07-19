@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { CardBody } from '../../../components/Card';
-import { NotificationTemplatesAPI } from '../../../api';
+import { CardBody } from 'components/Card';
+import { NotificationTemplatesAPI } from 'api';
 import NotificationTemplateForm from '../shared/NotificationTemplateForm';
 
 function NotificationTemplateEdit({ template, defaultMessages }) {

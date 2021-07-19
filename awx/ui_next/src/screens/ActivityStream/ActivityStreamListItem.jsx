@@ -5,8 +5,8 @@ import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
-import { formatDateString } from '../../util/dates';
-import { ActionsTd, ActionItem } from '../../components/PaginatedTable';
+import { formatDateString } from 'util/dates';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 
 import ActivityStreamDetailButton from './ActivityStreamDetailButton';
 import ActivityStreamDescription from './ActivityStreamDescription';

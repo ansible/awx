@@ -2,19 +2,19 @@ import React, { useCallback, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import useSelected from '../../../util/useSelected';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { UsersAPI, TokensAPI } from '../../../api';
-import DataListToolbar from '../../../components/DataListToolbar';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'components/PaginatedTable';
+import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import { UsersAPI, TokensAPI } from 'api';
+import DataListToolbar from 'components/DataListToolbar';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import UserTokensListItem from './UserTokenListItem';
 
 const QS_CONFIG = getQSConfig('user', {

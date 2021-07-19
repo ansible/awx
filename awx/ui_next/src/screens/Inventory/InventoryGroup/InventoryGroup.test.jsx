@@ -2,11 +2,11 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { GroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { GroupsAPI } from '../../../api';
 
 import InventoryGroup from './InventoryGroup';
 

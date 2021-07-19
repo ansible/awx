@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import { CardBody } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
+import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import {
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
   CredentialsAPI,
-} from '../../../api';
+} from 'api';
+import useRequest from 'util/useRequest';
 import CredentialForm from '../shared/CredentialForm';
-import useRequest from '../../../util/useRequest';
 
 function CredentialAdd({ me }) {
   const history = useHistory();

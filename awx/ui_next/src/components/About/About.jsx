@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { AboutModal } from '@patternfly/react-core';
-import useBrandName from '../../util/useBrandName';
+import useBrandName from 'util/useBrandName';
 
 function About({ version, isOpen, onClose }) {
   const brandName = useBrandName();

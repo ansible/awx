@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { InventoriesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
-import { InventoriesAPI } from '../../../api';
 import InventoryGroupsDeleteModal from './InventoryGroupsDeleteModal';
 
 jest.mock('../../../api');

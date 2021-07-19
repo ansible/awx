@@ -6,7 +6,7 @@ import {
   SystemJobsAPI,
   WorkflowJobsAPI,
   JobsAPI,
-} from '../../api';
+} from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import JobCancelButton from './JobCancelButton';
 

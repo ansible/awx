@@ -12,14 +12,14 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
-import useRequest from '../../util/useRequest';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import RoutedTabs from '../../components/RoutedTabs';
+import useRequest from 'util/useRequest';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
+import { CredentialsAPI } from 'api';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
-import { CredentialsAPI } from '../../api';
 
 function Credential({ setBreadcrumb }) {
   const { pathname } = useLocation();

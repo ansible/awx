@@ -8,22 +8,22 @@ import {
   FormColumnLayout,
   FormFullWidthLayout,
   SubFormLayout,
-} from '../../../components/FormLayout';
+} from 'components/FormLayout';
 import FormField, {
   PasswordField,
   CheckboxField,
   ArrayTextField,
-} from '../../../components/FormField';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import { CodeEditorField } from '../../../components/CodeEditor';
+} from 'components/FormField';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { CodeEditorField } from 'components/CodeEditor';
 import {
   combine,
   required,
   requiredEmail,
   url,
   minMaxValue,
-} from '../../../util/validators';
-import { NotificationType } from '../../../types';
+} from 'util/validators';
+import { NotificationType } from 'types';
 
 const TypeFields = {
   email: EmailFields,

@@ -9,10 +9,10 @@ import {
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
+import { CredentialsAPI } from 'api';
+import useRequest from 'util/useRequest';
 import CredentialsStep from './CredentialsStep';
 import MetadataStep from './MetadataStep';
-import { CredentialsAPI } from '../../../../../api';
-import useRequest from '../../../../../util/useRequest';
 import { CredentialPluginTestAlert } from '..';
 
 function CredentialPluginWizard({ handleSubmit, onClose }) {

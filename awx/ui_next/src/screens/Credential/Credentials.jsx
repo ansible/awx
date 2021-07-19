@@ -2,8 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import { Config } from '../../contexts/Config';
-import ScreenHeader from '../../components/ScreenHeader';
+import { Config } from 'contexts/Config';
+import ScreenHeader from 'components/ScreenHeader';
 import Credential from './Credential';
 import CredentialAdd from './CredentialAdd';
 import { CredentialList } from './CredentialList';

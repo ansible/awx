@@ -3,23 +3,19 @@ import { Link, useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import { VariablesDetail } from '../../../components/CodeEditor';
-import DeleteButton from '../../../components/DeleteButton';
-import ErrorDetail from '../../../components/ErrorDetail';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import ChipGroup from '../../../components/ChipGroup';
-import { InventoriesAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { Inventory } from '../../../types';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import { VariablesDetail } from 'components/CodeEditor';
+import DeleteButton from 'components/DeleteButton';
+import ErrorDetail from 'components/ErrorDetail';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import ChipGroup from 'components/ChipGroup';
+import { InventoriesAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { Inventory } from 'types';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 function InventoryDetail({ inventory }) {
   const history = useHistory();

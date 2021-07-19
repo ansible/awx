@@ -3,10 +3,10 @@ import React, { useState, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
+import ScreenHeader from 'components/ScreenHeader';
 import CredentialTypeAdd from './CredentialTypeAdd';
 import CredentialTypeList from './CredentialTypeList';
 import CredentialType from './CredentialType';
-import ScreenHeader from '../../components/ScreenHeader';
 
 function CredentialTypes() {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({

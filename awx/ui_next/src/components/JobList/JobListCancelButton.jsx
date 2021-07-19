@@ -3,10 +3,10 @@ import React, { useContext, useEffect, useState } from 'react';
 import { t, Plural } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
-import { KebabifiedContext } from '../../contexts/Kebabified';
-import { isJobRunning } from '../../util/jobs';
+import { KebabifiedContext } from 'contexts/Kebabified';
+import { isJobRunning } from 'util/jobs';
+import { Job } from 'types';
 import AlertModal from '../AlertModal';
-import { Job } from '../../types';
 
 function cannotCancelBecausePermissions(job) {
   return (

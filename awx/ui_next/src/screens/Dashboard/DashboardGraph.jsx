@@ -13,9 +13,9 @@ import {
   SelectOption,
 } from '@patternfly/react-core';
 
-import useRequest from '../../util/useRequest';
-import { DashboardAPI } from '../../api';
-import ContentLoading from '../../components/ContentLoading';
+import useRequest from 'util/useRequest';
+import { DashboardAPI } from 'api';
+import ContentLoading from 'components/ContentLoading';
 import LineChart from './shared/LineChart';
 
 const StatusSelect = styled(Select)`

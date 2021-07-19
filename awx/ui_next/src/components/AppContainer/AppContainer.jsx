@@ -15,9 +15,9 @@ import { t, Plural } from '@lingui/macro';
 
 import styled from 'styled-components';
 
-import { useConfig, useAuthorizedPath } from '../../contexts/Config';
-import { useSession } from '../../contexts/Session';
-import issuePendoIdentity from '../../util/issuePendoIdentity';
+import { useConfig, useAuthorizedPath } from 'contexts/Config';
+import { useSession } from 'contexts/Session';
+import issuePendoIdentity from 'util/issuePendoIdentity';
 import About from '../About';
 import BrandLogo from './BrandLogo';
 import NavExpandableGroup from './NavExpandableGroup';

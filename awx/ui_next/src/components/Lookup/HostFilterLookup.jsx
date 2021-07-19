@@ -14,15 +14,15 @@ import {
   Modal,
   Tooltip,
 } from '@patternfly/react-core';
+import { HostsAPI } from 'api';
+import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
+import useRequest, { useDismissableError } from 'util/useRequest';
 import ChipGroup from '../ChipGroup';
 import Popover from '../Popover';
 import DataListToolbar from '../DataListToolbar';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 import HostListItem from './HostListItem';
-import { HostsAPI } from '../../api';
-import { getQSConfig, mergeParams, parseQueryString } from '../../util/qs';
-import useRequest, { useDismissableError } from '../../util/useRequest';
 import {
   removeDefaultParams,
   removeNamespacedKeys,

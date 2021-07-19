@@ -1,8 +1,8 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { Inventory } from 'types';
 import SmartInventoryHostList from './SmartInventoryHostList';
 import SmartInventoryHost from '../SmartInventoryHost';
-import { Inventory } from '../../../types';
 
 function SmartInventoryHosts({ inventory, setBreadcrumb }) {
   return (

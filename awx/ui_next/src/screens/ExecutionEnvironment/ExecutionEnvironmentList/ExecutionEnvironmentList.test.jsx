@@ -2,18 +2,18 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-
-import {
   ExecutionEnvironmentsAPI,
   InventorySourcesAPI,
   WorkflowJobTemplateNodesAPI,
   OrganizationsAPI,
   ProjectsAPI,
   UnifiedJobTemplatesAPI,
-} from '../../../api';
+} from 'api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+
 import ExecutionEnvironmentList from './ExecutionEnvironmentList';
 
 jest.mock('../../../api/models/ExecutionEnvironments');

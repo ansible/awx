@@ -9,24 +9,20 @@ import {
   TextListVariants,
   TextListItemVariants,
 } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ChipGroup from '../../../components/ChipGroup';
-import CodeEditor from '../../../components/CodeEditor';
-import CredentialChip from '../../../components/CredentialChip';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
-import { Credential } from '../../../types';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import DeleteButton from 'components/DeleteButton';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import ChipGroup from 'components/ChipGroup';
+import CodeEditor from 'components/CodeEditor';
+import CredentialChip from 'components/CredentialChip';
+import ErrorDetail from 'components/ErrorDetail';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import { Credential } from 'types';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 const PluginInputMetadata = styled.div`
   grid-column: 1 / -1;

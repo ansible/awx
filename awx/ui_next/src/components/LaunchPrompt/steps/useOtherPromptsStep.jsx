@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { jsonToYaml, yamlToJson } from '../../../util/yaml';
+import { jsonToYaml, yamlToJson } from 'util/yaml';
 import OtherPromptsStep from './OtherPromptsStep';
 import StepName from './StepName';
 

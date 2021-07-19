@@ -16,7 +16,7 @@ import {
   PlusIcon,
   TimesIcon,
 } from '@patternfly/react-icons';
-import { WorkflowDispatchContext } from '../../contexts/Workflow';
+import { WorkflowDispatchContext } from 'contexts/Workflow';
 
 const Wrapper = styled.div`
   background-color: white;

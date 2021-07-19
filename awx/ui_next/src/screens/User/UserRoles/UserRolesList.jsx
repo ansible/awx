@@ -9,19 +9,19 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { UsersAPI, RolesAPI } from '../../../api';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { UsersAPI, RolesAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
-} from '../../../components/PaginatedTable';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
+} from 'components/PaginatedTable';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
+import UserAndTeamAccessAdd from 'components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 import UserRolesListItem from './UserRolesListItem';
-import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
   page: 1,

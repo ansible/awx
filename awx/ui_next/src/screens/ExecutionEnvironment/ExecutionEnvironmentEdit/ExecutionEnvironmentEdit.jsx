@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CardBody } from '../../../components/Card';
-import { ExecutionEnvironmentsAPI } from '../../../api';
+import { CardBody } from 'components/Card';
+import { ExecutionEnvironmentsAPI } from 'api';
+import { Config } from 'contexts/Config';
 import ExecutionEnvironmentForm from '../shared/ExecutionEnvironmentForm';
-import { Config } from '../../../contexts/Config';
 
 function ExecutionEnvironmentEdit({ executionEnvironment }) {
   const history = useHistory();

@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { SchedulesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { SchedulesAPI } from '../../../api';
 import ScheduleList from './ScheduleList';
 import mockSchedules from '../data.schedules.json';
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { InstancesAPI } from 'api';
+import useDebounce from 'util/useDebounce';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { InstancesAPI } from '../../../api';
-import useDebounce from '../../../util/useDebounce';
 
 import InstanceListItem from './InstanceListItem';
 

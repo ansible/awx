@@ -6,8 +6,8 @@ import { t } from '@lingui/macro';
 import 'styled-components/macro';
 
 import { Tr, Td } from '@patternfly/react-table';
-import Sparkline from '../../../components/Sparkline';
-import { Host } from '../../../types';
+import Sparkline from 'components/Sparkline';
+import { Host } from 'types';
 
 function SmartInventoryHostListItem({
   detailUrl,

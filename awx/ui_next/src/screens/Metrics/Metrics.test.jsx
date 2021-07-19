@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { MetricsAPI, InstancesAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import Metrics from './Metrics';
-import { MetricsAPI, InstancesAPI } from '../../api';
 
 jest.mock('../../api/models/Instances');
 jest.mock('../../api/models/Metrics');

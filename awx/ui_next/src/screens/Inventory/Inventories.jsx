@@ -3,8 +3,8 @@ import React, { useState, useCallback, useRef } from 'react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
-import { Config } from '../../contexts/Config';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
+import { Config } from 'contexts/Config';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import { InventoryList } from './InventoryList';
 import Inventory from './Inventory';
 import SmartInventory from './SmartInventory';

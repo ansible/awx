@@ -13,16 +13,16 @@ import {
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { WorkflowJobTemplateNodesAPI } from '../../../api';
-import { constants as wfConstants } from '../../../components/Workflow/WorkflowUtils';
+} from 'contexts/Workflow';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import { WorkflowJobTemplateNodesAPI } from 'api';
+import { constants as wfConstants } from 'components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
   WorkflowNodeTypeLetter,
-} from '../../../components/Workflow';
+} from 'components/Workflow';
 import getNodeType from './shared/WorkflowJobTemplateVisualizerUtils';
 
 const NodeG = styled.g`

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
+import { SettingsProvider } from 'contexts/Settings';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { SettingsAPI } from '../../../api';
-import { SettingsProvider } from '../../../contexts/Settings';
 import mockAllOptions from '../shared/data.allSettingOptions.json';
 import mockLDAP from '../shared/data.ldapSettings.json';
 import LDAP from './LDAP';

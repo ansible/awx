@@ -3,7 +3,7 @@ import { Route, withRouter, Switch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 
 import ProjectsList from './ProjectList/ProjectList';
 import ProjectAdd from './ProjectAdd/ProjectAdd';

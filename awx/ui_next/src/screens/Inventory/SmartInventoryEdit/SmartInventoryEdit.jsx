@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Inventory } from '../../../types';
-import useRequest from '../../../util/useRequest';
-import { InventoriesAPI } from '../../../api';
-import { CardBody } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
+import { Inventory } from 'types';
+import useRequest from 'util/useRequest';
+import { InventoriesAPI } from 'api';
+import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import SmartInventoryForm from '../shared/SmartInventoryForm';
 
 function SmartInventoryEdit({ inventory }) {

@@ -5,13 +5,13 @@ import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button, DropdownItem } from '@patternfly/react-core';
 
-import useRequest, { useDismissableError } from '../../util/useRequest';
-import { InventoriesAPI, CredentialTypesAPI } from '../../api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { InventoriesAPI, CredentialTypesAPI } from 'api';
 
+import { KebabifiedContext } from 'contexts/Kebabified';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
-import { KebabifiedContext } from '../../contexts/Kebabified';
 import ContentError from '../ContentError';
 
 function AdHocCommands({ adHocItems, hasListItems, onLaunchLoading }) {

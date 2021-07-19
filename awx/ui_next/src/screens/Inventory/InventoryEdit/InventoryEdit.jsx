@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
-import { CardBody } from '../../../components/Card';
-import { InventoriesAPI } from '../../../api';
-import ContentLoading from '../../../components/ContentLoading';
+import { CardBody } from 'components/Card';
+import { InventoriesAPI } from 'api';
+import ContentLoading from 'components/ContentLoading';
+import useIsMounted from 'util/useIsMounted';
 import InventoryForm from '../shared/InventoryForm';
-import useIsMounted from '../../../util/useIsMounted';
 
 function InventoryEdit({ inventory }) {
   const [error, setError] = useState(null);

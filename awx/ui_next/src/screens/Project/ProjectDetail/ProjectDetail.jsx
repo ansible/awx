@@ -11,27 +11,23 @@ import {
   TextListItemVariants,
   Tooltip,
 } from '@patternfly/react-core';
-import { Project } from '../../../types';
-import { Config } from '../../../contexts/Config';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import JobCancelButton from '../../../components/JobCancelButton';
-import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
-import CredentialChip from '../../../components/CredentialChip';
-import { ProjectsAPI } from '../../../api';
-import { toTitleCase } from '../../../util/strings';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+import { Project } from 'types';
+import { Config } from 'contexts/Config';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import JobCancelButton from 'components/JobCancelButton';
+import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
+import CredentialChip from 'components/CredentialChip';
+import { ProjectsAPI } from 'api';
+import { toTitleCase } from 'util/strings';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import StatusLabel from 'components/StatusLabel';
+import { formatDateString } from 'util/dates';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import StatusLabel from '../../../components/StatusLabel';
-import { formatDateString } from '../../../util/dates';
 import useWsProject from './useWsProject';
 
 const Label = styled.span`

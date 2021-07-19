@@ -11,12 +11,12 @@ import {
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import { ConfigAPI, SettingsAPI, RootAPI } from '../../../../api';
-import useRequest, { useDismissableError } from '../../../../util/useRequest';
-import ContentLoading from '../../../../components/ContentLoading';
-import ContentError from '../../../../components/ContentError';
-import { FormSubmitError } from '../../../../components/FormField';
-import { useConfig } from '../../../../contexts/Config';
+import { ConfigAPI, SettingsAPI, RootAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import ContentLoading from 'components/ContentLoading';
+import ContentError from 'components/ContentError';
+import { FormSubmitError } from 'components/FormField';
+import { useConfig } from 'contexts/Config';
 import SubscriptionStep from './SubscriptionStep';
 import AnalyticsStep from './AnalyticsStep';
 import EulaStep from './EulaStep';

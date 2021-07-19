@@ -4,12 +4,16 @@ import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { Form } from '@patternfly/react-core';
-import { CardBody } from '../../../../components/Card';
-import ContentError from '../../../../components/ContentError';
-import ContentLoading from '../../../../components/ContentLoading';
-import { FormSubmitError } from '../../../../components/FormField';
-import { FormColumnLayout } from '../../../../components/FormLayout';
-import { useSettings } from '../../../../contexts/Settings';
+import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout } from 'components/FormLayout';
+import { useSettings } from 'contexts/Settings';
+import useModal from 'util/useModal';
+import useRequest from 'util/useRequest';
+import { SettingsAPI } from 'api';
+import { formatJson } from '../../shared/settingUtils';
 import {
   BooleanField,
   ChoiceField,
@@ -19,10 +23,6 @@ import {
   RevertAllAlert,
   RevertFormActionGroup,
 } from '../../shared';
-import useModal from '../../../../util/useModal';
-import useRequest from '../../../../util/useRequest';
-import { formatJson } from '../../shared/settingUtils';
-import { SettingsAPI } from '../../../../api';
 
 function LoggingEdit() {
   const history = useHistory();

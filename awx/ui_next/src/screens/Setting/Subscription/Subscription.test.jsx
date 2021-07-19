@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI, RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import mockAllSettings from '../shared/data.allSettings.json';
-import { SettingsAPI, RootAPI } from '../../../api';
 import Subscription from './Subscription';
 
 jest.mock('../../../api');

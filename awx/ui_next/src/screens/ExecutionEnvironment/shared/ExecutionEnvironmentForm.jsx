@@ -3,17 +3,17 @@ import { func, shape, bool } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
-import { ExecutionEnvironmentsAPI } from '../../../api';
-import CredentialLookup from '../../../components/Lookup/CredentialLookup';
-import FormActionGroup from '../../../components/FormActionGroup';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import { FormColumnLayout } from '../../../components/FormLayout';
-import { OrganizationLookup } from '../../../components/Lookup';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import { required } from '../../../util/validators';
-import useRequest from '../../../util/useRequest';
+import { ExecutionEnvironmentsAPI } from 'api';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import FormActionGroup from 'components/FormActionGroup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { FormColumnLayout } from 'components/FormLayout';
+import { OrganizationLookup } from 'components/Lookup';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import { required } from 'util/validators';
+import useRequest from 'util/useRequest';
 
 function ExecutionEnvironmentFormFields({
   me,

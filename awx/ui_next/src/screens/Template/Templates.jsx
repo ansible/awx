@@ -4,8 +4,8 @@ import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { PageSection } from '@patternfly/react-core';
 
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
-import TemplateList from '../../components/TemplateList';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import TemplateList from 'components/TemplateList';
 import Template from './Template';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
 import JobTemplateAdd from './JobTemplateAdd';

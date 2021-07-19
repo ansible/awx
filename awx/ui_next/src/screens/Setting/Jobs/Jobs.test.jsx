@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import mockJobSettings from '../shared/data.jobSettings.json';
-import { SettingsAPI } from '../../../api';
 import Jobs from './Jobs';
 
 jest.mock('../../../api');

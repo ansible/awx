@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { ProjectsAPI, CredentialTypesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import ProjectAdd from './ProjectAdd';
-import { ProjectsAPI, CredentialTypesAPI } from '../../../api';
 
 jest.mock('../../../api');
 

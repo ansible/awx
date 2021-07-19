@@ -5,14 +5,14 @@ import { Button, Modal } from '@patternfly/react-core';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
+} from 'contexts/Workflow';
 
-import ContentError from '../../../../../components/ContentError';
-import ContentLoading from '../../../../../components/ContentLoading';
-import PromptDetail from '../../../../../components/PromptDetail';
-import useRequest from '../../../../../util/useRequest';
-import { jsonToYaml } from '../../../../../util/yaml';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import PromptDetail from 'components/PromptDetail';
+import useRequest from 'util/useRequest';
+import { jsonToYaml } from 'util/yaml';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import getNodeType from '../../shared/WorkflowJobTemplateVisualizerUtils';
 
 function NodeViewModal({ readOnly }) {

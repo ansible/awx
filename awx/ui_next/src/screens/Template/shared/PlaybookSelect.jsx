@@ -3,8 +3,8 @@ import { number, string, oneOfType } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { SelectVariant, Select, SelectOption } from '@patternfly/react-core';
-import { ProjectsAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import { ProjectsAPI } from 'api';
+import useRequest from 'util/useRequest';
 
 function PlaybookSelect({
   projectId,

@@ -1,18 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CardBody } from '../../../components/Card';
-import { getAddedAndRemoved } from '../../../util/lists';
-import {
-  WorkflowJobTemplatesAPI,
-  OrganizationsAPI,
-  UsersAPI,
-} from '../../../api';
+import { CardBody } from 'components/Card';
+import { getAddedAndRemoved } from 'util/lists';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
+import { useConfig } from 'contexts/Config';
+import useRequest from 'util/useRequest';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import { WorkflowJobTemplateForm } from '../shared';
-import { useConfig } from '../../../contexts/Config';
-import useRequest from '../../../util/useRequest';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
 
 function WorkflowJobTemplateEdit({ template }) {
   const { me = {} } = useConfig();

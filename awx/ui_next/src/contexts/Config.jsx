@@ -3,10 +3,10 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import { ConfigAPI, MeAPI, UsersAPI, OrganizationsAPI } from '../api';
-import useRequest, { useDismissableError } from '../util/useRequest';
-import AlertModal from '../components/AlertModal';
-import ErrorDetail from '../components/ErrorDetail';
+import { ConfigAPI, MeAPI, UsersAPI, OrganizationsAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from './Session';
 
 // eslint-disable-next-line import/prefer-default-export

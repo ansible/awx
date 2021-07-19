@@ -7,11 +7,11 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import CopyButton from '../../../components/CopyButton';
-import { ExecutionEnvironment } from '../../../types';
-import { ExecutionEnvironmentsAPI } from '../../../api';
-import { timeOfDay } from '../../../util/dates';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import CopyButton from 'components/CopyButton';
+import { ExecutionEnvironment } from 'types';
+import { ExecutionEnvironmentsAPI } from 'api';
+import { timeOfDay } from 'util/dates';
 
 function ExecutionEnvironmentListItem({
   executionEnvironment,

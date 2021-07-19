@@ -3,16 +3,13 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { Form } from '@patternfly/react-core';
-import { VariablesField } from '../../../components/CodeEditor';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
-import { required } from '../../../util/validators';
-import InstanceGroupsLookup from '../../../components/Lookup/InstanceGroupsLookup';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../components/FormLayout';
+import { VariablesField } from 'components/CodeEditor';
+import FormField, { FormSubmitError } from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup';
+import { required } from 'util/validators';
+import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
 
 function InventoryFormFields({ inventory }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();

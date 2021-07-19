@@ -2,9 +2,13 @@ import React, { useCallback, useEffect } from 'react';
 import { Link, Route, Switch, Redirect } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import ScreenHeader from '../../components/ScreenHeader';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import ScreenHeader from 'components/ScreenHeader';
+import { SettingsProvider } from 'contexts/Settings';
+import { useConfig } from 'contexts/Config';
+import { SettingsAPI } from 'api';
+import useRequest from 'util/useRequest';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
 import GoogleOAuth2 from './GoogleOAuth2';
@@ -19,10 +23,6 @@ import SAML from './SAML';
 import SettingList from './SettingList';
 import TACACS from './TACACS';
 import UI from './UI';
-import { SettingsProvider } from '../../contexts/Settings';
-import { useConfig } from '../../contexts/Config';
-import { SettingsAPI } from '../../api';
-import useRequest from '../../util/useRequest';
 
 function Settings() {
   const { license_info = {}, me } = useConfig();

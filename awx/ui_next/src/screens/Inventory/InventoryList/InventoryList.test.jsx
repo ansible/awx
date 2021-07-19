@@ -1,10 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import {
-  InventoriesAPI,
-  JobTemplatesAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../api';
+import { InventoriesAPI, JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryList from './InventoryList';

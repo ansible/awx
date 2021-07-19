@@ -12,11 +12,11 @@ import {
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import RoutedTabs from '../../components/RoutedTabs';
-import useRequest from '../../util/useRequest';
-import { getJobModel } from '../../util/jobs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
+import useRequest from 'util/useRequest';
+import { getJobModel } from 'util/jobs';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { WorkflowOutput } from './WorkflowOutput';

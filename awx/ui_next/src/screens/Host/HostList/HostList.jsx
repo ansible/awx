@@ -2,23 +2,19 @@ import React, { useEffect, useCallback } from 'react';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-import { HostsAPI } from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import DataListToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { HostsAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import DataListToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import {
-  encodeQueryString,
-  getQSConfig,
-  parseQueryString,
-} from '../../../util/qs';
+} from 'components/PaginatedTable';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { encodeQueryString, getQSConfig, parseQueryString } from 'util/qs';
 
 import HostListItem from './HostListItem';
 import SmartInventoryButton from './SmartInventoryButton';

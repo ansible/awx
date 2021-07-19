@@ -3,9 +3,9 @@ import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
+import ContentError from 'components/ContentError';
 import SubscriptionDetail from './SubscriptionDetail';
 import SubscriptionEdit from './SubscriptionEdit';
-import ContentError from '../../../components/ContentError';
 
 function Subscription() {
   const baseURL = '/settings/subscription';

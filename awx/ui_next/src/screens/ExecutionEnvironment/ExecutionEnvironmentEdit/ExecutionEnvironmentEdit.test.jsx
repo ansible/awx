@@ -2,8 +2,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from '../../../api';
 
 import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
 

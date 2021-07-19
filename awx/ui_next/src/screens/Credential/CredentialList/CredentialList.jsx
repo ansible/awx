@@ -2,21 +2,21 @@ import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-import { CredentialsAPI } from '../../../api';
-import useSelected from '../../../util/useSelected';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import DataListToolbar from '../../../components/DataListToolbar';
+import { CredentialsAPI } from 'api';
+import useSelected from 'util/useSelected';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+} from 'components/PaginatedTable';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import CredentialListItem from './CredentialListItem';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,

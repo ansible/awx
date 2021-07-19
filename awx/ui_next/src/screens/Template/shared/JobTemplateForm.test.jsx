@@ -3,12 +3,6 @@ import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
-import JobTemplateForm from './JobTemplateForm';
-import {
   LabelsAPI,
   JobTemplatesAPI,
   ProjectsAPI,
@@ -16,7 +10,13 @@ import {
   CredentialTypesAPI,
   InventoriesAPI,
   RootAPI,
-} from '../../../api';
+} from 'api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
+import JobTemplateForm from './JobTemplateForm';
 
 jest.mock('../../../api');
 

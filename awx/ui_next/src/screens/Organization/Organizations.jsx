@@ -3,8 +3,8 @@ import { Route, withRouter, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import { Config } from '../../contexts/Config';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
+import { Config } from 'contexts/Config';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 
 import OrganizationsList from './OrganizationList/OrganizationList';
 import OrganizationAdd from './OrganizationAdd/OrganizationAdd';

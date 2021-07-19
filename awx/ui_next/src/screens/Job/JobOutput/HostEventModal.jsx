@@ -5,10 +5,10 @@ import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { AllHtmlEntities } from 'html-entities';
-import StatusIcon from '../../../components/StatusIcon';
-import { DetailList, Detail } from '../../../components/DetailList';
-import ContentEmpty from '../../../components/ContentEmpty';
-import CodeEditor from '../../../components/CodeEditor';
+import StatusIcon from 'components/StatusIcon';
+import { DetailList, Detail } from 'components/DetailList';
+import ContentEmpty from 'components/ContentEmpty';
+import CodeEditor from 'components/CodeEditor';
 
 const entities = new AllHtmlEntities();
 

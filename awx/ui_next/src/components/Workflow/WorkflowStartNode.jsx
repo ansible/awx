@@ -6,7 +6,7 @@ import { PlusIcon } from '@patternfly/react-icons';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../contexts/Workflow';
+} from 'contexts/Workflow';
 import WorkflowActionTooltip from './WorkflowActionTooltip';
 import WorkflowActionTooltipItem from './WorkflowActionTooltipItem';
 

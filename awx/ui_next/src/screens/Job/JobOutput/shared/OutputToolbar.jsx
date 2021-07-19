@@ -9,14 +9,11 @@ import {
   TrashAltIcon,
 } from '@patternfly/react-icons';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
-import DeleteButton from '../../../../components/DeleteButton';
-import {
-  LaunchButton,
-  ReLaunchDropDown,
-} from '../../../../components/LaunchButton';
-import { useConfig } from '../../../../contexts/Config';
+import DeleteButton from 'components/DeleteButton';
+import { LaunchButton, ReLaunchDropDown } from 'components/LaunchButton';
+import { useConfig } from 'contexts/Config';
 
-import JobCancelButton from '../../../../components/JobCancelButton';
+import JobCancelButton from 'components/JobCancelButton';
 
 const BadgeGroup = styled.div`
   margin-left: 20px;

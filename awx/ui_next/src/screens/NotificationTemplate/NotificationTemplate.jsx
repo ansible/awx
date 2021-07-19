@@ -12,13 +12,13 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from '../../util/useRequest';
-import RoutedTabs from '../../components/RoutedTabs';
-import ContentError from '../../components/ContentError';
-import { NotificationTemplatesAPI } from '../../api';
+import useRequest from 'util/useRequest';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import { NotificationTemplatesAPI } from 'api';
+import ContentLoading from 'components/ContentLoading';
 import NotificationTemplateDetail from './NotificationTemplateDetail';
 import NotificationTemplateEdit from './NotificationTemplateEdit';
-import ContentLoading from '../../components/ContentLoading';
 
 function NotificationTemplate({ setBreadcrumb }) {
   const { id: templateId } = useParams();

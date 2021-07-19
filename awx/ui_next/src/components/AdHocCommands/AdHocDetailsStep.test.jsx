@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
+import { RootAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { RootAPI } from '../../api';
 import DetailsStep from './AdHocDetailsStep';
 
 jest.mock('../../api/models/Credentials');

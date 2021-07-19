@@ -6,8 +6,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { CredentialType } from '../../../types';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { CredentialType } from 'types';
 
 function CredentialTypeListItem({
   credentialType,

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { CardBody } from '../../../components/Card';
-import { OrganizationsAPI } from '../../../api';
+import { CardBody } from 'components/Card';
+import { OrganizationsAPI } from 'api';
 import OrganizationForm from '../shared/OrganizationForm';
 
 const isEqual = (array1, array2) =>

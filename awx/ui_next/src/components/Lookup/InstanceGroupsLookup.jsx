@@ -4,12 +4,12 @@ import { withRouter } from 'react-router-dom';
 
 import { t, Trans } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { InstanceGroupsAPI } from '../../api';
-import { InstanceGroup } from '../../types';
-import { getQSConfig, parseQueryString } from '../../util/qs';
+import { InstanceGroupsAPI } from 'api';
+import { InstanceGroup } from 'types';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import Popover from '../Popover';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 

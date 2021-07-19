@@ -5,7 +5,7 @@ import {
   WorkflowJobTemplatesAPI,
   OrganizationsAPI,
   NotificationTemplatesAPI,
-} from '../../api';
+} from 'api';
 
 import {
   mountWithContexts,

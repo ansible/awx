@@ -6,7 +6,11 @@ import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
 import { Chip, Divider, Title, Button } from '@patternfly/react-core';
-import { Schedule } from '../../../types';
+import { Schedule } from 'types';
+import { formatDateString } from 'util/dates';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
+import { parseVariableField, jsonToYaml } from 'util/yaml';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
 import ContentError from '../../ContentError';
@@ -15,18 +19,10 @@ import CredentialChip from '../../CredentialChip';
 import { DetailList, Detail, UserDateDetail } from '../../DetailList';
 import ScheduleOccurrences from '../ScheduleOccurrences';
 import ScheduleToggle from '../ScheduleToggle';
-import { formatDateString } from '../../../util/dates';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import {
-  JobTemplatesAPI,
-  SchedulesAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../api';
 import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
-import { parseVariableField, jsonToYaml } from '../../../util/yaml';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);

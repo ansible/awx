@@ -1,26 +1,26 @@
 import React from 'react';
 import { Trans } from '@lingui/macro';
 
-import ActivityStream from './screens/ActivityStream';
-import Applications from './screens/Application';
-import CredentialTypes from './screens/CredentialType';
-import Credentials from './screens/Credential';
-import Dashboard from './screens/Dashboard';
-import ExecutionEnvironments from './screens/ExecutionEnvironment';
-import Hosts from './screens/Host';
-import InstanceGroups from './screens/InstanceGroup';
-import Inventory from './screens/Inventory';
-import ManagementJobs from './screens/ManagementJob';
-import NotificationTemplates from './screens/NotificationTemplate';
-import Organizations from './screens/Organization';
-import Projects from './screens/Project';
-import Schedules from './screens/Schedule';
-import Settings from './screens/Setting';
-import Teams from './screens/Team';
-import Templates from './screens/Template';
-import Users from './screens/User';
-import WorkflowApprovals from './screens/WorkflowApproval';
-import { Jobs } from './screens/Job';
+import ActivityStream from 'screens/ActivityStream';
+import Applications from 'screens/Application';
+import CredentialTypes from 'screens/CredentialType';
+import Credentials from 'screens/Credential';
+import Dashboard from 'screens/Dashboard';
+import ExecutionEnvironments from 'screens/ExecutionEnvironment';
+import Hosts from 'screens/Host';
+import InstanceGroups from 'screens/InstanceGroup';
+import Inventory from 'screens/Inventory';
+import ManagementJobs from 'screens/ManagementJob';
+import NotificationTemplates from 'screens/NotificationTemplate';
+import Organizations from 'screens/Organization';
+import Projects from 'screens/Project';
+import Schedules from 'screens/Schedule';
+import Settings from 'screens/Setting';
+import Teams from 'screens/Team';
+import Templates from 'screens/Template';
+import Users from 'screens/User';
+import WorkflowApprovals from 'screens/WorkflowApproval';
+import { Jobs } from 'screens/Job';
 
 function getRouteConfig(userProfile = {}) {
   let routeConfig = [

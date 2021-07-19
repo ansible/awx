@@ -8,19 +8,15 @@ import {
   CheckIcon,
   ExclamationCircleIcon,
 } from '@patternfly/react-icons';
-import RoutedTabs from '../../../../components/RoutedTabs';
-import { CardBody, CardActionsRow } from '../../../../components/Card';
-import {
-  DetailList,
-  Detail,
-  NumberSinceDetail,
-} from '../../../../components/DetailList';
-import { useConfig } from '../../../../contexts/Config';
+import RoutedTabs from 'components/RoutedTabs';
+import { CardBody, CardActionsRow } from 'components/Card';
+import { DetailList, Detail, NumberSinceDetail } from 'components/DetailList';
+import { useConfig } from 'contexts/Config';
 import {
   formatDateString,
   formatDateStringUTC,
   secondsToDays,
-} from '../../../../util/dates';
+} from 'util/dates';
 
 function SubscriptionDetail() {
   const { me = {}, license_info, version } = useConfig();

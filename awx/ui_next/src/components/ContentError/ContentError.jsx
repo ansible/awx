@@ -10,7 +10,7 @@ import {
   EmptyStateBody,
 } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
-import { useSession } from '../../contexts/Session';
+import { useSession } from 'contexts/Session';
 import ErrorDetail from '../ErrorDetail';
 
 function ContentError({ error, children, isNotFound }) {

@@ -12,18 +12,18 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import { useConfig } from '../../contexts/Config';
-import useRequest from '../../util/useRequest';
-import RoutedTabs from '../../components/RoutedTabs';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import NotificationList from '../../components/NotificationList';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
-import { Schedules } from '../../components/Schedule';
+import { useConfig } from 'contexts/Config';
+import useRequest from 'util/useRequest';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import NotificationList from 'components/NotificationList';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import { Schedules } from 'components/Schedule';
+import { OrganizationsAPI, ProjectsAPI } from 'api';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
-import { OrganizationsAPI, ProjectsAPI } from '../../api';
 
 function Project({ setBreadcrumb }) {
   const { me = {} } = useConfig();

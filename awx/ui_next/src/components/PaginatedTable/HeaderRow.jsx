@@ -3,7 +3,7 @@ import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Thead, Tr, Th as PFTh } from '@patternfly/react-table';
 import styled from 'styled-components';
-import { parseQueryString, updateQueryString } from '../../util/qs';
+import { parseQueryString, updateQueryString } from 'util/qs';
 
 const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;

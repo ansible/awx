@@ -2,23 +2,23 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import useRequest, {
   useDismissableError,
   useDeleteItems,
-} from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { HostsAPI, InventoriesAPI } from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { HostsAPI, InventoriesAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
   ToolbarAddButton,
-} from '../../../components/PaginatedTable';
-import AssociateModal from '../../../components/AssociateModal';
-import DisassociateButton from '../../../components/DisassociateButton';
-import DataListToolbar from '../../../components/DataListToolbar';
+} from 'components/PaginatedTable';
+import AssociateModal from 'components/AssociateModal';
+import DisassociateButton from 'components/DisassociateButton';
+import DataListToolbar from 'components/DataListToolbar';
 import HostGroupItem from './HostGroupItem';
 
 const QS_CONFIG = getQSConfig('group', {

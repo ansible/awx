@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { ExecutionEnvironmentsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import ExecutionEnvironmentListItem from './ExecutionEnvironmentListItem';
-import { ExecutionEnvironmentsAPI } from '../../../api';
 
 jest.mock('../../../api');
 

@@ -7,12 +7,12 @@ import {
   Select,
   SelectOption,
 } from '@patternfly/react-core';
-import { ProjectsAPI } from '../../../../api';
-import useRequest from '../../../../util/useRequest';
-import { required } from '../../../../util/validators';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
-import Popover from '../../../../components/Popover';
+import { ProjectsAPI } from 'api';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import ProjectLookup from 'components/Lookup/ProjectLookup';
+import Popover from 'components/Popover';
 import {
   OptionsField,
   SourceVarsField,

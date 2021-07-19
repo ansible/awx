@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { CredentialsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { CredentialsAPI } from '../../api';
 import DeleteButton from './DeleteButton';
 
 jest.mock('../../api');

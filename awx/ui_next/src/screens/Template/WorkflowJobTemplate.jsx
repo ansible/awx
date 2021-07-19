@@ -12,22 +12,22 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
-import RoutedTabs from '../../components/RoutedTabs';
-import { useConfig } from '../../contexts/Config';
-import useRequest from '../../util/useRequest';
-import AppendBody from '../../components/AppendBody';
-import ContentError from '../../components/ContentError';
-import FullPage from '../../components/FullPage';
-import JobList from '../../components/JobList';
-import NotificationList from '../../components/NotificationList';
-import { Schedules } from '../../components/Schedule';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
+import RoutedTabs from 'components/RoutedTabs';
+import { useConfig } from 'contexts/Config';
+import useRequest from 'util/useRequest';
+import AppendBody from 'components/AppendBody';
+import ContentError from 'components/ContentError';
+import FullPage from 'components/FullPage';
+import JobList from 'components/JobList';
+import NotificationList from 'components/NotificationList';
+import { Schedules } from 'components/Schedule';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI } from 'api';
+import ContentLoading from 'components/ContentLoading';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
-import ContentLoading from '../../components/ContentLoading';
 
 function WorkflowJobTemplate({ setBreadcrumb }) {
   const location = useLocation();

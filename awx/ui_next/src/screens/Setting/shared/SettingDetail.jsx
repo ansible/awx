@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { t } from '@lingui/macro';
-import { Detail } from '../../../components/DetailList';
-import CodeDetail from '../../../components/DetailList/CodeDetail';
+import { Detail } from 'components/DetailList';
+import CodeDetail from 'components/DetailList/CodeDetail';
 
 export default ({ helpText, id, label, type, unit = '', value }) => {
   const dataType = value === '$encrypted$' ? 'encrypted' : type;

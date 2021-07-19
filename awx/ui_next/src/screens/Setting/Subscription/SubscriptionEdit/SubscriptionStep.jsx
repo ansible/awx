@@ -15,11 +15,11 @@ import {
   ToggleGroupItem,
   Tooltip,
 } from '@patternfly/react-core';
-import { useConfig } from '../../../../contexts/Config';
-import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
-import useModal from '../../../../util/useModal';
-import FormField, { PasswordField } from '../../../../components/FormField';
-import Popover from '../../../../components/Popover';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import useModal from 'util/useModal';
+import FormField, { PasswordField } from 'components/FormField';
+import Popover from 'components/Popover';
 import SubscriptionModal from './SubscriptionModal';
 
 const LICENSELINK = 'https://www.ansible.com/license';

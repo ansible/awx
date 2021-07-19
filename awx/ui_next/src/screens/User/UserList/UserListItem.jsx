@@ -7,9 +7,9 @@ import { Button, Label } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 
-import { User } from '../../../types';
+import { User } from 'types';
 
 function UserListItem({ user, isSelected, onSelect, detailUrl, rowIndex }) {
   const labelId = `check-action-${user.id}`;

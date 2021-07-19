@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI, OrganizationsAPI } from '../../../api';
+import { InventoriesAPI, OrganizationsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

@@ -3,11 +3,11 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { FormGroup, Alert } from '@patternfly/react-core';
-import { required } from '../../../../util/validators';
-import AnsibleSelect from '../../../../components/AnsibleSelect';
-import FormField from '../../../../components/FormField';
-import Popover from '../../../../components/Popover';
-import useBrandName from '../../../../util/useBrandName';
+import { required } from 'util/validators';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormField from 'components/FormField';
+import Popover from 'components/Popover';
+import useBrandName from 'util/useBrandName';
 
 const ManualSubForm = ({
   localPath,

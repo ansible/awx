@@ -3,10 +3,10 @@ import { Redirect, Link } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
 import { t } from '@lingui/macro';
-import useRequest from '../../util/useRequest';
-import { UnifiedJobsAPI } from '../../api';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
+import useRequest from 'util/useRequest';
+import { UnifiedJobsAPI } from 'api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const NOT_FOUND = 'not found';

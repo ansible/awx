@@ -2,12 +2,12 @@ import React, { useCallback, useEffect } from 'react';
 import { func, bool, string } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { InventoriesAPI } from '../../api';
-import { Inventory } from '../../types';
+import { InventoriesAPI } from 'api';
+import { Inventory } from 'types';
+import useRequest from 'util/useRequest';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
-import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 import FieldWithPrompt from '../FieldWithPrompt';
 

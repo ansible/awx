@@ -1,10 +1,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../testUtils/testUtils';
-
-import LaunchButton from './LaunchButton';
 import {
   InventorySourcesAPI,
   JobsAPI,
@@ -12,7 +8,11 @@ import {
   ProjectsAPI,
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
-} from '../../api';
+} from 'api';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../testUtils/testUtils';
+
+import LaunchButton from './LaunchButton';
 
 jest.mock('../../api');
 

@@ -20,10 +20,10 @@ import {
   QuestionCircleIcon,
   UserIcon,
 } from '@patternfly/react-icons';
-import { WorkflowApprovalsAPI } from '../../api';
-import useRequest from '../../util/useRequest';
-import getDocsBaseUrl from '../../util/getDocsBaseUrl';
-import { useConfig } from '../../contexts/Config';
+import { WorkflowApprovalsAPI } from 'api';
+import useRequest from 'util/useRequest';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import useWsPendingApprovalCount from './useWsPendingApprovalCount';
 
 const PendingWorkflowApprovals = styled.div`

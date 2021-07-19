@@ -1,7 +1,7 @@
 import React from 'react';
+import debounce from 'util/debounce';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import CodeEditor from './CodeEditor';
-import debounce from '../../util/debounce';
 
 jest.mock('../../util/debounce');
 

@@ -2,18 +2,14 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { Card, PageSection } from '@patternfly/react-core';
-import { CardBody } from '../../../components/Card';
+import { CardBody } from 'components/Card';
 
-import {
-  WorkflowJobTemplatesAPI,
-  OrganizationsAPI,
-  UsersAPI,
-} from '../../../api';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
+import { useConfig } from 'contexts/Config';
+import useRequest from 'util/useRequest';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import WorkflowJobTemplateForm from '../shared/WorkflowJobTemplateForm';
-import { useConfig } from '../../../contexts/Config';
-import useRequest from '../../../util/useRequest';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
 
 function WorkflowJobTemplateAdd() {
   const { me = {} } = useConfig();

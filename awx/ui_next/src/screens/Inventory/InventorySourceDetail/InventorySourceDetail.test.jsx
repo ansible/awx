@@ -2,16 +2,16 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import {
+  InventorySourcesAPI,
+  InventoriesAPI,
+  WorkflowJobTemplateNodesAPI,
+} from 'api';
+import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceDetail from './InventorySourceDetail';
 import mockInvSource from '../shared/data.inventory_source.json';
-import {
-  InventorySourcesAPI,
-  InventoriesAPI,
-  WorkflowJobTemplateNodesAPI,
-} from '../../../api';
 
 jest.mock('../../../api');
 

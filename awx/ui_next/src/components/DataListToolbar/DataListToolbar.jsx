@@ -20,11 +20,11 @@ import {
   AngleRightIcon,
   SearchIcon,
 } from '@patternfly/react-icons';
+import { SearchColumns, SortColumns, QSConfig } from 'types';
+import { KebabifiedProvider } from 'contexts/Kebabified';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
-import { SearchColumns, SortColumns, QSConfig } from '../../types';
-import { KebabifiedProvider } from '../../contexts/Kebabified';
 
 const ToolbarContent = styled(PFToolbarContent)`
   & > .pf-c-toolbar__content-section {

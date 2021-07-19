@@ -3,16 +3,16 @@ import { useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { CredentialsAPI } from '../../../../../api';
-import CheckboxListItem from '../../../../../components/CheckboxListItem';
-import ContentError from '../../../../../components/ContentError';
-import DataListToolbar from '../../../../../components/DataListToolbar';
-import { getQSConfig, parseQueryString } from '../../../../../util/qs';
-import useRequest from '../../../../../util/useRequest';
+import { CredentialsAPI } from 'api';
+import CheckboxListItem from 'components/CheckboxListItem';
+import ContentError from 'components/ContentError';
+import DataListToolbar from 'components/DataListToolbar';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
-} from '../../../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,

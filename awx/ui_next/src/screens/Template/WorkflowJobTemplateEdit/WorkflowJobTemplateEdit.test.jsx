@@ -8,13 +8,13 @@ import {
   LabelsAPI,
   UsersAPI,
   InventoriesAPI,
-} from '../../../api';
+} from 'api';
+import useDebounce from 'util/useDebounce';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
-import useDebounce from '../../../util/useDebounce';
 
 jest.mock('../../../util/useDebounce');
 jest.mock('../../../api/models/WorkflowJobTemplates');

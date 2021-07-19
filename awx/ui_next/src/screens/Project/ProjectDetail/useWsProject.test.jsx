@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import WS from 'jest-websocket-mock';
+import { ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { ProjectsAPI } from '../../../api';
 import useWsProject from './useWsProject';
 
 jest.mock('../../../api/models/Projects');

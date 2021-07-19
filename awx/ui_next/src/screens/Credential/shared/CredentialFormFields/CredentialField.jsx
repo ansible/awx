@@ -14,11 +14,11 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { PficonHistoryIcon } from '@patternfly/react-icons';
-import { PasswordInput } from '../../../../components/FormField';
-import AnsibleSelect from '../../../../components/AnsibleSelect';
-import Popover from '../../../../components/Popover';
-import { CredentialType } from '../../../../types';
-import { required } from '../../../../util/validators';
+import { PasswordInput } from 'components/FormField';
+import AnsibleSelect from 'components/AnsibleSelect';
+import Popover from 'components/Popover';
+import { CredentialType } from 'types';
+import { required } from 'util/validators';
 import { CredentialPluginField } from '../CredentialPlugins';
 import BecomeMethodField from './BecomeMethodField';
 

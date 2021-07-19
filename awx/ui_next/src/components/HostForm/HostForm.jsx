@@ -3,13 +3,13 @@ import { bool, func, shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
+import { required } from 'util/validators';
 import FormField, { FormSubmitError } from '../FormField';
 import FormActionGroup from '../FormActionGroup/FormActionGroup';
 import { VariablesField } from '../CodeEditor';
 import { InventoryLookup } from '../Lookup';
 import { FormColumnLayout, FormFullWidthLayout } from '../FormLayout';
 import Popover from '../Popover';
-import { required } from '../../util/validators';
 
 const InventoryLookupField = ({ isDisabled }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();

@@ -1,12 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { OrganizationsAPI, TeamsAPI, UsersAPI, RolesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-
-import { OrganizationsAPI, TeamsAPI, UsersAPI, RolesAPI } from '../../api';
 
 import ResourceAccessList from './ResourceAccessList';
 

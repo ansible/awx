@@ -2,8 +2,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import { InstanceGroupsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { InstanceGroupsAPI } from '../../../api';
 
 import InstanceGroupEdit from './InstanceGroupEdit';
 

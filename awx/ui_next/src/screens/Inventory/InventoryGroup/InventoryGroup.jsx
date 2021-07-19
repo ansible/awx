@@ -10,15 +10,14 @@ import {
   useParams,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import RoutedTabs from '../../../components/RoutedTabs';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import { GroupsAPI } from 'api';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 import InventoryGroupHosts from '../InventoryGroupHosts';
 import InventoryRelatedGroups from '../InventoryRelatedGroups';
-
-import { GroupsAPI } from '../../../api';
 
 function InventoryGroup({ setBreadcrumb, inventory }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);

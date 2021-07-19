@@ -2,11 +2,11 @@ import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
+import { TeamsAPI, UsersAPI } from 'api';
 import SelectableCard from '../SelectableCard';
 import Wizard from '../Wizard';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
-import { TeamsAPI, UsersAPI } from '../../api';
 
 const readUsers = async queryParams =>
   UsersAPI.read(Object.assign(queryParams, { is_superuser: false }));

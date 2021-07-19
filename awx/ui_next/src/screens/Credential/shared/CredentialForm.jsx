@@ -15,13 +15,10 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../components/FormLayout';
-import { required } from '../../../util/validators';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import { required } from 'util/validators';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import TypeInputsSubForm from './TypeInputsSubForm';
 import ExternalTestModal from './ExternalTestModal';
 

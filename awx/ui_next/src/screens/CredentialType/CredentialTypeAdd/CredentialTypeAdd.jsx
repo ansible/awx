@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Card, PageSection } from '@patternfly/react-core';
 import { useHistory } from 'react-router-dom';
 
+import { CardBody } from 'components/Card';
+import { CredentialTypesAPI } from 'api';
+import { parseVariableField } from 'util/yaml';
 import CredentialTypeForm from '../shared/CredentialTypeForm';
-import { CardBody } from '../../../components/Card';
-import { CredentialTypesAPI } from '../../../api';
-import { parseVariableField } from '../../../util/yaml';
 
 function CredentialTypeAdd() {
   const history = useHistory();

@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { DashboardAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
-import { DashboardAPI } from '../../api';
 import DashboardGraph from './DashboardGraph';
 
 jest.mock('../../api');

@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Button, Badge, Alert, Tooltip } from '@patternfly/react-core';
+import { getRelatedResourceDeleteCounts } from 'util/getRelatedResourceDeleteDetails';
 import AlertModal from '../AlertModal';
-import { getRelatedResourceDeleteCounts } from '../../util/getRelatedResourceDeleteDetails';
 import ErrorDetail from '../ErrorDetail';
 
 const WarningMessage = styled(Alert)`

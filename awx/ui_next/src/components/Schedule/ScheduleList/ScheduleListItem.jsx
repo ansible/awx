@@ -11,11 +11,11 @@ import {
   ExclamationTriangleIcon as PFExclamationTriangleIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { Schedule } from 'types';
+import { formatDateString } from 'util/dates';
 import { DetailList, Detail } from '../../DetailList';
 import { ActionsTd, ActionItem } from '../../PaginatedTable';
 import { ScheduleToggle } from '..';
-import { Schedule } from '../../../types';
-import { formatDateString } from '../../../util/dates';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: #c9190b;

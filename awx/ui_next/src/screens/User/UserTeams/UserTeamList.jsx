@@ -6,19 +6,19 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
-} from '../../../components/PaginatedTable';
-import DataListToolbar from '../../../components/DataListToolbar';
-import DisassociateButton from '../../../components/DisassociateButton';
-import AssociateModal from '../../../components/AssociateModal';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'components/PaginatedTable';
+import DataListToolbar from 'components/DataListToolbar';
+import DisassociateButton from 'components/DisassociateButton';
+import AssociateModal from 'components/AssociateModal';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { TeamsAPI, UsersAPI } from '../../../api';
-import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
+} from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { TeamsAPI, UsersAPI } from 'api';
+import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
 
 import UserTeamListItem from './UserTeamListItem';
 

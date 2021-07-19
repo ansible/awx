@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { RRule } from 'rrule';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import {
   SchedulesAPI,
   InventoriesAPI,
   CredentialsAPI,
   CredentialTypesAPI,
-} from '../../../api';
+} from 'api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ScheduleEdit from './ScheduleEdit';
 
 jest.mock('../../../api');

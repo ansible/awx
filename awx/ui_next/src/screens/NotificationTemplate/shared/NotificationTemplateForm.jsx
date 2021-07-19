@@ -5,12 +5,12 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import { OrganizationLookup } from '../../../components/Lookup';
-import { required } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormField, { FormSubmitError } from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
+import { OrganizationLookup } from 'components/Lookup';
+import { required } from 'util/validators';
+import { FormColumnLayout } from 'components/FormLayout';
 import TypeInputsSubForm from './TypeInputsSubForm';
 import CustomMessagesSubForm from './CustomMessagesSubForm';
 import hasCustomMessages from './hasCustomMessages';

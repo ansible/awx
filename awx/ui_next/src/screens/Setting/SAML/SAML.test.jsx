@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
+import { SettingsProvider } from 'contexts/Settings';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { SettingsAPI } from '../../../api';
-import { SettingsProvider } from '../../../contexts/Settings';
 import mockAllOptions from '../shared/data.allSettingOptions.json';
 import SAML from './SAML';
 

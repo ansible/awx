@@ -13,18 +13,14 @@ import {
   Title,
 } from '@patternfly/react-core';
 
-import DatalistToolbar from '../../components/DataListToolbar';
+import DatalistToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../components/PaginatedTable';
-import useRequest from '../../util/useRequest';
-import {
-  getQSConfig,
-  parseQueryString,
-  updateQueryString,
-} from '../../util/qs';
-import { ActivityStreamAPI } from '../../api';
+} from 'components/PaginatedTable';
+import useRequest from 'util/useRequest';
+import { getQSConfig, parseQueryString, updateQueryString } from 'util/qs';
+import { ActivityStreamAPI } from 'api';
 
 import ActivityStreamListItem from './ActivityStreamListItem';
 

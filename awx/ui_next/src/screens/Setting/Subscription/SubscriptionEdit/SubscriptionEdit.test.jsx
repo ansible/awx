@@ -1,17 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { ConfigAPI, MeAPI, SettingsAPI, RootAPI, UsersAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
-import {
-  ConfigAPI,
-  MeAPI,
-  SettingsAPI,
-  RootAPI,
-  UsersAPI,
-} from '../../../../api';
 import SubscriptionEdit from './SubscriptionEdit';
 
 jest.mock('../../../../api');

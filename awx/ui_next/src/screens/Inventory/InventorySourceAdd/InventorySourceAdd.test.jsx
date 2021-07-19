@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { InventorySourcesAPI, ProjectsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceAdd from './InventorySourceAdd';
-import { InventorySourcesAPI, ProjectsAPI } from '../../../api';
 
 jest.mock('../../../api');
 jest.mock('react-router-dom', () => ({

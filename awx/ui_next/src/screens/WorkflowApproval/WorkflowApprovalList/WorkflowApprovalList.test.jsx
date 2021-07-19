@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { WorkflowApprovalsAPI } from '../../../api';
+import { WorkflowApprovalsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowApprovalList from './WorkflowApprovalList';
 import mockWorkflowApprovals from '../data.workflowApprovals.json';

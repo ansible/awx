@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { GroupsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { GroupsAPI } from '../../../api';
 import InventoryRelatedGroupAdd from './InventoryRelatedGroupAdd';
 
 jest.mock('../../../api');

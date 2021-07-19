@@ -5,7 +5,7 @@ import {
   JobTemplatesAPI,
   WorkflowJobTemplatesAPI,
   InventorySourcesAPI,
-} from '../../../api';
+} from 'api';
 import {
   mountWithContexts,
   waitForElement,

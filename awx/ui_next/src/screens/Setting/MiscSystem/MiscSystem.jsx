@@ -2,8 +2,8 @@ import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
-import ContentError from '../../../components/ContentError';
-import { useConfig } from '../../../contexts/Config';
+import ContentError from 'components/ContentError';
+import { useConfig } from 'contexts/Config';
 import MiscSystemDetail from './MiscSystemDetail';
 import MiscSystemEdit from './MiscSystemEdit';
 

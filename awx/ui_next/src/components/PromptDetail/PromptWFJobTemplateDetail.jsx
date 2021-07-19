@@ -8,12 +8,12 @@ import {
   TextListVariants,
   TextListItemVariants,
 } from '@patternfly/react-core';
+import { toTitleCase } from 'util/strings';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { Detail } from '../DetailList';
 import { VariablesDetail } from '../CodeEditor';
 import Sparkline from '../Sparkline';
-import { toTitleCase } from '../../util/strings';
 
 function PromptWFJobTemplateDetail({ resource }) {
   const {

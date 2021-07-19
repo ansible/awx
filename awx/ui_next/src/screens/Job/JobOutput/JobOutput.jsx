@@ -22,31 +22,31 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody as _CardBody } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import ErrorDetail from '../../../components/ErrorDetail';
-import Search from '../../../components/Search';
-import StatusIcon from '../../../components/StatusIcon';
+import AlertModal from 'components/AlertModal';
+import { CardBody as _CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import ErrorDetail from 'components/ErrorDetail';
+import Search from 'components/Search';
+import StatusIcon from 'components/StatusIcon';
 
-import JobEvent from './JobEvent';
-import JobEventSkeleton from './JobEventSkeleton';
-import PageControls from './PageControls';
-import HostEventModal from './HostEventModal';
-import { HostStatusBar, OutputToolbar } from './shared';
-import getRowRangePageSize from './shared/jobOutputUtils';
-import { getJobModel, isJobRunning } from '../../../util/jobs';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import useInterval from '../../../util/useInterval';
+import { getJobModel, isJobRunning } from 'util/jobs';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import useInterval from 'util/useInterval';
 import {
   parseQueryString,
   mergeParams,
   removeParams,
   getQSConfig,
   updateQueryString,
-} from '../../../util/qs';
-import useIsMounted from '../../../util/useIsMounted';
+} from 'util/qs';
+import useIsMounted from 'util/useIsMounted';
+import JobEvent from './JobEvent';
+import JobEventSkeleton from './JobEventSkeleton';
+import PageControls from './PageControls';
+import HostEventModal from './HostEventModal';
+import { HostStatusBar, OutputToolbar } from './shared';
+import getRowRangePageSize from './shared/jobOutputUtils';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'counter',

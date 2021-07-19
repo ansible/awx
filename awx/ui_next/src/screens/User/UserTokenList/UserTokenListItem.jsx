@@ -3,8 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Tr, Td } from '@patternfly/react-table';
-import { toTitleCase } from '../../../util/strings';
-import { formatDateString } from '../../../util/dates';
+import { toTitleCase } from 'util/strings';
+import { formatDateString } from 'util/dates';
 
 function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
   const { id } = useParams();

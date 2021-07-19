@@ -11,10 +11,10 @@ import {
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { LaunchButton } from '../../../components/LaunchButton';
-import Sparkline from '../../../components/Sparkline';
-import { toTitleCase } from '../../../util/strings';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { LaunchButton } from 'components/LaunchButton';
+import Sparkline from 'components/Sparkline';
+import { toTitleCase } from 'util/strings';
 
 const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);

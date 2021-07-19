@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { OrganizationsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import UserAdd from './UserAdd';
-import { OrganizationsAPI } from '../../../api';
 
 jest.mock('../../../api');
 let wrapper;

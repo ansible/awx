@@ -2,11 +2,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from '../../../api';
 import ExecutionEnvironmentAdd from './ExecutionEnvironmentAdd';
 
 jest.mock('../../../api');

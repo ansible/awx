@@ -13,7 +13,7 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import { PasswordField } from '../../../components/FormField';
+import { PasswordField } from 'components/FormField';
 
 function SurveyPreviewModal({
   questions,

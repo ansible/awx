@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import { LabelsAPI } from '../../../api';
+import { LabelsAPI } from 'api';
 import LabelSelect from './LabelSelect';
 
 jest.mock('../../../api');

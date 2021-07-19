@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from 'contexts/Workflow';
+import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../../testUtils/enzymeHelpers';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
 import NodeAddModal from './NodeAddModal';
 
 const dispatch = jest.fn();

@@ -3,19 +3,19 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
-import { JobTemplatesAPI } from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { JobTemplatesAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useSelected from '../../../util/useSelected';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
+} from 'components/PaginatedTable';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'util/useRequest';
 import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
 
 const QS_CONFIG = getQSConfig('template', {

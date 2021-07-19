@@ -2,19 +2,19 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useSelected from '../../../util/useSelected';
-import useRequest from '../../../util/useRequest';
-import { InventoriesAPI } from '../../../api';
-import DataListToolbar from '../../../components/DataListToolbar';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useSelected from 'util/useSelected';
+import useRequest from 'util/useRequest';
+import { InventoriesAPI } from 'api';
+import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
-} from '../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
+import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
-import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,

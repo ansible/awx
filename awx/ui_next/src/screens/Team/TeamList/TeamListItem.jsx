@@ -7,8 +7,8 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { Team } from '../../../types';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { Team } from 'types';
 
 function TeamListItem({ team, isSelected, onSelect, detailUrl, rowIndex }) {
   TeamListItem.propTypes = {

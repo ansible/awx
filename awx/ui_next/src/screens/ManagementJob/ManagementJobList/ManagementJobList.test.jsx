@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { SystemJobTemplatesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import { SystemJobTemplatesAPI } from '../../../api';
 import ManagementJobList from './ManagementJobList';
 
 jest.mock('../../../api/models/SystemJobTemplates');

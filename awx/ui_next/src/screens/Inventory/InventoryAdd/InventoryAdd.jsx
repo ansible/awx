@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import { CardBody } from '../../../components/Card';
+import { CardBody } from 'components/Card';
 
-import { InventoriesAPI } from '../../../api';
+import { InventoriesAPI } from 'api';
 import InventoryForm from '../shared/InventoryForm';
 
 function InventoryAdd() {

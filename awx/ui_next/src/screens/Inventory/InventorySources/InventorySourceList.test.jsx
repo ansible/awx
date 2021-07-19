@@ -6,7 +6,7 @@ import {
   InventoriesAPI,
   InventorySourcesAPI,
   WorkflowJobTemplateNodesAPI,
-} from '../../../api';
+} from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventorySourceList from './InventorySourceList';

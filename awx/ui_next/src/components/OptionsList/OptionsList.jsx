@@ -10,10 +10,10 @@ import {
 } from 'prop-types';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
+import { QSConfig, SearchColumns, SortColumns } from 'types';
 import { SelectedList, DraggableSelectedList } from '../SelectedList';
 import CheckboxListItem from '../CheckboxListItem';
 import DataListToolbar from '../DataListToolbar';
-import { QSConfig, SearchColumns, SortColumns } from '../../types';
 import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 
 const ModalList = styled.div`

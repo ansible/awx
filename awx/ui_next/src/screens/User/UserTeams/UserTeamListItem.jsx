@@ -3,7 +3,7 @@ import { bool, func } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Tr, Td } from '@patternfly/react-table';
-import { Team } from '../../../types';
+import { Team } from 'types';
 
 function UserTeamListItem({ team, isSelected, onSelect, rowIndex }) {
   return (

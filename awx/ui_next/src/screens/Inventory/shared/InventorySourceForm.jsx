@@ -3,19 +3,17 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { func, shape } from 'prop-types';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import { InventorySourcesAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import {
-  FormColumnLayout,
-  SubFormLayout,
-} from '../../../components/FormLayout';
+import { InventorySourcesAPI } from 'api';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
+import AnsibleSelect from 'components/AnsibleSelect';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, SubFormLayout } from 'components/FormLayout';
 
+import { ExecutionEnvironmentLookup } from 'components/Lookup';
 import {
   AzureSubForm,
   EC2SubForm,
@@ -28,7 +26,6 @@ import {
   VMwareSubForm,
   VirtualizationSubForm,
 } from './InventorySourceSubForms';
-import { ExecutionEnvironmentLookup } from '../../../components/Lookup';
 
 const buildSourceChoiceOptions = options => {
   const sourceChoices = options.actions.GET.source.choices.map(

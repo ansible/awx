@@ -1,7 +1,10 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { t, Trans } from '@lingui/macro';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import { required } from 'util/validators';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import {
   OptionsField,
   VerbosityField,
@@ -10,9 +13,6 @@ import {
   HostFilterField,
   SourceVarsField,
 } from './SharedFields';
-import { required } from '../../../../util/validators';
-import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
-import { useConfig } from '../../../../contexts/Config';
 
 const GCESubForm = ({ autoPopulateCredential }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();

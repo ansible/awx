@@ -2,9 +2,9 @@ import React, { useState, useCallback } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import WorkflowApprovalList from './WorkflowApprovalList';
 import WorkflowApproval from './WorkflowApproval';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
 function WorkflowApprovals() {
   const match = useRouteMatch();

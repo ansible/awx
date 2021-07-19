@@ -12,23 +12,21 @@ import {
   WizardFooter,
   Form,
 } from '@patternfly/react-core';
-import ContentError from '../../../../../components/ContentError';
-import ContentLoading from '../../../../../components/ContentLoading';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 
-import useRequest, {
-  useDismissableError,
-} from '../../../../../util/useRequest';
-import mergeExtraVars from '../../../../../util/prompt/mergeExtraVars';
-import getSurveyValues from '../../../../../util/prompt/getSurveyValues';
-import { parseVariableField } from '../../../../../util/yaml';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import mergeExtraVars from 'util/prompt/mergeExtraVars';
+import getSurveyValues from 'util/prompt/getSurveyValues';
+import { parseVariableField } from 'util/yaml';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
-import Wizard from '../../../../../components/Wizard';
+} from 'contexts/Workflow';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
+import Wizard from 'components/Wizard';
+import AlertModal from 'components/AlertModal';
 import useWorkflowNodeSteps from './useWorkflowNodeSteps';
-import AlertModal from '../../../../../components/AlertModal';
 
 import NodeNextButton from './NodeNextButton';
 

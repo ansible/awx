@@ -3,7 +3,7 @@ import { Route } from 'react-router-dom';
 
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { GroupsAPI } from '../../../api';
+import { GroupsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryGroupAdd from './InventoryGroupAdd';

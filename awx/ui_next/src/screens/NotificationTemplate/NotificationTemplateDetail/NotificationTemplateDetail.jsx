@@ -8,20 +8,20 @@ import {
   TextListVariants,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
 import {
   Detail,
   ArrayDetail,
   DetailList,
   DeletedDetail,
   UserDateDetail,
-} from '../../../components/DetailList';
-import CodeDetail from '../../../components/DetailList/CodeDetail';
-import DeleteButton from '../../../components/DeleteButton';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { NotificationTemplatesAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
+} from 'components/DetailList';
+import CodeDetail from 'components/DetailList/CodeDetail';
+import DeleteButton from 'components/DeleteButton';
+import ErrorDetail from 'components/ErrorDetail';
+import { NotificationTemplatesAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
 import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
 

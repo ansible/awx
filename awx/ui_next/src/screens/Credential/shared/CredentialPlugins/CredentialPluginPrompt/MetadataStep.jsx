@@ -2,15 +2,15 @@ import React, { useCallback, useEffect } from 'react';
 
 import { useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { CredentialTypesAPI } from '../../../../../api';
-import AnsibleSelect from '../../../../../components/AnsibleSelect';
-import ContentError from '../../../../../components/ContentError';
-import ContentLoading from '../../../../../components/ContentLoading';
-import FormField from '../../../../../components/FormField';
-import { FormFullWidthLayout } from '../../../../../components/FormLayout';
-import Popover from '../../../../../components/Popover';
-import useRequest from '../../../../../util/useRequest';
-import { required } from '../../../../../util/validators';
+import { CredentialTypesAPI } from 'api';
+import AnsibleSelect from 'components/AnsibleSelect';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import FormField from 'components/FormField';
+import { FormFullWidthLayout } from 'components/FormLayout';
+import Popover from 'components/Popover';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
 
 function MetadataStep() {
   const form = useFormikContext();

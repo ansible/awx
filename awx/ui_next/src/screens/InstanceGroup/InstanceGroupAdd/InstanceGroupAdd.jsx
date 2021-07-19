@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Card, PageSection } from '@patternfly/react-core';
 import { useHistory } from 'react-router-dom';
 
+import { CardBody } from 'components/Card';
+import { InstanceGroupsAPI } from 'api';
 import InstanceGroupForm from '../shared/InstanceGroupForm';
-import { CardBody } from '../../../components/Card';
-import { InstanceGroupsAPI } from '../../../api';
 
 function InstanceGroupAdd() {
   const history = useHistory();

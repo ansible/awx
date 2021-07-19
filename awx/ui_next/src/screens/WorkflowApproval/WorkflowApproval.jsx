@@ -12,10 +12,10 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from '../../util/useRequest';
-import RoutedTabs from '../../components/RoutedTabs';
-import ContentError from '../../components/ContentError';
-import { WorkflowApprovalsAPI } from '../../api';
+import useRequest from 'util/useRequest';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import { WorkflowApprovalsAPI } from 'api';
 import WorkflowApprovalDetail from './WorkflowApprovalDetail';
 
 function WorkflowApproval({ setBreadcrumb }) {

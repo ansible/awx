@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest from '../../../util/useRequest';
+} from 'components/PaginatedTable';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import OrganizationTeamListItem from './OrganizationTeamListItem';
 
 const QS_CONFIG = getQSConfig('team', {

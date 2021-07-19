@@ -3,15 +3,15 @@ import { useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { ProjectsAPI } from '../../../../../../api';
-import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
-import useRequest from '../../../../../../util/useRequest';
-import DataListToolbar from '../../../../../../components/DataListToolbar';
-import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import { ProjectsAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
+import DataListToolbar from 'components/DataListToolbar';
+import CheckboxListItem from 'components/CheckboxListItem';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
-} from '../../../../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('projects', {
   page: 1,

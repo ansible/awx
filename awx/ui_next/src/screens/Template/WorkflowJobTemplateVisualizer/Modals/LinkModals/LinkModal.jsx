@@ -6,8 +6,8 @@ import { func } from 'prop-types';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
-import AnsibleSelect from '../../../../../components/AnsibleSelect';
+} from 'contexts/Workflow';
+import AnsibleSelect from 'components/AnsibleSelect';
 
 function LinkModal({ header, onConfirm }) {
   const dispatch = useContext(WorkflowDispatchContext);

@@ -4,12 +4,12 @@ import { shallow } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 
+import { TeamsAPI, UsersAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import AddResourceRole, { _AddResourceRole } from './AddResourceRole';
-import { TeamsAPI, UsersAPI } from '../../api';
 
 jest.mock('../../api/models/Teams');
 jest.mock('../../api/models/Users');

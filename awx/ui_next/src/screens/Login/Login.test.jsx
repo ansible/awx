@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { AuthAPI, RootAPI } from '../../api';
+import { AuthAPI, RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

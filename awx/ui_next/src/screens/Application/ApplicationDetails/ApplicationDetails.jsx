@@ -4,17 +4,13 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import { ApplicationsAPI } from '../../../api';
-import DeleteButton from '../../../components/DeleteButton';
-import ErrorDetail from '../../../components/ErrorDetail';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import { ApplicationsAPI } from 'api';
+import DeleteButton from 'components/DeleteButton';
+import ErrorDetail from 'components/ErrorDetail';
 
 function ApplicationDetails({
   application,

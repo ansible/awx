@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from '../../../api';
 
 import ExecutionEnvironmentForm from './ExecutionEnvironmentForm';
 

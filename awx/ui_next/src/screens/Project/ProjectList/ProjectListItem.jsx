@@ -11,22 +11,18 @@ import {
   UndoIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { formatDateString, timeOfDay } from '../../../util/dates';
-import { ProjectsAPI } from '../../../api';
-import {
-  DetailList,
-  Detail,
-  DeletedDetail,
-} from '../../../components/DetailList';
-import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
-import StatusLabel from '../../../components/StatusLabel';
-import { toTitleCase } from '../../../util/strings';
-import { isJobRunning } from '../../../util/jobs';
-import CopyButton from '../../../components/CopyButton';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { formatDateString, timeOfDay } from 'util/dates';
+import { ProjectsAPI } from 'api';
+import { DetailList, Detail, DeletedDetail } from 'components/DetailList';
+import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
+import StatusLabel from 'components/StatusLabel';
+import { toTitleCase } from 'util/strings';
+import { isJobRunning } from 'util/jobs';
+import CopyButton from 'components/CopyButton';
+import { Project } from 'types';
+import JobCancelButton from 'components/JobCancelButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import { Project } from '../../../types';
-import JobCancelButton from '../../../components/JobCancelButton';
 
 const Label = styled.span`
   color: var(--pf-global--disabled-color--100);

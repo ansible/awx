@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { JobsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import JobOutput from './JobOutput';
-import { JobsAPI } from '../../../api';
 import mockJobData from '../shared/data.job.json';
 import mockJobEventsData from './data.job_events.json';
 import mockFilteredJobEventsData from './data.filtered_job_events.json';

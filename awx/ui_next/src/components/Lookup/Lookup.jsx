@@ -22,10 +22,10 @@ import {
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import useDebounce from '../../util/useDebounce';
+import useDebounce from 'util/useDebounce';
+import { QSConfig } from 'types';
 import ChipGroup from '../ChipGroup';
 import reducer, { initReducer } from './shared/reducer';
-import { QSConfig } from '../../types';
 
 const ChipHolder = styled.div`
   --pf-c-form-control--Height: auto;

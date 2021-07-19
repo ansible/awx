@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { HostsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import HostDetail from './HostDetail';
-import { HostsAPI } from '../../../api';
 
 import mockHost from '../data.host.json';
 

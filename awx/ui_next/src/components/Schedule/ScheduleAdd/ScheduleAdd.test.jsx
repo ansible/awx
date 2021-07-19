@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { RRule } from 'rrule';
+import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from '../../../api';
 import ScheduleAdd from './ScheduleAdd';
 
 jest.mock('../../../api');

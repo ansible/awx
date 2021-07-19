@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

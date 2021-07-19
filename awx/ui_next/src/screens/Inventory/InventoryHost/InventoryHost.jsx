@@ -11,13 +11,13 @@ import {
 } from 'react-router-dom';
 import { Card } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import useRequest from '../../../util/useRequest';
+import useRequest from 'util/useRequest';
 
-import { InventoriesAPI } from '../../../api';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import RoutedTabs from '../../../components/RoutedTabs';
-import JobList from '../../../components/JobList';
+import { InventoriesAPI } from 'api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
+import JobList from 'components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
 import InventoryHostFacts from '../InventoryHostFacts';

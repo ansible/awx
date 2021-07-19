@@ -4,21 +4,21 @@ import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 
-import { InstanceGroupsAPI, SettingsAPI } from '../../../api';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
+import { InstanceGroupsAPI, SettingsAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import AddDropDownButton from '../../../components/AddDropDownButton';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+} from 'components/PaginatedTable';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
+import AddDropDownButton from 'components/AddDropDownButton';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import InstanceGroupListItem from './InstanceGroupListItem';
 
 const QS_CONFIG = getQSConfig('instance-group', {

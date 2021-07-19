@@ -4,9 +4,9 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { Tr, Td } from '@patternfly/react-table';
 
-import { Token } from '../../../types';
-import { formatDateString } from '../../../util/dates';
-import { toTitleCase } from '../../../util/strings';
+import { Token } from 'types';
+import { formatDateString } from 'util/dates';
+import { toTitleCase } from 'util/strings';
 
 function ApplicationTokenListItem({
   token,

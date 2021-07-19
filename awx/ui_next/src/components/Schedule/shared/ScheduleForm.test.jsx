@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { dateToInputDateTime } from 'util/dates';
+import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { dateToInputDateTime } from '../../../util/dates';
-import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from '../../../api';
 import ScheduleForm from './ScheduleForm';
 
 jest.mock('../../../api/models/Schedules');

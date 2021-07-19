@@ -2,14 +2,14 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { useRouteMatch } from 'react-router-dom';
+import { SettingsProvider } from 'contexts/Settings';
+import { SettingsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import mockLDAP from '../../shared/data.ldapSettings.json';
-import { SettingsProvider } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
 import LDAPEdit from './LDAPEdit';
 
 jest.mock('../../../../api');

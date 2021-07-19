@@ -7,7 +7,7 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import Popover from '../../../../components/Popover';
+import Popover from 'components/Popover';
 
 function BecomeMethodField({ fieldOptions, isRequired }) {
   const [isOpen, setIsOpen] = useState(false);

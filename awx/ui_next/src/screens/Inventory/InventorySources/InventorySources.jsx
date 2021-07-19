@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { Config } from 'contexts/Config';
 import InventorySource from '../InventorySource';
-import { Config } from '../../../contexts/Config';
 import InventorySourceAdd from '../InventorySourceAdd';
 import InventorySourceList from './InventorySourceList';
 

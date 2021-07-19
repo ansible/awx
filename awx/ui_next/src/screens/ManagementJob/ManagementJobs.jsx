@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
-import ScreenHeader from '../../components/ScreenHeader';
+import ScreenHeader from 'components/ScreenHeader';
 import ManagementJob from './ManagementJob';
 import ManagementJobList from './ManagementJobList';
 

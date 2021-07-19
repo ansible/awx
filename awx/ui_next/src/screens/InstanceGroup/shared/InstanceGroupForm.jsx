@@ -5,10 +5,10 @@ import { Formik, useField } from 'formik';
 import { t } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
-import { required, minMaxValue } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
+import FormField, { FormSubmitError } from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup';
+import { required, minMaxValue } from 'util/validators';
+import { FormColumnLayout } from 'components/FormLayout';
 
 function InstanceGroupFormFields({ defaultControlPlane }) {
   const [instanceGroupNameField, ,] = useField('name');

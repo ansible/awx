@@ -13,9 +13,9 @@ import {
   PageSection,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { useConfig } from '../../contexts/Config';
-import ContentLoading from '../../components/ContentLoading/ContentLoading';
-import useBrandName from '../../util/useBrandName';
+import { useConfig } from 'contexts/Config';
+import ContentLoading from 'components/ContentLoading/ContentLoading';
+import useBrandName from 'util/useBrandName';
 
 const SplitLayout = styled(PageSection)`
   column-count: 1;

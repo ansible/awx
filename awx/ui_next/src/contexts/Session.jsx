@@ -6,9 +6,9 @@ import React, {
   useCallback,
 } from 'react';
 import { useHistory } from 'react-router-dom';
-import { RootAPI, MeAPI } from '../api';
+import { RootAPI, MeAPI } from 'api';
+import { isAuthenticated } from 'util/auth';
 import { SESSION_TIMEOUT_KEY } from '../constants';
-import { isAuthenticated } from '../util/auth';
 
 // The maximum supported timeout for setTimeout(), in milliseconds,
 // is the highest number you can represent as a signed 32bit

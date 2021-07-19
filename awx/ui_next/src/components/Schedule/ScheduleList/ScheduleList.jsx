@@ -3,7 +3,10 @@ import { useLocation } from 'react-router-dom';
 import { bool, func } from 'prop-types';
 
 import { t } from '@lingui/macro';
-import { SchedulesAPI } from '../../../api';
+import { SchedulesAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import AlertModal from '../../AlertModal';
 import ErrorDetail from '../../ErrorDetail';
 import PaginatedTable, {
@@ -13,9 +16,6 @@ import PaginatedTable, {
   ToolbarDeleteButton,
 } from '../../PaginatedTable';
 import DataListToolbar from '../../DataListToolbar';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ScheduleListItem from './ScheduleListItem';
 
 const QS_CONFIG = getQSConfig('schedule', {

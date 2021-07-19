@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
+import { ExecutionEnvironmentsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI } from '../../api';
 import AdHocExecutionEnvironmentStep from './AdHocExecutionEnvironmentStep';
 
 jest.mock('../../api/models/ExecutionEnvironments');

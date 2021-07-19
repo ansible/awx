@@ -1,18 +1,19 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import {
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../api';
+} from 'api';
+import workflowReducer from 'components/Workflow/workflowReducer';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import Visualizer from './Visualizer';
-
-import workflowReducer from '../../../components/Workflow/workflowReducer';
 
 jest.mock('../../../components/Workflow/workflowReducer');
 
-const realWorkflowReducer = jest.requireActual('../../../components/Workflow/workflowReducer').default;
+const realWorkflowReducer = jest.requireActual(
+  '../../../components/Workflow/workflowReducer'
+).default;
 
 jest.mock('../../../api');
 

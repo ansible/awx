@@ -1,8 +1,8 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
+import StepName from 'components/LaunchPrompt/steps/StepName';
 import RunStep from './RunStep';
-import StepName from '../../../../../components/LaunchPrompt/steps/StepName';
 
 const STEP_ID = 'runType';
 

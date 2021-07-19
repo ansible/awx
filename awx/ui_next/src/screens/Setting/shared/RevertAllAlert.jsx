@@ -2,7 +2,7 @@ import React from 'react';
 
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
+import AlertModal from 'components/AlertModal';
 
 function RevertAllAlert({ onClose, onRevertAll }) {
   return (

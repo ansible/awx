@@ -4,19 +4,19 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { TeamsAPI } from '../../../api';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import AlertModal from '../../../components/AlertModal';
-import DataListToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { TeamsAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import AlertModal from 'components/AlertModal';
+import DataListToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import useSelected from '../../../util/useSelected';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+} from 'components/PaginatedTable';
+import useSelected from 'util/useSelected';
+import { getQSConfig, parseQueryString } from 'util/qs';
 
 import TeamListItem from './TeamListItem';
 

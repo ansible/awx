@@ -2,7 +2,7 @@ import React from 'react';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
+} from 'contexts/Workflow';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowOutputToolbar from './WorkflowOutputToolbar';
 

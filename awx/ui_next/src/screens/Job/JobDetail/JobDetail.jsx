@@ -6,31 +6,28 @@ import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-import { useConfig } from '../../../contexts/Config';
-import AlertModal from '../../../components/AlertModal';
+import { useConfig } from 'contexts/Config';
+import AlertModal from 'components/AlertModal';
 import {
   DetailList,
   Detail,
   UserDateDetail,
   LaunchedByDetail,
-} from '../../../components/DetailList';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import ChipGroup from '../../../components/ChipGroup';
-import CredentialChip from '../../../components/CredentialChip';
-import { VariablesInput as _VariablesInput } from '../../../components/CodeEditor';
-import DeleteButton from '../../../components/DeleteButton';
-import ErrorDetail from '../../../components/ErrorDetail';
-import {
-  LaunchButton,
-  ReLaunchDropDown,
-} from '../../../components/LaunchButton';
-import StatusIcon from '../../../components/StatusIcon';
-import JobCancelButton from '../../../components/JobCancelButton';
-import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
-import { getJobModel, isJobRunning } from '../../../util/jobs';
-import { toTitleCase } from '../../../util/strings';
-import { formatDateString } from '../../../util/dates';
-import { Job } from '../../../types';
+} from 'components/DetailList';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ChipGroup from 'components/ChipGroup';
+import CredentialChip from 'components/CredentialChip';
+import { VariablesInput as _VariablesInput } from 'components/CodeEditor';
+import DeleteButton from 'components/DeleteButton';
+import ErrorDetail from 'components/ErrorDetail';
+import { LaunchButton, ReLaunchDropDown } from 'components/LaunchButton';
+import StatusIcon from 'components/StatusIcon';
+import JobCancelButton from 'components/JobCancelButton';
+import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
+import { getJobModel, isJobRunning } from 'util/jobs';
+import { toTitleCase } from 'util/strings';
+import { formatDateString } from 'util/dates';
+import { Job } from 'types';
 
 const VariablesInput = styled(_VariablesInput)`
   .pf-c-form__label {

@@ -13,21 +13,18 @@ import {
   SelectVariant,
   SelectOption,
 } from '@patternfly/react-core';
-import { required } from '../../../../../../util/validators';
+import { required } from 'util/validators';
 
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../../../../components/FormLayout';
-import Popover from '../../../../../../components/Popover';
-import AnsibleSelect from '../../../../../../components/AnsibleSelect';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import Popover from 'components/Popover';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormField from 'components/FormField';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
-import FormField from '../../../../../../components/FormField';
-import getDocsBaseUrl from '../../../../../../util/getDocsBaseUrl';
-import { useConfig } from '../../../../../../contexts/Config';
 
 const NodeTypeErrorAlert = styled(Alert)`
   margin-bottom: 20px;

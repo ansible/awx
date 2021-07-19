@@ -2,7 +2,7 @@ import React from 'react';
 import { bool, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import { useKebabifiedMenu } from '../../../contexts/Kebabified';
+import { useKebabifiedMenu } from 'contexts/Kebabified';
 
 function SmartInventoryButton({ onClick, isDisabled, hasInvalidKeys }) {
   const { isKebabified } = useKebabifiedMenu();

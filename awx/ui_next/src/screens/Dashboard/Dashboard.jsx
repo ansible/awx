@@ -10,13 +10,13 @@ import {
   TabTitleText,
 } from '@patternfly/react-core';
 
-import useRequest from '../../util/useRequest';
-import { DashboardAPI } from '../../api';
-import ScreenHeader from '../../components/ScreenHeader';
-import JobList from '../../components/JobList';
-import ContentLoading from '../../components/ContentLoading';
+import useRequest from 'util/useRequest';
+import { DashboardAPI } from 'api';
+import ScreenHeader from 'components/ScreenHeader';
+import JobList from 'components/JobList';
+import ContentLoading from 'components/ContentLoading';
+import TemplateList from 'components/TemplateList';
 import Count from './shared/Count';
-import TemplateList from '../../components/TemplateList';
 import DashboardGraph from './DashboardGraph';
 
 const Counts = styled.div`

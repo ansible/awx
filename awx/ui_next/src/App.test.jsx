@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { RootAPI } from 'api';
+import * as SessionContext from 'contexts/Session';
 import { mountWithContexts } from '../testUtils/enzymeHelpers';
-import { RootAPI } from './api';
-import * as SessionContext from './contexts/Session';
 import App from './App';
 
 jest.mock('./api');

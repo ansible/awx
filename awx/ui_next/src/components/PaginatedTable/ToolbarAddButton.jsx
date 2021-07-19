@@ -5,7 +5,7 @@ import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import CaretDownIcon from '@patternfly/react-icons/dist/js/icons/caret-down-icon';
 
 import { t } from '@lingui/macro';
-import { useKebabifiedMenu } from '../../contexts/Kebabified';
+import { useKebabifiedMenu } from 'contexts/Kebabified';
 
 function ToolbarAddButton({
   linkTo,

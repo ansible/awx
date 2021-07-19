@@ -13,20 +13,14 @@ import {
 } from '@patternfly/react-core';
 import FileUploadIcon from '@patternfly/react-icons/dist/js/icons/file-upload-icon';
 import styled from 'styled-components';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import CodeEditor from '../../../components/CodeEditor';
-import { PasswordInput } from '../../../components/FormField';
-import { FormFullWidthLayout } from '../../../components/FormLayout';
-import Popover from '../../../components/Popover';
-import {
-  combine,
-  integer,
-  minMaxValue,
-  required,
-  url,
-} from '../../../util/validators';
+import AnsibleSelect from 'components/AnsibleSelect';
+import CodeEditor from 'components/CodeEditor';
+import { PasswordInput } from 'components/FormField';
+import { FormFullWidthLayout } from 'components/FormLayout';
+import Popover from 'components/Popover';
+import { combine, integer, minMaxValue, required, url } from 'util/validators';
+import AlertModal from 'components/AlertModal';
 import RevertButton from './RevertButton';
-import AlertModal from '../../../components/AlertModal';
 
 const FormGroup = styled(PFFormGroup)`
   .pf-c-form__group-label {

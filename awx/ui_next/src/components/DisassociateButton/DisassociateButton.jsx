@@ -4,7 +4,7 @@ import { arrayOf, func, shape, string, oneOfType, number } from 'prop-types';
 import { t } from '@lingui/macro';
 import { Button, Tooltip, DropdownItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { KebabifiedContext } from '../../contexts/Kebabified';
+import { KebabifiedContext } from 'contexts/Kebabified';
 
 import AlertModal from '../AlertModal';
 

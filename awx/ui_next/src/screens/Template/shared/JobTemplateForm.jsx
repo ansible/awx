@@ -11,40 +11,40 @@ import {
   TextInput,
   Title,
 } from '@patternfly/react-core';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import { TagMultiSelect } from '../../../components/MultiSelect';
-import useRequest from '../../../util/useRequest';
-import useBrandName from '../../../util/useBrandName';
-import FormActionGroup from '../../../components/FormActionGroup';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { TagMultiSelect } from 'components/MultiSelect';
+import useRequest from 'util/useRequest';
+import useBrandName from 'util/useBrandName';
+import FormActionGroup from 'components/FormActionGroup';
 import FormField, {
   CheckboxField,
   FormSubmitError,
-} from '../../../components/FormField';
-import FieldWithPrompt from '../../../components/FieldWithPrompt';
+} from 'components/FormField';
+import FieldWithPrompt from 'components/FieldWithPrompt';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
   SubFormLayout,
-} from '../../../components/FormLayout';
-import { VariablesField } from '../../../components/CodeEditor';
-import { required, combine, maxLength } from '../../../util/validators';
-import { JobTemplate } from '../../../types';
+} from 'components/FormLayout';
+import { VariablesField } from 'components/CodeEditor';
+import { required, combine, maxLength } from 'util/validators';
+import { JobTemplate } from 'types';
 import {
   InventoryLookup,
   InstanceGroupsLookup,
   ProjectLookup,
   MultiCredentialsLookup,
   ExecutionEnvironmentLookup,
-} from '../../../components/Lookup';
-import Popover from '../../../components/Popover';
-import { JobTemplatesAPI } from '../../../api';
+} from 'components/Lookup';
+import Popover from 'components/Popover';
+import { JobTemplatesAPI } from 'api';
+import useIsMounted from 'util/useIsMounted';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
-import useIsMounted from '../../../util/useIsMounted';
 
 const { origin } = document.location;
 

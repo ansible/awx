@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect, Fragment } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Dropdown, DropdownPosition } from '@patternfly/react-core';
+import { useKebabifiedMenu } from 'contexts/Kebabified';
 import { ToolbarAddButton } from '../PaginatedTable';
-import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
 function AddDropDownButton({ dropdownItems, ouiaId }) {
   const { isKebabified } = useKebabifiedMenu();

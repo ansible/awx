@@ -11,19 +11,19 @@ import {
   RocketIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { timeOfDay, formatDateString } from 'util/dates';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
+import { toTitleCase } from 'util/strings';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import { ActionsTd, ActionItem } from '../PaginatedTable';
 import { DetailList, Detail, DeletedDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
-import { timeOfDay, formatDateString } from '../../util/dates';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 import { LaunchButton } from '../LaunchButton';
 import Sparkline from '../Sparkline';
-import { toTitleCase } from '../../util/strings';
 import CopyButton from '../CopyButton';
-import getDocsBaseUrl from '../../util/getDocsBaseUrl';
-import { useConfig } from '../../contexts/Config';
 
 const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);

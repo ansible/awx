@@ -9,20 +9,20 @@ import {
   Card,
   PageSection,
 } from '@patternfly/react-core';
-import { NotificationTemplatesAPI } from '../../../api';
+import { NotificationTemplatesAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import DataListToolbar from '../../../components/DataListToolbar';
+} from 'components/PaginatedTable';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import DataListToolbar from 'components/DataListToolbar';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import NotificationTemplateListItem from './NotificationTemplateListItem';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 const QS_CONFIG = getQSConfig('notification-templates', {
   page: 1,

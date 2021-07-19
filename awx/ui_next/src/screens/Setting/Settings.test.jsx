@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI, RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { SettingsAPI, RootAPI } from '../../api';
 import mockAllOptions from './shared/data.allSettingOptions.json';
 import Settings from './Settings';
 

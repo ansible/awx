@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { MeAPI, RootAPI } from 'api';
+import { useAuthorizedPath } from 'contexts/Config';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { MeAPI, RootAPI } from '../../api';
-import { useAuthorizedPath } from '../../contexts/Config';
 import AppContainer from './AppContainer';
 
 jest.mock('../../api');

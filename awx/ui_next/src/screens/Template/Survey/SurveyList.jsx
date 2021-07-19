@@ -12,14 +12,14 @@ import {
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import ContentLoading from '../../../components/ContentLoading';
-import AlertModal from '../../../components/AlertModal';
-import { ToolbarAddButton } from '../../../components/PaginatedTable';
+import ContentLoading from 'components/ContentLoading';
+import AlertModal from 'components/AlertModal';
+import { ToolbarAddButton } from 'components/PaginatedTable';
 
+import useSelected from 'util/useSelected';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 import SurveyPreviewModal from './SurveyPreviewModal';
-import useSelected from '../../../util/useSelected';
 
 const Button = styled(_Button)`
   margin: 20px;

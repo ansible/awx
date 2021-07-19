@@ -4,8 +4,8 @@ import { Button } from '@patternfly/react-core';
 
 import { t } from '@lingui/macro';
 
+import { Role } from 'types';
 import AlertModal from '../AlertModal';
-import { Role } from '../../types';
 
 function DeleteRoleConfirmationModal({ role, username, onCancel, onConfirm }) {
   const isTeamRole = () => {

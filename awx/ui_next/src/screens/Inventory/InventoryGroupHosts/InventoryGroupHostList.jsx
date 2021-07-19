@@ -3,26 +3,26 @@ import { useLocation, useParams, Link } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { DropdownItem } from '@patternfly/react-core';
-import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
-import { GroupsAPI, InventoriesAPI } from '../../../api';
+import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
+import { GroupsAPI, InventoriesAPI } from 'api';
 
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import AlertModal from '../../../components/AlertModal';
-import DataListToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import AlertModal from 'components/AlertModal';
+import DataListToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
-} from '../../../components/PaginatedTable';
-import AssociateModal from '../../../components/AssociateModal';
-import DisassociateButton from '../../../components/DisassociateButton';
-import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
+} from 'components/PaginatedTable';
+import AssociateModal from 'components/AssociateModal';
+import DisassociateButton from 'components/DisassociateButton';
+import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
+import AddDropDownButton from 'components/AddDropDownButton';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AddDropDownButton from '../../../components/AddDropDownButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,

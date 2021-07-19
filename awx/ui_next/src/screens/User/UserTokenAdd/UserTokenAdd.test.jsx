@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { UsersAPI, TokensAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import UserTokenAdd from './UserTokenAdd';
-import { UsersAPI, TokensAPI } from '../../../api';
 
 jest.mock('../../../api');
 jest.mock('react-router-dom', () => ({

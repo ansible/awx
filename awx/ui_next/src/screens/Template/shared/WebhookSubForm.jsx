@@ -10,18 +10,18 @@ import {
   Button,
 } from '@patternfly/react-core';
 import { useField, useFormikContext } from 'formik';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import useRequest from '../../../util/useRequest';
-import { FormColumnLayout } from '../../../components/FormLayout';
-import { CredentialLookup } from '../../../components/Lookup';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import Popover from '../../../components/Popover';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import useRequest from 'util/useRequest';
+import { FormColumnLayout } from 'components/FormLayout';
+import { CredentialLookup } from 'components/Lookup';
+import AnsibleSelect from 'components/AnsibleSelect';
+import Popover from 'components/Popover';
 import {
   JobTemplatesAPI,
   WorkflowJobTemplatesAPI,
   CredentialTypesAPI,
-} from '../../../api';
+} from 'api';
 
 function WebhookSubForm({ templateType }) {
   const { setFieldValue } = useFormikContext();

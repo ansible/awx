@@ -3,8 +3,8 @@ import { Route, useRouteMatch, Switch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
-import { Config } from '../../contexts/Config';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import { Config } from 'contexts/Config';
 
 import UsersList from './UserList/UserList';
 import UserAdd from './UserAdd/UserAdd';

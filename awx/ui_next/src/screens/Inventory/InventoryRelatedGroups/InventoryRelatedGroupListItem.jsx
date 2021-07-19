@@ -9,8 +9,8 @@ import { Td, Tr } from '@patternfly/react-table';
 import { Button } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import { Group } from '../../../types';
-import { ActionItem, ActionsTd } from '../../../components/PaginatedTable';
+import { Group } from 'types';
+import { ActionItem, ActionsTd } from 'components/PaginatedTable';
 
 function InventoryRelatedGroupListItem({
   detailUrl,

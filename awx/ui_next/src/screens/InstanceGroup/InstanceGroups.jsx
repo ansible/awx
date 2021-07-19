@@ -3,15 +3,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
-import useRequest from '../../util/useRequest';
-import { SettingsAPI } from '../../api';
+import useRequest from 'util/useRequest';
+import { SettingsAPI } from 'api';
 
+import ScreenHeader from 'components/ScreenHeader';
 import InstanceGroupAdd from './InstanceGroupAdd';
 import InstanceGroupList from './InstanceGroupList';
 import InstanceGroup from './InstanceGroup';
 import ContainerGroupAdd from './ContainerGroupAdd';
 import ContainerGroup from './ContainerGroup';
-import ScreenHeader from '../../components/ScreenHeader';
 
 function InstanceGroups() {
   const {

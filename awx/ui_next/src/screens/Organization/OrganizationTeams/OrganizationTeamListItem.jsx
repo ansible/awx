@@ -6,7 +6,7 @@ import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 
 function OrganizationTeamListItem({ team, detailUrl }) {
   return (

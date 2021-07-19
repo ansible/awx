@@ -13,8 +13,8 @@ import {
 import { KeyIcon } from '@patternfly/react-icons';
 import styles from '@patternfly/react-styles/css/components/Form/form';
 import { css } from '@patternfly/react-styles';
-import FieldWithPrompt from '../../../../components/FieldWithPrompt';
-import Popover from '../../../../components/Popover';
+import FieldWithPrompt from 'components/FieldWithPrompt';
+import Popover from 'components/Popover';
 import { CredentialPluginPrompt } from './CredentialPluginPrompt';
 import CredentialPluginSelected from './CredentialPluginSelected';
 

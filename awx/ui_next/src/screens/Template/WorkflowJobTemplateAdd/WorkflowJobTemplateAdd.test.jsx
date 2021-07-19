@@ -7,7 +7,7 @@ import {
   OrganizationsAPI,
   LabelsAPI,
   UsersAPI,
-} from '../../../api';
+} from 'api';
 import {
   mountWithContexts,
   waitForElement,

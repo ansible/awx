@@ -6,7 +6,13 @@ import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
-} from '../../api';
+} from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import useExpanded from 'util/useExpanded';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useWsTemplates from 'util/useWsTemplates';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
@@ -15,14 +21,8 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarDeleteButton,
 } from '../PaginatedTable';
-import useRequest, { useDeleteItems } from '../../util/useRequest';
-import useSelected from '../../util/useSelected';
-import useExpanded from '../../util/useExpanded';
-import { getQSConfig, parseQueryString } from '../../util/qs';
-import useWsTemplates from '../../util/useWsTemplates';
 import AddDropDownButton from '../AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
-import { relatedResourceDeleteRequests } from '../../util/getRelatedResourceDeleteDetails';
 
 function TemplateList({ defaultParams }) {
   // The type value in const qsConfig below does not have a space between job_template and

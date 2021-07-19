@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import { t } from '@lingui/macro';
-import { WorkflowDispatchContext } from '../../../../../contexts/Workflow';
+import { WorkflowDispatchContext } from 'contexts/Workflow';
 import NodeModal from './NodeModal';
 
 function NodeEditModal() {

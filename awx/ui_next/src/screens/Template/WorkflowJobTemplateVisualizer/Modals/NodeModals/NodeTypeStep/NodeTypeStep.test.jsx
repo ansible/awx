@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
-import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../../../../api';
+} from 'api';
+import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 
 import NodeTypeStep from './NodeTypeStep';
 

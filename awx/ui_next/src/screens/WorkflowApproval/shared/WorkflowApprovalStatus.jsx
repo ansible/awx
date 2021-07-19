@@ -2,8 +2,8 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { Label, Tooltip } from '@patternfly/react-core';
 import { CheckIcon, InfoCircleIcon } from '@patternfly/react-icons';
-import { WorkflowApproval } from '../../../types';
-import { formatDateString } from '../../../util/dates';
+import { WorkflowApproval } from 'types';
+import { formatDateString } from 'util/dates';
 
 function WorkflowApprovalStatus({ workflowApproval }) {
   if (workflowApproval.status === 'pending') {

@@ -5,7 +5,7 @@ import {
   WorkflowJobsAPI,
   InventoryUpdatesAPI,
   AdHocCommandsAPI,
-} from '../api';
+} from 'api';
 
 export function isJobRunning(status) {
   return ['new', 'pending', 'waiting', 'running'].includes(status);

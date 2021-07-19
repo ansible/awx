@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import { LabelsAPI } from '../../../api';
-import { useSyncedSelectValue } from '../../../components/MultiSelect';
-import useIsMounted from '../../../util/useIsMounted';
+import { LabelsAPI } from 'api';
+import { useSyncedSelectValue } from 'components/MultiSelect';
+import useIsMounted from 'util/useIsMounted';
 
 async function loadLabelOptions(setLabels, onError, isMounted) {
   if (!isMounted.current) {

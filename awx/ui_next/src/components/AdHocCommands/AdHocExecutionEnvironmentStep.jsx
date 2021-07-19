@@ -3,11 +3,11 @@ import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { ExecutionEnvironmentsAPI } from '../../api';
-import Popover from '../Popover';
+import { ExecutionEnvironmentsAPI } from 'api';
 
-import { parseQueryString, getQSConfig, mergeParams } from '../../util/qs';
-import useRequest from '../../util/useRequest';
+import { parseQueryString, getQSConfig, mergeParams } from 'util/qs';
+import useRequest from 'util/useRequest';
+import Popover from '../Popover';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import OptionsList from '../OptionsList';

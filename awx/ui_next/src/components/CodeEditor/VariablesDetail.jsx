@@ -11,15 +11,10 @@ import {
   Modal,
 } from '@patternfly/react-core';
 import { ExpandArrowsAltIcon } from '@patternfly/react-icons';
+import { yamlToJson, jsonToYaml, isJsonObject, isJsonString } from 'util/yaml';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
 import Popover from '../Popover';
-import {
-  yamlToJson,
-  jsonToYaml,
-  isJsonObject,
-  isJsonString,
-} from '../../util/yaml';
 import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 

@@ -6,11 +6,11 @@ import { SyncIcon } from '@patternfly/react-icons';
 import { number } from 'prop-types';
 
 import { t } from '@lingui/macro';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
+import useRequest, { useDismissableError } from 'util/useRequest';
 
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { ProjectsAPI } from '../../../api';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import { ProjectsAPI } from 'api';
 
 function ProjectSyncButton({ projectId, lastJobStatus = null }) {
   const match = useRouteMatch();

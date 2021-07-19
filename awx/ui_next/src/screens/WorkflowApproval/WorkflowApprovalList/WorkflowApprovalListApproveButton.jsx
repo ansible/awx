@@ -3,8 +3,8 @@ import React, { useContext } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
-import { KebabifiedContext } from '../../../contexts/Kebabified';
-import { WorkflowApproval } from '../../../types';
+import { KebabifiedContext } from 'contexts/Kebabified';
+import { WorkflowApproval } from 'types';
 
 function cannotApprove(item) {
   return !item.can_approve_or_deny;

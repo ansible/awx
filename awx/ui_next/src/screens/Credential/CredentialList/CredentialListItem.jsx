@@ -6,12 +6,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { timeOfDay } from '../../../util/dates';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { timeOfDay } from 'util/dates';
 
-import { Credential } from '../../../types';
-import { CredentialsAPI } from '../../../api';
-import CopyButton from '../../../components/CopyButton';
+import { Credential } from 'types';
+import { CredentialsAPI } from 'api';
+import CopyButton from 'components/CopyButton';
 
 function CredentialListItem({
   credential,

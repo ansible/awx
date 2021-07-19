@@ -3,10 +3,10 @@ import { Route, Switch, useParams, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { PageSection } from '@patternfly/react-core';
-import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
+import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import JobList from 'components/JobList';
 import Job from './Job';
 import JobTypeRedirect from './JobTypeRedirect';
-import JobList from '../../components/JobList';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 function Jobs() {

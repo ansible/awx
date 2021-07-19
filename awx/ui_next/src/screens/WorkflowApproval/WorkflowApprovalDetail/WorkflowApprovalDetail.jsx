@@ -3,20 +3,16 @@ import React, { useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import { formatDateString, secondsToHHMMSS } from 'util/dates';
+import { WorkflowApprovalsAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { WorkflowApproval } from 'types';
 import WorkflowApprovalStatus from '../shared/WorkflowApprovalStatus';
-import { formatDateString, secondsToHHMMSS } from '../../../util/dates';
-import { WorkflowApprovalsAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { WorkflowApproval } from '../../../types';
 
 function WorkflowApprovalDetail({ workflowApproval }) {
   const { id: workflowApprovalId } = useParams();

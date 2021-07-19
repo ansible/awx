@@ -13,14 +13,14 @@ import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { SystemJobTemplatesAPI, OrganizationsAPI } from '../../api';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import NotificationList from '../../components/NotificationList';
-import RoutedTabs from '../../components/RoutedTabs';
-import { Schedules } from '../../components/Schedule';
-import { useConfig } from '../../contexts/Config';
-import useRequest from '../../util/useRequest';
+import { SystemJobTemplatesAPI, OrganizationsAPI } from 'api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import NotificationList from 'components/NotificationList';
+import RoutedTabs from 'components/RoutedTabs';
+import { Schedules } from 'components/Schedule';
+import { useConfig } from 'contexts/Config';
+import useRequest from 'util/useRequest';
 
 function ManagementJob({ setBreadcrumb }) {
   const basePath = '/management_jobs';

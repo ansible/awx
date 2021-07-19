@@ -10,11 +10,11 @@ import {
   ProjectDiagramIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import StatusIcon from '../../../components/StatusIcon';
+import StatusIcon from 'components/StatusIcon';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
+} from 'contexts/Workflow';
 
 const Toolbar = styled.div`
   align-items: center;

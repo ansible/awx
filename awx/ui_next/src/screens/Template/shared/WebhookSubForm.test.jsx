@@ -4,11 +4,11 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
 import { Formik } from 'formik';
+import { CredentialsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { CredentialsAPI } from '../../../api';
 
 import WebhookSubForm from './WebhookSubForm';
 

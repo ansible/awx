@@ -5,10 +5,10 @@ import { t } from '@lingui/macro';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-} from '../../../components/PaginatedTable';
-import useRequest from '../../../util/useRequest';
-import { UsersAPI } from '../../../api';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+} from 'components/PaginatedTable';
+import useRequest from 'util/useRequest';
+import { UsersAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import UserOrganizationListItem from './UserOrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organizations', {

@@ -3,8 +3,8 @@ import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
-import ContentError from '../../../components/ContentError';
-import { useConfig } from '../../../contexts/Config';
+import ContentError from 'components/ContentError';
+import { useConfig } from 'contexts/Config';
 import LoggingDetail from './LoggingDetail';
 import LoggingEdit from './LoggingEdit';
 

@@ -2,15 +2,15 @@ import 'styled-components/macro';
 import React from 'react';
 
 import { t } from '@lingui/macro';
-import FormField from '../../../../components/FormField';
+import FormField from 'components/FormField';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import {
   UrlFormField,
   BranchFormField,
   ScmCredentialFormField,
   ScmTypeOptions,
 } from './SharedFields';
-import { useConfig } from '../../../../contexts/Config';
-import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 
 const GitSubForm = ({
   credential,

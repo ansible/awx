@@ -4,14 +4,14 @@ import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '../../api';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import useRequest from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useIsMounted from 'util/useIsMounted';
 import AnsibleSelect from '../AnsibleSelect';
 import CredentialChip from '../CredentialChip';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
-import useIsMounted from '../../util/useIsMounted';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,

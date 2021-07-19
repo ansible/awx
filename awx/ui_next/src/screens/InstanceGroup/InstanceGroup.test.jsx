@@ -2,11 +2,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import { InstanceGroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { InstanceGroupsAPI } from '../../api';
 
 import InstanceGroup from './InstanceGroup';
 

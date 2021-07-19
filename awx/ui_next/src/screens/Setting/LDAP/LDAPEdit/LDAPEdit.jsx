@@ -2,15 +2,15 @@ import React, { useCallback, useEffect } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { Formik } from 'formik';
 import { Form } from '@patternfly/react-core';
-import { CardBody } from '../../../../components/Card';
-import ContentError from '../../../../components/ContentError';
-import ContentLoading from '../../../../components/ContentLoading';
-import { FormSubmitError } from '../../../../components/FormField';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../../components/FormLayout';
-import { useSettings } from '../../../../contexts/Settings';
+import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import { useSettings } from 'contexts/Settings';
+import useModal from 'util/useModal';
+import useRequest from 'util/useRequest';
+import { SettingsAPI } from 'api';
 import { RevertAllAlert, RevertFormActionGroup } from '../../shared';
 import {
   BooleanField,
@@ -20,9 +20,6 @@ import {
   ObjectField,
 } from '../../shared/SharedFields';
 import { formatJson } from '../../shared/settingUtils';
-import useModal from '../../../../util/useModal';
-import useRequest from '../../../../util/useRequest';
-import { SettingsAPI } from '../../../../api';
 
 function filterByPrefix(data, prefix) {
   return Object.keys(data)

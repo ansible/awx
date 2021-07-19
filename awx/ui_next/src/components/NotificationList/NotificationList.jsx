@@ -3,13 +3,13 @@ import { useLocation } from 'react-router-dom';
 import { number, shape, bool } from 'prop-types';
 
 import { t } from '@lingui/macro';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
+import { NotificationTemplatesAPI } from 'api';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import NotificationListItem from './NotificationListItem';
 import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
-import { getQSConfig, parseQueryString } from '../../util/qs';
-import useRequest from '../../util/useRequest';
-import { NotificationTemplatesAPI } from '../../api';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,

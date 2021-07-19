@@ -2,22 +2,22 @@ import React, { useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
-import { InventoriesAPI } from '../../../api';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { InventoriesAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedTable';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+} from 'components/PaginatedTable';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import AddDropDownButton from 'components/AddDropDownButton';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useWsInventories from './useWsInventories';
-import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
-import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,

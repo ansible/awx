@@ -21,7 +21,7 @@ import {
   PencilAltIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import ChipGroup from '../../../components/ChipGroup';
+import ChipGroup from 'components/ChipGroup';
 
 const DataListAction = styled(_DataListAction)`
   && {

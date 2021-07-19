@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { WorkflowApprovalsAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import PageHeaderToolbar from './PageHeaderToolbar';
-import { WorkflowApprovalsAPI } from '../../api';
 
 jest.mock('../../api');
 

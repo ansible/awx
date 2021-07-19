@@ -4,9 +4,9 @@ import { Route, Switch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
 import { PageSection, Card } from '@patternfly/react-core';
-import ScreenHeader from '../../components/ScreenHeader';
-import { ScheduleList } from '../../components/Schedule';
-import { SchedulesAPI } from '../../api';
+import ScreenHeader from 'components/ScreenHeader';
+import { ScheduleList } from 'components/Schedule';
+import { SchedulesAPI } from 'api';
 
 function AllSchedules() {
   const loadScheduleOptions = useCallback(() => {

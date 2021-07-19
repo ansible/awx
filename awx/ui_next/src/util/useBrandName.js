@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { RootAPI } from '../api';
+import { RootAPI } from 'api';
 
 export default function useBrandName() {
   const brandName = useRef('');

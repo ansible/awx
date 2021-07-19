@@ -14,8 +14,8 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { useConfig } from '../../contexts/Config';
-import getDocsBaseUrl from '../../util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 
 const AdvancedGroup = styled.div`
   display: flex;

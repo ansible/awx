@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ApplicationsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import UserTokenForm from './UserTokenForm';
 import { sleep } from '../../../../testUtils/testUtils';
-import { ApplicationsAPI } from '../../../api';
 
 jest.mock('../../../api');
 const applications = {

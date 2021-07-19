@@ -6,8 +6,8 @@ import { Label } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { WorkflowApproval } from '../../../types';
-import { formatDateString } from '../../../util/dates';
+import { WorkflowApproval } from 'types';
+import { formatDateString } from 'util/dates';
 import WorkflowApprovalStatus from '../shared/WorkflowApprovalStatus';
 
 const JobLabel = styled.b`

@@ -2,7 +2,7 @@ import React from 'react';
 import { node, string } from 'prop-types';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { formatDateString } from '../../util/dates';
+import { formatDateString } from 'util/dates';
 import _Detail from './Detail';
 
 const Detail = styled(_Detail)`

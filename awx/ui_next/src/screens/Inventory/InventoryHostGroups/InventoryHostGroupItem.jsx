@@ -6,8 +6,8 @@ import { Tr, Td } from '@patternfly/react-table';
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import { Group } from '../../../types';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { Group } from 'types';
 
 function InventoryHostGroupItem({
   group,

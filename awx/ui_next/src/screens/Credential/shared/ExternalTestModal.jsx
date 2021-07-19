@@ -4,13 +4,13 @@ import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { Formik } from 'formik';
 import { Button, Form, FormGroup, Modal } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import FormField from '../../../components/FormField';
-import { FormFullWidthLayout } from '../../../components/FormLayout';
-import Popover from '../../../components/Popover';
-import { required } from '../../../util/validators';
-import useRequest from '../../../util/useRequest';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormField from 'components/FormField';
+import { FormFullWidthLayout } from 'components/FormLayout';
+import Popover from 'components/Popover';
+import { required } from 'util/validators';
+import useRequest from 'util/useRequest';
 import { CredentialPluginTestAlert } from './CredentialPlugins';
 
 function ExternalTestModal({

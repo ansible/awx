@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useIsMounted from '../../util/useIsMounted';
+import useIsMounted from 'util/useIsMounted';
 
 /*
   Hook for using PatternFly's <Select> component when a pre-existing value

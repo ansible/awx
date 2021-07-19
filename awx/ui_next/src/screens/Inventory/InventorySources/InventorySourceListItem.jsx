@@ -9,11 +9,11 @@ import {
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import StatusIcon from '../../../components/StatusIcon';
-import JobCancelButton from '../../../components/JobCancelButton';
+import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import StatusIcon from 'components/StatusIcon';
+import JobCancelButton from 'components/JobCancelButton';
+import { formatDateString } from 'util/dates';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
-import { formatDateString } from '../../../util/dates';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
