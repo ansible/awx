@@ -470,7 +470,7 @@ CLUSTER_NODE_COUNT ?= 1
 MINIKUBE_CONTAINER_GROUP ?= false
 
 docker-compose-sources: .git/hooks/pre-commit
-	@if [ $(MINIKUBE_CONTAINER_GROUP) ]; then\
+	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
 	    ansible-playbook -i tools/docker-compose/inventory tools/docker-compose-minikube/deploy.yml; \
 	fi;
 
