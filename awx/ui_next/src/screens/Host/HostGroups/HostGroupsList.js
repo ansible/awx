@@ -6,8 +6,8 @@ import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import useRequest, {
   useDismissableError,
   useDeleteItems,
-} from 'util/useRequest';
-import useSelected from 'util/useSelected';
+} from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { HostsAPI, InventoriesAPI } from 'api';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';

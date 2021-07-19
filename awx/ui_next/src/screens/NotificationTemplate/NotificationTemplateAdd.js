@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from 'components/Card';
 import { NotificationTemplatesAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import ContentError from 'components/ContentError';
 import NotificationTemplateForm from './shared/NotificationTemplateForm';
 

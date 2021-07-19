@@ -24,7 +24,7 @@ import { LaunchButton } from 'components/LaunchButton';
 import Sparkline from 'components/Sparkline';
 import { toTitleCase } from 'util/strings';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 function WorkflowJobTemplateDetail({ template }) {
   const {

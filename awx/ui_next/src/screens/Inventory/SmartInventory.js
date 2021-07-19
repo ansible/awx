@@ -11,7 +11,7 @@ import {
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { InventoriesAPI } from 'api';
 
 import ContentError from 'components/ContentError';

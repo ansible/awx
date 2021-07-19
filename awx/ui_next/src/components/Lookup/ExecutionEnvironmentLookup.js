@@ -6,7 +6,7 @@ import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { ExecutionEnvironmentsAPI, ProjectsAPI } from 'api';
 import { ExecutionEnvironment } from 'types';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import Popover from '../Popover';
 import OptionsList from '../OptionsList';
 

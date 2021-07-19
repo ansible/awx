@@ -13,7 +13,7 @@ import { OrganizationLookup } from 'components/Lookup';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { required } from 'util/validators';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 
 function ExecutionEnvironmentFormFields({
   me,

@@ -12,7 +12,7 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { ResourceAccessList } from 'components/ResourceAccessList';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';

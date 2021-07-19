@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 
 import { CardBody } from 'components/Card';
 import { InstanceGroupsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { jsonToYaml, isJsonString } from 'util/yaml';

@@ -11,7 +11,7 @@ import {
 import { CubesIcon } from '@patternfly/react-icons';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { UsersAPI, RolesAPI } from 'api';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,

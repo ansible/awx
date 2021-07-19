@@ -18,10 +18,10 @@ import DeleteButton from 'components/DeleteButton';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { InventorySourcesAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import useIsMounted from 'util/useIsMounted';
+import useIsMounted from 'hooks/useIsMounted';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 
 function InventorySourceDetail({ inventorySource }) {

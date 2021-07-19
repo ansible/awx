@@ -7,7 +7,7 @@ import { DetailList } from 'components/DetailList';
 import { VariablesDetail } from 'components/CodeEditor';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { HostsAPI } from 'api';
 
 function HostFacts({ host }) {

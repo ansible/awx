@@ -6,7 +6,7 @@ import { ProjectsAPI } from 'api';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
+} from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import DataListToolbar from 'components/DataListToolbar';
 import ErrorDetail from 'components/ErrorDetail';
@@ -16,8 +16,8 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
-import useSelected from 'util/useSelected';
-import useExpanded from 'util/useExpanded';
+import useSelected from 'hooks/useSelected';
+import useExpanded from 'hooks/useExpanded';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useWsProjects from './useWsProjects';

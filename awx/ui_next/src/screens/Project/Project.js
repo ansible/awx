@@ -13,7 +13,7 @@ import {
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 import { useConfig } from 'contexts/Config';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';

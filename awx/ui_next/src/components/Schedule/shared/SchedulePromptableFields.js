@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
-import { useDismissableError } from 'util/useRequest';
+import { useDismissableError } from 'hooks/useRequest';
 import AlertModal from '../../AlertModal';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';

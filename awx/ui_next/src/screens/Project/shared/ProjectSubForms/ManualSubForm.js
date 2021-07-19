@@ -7,7 +7,7 @@ import { required } from 'util/validators';
 import AnsibleSelect from 'components/AnsibleSelect';
 import FormField from 'components/FormField';
 import Popover from 'components/Popover';
-import useBrandName from 'util/useBrandName';
+import useBrandName from 'hooks/useBrandName';
 
 const ManualSubForm = ({
   localPath,

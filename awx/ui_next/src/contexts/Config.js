@@ -4,7 +4,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
 import { ConfigAPI, MeAPI, UsersAPI, OrganizationsAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from './Session';

@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import { TeamsAPI, RolesAPI, UsersAPI } from 'api';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderCell,

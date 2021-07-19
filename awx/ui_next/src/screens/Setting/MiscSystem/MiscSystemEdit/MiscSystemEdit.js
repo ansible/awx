@@ -10,8 +10,8 @@ import { FormSubmitError } from 'components/FormField';
 import { FormColumnLayout } from 'components/FormLayout';
 import { ExecutionEnvironmentLookup } from 'components/Lookup';
 import { useSettings } from 'contexts/Settings';
-import useModal from 'util/useModal';
-import useRequest from 'util/useRequest';
+import useModal from 'hooks/useModal';
+import useRequest from 'hooks/useRequest';
 import { SettingsAPI, ExecutionEnvironmentsAPI } from 'api';
 import {
   BooleanField,

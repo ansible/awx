@@ -10,7 +10,7 @@ import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
 import { TokensAPI } from 'api';
 import { formatDateString } from 'util/dates';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
 
 function UserTokenDetail({ token }) {

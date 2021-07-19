@@ -10,7 +10,7 @@ import {
   WizardFooter,
 } from '@patternfly/react-core';
 import { CredentialsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import CredentialsStep from './CredentialsStep';
 import MetadataStep from './MetadataStep';
 import { CredentialPluginTestAlert } from '..';

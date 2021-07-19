@@ -12,14 +12,14 @@ import {
   InstanceGroupsAPI,
   RootAPI,
 } from 'api';
-import useDebounce from 'util/useDebounce';
+import useDebounce from 'hooks/useDebounce';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import JobTemplateEdit from './JobTemplateEdit';
 
-jest.mock('../../../util/useDebounce');
+jest.mock('../../../hooks/useDebounce');
 jest.mock('../../../api/models/Credentials');
 jest.mock('../../../api/models/CredentialTypes');
 jest.mock('../../../api/models/JobTemplates');

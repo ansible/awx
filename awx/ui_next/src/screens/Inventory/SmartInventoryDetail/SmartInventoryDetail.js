@@ -6,7 +6,7 @@ import { Button, Chip, Label } from '@patternfly/react-core';
 
 import { Inventory } from 'types';
 import { InventoriesAPI, UnifiedJobsAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';

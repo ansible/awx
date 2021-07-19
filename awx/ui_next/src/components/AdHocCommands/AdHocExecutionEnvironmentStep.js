@@ -6,7 +6,7 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import { ExecutionEnvironmentsAPI } from 'api';
 
 import { parseQueryString, getQSConfig, mergeParams } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import Popover from '../Popover';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';

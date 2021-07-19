@@ -13,7 +13,7 @@ import StatusLabel from 'components/StatusLabel';
 import CopyButton from 'components/CopyButton';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { NOTIFICATION_TYPES } from '../constants';
 
 const NUM_RETRIES = 25;

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parseQueryString, updateQueryString } from 'util/qs';
-import useWebsocket from 'util/useWebsocket';
-import useThrottle from 'util/useThrottle';
+import useWebsocket from 'hooks/useWebsocket';
+import useThrottle from 'hooks/useThrottle';
 
 export default function useWsInventories(
   initialInventories,

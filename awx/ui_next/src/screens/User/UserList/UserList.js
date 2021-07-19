@@ -13,8 +13,8 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
-import useRequest, { useDeleteItems } from 'util/useRequest';
-import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import UserListItem from './UserListItem';
 

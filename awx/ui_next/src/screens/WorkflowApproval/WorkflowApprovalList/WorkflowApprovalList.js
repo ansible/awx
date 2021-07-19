@@ -14,8 +14,8 @@ import DataListToolbar from 'components/DataListToolbar';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
-import useSelected from 'util/useSelected';
+} from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import WorkflowApprovalListItem from './WorkflowApprovalListItem';
 import useWsWorkflowApprovals from './useWsWorkflowApprovals';

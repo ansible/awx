@@ -3,7 +3,7 @@ import React, { Fragment, useState, useEffect, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { SchedulesAPI } from 'api';
 import AlertModal from '../../AlertModal';
 import ErrorDetail from '../../ErrorDetail';

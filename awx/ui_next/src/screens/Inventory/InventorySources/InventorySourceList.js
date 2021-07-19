@@ -6,7 +6,7 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
+} from 'hooks/useRequest';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { InventoriesAPI, InventorySourcesAPI } from 'api';
 import PaginatedTable, {
@@ -15,7 +15,7 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 import DatalistToolbar from 'components/DataListToolbar';
 import AlertModal from 'components/AlertModal/AlertModal';
 import ErrorDetail from 'components/ErrorDetail/ErrorDetail';

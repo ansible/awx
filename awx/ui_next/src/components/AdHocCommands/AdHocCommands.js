@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button, DropdownItem } from '@patternfly/react-core';
 
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { InventoriesAPI, CredentialTypesAPI } from 'api';
 
 import { KebabifiedContext } from 'contexts/Kebabified';

@@ -16,7 +16,7 @@ import ContentLoading from 'components/ContentLoading';
 import AlertModal from 'components/AlertModal';
 import { ToolbarAddButton } from 'components/PaginatedTable';
 
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 import SurveyPreviewModal from './SurveyPreviewModal';

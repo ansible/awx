@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Inventory } from 'types';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { InventoriesAPI } from 'api';
 import { CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';

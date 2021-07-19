@@ -14,7 +14,7 @@ import PaginatedTable, {
 } from 'components/PaginatedTable';
 import { useConfig } from 'contexts/Config';
 import { parseQueryString, getQSConfig } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 
 import ManagementJobListItem from './ManagementJobListItem';
 

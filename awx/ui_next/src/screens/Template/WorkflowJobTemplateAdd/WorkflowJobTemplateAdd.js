@@ -6,7 +6,7 @@ import { CardBody } from 'components/Card';
 
 import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
 import { useConfig } from 'contexts/Config';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import WorkflowJobTemplateForm from '../shared/WorkflowJobTemplateForm';

@@ -15,7 +15,7 @@ import {
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
 import { parseVariableField } from 'util/yaml';

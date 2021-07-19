@@ -7,7 +7,7 @@ import { useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 import Popover from '../Popover';
 

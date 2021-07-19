@@ -25,7 +25,7 @@ describe('useWsWorkflowApprovals hook', () => {
     Jest mock timers don’t play well with jest-websocket-mock,
     so we'll stub out throttling to resolve immediately
     */
-    jest.mock('../../../util/useThrottle', () => ({
+    jest.mock('../../../hooks/useThrottle', () => ({
       __esModule: true,
       default: jest.fn(val => val),
     }));

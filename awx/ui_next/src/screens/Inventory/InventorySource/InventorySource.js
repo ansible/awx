@@ -10,7 +10,7 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 
 import { InventoriesAPI, InventorySourcesAPI, OrganizationsAPI } from 'api';
 import { Schedules } from 'components/Schedule';

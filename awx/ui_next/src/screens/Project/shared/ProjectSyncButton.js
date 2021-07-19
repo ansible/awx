@@ -6,7 +6,7 @@ import { SyncIcon } from '@patternfly/react-icons';
 import { number } from 'prop-types';
 
 import { t } from '@lingui/macro';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';

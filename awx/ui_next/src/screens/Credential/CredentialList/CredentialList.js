@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CredentialsAPI } from 'api';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import DataListToolbar from 'components/DataListToolbar';
@@ -13,7 +13,7 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import CredentialListItem from './CredentialListItem';

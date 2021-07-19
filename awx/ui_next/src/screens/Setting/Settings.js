@@ -8,7 +8,7 @@ import ScreenHeader from 'components/ScreenHeader';
 import { SettingsProvider } from 'contexts/Settings';
 import { useConfig } from 'contexts/Config';
 import { SettingsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
 import GoogleOAuth2 from './GoogleOAuth2';

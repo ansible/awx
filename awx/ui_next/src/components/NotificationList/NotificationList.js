@@ -4,7 +4,7 @@ import { number, shape, bool } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { NotificationTemplatesAPI } from 'api';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';

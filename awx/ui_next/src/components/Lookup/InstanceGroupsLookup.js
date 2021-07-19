@@ -7,7 +7,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from 'api';
 import { InstanceGroup } from 'types';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import Popover from '../Popover';
 import OptionsList from '../OptionsList';
 import Lookup from './Lookup';

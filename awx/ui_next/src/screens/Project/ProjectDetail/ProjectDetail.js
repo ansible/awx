@@ -23,7 +23,7 @@ import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import CredentialChip from 'components/CredentialChip';
 import { ProjectsAPI } from 'api';
 import { toTitleCase } from 'util/strings';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import StatusLabel from 'components/StatusLabel';
 import { formatDateString } from 'util/dates';

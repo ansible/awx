@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { InventoriesAPI } from 'api';
 import { Inventory } from 'types';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';

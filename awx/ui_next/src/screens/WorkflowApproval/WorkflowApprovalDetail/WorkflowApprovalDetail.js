@@ -10,7 +10,7 @@ import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
 import { formatDateString, secondsToHHMMSS } from 'util/dates';
 import { WorkflowApprovalsAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { WorkflowApproval } from 'types';
 import WorkflowApprovalStatus from '../shared/WorkflowApprovalStatus';
 

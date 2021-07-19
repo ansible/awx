@@ -8,7 +8,7 @@ import {
   SelectOption,
 } from '@patternfly/react-core';
 import { ProjectsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import ProjectLookup from 'components/Lookup/ProjectLookup';

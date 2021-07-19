@@ -14,7 +14,7 @@ import {
 } from 'react-router-dom';
 import RoutedTabs from 'components/RoutedTabs';
 import { useConfig } from 'contexts/Config';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import ContentError from 'components/ContentError';
 import JobList from 'components/JobList';
 import NotificationList from 'components/NotificationList';

@@ -9,7 +9,7 @@ import ContentLoading from 'components/ContentLoading';
 import ContentError from 'components/ContentError';
 import RoutedTabs from 'components/RoutedTabs';
 import { SettingsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { DetailList } from 'components/DetailList';
 import { useConfig } from 'contexts/Config';
 import { useSettings } from 'contexts/Settings';

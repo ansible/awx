@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { UsersAPI } from 'api';
 import ContentError from 'components/ContentError';
 import RoutedTabs from 'components/RoutedTabs';

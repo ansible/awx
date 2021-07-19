@@ -31,8 +31,8 @@ import Search from 'components/Search';
 import StatusIcon from 'components/StatusIcon';
 
 import { getJobModel, isJobRunning } from 'util/jobs';
-import useRequest, { useDismissableError } from 'util/useRequest';
-import useInterval from 'util/useInterval';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useInterval from 'hooks/useInterval';
 import {
   parseQueryString,
   mergeParams,
@@ -40,7 +40,7 @@ import {
   getQSConfig,
   updateQueryString,
 } from 'util/qs';
-import useIsMounted from 'util/useIsMounted';
+import useIsMounted from 'hooks/useIsMounted';
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
 import PageControls from './PageControls';

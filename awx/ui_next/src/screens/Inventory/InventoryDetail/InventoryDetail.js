@@ -13,7 +13,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ChipGroup from 'components/ChipGroup';
 import { InventoriesAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { Inventory } from 'types';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 

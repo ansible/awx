@@ -18,8 +18,8 @@ import ErrorDetail from 'components/ErrorDetail';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
-import useSelected from 'util/useSelected';
+} from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 

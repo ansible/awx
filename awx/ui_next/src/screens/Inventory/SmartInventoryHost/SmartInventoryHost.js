@@ -6,7 +6,7 @@ import { CaretLeftIcon } from '@patternfly/react-icons';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import RoutedTabs from 'components/RoutedTabs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { InventoriesAPI } from 'api';
 import SmartInventoryHostDetail from '../SmartInventoryHostDetail';
 

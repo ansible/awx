@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom';
 import { Card } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 
 import { InventoriesAPI } from 'api';
 import ContentError from 'components/ContentError';

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { RolesAPI, TeamsAPI, UsersAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';

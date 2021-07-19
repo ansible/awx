@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { Alert } from '@patternfly/react-core';
 import { InventoriesAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';
 import ContentError from '../../ContentError';

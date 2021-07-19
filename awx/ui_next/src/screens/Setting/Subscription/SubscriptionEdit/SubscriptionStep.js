@@ -17,7 +17,7 @@ import {
 } from '@patternfly/react-core';
 import { useConfig } from 'contexts/Config';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import useModal from 'util/useModal';
+import useModal from 'hooks/useModal';
 import FormField, { PasswordField } from 'components/FormField';
 import Popover from 'components/Popover';
 import SubscriptionModal from './SubscriptionModal';

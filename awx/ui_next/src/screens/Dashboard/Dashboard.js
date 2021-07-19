@@ -10,7 +10,7 @@ import {
   TabTitleText,
 } from '@patternfly/react-core';
 
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { DashboardAPI } from 'api';
 import ScreenHeader from 'components/ScreenHeader';
 import JobList from 'components/JobList';

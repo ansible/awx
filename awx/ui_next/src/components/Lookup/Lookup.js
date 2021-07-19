@@ -22,7 +22,7 @@ import {
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import useDebounce from 'util/useDebounce';
+import useDebounce from 'hooks/useDebounce';
 import { QSConfig } from 'types';
 import ChipGroup from '../ChipGroup';
 import reducer, { initReducer } from './shared/reducer';

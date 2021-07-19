@@ -3,9 +3,9 @@ import { useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 import OptionsList from '../OptionsList';
 
 const QS_CONFIG = (order_by = 'name') => {

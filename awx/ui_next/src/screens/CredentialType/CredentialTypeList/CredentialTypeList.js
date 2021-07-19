@@ -6,8 +6,8 @@ import { Card, PageSection } from '@patternfly/react-core';
 
 import { CredentialTypesAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest, { useDeleteItems } from 'util/useRequest';
-import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,

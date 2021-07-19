@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from 'util/useWebsocket';
+import useWebsocket from 'hooks/useWebsocket';
 import { getJobModel } from 'util/jobs';
 
 export default function useWsJob(initialJob) {

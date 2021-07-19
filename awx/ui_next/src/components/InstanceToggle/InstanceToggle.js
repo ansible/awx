@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { InstancesAPI } from 'api';
 import { useConfig } from 'contexts/Config';
 import ErrorDetail from '../ErrorDetail';

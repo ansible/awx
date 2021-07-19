@@ -14,7 +14,7 @@ import { Card, PageSection } from '@patternfly/react-core';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
 import { TokensAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import UserTokenDetail from '../UserTokenDetail';
 
 function UserToken({ setBreadcrumb, user }) {

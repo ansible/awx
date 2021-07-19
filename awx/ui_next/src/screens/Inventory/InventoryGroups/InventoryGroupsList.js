@@ -3,8 +3,8 @@ import { useParams, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useSelected from 'util/useSelected';
-import useRequest from 'util/useRequest';
+import useSelected from 'hooks/useSelected';
+import useRequest from 'hooks/useRequest';
 import { InventoriesAPI } from 'api';
 import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {

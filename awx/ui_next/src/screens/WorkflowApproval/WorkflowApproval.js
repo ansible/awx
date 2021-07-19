@@ -12,7 +12,7 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
 import { WorkflowApprovalsAPI } from 'api';

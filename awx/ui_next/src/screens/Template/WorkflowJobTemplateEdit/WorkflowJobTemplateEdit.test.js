@@ -9,14 +9,14 @@ import {
   UsersAPI,
   InventoriesAPI,
 } from 'api';
-import useDebounce from 'util/useDebounce';
+import useDebounce from 'hooks/useDebounce';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 
-jest.mock('../../../util/useDebounce');
+jest.mock('../../../hooks/useDebounce');
 jest.mock('../../../api/models/WorkflowJobTemplates');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Labels');

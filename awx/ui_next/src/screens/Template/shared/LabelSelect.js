@@ -4,7 +4,7 @@ import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { LabelsAPI } from 'api';
 import { useSyncedSelectValue } from 'components/MultiSelect';
-import useIsMounted from 'util/useIsMounted';
+import useIsMounted from 'hooks/useIsMounted';
 
 async function loadLabelOptions(setLabels, onError, isMounted) {
   if (!isMounted.current) {

@@ -18,7 +18,7 @@ import {
 import HostFilterLookup from 'components/Lookup/HostFilterLookup';
 import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 import { InventoriesAPI } from 'api';
 

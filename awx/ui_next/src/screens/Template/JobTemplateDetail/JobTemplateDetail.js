@@ -29,7 +29,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import { LaunchButton } from 'components/LaunchButton';
 import { VariablesDetail } from 'components/CodeEditor';
 import { JobTemplatesAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 

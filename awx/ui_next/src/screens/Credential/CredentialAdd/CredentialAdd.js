@@ -9,7 +9,7 @@ import {
   CredentialTypesAPI,
   CredentialsAPI,
 } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import CredentialForm from '../shared/CredentialForm';
 
 function CredentialAdd({ me }) {

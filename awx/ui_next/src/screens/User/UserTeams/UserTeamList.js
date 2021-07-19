@@ -15,8 +15,8 @@ import ErrorDetail from 'components/ErrorDetail';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
-import useSelected from 'util/useSelected';
+} from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { TeamsAPI, UsersAPI } from 'api';
 import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
 

@@ -10,7 +10,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import { CardBody, CardActionsRow } from 'components/Card';
 import DeleteButton from 'components/DeleteButton';
 import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { jsonToYaml, isJsonString } from 'util/yaml';
 import { InstanceGroupsAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';

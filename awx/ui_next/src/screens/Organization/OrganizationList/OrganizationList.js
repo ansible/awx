@@ -4,7 +4,7 @@ import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from 'api';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import DataListToolbar from 'components/DataListToolbar';
 import ErrorDetail from 'components/ErrorDetail';
@@ -15,7 +15,7 @@ import PaginatedTable, {
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import OrganizationListItem from './OrganizationListItem';
 

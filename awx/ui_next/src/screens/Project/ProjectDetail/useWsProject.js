@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from 'util/useWebsocket';
+import useWebsocket from 'hooks/useWebsocket';
 import { ProjectsAPI } from 'api';
 
 export default function useWsProjects(initialProject) {

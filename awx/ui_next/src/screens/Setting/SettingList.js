@@ -15,7 +15,7 @@ import {
 import styled from 'styled-components';
 import { useConfig } from 'contexts/Config';
 import ContentLoading from 'components/ContentLoading/ContentLoading';
-import useBrandName from 'util/useBrandName';
+import useBrandName from 'hooks/useBrandName';
 
 const SplitLayout = styled(PageSection)`
   column-count: 1;

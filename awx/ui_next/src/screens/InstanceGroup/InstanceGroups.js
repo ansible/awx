@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 
 import ScreenHeader from 'components/ScreenHeader';

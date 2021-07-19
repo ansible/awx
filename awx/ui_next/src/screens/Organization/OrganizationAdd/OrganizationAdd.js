@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { CredentialsAPI, OrganizationsAPI } from 'api';
 import { CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';

@@ -5,7 +5,7 @@ import { Redirect, useHistory } from 'react-router-dom';
 import { JobTemplate } from 'types';
 import { JobTemplatesAPI, ProjectsAPI } from 'api';
 import { getAddedAndRemoved } from 'util/lists';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import ContentLoading from 'components/ContentLoading';
 import { CardBody } from 'components/Card';
 import JobTemplateForm from '../shared/JobTemplateForm';

@@ -16,7 +16,7 @@ import {
 } from '@patternfly/react-core';
 import { HostsAPI } from 'api';
 import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import ChipGroup from '../ChipGroup';
 import Popover from '../Popover';
 import DataListToolbar from '../DataListToolbar';

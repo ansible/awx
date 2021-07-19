@@ -5,7 +5,7 @@ import { object } from 'prop-types';
 import { CardBody } from 'components/Card';
 import { InventoriesAPI } from 'api';
 import ContentLoading from 'components/ContentLoading';
-import useIsMounted from 'util/useIsMounted';
+import useIsMounted from 'hooks/useIsMounted';
 import InventoryForm from '../shared/InventoryForm';
 
 function InventoryEdit({ inventory }) {

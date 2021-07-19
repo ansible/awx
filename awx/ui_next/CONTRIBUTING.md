@@ -156,6 +156,7 @@ Inside these folders, the internal structure is:
 - **/api** - All classes used to interact with API's are found here. See [AWX REST API Interaction](#awx-rest-api-interaction) for more information.
 - **/components** - All generic components that are meant to be used in multiple contexts throughout awx. Things like buttons, tabs go here.
 - **/contexts** - Components which utilize react's context api.
+- **/hooks** - Custom react [hooks](https://reactjs.org/docs/hooks-custom.html)
 - **/locales** - [Internationalization](#internationalization) config and source files.
 - **/screens** - Based on the various routes of awx.
   - **/shared** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.

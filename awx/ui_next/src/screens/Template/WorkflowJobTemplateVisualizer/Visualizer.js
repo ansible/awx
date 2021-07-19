@@ -15,7 +15,7 @@ import { layoutGraph } from 'components/Workflow/WorkflowUtils';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import workflowReducer from 'components/Workflow/workflowReducer';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import {
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,

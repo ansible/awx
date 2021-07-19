@@ -15,8 +15,8 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import AnsibleSelect from 'components/AnsibleSelect';
 import { TagMultiSelect } from 'components/MultiSelect';
-import useRequest from 'util/useRequest';
-import useBrandName from 'util/useBrandName';
+import useRequest from 'hooks/useRequest';
+import useBrandName from 'hooks/useBrandName';
 import FormActionGroup from 'components/FormActionGroup';
 import FormField, {
   CheckboxField,
@@ -41,7 +41,7 @@ import {
 } from 'components/Lookup';
 import Popover from 'components/Popover';
 import { JobTemplatesAPI } from 'api';
-import useIsMounted from 'util/useIsMounted';
+import useIsMounted from 'hooks/useIsMounted';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';

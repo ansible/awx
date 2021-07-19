@@ -7,7 +7,7 @@ import { useField } from 'formik';
 import { Form, FormGroup, Switch, Checkbox } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { required } from 'util/validators';
-import useBrandName from 'util/useBrandName';
+import useBrandName from 'hooks/useBrandName';
 import AnsibleSelect from '../AnsibleSelect';
 import FormField from '../FormField';
 import { VariablesField } from '../CodeEditor';

@@ -3,7 +3,7 @@ import { t } from '@lingui/macro';
 import { MinusCircleIcon } from '@patternfly/react-icons';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { getJobModel } from 'util/jobs';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 

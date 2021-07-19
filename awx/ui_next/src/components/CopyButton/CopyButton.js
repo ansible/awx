@@ -3,7 +3,7 @@ import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 

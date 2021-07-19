@@ -16,7 +16,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import JobList from 'components/JobList';
 import { HostsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import HostFacts from './HostFacts';
 import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';

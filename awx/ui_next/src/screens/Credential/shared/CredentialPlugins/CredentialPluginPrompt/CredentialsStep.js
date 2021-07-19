@@ -8,7 +8,7 @@ import CheckboxListItem from 'components/CheckboxListItem';
 import ContentError from 'components/ContentError';
 import DataListToolbar from 'components/DataListToolbar';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,

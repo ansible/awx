@@ -9,8 +9,8 @@ import { FormSubmitError } from 'components/FormField';
 import { FormColumnLayout } from 'components/FormLayout';
 import { useSettings } from 'contexts/Settings';
 import { useConfig } from 'contexts/Config';
-import useModal from 'util/useModal';
-import useRequest from 'util/useRequest';
+import useModal from 'hooks/useModal';
+import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 import {
   ChoiceField,

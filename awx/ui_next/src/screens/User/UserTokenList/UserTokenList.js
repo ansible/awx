@@ -9,8 +9,8 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
-import useSelected from 'util/useSelected';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'hooks/useSelected';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import { UsersAPI, TokensAPI } from 'api';
 import DataListToolbar from 'components/DataListToolbar';
 import AlertModal from 'components/AlertModal';

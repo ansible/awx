@@ -4,7 +4,7 @@ import { func, shape } from 'prop-types';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import { InventorySourcesAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 import AnsibleSelect from 'components/AnsibleSelect';
 import ContentError from 'components/ContentError';

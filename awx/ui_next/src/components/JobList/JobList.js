@@ -6,10 +6,10 @@ import { Card } from '@patternfly/react-core';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
+} from 'hooks/useRequest';
 import { useConfig } from 'contexts/Config';
-import useSelected from 'util/useSelected';
-import useExpanded from 'util/useExpanded';
+import useSelected from 'hooks/useSelected';
+import useExpanded from 'hooks/useExpanded';
 import { isJobRunning, getJobModel } from 'util/jobs';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { UnifiedJobsAPI } from 'api';

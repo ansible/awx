@@ -5,9 +5,9 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 
 import { DropdownItem } from '@patternfly/react-core';
 import { GroupsAPI, InventoriesAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 
 import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {

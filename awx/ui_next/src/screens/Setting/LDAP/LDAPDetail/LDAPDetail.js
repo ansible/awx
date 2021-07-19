@@ -10,7 +10,7 @@ import ContentLoading from 'components/ContentLoading';
 import { DetailList } from 'components/DetailList';
 import RoutedTabs from 'components/RoutedTabs';
 import { SettingsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { useConfig } from 'contexts/Config';
 import { useSettings } from 'contexts/Settings';
 import { SettingDetail } from '../../shared';

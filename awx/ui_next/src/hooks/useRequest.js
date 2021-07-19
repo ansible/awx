@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { parseQueryString, updateQueryString } from './qs';
+import { parseQueryString, updateQueryString } from 'util/qs';
 import useIsMounted from './useIsMounted';
 
 /*

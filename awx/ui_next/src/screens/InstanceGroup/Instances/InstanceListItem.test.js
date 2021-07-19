@@ -2,13 +2,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { InstancesAPI } from 'api';
-import useDebounce from 'util/useDebounce';
+import useDebounce from 'hooks/useDebounce';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InstanceListItem from './InstanceListItem';
 
 jest.mock('../../../api');
-jest.mock('../../../util/useDebounce');
+jest.mock('../../../hooks/useDebounce');
 
 const instance = [
   {

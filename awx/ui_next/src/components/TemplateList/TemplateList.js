@@ -7,11 +7,11 @@ import {
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
 } from 'api';
-import useRequest, { useDeleteItems } from 'util/useRequest';
-import useSelected from 'util/useSelected';
-import useExpanded from 'util/useExpanded';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
+import useExpanded from 'hooks/useExpanded';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useWsTemplates from 'util/useWsTemplates';
+import useWsTemplates from 'hooks/useWsTemplates';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';

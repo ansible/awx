@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { Alert, ToolbarItem } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import AnsibleSelect from '../../AnsibleSelect';
 import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';

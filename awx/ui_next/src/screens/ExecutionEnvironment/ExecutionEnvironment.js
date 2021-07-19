@@ -12,7 +12,7 @@ import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { ExecutionEnvironmentsAPI } from 'api';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';

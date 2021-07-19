@@ -21,8 +21,8 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 
 import { ConfigAPI } from 'api';
 import { formatDateStringUTC } from 'util/dates';
-import useRequest from 'util/useRequest';
-import useSelected from 'util/useSelected';
+import useRequest from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import ErrorDetail from 'components/ErrorDetail';
 import ContentEmpty from 'components/ContentEmpty';
 import ContentLoading from 'components/ContentLoading';

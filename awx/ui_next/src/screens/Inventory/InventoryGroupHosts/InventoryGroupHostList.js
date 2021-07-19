@@ -9,8 +9,8 @@ import { GroupsAPI, InventoriesAPI } from 'api';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from 'util/useRequest';
-import useSelected from 'util/useSelected';
+} from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import AlertModal from 'components/AlertModal';
 import DataListToolbar from 'components/DataListToolbar';
 import ErrorDetail from 'components/ErrorDetail';

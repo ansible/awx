@@ -5,7 +5,7 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 
 import { Card, PageSection } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
 
@@ -17,7 +17,7 @@ import PaginatedTable, {
   ToolbarDeleteButton,
   ToolbarAddButton,
 } from 'components/PaginatedTable';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 
 import ApplicationListItem from './ApplicationListItem';
 

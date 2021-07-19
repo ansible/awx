@@ -11,7 +11,7 @@ import { DetailList, Detail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
 import { formatDateString } from 'util/dates';
 import { UsersAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 function UserDetail({ user }) {
   const {

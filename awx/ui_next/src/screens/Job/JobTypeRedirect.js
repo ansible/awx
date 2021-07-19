@@ -3,7 +3,7 @@ import { Redirect, Link } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
 import { t } from '@lingui/macro';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { UnifiedJobsAPI } from 'api';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';

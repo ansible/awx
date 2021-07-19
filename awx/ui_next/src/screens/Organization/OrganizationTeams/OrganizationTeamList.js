@@ -9,7 +9,7 @@ import PaginatedTable, {
   HeaderCell,
 } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import OrganizationTeamListItem from './OrganizationTeamListItem';
 
 const QS_CONFIG = getQSConfig('team', {

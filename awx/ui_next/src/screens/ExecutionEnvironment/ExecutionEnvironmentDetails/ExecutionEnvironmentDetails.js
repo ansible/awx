@@ -8,7 +8,7 @@ import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
 import DeleteButton from 'components/DeleteButton';
 import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
 import { ExecutionEnvironmentsAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';

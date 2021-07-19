@@ -8,8 +8,8 @@ import ContentLoading from 'components/ContentLoading';
 import { FormSubmitError } from 'components/FormField';
 import { FormColumnLayout } from 'components/FormLayout';
 import { useSettings } from 'contexts/Settings';
-import useModal from 'util/useModal';
-import useRequest from 'util/useRequest';
+import useModal from 'hooks/useModal';
+import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 import { RevertAllAlert, RevertFormActionGroup } from '../../shared';
 import {

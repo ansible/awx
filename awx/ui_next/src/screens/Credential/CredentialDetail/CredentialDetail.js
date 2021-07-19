@@ -21,7 +21,7 @@ import CredentialChip from 'components/CredentialChip';
 import ErrorDetail from 'components/ErrorDetail';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import { Credential } from 'types';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 const PluginInputMetadata = styled.div`

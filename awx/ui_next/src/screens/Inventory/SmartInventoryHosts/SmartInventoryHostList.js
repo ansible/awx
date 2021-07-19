@@ -7,8 +7,8 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
 } from 'components/PaginatedTable';
-import useRequest from 'util/useRequest';
-import useSelected from 'util/useSelected';
+import useRequest from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { InventoriesAPI } from 'api';
 import { Inventory } from 'types';

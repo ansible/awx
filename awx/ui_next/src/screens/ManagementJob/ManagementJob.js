@@ -20,7 +20,7 @@ import NotificationList from 'components/NotificationList';
 import RoutedTabs from 'components/RoutedTabs';
 import { Schedules } from 'components/Schedule';
 import { useConfig } from 'contexts/Config';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 
 function ManagementJob({ setBreadcrumb }) {
   const basePath = '/management_jobs';

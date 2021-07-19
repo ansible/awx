@@ -10,7 +10,7 @@ import {
 } from 'api';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { useConfig } from 'contexts/Config';
 import { Credential } from 'types';
 import CredentialForm from '../shared/CredentialForm';

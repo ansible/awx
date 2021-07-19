@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { InventorySourcesAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
 import CheckboxListItem from 'components/CheckboxListItem';
 import PaginatedTable, {

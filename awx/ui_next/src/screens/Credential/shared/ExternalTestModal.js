@@ -10,7 +10,7 @@ import FormField from 'components/FormField';
 import { FormFullWidthLayout } from 'components/FormLayout';
 import Popover from 'components/Popover';
 import { required } from 'util/validators';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { CredentialPluginTestAlert } from './CredentialPlugins';
 
 function ExternalTestModal({

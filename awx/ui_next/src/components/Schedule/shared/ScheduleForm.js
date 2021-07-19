@@ -14,7 +14,7 @@ import {
 import { Config } from 'contexts/Config';
 import { SchedulesAPI } from 'api';
 import { dateToInputDateTime } from 'util/dates';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 import { parseVariableField } from 'util/yaml';
 import AnsibleSelect from '../../AnsibleSelect';

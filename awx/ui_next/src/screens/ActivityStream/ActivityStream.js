@@ -18,7 +18,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
 } from 'components/PaginatedTable';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { getQSConfig, parseQueryString, updateQueryString } from 'util/qs';
 import { ActivityStreamAPI } from 'api';
 

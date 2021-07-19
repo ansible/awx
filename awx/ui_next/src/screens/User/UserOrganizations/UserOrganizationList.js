@@ -6,7 +6,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
 } from 'components/PaginatedTable';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { UsersAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import UserOrganizationListItem from './UserOrganizationListItem';

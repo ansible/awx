@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import About from './About';
 
-jest.mock('../../util/useBrandName', () => ({
+jest.mock('../../hooks/useBrandName', () => ({
   __esModule: true,
   default: () => ({
     current: 'AWX',

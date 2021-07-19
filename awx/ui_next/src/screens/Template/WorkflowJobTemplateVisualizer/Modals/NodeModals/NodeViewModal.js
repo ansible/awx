@@ -10,7 +10,7 @@ import {
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import PromptDetail from 'components/PromptDetail';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { jsonToYaml } from 'util/yaml';
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import getNodeType from '../../shared/WorkflowJobTemplateVisualizerUtils';

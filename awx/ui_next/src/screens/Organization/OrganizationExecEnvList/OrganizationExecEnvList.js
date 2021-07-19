@@ -6,7 +6,7 @@ import { Card } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,

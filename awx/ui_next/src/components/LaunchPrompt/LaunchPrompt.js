@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
-import { useDismissableError } from 'util/useRequest';
+import { useDismissableError } from 'hooks/useRequest';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
 import ContentLoading from '../ContentLoading';

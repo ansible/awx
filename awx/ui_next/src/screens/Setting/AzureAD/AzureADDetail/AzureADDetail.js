@@ -11,7 +11,7 @@ import { DetailList } from 'components/DetailList';
 import RoutedTabs from 'components/RoutedTabs';
 import { useConfig } from 'contexts/Config';
 import { useSettings } from 'contexts/Settings';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 import { SettingDetail } from '../../shared';
 

@@ -21,7 +21,7 @@ import {
   UserIcon,
 } from '@patternfly/react-icons';
 import { WorkflowApprovalsAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig } from 'contexts/Config';
 import useWsPendingApprovalCount from './useWsPendingApprovalCount';

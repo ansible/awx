@@ -9,7 +9,7 @@ import ContentLoading from 'components/ContentLoading';
 import FormField from 'components/FormField';
 import { FormFullWidthLayout } from 'components/FormLayout';
 import Popover from 'components/Popover';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 
 function MetadataStep() {

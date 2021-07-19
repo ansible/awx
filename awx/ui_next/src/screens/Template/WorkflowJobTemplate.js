@@ -14,7 +14,7 @@ import {
 } from 'react-router-dom';
 import RoutedTabs from 'components/RoutedTabs';
 import { useConfig } from 'contexts/Config';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import AppendBody from 'components/AppendBody';
 import ContentError from 'components/ContentError';
 import FullPage from 'components/FullPage';

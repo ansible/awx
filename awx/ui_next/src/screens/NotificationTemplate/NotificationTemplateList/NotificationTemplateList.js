@@ -19,8 +19,8 @@ import PaginatedTable, {
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import DataListToolbar from 'components/DataListToolbar';
-import useRequest, { useDeleteItems } from 'util/useRequest';
-import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import NotificationTemplateListItem from './NotificationTemplateListItem';
 

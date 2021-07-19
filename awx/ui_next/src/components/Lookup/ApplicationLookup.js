@@ -6,7 +6,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { ApplicationsAPI } from 'api';
 import { Application } from 'types';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';

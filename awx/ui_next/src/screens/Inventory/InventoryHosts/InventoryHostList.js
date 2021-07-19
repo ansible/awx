@@ -3,7 +3,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { InventoriesAPI, HostsAPI } from 'api';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import DataListToolbar from 'components/DataListToolbar';
 import ErrorDetail from 'components/ErrorDetail';
@@ -13,7 +13,7 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
-import useSelected from 'util/useSelected';
+import useSelected from 'hooks/useSelected';
 import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';
 

@@ -15,7 +15,7 @@ import { Card, PageSection } from '@patternfly/react-core';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import RoutedTabs from 'components/RoutedTabs';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { getJobModel } from 'util/jobs';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';

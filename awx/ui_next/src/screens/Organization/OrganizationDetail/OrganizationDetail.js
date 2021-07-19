@@ -13,7 +13,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { useConfig } from 'contexts/Config';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';

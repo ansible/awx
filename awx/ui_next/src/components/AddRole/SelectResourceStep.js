@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import { SearchColumns, SortColumns } from 'types';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import DataListToolbar from '../DataListToolbar';

@@ -12,7 +12,7 @@ import {
   WizardFooter,
 } from '@patternfly/react-core';
 import { ConfigAPI, SettingsAPI, RootAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import ContentLoading from 'components/ContentLoading';
 import ContentError from 'components/ContentError';
 import { FormSubmitError } from 'components/FormField';

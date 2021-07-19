@@ -15,7 +15,7 @@ import {
 } from '@patternfly/react-core';
 
 import { MetricsAPI, InstancesAPI } from 'api';
-import useRequest from 'util/useRequest';
+import useRequest from 'hooks/useRequest';
 import ContentEmpty from 'components/ContentEmpty';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import ContentError from 'components/ContentError';

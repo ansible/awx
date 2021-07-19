@@ -4,8 +4,8 @@ import { bool, func } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { SchedulesAPI } from 'api';
-import useRequest, { useDeleteItems } from 'util/useRequest';
-import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import AlertModal from '../../AlertModal';
 import ErrorDetail from '../../ErrorDetail';

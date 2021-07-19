@@ -14,8 +14,8 @@ import PaginatedTable, {
   ToolbarDeleteButton,
 } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import useSelected from 'util/useSelected';
-import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'hooks/useSelected';
+import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
 
 const QS_CONFIG = getQSConfig('template', {

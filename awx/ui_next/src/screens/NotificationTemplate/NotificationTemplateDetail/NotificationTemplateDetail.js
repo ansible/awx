@@ -21,7 +21,7 @@ import CodeDetail from 'components/DetailList/CodeDetail';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
 import { NotificationTemplatesAPI } from 'api';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
 

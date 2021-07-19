@@ -15,7 +15,7 @@ import {
   UserDateDetail,
   DetailBadge,
 } from 'components/DetailList';
-import useRequest, { useDismissableError } from 'util/useRequest';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { InstanceGroupsAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 

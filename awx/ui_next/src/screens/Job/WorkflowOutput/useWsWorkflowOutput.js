@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from 'util/useWebsocket';
+import useWebsocket from 'hooks/useWebsocket';
 import { WorkflowJobsAPI } from 'api';
 
 const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
