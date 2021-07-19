@@ -59,7 +59,7 @@ services:
     user: root  # TODO "{{ ansible_user_uid }}"?
     container_name: tools_receptor_{{ container_postfix }}
     hostname: receptor_{{ container_postfix }}
-    command: 'receptor --config /etc/receptor/awx-1-receptor.conf'  # TODO Refactor this to give mesh option
+    command: 'receptor --config /etc/receptor/awx-1-receptor-standalone.conf'  # TODO Refactor this to give mesh option
     # links:
     #   - awx_{{ container_postfix }} TODO (possibly this is where the link should go?)
     volumes:
