@@ -1,6 +1,10 @@
 ---
 sources_dest: '_sources'
 driver: 'docker'
+addons:
+  - default-storageclass
+  - storage-provisioner
+  - dashboard
 
 minikube_url_linux: 'https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64'
 minikube_url_macos: 'https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64'
