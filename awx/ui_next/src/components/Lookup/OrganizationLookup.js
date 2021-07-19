@@ -19,6 +19,7 @@ const QS_CONFIG = getQSConfig('organizations', {
 });
 
 function OrganizationLookup({
+  id,
   helperTextInvalid,
   isValid,
   onBlur,
@@ -94,7 +95,7 @@ function OrganizationLookup({
 
   return (
     <FormGroup
-      fieldId="organization"
+      fieldId={id}
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
@@ -103,7 +104,7 @@ function OrganizationLookup({
     >
       <Lookup
         isDisabled={isDisabled}
-        id="organization"
+        id={id}
         header={t`Organization`}
         value={value}
         onBlur={onBlur}
@@ -158,6 +159,7 @@ function OrganizationLookup({
 }
 
 OrganizationLookup.propTypes = {
+  id: string,
   helperTextInvalid: node,
   isValid: bool,
   onBlur: func,
@@ -171,6 +173,7 @@ OrganizationLookup.propTypes = {
 };
 
 OrganizationLookup.defaultProps = {
+  id: 'organization',
   helperTextInvalid: '',
   isValid: true,
   onBlur: () => {},

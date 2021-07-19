@@ -236,6 +236,7 @@ function InventoryLookup({
 }
 
 InventoryLookup.propTypes = {
+  fieldId: string,
   value: Inventory,
   onChange: func.isRequired,
   required: bool,
@@ -247,6 +248,7 @@ InventoryLookup.propTypes = {
 };
 
 InventoryLookup.defaultProps = {
+  fieldId: 'inventory',
   value: null,
   required: false,
   isOverrideDisabled: false,
