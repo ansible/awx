@@ -2848,7 +2848,7 @@ class RunAdHocCommand(BaseTask):
         return d
 
     def build_execution_environment_params(self, instance, private_data_dir):
-        params = super(RunAdHocCommand, self).build_execution_environment_params(instance)
+        params = super(RunAdHocCommand, self).build_execution_environment_params(instance, private_data_dir)
         params['process_isolation'] = False if MODE == 'development' else True
         return params
 
