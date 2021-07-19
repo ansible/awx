@@ -1,0 +1,41 @@
+---
+name: Upload API Schema
+on:
+  push:
+    branches:
+      - devel
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Log in to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pre-pull image to warm build cache
+        run: |
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
+
+      - name: Build image
+        run: |
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
+
+      - name: Generate API Schema
+        run: |
+          docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /start_tests.sh genschema
+
+      - name: Upload API Schema
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        run: |
+          ansible localhost -c local -m aws_s3 \
+            -a 'src=${{ github.workspace }}/schema.json bucket=awx-public-ci-files object=schema.json mode=put permission=public-read'
+
+
