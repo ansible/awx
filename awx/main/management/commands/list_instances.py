@@ -25,6 +25,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         super(Command, self).__init__()
+        no_color = options.get("no_color", False)
 
         groups = list(InstanceGroup.objects.all())
         ungrouped = Ungrouped()
@@ -44,6 +45,8 @@ class Command(BaseCommand):
                     color = '\033[91m'
                 if x.enabled is False:
                     color = '\033[90m[DISABLED] '
+                if no_color:
+                    color = ''
                 fmt = '\t' + color + '{0.hostname} capacity={0.capacity} version={1}'
                 if x.capacity:
                     fmt += ' heartbeat="{0.modified:%Y-%m-%d %H:%M:%S}"'
