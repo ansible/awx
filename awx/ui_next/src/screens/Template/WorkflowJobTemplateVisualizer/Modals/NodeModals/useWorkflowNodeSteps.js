@@ -1,13 +1,13 @@
 import { useContext, useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
-import useInventoryStep from '../../../../../components/LaunchPrompt/steps/useInventoryStep';
-import useCredentialsStep from '../../../../../components/LaunchPrompt/steps/useCredentialsStep';
-import useOtherPromptsStep from '../../../../../components/LaunchPrompt/steps/useOtherPromptsStep';
-import useSurveyStep from '../../../../../components/LaunchPrompt/steps/useSurveyStep';
-import usePreviewStep from '../../../../../components/LaunchPrompt/steps/usePreviewStep';
-import { WorkflowStateContext } from '../../../../../contexts/Workflow';
-import { jsonToYaml } from '../../../../../util/yaml';
+import useInventoryStep from 'components/LaunchPrompt/steps/useInventoryStep';
+import useCredentialsStep from 'components/LaunchPrompt/steps/useCredentialsStep';
+import useOtherPromptsStep from 'components/LaunchPrompt/steps/useOtherPromptsStep';
+import useSurveyStep from 'components/LaunchPrompt/steps/useSurveyStep';
+import usePreviewStep from 'components/LaunchPrompt/steps/usePreviewStep';
+import { WorkflowStateContext } from 'contexts/Workflow';
+import { jsonToYaml } from 'util/yaml';
 import useNodeTypeStep from './NodeTypeStep/useNodeTypeStep';
 import useRunTypeStep from './useRunTypeStep';
 

@@ -3,7 +3,7 @@ import {
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../../api';
+} from 'api';
 
 export default function getNodeType(node) {
   const ujtType = node?.type || node?.unified_job_type;

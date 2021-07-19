@@ -156,6 +156,7 @@ Inside these folders, the internal structure is:
 - **/api** - All classes used to interact with API's are found here. See [AWX REST API Interaction](#awx-rest-api-interaction) for more information.
 - **/components** - All generic components that are meant to be used in multiple contexts throughout awx. Things like buttons, tabs go here.
 - **/contexts** - Components which utilize react's context api.
+- **/hooks** - Custom react [hooks](https://reactjs.org/docs/hooks-custom.html)
 - **/locales** - [Internationalization](#internationalization) config and source files.
 - **/screens** - Based on the various routes of awx.
   - **/shared** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.
@@ -169,24 +170,24 @@ Inside these folders, the internal structure is:
 
 In the root of `/src`, there are a few files which are used to initialize the react app. These are
 
-- **index.jsx**
+- **index.js**
   - Connects react app to root dom node.
   - Sets up root route structure, navigation grouping and login modal
   - Calls base context providers
   - Imports .scss styles.
-- **app.jsx**
+- **app.js**
   - Sets standard page layout, about modal, and root dialog modal.
-- **RootProvider.jsx**
+- **RootProvider.js**
   - Sets up all context providers.
   - Initializes i18n and router
 
 ### Naming files
 
-Ideally, files should be named the same as the component they export, and tests with `.test` appended. In other words, `<FooBar>` would be defined in `FooBar.jsx`, and its tests would be defined in `FooBar.test.jsx`.
+Ideally, files should be named the same as the component they export, and tests with `.test` appended. In other words, `<FooBar>` would be defined in `FooBar.js`, and its tests would be defined in `FooBar.test.js`.
 
 #### Naming components that use the context api
 
-**File naming** - Since contexts export both consumer and provider (and potentially in withContext function form), the file can be simplified to be named after the consumer export. In other words, the file containing the `Network` context components would be named `Network.jsx`.
+**File naming** - Since contexts export both consumer and provider (and potentially in withContext function form), the file can be simplified to be named after the consumer export. In other words, the file containing the `Network` context components would be named `Network.js`.
 
 **Component naming and conventions** - In order to provide a consistent interface with react-router and [lingui](https://lingui.js.org/), as well as make their usage easier and less verbose, context components follow these conventions:
 
@@ -264,7 +265,7 @@ There are currently a few custom hooks:
 1. [useRequest](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L21) encapsulates main actions related to requests.
 2. [useDismissableError](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L71) provides controls for "dismissing" an error message.
 3. [useDeleteItems](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L98) handles deletion of items from a paginated item list.
-4. [useSelected](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useSelected.jsx#L14) provides a way to read and update a selected list.
+4. [useSelected](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useSelected.js#L14) provides a way to read and update a selected list.
 
 ### Naming Functions
 
@@ -302,7 +303,7 @@ this.state = {
 
 ### Testing components that use contexts
 
-We have several React contexts that wrap much of the app, including those from react-router, lingui, and some of our own. When testing a component that depends on one or more of these, you can use the `mountWithContexts()` helper function found in `testUtils/enzymeHelpers.jsx`. This can be used just like Enzyme's `mount()` function, except it will wrap the component tree with the necessary context providers and basic stub data.
+We have several React contexts that wrap much of the app, including those from react-router, lingui, and some of our own. When testing a component that depends on one or more of these, you can use the `mountWithContexts()` helper function found in `testUtils/enzymeHelpers.js`. This can be used just like Enzyme's `mount()` function, except it will wrap the component tree with the necessary context providers and basic stub data.
 
 If you want to stub the value of a context, or assert actions taken on it, you can customize a contexts value by passing a second parameter to `mountWithContexts`. For example, this provides a custom value for the `Config` context:
 
@@ -352,7 +353,7 @@ You can learn more about the ways lingui and its React helpers at [this link](ht
 1. `npm run add-locale` to add the language that you want to translate to (we should only have to do this once and the commit to repo afaik). Example: `npm run add-locale en es fr` # Add English, Spanish and French locale
 2. `npm run extract-strings` to create .po files for each language specified. The .po files will be placed in src/locales. When updating strings that are used by `<Plural>` or `plural()` you will need to run this command to get the strings to render properly. This command will create `.po` files for each of the supported languages that will need to be committed with your PR.
 3. Open up the .po file for the language you want to test and add some translations. In production we would pass this .po file off to the translation team.
-4. Once you've edited your .po file (or we've gotten a .po file back from the translation team) run `npm run compile-strings`. This command takes the .po files and turns them into a minified JSON object and can be seen in the `messages.js` file in each locale directory. These files get loaded at the App root level (see: App.jsx).
+4. Once you've edited your .po file (or we've gotten a .po file back from the translation team) run `npm run compile-strings`. This command takes the .po files and turns them into a minified JSON object and can be seen in the `messages.js` file in each locale directory. These files get loaded at the App root level (see: App.js).
 5. Change the language in your browser and reload the page. You should see your specified translations in place of English strings.
 
 ### Marking an issue to be translated

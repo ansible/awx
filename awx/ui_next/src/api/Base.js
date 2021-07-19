@@ -1,7 +1,7 @@
 import axios from 'axios';
+import { encodeQueryString } from 'util/qs';
+import debounce from 'util/debounce';
 import { SESSION_TIMEOUT_KEY } from '../constants';
-import { encodeQueryString } from '../util/qs';
-import debounce from '../util/debounce';
 
 const updateStorage = debounce((key, val) => {
   window.localStorage.setItem(key, val);

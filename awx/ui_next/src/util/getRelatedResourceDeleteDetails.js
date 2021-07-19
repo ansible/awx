@@ -15,7 +15,7 @@ import {
   ExecutionEnvironmentsAPI,
   ApplicationsAPI,
   OrganizationsAPI,
-} from '../api';
+} from 'api';
 
 export async function getRelatedResourceDeleteCounts(requests) {
   const results = {};

@@ -1,4 +1,4 @@
-import { RootAPI, UsersAPI } from '../api';
+import { RootAPI, UsersAPI } from 'api';
 import bootstrapPendo from './bootstrapPendo';
 
 function buildPendoOptions(config, pendoApiKey) {

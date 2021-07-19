@@ -1,4 +1,4 @@
-import { isJsonString } from '../../../util/yaml';
+import { isJsonString } from 'util/yaml';
 
 export function sortNestedDetails(obj = {}) {
   const nestedTypes = ['nested object', 'list', 'boolean'];
