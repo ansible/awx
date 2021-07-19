@@ -217,7 +217,7 @@ class APIView(views.APIView):
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
-                response.data['detail'] += ' To establish a login session, visit /api/login/.'
+                response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
                 logger.warning(status_msg)
