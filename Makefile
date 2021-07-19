@@ -83,7 +83,7 @@ clean-schema:
 
 clean-languages:
 	rm -f $(I18N_FLAG_FILE)
-	find . -type f -regex ".*\.mo$$" -delete
+	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
 
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-api clean-awxkit clean-dist
@@ -396,6 +396,7 @@ awx/ui_next/node_modules:
 	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui_next --loglevel warn ci
 
 $(UI_BUILD_FLAG_FILE):
+	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
 	mkdir -p awx/public/static/css

@@ -6032,7 +6032,7 @@ msgstr "Les paramètres requis manquants dans {dependency}."
 msgid ""
 "Invalid group_type parameters. Expected instance of dict but got "
 "{parameters_type} instead."
-msgstr "Paramètres group_type non valides. Instance attendue de dict mais obtenue à la place."
+msgstr "Paramètres group_type non valides. Instance attendue de dict mais {parameters_type} obtenue à la place."
 
 #: awx/sso/fields.py:476
 #, python-brace-format
