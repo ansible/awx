@@ -98,8 +98,8 @@ def run():
     search_path = args.root_dir + "**/**/*.js*"
 
     for file_path in glob.iglob(search_path, recursive=True):
-        find_and_replace_roots(file_path, args.root_dir, args.preview)
-        #rename_jsx(file_path, args.preview)
+        #find_and_replace_roots(file_path, args.root_dir, args.preview)
+        rename_jsx(file_path, args.preview)
 
 
 if __name__ == "__main__":

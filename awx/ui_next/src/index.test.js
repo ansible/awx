@@ -9,7 +9,7 @@ describe('index.jsx', () => {
     const div = document.createElement('div');
     div.setAttribute('id', 'app');
     document.body.appendChild(div);
-    require('./index.jsx'); // eslint-disable-line global-require
+    require('./index.js'); // eslint-disable-line global-require
     expect(ReactDOM.render).toHaveBeenCalledWith(
       <React.StrictMode>
         <App />
