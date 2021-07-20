@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import { InventoriesAPI } from 'api';
 import { Inventory } from 'types';
 import useRequest from 'hooks/useRequest';
+import useAutoPopulateLookup from 'hooks/useAutoPopulateLookup';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
@@ -19,21 +20,24 @@ const QS_CONFIG = getQSConfig('inventory', {
 });
 
 function InventoryLookup({
-  value,
-  onChange,
-  onBlur,
-  history,
-  required,
-  isPromptableField,
+  autoPopulate,
   fieldId,
+  fieldName,
+  hideSmartInventories,
+  history,
+  isDisabled,
+  isOverrideDisabled,
+  isPromptableField,
+  onBlur,
+  onChange,
   promptId,
   promptName,
-  isOverrideDisabled,
+  required,
   validate,
-  fieldName,
-  isDisabled,
-  hideSmartInventories,
+  value,
 }) {
+  const autoPopulateLookup = useAutoPopulateLookup(onChange);
+
   const {
     result: {
       inventories,
@@ -60,6 +64,10 @@ function InventoryLookup({
         InventoriesAPI.readOptions(),
       ]);
 
+      if (autoPopulate) {
+        autoPopulateLookup(data.results);
+      }
+
       return {
         inventories: data.results,
         count: data.count,
@@ -78,7 +86,7 @@ function InventoryLookup({
           Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [history.location]),
+    }, [autoPopulate, autoPopulateLookup, history.location]),
     {
       inventories: [],
       count: 0,
@@ -236,26 +244,28 @@ function InventoryLookup({
 }
 
 InventoryLookup.propTypes = {
+  autoPopulate: bool,
   fieldId: string,
-  value: Inventory,
+  fieldName: string,
+  hideSmartInventories: bool,
+  isDisabled: bool,
+  isOverrideDisabled: bool,
   onChange: func.isRequired,
   required: bool,
-  isOverrideDisabled: bool,
   validate: func,
-  fieldName: string,
-  isDisabled: bool,
-  hideSmartInventories: bool,
+  value: Inventory,
 };
 
 InventoryLookup.defaultProps = {
+  autoPopulate: false,
   fieldId: 'inventory',
-  value: null,
-  required: false,
-  isOverrideDisabled: false,
-  validate: () => {},
   fieldName: 'inventory',
-  isDisabled: false,
   hideSmartInventories: false,
+  isDisabled: false,
+  isOverrideDisabled: false,
+  required: false,
+  validate: () => {},
+  value: null,
 };
 
 export default withRouter(InventoryLookup);
