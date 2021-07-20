@@ -124,6 +124,7 @@ function JobListItem({
                   <ReLaunchDropDown
                     handleRelaunch={handleRelaunch}
                     isLaunching={isLaunching}
+                    id={`relaunch-job-${job.id}`}
                   />
                 )}
               </LaunchButton>
@@ -214,6 +215,7 @@ function JobListItem({
                 <ExecutionEnvironmentDetail
                   executionEnvironment={execution_environment}
                   verifyMissingVirtualEnv={false}
+                  dataCy={`execution-environment-detail-${job.id}`}
                 />
               )}
               {credentials && credentials.length > 0 && (
