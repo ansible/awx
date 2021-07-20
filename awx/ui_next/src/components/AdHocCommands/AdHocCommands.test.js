@@ -184,14 +184,6 @@ describe('<AdHocCommands />', () => {
     );
     wrapper.update();
 
-    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
-
-    expect(
-      wrapper
-        .find('WizardNavItem[content="Machine credential"]')
-        .prop('isDisabled')
-    ).toBe(true);
-
     await act(async () => {
       wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
@@ -247,6 +239,12 @@ describe('<AdHocCommands />', () => {
       wrapper.find('CheckboxListItem[label="Cred 4"]').prop('isSelected')
     ).toBe(true);
 
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    wrapper.update();
+
+    // fourth step
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
@@ -353,13 +351,6 @@ describe('<AdHocCommands />', () => {
     );
     wrapper.update();
 
-    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
-    expect(
-      wrapper
-        .find('WizardNavItem[content="Machine credential"]')
-        .prop('isDisabled')
-    ).toBe(true);
-
     await act(async () => {
       wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
@@ -423,7 +414,13 @@ describe('<AdHocCommands />', () => {
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
+    wrapper.update();
 
+    // fourth step of wizard
+
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
     await waitForElement(wrapper, 'ErrorDetail', el => el.length > 0);
   });
 

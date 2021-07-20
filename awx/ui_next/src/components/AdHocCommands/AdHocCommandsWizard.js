@@ -1,26 +1,10 @@
-import React, { useState } from 'react';
-
+import React from 'react';
 import { t } from '@lingui/macro';
-import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
-import { Tooltip } from '@patternfly/react-core';
 import { withFormik, useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
 
-import styled from 'styled-components';
 import Wizard from '../Wizard';
-import AdHocCredentialStep from './AdHocCredentialStep';
-import AdHocDetailsStep from './AdHocDetailsStep';
-import AdHocExecutionEnvironmentStep from './AdHocExecutionEnvironmentStep';
-
-const AlertText = styled.div`
-  color: var(--pf-global--danger-color--200);
-  font-weight: var(--pf-global--FontWeight--bold);
-`;
-
-const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`
-  margin-left: 10px;
-  color: var(--pf-global--danger-color--100);
-`;
+import useAdHocLaunchSteps from './useAdHocLaunchSteps';
 
 function AdHocCommandsWizard({
   onLaunch,
@@ -30,100 +14,44 @@ function AdHocCommandsWizard({
   credentialTypeId,
   organizationId,
 }) {
-  const [currentStepId, setCurrentStepId] = useState(1);
-  const [enableLaunch, setEnableLaunch] = useState(false);
+  const { setFieldTouched, values } = useFormikContext();
 
-  const { values, errors, touched } = useFormikContext();
-
-  const enabledNextOnDetailsStep = () => {
-    if (!values.module_name) {
-      return false;
-    }
-
-    if (values.module_name === 'shell' || values.module_name === 'command') {
-      if (values.module_args) {
-        return true;
-        // eslint-disable-next-line no-else-return
-      } else {
-        return false;
-      }
-    }
-    return undefined; // makes the linter happy;
-  };
-  const hasDetailsStepError = errors.module_args && touched.module_args;
-
-  const steps = [
-    {
-      id: 1,
-      key: 1,
-      name: hasDetailsStepError ? (
-        <AlertText>
-          {t`Details`}
-          <Tooltip
-            position="right"
-            content={t`This step contains errors`}
-            trigger="click mouseenter focus"
-          >
-            <ExclamationCircleIcon />
-          </Tooltip>
-        </AlertText>
-      ) : (
-        t`Details`
-      ),
-      component: (
-        <AdHocDetailsStep
-          moduleOptions={moduleOptions}
-          verbosityOptions={verbosityOptions}
-        />
-      ),
-      enableNext: enabledNextOnDetailsStep(),
-      nextButtonText: t`Next`,
-    },
-    {
-      id: 2,
-      key: 2,
-      name: t`Execution Environment`,
-      component: (
-        <AdHocExecutionEnvironmentStep organizationId={organizationId} />
-      ),
-      // Removed this line when https://github.com/patternfly/patternfly-react/issues/5729 is fixed
-      stepNavItemProps: { style: { whiteSpace: 'nowrap' } },
-      enableNext: true,
-      nextButtonText: t`Next`,
-      canJumpTo: currentStepId >= 2,
-    },
-    {
-      id: 3,
-      key: 3,
-      name: t`Machine credential`,
-      component: (
-        <AdHocCredentialStep
-          credentialTypeId={credentialTypeId}
-          onEnableLaunch={() => setEnableLaunch(true)}
-        />
-      ),
-      enableNext: enableLaunch && Object.values(errors).length === 0,
-      nextButtonText: t`Launch`,
-      canJumpTo: currentStepId >= 2,
-    },
-  ];
-
-  const currentStep = steps.find(step => step.id === currentStepId);
+  const { steps, validateStep, visitStep, visitAllSteps } = useAdHocLaunchSteps(
+    moduleOptions,
+    verbosityOptions,
+    organizationId,
+    credentialTypeId
+  );
 
   return (
     <Wizard
       style={{ overflow: 'scroll' }}
       isOpen
-      onNext={step => setCurrentStepId(step.id)}
+      onNext={(nextStep, prevStep) => {
+        if (nextStep.id === 'preview') {
+          visitAllSteps(setFieldTouched);
+        } else {
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
+        }
+      }}
       onClose={() => onCloseWizard()}
       onSave={() => {
         onLaunch(values);
       }}
+      onGoToStep={(nextStep, prevStep) => {
+        if (nextStep.id === 'preview') {
+          visitAllSteps(setFieldTouched);
+        } else {
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
+        }
+      }}
       steps={steps}
       title={t`Run command`}
-      nextButtonText={currentStep.nextButtonText || undefined}
       backButtonText={t`Back`}
       cancelButtonText={t`Cancel`}
+      nextButtonText={t`Next`}
     />
   );
 }
