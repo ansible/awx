@@ -16,7 +16,7 @@ const InsightsSubForm = ({
   const [, credMeta, credHelpers] = useField('credential');
 
   const onCredentialChange = useCallback(
-    value => {
+    (value) => {
       onCredentialSelection('insights', value);
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);

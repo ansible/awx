@@ -345,7 +345,7 @@ describe('<UserRolesList />', () => {
     waitForElement(
       wrapper,
       'EmptyState[title="System Administrator"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
   });
 });

@@ -65,55 +65,29 @@ describe('ScheduleListItem', () => {
     });
 
     test('Name correctly shown with correct link', () => {
-      expect(
-        wrapper
-          .find('Td')
-          .at(1)
-          .text()
-      ).toBe('Mock Schedule');
-      expect(
-        wrapper
-          .find('Td')
-          .at(1)
-          .find('Link')
-          .props().to
-      ).toBe('/templates/job_template/12/schedules/6/details');
+      expect(wrapper.find('Td').at(1).text()).toBe('Mock Schedule');
+      expect(wrapper.find('Td').at(1).find('Link').props().to).toBe(
+        '/templates/job_template/12/schedules/6/details'
+      );
     });
 
     test('Type correctly shown', () => {
-      expect(
-        wrapper
-          .find('Td')
-          .at(2)
-          .text()
-      ).toBe('Playbook Run');
+      expect(wrapper.find('Td').at(2).text()).toBe('Playbook Run');
     });
 
     test('Edit button shown with correct link', () => {
       expect(wrapper.find('PencilAltIcon').length).toBe(1);
-      expect(
-        wrapper
-          .find('Button')
-          .find('Link')
-          .props().to
-      ).toBe('/templates/job_template/12/schedules/6/edit');
+      expect(wrapper.find('Button').find('Link').props().to).toBe(
+        '/templates/job_template/12/schedules/6/edit'
+      );
     });
 
     test('Toggle button enabled', () => {
-      expect(
-        wrapper
-          .find('Switch')
-          .first()
-          .props().isDisabled
-      ).toBe(false);
+      expect(wrapper.find('Switch').first().props().isDisabled).toBe(false);
     });
 
     test('Clicking checkbox selects item', () => {
-      wrapper
-        .find('Td')
-        .first()
-        .find('input')
-        .simulate('change');
+      wrapper.find('Td').first().find('input').simulate('change');
       expect(onSelect).toHaveBeenCalledTimes(1);
     });
     test('Toggle button is enabled', () => {
@@ -146,28 +120,14 @@ describe('ScheduleListItem', () => {
     });
 
     test('Name correctly shown with correct link', () => {
-      expect(
-        wrapper
-          .find('Td')
-          .at(1)
-          .text()
-      ).toBe('Mock Schedule');
-      expect(
-        wrapper
-          .find('Td')
-          .at(1)
-          .find('Link')
-          .props().to
-      ).toBe('/templates/job_template/12/schedules/6/details');
+      expect(wrapper.find('Td').at(1).text()).toBe('Mock Schedule');
+      expect(wrapper.find('Td').at(1).find('Link').props().to).toBe(
+        '/templates/job_template/12/schedules/6/details'
+      );
     });
 
     test('Type correctly shown', () => {
-      expect(
-        wrapper
-          .find('Td')
-          .at(2)
-          .text()
-      ).toBe('Playbook Run');
+      expect(wrapper.find('Td').at(2).text()).toBe('Playbook Run');
     });
 
     test('Edit button hidden', () => {
@@ -175,12 +135,7 @@ describe('ScheduleListItem', () => {
     });
 
     test('Toggle button disabled', () => {
-      expect(
-        wrapper
-          .find('Switch')
-          .first()
-          .props().isDisabled
-      ).toBe(true);
+      expect(wrapper.find('Switch').first().props().isDisabled).toBe(true);
     });
   });
   describe('schedule has missing prompt data', () => {

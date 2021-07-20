@@ -38,7 +38,7 @@ function LoggingEdit() {
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('logging');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -56,7 +56,7 @@ function LoggingEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/logging/details');
       },
@@ -65,7 +65,7 @@ function LoggingEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       ...form,
       LOG_AGGREGATOR_LOGGERS: formatJson(form.LOG_AGGREGATOR_LOGGERS),
@@ -93,7 +93,7 @@ function LoggingEdit() {
     history.push('/settings/logging/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list') {
         acc[key] = JSON.stringify(fields[key].value, null, 2);
@@ -109,111 +109,109 @@ function LoggingEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && logging && (
         <Formik initialValues={initialValues(logging)} onSubmit={handleSubmit}>
-          {formik => {
-            return (
-              <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-                <FormColumnLayout>
-                  <BooleanField
-                    name="LOG_AGGREGATOR_ENABLED"
-                    config={{
-                      ...logging.LOG_AGGREGATOR_ENABLED,
-                      help_text: (
-                        <>
-                          {logging.LOG_AGGREGATOR_ENABLED.help_text}
-                          {!formik.values.LOG_AGGREGATOR_ENABLED &&
-                            (!formik.values.LOG_AGGREGATOR_HOST ||
-                              !formik.values.LOG_AGGREGATOR_TYPE) && (
-                              <>
-                                <br />
-                                <br />
-                                {t`Cannot enable log aggregator without providing
+          {(formik) => (
+            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+              <FormColumnLayout>
+                <BooleanField
+                  name="LOG_AGGREGATOR_ENABLED"
+                  config={{
+                    ...logging.LOG_AGGREGATOR_ENABLED,
+                    help_text: (
+                      <>
+                        {logging.LOG_AGGREGATOR_ENABLED.help_text}
+                        {!formik.values.LOG_AGGREGATOR_ENABLED &&
+                          (!formik.values.LOG_AGGREGATOR_HOST ||
+                            !formik.values.LOG_AGGREGATOR_TYPE) && (
+                            <>
+                              <br />
+                              <br />
+                              {t`Cannot enable log aggregator without providing
                                   logging aggregator host and logging aggregator type.`}
-                              </>
-                            )}
-                        </>
-                      ),
-                    }}
-                    ariaLabel={t`Enable external logging`}
-                    disabled={
-                      !formik.values.LOG_AGGREGATOR_ENABLED &&
-                      (!formik.values.LOG_AGGREGATOR_HOST ||
-                        !formik.values.LOG_AGGREGATOR_TYPE)
-                    }
-                  />
+                            </>
+                          )}
+                      </>
+                    ),
+                  }}
+                  ariaLabel={t`Enable external logging`}
+                  disabled={
+                    !formik.values.LOG_AGGREGATOR_ENABLED &&
+                    (!formik.values.LOG_AGGREGATOR_HOST ||
+                      !formik.values.LOG_AGGREGATOR_TYPE)
+                  }
+                />
+                <InputField
+                  name="LOG_AGGREGATOR_HOST"
+                  config={logging.LOG_AGGREGATOR_HOST}
+                  isRequired={Boolean(formik.values.LOG_AGGREGATOR_ENABLED)}
+                />
+                <InputField
+                  name="LOG_AGGREGATOR_PORT"
+                  config={logging.LOG_AGGREGATOR_PORT}
+                  type="number"
+                />
+                <ChoiceField
+                  name="LOG_AGGREGATOR_TYPE"
+                  config={logging.LOG_AGGREGATOR_TYPE}
+                  isRequired={Boolean(formik.values.LOG_AGGREGATOR_ENABLED)}
+                />
+                <InputField
+                  name="LOG_AGGREGATOR_USERNAME"
+                  config={logging.LOG_AGGREGATOR_USERNAME}
+                />
+                <EncryptedField
+                  name="LOG_AGGREGATOR_PASSWORD"
+                  config={logging.LOG_AGGREGATOR_PASSWORD}
+                />
+                <BooleanField
+                  name="LOG_AGGREGATOR_INDIVIDUAL_FACTS"
+                  ariaLabel={t`Enable log system tracking facts individually`}
+                  config={logging.LOG_AGGREGATOR_INDIVIDUAL_FACTS}
+                />
+                <ChoiceField
+                  name="LOG_AGGREGATOR_PROTOCOL"
+                  config={logging.LOG_AGGREGATOR_PROTOCOL}
+                />
+                <ChoiceField
+                  name="LOG_AGGREGATOR_LEVEL"
+                  config={logging.LOG_AGGREGATOR_LEVEL}
+                />
+                {['tcp', 'https'].includes(
+                  formik.values.LOG_AGGREGATOR_PROTOCOL
+                ) && (
                   <InputField
-                    name="LOG_AGGREGATOR_HOST"
-                    config={logging.LOG_AGGREGATOR_HOST}
-                    isRequired={Boolean(formik.values.LOG_AGGREGATOR_ENABLED)}
-                  />
-                  <InputField
-                    name="LOG_AGGREGATOR_PORT"
-                    config={logging.LOG_AGGREGATOR_PORT}
+                    name="LOG_AGGREGATOR_TCP_TIMEOUT"
+                    config={logging.LOG_AGGREGATOR_TCP_TIMEOUT}
                     type="number"
-                  />
-                  <ChoiceField
-                    name="LOG_AGGREGATOR_TYPE"
-                    config={logging.LOG_AGGREGATOR_TYPE}
-                    isRequired={Boolean(formik.values.LOG_AGGREGATOR_ENABLED)}
-                  />
-                  <InputField
-                    name="LOG_AGGREGATOR_USERNAME"
-                    config={logging.LOG_AGGREGATOR_USERNAME}
-                  />
-                  <EncryptedField
-                    name="LOG_AGGREGATOR_PASSWORD"
-                    config={logging.LOG_AGGREGATOR_PASSWORD}
-                  />
-                  <BooleanField
-                    name="LOG_AGGREGATOR_INDIVIDUAL_FACTS"
-                    ariaLabel={t`Enable log system tracking facts individually`}
-                    config={logging.LOG_AGGREGATOR_INDIVIDUAL_FACTS}
-                  />
-                  <ChoiceField
-                    name="LOG_AGGREGATOR_PROTOCOL"
-                    config={logging.LOG_AGGREGATOR_PROTOCOL}
-                  />
-                  <ChoiceField
-                    name="LOG_AGGREGATOR_LEVEL"
-                    config={logging.LOG_AGGREGATOR_LEVEL}
-                  />
-                  {['tcp', 'https'].includes(
-                    formik.values.LOG_AGGREGATOR_PROTOCOL
-                  ) && (
-                    <InputField
-                      name="LOG_AGGREGATOR_TCP_TIMEOUT"
-                      config={logging.LOG_AGGREGATOR_TCP_TIMEOUT}
-                      type="number"
-                      isRequired
-                    />
-                  )}
-                  {formik.values.LOG_AGGREGATOR_PROTOCOL === 'https' && (
-                    <BooleanField
-                      name="LOG_AGGREGATOR_VERIFY_CERT"
-                      ariaLabel={t`Enable HTTPS certificate verification`}
-                      config={logging.LOG_AGGREGATOR_VERIFY_CERT}
-                    />
-                  )}
-                  <ObjectField
-                    name="LOG_AGGREGATOR_LOGGERS"
-                    config={logging.LOG_AGGREGATOR_LOGGERS}
-                  />
-                  {submitError && <FormSubmitError error={submitError} />}
-                  {revertError && <FormSubmitError error={revertError} />}
-                  <RevertFormActionGroup
-                    onCancel={handleCancel}
-                    onSubmit={formik.handleSubmit}
-                    onRevert={toggleModal}
-                  />
-                </FormColumnLayout>
-                {isModalOpen && (
-                  <RevertAllAlert
-                    onClose={closeModal}
-                    onRevertAll={handleRevertAll}
+                    isRequired
                   />
                 )}
-              </Form>
-            );
-          }}
+                {formik.values.LOG_AGGREGATOR_PROTOCOL === 'https' && (
+                  <BooleanField
+                    name="LOG_AGGREGATOR_VERIFY_CERT"
+                    ariaLabel={t`Enable HTTPS certificate verification`}
+                    config={logging.LOG_AGGREGATOR_VERIFY_CERT}
+                  />
+                )}
+                <ObjectField
+                  name="LOG_AGGREGATOR_LOGGERS"
+                  config={logging.LOG_AGGREGATOR_LOGGERS}
+                />
+                {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
+                <RevertFormActionGroup
+                  onCancel={handleCancel}
+                  onSubmit={formik.handleSubmit}
+                  onRevert={toggleModal}
+                />
+              </FormColumnLayout>
+              {isModalOpen && (
+                <RevertAllAlert
+                  onClose={closeModal}
+                  onRevertAll={handleRevertAll}
+                />
+              )}
+            </Form>
+          )}
         </Formik>
       )}
     </CardBody>

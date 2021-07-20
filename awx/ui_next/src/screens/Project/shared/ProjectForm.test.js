@@ -117,7 +117,7 @@ describe('<ProjectForm />', () => {
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
@@ -136,7 +136,7 @@ describe('<ProjectForm />', () => {
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       await wrapper.find('AnsibleSelect[id="scm_type"]').invoke('onChange')(
         null,
@@ -170,7 +170,7 @@ describe('<ProjectForm />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
@@ -200,7 +200,7 @@ describe('<ProjectForm />', () => {
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       await wrapper.find('AnsibleSelect[id="scm_type"]').invoke('onChange')(
         null,
@@ -242,7 +242,7 @@ describe('<ProjectForm />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     const playbookDirectorySelect = wrapper.find(
       'FormGroup[label="Playbook Directory"] FormSelect'
     );
@@ -274,7 +274,7 @@ describe('<ProjectForm />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ManualSubForm Alert').length).toBe(1);
   });
 
@@ -288,7 +288,7 @@ describe('<ProjectForm />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     const scmTypeSelect = wrapper.find(
       'FormGroup[label="Source Control Credential Type"] FormSelect'
@@ -332,7 +332,7 @@ describe('<ProjectForm />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
@@ -351,7 +351,7 @@ describe('<ProjectForm />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();
@@ -364,7 +364,7 @@ describe('<ProjectForm />', () => {
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 });

@@ -141,7 +141,7 @@ function createLink(state, linkType) {
   const newLinks = [...links];
   const newNodes = [...nodes];
 
-  newNodes.forEach(node => {
+  newNodes.forEach((node) => {
     node.isInvalidLinkTarget = false;
   });
 
@@ -203,7 +203,7 @@ function createNode(state, node) {
   });
 
   if (addNodeTarget) {
-    newLinks.forEach(linkToCompare => {
+    newLinks.forEach((linkToCompare) => {
       if (
         linkToCompare.source.id === addNodeSource &&
         linkToCompare.target.id === addNodeTarget
@@ -230,7 +230,7 @@ function cancelLink(state) {
   const { nodes } = state;
   const newNodes = [...nodes];
 
-  newNodes.forEach(node => {
+  newNodes.forEach((node) => {
     node.isInvalidLinkTarget = false;
   });
 
@@ -252,7 +252,7 @@ function deleteAllNodes(state) {
     addLinkTargetNode: null,
     addingLink: false,
     links: [],
-    nodes: nodes.map(node => {
+    nodes: nodes.map((node) => {
       if (node.id !== 1) {
         node.isDeleted = true;
       }
@@ -306,8 +306,8 @@ function addLinksFromParentsToChildren(
   newLinks,
   linkParentMapping
 ) {
-  parents.forEach(parentId => {
-    children.forEach(child => {
+  parents.forEach((parentId) => {
+    children.forEach((child) => {
       if (parentId === 1) {
         // We only want to create a link from the start node to this node if it
         // doesn't have any other parents
@@ -374,7 +374,7 @@ function deleteNode(state) {
   const newNodes = [...nodes];
   const newLinks = [...links];
 
-  newNodes.find(node => node.id === nodeToDelete.id).isDeleted = true;
+  newNodes.find((node) => node.id === nodeToDelete.id).isDeleted = true;
 
   // Update the links
   const parents = [];
@@ -413,7 +413,7 @@ function generateNodes(workflowNodes) {
       },
     },
   ];
-  workflowNodes.forEach(node => {
+  workflowNodes.forEach((node) => {
     node.workflowMakerNodeId = nodeIdCounter;
 
     const nodeObj = {
@@ -455,9 +455,9 @@ function generateLinks(
 ) {
   const arrayOfLinksForChart = [];
   const nonRootNodeIds = [];
-  workflowNodes.forEach(node => {
+  workflowNodes.forEach((node) => {
     const sourceIndex = chartNodeIdToIndexMapping[node.workflowMakerNodeId];
-    node.success_nodes.forEach(nodeId => {
+    node.success_nodes.forEach((nodeId) => {
       const targetIndex =
         chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[nodeId]];
       arrayOfLinksForChart.push({
@@ -467,7 +467,7 @@ function generateLinks(
       });
       nonRootNodeIds.push(nodeId);
     });
-    node.failure_nodes.forEach(nodeId => {
+    node.failure_nodes.forEach((nodeId) => {
       const targetIndex =
         chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[nodeId]];
       arrayOfLinksForChart.push({
@@ -477,7 +477,7 @@ function generateLinks(
       });
       nonRootNodeIds.push(nodeId);
     });
-    node.always_nodes.forEach(nodeId => {
+    node.always_nodes.forEach((nodeId) => {
       const targetIndex =
         chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[nodeId]];
       arrayOfLinksForChart.push({
@@ -510,10 +510,10 @@ function generateNodesAndLinks(state, workflowNodes) {
   const uniqueNonRootNodeIds = Array.from(new Set(nonRootNodeIds));
 
   const rootNodes = allNodeIds.filter(
-    nodeId => !uniqueNonRootNodeIds.includes(nodeId)
+    (nodeId) => !uniqueNonRootNodeIds.includes(nodeId)
   );
 
-  rootNodes.forEach(rootNodeId => {
+  rootNodes.forEach((rootNodeId) => {
     const targetIndex =
       chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[rootNodeId]];
     arrayOfLinksForChart.push({
@@ -537,7 +537,7 @@ function selectSourceForLinking(state, sourceNode) {
   const parentMap = {};
   const invalidLinkTargetIds = [];
   // Find and mark any ancestors as disabled to prevent cycles
-  links.forEach(link => {
+  links.forEach((link) => {
     // id=1 is our artificial root node so we don't care about that
     if (link.source.id === 1) {
       return;
@@ -552,9 +552,9 @@ function selectSourceForLinking(state, sourceNode) {
     parentMap[link.target.id].push(link.source.id);
   });
 
-  const getAncestors = id => {
+  const getAncestors = (id) => {
     if (parentMap[id]) {
-      parentMap[id].forEach(parentId => {
+      parentMap[id].forEach((parentId) => {
         invalidLinkTargetIds.push(parentId);
         getAncestors(parentId);
       });
@@ -566,8 +566,8 @@ function selectSourceForLinking(state, sourceNode) {
   // Filter out the duplicates
   invalidLinkTargetIds
     .filter((element, index, array) => index === array.indexOf(element))
-    .forEach(ancestorId => {
-      newNodes.forEach(node => {
+    .forEach((ancestorId) => {
+      newNodes.forEach((node) => {
         if (node.id === ancestorId) {
           node.isInvalidLinkTarget = true;
         }
@@ -585,7 +585,7 @@ function selectSourceForLinking(state, sourceNode) {
 function startDeleteLink(state, link) {
   const { links } = state;
   const parentMap = {};
-  links.forEach(existingLink => {
+  links.forEach((existingLink) => {
     if (!parentMap[existingLink.target.id]) {
       parentMap[existingLink.target.id] = [];
     }
@@ -636,7 +636,7 @@ function updateLink(state, linkType) {
   const { linkToEdit, links } = state;
   const newLinks = [...links];
 
-  newLinks.forEach(link => {
+  newLinks.forEach((link) => {
     if (
       link.source.id === linkToEdit.source.id &&
       link.target.id === linkToEdit.target.id
@@ -663,7 +663,7 @@ function updateNode(state, editedNode) {
   } = editedNode;
   const newNodes = [...nodes];
 
-  const matchingNode = newNodes.find(node => node.id === nodeToEdit.id);
+  const matchingNode = newNodes.find((node) => node.id === nodeToEdit.id);
   matchingNode.all_parents_must_converge = all_parents_must_converge;
   if (matchingNode.originalNodeObject) {
     delete matchingNode.originalNodeObject.all_parents_must_converge;
@@ -690,7 +690,7 @@ function refreshNode(state, refreshedNode) {
   const { nodeToView, nodes } = state;
   const newNodes = [...nodes];
 
-  const matchingNode = newNodes.find(node => node.id === nodeToView.id);
+  const matchingNode = newNodes.find((node) => node.id === nodeToView.id);
 
   if (refreshedNode.fullUnifiedJobTemplate) {
     matchingNode.fullUnifiedJobTemplate = refreshedNode.fullUnifiedJobTemplate;

@@ -25,10 +25,8 @@ function InventorySourceSyncButton({ source, icon }) {
     {}
   );
 
-  const {
-    error: startError,
-    dismissError: dismissStartError,
-  } = useDismissableError(startSyncError);
+  const { error: startError, dismissError: dismissStartError } =
+    useDismissableError(startSyncError);
 
   return (
     <>

@@ -174,18 +174,12 @@ describe('<InventoryList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('InventoryListItem')
-        .first()
-        .invoke('onSelect')();
+      wrapper.find('InventoryListItem').first().invoke('onSelect')();
     });
     wrapper.update();
 
     expect(
-      wrapper
-        .find('InventoryListItem')
-        .first()
-        .prop('isSelected')
+      wrapper.find('InventoryListItem').first().prop('isSelected')
     ).toEqual(true);
   });
 
@@ -203,15 +197,12 @@ describe('<InventoryList />', () => {
 
     const items = wrapper.find('InventoryListItem');
     expect(items).toHaveLength(3);
-    items.forEach(item => {
+    items.forEach((item) => {
       expect(item.prop('isSelected')).toEqual(true);
     });
 
     expect(
-      wrapper
-        .find('InventoryListItem')
-        .first()
-        .prop('isSelected')
+      wrapper.find('InventoryListItem').first().prop('isSelected')
     ).toEqual(true);
   });
 
@@ -223,10 +214,7 @@ describe('<InventoryList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('InventoryListItem')
-        .at(2)
-        .invoke('onSelect')();
+      wrapper.find('InventoryListItem').at(2).invoke('onSelect')();
     });
     wrapper.update();
 
@@ -243,17 +231,11 @@ describe('<InventoryList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('InventoryListItem')
-        .at(0)
-        .invoke('onSelect')();
+      wrapper.find('InventoryListItem').at(0).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('InventoryListItem')
-        .at(1)
-        .invoke('onSelect')();
+      wrapper.find('InventoryListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
@@ -282,10 +264,7 @@ describe('<InventoryList />', () => {
     wrapper.update();
     expect(InventoriesAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
-      wrapper
-        .find('InventoryListItem')
-        .at(0)
-        .invoke('onSelect')();
+      wrapper.find('InventoryListItem').at(0).invoke('onSelect')();
     });
     wrapper.update();
 

@@ -29,7 +29,7 @@ function SmartInventoryAdd() {
     }, [])
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     const { instance_groups, organization, ...remainingForm } = form;
 
     await submitRequest(

@@ -96,14 +96,13 @@ function WorkflowJobTemplateDetail({ template }) {
   };
 
   const canLaunch = summary_fields?.user_capabilities?.start;
-  const recentPlaybookJobs = summary_fields.recent_jobs.map(job => ({
+  const recentPlaybookJobs = summary_fields.recent_jobs.map((job) => ({
     ...job,
     type: 'workflow_job',
   }));
 
-  const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    template
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.template(template);
 
   return (
     <CardBody>
@@ -192,7 +191,7 @@ function WorkflowJobTemplateDetail({ template }) {
                 numChips={3}
                 totalChips={summary_fields.labels.results.length}
               >
-                {summary_fields.labels.results.map(l => (
+                {summary_fields.labels.results.map((l) => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}
                   </Chip>

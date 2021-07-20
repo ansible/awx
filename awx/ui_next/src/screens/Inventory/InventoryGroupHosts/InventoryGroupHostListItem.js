@@ -20,7 +20,7 @@ function InventoryGroupHostListItem({
   isSelected,
   onSelect,
 }) {
-  const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
+  const recentPlaybookJobs = host.summary_fields.recent_jobs.map((job) => ({
     ...job,
     type: 'job',
   }));

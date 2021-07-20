@@ -53,10 +53,10 @@ function InventoryList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -73,7 +73,7 @@ function InventoryList() {
   }, [fetchInventories]);
 
   const fetchInventoriesById = useCallback(
-    async ids => {
+    async (ids) => {
       const params = { ...parseQueryString(QS_CONFIG, location.search) };
       params.id__in = ids.join(',');
       const { data } = await InventoriesAPI.read(params);
@@ -89,13 +89,8 @@ function InventoryList() {
     QS_CONFIG
   );
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(inventories);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(inventories);
 
   const {
     isLoading: isDeleteLoading,
@@ -103,9 +98,11 @@ function InventoryList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(team => InventoriesAPI.destroy(team.id)));
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(selected.map((team) => InventoriesAPI.destroy(team.id))),
+      [selected]
+    ),
     {
       allItemsSelected: isAllSelected,
     }
@@ -211,7 +208,7 @@ function InventoryList() {
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DatalistToolbar
               {...props}
               isAllSelected={isAllSelected}
@@ -260,7 +257,7 @@ function InventoryList() {
                   handleSelect(inventory);
                 }
               }}
-              isSelected={selected.some(row => row.id === inventory.id)}
+              isSelected={selected.some((row) => row.id === inventory.id)}
             />
           )}
           emptyStateControls={canAdd && addButton}

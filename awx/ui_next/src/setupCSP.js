@@ -7,7 +7,7 @@ __webpack_nonce__ = window.NONCE_ID;
 // Send report when a CSP violation occurs
 // See: https://w3c.github.io/webappsec-csp/2/#violation-reports
 // See: https://developer.mozilla.org/en-US/docs/Web/API/SecurityPolicyViolationEvent
-document.addEventListener('securitypolicyviolation', e => {
+document.addEventListener('securitypolicyviolation', (e) => {
   const violation = {
     'csp-report': {
       'blocked-uri': e.blockedURI,

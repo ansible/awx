@@ -37,8 +37,8 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
         launchConfig.ask_variables_on_launch && (overrides.extra_vars || '---');
       if (surveyConfig?.spec) {
         const passwordFields = surveyConfig.spec
-          .filter(q => q.type === 'password')
-          .map(q => q.variable);
+          .filter((q) => q.type === 'password')
+          .map((q) => q.variable);
         const masked = maskPasswords(surveyValues, passwordFields);
         overrides.extra_vars = yaml.safeDump(
           mergeExtraVars(initialExtraVars, masked)
@@ -54,7 +54,7 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
   }
 
   return (
-    <Fragment>
+    <>
       {formErrors && (
         <ErrorMessageWrapper>
           {t`Some of the previous step(s) have errors`}
@@ -72,7 +72,7 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
         launchConfig={launchConfig}
         overrides={overrides}
       />
-    </Fragment>
+    </>
   );
 }
 

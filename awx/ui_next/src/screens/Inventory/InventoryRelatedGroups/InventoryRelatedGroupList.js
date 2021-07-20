@@ -62,11 +62,11 @@ function InventoryRelatedGroupList() {
         isAdHocDisabled: !adHocOptions.data.actions.POST,
         groups: response.data.results,
         itemCount: response.data.count,
-        relatedSearchableKeys: (
-          actions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
+          (val) => val.slice(0, -8)
+        ),
         searchableKeys: Object.keys(actions.data.actions?.GET || {}).filter(
-          key => actions.data.actions?.GET[key].filterable
+          (key) => actions.data.actions?.GET[key].filterable
         ),
         canAdd:
           actions.data.actions &&
@@ -86,20 +86,19 @@ function InventoryRelatedGroupList() {
   }, [fetchRelated]);
 
   const fetchGroupsToAssociate = useCallback(
-    params => {
-      return GroupsAPI.readPotentialGroups(
+    (params) =>
+      GroupsAPI.readPotentialGroups(
         groupId,
         mergeParams(params, { not__id: groupId, not__parents: groupId })
-      );
-    },
+      ),
     [groupId]
   );
 
   const associateGroup = useCallback(
-    async selectedGroups => {
+    async (selectedGroups) => {
       try {
         await Promise.all(
-          selectedGroups.map(selected =>
+          selectedGroups.map((selected) =>
             GroupsAPI.associateChildGroup(groupId, selected.id)
           )
         );
@@ -111,9 +110,8 @@ function InventoryRelatedGroupList() {
     [groupId, fetchRelated]
   );
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    groups
-  );
+  const { selected, isAllSelected, handleSelect, setSelected } =
+    useSelected(groups);
 
   const disassociateGroups = useCallback(async () => {
     try {
@@ -200,11 +198,11 @@ function InventoryRelatedGroupList() {
         ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
+            onSelectAll={(isSelected) =>
               setSelected(isSelected ? [...groups] : [])
             }
             qsConfig={QS_CONFIG}
@@ -242,7 +240,7 @@ function InventoryRelatedGroupList() {
             group={group}
             detailUrl={`/inventories/inventory/${inventoryId}/groups/${group.id}/details`}
             editUrl={`/inventories/inventory/${inventoryId}/groups/${group.id}/edit`}
-            isSelected={selected.some(row => row.id === group.id)}
+            isSelected={selected.some((row) => row.id === group.id)}
             onSelect={() => handleSelect(group)}
           />
         )}

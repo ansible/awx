@@ -34,7 +34,7 @@ function DeleteButton({
   const [deleteDetails, setDeleteDetails] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const toggleModal = async isModalOpen => {
+  const toggleModal = async (isModalOpen) => {
     setIsLoading(true);
     if (deleteDetailsRequests?.length && isModalOpen) {
       const { results, error } = await getRelatedResourceDeleteCounts(

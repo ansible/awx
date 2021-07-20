@@ -11,7 +11,7 @@ function CredentialTypeEdit({ credentialType }) {
   const [submitError, setSubmitError] = useState(null);
   const detailsUrl = `/credential_types/${credentialType.id}/details`;
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await CredentialTypesAPI.update(credentialType.id, {
         ...values,

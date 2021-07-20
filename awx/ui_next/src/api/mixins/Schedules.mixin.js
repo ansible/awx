@@ -1,4 +1,4 @@
-const SchedulesMixin = parent =>
+const SchedulesMixin = (parent) =>
   class extends parent {
     createSchedule(id, data) {
       return this.http.post(`${this.baseUrl}${id}/schedules/`, data);

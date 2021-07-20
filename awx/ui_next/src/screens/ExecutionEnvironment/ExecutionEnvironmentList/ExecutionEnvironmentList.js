@@ -55,10 +55,10 @@ function ExecutionEnvironmentList() {
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           responseActions.data.actions?.GET || {}
-        ).filter(key => responseActions.data.actions?.GET[key].filterable),
+        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -74,13 +74,8 @@ function ExecutionEnvironmentList() {
     fetchExecutionEnvironments();
   }, [fetchExecutionEnvironments]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(executionEnvironments);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(executionEnvironments);
 
   const {
     isLoading: deleteLoading,
@@ -106,9 +101,8 @@ function ExecutionEnvironmentList() {
   };
 
   const canAdd = actions && actions.POST;
-  const deleteDetailsRequests = relatedResourceDeleteRequests.executionEnvironment(
-    selected[0]
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.executionEnvironment(selected[0]);
   return (
     <>
       <PageSection>
@@ -161,7 +155,7 @@ function ExecutionEnvironmentList() {
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DatalistToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -202,7 +196,7 @@ function ExecutionEnvironmentList() {
                 detailUrl={`${match.url}/${executionEnvironment.id}/details`}
                 onSelect={() => handleSelect(executionEnvironment)}
                 isSelected={selected.some(
-                  row => row.id === executionEnvironment.id
+                  (row) => row.id === executionEnvironment.id
                 )}
                 fetchExecutionEnvironments={fetchExecutionEnvironments}
               />

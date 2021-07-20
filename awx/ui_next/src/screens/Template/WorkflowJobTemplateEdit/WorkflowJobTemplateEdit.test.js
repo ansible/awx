@@ -78,7 +78,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       data: { count: 1, results: [{ id: 1, name: 'Default' }] },
     });
 
-    useDebounce.mockImplementation(fn => fn);
+    useDebounce.mockImplementation((fn) => fn);
 
     await act(async () => {
       history = createMemoryHistory({
@@ -101,7 +101,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
           },
         }
       );
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
   });
 
@@ -117,10 +117,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       wrapper.find('input#wfjt-limit').simulate('change', {
         target: { value: '5000', name: 'limit' },
       });
-      wrapper
-        .find('LabelSelect')
-        .find('SelectToggle')
-        .simulate('click');
+      wrapper.find('LabelSelect').find('SelectToggle').simulate('click');
       wrapper.update();
       wrapper.find('input#wfjt-description').simulate('change', {
         target: { value: 'main', name: 'scm_branch' },
@@ -135,7 +132,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     await waitForElement(
       wrapper,
       'SelectOption button[aria-label="Label 3"]',
-      el => el.length > 0
+      (el) => el.length > 0
     );
     wrapper.find('input#wfjt-scm-branch').instance().value = 'main';
 
@@ -249,7 +246,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         }
       );
     });
-    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(newWrapper, 'ContentLoading', (el) => el.length === 0);
     OrganizationsAPI.read.mockRejectedValue({
       response: {
         config: {

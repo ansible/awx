@@ -10,7 +10,7 @@ function InstanceGroupEdit({ instanceGroup, defaultControlPlane }) {
   const [submitError, setSubmitError] = useState(null);
   const detailsUrl = `/instance_groups/${instanceGroup.id}/details`;
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await InstanceGroupsAPI.update(instanceGroup.id, values);
       history.push(detailsUrl);

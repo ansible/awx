@@ -21,7 +21,7 @@ function ReLaunchDropDown({
   const [isOpen, setIsOpen] = useState(false);
 
   const onToggle = () => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   };
 
   const dropdownItems = [

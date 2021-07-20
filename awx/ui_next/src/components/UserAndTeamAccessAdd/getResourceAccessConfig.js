@@ -38,7 +38,7 @@ export default function getResourceAccessConfig() {
           key: 'name',
         },
       ],
-      fetchItems: queryParams => JobTemplatesAPI.read(queryParams),
+      fetchItems: (queryParams) => JobTemplatesAPI.read(queryParams),
       fetchOptions: () => JobTemplatesAPI.readOptions(),
     },
     {
@@ -69,7 +69,7 @@ export default function getResourceAccessConfig() {
           key: 'name',
         },
       ],
-      fetchItems: queryParams => WorkflowJobTemplatesAPI.read(queryParams),
+      fetchItems: (queryParams) => WorkflowJobTemplatesAPI.read(queryParams),
       fetchOptions: () => WorkflowJobTemplatesAPI.readOptions(),
     },
     {
@@ -111,7 +111,7 @@ export default function getResourceAccessConfig() {
           key: 'name',
         },
       ],
-      fetchItems: queryParams => CredentialsAPI.read(queryParams),
+      fetchItems: (queryParams) => CredentialsAPI.read(queryParams),
       fetchOptions: () => CredentialsAPI.readOptions(),
     },
     {
@@ -138,7 +138,7 @@ export default function getResourceAccessConfig() {
           key: 'name',
         },
       ],
-      fetchItems: queryParams => InventoriesAPI.read(queryParams),
+      fetchItems: (queryParams) => InventoriesAPI.read(queryParams),
       fetchOptions: () => InventoriesAPI.readOptions(),
     },
     {
@@ -180,7 +180,7 @@ export default function getResourceAccessConfig() {
           key: 'name',
         },
       ],
-      fetchItems: queryParams => ProjectsAPI.read(queryParams),
+      fetchItems: (queryParams) => ProjectsAPI.read(queryParams),
       fetchOptions: () => ProjectsAPI.readOptions(),
     },
     {
@@ -207,7 +207,7 @@ export default function getResourceAccessConfig() {
           key: 'name',
         },
       ],
-      fetchItems: queryParams => OrganizationsAPI.read(queryParams),
+      fetchItems: (queryParams) => OrganizationsAPI.read(queryParams),
       fetchOptions: () => OrganizationsAPI.readOptions(),
     },
   ];

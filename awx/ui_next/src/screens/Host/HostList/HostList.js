@@ -32,7 +32,7 @@ function HostList() {
   const parsedQueryStrings = parseQueryString(QS_CONFIG, location.search);
   const nonDefaultSearchParams = {};
 
-  Object.keys(parsedQueryStrings).forEach(key => {
+  Object.keys(parsedQueryStrings).forEach((key) => {
     if (!QS_CONFIG.defaultParams[key]) {
       nonDefaultSearchParams[key] = parsedQueryStrings[key];
     }
@@ -41,9 +41,9 @@ function HostList() {
   const hasInvalidHostFilterKeys = () => {
     const nonDefaultSearchKeys = Object.keys(nonDefaultSearchParams);
     return (
-      nonDefaultSearchKeys.filter(searchKey => searchKey.startsWith('not__'))
+      nonDefaultSearchKeys.filter((searchKey) => searchKey.startsWith('not__'))
         .length > 0 ||
-      nonDefaultSearchKeys.filter(searchKey => searchKey.endsWith('__search'))
+      nonDefaultSearchKeys.filter((searchKey) => searchKey.endsWith('__search'))
         .length > 0
     );
   };
@@ -66,9 +66,9 @@ function HostList() {
         actions: results[1].data.actions,
         relatedSearchableKeys: (
           results[1]?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(results[1].data.actions?.GET || {}).filter(
-          key => results[1].data.actions?.GET[key].filterable
+          (key) => results[1].data.actions?.GET[key].filterable
         ),
       };
     }, [location]),
@@ -85,13 +85,8 @@ function HostList() {
     fetchHosts();
   }, [fetchHosts]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(hosts);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(hosts);
 
   const {
     isLoading: isDeleteLoading,
@@ -99,9 +94,10 @@ function HostList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map((host) => HostsAPI.destroy(host.id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -164,7 +160,7 @@ function HostList() {
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DataListToolbar
               {...props}
               isAllSelected={isAllSelected}
@@ -200,7 +196,7 @@ function HostList() {
               key={host.id}
               host={host}
               detailUrl={`${match.url}/${host.id}/details`}
-              isSelected={selected.some(row => row.id === host.id)}
+              isSelected={selected.some((row) => row.id === host.id)}
               onSelect={() => handleSelect(host)}
               rowIndex={index}
             />

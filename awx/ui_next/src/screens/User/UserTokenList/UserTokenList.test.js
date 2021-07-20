@@ -148,7 +148,7 @@ describe('<UserTokenList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UserTokenList />);
     });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
       true
     );
@@ -159,24 +159,18 @@ describe('<UserTokenList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UserTokenList />);
     });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
       true
     );
     await act(async () => {
-      wrapper
-        .find('.pf-c-table__check')
-        .at(2)
-        .find('input')
-        .prop('onChange')(tokens.data.results[0]);
+      wrapper.find('.pf-c-table__check').at(2).find('input').prop('onChange')(
+        tokens.data.results[0]
+      );
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .at(2)
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').at(2).find('input').prop('checked')
     ).toBe(true);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
       false
@@ -210,24 +204,18 @@ describe('<UserTokenList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UserTokenList />);
     });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
       true
     );
     await act(async () => {
-      wrapper
-        .find('.pf-c-table__check')
-        .at(2)
-        .find('input')
-        .prop('onChange')(tokens.data.results[0]);
+      wrapper.find('.pf-c-table__check').at(2).find('input').prop('onChange')(
+        tokens.data.results[0]
+      );
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .at(2)
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').at(2).find('input').prop('checked')
     ).toBe(true);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
       false

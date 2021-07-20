@@ -29,7 +29,7 @@ export default function useCredentialsStep(
     isReady: true,
     contentError: null,
     hasError: launchConfig.ask_credential_on_launch && formError,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('credentials', true, false);
     },
     validate: () => {

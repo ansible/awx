@@ -19,10 +19,8 @@ function CredentialPluginTestAlert({
     if (errorResponse) {
       if (errorResponse?.response?.data?.inputs) {
         if (errorResponse.response.data.inputs.startsWith('HTTP')) {
-          const [
-            errorCode,
-            errorStr,
-          ] = errorResponse.response.data.inputs.split('\n');
+          const [errorCode, errorStr] =
+            errorResponse.response.data.inputs.split('\n');
           try {
             const errorJSON = JSON.parse(errorStr);
             setTestMessage(

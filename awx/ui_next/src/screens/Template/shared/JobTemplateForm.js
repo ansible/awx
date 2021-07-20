@@ -73,9 +73,8 @@ function JobTemplateForm({
     name: 'job_type',
     validate: required(null),
   });
-  const [inventoryField, inventoryMeta, inventoryHelpers] = useField(
-    'inventory'
-  );
+  const [inventoryField, inventoryMeta, inventoryHelpers] =
+    useField('inventory');
   const [projectField, projectMeta, projectHelpers] = useField('project');
   const [scmField, , scmHelpers] = useField('scm_branch');
   const [playbookField, playbookMeta, playbookHelpers] = useField({
@@ -87,20 +86,17 @@ function JobTemplateForm({
   const [limitField, limitMeta, limitHelpers] = useField('limit');
   const [verbosityField] = useField('verbosity');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
-  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
-    'instanceGroups'
-  );
+  const [instanceGroupsField, , instanceGroupsHelpers] =
+    useField('instanceGroups');
   const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
   const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
 
-  const [, webhookServiceMeta, webhookServiceHelpers] = useField(
-    'webhook_service'
-  );
+  const [, webhookServiceMeta, webhookServiceHelpers] =
+    useField('webhook_service');
   const [, webhookUrlMeta, webhookUrlHelpers] = useField('webhook_url');
   const [, webhookKeyMeta, webhookKeyHelpers] = useField('webhook_key');
-  const [, webhookCredentialMeta, webhookCredentialHelpers] = useField(
-    'webhook_credential'
-  );
+  const [, webhookCredentialMeta, webhookCredentialHelpers] =
+    useField('webhook_credential');
 
   const [
     executionEnvironmentField,
@@ -148,7 +144,7 @@ function JobTemplateForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableWebhooks]);
 
-  const handleProjectValidation = project => {
+  const handleProjectValidation = (project) => {
     if (!project) {
       return t`This field must not be blank`;
     }
@@ -159,7 +155,7 @@ function JobTemplateForm({
   };
 
   const handleProjectUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('project', value);
       setFieldValue('playbook', '', false);
       setFieldValue('scm_branch', '', false);
@@ -168,7 +164,7 @@ function JobTemplateForm({
     [setFieldValue, setFieldTouched]
   );
 
-  const handleInventoryValidation = inventory => {
+  const handleInventoryValidation = (inventory) => {
     if (!inventory && !askInventoryOnLaunchField.value) {
       return t`Please select an Inventory or check the Prompt on Launch option`;
     }
@@ -176,7 +172,7 @@ function JobTemplateForm({
   };
 
   const handleInventoryUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('inventory', value);
       setFieldTouched('inventory', true, false);
     },
@@ -184,7 +180,7 @@ function JobTemplateForm({
   );
 
   const handleExecutionEnvironmentUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('execution_environment', value);
       setFieldTouched('execution_environment', true, false);
     },
@@ -340,7 +336,7 @@ function JobTemplateForm({
           >
             <TextInput
               id="template-scm-branch"
-              onChange={value => {
+              onChange={(value) => {
                 scmHelpers.setValue(value);
               }}
               value={scmField.value}
@@ -385,7 +381,7 @@ function JobTemplateForm({
           >
             <MultiCredentialsLookup
               value={credentialField.value}
-              onChange={newCredentials =>
+              onChange={(newCredentials) =>
                 credentialHelpers.setValue(newCredentials)
               }
               onError={setContentError}
@@ -404,7 +400,7 @@ function JobTemplateForm({
           >
             <LabelSelect
               value={labelsField.value}
-              onChange={labels => labelsHelpers.setValue(labels)}
+              onChange={(labels) => labelsHelpers.setValue(labels)}
               onError={setContentError}
               createText={t`Create`}
             />
@@ -455,7 +451,7 @@ function JobTemplateForm({
                 validated={
                   !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
                 }
-                onChange={value => {
+                onChange={(value) => {
                   limitHelpers.setValue(value);
                 }}
               />
@@ -507,13 +503,13 @@ function JobTemplateForm({
                 id="template-show-changes"
                 label={diffModeField.value ? t`On` : t`Off`}
                 isChecked={diffModeField.value}
-                onChange={checked => diffModeHelpers.setValue(checked)}
+                onChange={(checked) => diffModeHelpers.setValue(checked)}
               />
             </FieldWithPrompt>
             <FormFullWidthLayout>
               <InstanceGroupsLookup
                 value={instanceGroupsField.value}
-                onChange={value => instanceGroupsHelpers.setValue(value)}
+                onChange={(value) => instanceGroupsHelpers.setValue(value)}
                 tooltip={t`Select the Instance Groups for this Organization
                         to run on.`}
                 fieldName="instanceGroups"
@@ -531,7 +527,7 @@ function JobTemplateForm({
               >
                 <TagMultiSelect
                   value={jobTagsField.value}
-                  onChange={value => jobTagsHelpers.setValue(value)}
+                  onChange={(value) => jobTagsHelpers.setValue(value)}
                 />
               </FieldWithPrompt>
               <FieldWithPrompt
@@ -547,7 +543,7 @@ function JobTemplateForm({
               >
                 <TagMultiSelect
                   value={skipTagsField.value}
-                  onChange={value => skipTagsHelpers.setValue(value)}
+                  onChange={(value) => skipTagsHelpers.setValue(value)}
                 />
               </FieldWithPrompt>
               <FormGroup
@@ -578,7 +574,7 @@ function JobTemplateForm({
                     }
                     id="option-callbacks"
                     isChecked={allowCallbacks}
-                    onChange={checked => {
+                    onChange={(checked) => {
                       setAllowCallbacks(checked);
                     }}
                   />
@@ -595,7 +591,7 @@ function JobTemplateForm({
                     }
                     id="wfjt-enabled-webhooks"
                     isChecked={enableWebhooks}
-                    onChange={checked => {
+                    onChange={(checked) => {
                       setEnableWebhooks(checked);
                     }}
                   />

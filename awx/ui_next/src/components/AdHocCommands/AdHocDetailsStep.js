@@ -30,9 +30,8 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
 
   const [variablesField] = useField('extra_vars');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
-  const [becomeEnabledField, , becomeEnabledHelpers] = useField(
-    'become_enabled'
-  );
+  const [becomeEnabledField, , becomeEnabledHelpers] =
+    useField('become_enabled');
   const [verbosityField, verbosityMeta, verbosityHelpers] = useField({
     name: 'verbosity',
     validate: required(null),
@@ -82,7 +81,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
                   label: t`Choose a module`,
                   isDisabled: true,
                 },
-                ...moduleOptions.map(value => ({
+                ...moduleOptions.map((value) => ({
                   value: value[0],
                   label: value[0],
                   key: value[0],
@@ -238,7 +237,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
                   }
                   id="become_enabled"
                   isChecked={becomeEnabledField.value}
-                  onChange={checked => {
+                  onChange={(checked) => {
                     becomeEnabledHelpers.setValue(checked);
                   }}
                 />

@@ -9,7 +9,7 @@ import {
 } from './dates';
 
 const i18n = {
-  _: key => {
+  _: (key) => {
     if (key.values) {
       Object.entries(key.values).forEach(([k, v]) => {
         key.id = key.id.replace(new RegExp(`\\{${k}\\}`), v);

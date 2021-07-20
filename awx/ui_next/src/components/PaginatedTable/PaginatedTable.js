@@ -46,7 +46,7 @@ function PaginatedTable({
     clearSelected();
   }, [location.search, clearSelected]);
 
-  const pushHistoryState = qs => {
+  const pushHistoryState = (qs) => {
     history.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
@@ -202,7 +202,7 @@ PaginatedTable.defaultProps = {
   toolbarRelatedSearchableKeys: [],
   pluralizedItemName: null,
   showPageSizeOptions: true,
-  renderToolbar: props => <DataListToolbar {...props} />,
+  renderToolbar: (props) => <DataListToolbar {...props} />,
   ouiaId: null,
   clearSelected: () => {},
 };

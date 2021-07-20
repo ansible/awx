@@ -23,9 +23,10 @@ function UserTokens({ setBreadcrumb, user }) {
   const [tokenModalSource, setTokenModalSource] = useState(null);
   const { id } = useParams();
 
-  const onSuccessfulAdd = useCallback(token => setTokenModalSource(token), [
-    setTokenModalSource,
-  ]);
+  const onSuccessfulAdd = useCallback(
+    (token) => setTokenModalSource(token),
+    [setTokenModalSource]
+  );
 
   return (
     <>

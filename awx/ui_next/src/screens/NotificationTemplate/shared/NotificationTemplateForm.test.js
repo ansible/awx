@@ -124,12 +124,7 @@ describe('<NotificationTemplateForm />', () => {
       );
     });
 
-    expect(
-      wrapper
-        .find('CodeEditor')
-        .at(0)
-        .prop('value')
-    ).toEqual('Started');
+    expect(wrapper.find('CodeEditor').at(0).prop('value')).toEqual('Started');
   });
 
   test('should submit', async () => {

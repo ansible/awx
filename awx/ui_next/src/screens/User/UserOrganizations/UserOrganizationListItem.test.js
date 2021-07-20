@@ -33,18 +33,8 @@ describe('<UserOrganizationListItem />', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(0)
-        .text()
-    ).toBe('foo');
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Bar');
+    expect(wrapper.find('Td').at(0).text()).toBe('foo');
+    expect(wrapper.find('Td').at(1).text()).toBe('Bar');
     expect(wrapper.find('Link').prop('to')).toBe('/organizations/1/details');
   });
 });

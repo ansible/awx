@@ -140,7 +140,7 @@ function SurveyListItem({
                     numChips={5}
                     totalChips={question.default.split('\n').length}
                   >
-                    {question.default.split('\n').map(chip => (
+                    {question.default.split('\n').map((chip) => (
                       <Chip key={chip} isReadOnly>
                         {chip}
                       </Chip>

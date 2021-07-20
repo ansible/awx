@@ -41,34 +41,32 @@ const SettingGroup = ({
   onRevertCallback,
   popoverContent,
   validated,
-}) => {
-  return (
-    <FormGroup
-      fieldId={fieldId}
-      helperTextInvalid={helperTextInvalid}
-      id={`${fieldId}-field`}
-      isRequired={isRequired}
-      label={label}
-      validated={validated}
-      labelIcon={
-        <>
-          <Popover
-            content={popoverContent}
-            ariaLabel={`${t`More information for`} ${label}`}
-          />
-          <RevertButton
-            id={fieldId}
-            defaultValue={defaultValue}
-            isDisabled={isDisabled}
-            onRevertCallback={onRevertCallback}
-          />
-        </>
-      }
-    >
-      {children}
-    </FormGroup>
-  );
-};
+}) => (
+  <FormGroup
+    fieldId={fieldId}
+    helperTextInvalid={helperTextInvalid}
+    id={`${fieldId}-field`}
+    isRequired={isRequired}
+    label={label}
+    validated={validated}
+    labelIcon={
+      <>
+        <Popover
+          content={popoverContent}
+          ariaLabel={`${t`More information for`} ${label}`}
+        />
+        <RevertButton
+          id={fieldId}
+          defaultValue={defaultValue}
+          isDisabled={isDisabled}
+          onRevertCallback={onRevertCallback}
+        />
+      </>
+    }
+  >
+    {children}
+  </FormGroup>
+);
 const BooleanField = ({
   ariaLabel = '',
   name,
@@ -320,7 +318,7 @@ const ObjectField = ({ name, config, isRequired = false }) => {
           rows="auto"
           id={name}
           mode="javascript"
-          onChange={value => {
+          onChange={(value) => {
             helpers.setValue(value);
           }}
           placeholder={JSON.stringify(config?.placeholder, null, 2)}

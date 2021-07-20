@@ -10,7 +10,7 @@ function InventoryGroupHostAdd({ inventoryGroup }) {
   const baseUrl = `/inventories/inventory/${inventoryGroup.inventory}`;
   const history = useHistory();
 
-  const handleSubmit = async formData => {
+  const handleSubmit = async (formData) => {
     try {
       const values = {
         ...formData,

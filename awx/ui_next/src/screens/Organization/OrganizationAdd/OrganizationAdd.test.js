@@ -55,7 +55,7 @@ describe('<OrganizationAdd />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
@@ -167,7 +167,7 @@ describe('<OrganizationAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<OrganizationAdd />, {});
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('AnsibleSelect FormSelect')).toHaveLength(0);
   });
 });

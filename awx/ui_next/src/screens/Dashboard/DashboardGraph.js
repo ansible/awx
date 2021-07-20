@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
@@ -63,7 +63,7 @@ function DashboardGraph() {
         }
         newData[dateSecs].failed = count;
       });
-      const jobData = Object.keys(newData).map(dateSecs => {
+      const jobData = Object.keys(newData).map((dateSecs) => {
         const [created] = new Date(dateSecs * 1000).toISOString().split('T');
         newData[dateSecs].created = created;
         return newData[dateSecs];
@@ -87,7 +87,7 @@ function DashboardGraph() {
   }
 
   return (
-    <Fragment>
+    <>
       <GraphCardHeader>
         <GraphCardActions>
           <Select
@@ -176,7 +176,7 @@ function DashboardGraph() {
           data={jobGraphData}
         />
       </CardBody>
-    </Fragment>
+    </>
   );
 }
 export default DashboardGraph;

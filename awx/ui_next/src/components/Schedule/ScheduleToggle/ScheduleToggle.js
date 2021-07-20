@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
@@ -12,7 +12,12 @@ function ScheduleToggle({ schedule, onToggle, className, isDisabled }) {
   const [isEnabled, setIsEnabled] = useState(schedule.enabled);
   const [showError, setShowError] = useState(false);
 
-  const { result, isLoading, error, request: toggleSchedule } = useRequest(
+  const {
+    result,
+    isLoading,
+    error,
+    request: toggleSchedule,
+  } = useRequest(
     useCallback(async () => {
       await SchedulesAPI.update(schedule.id, {
         enabled: !isEnabled,
@@ -38,7 +43,7 @@ function ScheduleToggle({ schedule, onToggle, className, isDisabled }) {
   }, [error]);
 
   return (
-    <Fragment>
+    <>
       <Tooltip
         content={
           schedule.enabled ? t`Schedule is active` : t`Schedule is inactive`
@@ -72,7 +77,7 @@ function ScheduleToggle({ schedule, onToggle, className, isDisabled }) {
           <ErrorDetail error={error} />
         </AlertModal>
       )}
-    </Fragment>
+    </>
   );
 }
 

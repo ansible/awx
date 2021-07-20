@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
@@ -20,7 +20,12 @@ function HostToggle({
   const [isEnabled, setIsEnabled] = useState(host.enabled);
   const [showError, setShowError] = useState(false);
 
-  const { result, isLoading, error, request: toggleHost } = useRequest(
+  const {
+    result,
+    isLoading,
+    error,
+    request: toggleHost,
+  } = useRequest(
     useCallback(async () => {
       await HostsAPI.update(host.id, {
         enabled: !isEnabled,
@@ -46,7 +51,7 @@ function HostToggle({
   }, [error]);
 
   return (
-    <Fragment>
+    <>
       <Tooltip content={tooltip} position="top">
         <Switch
           className={className}
@@ -75,7 +80,7 @@ function HostToggle({
           <ErrorDetail error={error} />
         </AlertModal>
       )}
-    </Fragment>
+    </>
   );
 }
 

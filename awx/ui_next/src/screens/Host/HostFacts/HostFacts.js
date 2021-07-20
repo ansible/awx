@@ -11,7 +11,12 @@ import useRequest from 'hooks/useRequest';
 import { HostsAPI } from 'api';
 
 function HostFacts({ host }) {
-  const { result: facts, isLoading, error, request: fetchFacts } = useRequest(
+  const {
+    result: facts,
+    isLoading,
+    error,
+    request: fetchFacts,
+  } = useRequest(
     useCallback(async () => {
       const [{ data: factsObj }] = await Promise.all([
         HostsAPI.readFacts(host.id),

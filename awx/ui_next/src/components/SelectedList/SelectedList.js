@@ -40,7 +40,7 @@ class SelectedList extends Component {
         <SplitLabelItem>{label}</SplitLabelItem>
         <SplitItem>
           <ChipGroup numChips={5} totalChips={selected.length}>
-            {selected.map(item =>
+            {selected.map((item) =>
               renderChip({
                 item,
                 removeItem: () => onRemove(item),

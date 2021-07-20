@@ -79,7 +79,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     await waitForElement(
       wrapper,
       'ExecutionEnvironmentList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
   });
 
@@ -90,7 +90,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     await waitForElement(
       wrapper,
       'ExecutionEnvironmentList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
 
     expect(wrapper.find('ExecutionEnvironmentListItem').length).toBe(2);
@@ -105,21 +105,15 @@ describe('<ExecutionEnvironmentList/>', () => {
     await waitForElement(
       wrapper,
       'ExecutionEnvironmentList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
 
     await act(async () => {
-      wrapper
-        .find('ExecutionEnvironmentListItem')
-        .at(0)
-        .invoke('onSelect')();
+      wrapper.find('ExecutionEnvironmentListItem').at(0).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('ExecutionEnvironmentListItem')
-        .at(1)
-        .invoke('onSelect')();
+      wrapper.find('ExecutionEnvironmentListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
@@ -144,7 +138,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentList />);
     });
-    waitForElement(wrapper, 'ExecutionEnvironmentList', el => el.length > 0);
+    waitForElement(wrapper, 'ExecutionEnvironmentList', (el) => el.length > 0);
 
     wrapper
       .find('ExecutionEnvironmentListItem')
@@ -169,7 +163,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     await waitForElement(
       wrapper,
       'Button[aria-label="confirm delete"]',
-      el => el.length > 0
+      (el) => el.length > 0
     );
     await act(async () =>
       wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
@@ -196,7 +190,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     await waitForElement(
       wrapper,
       'ExecutionEnvironmentList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
     expect(wrapper.find('ContentError').length).toBe(1);
   });
@@ -209,7 +203,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentList />);
     });
-    waitForElement(wrapper, 'ExecutionEnvironmentList', el => el.length > 0);
+    waitForElement(wrapper, 'ExecutionEnvironmentList', (el) => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 

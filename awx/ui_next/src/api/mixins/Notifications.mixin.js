@@ -1,4 +1,4 @@
-const NotificationsMixin = parent =>
+const NotificationsMixin = (parent) =>
   class extends parent {
     readOptionsNotificationTemplates(id) {
       return this.http.options(`${this.baseUrl}${id}/notification_templates/`);

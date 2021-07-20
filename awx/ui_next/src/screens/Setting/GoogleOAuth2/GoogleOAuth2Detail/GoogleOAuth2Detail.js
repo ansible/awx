@@ -19,7 +19,12 @@ function GoogleOAuth2Detail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: googleOAuth2 } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: googleOAuth2,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('google-oauth2');
       return data;
@@ -57,7 +62,7 @@ function GoogleOAuth2Detail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && googleOAuth2 && (
           <DetailList>
-            {Object.keys(googleOAuth2).map(key => {
+            {Object.keys(googleOAuth2).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

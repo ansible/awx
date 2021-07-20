@@ -11,7 +11,7 @@ function InventorySourceAdd({ inventory }) {
   const { id, organization } = inventory;
 
   const { error, request, result } = useRequest(
-    useCallback(async values => {
+    useCallback(async (values) => {
       const { data } = await InventorySourcesAPI.create(values);
       return data;
     }, [])
@@ -25,7 +25,7 @@ function InventorySourceAdd({ inventory }) {
     }
   }, [result, history]);
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     const {
       credential,
       source_path,

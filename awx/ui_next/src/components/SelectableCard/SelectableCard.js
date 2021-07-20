@@ -7,7 +7,7 @@ const SelectableItem = styled.div`
   border: 1px solid var(--pf-global--BorderColor--200);
   border-radius: var(--pf-global--BorderRadius--sm);
   border: 1px solid;
-  border-color: ${props =>
+  border-color: ${(props) =>
     props.isSelected
       ? 'var(--pf-global--active-color--100)'
       : 'var(--pf-global--BorderColor--200)'};
@@ -19,7 +19,7 @@ const SelectableItem = styled.div`
 const Indicator = styled.div`
   display: flex;
   flex: 0 0 5px;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isSelected ? 'var(--pf-global--active-color--100)' : null};
 `;
 

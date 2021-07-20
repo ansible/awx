@@ -58,10 +58,10 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           count: response.data.count,
           relatedSearchableKeys: (
             actionsResponse?.data?.related_search_fields || []
-          ).map(val => val.slice(0, -8)),
+          ).map((val) => val.slice(0, -8)),
           searchableKeys: Object.keys(
             actionsResponse.data.actions?.GET || {}
-          ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+          ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
         };
       },
       [location] // eslint-disable-line react-hooks/exhaustive-deps
@@ -79,7 +79,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
 
   // TODO: update QS_CONFIG to be safe for deps array
   const fetchJobsById = useCallback(
-    async ids => {
+    async (ids) => {
       const params = parseQueryString(qsConfig, location.search);
       params.id__in = ids.join(',');
       const { data } = await UnifiedJobsAPI.read(params);
@@ -90,40 +90,34 @@ function JobList({ defaultParams, showTypeColumn = false }) {
 
   const jobs = useWsJobs(results, fetchJobsById, qsConfig);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(jobs);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(jobs);
 
-  const { expanded, isAllExpanded, handleExpand, expandAll } = useExpanded(
-    jobs
-  );
+  const { expanded, isAllExpanded, handleExpand, expandAll } =
+    useExpanded(jobs);
 
   const {
     error: cancelJobsError,
     isLoading: isCancelLoading,
     request: cancelJobs,
   } = useRequest(
-    useCallback(async () => {
-      return Promise.all(
-        selected.map(job => {
-          if (isJobRunning(job.status)) {
-            return getJobModel(job.type).cancel(job.id);
-          }
-          return Promise.resolve();
-        })
-      );
-    }, [selected]),
+    useCallback(
+      async () =>
+        Promise.all(
+          selected.map((job) => {
+            if (isJobRunning(job.status)) {
+              return getJobModel(job.type).cancel(job.id);
+            }
+            return Promise.resolve();
+          })
+        ),
+      [selected]
+    ),
     {}
   );
 
-  const {
-    error: cancelError,
-    dismissError: dismissCancelError,
-  } = useDismissableError(cancelJobsError);
+  const { error: cancelError, dismissError: dismissCancelError } =
+    useDismissableError(cancelJobsError);
 
   const {
     isLoading: isDeleteLoading,
@@ -131,13 +125,13 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ type, id }) => {
-          return getJobModel(type).destroy(id);
-        })
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map(({ type, id }) => getJobModel(type).destroy(id))
+        ),
+      [selected]
+    ),
     {
       qsConfig,
       allItemsSelected: isAllSelected,
@@ -155,7 +149,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     clearSelected();
   };
 
-  const cannotDeleteItems = selected.filter(job => isJobRunning(job.status));
+  const cannotDeleteItems = selected.filter((job) => isJobRunning(job.status));
 
   return (
     <>
@@ -229,7 +223,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           clearSelected={clearSelected}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DatalistToolbar
               {...props}
               isAllExpanded={isAllExpanded}
@@ -246,7 +240,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
                     return item;
                   })}
                   pluralizedItemName={t`Jobs`}
-                  cannotDelete={item =>
+                  cannotDelete={(item) =>
                     isJobRunning(item.status) ||
                     !item.summary_fields.user_capabilities.delete
                   }
@@ -270,12 +264,12 @@ function JobList({ defaultParams, showTypeColumn = false }) {
             <JobListItem
               key={job.id}
               job={job}
-              isExpanded={expanded.some(row => row.id === job.id)}
+              isExpanded={expanded.some((row) => row.id === job.id)}
               onExpand={() => handleExpand(job)}
               isSuperUser={me?.is_superuser}
               showTypeColumn={showTypeColumn}
               onSelect={() => handleSelect(job)}
-              isSelected={selected.some(row => row.id === job.id)}
+              isSelected={selected.some((row) => row.id === job.id)}
               rowIndex={index}
             />
           )}

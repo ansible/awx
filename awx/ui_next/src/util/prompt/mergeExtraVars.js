@@ -10,7 +10,7 @@ export default function mergeExtraVars(extraVars = '', survey = {}) {
 
 export function maskPasswords(vars, passwordKeys) {
   const updated = { ...vars };
-  passwordKeys.forEach(key => {
+  passwordKeys.forEach((key) => {
     if (typeof updated[key] !== 'undefined') {
       updated[key] = '········';
     }

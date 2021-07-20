@@ -103,7 +103,7 @@ describe('<ProjectAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ProjectAdd />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     wrapper.find('ProjectForm').invoke('handleSubmit')(projectData);
     expect(ProjectsAPI.create).toHaveBeenCalledTimes(1);
     expect(ProjectsAPI.create).toHaveBeenCalledWith({
@@ -133,7 +133,7 @@ describe('<ProjectAdd />', () => {
         context: { config },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('ProjectForm').prop('handleSubmit')(
         { ...projectData },
@@ -152,7 +152,7 @@ describe('<ProjectAdd />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('ProjectAdd button[aria-label="Cancel"]').simulate('click');
     });

@@ -156,14 +156,14 @@ function getRouteConfig(userProfile = {}) {
     },
   ];
 
-  const deleteRoute = name => {
-    routeConfig.forEach(group => {
+  const deleteRoute = (name) => {
+    routeConfig.forEach((group) => {
       group.routes = group.routes.filter(({ path }) => !path.includes(name));
     });
-    routeConfig = routeConfig.filter(groups => groups.routes.length);
+    routeConfig = routeConfig.filter((groups) => groups.routes.length);
   };
 
-  const deleteRouteGroup = name => {
+  const deleteRouteGroup = (name) => {
     routeConfig = routeConfig.filter(({ groupId }) => !groupId.includes(name));
   };
 

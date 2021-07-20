@@ -15,7 +15,12 @@ function SmartInventoryHost({ inventory, setBreadcrumb }) {
     '/inventories/smart_inventory/:id/hosts/:hostId'
   );
 
-  const { result: host, error, isLoading, request: fetchHost } = useRequest(
+  const {
+    result: host,
+    error,
+    isLoading,
+    request: fetchHost,
+  } = useRequest(
     useCallback(async () => {
       const response = await InventoriesAPI.readHostDetail(
         inventory.id,

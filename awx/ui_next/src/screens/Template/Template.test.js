@@ -92,7 +92,7 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 7
+      (el) => el.length === 7
     );
     expect(tabs.at(3).text()).toEqual('Notifications');
   });
@@ -114,9 +114,9 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 6
+      (el) => el.length === 6
     );
-    tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
+    tabs.forEach((tab) => expect(tab.text()).not.toEqual('Notifications'));
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
@@ -145,7 +145,7 @@ describe('<Template />', () => {
       );
     });
 
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
   test('should call to get webhook key', async () => {
     const history = createMemoryHistory({

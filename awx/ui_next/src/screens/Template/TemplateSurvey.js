@@ -40,7 +40,7 @@ function TemplateSurvey({ template, canEdit }) {
     isLoading: updateLoading,
   } = useRequest(
     useCallback(
-      async updatedSurvey => {
+      async (updatedSurvey) => {
         if (templateType === 'workflow_job_template') {
           await WorkflowJobTemplatesAPI.updateSurvey(templateId, updatedSurvey);
         } else {
@@ -51,7 +51,7 @@ function TemplateSurvey({ template, canEdit }) {
       [templateId, setSurvey, templateType]
     )
   );
-  const updateSurveySpec = spec => {
+  const updateSurveySpec = (spec) => {
     updateSurvey({
       name: survey?.name || '',
       description: survey?.description || '',

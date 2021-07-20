@@ -59,9 +59,9 @@ function ResourceAccessList({ apiModel, resource }) {
           data: { results: roles },
         } = await RolesAPI.read({ content_type__isnull: true });
         const sysAdmin = roles.filter(
-          role => role.name === 'System Administrator'
+          (role) => role.name === 'System Administrator'
         );
-        const sysAud = roles.filter(role => {
+        const sysAud = roles.filter((role) => {
           let auditor;
           if (role.name === 'System Auditor') {
             auditor = role.id;
@@ -70,7 +70,7 @@ function ResourceAccessList({ apiModel, resource }) {
         });
 
         orgRoles = Object.values(resource.summary_fields.object_roles).map(
-          opt => {
+          (opt) => {
             let item;
             if (opt.name === 'Admin') {
               item = [`${opt.id}, ${sysAdmin[0].id}`, opt.name];
@@ -88,10 +88,10 @@ function ResourceAccessList({ apiModel, resource }) {
         itemCount: response.data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
         organizationRoles: orgRoles,
       };
     }, [apiModel, location, resource]),
@@ -161,7 +161,7 @@ function ResourceAccessList({ apiModel, resource }) {
         toolbarSearchColumns={toolbarSearchColumns}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             qsConfig={QS_CONFIG}
@@ -206,7 +206,7 @@ function ResourceAccessList({ apiModel, resource }) {
             setShowAddModal(false);
             fetchAccessRecords();
           }}
-          onError={err => setSubmitError(err)}
+          onError={(err) => setSubmitError(err)}
           roles={resource.summary_fields.object_roles}
           resource={resource}
         />

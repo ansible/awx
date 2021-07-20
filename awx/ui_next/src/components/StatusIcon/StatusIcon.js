@@ -91,48 +91,46 @@ ChangedBottom.displayName = 'ChangedBottom';
 SkippedTop.displayName = 'SkippedTop';
 SkippedBottom.displayName = 'SkippedBottom';
 
-const StatusIcon = ({ status, ...props }) => {
-  return (
-    <div {...props} data-job-status={status} aria-label={status}>
-      {status === 'running' && <RunningJob aria-hidden="true" />}
-      {(status === 'new' ||
-        status === 'pending' ||
-        status === 'waiting' ||
-        status === 'never updated') && <WaitingJob aria-hidden="true" />}
-      {(status === 'failed' || status === 'error' || status === 'canceled') && (
-        <FinishedJob aria-hidden="true">
-          <FailedTop />
-          <FailedBottom />
-        </FinishedJob>
-      )}
-      {(status === 'successful' || status === 'ok') && (
-        <FinishedJob aria-hidden="true">
-          <SuccessfulTop />
-          <SuccessfulBottom />
-        </FinishedJob>
-      )}
-      {status === 'changed' && (
-        <FinishedJob aria-hidden="true">
-          <ChangedTop />
-          <ChangedBottom />
-        </FinishedJob>
-      )}
-      {status === 'skipped' && (
-        <FinishedJob aria-hidden="true">
-          <SkippedTop />
-          <SkippedBottom />
-        </FinishedJob>
-      )}
-      {status === 'unreachable' && (
-        <FinishedJob aria-hidden="true">
-          <UnreachableTop />
-          <UnreachableBottom />
-        </FinishedJob>
-      )}
-      <span className="pf-screen-reader"> {status} </span>
-    </div>
-  );
-};
+const StatusIcon = ({ status, ...props }) => (
+  <div {...props} data-job-status={status} aria-label={status}>
+    {status === 'running' && <RunningJob aria-hidden="true" />}
+    {(status === 'new' ||
+      status === 'pending' ||
+      status === 'waiting' ||
+      status === 'never updated') && <WaitingJob aria-hidden="true" />}
+    {(status === 'failed' || status === 'error' || status === 'canceled') && (
+      <FinishedJob aria-hidden="true">
+        <FailedTop />
+        <FailedBottom />
+      </FinishedJob>
+    )}
+    {(status === 'successful' || status === 'ok') && (
+      <FinishedJob aria-hidden="true">
+        <SuccessfulTop />
+        <SuccessfulBottom />
+      </FinishedJob>
+    )}
+    {status === 'changed' && (
+      <FinishedJob aria-hidden="true">
+        <ChangedTop />
+        <ChangedBottom />
+      </FinishedJob>
+    )}
+    {status === 'skipped' && (
+      <FinishedJob aria-hidden="true">
+        <SkippedTop />
+        <SkippedBottom />
+      </FinishedJob>
+    )}
+    {status === 'unreachable' && (
+      <FinishedJob aria-hidden="true">
+        <UnreachableTop />
+        <UnreachableBottom />
+      </FinishedJob>
+    )}
+    <span className="pf-screen-reader"> {status} </span>
+  </div>
+);
 
 StatusIcon.propTypes = {
   status: string.isRequired,

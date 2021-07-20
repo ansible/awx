@@ -18,7 +18,7 @@ import { sortNestedDetails } from '../../shared/settingUtils';
 
 function filterByPrefix(data, prefix) {
   return Object.keys(data)
-    .filter(key => key.includes(prefix))
+    .filter((key) => key.includes(prefix))
     .reduce((obj, key) => {
       obj[key] = data[key];
       return obj;
@@ -33,12 +33,17 @@ function LDAPDetail() {
     params: { category },
   } = useRouteMatch('/settings/ldap/:category/details');
 
-  const { isLoading, error, request, result: LDAPDetails } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: LDAPDetails,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('ldap');
 
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (key.includes('_CONNECTION_OPTIONS')) {
           return;
         }
@@ -51,9 +56,9 @@ function LDAPDetail() {
       const ldap3 = filterByPrefix(mergedData, 'AUTH_LDAP_3_');
       const ldap4 = filterByPrefix(mergedData, 'AUTH_LDAP_4_');
       const ldap5 = filterByPrefix(mergedData, 'AUTH_LDAP_5_');
-      const ldapDefault = Object.assign({}, mergedData);
+      const ldapDefault = { ...mergedData };
       Object.keys({ ...ldap1, ...ldap2, ...ldap3, ...ldap4, ...ldap5 }).forEach(
-        keyToOmit => {
+        (keyToOmit) => {
           delete ldapDefault[keyToOmit];
         }
       );
@@ -138,19 +143,17 @@ function LDAPDetail() {
           {!isLoading && error && <ContentError error={error} />}
           {!isLoading && !Object.values(LDAPDetails)?.includes(null) && (
             <DetailList>
-              {LDAPDetails[category].map(([key, detail]) => {
-                return (
-                  <SettingDetail
-                    key={key}
-                    id={key}
-                    helpText={detail?.help_text}
-                    label={detail?.label}
-                    type={detail?.type}
-                    unit={detail?.unit}
-                    value={detail?.value}
-                  />
-                );
-              })}
+              {LDAPDetails[category].map(([key, detail]) => (
+                <SettingDetail
+                  key={key}
+                  id={key}
+                  helpText={detail?.help_text}
+                  label={detail?.label}
+                  type={detail?.type}
+                  unit={detail?.unit}
+                  value={detail?.value}
+                />
+              ))}
             </DetailList>
           )}
         </>

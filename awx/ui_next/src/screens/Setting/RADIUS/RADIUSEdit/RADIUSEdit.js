@@ -19,11 +19,16 @@ function RADIUSEdit() {
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
-  const { isLoading, error, request: fetchRadius, result: radius } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchRadius,
+    result: radius,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('radius');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         mergedData[key] = options[key];
         mergedData[key].value = data[key];
       });
@@ -38,7 +43,7 @@ function RADIUSEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/radius/details');
       },
@@ -54,7 +59,7 @@ function RADIUSEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm(form);
   };
 
@@ -70,7 +75,7 @@ function RADIUSEdit() {
     history.push('/settings/radius/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       acc[key] = fields[key].value ?? '';
       return acc;
@@ -82,7 +87,7 @@ function RADIUSEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && radius && (
         <Formik initialValues={initialValues(radius)} onSubmit={handleSubmit}>
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField

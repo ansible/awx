@@ -9,7 +9,7 @@ jest.mock('../../../api/models/Credentials');
 jest.mock('../../../api/models/CredentialTypes');
 
 const credentialType = credentialTypesArr.find(
-  credType => credType.namespace === 'hashivault_kv'
+  (credType) => credType.namespace === 'hashivault_kv'
 );
 
 const credentialFormValues = {

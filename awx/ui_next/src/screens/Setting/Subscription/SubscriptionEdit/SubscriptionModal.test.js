@@ -48,7 +48,7 @@ describe('<SubscriptionModal />', () => {
           onClose={onClose}
         />
       );
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
   });
 
@@ -62,10 +62,7 @@ describe('<SubscriptionModal />', () => {
 
   test('should render header', async () => {
     wrapper.update();
-    const header = wrapper
-      .find('tr')
-      .first()
-      .find('th');
+    const header = wrapper.find('tr').first().find('th');
     expect(header.at(0).text()).toEqual('');
     expect(header.at(1).text()).toEqual('Name');
     expect(header.at(2).text()).toEqual('Managed nodes');
@@ -115,7 +112,7 @@ describe('<SubscriptionModal />', () => {
           }}
         />
       );
-      await waitForElement(wrapper, 'ContentEmpty', el => el.length === 1);
+      await waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 1);
     });
   });
 
@@ -152,7 +149,7 @@ describe('<SubscriptionModal />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, 'ErrorDetail', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    await waitForElement(wrapper, 'ErrorDetail', (el) => el.length === 1);
   });
 });

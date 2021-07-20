@@ -25,7 +25,12 @@ export const useConfig = () => {
 export const ConfigProvider = ({ children }) => {
   const { logout } = useSession();
 
-  const { error: configError, isLoading, request, result: config } = useRequest(
+  const {
+    error: configError,
+    isLoading,
+    request,
+    result: config,
+  } = useRequest(
     useCallback(async () => {
       const [
         { data },
@@ -75,11 +80,10 @@ export const ConfigProvider = ({ children }) => {
     }
   }, [error, logout]);
 
-  const value = useMemo(() => ({ ...config, request, isLoading }), [
-    config,
-    request,
-    isLoading,
-  ]);
+  const value = useMemo(
+    () => ({ ...config, request, isLoading }),
+    [config, request, isLoading]
+  );
 
   return (
     <ConfigContext.Provider value={value}>

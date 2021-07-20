@@ -24,7 +24,7 @@ import {
   ManualSubForm,
 } from './ProjectSubForms';
 
-const fetchCredentials = async credential => {
+const fetchCredentials = async (credential) => {
   const [
     {
       data: {
@@ -92,9 +92,8 @@ function ProjectFormFields({
     name: 'scm_type',
     validate: required(t`Set a value for this field`),
   });
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
+  const [organizationField, organizationMeta, organizationHelpers] =
+    useField('organization');
 
   const [
     executionEnvironmentField,
@@ -103,10 +102,10 @@ function ProjectFormFields({
   ] = useField('default_environment');
 
   /* Save current scm subform field values to state */
-  const saveSubFormState = form => {
+  const saveSubFormState = (form) => {
     const currentScmFormFields = { ...scmFormFields };
 
-    Object.keys(currentScmFormFields).forEach(label => {
+    Object.keys(currentScmFormFields).forEach((label) => {
       currentScmFormFields[label] = form.values[label];
     });
 
@@ -124,7 +123,7 @@ function ProjectFormFields({
       saveSubFormState(formik);
     }
 
-    Object.keys(scmFormFields).forEach(label => {
+    Object.keys(scmFormFields).forEach((label) => {
       if (value === form.initialValues.scm_type) {
         form.setFieldValue(label, scmSubFormState[label]);
       } else {
@@ -148,7 +147,7 @@ function ProjectFormFields({
   );
 
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -156,7 +155,7 @@ function ProjectFormFields({
   );
 
   const handleExecutionEnvironmentUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('default_environment', value);
       setFieldTouched('default_environment', true, false);
     },
@@ -383,7 +382,7 @@ function ProjectForm({ project, submitError, ...props }) {
       }}
       onSubmit={handleSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <ProjectFormFields

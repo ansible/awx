@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -8,13 +8,12 @@ import { getQSConfig, parseQueryString } from 'util/qs';
 import useSelected from 'hooks/useSelected';
 import OptionsList from '../OptionsList';
 
-const QS_CONFIG = (order_by = 'name') => {
-  return getQSConfig('associate', {
+const QS_CONFIG = (order_by = 'name') =>
+  getQSConfig('associate', {
     page: 1,
     page_size: 5,
     order_by,
   });
-};
 
 function AssociateModal({
   header = t`Items`,
@@ -53,10 +52,10 @@ function AssociateModal({
         itemCount: count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [fetchRequest, optionsRequest, history.location.search, displayKey]),
     {
@@ -75,7 +74,7 @@ function AssociateModal({
     const parts = history.location.search.replace(/^\?/, '').split('&');
     const { namespace } = QS_CONFIG(displayKey);
     const otherParts = parts.filter(
-      param => !param.startsWith(`${namespace}.`)
+      (param) => !param.startsWith(`${namespace}.`)
     );
     history.replace(`${history.location.pathname}?${otherParts.join('&')}`);
   };
@@ -92,7 +91,7 @@ function AssociateModal({
   };
 
   return (
-    <Fragment>
+    <>
       <Modal
         ouiaId={ouiaId}
         variant="large"
@@ -160,7 +159,7 @@ function AssociateModal({
           relatedSearchableKeys={relatedSearchableKeys}
         />
       </Modal>
-    </Fragment>
+    </>
   );
 }
 

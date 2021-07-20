@@ -37,7 +37,7 @@ describe('NodeAddModal', () => {
     waitForElement(
       wrapper,
       'WizardNavItem[content="ContentLoading"]',
-      el => el.length === 0
+      (el) => el.length === 0
     );
     await act(async () => {
       wrapper.find('NodeModal').prop('onSave')(

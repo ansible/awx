@@ -12,7 +12,7 @@ export default function useNodeTypeStep() {
   const [nodeTypeField, ,] = useField('nodeType');
   const [nodeResourceField, nodeResourceMeta] = useField({
     name: 'nodeResource',
-    validate: value => {
+    validate: (value) => {
       if (
         value?.type === 'job_template' &&
         (!value?.project ||
@@ -39,7 +39,7 @@ export default function useNodeTypeStep() {
     isReady: true,
     contentError: null,
     hasError: formError,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('nodeType', true, false);
     },
     validate: () => {},

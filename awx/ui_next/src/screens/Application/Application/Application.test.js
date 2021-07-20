@@ -75,7 +75,7 @@ describe('<Application />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<Application setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length > 0);
     expect(wrapper.find('ContentError').length).toBe(1);
     expect(wrapper.find('ApplicationAdd').length).toBe(0);
     expect(wrapper.find('ApplicationDetails').length).toBe(0);

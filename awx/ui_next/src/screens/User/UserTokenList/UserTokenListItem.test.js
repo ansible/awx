@@ -60,30 +60,10 @@ describe('<UserTokenListItem />', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .first()
-        .prop('select').isSelected
-    ).toBe(false);
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Foobar app');
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toContain('Read');
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toContain('10/25/3019, 3:06:43 PM');
+    expect(wrapper.find('Td').first().prop('select').isSelected).toBe(false);
+    expect(wrapper.find('Td').at(1).text()).toBe('Foobar app');
+    expect(wrapper.find('Td').at(2).text()).toContain('Read');
+    expect(wrapper.find('Td').at(3).text()).toContain('10/25/3019, 3:06:43 PM');
   });
 
   test('should render personal access token row properly', async () => {
@@ -107,30 +87,10 @@ describe('<UserTokenListItem />', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .first()
-        .prop('select').isSelected
-    ).toBe(false);
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toEqual('Personal access token');
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toEqual('Write');
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toContain('10/25/3019, 3:06:43 PM');
+    expect(wrapper.find('Td').first().prop('select').isSelected).toBe(false);
+    expect(wrapper.find('Td').at(1).text()).toEqual('Personal access token');
+    expect(wrapper.find('Td').at(2).text()).toEqual('Write');
+    expect(wrapper.find('Td').at(3).text()).toContain('10/25/3019, 3:06:43 PM');
   });
 
   test('should be checked', async () => {
@@ -143,11 +103,6 @@ describe('<UserTokenListItem />', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .first()
-        .prop('select').isSelected
-    ).toBe(true);
+    expect(wrapper.find('Td').first().prop('select').isSelected).toBe(true);
   });
 });

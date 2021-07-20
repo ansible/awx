@@ -100,12 +100,9 @@ describe('<SurveyToolbar />', () => {
         />
       );
     });
-    expect(
-      wrapper
-        .find('Toolbar')
-        .find('Checkbox')
-        .prop('isDisabled')
-    ).toBe(true);
+    expect(wrapper.find('Toolbar').find('Checkbox').prop('isDisabled')).toBe(
+      true
+    );
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(true);
     expect(wrapper.find('ToolbarAddButton').prop('isDisabled')).toBe(true);
     expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(

@@ -27,7 +27,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
   const [id, setId] = useState('');
   const [isDragging, setIsDragging] = useState(false);
 
-  const onDragStart = newId => {
+  const onDragStart = (newId) => {
     setId(newId);
     setLiveText(t`Dragging started for item id: ${newId}.`);
     setIsDragging(true);
@@ -44,23 +44,23 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
     setIsDragging(false);
   };
 
-  const onDragFinish = newItemOrder => {
-    const selectedItems = newItemOrder.map(item =>
-      selected.find(i => i.name === item)
+  const onDragFinish = (newItemOrder) => {
+    const selectedItems = newItemOrder.map((item) =>
+      selected.find((i) => i.name === item)
     );
     onRowDrag(selectedItems);
     setIsDragging(false);
   };
 
-  const removeItem = item => {
-    onRemove(selected.find(i => i.name === item));
+  const removeItem = (item) => {
+    onRemove(selected.find((i) => i.name === item));
   };
 
   if (selected.length <= 0) {
     return null;
   }
 
-  const orderedList = selected.map(item => item?.name);
+  const orderedList = selected.map((item) => item?.name);
 
   return (
     <>

@@ -13,7 +13,7 @@ import mockFilteredJobEventsData from './data.filtered_job_events.json';
 
 jest.mock('../../../api');
 
-const applyJobEventMock = mockJobEvents => {
+const applyJobEventMock = (mockJobEvents) => {
   const mockReadEvents = async (jobId, params) => {
     const [...results] = mockJobEvents.results;
     if (params.order_by && params.order_by.includes('-')) {
@@ -56,10 +56,10 @@ const generateChattyRows = () => {
 };
 
 async function checkOutput(wrapper, expectedLines) {
-  await waitForElement(wrapper, 'div[type="job_event"]', el => el.length > 1);
+  await waitForElement(wrapper, 'div[type="job_event"]', (el) => el.length > 1);
   const jobEventLines = wrapper.find('JobEventLineText div');
   const actualLines = [];
-  jobEventLines.forEach(line => {
+  jobEventLines.forEach((line) => {
     actualLines.push(line.text());
   });
   expect(actualLines.length).toEqual(expectedLines.length);
@@ -111,7 +111,7 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
 
     await checkOutput(wrapper, generateChattyRows());
 
@@ -130,12 +130,9 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    const {
-      scrollFirstButton,
-      scrollLastButton,
-      scrollPreviousButton,
-    } = await findScrollButtons(wrapper);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
+    const { scrollFirstButton, scrollLastButton, scrollPreviousButton } =
+      await findScrollButtons(wrapper);
     let jobEvents = wrapper.find('JobEvent');
     expect(jobEvents.at(0).prop('stdout')).toBe('');
     expect(jobEvents.at(1).prop('stdout')).toBe(
@@ -193,14 +190,14 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
     await act(async () =>
       wrapper.find('button[aria-label="Delete"]').simulate('click')
     );
     await waitForElement(
       wrapper,
       'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Delete Job'
+      (el) => el.props().isOpen === true && el.props().title === 'Delete Job'
     );
     await act(async () =>
       wrapper
@@ -226,14 +223,14 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
     await act(async () => {
       wrapper.find('DeleteButton').invoke('onConfirm')();
     });
     await waitForElement(
       wrapper,
       'Modal[title="Job Delete Error"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () => {
       wrapper.find('Modal[title="Job Delete Error"]').invoke('onClose')();
@@ -241,7 +238,7 @@ describe('<JobOutput />', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Job Delete Error"]',
-      el => el.length === 0
+      (el) => el.length === 0
     );
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
   });
@@ -250,7 +247,7 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
     expect(wrapper.find('Search').props().isDisabled).toBe(false);
   });
 
@@ -260,7 +257,7 @@ describe('<JobOutput />', () => {
         <JobOutput job={{ ...mockJob, status: 'running' }} />
       );
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
     expect(wrapper.find('Search').props().isDisabled).toBe(true);
   });
 
@@ -270,7 +267,7 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
     applyJobEventMock(mockFilteredJobEventsData);
     await act(async () => {
       wrapper.find(searchTextInput).instance().value = '99';
@@ -296,6 +293,6 @@ describe('<JobOutput />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

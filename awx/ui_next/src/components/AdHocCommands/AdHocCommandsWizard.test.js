@@ -61,7 +61,7 @@ describe('<AdHocCommandsWizard/>', () => {
   });
 
   test('launch button should be disabled', async () => {
-    waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
+    waitForElement(wrapper, 'WizardNavItem', (el) => el.length > 0);
 
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
       false
@@ -108,7 +108,7 @@ describe('<AdHocCommandsWizard/>', () => {
     CredentialsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {} } },
     });
-    await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
+    await waitForElement(wrapper, 'WizardNavItem', (el) => el.length > 0);
 
     await act(async () => {
       wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
@@ -132,17 +132,14 @@ describe('<AdHocCommandsWizard/>', () => {
 
     // step 2
 
-    await waitForElement(wrapper, 'OptionsList', el => el.length > 0);
+    await waitForElement(wrapper, 'OptionsList', (el) => el.length > 0);
     expect(wrapper.find('CheckboxListItem').length).toBe(2);
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(
       false
     );
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-1').find('input').simulate('click');
     });
 
     wrapper.update();
@@ -161,14 +158,11 @@ describe('<AdHocCommandsWizard/>', () => {
     wrapper.update();
     // step 3
 
-    await waitForElement(wrapper, 'OptionsList', el => el.length > 0);
+    await waitForElement(wrapper, 'OptionsList', (el) => el.length > 0);
     expect(wrapper.find('CheckboxListItem').length).toBe(2);
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-1').find('input').simulate('click');
     });
 
     wrapper.update();
@@ -204,7 +198,7 @@ describe('<AdHocCommandsWizard/>', () => {
   });
 
   test('should show error in navigation bar', async () => {
-    await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
+    await waitForElement(wrapper, 'WizardNavItem', (el) => el.length > 0);
 
     await act(async () => {
       wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
@@ -215,7 +209,7 @@ describe('<AdHocCommandsWizard/>', () => {
         target: { value: '', name: 'module_args' },
       });
     });
-    waitForElement(wrapper, 'ExclamationCircleIcon', el => el.length > 0);
+    waitForElement(wrapper, 'ExclamationCircleIcon', (el) => el.length > 0);
   });
 
   test('expect credential step to throw error', async () => {
@@ -234,7 +228,7 @@ describe('<AdHocCommandsWizard/>', () => {
     CredentialsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {} } },
     });
-    await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
+    await waitForElement(wrapper, 'WizardNavItem', (el) => el.length > 0);
 
     await act(async () => {
       wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(

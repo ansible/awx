@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
 import { Button, ClipboardCopy, Tooltip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
@@ -59,24 +59,22 @@ function ProjectListItem({
     await fetchProjects();
   }, [project.id, project.name, fetchProjects]);
 
-  const generateLastJobTooltip = job => {
-    return (
-      <Fragment>
-        <div>{t`MOST RECENT SYNC`}</div>
+  const generateLastJobTooltip = (job) => (
+    <>
+      <div>{t`MOST RECENT SYNC`}</div>
+      <div>
+        {t`JOB ID:`} {job.id}
+      </div>
+      <div>
+        {t`STATUS:`} {job.status.toUpperCase()}
+      </div>
+      {job.finished && (
         <div>
-          {t`JOB ID:`} {job.id}
+          {t`FINISHED:`} {formatDateString(job.finished)}
         </div>
-        <div>
-          {t`STATUS:`} {job.status.toUpperCase()}
-        </div>
-        {job.finished && (
-          <div>
-            {t`FINISHED:`} {formatDateString(job.finished)}
-          </div>
-        )}
-      </Fragment>
-    );
-  };
+      )}
+    </>
+  );
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);

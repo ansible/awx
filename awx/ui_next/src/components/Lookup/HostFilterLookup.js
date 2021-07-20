@@ -129,7 +129,7 @@ function HostFilterLookup({
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const searchColumns = buildSearchColumns();
 
-  const parseRelatedSearchFields = searchFields => {
+  const parseRelatedSearchFields = (searchFields) => {
     if (searchFields.indexOf('__search') !== -1) {
       return searchFields.slice(0, -8);
     }
@@ -143,7 +143,7 @@ function HostFilterLookup({
     isLoading,
   } = useRequest(
     useCallback(
-      async orgId => {
+      async (orgId) => {
         const params = parseQueryString(QS_CONFIG, location.search);
         const [{ data }, { data: actions }] = await Promise.all([
           HostsAPI.read(
@@ -158,7 +158,7 @@ function HostFilterLookup({
             parseRelatedSearchFields
           ),
           searchableKeys: Object.keys(actions?.actions.GET || {}).filter(
-            key => actions.actions?.GET[key].filterable
+            (key) => actions.actions?.GET[key].filterable
           ),
         };
       },
@@ -213,7 +213,7 @@ function HostFilterLookup({
       const chipsArray = [];
 
       if (Array.isArray(filter[param])) {
-        filter[param].forEach(val =>
+        filter[param].forEach((val) =>
           chipsArray.push({
             key: `${param}:${val}`,
             node: `${val}`,
@@ -274,7 +274,7 @@ function HostFilterLookup({
             numChips={5}
             totalChips={chips[key]?.chips?.length || 0}
           >
-            {chips[key]?.chips?.map(chip => (
+            {chips[key]?.chips?.map((chip) => (
               <Chip key={chip.key} isReadOnly>
                 {chip.node}
               </Chip>
@@ -284,18 +284,18 @@ function HostFilterLookup({
         {/* Parse advanced search chips */}
         {Object.keys(chips).length > 0 &&
           Object.keys(chips)
-            .filter(val => chips[val].chips.length > 0)
+            .filter((val) => chips[val].chips.length > 0)
             .filter(
-              val => searchColumns.map(val2 => val2.key).indexOf(val) === -1
+              (val) => searchColumns.map((val2) => val2.key).indexOf(val) === -1
             )
-            .map(leftoverKey => (
+            .map((leftoverKey) => (
               <ChipGroup
                 categoryName={chips[leftoverKey].key}
                 key={chips[leftoverKey].key}
                 numChips={5}
                 totalChips={chips[leftoverKey]?.chips?.length || 0}
               >
-                {chips[leftoverKey]?.chips?.map(chip => (
+                {chips[leftoverKey]?.chips?.map((chip) => (
                   <Chip key={chip.key} isReadOnly>
                     {chip.node}
                   </Chip>
@@ -372,8 +372,8 @@ function HostFilterLookup({
                 <HeaderCell>{t`Inventory`}</HeaderCell>
               </HeaderRow>
             }
-            renderRow={item => <HostListItem key={item.id} item={item} />}
-            renderToolbar={props => (
+            renderRow={(item) => <HostListItem key={item.id} item={item} />}
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 fillWidth

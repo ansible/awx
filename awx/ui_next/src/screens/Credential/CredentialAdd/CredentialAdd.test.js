@@ -119,7 +119,7 @@ describe('<CredentialAdd />', () => {
     });
 
     test('handleSubmit should call the api and redirect to details page', async () => {
-      await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
       await act(async () => {
         wrapper.find('CredentialForm').prop('onSubmit')({
           user: 1,
@@ -176,7 +176,7 @@ describe('<CredentialAdd />', () => {
     });
 
     test('handleCancel should return the user back to the credentials list', async () => {
-      await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
       await act(async () => {
         wrapper.find('Button[aria-label="Cancel"]').simulate('click');
       });

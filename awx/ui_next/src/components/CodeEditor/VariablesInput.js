@@ -26,7 +26,7 @@ function VariablesInput(props) {
   const isControlled = !!props.onChange;
   /* eslint-enable react/destructuring-assignment */
 
-  const onChange = newValue => {
+  const onChange = (newValue) => {
     if (isControlled) {
       props.onChange(newValue);
     }
@@ -48,7 +48,7 @@ function VariablesInput(props) {
               [JSON_MODE, 'JSON'],
             ]}
             value={mode}
-            onChange={newMode => {
+            onChange={(newMode) => {
               try {
                 if (mode === JSON_MODE) {
                   onChange(jsonToYaml(value));

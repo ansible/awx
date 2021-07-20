@@ -26,7 +26,12 @@ function UIDetail() {
     history.go();
   }
 
-  const { isLoading, error, request, result: ui } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: ui,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('ui');
 
@@ -78,7 +83,7 @@ function UIDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && ui && (
           <DetailList>
-            {Object.keys(ui).map(key => {
+            {Object.keys(ui).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

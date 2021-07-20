@@ -58,14 +58,15 @@ function NotificationList({
         NotificationTemplatesAPI.readOptions(),
       ]);
 
-      const labels = actionsResponse.data.actions.GET.notification_type.choices.reduce(
-        (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
-        {}
-      );
+      const labels =
+        actionsResponse.data.actions.GET.notification_type.choices.reduce(
+          (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
+          {}
+        );
 
       const idMatchParams =
         notificationsResults.length > 0
-          ? { id__in: notificationsResults.map(n => n.id).join(',') }
+          ? { id__in: notificationsResults.map((n) => n.id).join(',') }
           : {};
 
       const [
@@ -81,27 +82,23 @@ function NotificationList({
       const rtnObj = {
         notifications: notificationsResults,
         itemCount: notificationsCount,
-        startedTemplateIds: startedTemplates.results.map(st => st.id),
-        successTemplateIds: successTemplates.results.map(su => su.id),
-        errorTemplateIds: errorTemplates.results.map(e => e.id),
+        startedTemplateIds: startedTemplates.results.map((st) => st.id),
+        successTemplateIds: successTemplates.results.map((su) => su.id),
+        errorTemplateIds: errorTemplates.results.map((e) => e.id),
         typeLabels: labels,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
 
       if (showApprovalsToggle) {
-        const {
-          data: approvalsTemplates,
-        } = await apiModel.readNotificationTemplatesApprovals(
-          id,
-          idMatchParams
-        );
+        const { data: approvalsTemplates } =
+          await apiModel.readNotificationTemplatesApprovals(id, idMatchParams);
         rtnObj.approvalsTemplateIds = approvalsTemplates.results.map(
-          st => st.id
+          (st) => st.id
         );
       } else {
         rtnObj.approvalsTemplateIds = [];
@@ -143,7 +140,7 @@ function NotificationList({
           ...fetchNotificationsResults,
           [`${status}TemplateIds`]: fetchNotificationsResults[
             `${status}TemplateIds`
-          ].filter(i => i !== notificationId),
+          ].filter((i) => i !== notificationId),
         });
       } else {
         await apiModel.associateNotificationTemplate(
@@ -153,16 +150,17 @@ function NotificationList({
         );
         setValue({
           ...fetchNotificationsResults,
-          [`${status}TemplateIds`]: fetchNotificationsResults[
-            `${status}TemplateIds`
-          ].concat(notificationId),
+          [`${status}TemplateIds`]:
+            fetchNotificationsResults[`${status}TemplateIds`].concat(
+              notificationId
+            ),
         });
       }
     } catch (err) {
       setToggleError(err);
     } finally {
       setLoadingToggleIds(
-        loadingToggleIds.filter(item => item !== notificationId)
+        loadingToggleIds.filter((item) => item !== notificationId)
       );
     }
   };

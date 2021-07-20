@@ -40,7 +40,7 @@ describe('<UI />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('UIDetail').length).toBe(1);
   });
 
@@ -58,7 +58,7 @@ describe('<UI />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('UIEdit').length).toBe(1);
   });
 

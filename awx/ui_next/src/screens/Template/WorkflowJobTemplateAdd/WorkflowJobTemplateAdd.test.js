@@ -68,7 +68,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
           }
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
   });
   afterEach(async () => {
@@ -85,10 +85,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
         target: { value: 'Alex', name: 'name' },
       });
 
-      wrapper
-        .find('LabelSelect')
-        .find('SelectToggle')
-        .simulate('click');
+      wrapper.find('LabelSelect').find('SelectToggle').simulate('click');
     });
 
     await act(async () => {

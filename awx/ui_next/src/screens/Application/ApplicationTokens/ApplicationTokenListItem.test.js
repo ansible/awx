@@ -74,24 +74,9 @@ describe('<ApplicationTokenListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('admin');
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe('Read');
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toBe('10/25/3019, 7:56:38 PM');
+    expect(wrapper.find('Td').at(1).text()).toBe('admin');
+    expect(wrapper.find('Td').at(2).text()).toBe('Read');
+    expect(wrapper.find('Td').at(3).text()).toBe('10/25/3019, 7:56:38 PM');
   });
 
   test('should be checked', async () => {
@@ -110,11 +95,6 @@ describe('<ApplicationTokenListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(0)
-        .prop('select').isSelected
-    ).toBe(true);
+    expect(wrapper.find('Td').at(0).prop('select').isSelected).toBe(true);
   });
 });

@@ -68,8 +68,11 @@ function CredentialTypeForm({
       : '---',
   };
   return (
-    <Formik initialValues={initialValues} onSubmit={values => onSubmit(values)}>
-      {formik => (
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => onSubmit(values)}
+    >
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <CredentialTypeFormFields {...rest} />

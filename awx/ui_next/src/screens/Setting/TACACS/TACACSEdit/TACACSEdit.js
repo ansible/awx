@@ -23,11 +23,16 @@ function TACACSEdit() {
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
-  const { isLoading, error, request: fetchTACACS, result: tacacs } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchTACACS,
+    result: tacacs,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('tacacsplus');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         mergedData[key] = options[key];
         mergedData[key].value = data[key];
       });
@@ -42,7 +47,7 @@ function TACACSEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/tacacs/details');
       },
@@ -58,7 +63,7 @@ function TACACSEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm(form);
   };
 
@@ -74,7 +79,7 @@ function TACACSEdit() {
     history.push('/settings/tacacs/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       acc[key] = fields[key].value ?? '';
       return acc;
@@ -86,7 +91,7 @@ function TACACSEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && tacacs && (
         <Formik initialValues={initialValues(tacacs)} onSubmit={handleSubmit}>
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField

@@ -47,21 +47,19 @@ function PageHeaderToolbar({
   const [isUserOpen, setIsUserOpen] = useState(false);
   const config = useConfig();
 
-  const {
-    request: fetchPendingApprovalCount,
-    result: pendingApprovals,
-  } = useRequest(
-    useCallback(async () => {
-      const {
-        data: { count },
-      } = await WorkflowApprovalsAPI.read({
-        status: 'pending',
-        page_size: 1,
-      });
-      return count;
-    }, []),
-    0
-  );
+  const { request: fetchPendingApprovalCount, result: pendingApprovals } =
+    useRequest(
+      useCallback(async () => {
+        const {
+          data: { count },
+        } = await WorkflowApprovalsAPI.read({
+          status: 'pending',
+          page_size: 1,
+        });
+        return count;
+      }, []),
+      0
+    );
 
   const pendingApprovalsCount = useWsPendingApprovalCount(
     pendingApprovals,

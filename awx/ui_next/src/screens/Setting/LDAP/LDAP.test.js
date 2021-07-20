@@ -30,7 +30,7 @@ describe('<LDAP />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('LDAPDetail').length).toBe(1);
   });
 
@@ -48,7 +48,7 @@ describe('<LDAP />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('LDAPEdit').length).toBe(1);
   });
 

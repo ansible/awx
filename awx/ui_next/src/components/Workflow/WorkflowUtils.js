@@ -49,12 +49,8 @@ export function getScaleAndOffsetToFit(
 export function generateLine(points) {
   const line = d3
     .line()
-    .x(d => {
-      return d.x;
-    })
-    .y(d => {
-      return d.y;
-    });
+    .x((d) => d.x)
+    .y((d) => d.y);
 
   return line(points);
 }
@@ -139,11 +135,9 @@ export function layoutGraph(nodes, links) {
   g.setGraph({ rankdir: 'LR', nodesep: 30, ranksep: 120 });
 
   // This is needed for Dagre
-  g.setDefaultEdgeLabel(() => {
-    return {};
-  });
+  g.setDefaultEdgeLabel(() => ({}));
 
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     if (node.id === 1) {
       g.setNode(node.id, {
         label: '',
@@ -159,7 +153,7 @@ export function layoutGraph(nodes, links) {
     }
   });
 
-  links.forEach(link => {
+  links.forEach((link) => {
     g.setEdge(link.source.id, link.target.id);
   });
 

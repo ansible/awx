@@ -62,10 +62,8 @@ function MiscAuthenticationEdit() {
         ...pluckedAuthenticationData,
       };
 
-      const {
-        OAUTH2_PROVIDER: OAUTH2_PROVIDER_OPTIONS,
-        ...restOptions
-      } = options;
+      const { OAUTH2_PROVIDER: OAUTH2_PROVIDER_OPTIONS, ...restOptions } =
+        options;
 
       const authenticationOptions = {
         ...restOptions,
@@ -92,7 +90,7 @@ function MiscAuthenticationEdit() {
 
       const mergedData = {};
 
-      Object.keys(authenticationData).forEach(key => {
+      Object.keys(authenticationData).forEach((key) => {
         if (!authenticationOptions[key]) {
           return;
         }
@@ -111,7 +109,7 @@ function MiscAuthenticationEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/miscellaneous_authentication/details');
       },
@@ -127,7 +125,7 @@ function MiscAuthenticationEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     const {
       ACCESS_TOKEN_EXPIRE_SECONDS,
       REFRESH_TOKEN_EXPIRE_SECONDS,
@@ -162,7 +160,7 @@ function MiscAuthenticationEdit() {
     history.push('/settings/miscellaneous_authentication/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
         const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
@@ -184,7 +182,7 @@ function MiscAuthenticationEdit() {
           initialValues={initialValues(authentication)}
           onSubmit={handleSubmit}
         >
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <BooleanField

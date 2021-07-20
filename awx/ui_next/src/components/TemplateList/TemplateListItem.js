@@ -318,7 +318,7 @@ function TemplateListItem({
                       numChips={5}
                       totalChips={summaryFields.credentials.length}
                     >
-                      {summaryFields.credentials.map(c => (
+                      {summaryFields.credentials.map((c) => (
                         <CredentialChip key={c.id} credential={c} isReadOnly />
                       ))}
                     </ChipGroup>
@@ -335,7 +335,7 @@ function TemplateListItem({
                       numChips={5}
                       totalChips={summaryFields.labels.results.length}
                     >
-                      {summaryFields.labels.results.map(l => (
+                      {summaryFields.labels.results.map((l) => (
                         <Chip key={l.id} isReadOnly>
                           {l.name}
                         </Chip>

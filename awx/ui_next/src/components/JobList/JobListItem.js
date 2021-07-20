@@ -222,7 +222,7 @@ function JobListItem({
                   label={t`Credentials`}
                   value={
                     <ChipGroup numChips={5} totalChips={credentials.length}>
-                      {credentials.map(c => (
+                      {credentials.map((c) => (
                         <CredentialChip key={c.id} credential={c} isReadOnly />
                       ))}
                     </ChipGroup>
@@ -235,7 +235,7 @@ function JobListItem({
                   label={t`Labels`}
                   value={
                     <ChipGroup numChips={5} totalChips={labels.results.length}>
-                      {labels.results.map(l => (
+                      {labels.results.map((l) => (
                         <Chip key={l.id} isReadOnly>
                           {l.name}
                         </Chip>

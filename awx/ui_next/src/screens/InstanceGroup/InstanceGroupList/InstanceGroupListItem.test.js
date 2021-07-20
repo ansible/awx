@@ -77,19 +77,9 @@ describe('<InstanceGroupListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Foo');
+    expect(wrapper.find('Td').at(1).text()).toBe('Foo');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe('Instance group');
+    expect(wrapper.find('Td').at(2).text()).toBe('Instance group');
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
     expect(wrapper.find('.pf-c-table__check input').prop('checked')).toBe(
       undefined
@@ -111,19 +101,9 @@ describe('<InstanceGroupListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Bar');
+    expect(wrapper.find('Td').at(1).text()).toBe('Bar');
 
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe('Container group');
+    expect(wrapper.find('Td').at(2).text()).toBe('Container group');
     expect(wrapper.find('PencilAltIcon').length).toBe(0);
   });
 

@@ -18,12 +18,8 @@ function SchedulePromptableFields({
   resource,
   resourceDefaultCredentials,
 }) {
-  const {
-    setFieldTouched,
-    values,
-    initialValues,
-    resetForm,
-  } = useFormikContext();
+  const { setFieldTouched, values, initialValues, resetForm } =
+    useFormikContext();
   const {
     steps,
     visitStep,
@@ -86,7 +82,7 @@ function SchedulePromptableFields({
       isOpen
       onClose={cancelPromptableValues}
       onSave={onSave}
-      onBack={async nextStep => {
+      onBack={async (nextStep) => {
         validateStep(nextStep.id);
       }}
       onNext={async (nextStep, prevStep) => {

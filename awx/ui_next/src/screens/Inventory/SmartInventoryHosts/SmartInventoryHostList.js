@@ -47,13 +47,8 @@ function SmartInventoryHostList({ inventory }) {
     }
   );
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(hosts);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(hosts);
 
   useEffect(() => {
     fetchHosts();
@@ -84,7 +79,7 @@ function SmartInventoryHostList({ inventory }) {
             key: 'modified_by__username',
           },
         ]}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}
@@ -115,7 +110,7 @@ function SmartInventoryHostList({ inventory }) {
             key={host.id}
             host={host}
             detailUrl={`/inventories/smart_inventory/${inventory.id}/hosts/${host.id}/details`}
-            isSelected={selected.some(row => row.id === host.id)}
+            isSelected={selected.some((row) => row.id === host.id)}
             onSelect={() => handleSelect(host)}
             rowIndex={index}
           />

@@ -6,9 +6,8 @@ export default function useWsPendingApprovalCount(
   initialCount,
   fetchApprovalsCount
 ) {
-  const [pendingApprovalCount, setPendingApprovalCount] = useState(
-    initialCount
-  );
+  const [pendingApprovalCount, setPendingApprovalCount] =
+    useState(initialCount);
   const [reloadCount, setReloadCount] = useState(false);
   const throttledFetch = useThrottle(reloadCount, 1000);
   const lastMessage = useWebsocket({
@@ -20,27 +19,21 @@ export default function useWsPendingApprovalCount(
     setPendingApprovalCount(initialCount);
   }, [initialCount]);
 
-  useEffect(
-    function reloadTheCount() {
-      (async () => {
-        if (!throttledFetch) {
-          return;
-        }
-        setReloadCount(false);
-        fetchApprovalsCount();
-      })();
-    },
-    [throttledFetch, fetchApprovalsCount]
-  );
-
-  useEffect(
-    function processWsMessage() {
-      if (lastMessage?.type === 'workflow_approval') {
-        setReloadCount(true);
+  useEffect(() => {
+    (async () => {
+      if (!throttledFetch) {
+        return;
       }
-    },
-    [lastMessage]
-  );
+      setReloadCount(false);
+      fetchApprovalsCount();
+    })();
+  }, [throttledFetch, fetchApprovalsCount]);
+
+  useEffect(() => {
+    if (lastMessage?.type === 'workflow_approval') {
+      setReloadCount(true);
+    }
+  }, [lastMessage]);
 
   return pendingApprovalCount;
 }

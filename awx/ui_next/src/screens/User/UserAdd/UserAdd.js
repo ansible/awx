@@ -9,7 +9,7 @@ function UserAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     setFormSubmitError(null);
     const { organization, ...userValues } = values;
     try {

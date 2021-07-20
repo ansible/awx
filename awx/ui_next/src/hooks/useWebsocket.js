@@ -4,7 +4,7 @@ export default function useWebsocket(subscribeGroups) {
   const [lastMessage, setLastMessage] = useState(null);
   const ws = useRef(null);
 
-  useEffect(function setupSocket() {
+  useEffect(() => {
     ws.current = new WebSocket(
       `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
         window.location.host
@@ -26,11 +26,11 @@ export default function useWebsocket(subscribeGroups) {
     };
     ws.current.onopen = connect;
 
-    ws.current.onmessage = e => {
+    ws.current.onmessage = (e) => {
       setLastMessage(JSON.parse(e.data));
     };
 
-    ws.current.onclose = e => {
+    ws.current.onclose = (e) => {
       if (e.code !== 1000) {
         // eslint-disable-next-line no-console
         console.debug('Socket closed. Reconnecting...', e);
@@ -40,7 +40,7 @@ export default function useWebsocket(subscribeGroups) {
       }
     };
 
-    ws.current.onerror = err => {
+    ws.current.onerror = (err) => {
       // eslint-disable-next-line no-console
       console.debug('Socket error: ', err, 'Disconnecting...');
       ws.current.close();

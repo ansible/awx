@@ -82,7 +82,7 @@ describe('<InventoryEdit />', () => {
   });
 
   test('handleCancel returns the user to inventory detail', async () => {
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('Button[aria-label="Cancel"]').simulate('click');
     });
@@ -92,7 +92,7 @@ describe('<InventoryEdit />', () => {
   });
 
   test('handleSubmit should post to the api', async () => {
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
     const instanceGroups = [
       { name: 'Bizz', id: 2 },
       { name: 'Buzz', id: 3 },

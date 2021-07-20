@@ -54,7 +54,11 @@ function NotificationTemplateListItem({
     setStatus(latestStatus);
   }, [latestStatus]);
 
-  const { request: sendTestNotification, isLoading, error } = useRequest(
+  const {
+    request: sendTestNotification,
+    isLoading,
+    error,
+  } = useRequest(
     useCallback(async () => {
       const request = NotificationTemplatesAPI.test(template.id);
       setStatus('running');

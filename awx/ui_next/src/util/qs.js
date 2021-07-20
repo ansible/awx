@@ -44,7 +44,7 @@ function stringToObject(config, qs) {
   const params = {};
   qs.replace(/^\?/, '')
     .split('&')
-    .map(s => s.split('='))
+    .map((s) => s.split('='))
     .forEach(([nsKey, rawValue]) => {
       if (!nsKey || !namespaceMatches(config.namespace, nsKey)) {
         return;
@@ -72,7 +72,7 @@ const namespaceMatches = (namespace, fieldname) => {
 };
 
 function parseValue(config, key, rawValue) {
-  if (config.integerFields && config.integerFields.some(v => v === key)) {
+  if (config.integerFields && config.integerFields.some((v) => v === key)) {
     return parseInt(rawValue, 10);
   }
   // TODO: parse dateFields into date format?
@@ -93,13 +93,13 @@ export { addDefaultsToObject as _addDefaultsToObject };
  * @param {object} query param object
  * @return {string} url query string
  */
-export const encodeQueryString = params => {
+export const encodeQueryString = (params) => {
   if (!params) return '';
 
   return Object.keys(params)
     .sort()
-    .filter(key => params[key] !== null)
-    .map(key => [key, params[key]])
+    .filter((key) => params[key] !== null)
+    .map((key) => [key, params[key]])
     .map(([key, value]) => encodeValue(key, value))
     .join('&');
 };
@@ -107,7 +107,7 @@ export const encodeQueryString = params => {
 function encodeValue(key, value) {
   if (Array.isArray(value)) {
     return value
-      .map(val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+      .map((val) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
       .join('&');
   }
   return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
@@ -124,7 +124,7 @@ export function removeParams(config, oldParams, paramsToRemove) {
   const updated = {
     ...config.defaultParams,
   };
-  Object.keys(oldParams).forEach(key => {
+  Object.keys(oldParams).forEach((key) => {
     const valToRemove = paramsToRemove[key];
     const isInt = config.integerFields?.includes(key);
     const updatedValue = removeParam(
@@ -169,10 +169,10 @@ function removeParam(oldVal, deleteVal) {
  */
 export function mergeParams(oldParams, newParams) {
   const merged = {};
-  Object.keys(oldParams).forEach(key => {
+  Object.keys(oldParams).forEach((key) => {
     merged[key] = mergeParam(oldParams[key], newParams[key]);
   });
-  Object.keys(newParams).forEach(key => {
+  Object.keys(newParams).forEach((key) => {
     if (!merged[key]) {
       merged[key] = newParams[key];
     }
@@ -216,7 +216,7 @@ function dedupeArray(arr) {
 export function updateQueryString(config, queryString, newParams) {
   const allParams = parseFullQueryString(queryString);
   const { namespace = null, defaultParams = {} } = config || {};
-  Object.keys(newParams).forEach(key => {
+  Object.keys(newParams).forEach((key) => {
     const val = newParams[key];
     const fullKey = namespace ? `${namespace}.${key}` : key;
     if (val === null || val === defaultParams[key]) {
@@ -233,7 +233,7 @@ function parseFullQueryString(queryString) {
   queryString
     .replace(/^\?/, '')
     .split('&')
-    .map(s => s.split('='))
+    .map((s) => s.split('='))
     .forEach(([rawKey, rawValue]) => {
       if (!rawKey) {
         return;

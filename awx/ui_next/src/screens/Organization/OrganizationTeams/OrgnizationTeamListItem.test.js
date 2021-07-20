@@ -37,12 +37,7 @@ describe('<OrganizationTeamListItem />', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find(`Td`)
-        .first()
-        .text()
-    ).toBe('one');
+    expect(wrapper.find(`Td`).first().text()).toBe('one');
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
   });
 

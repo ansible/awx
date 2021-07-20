@@ -27,7 +27,7 @@ function selectItem(state, item) {
       selectedItems: [item],
     };
   }
-  const index = selectedItems.findIndex(i => i.id === item.id);
+  const index = selectedItems.findIndex((i) => i.id === item.id);
   if (index > -1) {
     return state;
   }
@@ -40,7 +40,7 @@ function selectItem(state, item) {
 function deselectItem(state, item) {
   return {
     ...state,
-    selectedItems: state.selectedItems.filter(i => i.id !== item.id),
+    selectedItems: state.selectedItems.filter((i) => i.id !== item.id),
   };
 }
 

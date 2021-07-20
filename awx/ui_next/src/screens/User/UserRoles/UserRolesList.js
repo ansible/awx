@@ -66,10 +66,10 @@ function UserRolesList({ user }) {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [user.id, search]),
     {
@@ -104,7 +104,7 @@ function UserRolesList({ user }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
-  const detailUrl = role => {
+  const detailUrl = (role) => {
     const { resource_id, resource_type } = role.summary_fields;
 
     if (!role || !resource_type) {
@@ -119,7 +119,7 @@ function UserRolesList({ user }) {
     }
     return `/${resource_type}s/${resource_id}/details`;
   };
-  const isSysAdmin = roles.some(role => role.name === 'System Administrator');
+  const isSysAdmin = roles.some((role) => role.name === 'System Administrator');
   if (isSysAdmin) {
     return (
       <EmptyState variant="full">
@@ -158,22 +158,20 @@ function UserRolesList({ user }) {
             <HeaderCell>{t`Role`}</HeaderCell>
           </HeaderRow>
         }
-        renderRow={(role, index) => {
-          return (
-            <UserRolesListItem
-              key={role.id}
-              value={role.name}
-              role={role}
-              detailUrl={detailUrl(role)}
-              isSelected={false}
-              onSelect={item => {
-                setRoleToDisassociate(item);
-              }}
-              rowIndex={index}
-            />
-          );
-        }}
-        renderToolbar={props => (
+        renderRow={(role, index) => (
+          <UserRolesListItem
+            key={role.id}
+            value={role.name}
+            role={role}
+            detailUrl={detailUrl(role)}
+            isSelected={false}
+            onSelect={(item) => {
+              setRoleToDisassociate(item);
+            }}
+            rowIndex={index}
+          />
+        )}
+        renderToolbar={(props) => (
           <DatalistToolbar
             {...props}
             qsConfig={QS_CONFIG}
@@ -200,7 +198,7 @@ function UserRolesList({ user }) {
           }}
           title={t`Add user permissions`}
           onClose={() => setShowAddModal(false)}
-          onError={err => setAssociateError(err)}
+          onError={(err) => setAssociateError(err)}
         />
       )}
       {roleToDisassociate && (

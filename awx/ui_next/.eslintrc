@@ -12,7 +12,6 @@
   "extends": [
     "airbnb",
     "prettier",
-    "prettier/react",
     "plugin:jsx-a11y/strict",
     "plugin:i18next/recommended"
   ],
@@ -22,7 +21,7 @@
     },
     "import/resolver": {
       "node": {
-        paths: ["src"]
+        "paths": ["src"]
       }
     }
   },
@@ -134,6 +133,7 @@
     "object-curly-newline": "off",
     "no-trailing-spaces": ["error"],
     "no-unused-expressions": ["error", { "allowShortCircuit": true }],
+    "react/jsx-props-no-spreading":["off"],
     "react/prefer-stateless-function": "off",
     "react/prop-types": "off",
     "react/sort-comp": ["error", {}],

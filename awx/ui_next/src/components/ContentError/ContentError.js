@@ -26,7 +26,7 @@ function ContentError({ error, children, isNotFound }) {
     isNotFound || (error && error.response && error.response.status === 404);
   const is401 = error && error.response && error.response.status === 401;
   return (
-    <Fragment>
+    <>
       {is401 ? (
         <Redirect to="/login" />
       ) : (
@@ -44,7 +44,7 @@ function ContentError({ error, children, isNotFound }) {
           {error && <ErrorDetail error={error} />}
         </EmptyState>
       )}
-    </Fragment>
+    </>
   );
 }
 ContentError.propTypes = {

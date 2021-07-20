@@ -34,21 +34,19 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
     return [teamRoles, userRoles];
   };
 
-  const renderChip = role => {
-    return (
-      <Chip
-        key={role.id}
-        onClick={() => {
-          onRoleDelete(role, accessRecord);
-        }}
-        isReadOnly={!role.user_capabilities.unattach}
-        ouiaId={`${role.name}-${role.id}`}
-        closeBtnAriaLabel={t`Remove ${role.name} chip`}
-      >
-        {role.name}
-      </Chip>
-    );
-  };
+  const renderChip = (role) => (
+    <Chip
+      key={role.id}
+      onClick={() => {
+        onRoleDelete(role, accessRecord);
+      }}
+      isReadOnly={!role.user_capabilities.unattach}
+      ouiaId={`${role.name}-${role.id}`}
+      closeBtnAriaLabel={t`Remove ${role.name} chip`}
+    >
+      {role.name}
+    </Chip>
+  );
 
   const [teamRoles, userRoles] = getRoleLists();
 

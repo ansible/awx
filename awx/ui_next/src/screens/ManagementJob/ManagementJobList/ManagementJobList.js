@@ -23,17 +23,17 @@ const QS_CONFIG = getQSConfig('system_job_templates', {
   page_size: 20,
 });
 
-const buildSearchKeys = options => {
+const buildSearchKeys = (options) => {
   const actions = options?.data?.actions?.GET || {};
   const searchableKeys = Object.keys(actions).filter(
-    key => actions[key].filterable
+    (key) => actions[key].filterable
   );
   const relatedSearchableKeys = options?.data?.related_search_fields || [];
 
   return { searchableKeys, relatedSearchableKeys };
 };
 
-const loadManagementJobs = async search => {
+const loadManagementJobs = async (search) => {
   const params = parseQueryString(QS_CONFIG, search);
   const [
     {
@@ -90,7 +90,7 @@ function ManagementJobList() {
                 isDefault: true,
               },
             ]}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
             )}
             headerRow={

@@ -61,7 +61,7 @@ describe('<SmartInventoryAdd />', () => {
           context: { router: { history } },
         });
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -148,7 +148,7 @@ describe('<SmartInventoryAdd />', () => {
           context: { router: { history } },
         });
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     test('should disable save button', () => {

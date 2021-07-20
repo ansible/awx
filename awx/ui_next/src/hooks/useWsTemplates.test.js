@@ -10,7 +10,7 @@ import useWsTemplates from './useWsTemplates';
 */
 jest.mock('./useThrottle', () => ({
   __esModule: true,
-  default: jest.fn(val => val),
+  default: jest.fn((val) => val),
 }));
 
 function TestInner() {

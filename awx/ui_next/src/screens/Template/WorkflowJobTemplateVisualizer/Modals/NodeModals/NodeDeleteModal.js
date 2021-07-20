@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Button } from '@patternfly/react-core';
 
 import { t } from '@lingui/macro';
@@ -42,13 +42,13 @@ function NodeDeleteModal() {
       ]}
     >
       {nodeToDelete && nodeToDelete.unifiedJobTemplate ? (
-        <Fragment>
+        <>
           <p>{t`Are you sure you want to remove the node below:`}</p>
           <br />
           <strong css="color: var(--pf-global--danger-color--100)">
             {nodeToDelete.unifiedJobTemplate.name}
           </strong>
-        </Fragment>
+        </>
       ) : (
         <p>{t`Are you sure you want to remove this node?`}</p>
       )}

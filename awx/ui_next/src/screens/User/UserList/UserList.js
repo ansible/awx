@@ -52,10 +52,10 @@ function UserList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -71,13 +71,8 @@ function UserList() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(users);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(users);
 
   const {
     isLoading: isDeleteLoading,
@@ -85,9 +80,10 @@ function UserList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(user => UsersAPI.destroy(user.id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map((user) => UsersAPI.destroy(user.id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -132,7 +128,7 @@ function UserList() {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -170,7 +166,7 @@ function UserList() {
                 key={user.id}
                 user={user}
                 detailUrl={`${match.url}/${user.id}/details`}
-                isSelected={selected.some(row => row.id === user.id)}
+                isSelected={selected.some((row) => row.id === user.id)}
                 onSelect={() => handleSelect(user)}
                 rowIndex={index}
               />

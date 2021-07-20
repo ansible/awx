@@ -43,7 +43,7 @@ describe('<HostsListItem />', () => {
   });
 
   test('edit button hidden from users without edit capabilities', () => {
-    const copyMockHost = Object.assign({}, mockHost);
+    const copyMockHost = { ...mockHost };
     copyMockHost.summary_fields.user_capabilities.edit = false;
     wrapper = mountWithContexts(
       <table>

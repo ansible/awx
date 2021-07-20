@@ -71,7 +71,7 @@ function WorkflowOutput({ job }) {
       const newNodePositions = {};
       const g = layoutGraph(nodes, links);
 
-      g.nodes().forEach(node => {
+      g.nodes().forEach((node) => {
         newNodePositions[node] = g.node(node);
       });
 

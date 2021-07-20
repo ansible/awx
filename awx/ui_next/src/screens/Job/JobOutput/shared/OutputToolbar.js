@@ -26,7 +26,7 @@ const Badge = styled(PFBadge)`
   display: flex;
   justify-content: center;
   margin-left: 10px;
-  ${props =>
+  ${(props) =>
     props.color
       ? `
   background-color: ${props.color}
@@ -42,7 +42,7 @@ const Wrapper = styled.div`
   font-size: 14px;
 `;
 
-const toHHMMSS = elapsed => {
+const toHHMMSS = (elapsed) => {
   const sec_num = parseInt(elapsed, 10);
   const hours = Math.floor(sec_num / 3600);
   const minutes = Math.floor(sec_num / 60) % 60;

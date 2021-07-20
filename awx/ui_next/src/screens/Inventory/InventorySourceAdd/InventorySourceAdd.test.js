@@ -80,7 +80,7 @@ describe('<InventorySourceAdd />', () => {
         <InventorySourceAdd inventory={mockInventory} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('FormGroup[label="Name"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Description"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Source"]')).toHaveLength(1);

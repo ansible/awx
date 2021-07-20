@@ -30,7 +30,7 @@ function Popover({ ariaLabel, content, header, id, maxWidth, ...rest }) {
         aria-label={ariaLabel ?? t`More information`}
         aria-haspopup="true"
         className="pf-c-form__group-label-help"
-        onClick={e => e.preventDefault()}
+        onClick={(e) => e.preventDefault()}
         type="button"
       >
         <HelpIcon noVerticalAlign />

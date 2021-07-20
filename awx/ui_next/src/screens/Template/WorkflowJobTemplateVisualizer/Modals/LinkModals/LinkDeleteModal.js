@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Button } from '@patternfly/react-core';
 
 import { t } from '@lingui/macro';
@@ -42,12 +42,12 @@ function LinkDeleteModal() {
     >
       <p>{t`Are you sure you want to remove this link?`}</p>
       {!linkToDelete.isConvergenceLink && (
-        <Fragment>
+        <>
           <br />
           <p>
             {t`Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch.`}
           </p>
-        </Fragment>
+        </>
       )}
     </AlertModal>
   );

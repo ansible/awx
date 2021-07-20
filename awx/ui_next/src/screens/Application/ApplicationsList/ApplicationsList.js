@@ -56,10 +56,10 @@ function ApplicationsList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -75,13 +75,8 @@ function ApplicationsList() {
     fetchApplications();
   }, [fetchApplications]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(applications);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(applications);
 
   const {
     isLoading: deleteLoading,
@@ -89,9 +84,10 @@ function ApplicationsList() {
     deleteItems: deleteApplications,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(({ id }) => ApplicationsAPI.destroy(id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map(({ id }) => ApplicationsAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -131,7 +127,7 @@ function ApplicationsList() {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DatalistToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -172,7 +168,7 @@ function ApplicationsList() {
                 application={application}
                 detailUrl={`${match.url}/${application.id}/details`}
                 onSelect={() => handleSelect(application)}
-                isSelected={selected.some(row => row.id === application.id)}
+                isSelected={selected.some((row) => row.id === application.id)}
                 rowIndex={index}
               />
             )}

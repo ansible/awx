@@ -41,7 +41,7 @@ function OrganizationFormFields({
   ] = useField('default_environment');
 
   const handleCredentialUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('galaxy_credentials', value);
     },
     [setFieldValue]
@@ -89,7 +89,7 @@ function OrganizationFormFields({
         }
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
-        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        onChange={(value) => executionEnvironmentHelpers.setValue(value)}
         popoverContent={t`The execution environment that will be used for jobs inside of this organization. This will be used a fallback when an execution environment has not been explicitly assigned at the project, job template or workflow level.`}
         globallyAvailable
         organizationId={organizationId}
@@ -141,7 +141,7 @@ function OrganizationForm({
     onCancel();
   };
 
-  const handleSubmit = values => {
+  const handleSubmit = (values) => {
     if (
       typeof values.max_hosts !== 'number' ||
       values.max_hosts === 'undefined'
@@ -196,7 +196,7 @@ function OrganizationForm({
       }}
       onSubmit={handleSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <OrganizationFormFields

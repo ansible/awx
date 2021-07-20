@@ -4,7 +4,7 @@ describe('debounce', () => {
   test('it debounces', () => {
     jest.useFakeTimers();
     let count = 0;
-    const func = increment => {
+    const func = (increment) => {
       count += increment;
     };
     const debounced = debounce(func, 1000);

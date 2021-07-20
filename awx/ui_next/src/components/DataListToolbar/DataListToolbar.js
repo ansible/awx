@@ -66,7 +66,7 @@ function DataListToolbar({
   const dropdownPosition =
     viewportWidth >= 992 ? DropdownPosition.right : DropdownPosition.left;
 
-  const onShowAdvancedSearch = shown => {
+  const onShowAdvancedSearch = (shown) => {
     setIsAdvancedSearchShown(shown);
     setIsKebabOpen(false);
   };
@@ -165,7 +165,7 @@ function DataListToolbar({
                 toggle={
                   <KebabToggle
                     data-cy="actions-kebab-toogle"
-                    onToggle={isOpen => {
+                    onToggle={(isOpen) => {
                       if (!isKebabModalOpen) {
                         setIsKebabOpen(isOpen);
                       }
@@ -182,7 +182,7 @@ function DataListToolbar({
         )}
         {!isAdvancedSearchShown && (
           <ToolbarGroup>
-            {additionalControls.map(control => (
+            {additionalControls.map((control) => (
               <ToolbarItem key={control.key}>{control}</ToolbarItem>
             ))}
           </ToolbarGroup>

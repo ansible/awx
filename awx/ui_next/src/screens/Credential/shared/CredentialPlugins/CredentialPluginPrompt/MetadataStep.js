@@ -32,7 +32,7 @@ function MetadataStep() {
         selectedCredential.value.credential_type ||
           selectedCredential.value.credential_type_id
       );
-      metadata.forEach(field => {
+      metadata.forEach((field) => {
         if (inputValues.value[field.id]) {
           form.initialValues.inputs[field.id] = inputValues.value[field.id];
         } else if (field.type === 'string' && field.choices) {
@@ -68,7 +68,7 @@ function MetadataStep() {
       {fields.length > 0 && (
         <Form>
           <FormFullWidthLayout>
-            {fields.map(field => {
+            {fields.map((field) => {
               if (field.type === 'string') {
                 if (field.choices) {
                   return (
@@ -85,13 +85,11 @@ function MetadataStep() {
                         name={`inputs.${field.id}`}
                         value={form.values.inputs[field.id]}
                         id={`credential-${field.id}`}
-                        data={field.choices.map(choice => {
-                          return {
-                            value: choice,
-                            key: choice,
-                            label: choice,
-                          };
-                        })}
+                        data={field.choices.map((choice) => ({
+                          value: choice,
+                          key: choice,
+                          label: choice,
+                        }))}
                         onChange={(event, value) => {
                           form.setFieldValue(`inputs.${field.id}`, value);
                         }}

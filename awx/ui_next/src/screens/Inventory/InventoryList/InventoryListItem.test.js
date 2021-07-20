@@ -98,30 +98,10 @@ describe('<InventoryListItem />', () => {
     expect(wrapper.find('StatusLabel').prop('tooltipContent')).toBe(
       `${inventory.inventory_sources_with_failures} sources with sync failures.`
     );
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Inventory');
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe('Error');
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toBe('Inventory');
-    expect(
-      wrapper
-        .find('Td')
-        .at(4)
-        .text()
-    ).toBe('Default');
+    expect(wrapper.find('Td').at(1).text()).toBe('Inventory');
+    expect(wrapper.find('Td').at(2).text()).toBe('Error');
+    expect(wrapper.find('Td').at(3).text()).toBe('Inventory');
+    expect(wrapper.find('Td').at(4).text()).toBe('Default');
   });
 
   test('edit button shown to users with edit capabilities', () => {

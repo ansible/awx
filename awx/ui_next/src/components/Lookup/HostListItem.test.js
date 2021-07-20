@@ -23,17 +23,7 @@ describe('HostListItem', () => {
       </table>
     );
     expect(wrapper.find('HostListItem').length).toBe(1);
-    expect(
-      wrapper
-        .find('Td')
-        .at(0)
-        .text()
-    ).toBe('Foo');
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Bar');
+    expect(wrapper.find('Td').at(0).text()).toBe('Foo');
+    expect(wrapper.find('Td').at(1).text()).toBe('Bar');
   });
 });

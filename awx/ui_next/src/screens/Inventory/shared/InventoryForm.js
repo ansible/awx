@@ -13,14 +13,12 @@ import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
 
 function InventoryFormFields({ inventory }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
-  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
-    'instanceGroups'
-  );
+  const [organizationField, organizationMeta, organizationHelpers] =
+    useField('organization');
+  const [instanceGroupsField, , instanceGroupsHelpers] =
+    useField('instanceGroups');
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -57,7 +55,7 @@ function InventoryFormFields({ inventory }) {
       />
       <InstanceGroupsLookup
         value={instanceGroupsField.value}
-        onChange={value => {
+        onChange={(value) => {
           instanceGroupsHelpers.setValue(value);
         }}
         fieldName="instanceGroups"
@@ -95,11 +93,11 @@ function InventoryForm({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={values => {
+      onSubmit={(values) => {
         onSubmit(values);
       }}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <InventoryFormFields {...rest} inventory={inventory} />

@@ -59,7 +59,7 @@ function SmartInventoryEdit({ inventory }) {
     }
   }, [submitResult, detailsUrl, history]);
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     const { instance_groups, organization, ...remainingForm } = form;
 
     await submitRequest(

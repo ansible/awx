@@ -180,19 +180,11 @@ describe('CredentialsStep', () => {
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(0);
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-2')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-2').find('input').simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(1);
-    expect(
-      wrapper
-        .find('Alert')
-        .text()
-        .includes('Cred 2')
-    ).toBe(true);
+    expect(wrapper.find('Alert').text().includes('Cred 2')).toBe(true);
   });
 
   test('error should be toggled when default machine credential is removed and then replaced', async () => {
@@ -234,17 +226,9 @@ describe('CredentialsStep', () => {
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(1);
-    expect(
-      wrapper
-        .find('Alert')
-        .text()
-        .includes('Machine')
-    ).toBe(true);
+    expect(wrapper.find('Alert').text().includes('Machine')).toBe(true);
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-5')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-5').find('input').simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(0);
@@ -307,21 +291,13 @@ describe('CredentialsStep', () => {
     wrapper.update();
     expect(wrapper.find('CredentialChip').length).toBe(1);
     expect(wrapper.find('Alert').length).toBe(1);
-    expect(
-      wrapper
-        .find('Alert')
-        .text()
-        .includes('Vault | foo')
-    ).toBe(true);
+    expect(wrapper.find('Alert').text().includes('Vault | foo')).toBe(true);
     await act(async () => {
       wrapper.find('AnsibleSelect').invoke('onChange')({}, 3);
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-33')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-33').find('input').simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('Alert').length).toBe(0);

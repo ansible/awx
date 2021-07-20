@@ -8,7 +8,7 @@ const TestHook = ({ callback }) => {
   return null;
 };
 
-const testHook = callback => {
+const testHook = (callback) => {
   mount(<TestHook callback={callback} />);
 };
 

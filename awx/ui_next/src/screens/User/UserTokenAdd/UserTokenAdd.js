@@ -11,7 +11,7 @@ function UserTokenAdd({ onSuccessfulAdd }) {
   const { id: userId } = useParams();
   const { error: submitError, request: handleSubmit } = useRequest(
     useCallback(
-      async formData => {
+      async (formData) => {
         let response;
         if (formData.application) {
           response = await UsersAPI.createToken(userId, {

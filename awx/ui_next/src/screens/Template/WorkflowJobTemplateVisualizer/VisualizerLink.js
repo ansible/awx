@@ -19,7 +19,7 @@ import {
 } from 'components/Workflow';
 
 const LinkG = styled.g`
-  pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.ignorePointerEvents ? 'none' : 'auto')};
 `;
 
 function VisualizerLink({ link, updateLinkHelp, readOnly, updateHelpText }) {

@@ -13,7 +13,12 @@ function InstanceToggle({ className, fetchInstances, instance, onToggle }) {
   const [isEnabled, setIsEnabled] = useState(instance.enabled);
   const [showError, setShowError] = useState(false);
 
-  const { result, isLoading, error, request: toggleInstance } = useRequest(
+  const {
+    result,
+    isLoading,
+    error,
+    request: toggleInstance,
+  } = useRequest(
     useCallback(async () => {
       await InstancesAPI.update(instance.id, { enabled: !isEnabled });
       await fetchInstances();

@@ -31,7 +31,7 @@ describe('<JobTemplateDetail />', () => {
         <JobTemplateDetail template={mockTemplate} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -50,11 +50,11 @@ describe('<JobTemplateDetail />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await waitForElement(
       wrapper,
       'Detail[label="Name"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
   });
 
@@ -130,7 +130,7 @@ describe('<JobTemplateDetail />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('expected api calls are made for delete', async () => {
@@ -150,7 +150,7 @@ describe('<JobTemplateDetail />', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Error!"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () => {
       wrapper.find('Modal[title="Error!"]').invoke('onClose')();
@@ -158,7 +158,7 @@ describe('<JobTemplateDetail />', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Error!"]',
-      el => el.length === 0
+      (el) => el.length === 0
     );
   });
 

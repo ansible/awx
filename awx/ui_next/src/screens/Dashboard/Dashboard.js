@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
@@ -68,7 +68,7 @@ function Dashboard() {
     );
   }
   return (
-    <Fragment>
+    <>
       <ScreenHeader
         streamType="all"
         breadcrumbConfig={{ '/home': t`Dashboard` }}
@@ -151,7 +151,7 @@ function Dashboard() {
           </Card>
         </div>
       </MainPageSection>
-    </Fragment>
+    </>
   );
 }
 

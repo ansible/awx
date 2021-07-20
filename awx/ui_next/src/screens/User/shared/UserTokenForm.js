@@ -20,7 +20,7 @@ function UserTokenFormFields() {
   });
 
   const handleApplicationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('application', value);
       setFieldTouched('application', true, false);
     },
@@ -103,7 +103,7 @@ function UserTokenForm({
       }}
       onSubmit={handleSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <UserTokenFormFields />

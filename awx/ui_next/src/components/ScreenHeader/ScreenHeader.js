@@ -89,12 +89,12 @@ const ActualTitle = ({ breadcrumbConfig }) => {
   }
 
   return (
-    <Fragment>
+    <>
       {titleElement}
       <Route path={`${match.url}/:path`}>
         <ActualTitle breadcrumbConfig={breadcrumbConfig} />
       </Route>
-    </Fragment>
+    </>
   );
 };
 
@@ -116,12 +116,12 @@ const Crumb = ({ breadcrumbConfig, showDivider }) => {
     crumbElement = null;
   }
   return (
-    <Fragment>
+    <>
       {crumbElement}
       <Route path={`${match.url}/:path`}>
         <Crumb breadcrumbConfig={breadcrumbConfig} showDivider />
       </Route>
-    </Fragment>
+    </>
   );
 };
 

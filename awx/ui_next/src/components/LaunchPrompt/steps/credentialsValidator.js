@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro';
 
-const credentialPromptsForPassword = credential =>
+const credentialPromptsForPassword = (credential) =>
   credential?.inputs?.password === 'ASK' ||
   credential?.inputs?.ssh_key_unlock === 'ASK' ||
   credential?.inputs?.become_password === 'ASK' ||
@@ -13,10 +13,10 @@ export default function credentialsValidator(
 ) {
   if (defaultCredentials.length > 0 && selectedCredentials) {
     const missingCredentialTypes = [];
-    defaultCredentials.forEach(defaultCredential => {
+    defaultCredentials.forEach((defaultCredential) => {
       if (
-        !selectedCredentials.find(selectedCredential => {
-          return (
+        !selectedCredentials.find(
+          (selectedCredential) =>
             (selectedCredential?.credential_type ===
               defaultCredential?.credential_type &&
               !selectedCredential.inputs?.vault_id &&
@@ -24,8 +24,7 @@ export default function credentialsValidator(
             (defaultCredential.inputs?.vault_id &&
               selectedCredential.inputs?.vault_id ===
                 defaultCredential.inputs?.vault_id)
-          );
-        })
+        )
       ) {
         missingCredentialTypes.push(
           defaultCredential.inputs?.vault_id
@@ -44,7 +43,7 @@ export default function credentialsValidator(
 
   if (!allowCredentialsWithPasswords && selectedCredentials) {
     const credentialsThatPrompt = [];
-    selectedCredentials.forEach(selectedCredential => {
+    selectedCredentials.forEach((selectedCredential) => {
       if (credentialPromptsForPassword(selectedCredential)) {
         credentialsThatPrompt.push(selectedCredential.name);
       }

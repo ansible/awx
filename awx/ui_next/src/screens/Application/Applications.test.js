@@ -26,14 +26,11 @@ describe('<Applications />', () => {
     expect(wrapper.find('Modal[title="Application information"]').length).toBe(
       0
     );
-    wrapper
-      .find('ApplicationAdd')
-      .props()
-      .onSuccessfulAdd({
-        name: 'test',
-        client_id: 'foobar',
-        client_secret: 'aaaaaaaaaaaaaaaaaaaaaaaaaa',
-      });
+    wrapper.find('ApplicationAdd').props().onSuccessfulAdd({
+      name: 'test',
+      client_id: 'foobar',
+      client_secret: 'aaaaaaaaaaaaaaaaaaaaaaaaaa',
+    });
     wrapper.update();
     expect(wrapper.find('Modal[title="Application information"]').length).toBe(
       1

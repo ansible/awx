@@ -19,7 +19,12 @@ function AzureADDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: azure } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: azure,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('azuread-oauth2');
       return data;
@@ -57,7 +62,7 @@ function AzureADDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && azure && (
           <DetailList>
-            {Object.keys(azure).map(key => {
+            {Object.keys(azure).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

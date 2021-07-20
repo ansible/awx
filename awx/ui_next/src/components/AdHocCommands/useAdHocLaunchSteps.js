@@ -17,32 +17,28 @@ export default function useAdHocLaunchSteps(
     useAdHocCredentialStep(visited, credentialTypeId),
   ];
 
-  const hasErrors = steps.some(step => step.hasError);
+  const hasErrors = steps.some((step) => step.hasError);
 
   steps.push(useAdHocPreviewStep(hasErrors));
   return {
-    steps: steps.map(s => s.step).filter(s => s != null),
-    validateStep: stepId =>
-      steps
-        .find(s => {
-          return s?.step.id === stepId;
-        })
-        .validate(),
+    steps: steps.map((s) => s.step).filter((s) => s != null),
+    validateStep: (stepId) =>
+      steps.find((s) => s?.step.id === stepId).validate(),
     visitStep: (prevStepId, setFieldTouched) => {
       setVisited({
         ...visited,
         [prevStepId]: true,
       });
-      steps.find(s => s?.step?.id === prevStepId).setTouched(setFieldTouched);
+      steps.find((s) => s?.step?.id === prevStepId).setTouched(setFieldTouched);
     },
-    visitAllSteps: setFieldTouched => {
+    visitAllSteps: (setFieldTouched) => {
       setVisited({
         details: true,
         executionEnvironment: true,
         credential: true,
         preview: true,
       });
-      steps.forEach(s => s.setTouched(setFieldTouched));
+      steps.forEach((s) => s.setTouched(setFieldTouched));
     },
   };
 }

@@ -237,40 +237,34 @@ export const OptionsField = ({ showProjectUpdate = false }) => {
   );
 };
 
-export const EnabledVarField = () => {
-  return (
-    <FormField
-      id="inventory-enabled-var"
-      label={t`Enabled Variable`}
-      tooltip={t`Retrieve the enabled state from the given dict of host variables.
+export const EnabledVarField = () => (
+  <FormField
+    id="inventory-enabled-var"
+    label={t`Enabled Variable`}
+    tooltip={t`Retrieve the enabled state from the given dict of host variables.
         The enabled variable may be specified using dot notation, e.g: 'foo.bar'`}
-      name="enabled_var"
-      type="text"
-    />
-  );
-};
+    name="enabled_var"
+    type="text"
+  />
+);
 
-export const EnabledValueField = () => {
-  return (
-    <FormField
-      id="inventory-enabled-value"
-      label={t`Enabled Value`}
-      tooltip={t`This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import.`}
-      name="enabled_value"
-      type="text"
-    />
-  );
-};
+export const EnabledValueField = () => (
+  <FormField
+    id="inventory-enabled-value"
+    label={t`Enabled Value`}
+    tooltip={t`This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import.`}
+    name="enabled_value"
+    type="text"
+  />
+);
 
-export const HostFilterField = () => {
-  return (
-    <FormField
-      id="host-filter"
-      label={t`Host Filter`}
-      tooltip={t`Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied.`}
-      name="host_filter"
-      type="text"
-      validate={regExp()}
-    />
-  );
-};
+export const HostFilterField = () => (
+  <FormField
+    id="host-filter"
+    label={t`Host Filter`}
+    tooltip={t`Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied.`}
+    name="host_filter"
+    type="text"
+    validate={regExp()}
+  />
+);

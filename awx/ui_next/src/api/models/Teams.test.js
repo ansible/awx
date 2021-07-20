@@ -22,9 +22,10 @@ describe('TeamsAPI', () => {
     await TeamsAPI.associateRole(teamId, roleId);
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);
-    expect(
-      mockHttp.post.mock.calls[0]
-    ).toContainEqual(`/api/v2/teams/${teamId}/roles/`, { id: roleId });
+    expect(mockHttp.post.mock.calls[0]).toContainEqual(
+      `/api/v2/teams/${teamId}/roles/`,
+      { id: roleId }
+    );
   });
 
   test('read teams calls post with expected params', async () => {

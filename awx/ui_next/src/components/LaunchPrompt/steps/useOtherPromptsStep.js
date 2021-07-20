@@ -9,7 +9,7 @@ const STEP_ID = 'other';
 export const YAML_MODE = 'yaml';
 export const JSON_MODE = 'javascript';
 
-const getVariablesData = resource => {
+const getVariablesData = (resource) => {
   if (resource?.extra_data) {
     return jsonToYaml(JSON.stringify(resource.extra_data));
   }
@@ -34,7 +34,7 @@ export default function useOtherPromptsStep(launchConfig, resource) {
   const [variablesMode, setVariablesMode] = useState(null);
   const [isTouched, setIsTouched] = useState(false);
 
-  const handleModeChange = mode => {
+  const handleModeChange = (mode) => {
     setVariablesMode(mode);
   };
 
@@ -63,9 +63,11 @@ export default function useOtherPromptsStep(launchConfig, resource) {
     isReady: true,
     contentError: null,
     hasError,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setIsTouched(true);
-      FIELD_NAMES.forEach(fieldName => setFieldTouched(fieldName, true, false));
+      FIELD_NAMES.forEach((fieldName) =>
+        setFieldTouched(fieldName, true, false)
+      );
     },
     validate: () => {},
   };

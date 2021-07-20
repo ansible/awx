@@ -57,7 +57,7 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
           aria-label={t`${label} time`}
           time={timeField.value}
           {...timeField}
-          onChange={time => timeHelpers.setValue(time)}
+          onChange={(time) => timeHelpers.setValue(time)}
         />
       </DateTimeGroup>
     </FormGroup>

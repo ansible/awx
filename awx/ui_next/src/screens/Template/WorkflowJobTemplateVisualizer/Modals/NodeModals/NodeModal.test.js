@@ -264,10 +264,7 @@ describe('NodeModal', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-1').find('input').simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -334,10 +331,7 @@ describe('NodeModal', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-1').find('input').simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -373,10 +367,7 @@ describe('NodeModal', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-1').find('input').simulate('click');
     });
     wrapper.update();
     await act(async () => {
@@ -412,10 +403,7 @@ describe('NodeModal', () => {
     });
     wrapper.update();
     await act(async () =>
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click')
+      wrapper.find('td#check-action-item-1').find('input').simulate('click')
     );
     wrapper.update();
 
@@ -670,10 +658,7 @@ describe('Edit existing node', () => {
       'workflow_job_template'
     );
     await act(async () => {
-      newWrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      newWrapper.find('td#check-action-item-1').find('input').simulate('click');
       newWrapper.update();
     });
     newWrapper.update();

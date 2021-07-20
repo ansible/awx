@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { number, shape } from 'prop-types';
 
@@ -71,7 +71,7 @@ function LaunchButton({ resource, children, history }) {
     }
   };
 
-  const launchWithParams = async params => {
+  const launchWithParams = async (params) => {
     try {
       let jobPromise;
 
@@ -94,7 +94,7 @@ function LaunchButton({ resource, children, history }) {
     }
   };
 
-  const handleRelaunch = async params => {
+  const handleRelaunch = async (params) => {
     let readRelaunch;
     let relaunch;
 
@@ -148,7 +148,7 @@ function LaunchButton({ resource, children, history }) {
   };
 
   return (
-    <Fragment>
+    <>
       {children({
         handleLaunch,
         handleRelaunch,
@@ -174,7 +174,7 @@ function LaunchButton({ resource, children, history }) {
           onCancel={() => setShowLaunchPrompt(false)}
         />
       )}
-    </Fragment>
+    </>
   );
 }
 

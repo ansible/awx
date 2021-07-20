@@ -62,7 +62,7 @@ export default function useAdHocDetailsStep(
         }
       }
     },
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('module_name', true, false);
       setFieldTouched('module_args', true, false);
     },

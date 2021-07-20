@@ -2,7 +2,7 @@ import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
 import { getRRuleDayConstants } from 'util/dates';
 
-const parseTime = time => {
+const parseTime = (time) => {
   const [hour, minute, ampm] = time.split(/[: ]/);
   const timeHour =
     ampm === 'PM' && hour !== '12' ? `${parseInt(hour, 10) + 12}` : `${hour}`;

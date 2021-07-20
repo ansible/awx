@@ -13,7 +13,7 @@ const SmallButton = styled(Button)`
 SmallButton.displayName = 'SmallButton';
 
 function MultiButtonToggle({ buttons, value, onChange, name }) {
-  const setValue = newValue => {
+  const setValue = (newValue) => {
     if (value !== newValue) {
       onChange(newValue);
     }

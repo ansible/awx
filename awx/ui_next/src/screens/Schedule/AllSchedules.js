@@ -9,13 +9,9 @@ import { ScheduleList } from 'components/Schedule';
 import { SchedulesAPI } from 'api';
 
 function AllSchedules() {
-  const loadScheduleOptions = useCallback(() => {
-    return SchedulesAPI.readOptions();
-  }, []);
+  const loadScheduleOptions = useCallback(() => SchedulesAPI.readOptions(), []);
 
-  const loadSchedules = useCallback(params => {
-    return SchedulesAPI.read(params);
-  }, []);
+  const loadSchedules = useCallback((params) => SchedulesAPI.read(params), []);
 
   return (
     <>

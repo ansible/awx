@@ -80,21 +80,19 @@ function InstanceListItem({
 
   const { error: updateInstanceError, request: updateInstance } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await InstancesAPI.update(instance.id, values);
       },
       [instance]
     )
   );
 
-  const {
-    error: updateError,
-    dismissError: dismissUpdateError,
-  } = useDismissableError(updateInstanceError);
+  const { error: updateError, dismissError: dismissUpdateError } =
+    useDismissableError(updateInstanceError);
 
   const debounceUpdateInstance = useDebounce(updateInstance, 200);
 
-  const handleChangeValue = value => {
+  const handleChangeValue = (value) => {
     const roundedValue = Math.round(value * 100) / 100;
     setForks(
       computeForks(instance.mem_capacity, instance.cpu_capacity, roundedValue)

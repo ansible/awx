@@ -41,7 +41,7 @@ function DisassociateButton({
     if (verifyCannotDisassociate) {
       const itemsUnableToDisassociate = itemsToDisassociate
         .filter(cannotDisassociate)
-        .map(item => item.name)
+        .map((item) => item.name)
         .join(', ');
 
       if (itemsToDisassociate.some(cannotDisassociate)) {
@@ -130,7 +130,7 @@ function DisassociateButton({
 
           <div>{t`This action will disassociate the following:`}</div>
 
-          {itemsToDisassociate.map(item => (
+          {itemsToDisassociate.map((item) => (
             <span key={item.id}>
               <strong>{item.hostname ? item.hostname : item.name}</strong>
               <br />

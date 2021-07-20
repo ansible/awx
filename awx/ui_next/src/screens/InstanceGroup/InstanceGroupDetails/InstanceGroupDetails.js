@@ -40,9 +40,8 @@ function InstanceGroupDetails({ instanceGroup, defaultControlPlane }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-  const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
-    instanceGroup
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.instanceGroup(instanceGroup);
 
   return (
     <CardBody>

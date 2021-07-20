@@ -66,10 +66,10 @@ function InventoryGroupHostList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [groupId, inventoryId, location.search]),
     {
@@ -83,9 +83,8 @@ function InventoryGroupHostList() {
     }
   );
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    hosts
-  );
+  const { selected, isAllSelected, handleSelect, setSelected } =
+    useSelected(hosts);
 
   useEffect(() => {
     fetchHosts();
@@ -96,11 +95,13 @@ function InventoryGroupHostList() {
     deleteItems: disassociateHosts,
     deletionError: disassociateErr,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(host => GroupsAPI.disassociateHost(groupId, host))
-      );
-    }, [groupId, selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map((host) => GroupsAPI.disassociateHost(groupId, host))
+        ),
+      [groupId, selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -114,12 +115,11 @@ function InventoryGroupHostList() {
   };
 
   const fetchHostsToAssociate = useCallback(
-    params => {
-      return InventoriesAPI.readHosts(
+    (params) =>
+      InventoriesAPI.readHosts(
         inventoryId,
         mergeParams(params, { not__groups: groupId })
-      );
-    },
+      ),
     [groupId, inventoryId]
   );
 
@@ -130,9 +130,9 @@ function InventoryGroupHostList() {
 
   const { request: handleAssociate, error: associateErr } = useRequest(
     useCallback(
-      async hostsToAssociate => {
+      async (hostsToAssociate) => {
         await Promise.all(
-          hostsToAssociate.map(host =>
+          hostsToAssociate.map((host) =>
             GroupsAPI.associateHost(groupId, host.id)
           )
         );
@@ -142,14 +142,10 @@ function InventoryGroupHostList() {
     )
   );
 
-  const {
-    error: associateError,
-    dismissError: dismissAssociateError,
-  } = useDismissableError(associateErr);
-  const {
-    error: disassociateError,
-    dismissError: dismissDisassociateError,
-  } = useDismissableError(disassociateErr);
+  const { error: associateError, dismissError: dismissAssociateError } =
+    useDismissableError(associateErr);
+  const { error: disassociateError, dismissError: dismissDisassociateError } =
+    useDismissableError(disassociateErr);
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -222,11 +218,11 @@ function InventoryGroupHostList() {
         }
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}
-            onSelectAll={isSelected =>
+            onSelectAll={(isSelected) =>
               setSelected(isSelected ? [...hosts] : [])
             }
             qsConfig={QS_CONFIG}
@@ -263,7 +259,7 @@ function InventoryGroupHostList() {
             host={host}
             detailUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/details`}
             editUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/edit`}
-            isSelected={selected.some(row => row.id === host.id)}
+            isSelected={selected.some((row) => row.id === host.id)}
             onSelect={() => handleSelect(host)}
           />
         )}

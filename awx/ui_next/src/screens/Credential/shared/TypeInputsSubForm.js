@@ -14,10 +14,10 @@ import { CredentialField, GceFileUploadField } from './CredentialFormFields';
 
 function TypeInputsSubForm({ credentialType }) {
   const stringFields = credentialType.inputs.fields.filter(
-    fieldOptions => fieldOptions.type === 'string' || fieldOptions.choices
+    (fieldOptions) => fieldOptions.type === 'string' || fieldOptions.choices
   );
   const booleanFields = credentialType.inputs.fields.filter(
-    fieldOptions => fieldOptions.type === 'boolean'
+    (fieldOptions) => fieldOptions.type === 'boolean'
   );
   return (
     <SubFormLayout>
@@ -26,7 +26,7 @@ function TypeInputsSubForm({ credentialType }) {
       </Title>
       <FormColumnLayout>
         {credentialType.namespace === 'gce' && <GceFileUploadField />}
-        {stringFields.map(fieldOptions =>
+        {stringFields.map((fieldOptions) =>
           fieldOptions.multiline ? (
             <FormFullWidthLayout key={fieldOptions.id}>
               <CredentialField
@@ -46,7 +46,7 @@ function TypeInputsSubForm({ credentialType }) {
           <FormFullWidthLayout>
             <FormGroup fieldId="credential-checkboxes" label={t`Options`}>
               <FormCheckboxLayout>
-                {booleanFields.map(fieldOptions => (
+                {booleanFields.map((fieldOptions) => (
                   <CheckboxField
                     id={`credential-${fieldOptions.id}`}
                     key={fieldOptions.id}

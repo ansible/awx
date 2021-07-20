@@ -20,9 +20,9 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
     setJobs(initialJobs);
   }, [initialJobs]);
 
-  const enqueueJobId = id => {
+  const enqueueJobId = (id) => {
     if (!jobsToFetch.includes(id)) {
-      setJobsToFetch(ids => ids.concat(id));
+      setJobsToFetch((ids) => ids.concat(id));
     }
   };
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
       setJobsToFetch([]);
       const newJobs = await fetchJobsById(throttledJobsToFetch);
       const deduplicated = newJobs.filter(
-        job => !jobs.find(j => j.id === job.id)
+        (job) => !jobs.find((j) => j.id === job.id)
       );
       if (deduplicated.length) {
         const params = parseQueryString(qsConfig, location.search);
@@ -56,7 +56,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
     }
 
     const jobId = lastMessage.unified_job_id;
-    const index = jobs.findIndex(j => j.id === jobId);
+    const index = jobs.findIndex((j) => j.id === jobId);
     if (index > -1) {
       setJobs(sortJobs(updateJob(jobs, index, lastMessage), params));
     } else {

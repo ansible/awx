@@ -147,12 +147,13 @@ describe('<Sort />', () => {
     );
     act(() => wrapper.find('Dropdown').invoke('onToggle')(true));
     wrapper.update();
-    await waitForElement(wrapper, 'Dropdown', el => el.prop('isOpen') === true);
+    await waitForElement(
+      wrapper,
+      'Dropdown',
+      (el) => el.prop('isOpen') === true
+    );
     act(() =>
-      wrapper
-        .find('li')
-        .at(0)
-        .prop('onClick')({ target: { innerText: 'Bar' } })
+      wrapper.find('li').at(0).prop('onClick')({ target: { innerText: 'Bar' } })
     );
     wrapper.update();
     expect(onSort).toBeCalledWith('bar', 'ascending');

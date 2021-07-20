@@ -57,7 +57,7 @@ describe('<SmartInventoryHosts />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('SmartInventoryHost').length).toBe(1);
     jest.clearAllMocks();
   });

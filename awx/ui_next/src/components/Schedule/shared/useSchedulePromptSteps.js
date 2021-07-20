@@ -32,7 +32,7 @@ export default function useSchedulePromptSteps(
     useSurveyStep(launchConfig, surveyConfig, sourceOfValues, visited),
   ];
 
-  const hasErrors = steps.some(step => step.hasError);
+  const hasErrors = steps.some((step) => step.hasError);
 
   steps.push(
     usePreviewStep(
@@ -46,25 +46,26 @@ export default function useSchedulePromptSteps(
     )
   );
 
-  const pfSteps = steps.map(s => s.step).filter(s => s != null);
-  const isReady = !steps.some(s => !s.isReady);
+  const pfSteps = steps.map((s) => s.step).filter((s) => s != null);
+  const isReady = !steps.some((s) => !s.isReady);
 
   useEffect(() => {
     if (launchConfig && surveyConfig && isReady) {
       let initialValues = {};
-      initialValues = steps.reduce((acc, cur) => {
-        return {
+      initialValues = steps.reduce(
+        (acc, cur) => ({
           ...acc,
           ...cur.initialValues,
-        };
-      }, {});
+        }),
+        {}
+      );
 
       if (launchConfig.ask_credential_on_launch) {
         const defaultCredsWithoutOverrides = [];
 
-        const credentialHasOverride = templateDefaultCred => {
+        const credentialHasOverride = (templateDefaultCred) => {
           let hasOverride = false;
-          scheduleCredentials.forEach(scheduleCredential => {
+          scheduleCredentials.forEach((scheduleCredential) => {
             if (
               templateDefaultCred.credential_type ===
               scheduleCredential.credential_type
@@ -86,7 +87,7 @@ export default function useSchedulePromptSteps(
         };
 
         if (resourceDefaultCredentials) {
-          resourceDefaultCredentials.forEach(defaultCred => {
+          resourceDefaultCredentials.forEach((defaultCred) => {
             if (!credentialHasOverride(defaultCred)) {
               defaultCredsWithoutOverrides.push(defaultCred);
             }
@@ -109,13 +110,13 @@ export default function useSchedulePromptSteps(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [launchConfig, surveyConfig, isReady]);
 
-  const stepWithError = steps.find(s => s.contentError);
+  const stepWithError = steps.find((s) => s.contentError);
   const contentError = stepWithError ? stepWithError.contentError : null;
 
   return {
     isReady,
-    validateStep: stepId => {
-      steps.find(s => s?.step?.id === stepId).validate();
+    validateStep: (stepId) => {
+      steps.find((s) => s?.step?.id === stepId).validate();
     },
     steps: pfSteps,
     visitStep: (prevStepId, setFieldTouched) => {
@@ -123,9 +124,9 @@ export default function useSchedulePromptSteps(
         ...visited,
         [prevStepId]: true,
       });
-      steps.find(s => s?.step?.id === prevStepId).setTouched(setFieldTouched);
+      steps.find((s) => s?.step?.id === prevStepId).setTouched(setFieldTouched);
     },
-    visitAllSteps: setFieldTouched => {
+    visitAllSteps: (setFieldTouched) => {
       setVisited({
         inventory: true,
         credentials: true,
@@ -133,7 +134,7 @@ export default function useSchedulePromptSteps(
         survey: true,
         preview: true,
       });
-      steps.forEach(s => s.setTouched(setFieldTouched));
+      steps.forEach((s) => s.setTouched(setFieldTouched));
     },
     contentError,
   };

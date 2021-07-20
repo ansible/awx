@@ -41,7 +41,7 @@ function PromptModalForm({
     setValue('inventory_id', values.inventory?.id);
     setValue(
       'credentials',
-      values.credentials?.map(c => c.id)
+      values.credentials?.map((c) => c.id)
     );
     setValue('job_type', values.job_type);
     setValue('limit', values.limit);
@@ -78,7 +78,7 @@ function PromptModalForm({
       isOpen
       onClose={onCancel}
       onSave={handleSubmit}
-      onBack={async nextStep => {
+      onBack={async (nextStep) => {
         validateStep(nextStep.id);
       }}
       onNext={async (nextStep, prevStep) => {
@@ -141,9 +141,9 @@ function LaunchPrompt({
   resourceDefaultCredentials = [],
 }) {
   return (
-    <Formik initialValues={{}} onSubmit={values => onLaunch(values)}>
+    <Formik initialValues={{}} onSubmit={(values) => onLaunch(values)}>
       <PromptModalForm
-        onSubmit={values => onLaunch(values)}
+        onSubmit={(values) => onLaunch(values)}
         onCancel={onCancel}
         launchConfig={launchConfig}
         surveyConfig={surveyConfig}

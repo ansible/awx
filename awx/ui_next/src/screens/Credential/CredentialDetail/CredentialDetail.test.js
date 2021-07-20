@@ -57,7 +57,7 @@ describe('<CredentialDetail />', () => {
         <CredentialDetail credential={mockCredential} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   test('should render successfully', () => {
@@ -125,7 +125,7 @@ describe('<CredentialDetail />', () => {
         <CredentialDetail credential={mockCredential} />
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('handleDelete should call api', async () => {
@@ -144,7 +144,7 @@ describe('<CredentialDetail />', () => {
     await act(async () => {
       wrapper.find('DeleteButton').invoke('onConfirm')();
     });
-    await waitForElement(wrapper, 'ErrorDetail', el => el.length === 1);
+    await waitForElement(wrapper, 'ErrorDetail', (el) => el.length === 1);
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });

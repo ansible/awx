@@ -41,7 +41,7 @@ export const ScmCredentialFormField = ({
   const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const onCredentialChange = useCallback(
-    value => {
+    (value) => {
       onCredentialSelection('scm', value);
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);

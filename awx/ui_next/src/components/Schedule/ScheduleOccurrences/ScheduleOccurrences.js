@@ -50,7 +50,7 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
                 ['utc', t`UTC`],
               ]}
               value={mode}
-              onChange={newMode => setMode(newMode)}
+              onChange={(newMode) => setMode(newMode)}
               name="timezone"
             />
           </SplitItem>
@@ -61,7 +61,7 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
         fullWidth
         css="grid-column: 1 / -1; margin-top: -10px"
       >
-        {preview[mode].map(dateStr => (
+        {preview[mode].map((dateStr) => (
           <div key={dateStr}>
             {mode === 'local'
               ? formatDateString(dateStr)

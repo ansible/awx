@@ -75,7 +75,7 @@ describe('<OrganizationExecEnvList/>', () => {
     await waitForElement(
       wrapper,
       'OrganizationExecEnvList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
   });
 
@@ -96,7 +96,7 @@ describe('<OrganizationExecEnvList/>', () => {
     await waitForElement(
       wrapper,
       'OrganizationExecEnvList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
 
     expect(wrapper.find('OrganizationExecEnvListItem').length).toBe(3);
@@ -110,7 +110,7 @@ describe('<OrganizationExecEnvList/>', () => {
         <OrganizationExecEnvList organization={mockOrganization} />
       );
     });
-    waitForElement(wrapper, 'OrganizationExecEnvList', el => el.length > 0);
+    waitForElement(wrapper, 'OrganizationExecEnvList', (el) => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 });

@@ -25,7 +25,12 @@ function GitHubDetail() {
     params: { category },
   } = useRouteMatch(`${baseURL}/:category/details`);
 
-  const { isLoading, error, request, result: gitHubDetails } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: gitHubDetails,
+  } = useRequest(
     useCallback(async () => {
       const [
         { data: gitHubDefault },
@@ -120,7 +125,7 @@ function GitHubDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && !Object.values(gitHubDetails)?.includes(null) && (
           <DetailList>
-            {Object.keys(gitHubDetails[category]).map(key => {
+            {Object.keys(gitHubDetails[category]).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

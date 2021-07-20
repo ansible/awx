@@ -64,7 +64,7 @@ describe('<WorkflowApprovals />', () => {
       });
     });
 
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('Title').length).toBe(1);
   });
 });

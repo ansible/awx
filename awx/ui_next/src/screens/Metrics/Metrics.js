@@ -72,7 +72,7 @@ function Metrics() {
       const metricOptions = Object.keys(mets);
 
       return {
-        instances: [...results.map(result => result.hostname), 'All'],
+        instances: [...results.map((result) => result.hostname), 'All'],
         metrics: metricOptions,
       };
     }, []),
@@ -94,11 +94,13 @@ function Metrics() {
 
       const rendered = renderedData;
       const instanceData = Object.values(data);
-      instanceData.forEach(value => {
-        value.samples.forEach(sample => {
-          instances.forEach(i => {
+      instanceData.forEach((value) => {
+        value.samples.forEach((sample) => {
+          instances.forEach((i) => {
             if (i === sample.labels.node) {
-              const renderedIndex = renderedData.findIndex(rd => rd.name === i);
+              const renderedIndex = renderedData.findIndex(
+                (rd) => rd.name === i
+              );
 
               if (renderedIndex === -1) {
                 rendered.push({
@@ -190,7 +192,7 @@ function Metrics() {
                       selections={instance}
                       placeholderText={t`Select a instance`}
                     >
-                      {instances.map(inst => (
+                      {instances.map((inst) => (
                         <SelectOption value={inst} key={inst} />
                       ))}
                     </Select>
@@ -210,7 +212,7 @@ function Metrics() {
                       onToggle={setMetricIsOpen}
                       selections={metric}
                     >
-                      {metrics.map(met => (
+                      {metrics.map((met) => (
                         <SelectOption value={met} key={met} />
                       ))}
                     </Select>

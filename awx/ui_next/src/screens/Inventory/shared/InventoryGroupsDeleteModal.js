@@ -30,7 +30,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
       onKebabModalChange(isModalOpen);
     }
   }, [isKebabified, isModalOpen, onKebabModalChange]);
-  const handleDelete = async option => {
+  const handleDelete = async (option) => {
     setIsDeleteLoading(true);
 
     try {
@@ -115,9 +115,9 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
           />
 
           <div css="padding: 24px 0;">
-            {groups.map(group => {
-              return <ListItem key={group.id}>{group.name}</ListItem>;
-            })}
+            {groups.map((group) => (
+              <ListItem key={group.id}>{group.name}</ListItem>
+            ))}
           </div>
           <div>
             <Radio

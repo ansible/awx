@@ -56,10 +56,10 @@ function CredentialTypeList() {
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           responseActions.data.actions?.GET || {}
-        ).filter(key => responseActions.data.actions?.GET[key].filterable),
+        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -75,13 +75,8 @@ function CredentialTypeList() {
     fetchCredentialTypes();
   }, [fetchCredentialTypes]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(credentialTypes);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(credentialTypes);
 
   const {
     isLoading: deleteLoading,
@@ -89,11 +84,11 @@ function CredentialTypeList() {
     deleteItems: deleteCredentialTypes,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id }) => CredentialTypesAPI.destroy(id))
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(selected.map(({ id }) => CredentialTypesAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -145,7 +140,7 @@ function CredentialTypeList() {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DatalistToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -190,7 +185,9 @@ function CredentialTypeList() {
                 credentialType={credentialType}
                 detailUrl={`${match.url}/${credentialType.id}/details`}
                 onSelect={() => handleSelect(credentialType)}
-                isSelected={selected.some(row => row.id === credentialType.id)}
+                isSelected={selected.some(
+                  (row) => row.id === credentialType.id
+                )}
                 rowIndex={index}
               />
             )}

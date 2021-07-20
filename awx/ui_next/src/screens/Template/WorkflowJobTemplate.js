@@ -42,20 +42,16 @@ function WorkflowJobTemplate({ setBreadcrumb }) {
     request: loadTemplateAndRoles,
   } = useRequest(
     useCallback(async () => {
-      const [
-        { data },
-        actions,
-        notifAdminRes,
-        { data: launchConfiguration },
-      ] = await Promise.all([
-        WorkflowJobTemplatesAPI.readDetail(templateId),
-        WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions(templateId),
-        OrganizationsAPI.read({
-          page_size: 1,
-          role_level: 'notification_admin_role',
-        }),
-        WorkflowJobTemplatesAPI.readLaunch(templateId),
-      ]);
+      const [{ data }, actions, notifAdminRes, { data: launchConfiguration }] =
+        await Promise.all([
+          WorkflowJobTemplatesAPI.readDetail(templateId),
+          WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions(templateId),
+          OrganizationsAPI.read({
+            page_size: 1,
+            role_level: 'notification_admin_role',
+          }),
+          WorkflowJobTemplatesAPI.readLaunch(templateId),
+        ]);
 
       let surveyConfiguration = null;
 
@@ -91,14 +87,13 @@ function WorkflowJobTemplate({ setBreadcrumb }) {
     loadTemplateAndRoles();
   }, [loadTemplateAndRoles, location.pathname]);
 
-  const loadScheduleOptions = useCallback(() => {
-    return WorkflowJobTemplatesAPI.readScheduleOptions(templateId);
-  }, [templateId]);
+  const loadScheduleOptions = useCallback(
+    () => WorkflowJobTemplatesAPI.readScheduleOptions(templateId),
+    [templateId]
+  );
 
   const loadSchedules = useCallback(
-    params => {
-      return WorkflowJobTemplatesAPI.readSchedules(templateId, params);
-    },
+    (params) => WorkflowJobTemplatesAPI.readSchedules(templateId, params),
     [templateId]
   );
 

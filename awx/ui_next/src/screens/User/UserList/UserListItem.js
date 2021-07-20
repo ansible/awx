@@ -51,10 +51,10 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, rowIndex }) {
         )}
       </Td>
       <Td dataLabel={t`First Name`}>
-        {user.first_name && <Fragment>{user.first_name}</Fragment>}
+        {user.first_name && <>{user.first_name}</>}
       </Td>
       <Td dataLabel={t`Last Name`}>
-        {user.last_name && <Fragment>{user.last_name}</Fragment>}
+        {user.last_name && <>{user.last_name}</>}
       </Td>
       <Td dataLabel={t`Role`}>{user_type}</Td>
       <ActionsTd dataLabel={t`Actions`}>

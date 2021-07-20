@@ -23,7 +23,7 @@ const FieldHeader = styled.div`
 function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
   return (
     <Form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
       }}
     >

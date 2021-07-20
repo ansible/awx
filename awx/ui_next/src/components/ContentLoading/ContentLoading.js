@@ -13,13 +13,11 @@ const EmptyState = styled(PFEmptyState)`
 `;
 
 // TODO: Better loading state - skeleton lines / spinner, etc.
-const ContentLoading = ({ className }) => {
-  return (
-    <EmptyState variant="full" className={className}>
-      <EmptyStateIcon variant="container" component={Spinner} />
-    </EmptyState>
-  );
-};
+const ContentLoading = ({ className }) => (
+  <EmptyState variant="full" className={className}>
+    <EmptyStateIcon variant="container" component={Spinner} />
+  </EmptyState>
+);
 
 export { ContentLoading as _ContentLoading };
 export default ContentLoading;

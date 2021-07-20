@@ -47,6 +47,10 @@ describe('<Subscription />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'SubscriptionDetail', el => el.length === 1);
+    await waitForElement(
+      wrapper,
+      'SubscriptionDetail',
+      (el) => el.length === 1
+    );
   });
 });

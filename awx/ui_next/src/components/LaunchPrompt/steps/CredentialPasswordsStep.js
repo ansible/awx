@@ -19,7 +19,7 @@ function CredentialPasswordsStep({ launchConfig }) {
     !launchConfig.ask_credential_on_launch &&
     launchConfig.passwords_needed_to_start
   ) {
-    launchConfig.passwords_needed_to_start.forEach(password => {
+    launchConfig.passwords_needed_to_start.forEach((password) => {
       if (password === 'ssh_password') {
         showcredentialPasswordSsh = true;
       } else if (password === 'become_password') {
@@ -32,10 +32,10 @@ function CredentialPasswordsStep({ launchConfig }) {
       }
     });
   } else if (credentials) {
-    credentials.forEach(credential => {
+    credentials.forEach((credential) => {
       if (!credential.inputs) {
         const launchConfigCredential = launchConfig.defaults.credentials.find(
-          defaultCred => defaultCred.id === credential.id
+          (defaultCred) => defaultCred.id === credential.id
         );
 
         if (launchConfigCredential?.passwords_needed.length > 0) {
@@ -56,10 +56,10 @@ function CredentialPasswordsStep({ launchConfig }) {
           }
 
           const vaultPasswordIds = launchConfigCredential.passwords_needed
-            .filter(passwordNeeded =>
+            .filter((passwordNeeded) =>
               passwordNeeded.startsWith('vault_password')
             )
-            .map(vaultPassword => vaultPassword.split(/\.(.+)/)[1] || '');
+            .map((vaultPassword) => vaultPassword.split(/\.(.+)/)[1] || '');
 
           vaultsThatPrompt.push(...vaultPasswordIds);
         }
@@ -85,7 +85,7 @@ function CredentialPasswordsStep({ launchConfig }) {
 
   return (
     <Form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
       }}
     >
@@ -113,7 +113,7 @@ function CredentialPasswordsStep({ launchConfig }) {
           isRequired
         />
       )}
-      {vaultsThatPrompt.map(credId => (
+      {vaultsThatPrompt.map((credId) => (
         <PasswordField
           id={`launch-vault-password-${credId}`}
           key={credId}

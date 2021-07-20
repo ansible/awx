@@ -25,11 +25,16 @@ function UIEdit() {
   const { PUT: options } = useSettings();
   const { license_info } = useConfig();
 
-  const { isLoading, error, request: fetchUI, result: uiData } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchUI,
+    result: uiData,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('ui');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -47,7 +52,7 @@ function UIEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         if (
           values?.PENDO_TRACKING_STATE !== uiData?.PENDO_TRACKING_STATE?.value
@@ -72,7 +77,7 @@ function UIEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm(form);
   };
 
@@ -104,7 +109,7 @@ function UIEdit() {
           }}
           onSubmit={handleSubmit}
         >
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <ChoiceField

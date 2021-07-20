@@ -64,7 +64,7 @@ function ScheduleAdd({
       !Object.values(surveyValues).length &&
       surveyConfiguration?.spec?.length
     ) {
-      surveyConfiguration.spec.forEach(q => {
+      surveyConfiguration.spec.forEach((q) => {
         surveyValues[q.variable] = q.default;
       });
     }

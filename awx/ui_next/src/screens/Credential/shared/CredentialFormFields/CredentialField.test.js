@@ -5,7 +5,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import credentialTypes from '../data.credentialTypes.json';
 import CredentialField from './CredentialField';
 
-const credentialType = credentialTypes.find(type => type.id === 5);
+const credentialType = credentialTypes.find((type) => type.id === 5);
 const fieldOptions = {
   id: 'password',
   label: 'Secret Key',

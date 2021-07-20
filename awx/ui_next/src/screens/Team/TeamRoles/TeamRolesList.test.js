@@ -191,37 +191,22 @@ describe('<TeamRolesList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     expect(
-      wrapper
-        .find('Tr#role-item-row-2')
-        .find(`LinkAnchor`)
-        .prop('href')
+      wrapper.find('Tr#role-item-row-2').find(`LinkAnchor`).prop('href')
     ).toBe('/templates/job_template/15/details');
     expect(
-      wrapper
-        .find('Tr#role-item-row-3')
-        .find(`LinkAnchor`)
-        .prop('href')
+      wrapper.find('Tr#role-item-row-3').find(`LinkAnchor`).prop('href')
     ).toBe('/templates/workflow_job_template/16/details');
     expect(
-      wrapper
-        .find('Tr#role-item-row-4')
-        .find('LinkAnchor')
-        .prop('href')
+      wrapper.find('Tr#role-item-row-4').find('LinkAnchor').prop('href')
     ).toBe('/credentials/75/details');
     expect(
-      wrapper
-        .find('Tr#role-item-row-5')
-        .find('LinkAnchor')
-        .prop('href')
+      wrapper.find('Tr#role-item-row-5').find('LinkAnchor').prop('href')
     ).toBe('/inventories/inventory/76/details');
     expect(
-      wrapper
-        .find('Tr#role-item-row-6')
-        .find('LinkAnchor')
-        .prop('href')
+      wrapper.find('Tr#role-item-row-6').find('LinkAnchor').prop('href')
     ).toBe('/inventories/smart_inventory/77/details');
   });
   test('should not render add button when user cannot edit team and is not an admin of the org', async () => {
@@ -256,7 +241,7 @@ describe('<TeamRolesList />', () => {
       wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="Add resource roles"]').length).toBe(
       0
     );
@@ -269,7 +254,7 @@ describe('<TeamRolesList />', () => {
       wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     await act(async () =>
       wrapper.find('Chip[aria-label="Execute"]').prop('onClick')({
@@ -321,7 +306,7 @@ describe('<TeamRolesList />', () => {
       wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     await act(async () =>
       wrapper.find('Chip[aria-label="Execute"]').prop('onClick')({
@@ -380,7 +365,7 @@ describe('<TeamRolesList />', () => {
     waitForElement(
       wrapper,
       'EmptyState[title="System Administrator"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
   });
 });

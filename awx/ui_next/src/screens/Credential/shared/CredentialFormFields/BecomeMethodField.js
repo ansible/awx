@@ -25,7 +25,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
       'ksu',
       'machinectl',
       'sesu',
-    ].map(val => ({ value: val }))
+    ].map((val) => ({ value: val }))
   );
   const [becomeMethodField, meta, helpers] = useField({
     name: `inputs.${fieldOptions.id}`,
@@ -58,11 +58,11 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
         id="privilege-escalation-methods"
         selections={becomeMethodField.value}
         isCreatable
-        onCreateOption={option => {
+        onCreateOption={(option) => {
           setOptions([...options, { value: option }]);
         }}
       >
-        {options.map(option => (
+        {options.map((option) => (
           <SelectOption key={option.value} value={option.value} />
         ))}
       </Select>

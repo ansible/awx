@@ -59,25 +59,10 @@ describe('<ExecutionEnvironmentListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe(executionEnvironment.name);
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe(executionEnvironment.image);
+    expect(wrapper.find('Td').at(1).text()).toBe(executionEnvironment.name);
+    expect(wrapper.find('Td').at(2).text()).toBe(executionEnvironment.image);
 
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toBe('Globally Available');
+    expect(wrapper.find('Td').at(3).text()).toBe('Globally Available');
 
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
@@ -165,25 +150,10 @@ describe('<ExecutionEnvironmentListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe(executionEnvironment.name);
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe(executionEnvironment.image);
+    expect(wrapper.find('Td').at(1).text()).toBe(executionEnvironment.name);
+    expect(wrapper.find('Td').at(2).text()).toBe(executionEnvironment.image);
 
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toBe('Globally Available');
+    expect(wrapper.find('Td').at(3).text()).toBe('Globally Available');
 
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });

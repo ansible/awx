@@ -55,9 +55,9 @@ function OrganizationsList() {
         actions: orgActions.data.actions,
         relatedSearchableKeys: (
           orgActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(orgActions.data.actions?.GET || {}).filter(
-          key => orgActions.data.actions?.GET[key].filterable
+          (key) => orgActions.data.actions?.GET[key].filterable
         ),
       };
     }, [location]),
@@ -74,13 +74,8 @@ function OrganizationsList() {
     fetchOrganizations();
   }, [fetchOrganizations]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(organizations);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(organizations);
 
   const {
     isLoading: isDeleteLoading,
@@ -88,11 +83,10 @@ function OrganizationsList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id }) => OrganizationsAPI.destroy(id))
-      );
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map(({ id }) => OrganizationsAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -153,7 +147,7 @@ function OrganizationsList() {
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -186,7 +180,7 @@ function OrganizationsList() {
                 organization={o}
                 rowIndex={index}
                 detailUrl={`${match.url}/${o.id}`}
-                isSelected={selected.some(row => row.id === o.id)}
+                isSelected={selected.some((row) => row.id === o.id)}
                 onSelect={() => handleSelect(o)}
               />
             )}

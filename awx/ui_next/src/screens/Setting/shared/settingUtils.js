@@ -18,7 +18,10 @@ export function sortNestedDetails(obj = {}) {
 }
 
 export function pluck(sourceObject, ...keys) {
-  return Object.assign({}, ...keys.map(key => ({ [key]: sourceObject[key] })));
+  return Object.assign(
+    {},
+    ...keys.map((key) => ({ [key]: sourceObject[key] }))
+  );
 }
 
 export function formatJson(jsonString) {

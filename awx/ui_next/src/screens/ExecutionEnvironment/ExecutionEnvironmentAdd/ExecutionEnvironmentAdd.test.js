@@ -108,7 +108,7 @@ describe('<ExecutionEnvironmentAdd/>', () => {
   });
 
   test('handleCancel should return the user back to the execution environments list', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     wrapper.find('Button[aria-label="Cancel"]').simulate('click');
     expect(history.location.pathname).toEqual('/execution_environments');

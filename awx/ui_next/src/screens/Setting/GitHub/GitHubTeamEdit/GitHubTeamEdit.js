@@ -24,11 +24,16 @@ function GitHubTeamEdit() {
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
-  const { isLoading, error, request: fetchGithub, result: github } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchGithub,
+    result: github,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('github-team');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -46,7 +51,7 @@ function GitHubTeamEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/github/team/details');
       },
@@ -62,7 +67,7 @@ function GitHubTeamEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       ...form,
       SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: formatJson(
@@ -86,7 +91,7 @@ function GitHubTeamEdit() {
     history.push('/settings/github/team/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
         const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
@@ -105,7 +110,7 @@ function GitHubTeamEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && github && (
         <Formik initialValues={initialValues(github)} onSubmit={handleSubmit}>
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField

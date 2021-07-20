@@ -29,7 +29,11 @@ function UserDetail({ user }) {
   } = user;
   const history = useHistory();
 
-  const { request: deleteUser, isLoading, error: deleteError } = useRequest(
+  const {
+    request: deleteUser,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
     useCallback(async () => {
       await UsersAPI.destroy(id);
       history.push(`/users`);

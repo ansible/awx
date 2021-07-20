@@ -32,7 +32,12 @@ function Schedule({
 
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  const { isLoading, error, request: loadData, result: schedule } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: loadData,
+    result: schedule,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SchedulesAPI.readDetail(scheduleId);
 

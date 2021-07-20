@@ -43,7 +43,7 @@ function UserTokenList() {
         UsersAPI.readTokens(id, params),
         UsersAPI.readTokenOptions(id),
       ]);
-      const modifiedResults = results.map(result => {
+      const modifiedResults = results.map((result) => {
         result.summary_fields = {
           user: result.summary_fields.user,
           application: result.summary_fields.application,
@@ -57,10 +57,10 @@ function UserTokenList() {
         itemCount: count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [id, location.search]),
     { tokens: [], itemCount: 0, relatedSearchableKeys: [], searchableKeys: [] }
@@ -70,13 +70,8 @@ function UserTokenList() {
     fetchTokens();
   }, [fetchTokens]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(tokens);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(tokens);
 
   const {
     isLoading: isDeleteLoading,
@@ -84,11 +79,13 @@ function UserTokenList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id: tokenId }) => TokensAPI.destroy(tokenId))
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map(({ id: tokenId }) => TokensAPI.destroy(tokenId))
+        ),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -147,7 +144,7 @@ function UserTokenList() {
         ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}
@@ -185,7 +182,7 @@ function UserTokenList() {
             onSelect={() => {
               handleSelect(token);
             }}
-            isSelected={selected.some(row => row.id === token.id)}
+            isSelected={selected.some((row) => row.id === token.id)}
             rowIndex={index}
           />
         )}

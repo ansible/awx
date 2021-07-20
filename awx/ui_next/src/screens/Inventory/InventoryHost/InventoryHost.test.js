@@ -61,8 +61,8 @@ describe('<InventoryHost />', () => {
         <InventoryHost inventory={mockInventory} setBreadcrumb={() => {}} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
@@ -75,7 +75,7 @@ describe('<InventoryHost />', () => {
         { context: { router: { history } } }
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should show content error when inventory id does not match host inventory', async () => {
@@ -84,6 +84,6 @@ describe('<InventoryHost />', () => {
         <InventoryHost inventory={{ id: 99 }} setBreadcrumb={() => {}} />
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

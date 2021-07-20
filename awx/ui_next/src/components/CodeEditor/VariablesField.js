@@ -39,7 +39,7 @@ function VariablesField({
   const [shouldValidate, setShouldValidate] = useState(false);
   const [mode, setMode] = useState(initialMode || YAML_MODE);
   const validate = useCallback(
-    value => {
+    (value) => {
       if (!shouldValidate) {
         return undefined;
       }
@@ -58,7 +58,7 @@ function VariablesField({
   );
   const [field, meta, helpers] = useField({ name, validate });
 
-  useEffect(function initializeJSON() {
+  useEffect(() => {
     if (isJsonString(field.value)) {
       // mode's useState above couldn't be initialized to JSON_MODE because
       // the field value had to be defined below it
@@ -69,7 +69,7 @@ function VariablesField({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(
-    function validateOnBlur() {
+    () => {
       if (shouldValidate) {
         helpers.setError(validate(field.value));
       }
@@ -82,7 +82,7 @@ function VariablesField({
   const [isJsonEdited, setIsJsonEdited] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleModeChange = newMode => {
+  const handleModeChange = (newMode) => {
     if (newMode === YAML_MODE && !isJsonEdited && lastYamlValue !== null) {
       helpers.setValue(lastYamlValue, false);
       setMode(newMode);
@@ -103,7 +103,7 @@ function VariablesField({
     }
   };
 
-  const handleChange = newVal => {
+  const handleChange = (newVal) => {
     helpers.setValue(newVal);
     if (mode === JSON_MODE) {
       setIsJsonEdited(true);
@@ -201,7 +201,7 @@ function VariablesFieldInternals({
 }) {
   const [field, meta, helpers] = useField(name);
 
-  useEffect(function formatJsonString() {
+  useEffect(() => {
     if (mode === YAML_MODE) {
       return;
     }

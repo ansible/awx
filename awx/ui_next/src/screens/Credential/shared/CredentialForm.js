@@ -26,7 +26,7 @@ const Select = styled(PFSelect)`
   ul {
     max-width: 495px;
   }
-  ${props => (props.isDisabled ? `cursor: not-allowed` : null)}
+  ${(props) => (props.isDisabled ? `cursor: not-allowed` : null)}
 `;
 
 const SelectOption = styled(PFSelectOption)`
@@ -52,17 +52,15 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
 
   const credentialTypeOptions = Object.keys(credentialTypes)
-    .map(key => {
-      return {
-        value: credentialTypes[key].id,
-        key: credentialTypes[key].id,
-        label: credentialTypes[key].name,
-      };
-    })
+    .map((key) => ({
+      value: credentialTypes[key].id,
+      key: credentialTypes[key].id,
+      label: credentialTypes[key].name,
+    }))
     .sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
 
   const resetSubFormFields = useCallback(
-    newCredentialTypeId => {
+    (newCredentialTypeId) => {
       const fields = credentialTypes[newCredentialTypeId].inputs.fields || [];
       fields.forEach(
         ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
@@ -115,7 +113,7 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
   }, [resetSubFormFields, credentialTypeId]);
 
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -143,7 +141,7 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
       maxHeight="300px"
       width="100%"
     >
-      {credentialTypeOptions.map(credType => (
+      {credentialTypeOptions.map((credType) => (
         <SelectOption
           key={credType.value}
           value={credType.value}
@@ -241,7 +239,7 @@ function CredentialForm({
     isOrgLookupDisabled: isOrgLookupDisabled || false,
   };
 
-  Object.values(credentialTypes).forEach(credentialType => {
+  Object.values(credentialTypes).forEach((credentialType) => {
     if (!credential.id || credential.credential_type === credentialType.id) {
       const fields = credentialType.inputs.fields || [];
       fields.forEach(
@@ -280,7 +278,7 @@ function CredentialForm({
     }
   });
 
-  Object.values(inputSources).forEach(inputSource => {
+  Object.values(inputSources).forEach((inputSource) => {
     initialValues.inputs[inputSource.input_field_name] = {
       credential: inputSource.summary_fields.source_credential,
       inputs: inputSource.metadata,
@@ -290,18 +288,18 @@ function CredentialForm({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={values => {
+      onSubmit={(values) => {
         const { credential_type, ...actualValues } = values;
         // credential_type could be the raw id or the displayed name value.
         // If it's the name, replace it with the id before making the request.
         actualValues.credential_type =
           Object.keys(credentialTypes).find(
-            key => credentialTypes[key].name === credential_type
+            (key) => credentialTypes[key].name === credential_type
           ) || credential_type;
         onSubmit(actualValues);
       }}
     >
-      {formik => (
+      {(formik) => (
         <>
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>

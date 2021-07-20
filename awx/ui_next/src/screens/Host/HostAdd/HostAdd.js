@@ -9,7 +9,7 @@ function HostAdd() {
   const [formError, setFormError] = useState(null);
   const history = useHistory();
 
-  const handleSubmit = async formData => {
+  const handleSubmit = async (formData) => {
     try {
       const dataToSend = { ...formData };
       if (dataToSend.inventory) {

@@ -1,4 +1,4 @@
-const Runnable = parent =>
+const Runnable = (parent) =>
   class extends parent {
     jobEventSlug = '/events/';
 

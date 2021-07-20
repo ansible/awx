@@ -32,11 +32,11 @@ function SurveyStep({ surveyConfig }) {
   };
   return (
     <Form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
       }}
     >
-      {surveyConfig.spec.map(question => {
+      {surveyConfig.spec.map((question) => {
         const Field = fieldTypes[question.type];
         return <Field key={question.variable} question={question} />;
       })}
@@ -131,7 +131,7 @@ function MultipleChoiceField({ question }) {
           helpers.setValue('');
         }}
       >
-        {options.map(opt => (
+        {options.map((opt) => (
           <SelectOption key={opt} value={opt} />
         ))}
       </Select>
@@ -175,7 +175,7 @@ function MultiSelectField({ question }) {
         onToggle={setIsOpen}
         onSelect={(event, option) => {
           if (field?.value?.includes(option)) {
-            helpers.setValue(field.value.filter(o => o !== option));
+            helpers.setValue(field.value.filter((o) => o !== option));
           } else {
             helpers.setValue(field.value.concat(option));
           }
@@ -188,7 +188,7 @@ function MultiSelectField({ question }) {
           helpers.setValue([]);
         }}
       >
-        {options.map(opt => (
+        {options.map((opt) => (
           <SelectOption key={opt} value={opt} />
         ))}
       </Select>

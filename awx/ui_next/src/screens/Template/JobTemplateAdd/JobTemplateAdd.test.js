@@ -146,7 +146,7 @@ describe('<JobTemplateAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobTemplateAdd />);
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Bar', name: 'name' },
@@ -210,7 +210,7 @@ describe('<JobTemplateAdd />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Foo', name: 'name' },
@@ -255,7 +255,7 @@ describe('<JobTemplateAdd />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });

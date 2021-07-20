@@ -83,7 +83,7 @@ describe('<WorkflowJobTemplate />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 8
+      (el) => el.length === 8
     );
     expect(tabs.at(3).text()).toEqual('Notifications');
   });
@@ -106,9 +106,9 @@ describe('<WorkflowJobTemplate />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 7
+      (el) => el.length === 7
     );
-    tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
+    tabs.forEach((tab) => expect(tab.text()).not.toEqual('Notifications'));
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
@@ -137,7 +137,7 @@ describe('<WorkflowJobTemplate />', () => {
       );
     });
 
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should call to get webhook key', async () => {
@@ -255,7 +255,7 @@ describe('<WorkflowJobTemplate />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('NotificationListItem').length).toBe(1);
     expect(wrapper.find('Switch[label="Approval"]')).toHaveLength(1);
     expect(wrapper.find('Switch[label="Start"]')).toHaveLength(1);

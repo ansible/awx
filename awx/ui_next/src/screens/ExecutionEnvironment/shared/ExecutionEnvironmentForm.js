@@ -21,71 +21,64 @@ function ExecutionEnvironmentFormFields({
   executionEnvironment,
   isOrgLookupDisabled,
 }) {
-  const [credentialField, credentialMeta, credentialHelpers] = useField(
-    'credential'
-  );
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
+  const [credentialField, credentialMeta, credentialHelpers] =
+    useField('credential');
+  const [organizationField, organizationMeta, organizationHelpers] =
+    useField('organization');
 
   const isGloballyAvailable = useRef(!organizationField.value);
 
   const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const onCredentialChange = useCallback(
-    value => {
+    (value) => {
       setFieldValue('credential', value);
     },
     [setFieldValue]
   );
 
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
     [setFieldValue, setFieldTouched]
   );
 
-  const [
-    containerOptionsField,
-    containerOptionsMeta,
-    containerOptionsHelpers,
-  ] = useField('pull');
+  const [containerOptionsField, containerOptionsMeta, containerOptionsHelpers] =
+    useField('pull');
 
   const containerPullChoices = options?.actions?.POST?.pull?.choices.map(
     ([value, label]) => ({ value, label, key: value })
   );
 
-  const renderOrganizationLookup = () => {
-    return (
-      <OrganizationLookup
-        helperTextInvalid={organizationMeta.error}
-        isValid={!organizationMeta.touched || !organizationMeta.error}
-        onBlur={() => organizationHelpers.setTouched()}
-        onChange={handleOrganizationUpdate}
-        value={organizationField.value}
-        required={!me.is_superuser}
-        helperText={
-          me?.is_superuser &&
-          ((!isOrgLookupDisabled && isGloballyAvailable) ||
-            organizationField.value === null)
-            ? t`Leave this field blank to make the execution environment globally available.`
-            : null
-        }
-        autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
-        isDisabled={
-          (!!isOrgLookupDisabled && isGloballyAvailable.current) ||
-          executionEnvironment?.managed
-        }
-        validate={
-          !me?.is_superuser
-            ? required(t`Select a value for this field`)
-            : undefined
-        }
-      />
-    );
-  };
+  const renderOrganizationLookup = () => (
+    <OrganizationLookup
+      helperTextInvalid={organizationMeta.error}
+      isValid={!organizationMeta.touched || !organizationMeta.error}
+      onBlur={() => organizationHelpers.setTouched()}
+      onChange={handleOrganizationUpdate}
+      value={organizationField.value}
+      required={!me.is_superuser}
+      helperText={
+        me?.is_superuser &&
+        ((!isOrgLookupDisabled && isGloballyAvailable) ||
+          organizationField.value === null)
+          ? t`Leave this field blank to make the execution environment globally available.`
+          : null
+      }
+      autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
+      isDisabled={
+        (!!isOrgLookupDisabled && isGloballyAvailable.current) ||
+        executionEnvironment?.managed
+      }
+      validate={
+        !me?.is_superuser
+          ? required(t`Select a value for this field`)
+          : undefined
+      }
+    />
+  );
 
   return (
     <>
@@ -218,8 +211,11 @@ function ExecutionEnvironmentForm({
     organization: executionEnvironment.summary_fields?.organization || null,
   };
   return (
-    <Formik initialValues={initialValues} onSubmit={values => onSubmit(values)}>
-      {formik => (
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => onSubmit(values)}
+    >
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <ExecutionEnvironmentFormFields

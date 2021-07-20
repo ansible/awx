@@ -204,10 +204,10 @@ describe('Visualizer', () => {
     wrapper.find('WorkflowActionTooltipItem#link-edit').simulate('click');
     expect(wrapper.find('LinkEditModal').length).toBe(1);
     act(() => {
-      wrapper
-        .find('LinkEditModal')
-        .find('AnsibleSelect')
-        .prop('onChange')(null, 'success');
+      wrapper.find('LinkEditModal').find('AnsibleSelect').prop('onChange')(
+        null,
+        'success'
+      );
     });
     wrapper.find('button#link-confirm').simulate('click');
     expect(wrapper.find('LinkEditModal').length).toBe(0);
@@ -247,7 +247,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to node add error', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -299,7 +299,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to node edit error', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -355,7 +355,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to approval template add error', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -419,7 +419,7 @@ describe('Visualizer', () => {
 
   // TODO: figure out why this test is failing, the scenario passes in the ui
   test('Error shown when saving fails due to approval template edit error', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -493,7 +493,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to node disassociate failure', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -598,7 +598,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to node associate failure', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -704,7 +704,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to credential disassociate failure', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,
@@ -795,7 +795,7 @@ describe('Visualizer', () => {
   });
 
   test('Error shown when saving fails due to credential associate failure', async () => {
-    workflowReducer.mockImplementation(state => {
+    workflowReducer.mockImplementation((state) => {
       const newState = {
         ...state,
         isLoading: false,

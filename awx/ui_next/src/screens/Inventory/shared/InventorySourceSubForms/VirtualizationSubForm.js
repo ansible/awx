@@ -16,13 +16,12 @@ import {
 
 const VirtualizationSubForm = ({ autoPopulateCredential }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField(
-    'credential'
-  );
+  const [credentialField, credentialMeta, credentialHelpers] =
+    useField('credential');
   const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);
     },

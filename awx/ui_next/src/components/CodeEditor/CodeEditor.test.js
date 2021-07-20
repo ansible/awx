@@ -22,7 +22,7 @@ describe('CodeEditor', () => {
   });
 
   it('should trigger onChange prop', () => {
-    debounce.mockImplementation(fn => fn);
+    debounce.mockImplementation((fn) => fn);
     const onChange = jest.fn();
     const wrapper = mountWithContexts(
       <CodeEditor value="---" onChange={onChange} mode="yaml" />

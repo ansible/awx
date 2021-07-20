@@ -10,7 +10,7 @@ function UserEdit({ user }) {
 
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     setFormSubmitError(null);
     try {
       delete values.organization;

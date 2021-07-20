@@ -10,7 +10,7 @@ const TestHook = ({ callback }) => {
   return null;
 };
 
-const testHook = callback => {
+const testHook = (callback) => {
   mount(<TestHook callback={callback} />);
 };
 
@@ -23,13 +23,8 @@ describe('useSelected hook', () => {
 
   test('should return expected initial values', () => {
     testHook(() => {
-      ({
-        expanded,
-        isAllExpanded,
-        handleExpand,
-        setExpanded,
-        expandAll,
-      } = useExpanded());
+      ({ expanded, isAllExpanded, handleExpand, setExpanded, expandAll } =
+        useExpanded());
     });
     expect(expanded).toEqual([]);
     expect(isAllExpanded).toEqual(false);
@@ -39,13 +34,8 @@ describe('useSelected hook', () => {
 
   test('handleSelect should update and filter selected items', () => {
     testHook(() => {
-      ({
-        expanded,
-        isAllExpanded,
-        handleExpand,
-        setExpanded,
-        expandAll,
-      } = useExpanded());
+      ({ expanded, isAllExpanded, handleExpand, setExpanded, expandAll } =
+        useExpanded());
     });
 
     act(() => {
@@ -61,13 +51,8 @@ describe('useSelected hook', () => {
 
   test('should return expected isAllSelected value', () => {
     testHook(() => {
-      ({
-        expanded,
-        isAllExpanded,
-        handleExpand,
-        setExpanded,
-        expandAll,
-      } = useExpanded(array));
+      ({ expanded, isAllExpanded, handleExpand, setExpanded, expandAll } =
+        useExpanded(array));
     });
 
     act(() => {
@@ -92,13 +77,8 @@ describe('useSelected hook', () => {
 
   test('should return selectAll', () => {
     testHook(() => {
-      ({
-        expanded,
-        isAllExpanded,
-        handleExpand,
-        setExpanded,
-        expandAll,
-      } = useExpanded(array));
+      ({ expanded, isAllExpanded, handleExpand, setExpanded, expandAll } =
+        useExpanded(array));
     });
 
     act(() => {

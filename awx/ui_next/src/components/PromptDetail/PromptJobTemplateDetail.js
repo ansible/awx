@@ -94,7 +94,7 @@ function PromptJobTemplateDetail({ resource }) {
       ? 'smart_inventory'
       : 'inventory';
 
-  const recentJobs = summary_fields?.recent_jobs?.map(job => ({
+  const recentJobs = summary_fields?.recent_jobs?.map((job) => ({
     ...job,
     type: 'job',
   }));
@@ -196,7 +196,7 @@ function PromptJobTemplateDetail({ resource }) {
               numChips={5}
               totalChips={summary_fields.credentials.length}
             >
-              {summary_fields.credentials.map(cred => (
+              {summary_fields.credentials.map((cred) => (
                 <CredentialChip key={cred.id} credential={cred} isReadOnly />
               ))}
             </ChipGroup>
@@ -212,7 +212,7 @@ function PromptJobTemplateDetail({ resource }) {
               numChips={5}
               totalChips={summary_fields.labels.results.length}
             >
-              {summary_fields.labels.results.map(label => (
+              {summary_fields.labels.results.map((label) => (
                 <Chip key={label.id} isReadOnly>
                   {label.name}
                 </Chip>
@@ -227,7 +227,7 @@ function PromptJobTemplateDetail({ resource }) {
           label={t`Instance Groups`}
           value={
             <ChipGroup numChips={5} totalChips={instance_groups.length}>
-              {instance_groups.map(ig => (
+              {instance_groups.map((ig) => (
                 <Chip key={ig.id} isReadOnly>
                   {ig.name}
                 </Chip>
@@ -242,7 +242,7 @@ function PromptJobTemplateDetail({ resource }) {
           label={t`Job Tags`}
           value={
             <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
-              {job_tags.split(',').map(jobTag => (
+              {job_tags.split(',').map((jobTag) => (
                 <Chip key={jobTag} isReadOnly>
                   {jobTag}
                 </Chip>
@@ -257,7 +257,7 @@ function PromptJobTemplateDetail({ resource }) {
           label={t`Skip Tags`}
           value={
             <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
-              {skip_tags.split(',').map(skipTag => (
+              {skip_tags.split(',').map((skipTag) => (
                 <Chip key={skipTag} isReadOnly>
                   {skipTag}
                 </Chip>

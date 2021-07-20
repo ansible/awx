@@ -26,7 +26,7 @@ describe('<HostFacts />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<HostFacts host={mockHost} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -53,6 +53,6 @@ describe('<HostFacts />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<HostFacts host={mockHost} />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

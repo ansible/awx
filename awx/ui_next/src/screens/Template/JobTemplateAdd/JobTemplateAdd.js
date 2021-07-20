@@ -47,6 +47,7 @@ function JobTemplateAdd() {
 
   async function submitLabels(templateId, labels = [], orgId) {
     if (!orgId) {
+      // eslint-disable-next-line no-useless-catch
       try {
         const {
           data: { results },
@@ -56,7 +57,7 @@ function JobTemplateAdd() {
         throw err;
       }
     }
-    const associationPromises = labels.map(label =>
+    const associationPromises = labels.map((label) =>
       JobTemplatesAPI.associateLabel(templateId, label, orgId)
     );
 
@@ -73,7 +74,7 @@ function JobTemplateAdd() {
   }
 
   function submitCredentials(templateId, credentials = []) {
-    const associateCredentials = credentials.map(cred =>
+    const associateCredentials = credentials.map((cred) =>
       JobTemplatesAPI.associateCredentials(templateId, cred.id)
     );
     return Promise.all(associateCredentials);

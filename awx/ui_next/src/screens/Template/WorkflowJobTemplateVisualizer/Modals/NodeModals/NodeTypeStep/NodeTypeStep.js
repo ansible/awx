@@ -44,17 +44,14 @@ const TimeoutLabel = styled.p`
 
 function NodeTypeStep() {
   const [nodeTypeField, , nodeTypeHelpers] = useField('nodeType');
-  const [nodeResourceField, nodeResourceMeta, nodeResourceHelpers] = useField(
-    'nodeResource'
-  );
+  const [nodeResourceField, nodeResourceMeta, nodeResourceHelpers] =
+    useField('nodeResource');
   const [, approvalNameMeta, approvalNameHelpers] = useField('approvalName');
   const [, , approvalDescriptionHelpers] = useField('approvalDescription');
-  const [timeoutMinutesField, , timeoutMinutesHelpers] = useField(
-    'timeoutMinutes'
-  );
-  const [timeoutSecondsField, , timeoutSecondsHelpers] = useField(
-    'timeoutSeconds'
-  );
+  const [timeoutMinutesField, , timeoutMinutesHelpers] =
+    useField('timeoutMinutes');
+  const [timeoutSecondsField, , timeoutSecondsHelpers] =
+    useField('timeoutSeconds');
   const [convergenceField, , convergenceFieldHelpers] = useField('convergence');
 
   const [isConvergenceOpen, setIsConvergenceOpen] = useState(false);

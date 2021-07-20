@@ -12,7 +12,7 @@ export default function useAutoPopulateLookup(populateLookupField) {
   const isFirst = useRef(true);
 
   return useCallback(
-    results => {
+    (results) => {
       if (isFirst.current && results.length === 1) {
         populateLookupField(results[0]);
       }

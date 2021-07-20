@@ -62,7 +62,7 @@ describe('InventorySourceDetail', () => {
         <InventorySourceDetail inventorySource={mockInvSource} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('InventorySourceDetail')).toHaveLength(1);
     assertDetail(wrapper, 'Name', 'mock inv source');
     assertDetail(wrapper, 'Description', 'mock description');
@@ -85,7 +85,7 @@ describe('InventorySourceDetail', () => {
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       '---\nfoo: bar'
     );
-    wrapper.find('Detail[label="Enabled Options"] li').forEach(option => {
+    wrapper.find('Detail[label="Enabled Options"] li').forEach((option) => {
       expect([
         'Overwrite local groups and hosts from remote inventory source',
         'Overwrite local variables from remote inventory source',
@@ -101,7 +101,7 @@ describe('InventorySourceDetail', () => {
         <InventorySourceDetail inventorySource={mockInvSource} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     const editButton = wrapper.find('Button[aria-label="edit"]');
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe(
@@ -137,7 +137,7 @@ describe('InventorySourceDetail', () => {
         <InventorySourceDetail inventorySource={invSource} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="edit"]')).toHaveLength(0);
     expect(wrapper.find('DeleteButton')).toHaveLength(0);
     expect(wrapper.find('InventorySourceSyncButton')).toHaveLength(0);
@@ -180,7 +180,7 @@ describe('InventorySourceDetail', () => {
       );
     });
     expect(InventorySourcesAPI.readOptions).toHaveBeenCalledTimes(1);
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
     expect(wrapper.find('ContentError Title').text()).toEqual(
       'Something went wrong...'
     );
@@ -195,7 +195,7 @@ describe('InventorySourceDetail', () => {
         <InventorySourceDetail inventorySource={mockInvSource} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('Modal[title="Error!"]')).toHaveLength(0);
     await act(async () => {
       wrapper.find('DeleteButton').invoke('onConfirm')();
@@ -203,7 +203,7 @@ describe('InventorySourceDetail', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Error!"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () => {
       wrapper.find('Modal[title="Error!"]').invoke('onClose')();
@@ -211,7 +211,7 @@ describe('InventorySourceDetail', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Error!"]',
-      el => el.length === 0
+      (el) => el.length === 0
     );
   });
 });

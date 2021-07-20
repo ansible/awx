@@ -59,18 +59,10 @@ describe('<NotificationTemplateListItem />', () => {
       </table>
     );
     await act(async () => {
-      wrapper
-        .find('Button')
-        .at(0)
-        .invoke('onClick')();
+      wrapper.find('Button').at(0).invoke('onClick')();
     });
     expect(NotificationTemplatesAPI.test).toHaveBeenCalledTimes(1);
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toEqual('Running');
+    expect(wrapper.find('Td').at(2).text()).toEqual('Running');
   });
 
   test('should call api to copy inventory', async () => {

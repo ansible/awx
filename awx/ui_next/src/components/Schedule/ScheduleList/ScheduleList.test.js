@@ -63,11 +63,7 @@ describe('ScheduleList', () => {
 
     test('should check and uncheck the row item', async () => {
       expect(
-        wrapper
-          .find('.pf-c-table__check')
-          .first()
-          .find('input')
-          .props().checked
+        wrapper.find('.pf-c-table__check').first().find('input').props().checked
       ).toBe(false);
       await act(async () => {
         wrapper
@@ -78,11 +74,7 @@ describe('ScheduleList', () => {
       });
       wrapper.update();
       expect(
-        wrapper
-          .find('.pf-c-table__check')
-          .first()
-          .find('input')
-          .props().checked
+        wrapper.find('.pf-c-table__check').first().find('input').props().checked
       ).toBe(true);
       await act(async () => {
         wrapper
@@ -93,41 +85,34 @@ describe('ScheduleList', () => {
       });
       wrapper.update();
       expect(
-        wrapper
-          .find('.pf-c-table__check')
-          .first()
-          .find('input')
-          .props().checked
+        wrapper.find('.pf-c-table__check').first().find('input').props().checked
       ).toBe(false);
     });
 
     test('should check all row items when select all is checked', async () => {
       expect(wrapper.find('.pf-c-table__check input')).toHaveLength(5);
-      wrapper.find('.pf-c-table__check input').forEach(el => {
+      wrapper.find('.pf-c-table__check input').forEach((el) => {
         expect(el.props().checked).toBe(false);
       });
       await act(async () => {
         wrapper.find('Checkbox#select-all').invoke('onChange')(true);
       });
       wrapper.update();
-      wrapper.find('.pf-c-table__check input').forEach(el => {
+      wrapper.find('.pf-c-table__check input').forEach((el) => {
         expect(el.props().checked).toBe(true);
       });
       await act(async () => {
         wrapper.find('Checkbox#select-all').invoke('onChange')(false);
       });
       wrapper.update();
-      wrapper.find('.pf-c-table__check input').forEach(el => {
+      wrapper.find('.pf-c-table__check input').forEach((el) => {
         expect(el.props().checked).toBe(false);
       });
     });
 
     test('should call api delete schedules for each selected schedule', async () => {
       await act(async () => {
-        wrapper
-          .find('.pf-c-table__check input')
-          .at(3)
-          .invoke('onChange')();
+        wrapper.find('.pf-c-table__check input').at(3).invoke('onChange')();
       });
       wrapper.update();
       await act(async () => {
@@ -143,10 +128,7 @@ describe('ScheduleList', () => {
       );
       expect(wrapper.find('Modal').length).toBe(0);
       await act(async () => {
-        wrapper
-          .find('.pf-c-table__check input')
-          .at(2)
-          .invoke('onChange')();
+        wrapper.find('.pf-c-table__check input').at(2).invoke('onChange')();
       });
       wrapper.update();
       await act(async () => {
@@ -260,10 +242,7 @@ describe('ScheduleList', () => {
       });
       wrapper.update();
       expect(
-        wrapper
-          .find('ScheduleListItem')
-          .at(4)
-          .prop('isMissingSurvey')
+        wrapper.find('ScheduleListItem').at(4).prop('isMissingSurvey')
       ).toBe('This schedule is missing required survey values');
       expect(wrapper.find('ExclamationTriangleIcon').length).toBe(5);
       expect(wrapper.find('Switch#schedule-5-toggle').prop('isDisabled')).toBe(
@@ -289,10 +268,7 @@ describe('ScheduleList', () => {
       wrapper.update();
 
       expect(
-        wrapper
-          .find('ScheduleListItem')
-          .at(3)
-          .prop('isMissingInventory')
+        wrapper.find('ScheduleListItem').at(3).prop('isMissingInventory')
       ).toBe('This schedule is missing an Inventory');
       expect(wrapper.find('ExclamationTriangleIcon').length).toBe(4);
       expect(wrapper.find('Switch#schedule-3-toggle').prop('isDisabled')).toBe(

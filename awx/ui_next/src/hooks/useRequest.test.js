@@ -50,7 +50,7 @@ describe('useRequest hooks', () => {
     test('should is isLoading flag', async () => {
       const makeRequest = jest.fn();
       let resolve;
-      const promise = new Promise(r => {
+      const promise = new Promise((r) => {
         resolve = r;
       });
       makeRequest.mockReturnValue(promise);
@@ -98,7 +98,7 @@ describe('useRequest hooks', () => {
 
     test('should reset error/result on each request', async () => {
       const error = new Error('error');
-      const makeRequest = throwError => {
+      const makeRequest = (throwError) => {
         if (throwError) {
           throw error;
         }
@@ -130,7 +130,7 @@ describe('useRequest hooks', () => {
     test('should not update state after unmount', async () => {
       const makeRequest = jest.fn();
       let resolve;
-      const promise = new Promise(r => {
+      const promise = new Promise((r) => {
         resolve = r;
       });
       makeRequest.mockReturnValue(promise);

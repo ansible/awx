@@ -62,7 +62,10 @@ function InventoryHostDetail({ host }) {
     );
   }
 
-  const recentPlaybookJobs = recent_jobs.map(job => ({ ...job, type: 'job' }));
+  const recentPlaybookJobs = recent_jobs.map((job) => ({
+    ...job,
+    type: 'job',
+  }));
 
   return (
     <CardBody>

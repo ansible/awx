@@ -27,25 +27,21 @@ function UserAndTeamAccessAdd({
   const [selectedResourceType, setSelectedResourceType] = useState(null);
   const [stepIdReached, setStepIdReached] = useState(1);
   const { id: userId } = useParams();
-  const {
-    selected: resourcesSelected,
-    handleSelect: handleResourceSelect,
-  } = useSelected([]);
+  const { selected: resourcesSelected, handleSelect: handleResourceSelect } =
+    useSelected([]);
 
-  const {
-    selected: rolesSelected,
-    handleSelect: handleRoleSelect,
-  } = useSelected([]);
+  const { selected: rolesSelected, handleSelect: handleRoleSelect } =
+    useSelected([]);
 
   const { request: handleWizardSave, error: saveError } = useRequest(
     useCallback(async () => {
       const roleRequests = [];
-      const resourceRolesTypes = resourcesSelected.flatMap(resource =>
+      const resourceRolesTypes = resourcesSelected.flatMap((resource) =>
         Object.values(resource.summary_fields.object_roles)
       );
 
-      rolesSelected.map(role =>
-        resourceRolesTypes.forEach(rolename => {
+      rolesSelected.map((role) =>
+        resourceRolesTypes.forEach((rolename) => {
           if (rolename.name === role.name) {
             roleRequests.push(apiModel.associateRole(userId, rolename.id));
           }
@@ -64,7 +60,7 @@ function UserAndTeamAccessAdd({
       name: t`Add resource type`,
       component: (
         <Grid>
-          {getResourceAccessConfig().map(resource => (
+          {getResourceAccessConfig().map((resource) => (
             <SelectableCard
               key={resource.selectedResource}
               isSelected={

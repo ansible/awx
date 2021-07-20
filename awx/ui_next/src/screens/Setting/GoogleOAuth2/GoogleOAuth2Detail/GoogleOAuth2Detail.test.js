@@ -46,7 +46,7 @@ describe('<GoogleOAuth2Detail />', () => {
         </SettingsProvider>
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterAll(() => {
@@ -102,7 +102,7 @@ describe('<GoogleOAuth2Detail />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="Edit"]').exists()).toBeFalsy();
   });
 
@@ -115,7 +115,7 @@ describe('<GoogleOAuth2Detail />', () => {
         </SettingsProvider>
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 });

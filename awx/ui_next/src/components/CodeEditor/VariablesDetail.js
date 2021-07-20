@@ -196,7 +196,7 @@ function ModeToggle({
                 [JSON_MODE, 'JSON'],
               ]}
               value={mode}
-              onChange={newMode => {
+              onChange={(newMode) => {
                 setMode(newMode);
               }}
               name={name}

@@ -99,48 +99,30 @@ describe('<DraggableSelectedList />', () => {
     );
 
     expect(
-      wrapper
-        .find('Button[aria-label="Remove"]')
-        .at(0)
-        .prop('isDisabled')
+      wrapper.find('Button[aria-label="Remove"]').at(0).prop('isDisabled')
     ).toBe(false);
     expect(
-      wrapper
-        .find('Button[aria-label="Remove"]')
-        .at(1)
-        .prop('isDisabled')
+      wrapper.find('Button[aria-label="Remove"]').at(1).prop('isDisabled')
     ).toBe(false);
     act(() => {
       wrapper.find('DataList').prop('onDragStart')();
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('Button[aria-label="Remove"]')
-        .at(0)
-        .prop('isDisabled')
+      wrapper.find('Button[aria-label="Remove"]').at(0).prop('isDisabled')
     ).toBe(true);
     expect(
-      wrapper
-        .find('Button[aria-label="Remove"]')
-        .at(1)
-        .prop('isDisabled')
+      wrapper.find('Button[aria-label="Remove"]').at(1).prop('isDisabled')
     ).toBe(true);
     act(() => {
       wrapper.find('DataList').prop('onDragCancel')();
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('Button[aria-label="Remove"]')
-        .at(0)
-        .prop('isDisabled')
+      wrapper.find('Button[aria-label="Remove"]').at(0).prop('isDisabled')
     ).toBe(false);
     expect(
-      wrapper
-        .find('Button[aria-label="Remove"]')
-        .at(1)
-        .prop('isDisabled')
+      wrapper.find('Button[aria-label="Remove"]').at(1).prop('isDisabled')
     ).toBe(false);
   });
 });

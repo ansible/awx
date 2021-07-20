@@ -32,13 +32,12 @@ function CredentialsStep({
 }) {
   const [field, meta, helpers] = useField({
     name: 'credentials',
-    validate: val => {
-      return credentialsValidator(
+    validate: (val) =>
+      credentialsValidator(
         defaultCredentials,
         allowCredentialsWithPasswords,
         val
-      );
-    },
+      ),
   });
   const [selectedType, setSelectedType] = useState(null);
   const history = useHistory();
@@ -53,7 +52,7 @@ function CredentialsStep({
       const loadedTypes = await CredentialTypesAPI.loadAllTypes();
       if (loadedTypes.length) {
         const match =
-          loadedTypes.find(type => type.kind === 'ssh') || loadedTypes[0];
+          loadedTypes.find((type) => type.kind === 'ssh') || loadedTypes[0];
         setSelectedType(match);
       }
       return loadedTypes;
@@ -88,10 +87,10 @@ function CredentialsStep({
         count: data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [selectedType, history.location.search]),
     { credentials: [], count: 0, relatedSearchableKeys: [], searchableKeys: [] }
@@ -122,17 +121,15 @@ function CredentialsStep({
 
   const isVault = selectedType?.kind === 'vault';
 
-  const renderChip = ({ item, removeItem, canDelete }) => {
-    return (
-      <CredentialChip
-        id={`credential-chip-${item.id}`}
-        key={item.id}
-        onClick={() => removeItem(item)}
-        isReadOnly={!canDelete}
-        credential={item}
-      />
-    );
-  };
+  const renderChip = ({ item, removeItem, canDelete }) => (
+    <CredentialChip
+      id={`credential-chip-${item.id}`}
+      key={item.id}
+      onClick={() => removeItem(item)}
+      isReadOnly={!canDelete}
+      credential={item}
+    />
+  );
 
   return (
     <>
@@ -148,7 +145,7 @@ function CredentialsStep({
             css="flex: 1 1 75%;"
             id="multiCredentialsLookUp-select"
             label={t`Selected Category`}
-            data={types.map(type => ({
+            data={types.map((type) => ({
               key: type.id,
               value: type.id,
               label: type.name,
@@ -156,7 +153,7 @@ function CredentialsStep({
             }))}
             value={selectedType && selectedType.id}
             onChange={(e, id) => {
-              setSelectedType(types.find(o => o.id === parseInt(id, 10)));
+              setSelectedType(types.find((o) => o.id === parseInt(id, 10)));
             }}
           />
         </ToolbarItem>
@@ -194,20 +191,20 @@ function CredentialsStep({
         name="credentials"
         qsConfig={QS_CONFIG}
         readOnly={false}
-        selectItem={item => {
-          const hasSameVaultID = val =>
+        selectItem={(item) => {
+          const hasSameVaultID = (val) =>
             val?.inputs?.vault_id !== undefined &&
             val?.inputs?.vault_id === item?.inputs?.vault_id;
-          const hasSameCredentialType = val =>
+          const hasSameCredentialType = (val) =>
             val.credential_type === item.credential_type;
-          const newItems = field.value.filter(i =>
+          const newItems = field.value.filter((i) =>
             isVault ? !hasSameVaultID(i) : !hasSameCredentialType(i)
           );
           newItems.push(item);
           helpers.setValue(newItems);
         }}
-        deselectItem={item => {
-          helpers.setValue(field.value.filter(i => i.id !== item.id));
+        deselectItem={(item) => {
+          helpers.setValue(field.value.filter((i) => i.id !== item.id));
         }}
         renderItemChip={renderChip}
       />

@@ -12,7 +12,7 @@ export default styled(DetailList)`
   display: grid;
   grid-gap: 20px;
   align-items: start;
-  ${props =>
+  ${(props) =>
     props.stacked
       ? `
     grid-template-columns: auto 1fr;

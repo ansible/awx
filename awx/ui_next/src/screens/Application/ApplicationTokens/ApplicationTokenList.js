@@ -42,7 +42,7 @@ function ApplicationTokenList() {
         ApplicationsAPI.readTokens(id, params),
         ApplicationsAPI.readTokenOptions(id),
       ]);
-      const modifiedResults = results.map(result => {
+      const modifiedResults = results.map((result) => {
         result.summary_fields = {
           user: result.summary_fields.user,
           application: result.summary_fields.application,
@@ -56,10 +56,10 @@ function ApplicationTokenList() {
         itemCount: count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [id, location.search]),
     { tokens: [], itemCount: 0, relatedSearchableKeys: [], searchableKeys: [] }
@@ -69,24 +69,21 @@ function ApplicationTokenList() {
     fetchTokens();
   }, [fetchTokens]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(tokens);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(tokens);
   const {
     isLoading: deleteLoading,
     deletionError,
     deleteItems: handleDeleteApplications,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id: tokenId }) => TokensAPI.destroy(tokenId))
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map(({ id: tokenId }) => TokensAPI.destroy(tokenId))
+        ),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -118,7 +115,7 @@ function ApplicationTokenList() {
         clearSelected={clearSelected}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DatalistToolbar
             {...props}
             isAllSelected={isAllSelected}
@@ -148,7 +145,7 @@ function ApplicationTokenList() {
             token={token}
             detailUrl={`/users/${token.summary_fields.user.id}/details`}
             onSelect={() => handleSelect(token)}
-            isSelected={selected.some(row => row.id === token.id)}
+            isSelected={selected.some((row) => row.id === token.id)}
             rowIndex={index}
           />
         )}

@@ -58,7 +58,7 @@ describe('<InventoryHostDetail />', () => {
       await waitForElement(
         wrapper,
         'Modal[title="Error!"]',
-        el => el.length === 1
+        (el) => el.length === 1
       );
       await act(async () => {
         wrapper.find('Modal[title="Error!"]').invoke('onClose')();
@@ -66,7 +66,7 @@ describe('<InventoryHostDetail />', () => {
       await waitForElement(
         wrapper,
         'Modal[title="Error!"]',
-        el => el.length === 0
+        (el) => el.length === 0
       );
     });
   });

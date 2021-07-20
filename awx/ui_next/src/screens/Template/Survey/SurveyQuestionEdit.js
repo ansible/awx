@@ -23,7 +23,7 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
     return <ContentLoading />;
   }
 
-  const question = survey.spec.find(q => q.variable === questionVariable);
+  const question = survey.spec.find((q) => q.variable === questionVariable);
 
   if (!question) {
     return (
@@ -38,12 +38,12 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
     history.push(match.url.substr(0, index));
   };
 
-  const handleSubmit = async formData => {
+  const handleSubmit = async (formData) => {
     const submittedData = { ...formData };
     try {
       if (
         submittedData.variable !== question.variable &&
-        survey.spec.find(q => q.variable === submittedData.variable)
+        survey.spec.find((q) => q.variable === submittedData.variable)
       ) {
         setFormError(
           new Error(
@@ -53,7 +53,7 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
         return;
       }
       const questionIndex = survey.spec.findIndex(
-        q => q.variable === questionVariable
+        (q) => q.variable === questionVariable
       );
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');

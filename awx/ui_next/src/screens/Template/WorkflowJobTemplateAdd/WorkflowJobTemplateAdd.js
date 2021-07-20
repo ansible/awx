@@ -16,7 +16,7 @@ function WorkflowJobTemplateAdd() {
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const {
       labels,
       inventory,
@@ -43,6 +43,7 @@ function WorkflowJobTemplateAdd() {
 
   const submitLabels = async (templateId, labels = [], organizationId) => {
     if (!organizationId) {
+      // eslint-disable-next-line no-useless-catch
       try {
         const {
           data: { results },
@@ -52,7 +53,7 @@ function WorkflowJobTemplateAdd() {
         throw err;
       }
     }
-    const associatePromises = labels.map(label =>
+    const associatePromises = labels.map((label) =>
       WorkflowJobTemplatesAPI.associateLabel(templateId, label, organizationId)
     );
     return [...associatePromises];

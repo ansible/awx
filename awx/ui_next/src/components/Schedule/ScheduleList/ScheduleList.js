@@ -60,10 +60,10 @@ function ScheduleList({
         actions: scheduleActions.data.actions,
         relatedSearchableKeys: (
           scheduleActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           scheduleActions.data.actions?.GET || {}
-        ).filter(key => scheduleActions.data.actions?.GET[key].filterable),
+        ).filter((key) => scheduleActions.data.actions?.GET[key].filterable),
       };
     }, [location.search, loadSchedules, loadScheduleOptions]),
     {
@@ -79,13 +79,8 @@ function ScheduleList({
     fetchSchedules();
   }, [fetchSchedules]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(schedules);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(schedules);
 
   const {
     isLoading: isDeleteLoading,
@@ -93,9 +88,11 @@ function ScheduleList({
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      return Promise.all(selected.map(({ id }) => SchedulesAPI.destroy(id)));
-    }, [selected]),
+    useCallback(
+      async () =>
+        Promise.all(selected.map(({ id }) => SchedulesAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -116,7 +113,7 @@ function ScheduleList({
     resource?.type === 'workflow_job_template' ||
     resource?.type === 'job_template';
 
-  const missingRequiredInventory = schedule => {
+  const missingRequiredInventory = (schedule) => {
     if (
       !launchConfig.inventory_needed_to_start ||
       schedule?.summary_fields?.inventory?.id
@@ -126,16 +123,16 @@ function ScheduleList({
     return t`This schedule is missing an Inventory`;
   };
 
-  const hasMissingSurveyValue = schedule => {
+  const hasMissingSurveyValue = (schedule) => {
     let missingValues;
     if (launchConfig.survey_enabled) {
-      surveyConfig.spec.forEach(question => {
+      surveyConfig.spec.forEach((question) => {
         const hasDefaultValue = Boolean(question.default);
         if (question.required && !hasDefaultValue) {
           const extraDataKeys = Object.keys(schedule?.extra_data);
 
           const hasMatchingKey = extraDataKeys.includes(question.variable);
-          Object.values(schedule?.extra_data).forEach(value => {
+          Object.values(schedule?.extra_data).forEach((value) => {
             if (!value || !hasMatchingKey) {
               missingValues = true;
             } else {
@@ -170,7 +167,7 @@ function ScheduleList({
         }
         renderRow={(item, index) => (
           <ScheduleListItem
-            isSelected={selected.some(row => row.id === item.id)}
+            isSelected={selected.some((row) => row.id === item.id)}
             key={item.id}
             onSelect={() => handleSelect(item)}
             schedule={item}
@@ -201,7 +198,7 @@ function ScheduleList({
         ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}

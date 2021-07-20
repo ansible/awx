@@ -38,7 +38,7 @@ async function checkInputTagValues(wrapper, expected) {
   const chips = await waitForElement(
     wrapper,
     'Lookup InputGroup Chip span',
-    el => el.length === expected.length
+    (el) => el.length === expected.length
   );
   expect(chips).toHaveLength(expected.length);
   chips.forEach((el, index) => {
@@ -119,7 +119,7 @@ describe('<Lookup />', () => {
     expect(list.prop('canDelete')).toEqual(true);
     wrapper
       .find('Modal button')
-      .findWhere(e => e.text() === 'Cancel')
+      .findWhere((e) => e.text() === 'Cancel')
       .first()
       .simulate('click');
     checkRootElementNotPresent('body div[role="dialog"]');
@@ -130,7 +130,7 @@ describe('<Lookup />', () => {
     await checkInputTagValues(wrapper, ['foo']);
     wrapper
       .find('Lookup InputGroup Chip')
-      .findWhere(el => el.text() === 'foo')
+      .findWhere((el) => el.text() === 'foo')
       .first()
       .invoke('onClick')();
     expect(onChange).toHaveBeenCalledTimes(1);

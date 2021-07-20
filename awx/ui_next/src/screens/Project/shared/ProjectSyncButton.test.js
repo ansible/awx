@@ -11,7 +11,7 @@ jest.mock('../../../api');
 describe('ProjectSyncButton', () => {
   let wrapper;
 
-  const children = handleSync => (
+  const children = (handleSync) => (
     <button type="submit" onClick={() => handleSync()} />
   );
 

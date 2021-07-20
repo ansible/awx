@@ -28,7 +28,7 @@ describe('<CredentialList />', () => {
       wrapper = mountWithContexts(<CredentialList />);
     });
 
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -57,16 +57,12 @@ describe('<CredentialList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialList />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
     await act(async () => {
       wrapper
@@ -77,11 +73,7 @@ describe('<CredentialList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(true);
     await act(async () => {
       wrapper
@@ -92,30 +84,26 @@ describe('<CredentialList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach((el) => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
   });
@@ -157,11 +145,11 @@ describe('<CredentialList />', () => {
     await waitForElement(
       wrapper,
       'Modal[aria-label="Deletion Error"]',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
+      (el) => el.props().isOpen === true && el.props().title === 'Error!'
     );
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });
-    await waitForElement(wrapper, 'Modal', el => el.props().isOpen === false);
+    await waitForElement(wrapper, 'Modal', (el) => el.props().isOpen === false);
   });
 });

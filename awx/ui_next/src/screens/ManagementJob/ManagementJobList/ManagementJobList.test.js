@@ -64,14 +64,14 @@ describe('<ManagementJobList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ManagementJobList />);
     });
-    await waitForElement(wrapper, 'ManagementJobList', el => el.length > 0);
+    await waitForElement(wrapper, 'ManagementJobList', (el) => el.length > 0);
   });
 
   test('should have data fetched and render 4 rows', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<ManagementJobList />);
     });
-    await waitForElement(wrapper, 'ManagementJobList', el => el.length > 0);
+    await waitForElement(wrapper, 'ManagementJobList', (el) => el.length > 0);
 
     expect(wrapper.find('ManagementJobListItem').length).toBe(4);
     expect(SystemJobTemplatesAPI.read).toBeCalled();
@@ -93,7 +93,7 @@ describe('<ManagementJobList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ManagementJobList />);
     });
-    await waitForElement(wrapper, 'ManagementJobList', el => el.length > 0);
+    await waitForElement(wrapper, 'ManagementJobList', (el) => el.length > 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 
@@ -105,7 +105,7 @@ describe('<ManagementJobList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ManagementJobList />);
     });
-    waitForElement(wrapper, 'ManagementJobList', el => el.length > 0);
+    waitForElement(wrapper, 'ManagementJobList', (el) => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 });

@@ -71,7 +71,7 @@ function LaunchManagementPrompt({
         <TextInput
           value={dataRetention}
           type="number"
-          onChange={value => setDataRetention(clamp(value, 0, MAX_RETENTION))}
+          onChange={(value) => setDataRetention(clamp(value, 0, MAX_RETENTION))}
           aria-label={t`Data retention period`}
         />
       </AlertModal>

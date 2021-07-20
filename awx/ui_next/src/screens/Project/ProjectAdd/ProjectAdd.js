@@ -9,7 +9,7 @@ function ProjectAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     if (values.scm_type === 'manual') {
       values.scm_type = '';
     }

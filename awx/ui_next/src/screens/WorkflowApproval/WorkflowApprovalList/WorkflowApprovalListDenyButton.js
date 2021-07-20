@@ -20,7 +20,7 @@ function WorkflowApprovalListDenyButton({ onDeny, selectedItems }) {
 
     const itemsUnableToDeny = selectedItems
       .filter(cannotDeny)
-      .map(item => item.name)
+      .map((item) => item.name)
       .join(', ');
 
     if (selectedItems.some(cannotDeny)) {

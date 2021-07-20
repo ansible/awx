@@ -30,20 +30,20 @@ describe('<Login />', () => {
       submitButton,
       loginHeaderLogo,
     ] = await Promise.all([
-      waitForElement(wrapper, 'AWXLogin', el => el.length === 1),
-      waitForElement(wrapper, 'LoginForm', el => el.length === 1),
+      waitForElement(wrapper, 'AWXLogin', (el) => el.length === 1),
+      waitForElement(wrapper, 'LoginForm', (el) => el.length === 1),
       waitForElement(
         wrapper,
         'input#pf-login-username-id',
-        el => el.length === 1
+        (el) => el.length === 1
       ),
       waitForElement(
         wrapper,
         'input#pf-login-password-id',
-        el => el.length === 1
+        (el) => el.length === 1
       ),
-      waitForElement(wrapper, 'Button[type="submit"]', el => el.length === 1),
-      waitForElement(wrapper, 'img', el => el.length === 1),
+      waitForElement(wrapper, 'Button[type="submit"]', (el) => el.length === 1),
+      waitForElement(wrapper, 'img', (el) => el.length === 1),
     ]);
     return {
       awxLogin,
@@ -161,7 +161,7 @@ describe('<Login />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
     });
-    await waitForElement(wrapper, 'LoginForm', el => el.length === 1);
+    await waitForElement(wrapper, 'LoginForm', (el) => el.length === 1);
     await act(async () => {
       wrapper.find('TextInputBase#pf-login-username-id').prop('onChange')('un');
       wrapper.find('TextInputBase#pf-login-password-id').prop('onChange')('pw');
@@ -193,7 +193,7 @@ describe('<Login />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
     });
-    await waitForElement(wrapper, 'LoginForm', el => el.length === 1);
+    await waitForElement(wrapper, 'LoginForm', (el) => el.length === 1);
 
     expect(
       wrapper.find('TextInputBase#pf-login-username-id').prop('value')
@@ -259,7 +259,7 @@ describe('<Login />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
     });
-    await waitForElement(wrapper, 'LoginForm', el => el.length === 1);
+    await waitForElement(wrapper, 'LoginForm', (el) => el.length === 1);
 
     await act(async () => {
       wrapper.find('TextInputBase#pf-login-username-id').prop('onChange')('un');
@@ -281,8 +281,8 @@ describe('<Login />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => true} />);
     });
-    await waitForElement(wrapper, 'Redirect', el => el.length === 1);
-    await waitForElement(wrapper, 'Redirect', el => el.props().to === '/');
+    await waitForElement(wrapper, 'Redirect', (el) => el.length === 1);
+    await waitForElement(wrapper, 'Redirect', (el) => el.props().to === '/');
   });
 
   test('GitHub auth buttons shown', async () => {

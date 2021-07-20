@@ -111,7 +111,7 @@ function WorkflowTools({
           id="zoom-slider"
           max="200"
           min="10"
-          onChange={event =>
+          onChange={(event) =>
             onZoomChange(parseInt(event.target.value, 10) / 100)
           }
           step="10"
