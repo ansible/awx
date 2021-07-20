@@ -3,7 +3,7 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import SettingList from './SettingList';
 
 jest.mock('../../api');
-jest.mock('../../util/useBrandName', () => ({
+jest.mock('hooks/useBrandName', () => ({
   __esModule: true,
   default: () => ({
     current: 'AWX',
