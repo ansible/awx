@@ -2468,7 +2468,7 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = serializers.EmptySerializer
 
-    ALLOWED_TYPES = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': float}
+    ALLOWED_TYPES = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
