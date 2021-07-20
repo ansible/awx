@@ -8843,7 +8843,7 @@ msgstr "周"
 
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:449
 msgid "Weekday"
-msgstr "周内"
+msgstr "工作日"
 
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:454
 msgid "Weekend day"
