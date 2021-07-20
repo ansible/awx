@@ -40,7 +40,7 @@ msgstr "/ (project root)"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:106
 #: screens/Template/shared/JobTemplateForm.js:214
 msgid "0 (Normal)"
-msgstr "0（普通）"
+msgstr "0（正常）"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:101
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:79
@@ -9031,11 +9031,11 @@ msgstr "周"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:445
 msgid "Weekday"
-msgstr "周中日"
+msgstr "工作日"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:450
 msgid "Weekend day"
-msgstr "周末日"
+msgstr "周末"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:60
 msgid ""
