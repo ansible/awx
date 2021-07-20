@@ -1,5 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
+import { t } from '@lingui/macro';
 import { oneOf } from 'prop-types';
 import { Label, Tooltip } from '@patternfly/react-core';
 import {
@@ -49,7 +50,18 @@ const icons = {
 };
 
 export default function StatusLabel({ status, tooltipContent = '' }) {
-  const label = status.charAt(0).toUpperCase() + status.slice(1);
+  const upperCaseStatus = {
+    success: t`Success`,
+    successful: t`Successful`,
+    failed: t`Failed`,
+    error: t`Error`,
+    running: t`Running`,
+    pending: t`Pending`,
+    waiting: t`Waiting`,
+    disabled: t`Disabled`,
+    canceled: t`Canceled`,
+  };
+  const label = upperCaseStatus[status] || t`Undefined`;
   const color = colors[status] || 'grey';
   const Icon = icons[status];
 
