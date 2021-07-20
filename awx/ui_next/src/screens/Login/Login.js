@@ -230,7 +230,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with Azure AD`}>
-                        <AzureIcon />
+                        <AzureIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -244,7 +244,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub`}>
-                        <GithubIcon />
+                        <GithubIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -258,7 +258,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Organizations`}>
-                        <GithubIcon />
+                        <GithubIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -272,7 +272,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Teams`}>
-                        <GithubIcon />
+                        <GithubIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -286,7 +286,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with GitHub Enterprise`}>
-                        <GithubIcon />
+                        <GithubIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -302,7 +302,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       <Tooltip
                         content={t`Sign in with GitHub Enterprise Organizations`}
                       >
-                        <GithubIcon />
+                        <GithubIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -318,7 +318,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       <Tooltip
                         content={t`Sign in with GitHub Enterprise Teams`}
                       >
-                        <GithubIcon />
+                        <GithubIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -332,7 +332,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                       onClick={setSessionRedirect}
                     >
                       <Tooltip content={t`Sign in with Google`}>
-                        <GoogleIcon />
+                        <GoogleIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
@@ -353,7 +353,7 @@ function AWXLogin({ alt, isAuthenticated }) {
                             : t`Sign in with SAML`
                         }
                       >
-                        <UserCircleIcon />
+                        <UserCircleIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );
