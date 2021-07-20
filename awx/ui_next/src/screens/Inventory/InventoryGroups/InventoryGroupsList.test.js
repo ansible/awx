@@ -76,6 +76,21 @@ describe('<InventoryGroupsList />', () => {
         },
       },
     });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
     const history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/3/groups'],
     });
@@ -86,7 +101,12 @@ describe('<InventoryGroupsList />', () => {
         </Route>,
         {
           context: {
-            router: { history, route: { location: history.location } },
+            router: {
+              history,
+              route: {
+                location: history.location,
+              },
+            },
           },
         }
       );
@@ -101,6 +121,10 @@ describe('<InventoryGroupsList />', () => {
   test('should fetch groups from api and render them in the list', async () => {
     expect(InventoriesAPI.readGroups).toHaveBeenCalled();
     expect(wrapper.find('InventoryGroupItem').length).toBe(3);
+  });
+
+  test('should render Run Commands button', async () => {
+    expect(wrapper.find('AdHocCommands')).toHaveLength(1);
   });
 
   test('should check and uncheck the row item', async () => {
@@ -165,6 +189,27 @@ describe('<InventoryGroupsList />', () => {
       expect(el.find('input').props().checked).toBe(false);
     });
   });
+
+  test('should not render ad hoc commands button', async () => {
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupsList />);
+    });
+    expect(wrapper.find('AdHocCommands')).toHaveLength(0);
+  });
 });
 
 describe('<InventoryGroupsList/> error handling', () => {
@@ -181,6 +226,21 @@ describe('<InventoryGroupsList/> error handling', () => {
       data: {
         actions: {
           GET: {},
+          POST: {},
+        },
+      },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
           POST: {},
         },
       },

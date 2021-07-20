@@ -76,7 +76,7 @@ function JobDetail({ job }) {
     project_update: t`Source Control Update`,
     inventory_update: t`Inventory Sync`,
     job: job.job_type === 'check' ? t`Playbook Check` : t`Playbook Run`,
-    ad_hoc_command: t`Command`,
+    ad_hoc_command: t`Run Command`,
     system_job: t`Management Job`,
     workflow_job: t`Workflow Job`,
   };
@@ -337,6 +337,8 @@ function JobDetail({ job }) {
             }
           />
         )}
+        <Detail label={t`Module Name`} value={job.module_name} />
+        <Detail label={t`Module Arguments`} value={job.module_args} />
         <UserDateDetail
           label={t`Created`}
           date={job.created}

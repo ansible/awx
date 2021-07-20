@@ -43,18 +43,23 @@ function InventoryRelatedGroupList() {
       relatedSearchableKeys,
       searchableKeys,
       canAdd,
+      moduleOptions,
+      isAdHocDisabled,
     },
     isLoading,
     error: contentError,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, actions] = await Promise.all([
+      const [response, actions, adHocOptions] = await Promise.all([
         GroupsAPI.readChildren(groupId, params),
         InventoriesAPI.readGroupsOptions(inventoryId),
+        InventoriesAPI.readAdHocOptions(inventoryId),
       ]);
 
       return {
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
+        isAdHocDisabled: !adHocOptions.data.actions.POST,
         groups: response.data.results,
         itemCount: response.data.count,
         relatedSearchableKeys: (
@@ -68,7 +73,13 @@ function InventoryRelatedGroupList() {
           Object.prototype.hasOwnProperty.call(actions.data.actions, 'POST'),
       };
     }, [groupId, location.search, inventoryId]),
-    { groups: [], itemCount: 0, canAdd: false }
+    {
+      groups: [],
+      itemCount: 0,
+      canAdd: false,
+      moduleOptions: [],
+      isAdHocDisabled: true,
+    }
   );
   useEffect(() => {
     fetchRelated();
@@ -199,11 +210,16 @@ function InventoryRelatedGroupList() {
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd ? [addButton] : []),
-              <AdHocCommands
-                adHocItems={selected}
-                hasListItems={itemCount > 0}
-                onLaunchLoading={setIsAdHocLaunchLoading}
-              />,
+              ...(!isAdHocDisabled
+                ? [
+                    <AdHocCommands
+                      adHocItems={selected}
+                      hasListItems={itemCount > 0}
+                      onLaunchLoading={setIsAdHocLaunchLoading}
+                      moduleOptions={moduleOptions}
+                    />,
+                  ]
+                : []),
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={disassociateGroups}

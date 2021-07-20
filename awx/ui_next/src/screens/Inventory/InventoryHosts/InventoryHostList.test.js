@@ -93,6 +93,23 @@ describe('<InventoryHostList />', () => {
         },
       },
     });
+
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
+
     await act(async () => {
       wrapper = mountWithContexts(<InventoryHostList />);
     });
@@ -106,6 +123,10 @@ describe('<InventoryHostList />', () => {
   test('should fetch hosts from api and render them in the list', async () => {
     expect(InventoriesAPI.readHosts).toHaveBeenCalled();
     expect(wrapper.find('InventoryHostItem').length).toBe(3);
+  });
+
+  test('should render Run Commands button', async () => {
+    expect(wrapper.find('AdHocCommands')).toHaveLength(1);
   });
 
   test('should check and uncheck the row item', async () => {
@@ -321,5 +342,28 @@ describe('<InventoryHostList />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('should not render Run Commands button', async () => {
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventoryHostList inventory={mockInventory} />
+      );
+    });
+    expect(wrapper.find('AdHocCommands')).toHaveLength(0);
   });
 });

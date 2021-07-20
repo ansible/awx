@@ -35,6 +35,21 @@ describe('<InventoryGroupHostList />', () => {
         },
       },
     });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
@@ -52,6 +67,7 @@ describe('<InventoryGroupHostList />', () => {
   test('should fetch inventory group hosts from api and render them in the list', () => {
     expect(GroupsAPI.readAllHosts).toHaveBeenCalled();
     expect(InventoriesAPI.readHostsOptions).toHaveBeenCalled();
+    expect(InventoriesAPI.readAdHocOptions).toHaveBeenCalled();
     expect(wrapper.find('InventoryGroupHostListItem').length).toBe(3);
   });
 
@@ -95,7 +111,7 @@ describe('<InventoryGroupHostList />', () => {
     });
   });
 
-  test('should show add dropdown button according to permissions', async () => {
+  test('should show add dropdown button and Run Commands according to permissions', async () => {
     expect(wrapper.find('AddDropDownButton').length).toBe(1);
     InventoriesAPI.readHostsOptions.mockResolvedValueOnce({
       data: {
@@ -109,6 +125,7 @@ describe('<InventoryGroupHostList />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('AddDropDownButton').length).toBe(0);
+    expect(wrapper.find('AdHocCommands').length).toBe(1);
   });
 
   test('expected api calls are made for multi-delete', async () => {
@@ -270,5 +287,25 @@ describe('<InventoryGroupHostList />', () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+  test('should not render ad hoc commands button', async () => {
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupHostList />);
+    });
+    expect(wrapper.find('AdHocCommands')).toHaveLength(0);
   });
 });

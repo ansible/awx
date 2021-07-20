@@ -35,6 +35,8 @@ function InventoryHostList() {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      moduleOptions,
+      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -42,12 +44,15 @@ function InventoryHostList() {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
-      const [response, hostOptions] = await Promise.all([
+      const [response, hostOptions, adHocOptions] = await Promise.all([
         InventoriesAPI.readHosts(id, params),
         InventoriesAPI.readHostsOptions(id),
+        InventoriesAPI.readAdHocOptions(id),
       ]);
 
       return {
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
+        isAdHocDisabled: !adHocOptions.data.actions.POST,
         hosts: response.data.results,
         hostCount: response.data.count,
         actions: hostOptions.data.actions,
@@ -65,6 +70,8 @@ function InventoryHostList() {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
+      moduleOptions: [],
+      isAdHocDisabled: true,
     }
   );
 
@@ -152,11 +159,16 @@ function InventoryHostList() {
                     />,
                   ]
                 : []),
-              <AdHocCommands
-                adHocItems={selected}
-                hasListItems={hostCount > 0}
-                onLaunchLoading={setIsAdHocLaunchLoading}
-              />,
+              ...(!isAdHocDisabled
+                ? [
+                    <AdHocCommands
+                      moduleOptions={moduleOptions}
+                      adHocItems={selected}
+                      hasListItems={hostCount > 0}
+                      onLaunchLoading={setIsAdHocLaunchLoading}
+                    />,
+                  ]
+                : []),
               <ToolbarDeleteButton
                 key="delete"
                 onDelete={handleDeleteHosts}

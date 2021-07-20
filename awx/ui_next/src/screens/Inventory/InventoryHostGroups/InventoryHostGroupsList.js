@@ -41,6 +41,8 @@ function InventoryHostGroupsList() {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      moduleOptions,
+      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -54,12 +56,16 @@ function InventoryHostGroupsList() {
           data: { count, results },
         },
         hostGroupOptions,
+        adHocOptions,
       ] = await Promise.all([
         HostsAPI.readAllGroups(hostId, params),
         HostsAPI.readGroupsOptions(hostId),
+        InventoriesAPI.readAdHocOptions(invId),
       ]);
 
       return {
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
+        isAdHocDisabled: !adHocOptions.data.actions.POST,
         groups: results,
         itemCount: count,
         actions: hostGroupOptions.data.actions,
@@ -77,6 +83,8 @@ function InventoryHostGroupsList() {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
+      moduleOptions: [],
+      isAdHocDisabled: true,
     }
   );
 
@@ -209,11 +217,16 @@ function InventoryHostGroupsList() {
                     />,
                   ]
                 : []),
-              <AdHocCommands
-                adHocItems={selected}
-                hasListItems={itemCount > 0}
-                onLaunchLoading={setIsAdHocLaunchLoading}
-              />,
+              ...(!isAdHocDisabled
+                ? [
+                    <AdHocCommands
+                      adHocItems={selected}
+                      hasListItems={itemCount > 0}
+                      moduleOptions={moduleOptions}
+                      onLaunchLoading={setIsAdHocLaunchLoading}
+                    />,
+                  ]
+                : []),
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}

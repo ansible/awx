@@ -87,6 +87,21 @@ describe('<InventoryRelatedGroupList />', () => {
         ],
       },
     });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryRelatedGroupList />);
     });
@@ -105,6 +120,10 @@ describe('<InventoryRelatedGroupList />', () => {
     expect(GroupsAPI.readChildren).toHaveBeenCalled();
     expect(InventoriesAPI.readGroupsOptions).toHaveBeenCalled();
     expect(wrapper.find('InventoryRelatedGroupListItem').length).toBe(3);
+  });
+
+  test('should render Run Commands Button', async () => {
+    expect(wrapper.find('AdHocCommands')).toHaveLength(1);
   });
 
   test('should check and uncheck the row item', async () => {
@@ -219,5 +238,26 @@ describe('<InventoryRelatedGroupList />', () => {
       wrapper.find('button[aria-label="Save"]').prop('onClick')()
     );
     expect(GroupsAPI.associateChildGroup).toBeCalledTimes(1);
+  });
+
+  test('should not render Run Commands button', async () => {
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryRelatedGroupList />);
+    });
+    expect(wrapper.find('AdHocCommands')).toHaveLength(0);
   });
 });

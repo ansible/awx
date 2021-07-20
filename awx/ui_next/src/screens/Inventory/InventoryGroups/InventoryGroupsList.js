@@ -38,6 +38,8 @@ function InventoryGroupsList() {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      moduleOptions,
+      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -45,12 +47,15 @@ function InventoryGroupsList() {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, groupOptions] = await Promise.all([
+      const [response, groupOptions, options] = await Promise.all([
         InventoriesAPI.readGroups(inventoryId, params),
         InventoriesAPI.readGroupsOptions(inventoryId),
+        InventoriesAPI.readAdHocOptions(inventoryId),
       ]);
 
       return {
+        moduleOptions: options.data.actions.GET.module_name.choices,
+        isAdHocDisabled: !options.data.actions.POST,
         groups: response.data.results,
         groupCount: response.data.count,
         actions: groupOptions.data.actions,
@@ -68,6 +73,8 @@ function InventoryGroupsList() {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
+      moduleOptions: [],
+      isAdHocDisabled: true,
     }
   );
 
@@ -171,22 +178,29 @@ function InventoryGroupsList() {
                     />,
                   ]
                 : []),
-              <AdHocCommands
-                adHocItems={selected}
-                hasListItems={groupCount > 0}
-                onLaunchLoading={setIsAdHocLaunchLoading}
-              />,
+              ...(!isAdHocDisabled
+                ? [
+                    <AdHocCommands
+                      adHocItems={selected}
+                      hasListItems={groupCount > 0}
+                      onLaunchLoading={setIsAdHocLaunchLoading}
+                      moduleOptions={moduleOptions}
+                    />,
+                  ]
+                : []),
               <Tooltip content={renderTooltip()} position="top" key="delete">
-                <InventoryGroupsDeleteModal
-                  groups={selected}
-                  isDisabled={
-                    selected.length === 0 || selected.some(cannotDelete)
-                  }
-                  onAfterDelete={() => {
-                    fetchData();
-                    clearSelected();
-                  }}
-                />
+                <div>
+                  <InventoryGroupsDeleteModal
+                    groups={selected}
+                    isDisabled={
+                      selected.length === 0 || selected.some(cannotDelete)
+                    }
+                    onAfterDelete={() => {
+                      fetchData();
+                      clearSelected();
+                    }}
+                  />
+                </div>
               </Tooltip>,
             ]}
           />
