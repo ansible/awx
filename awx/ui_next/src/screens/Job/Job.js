@@ -119,7 +119,7 @@ function Job({ setBreadcrumb }) {
       <PageSection>
         <Card>
           <ContentError error={error}>
-            {error.response.status === 404 && (
+            {error.response?.status === 404 && (
               <span>
                 {t`The page you requested could not be found.`}{' '}
                 <Link to="/jobs">{t`View all Jobs.`}</Link>

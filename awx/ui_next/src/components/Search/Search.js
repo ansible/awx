@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   Button,
   ButtonVariant,
@@ -36,7 +36,6 @@ function Search({
   onReplaceSearch,
   onRemove,
   qsConfig,
-  location,
   searchableKeys,
   relatedSearchableKeys,
   onShowAdvancedSearch,
@@ -45,6 +44,7 @@ function Search({
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
 }) {
+  const location = useLocation();
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
     (() => {
@@ -341,4 +341,4 @@ Search.defaultProps = {
   enableRelatedFuzzyFiltering: true,
 };
 
-export default withRouter(Search);
+export default Search;
