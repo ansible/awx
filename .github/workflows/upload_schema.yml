@@ -36,7 +36,7 @@ jobs:
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_REGION: 'us-east-1'
         run: |
-          pip install boto3
+          ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
           ansible localhost -c local -m aws_s3 \
             -a 'src=${{ github.workspace }}/schema.json bucket=awx-public-ci-files object=schema.json mode=put permission=public-read'
 
