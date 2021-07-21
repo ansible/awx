@@ -42,12 +42,17 @@ tss_inputs = {
     'required': ['server_url', 'username', 'password', 'secret_id', 'secret_field'],
 }
 
-tss_plugin = CredentialPlugin(
-    'Thycotic Secret Server',
-    tss_inputs,
-    lambda **kwargs: ServerSecret(
+
+def tss_backend(**kwargs):
+    return ServerSecret(
         **SecretServer(kwargs['server_url'], PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])).get_secret(
             kwargs['secret_id']
         )
-    ).fields[kwargs['secret_field']],
+    ).fields[kwargs['secret_field']]
+
+
+tss_plugin = CredentialPlugin(
+    'Thycotic Secret Server',
+    tss_inputs,
+    tss_backend,
 )
