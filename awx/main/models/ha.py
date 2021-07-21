@@ -209,7 +209,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     @property
     def execution_capacity(self):
         # TODO: update query to exclude based on node_type field
-        return sum([inst.capacity for inst in self.instances.exclude(version__startswith='ansible-runner-')])
+        return sum([inst.capacity for inst in self.instances.filter(version__startswith='ansible-runner-')])
 
     @property
     def jobs_running(self):
