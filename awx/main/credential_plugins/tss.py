@@ -44,11 +44,12 @@ tss_inputs = {
 
 
 def tss_backend(**kwargs):
-    return ServerSecret(
-        **SecretServer(kwargs['server_url'], PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])).get_secret(
-            kwargs['secret_id']
-        )
-    ).fields[kwargs['secret_field']]
+    authorizer = PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])
+    secret_server = SecretServer(kwargs['server_url'], authorizer)
+    secret_dict = secret_server.get_secret(kwargs['secret_id'])
+    secret = ServerSecret(**secret_dict)
+
+    return secret.fields[kwargs['secret_field']]
 
 
 tss_plugin = CredentialPlugin(
