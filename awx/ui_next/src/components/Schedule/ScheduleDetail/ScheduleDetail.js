@@ -141,7 +141,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const repeatFrequency =
     rule.options.freq === RRule.MINUTELY && dtstart === dtend
       ? t`None (Run Once)`
-      : rule.toText().replace(/^\w/, c => c.toUpperCase());
+      : rule.toText().replace(/^\w/, (c) => c.toUpperCase());
 
   const {
     ask_credential_on_launch,
@@ -168,13 +168,13 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const hasMissingSurveyValue = () => {
     let missingValues = false;
     if (survey_enabled) {
-      surveyConfig.spec.forEach(question => {
+      surveyConfig.spec.forEach((question) => {
         const hasDefaultValue = Boolean(question.default);
         if (question.required && !hasDefaultValue) {
           const extraDataKeys = Object.keys(schedule?.extra_data);
 
           const hasMatchingKey = extraDataKeys.includes(question.variable);
-          Object.values(schedule?.extra_data).forEach(value => {
+          Object.values(schedule?.extra_data).forEach((value) => {
             if (!value || !hasMatchingKey) {
               missingValues = true;
             } else {
@@ -317,7 +317,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 label={t`Credentials`}
                 value={
                   <ChipGroup numChips={5} totalChips={credentials.length}>
-                    {credentials.map(c => (
+                    {credentials.map((c) => (
                       <CredentialChip key={c.id} credential={c} isReadOnly />
                     ))}
                   </ChipGroup>
@@ -333,7 +333,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     numChips={5}
                     totalChips={job_tags.split(',').length}
                   >
-                    {job_tags.split(',').map(jobTag => (
+                    {job_tags.split(',').map((jobTag) => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
                       </Chip>
@@ -351,7 +351,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     numChips={5}
                     totalChips={skip_tags.split(',').length}
                   >
-                    {skip_tags.split(',').map(skipTag => (
+                    {skip_tags.split(',').map((skipTag) => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}
                       </Chip>

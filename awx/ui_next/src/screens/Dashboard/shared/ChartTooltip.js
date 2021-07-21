@@ -106,23 +106,17 @@ class Tooltip {
       .text(t`Never`);
   }
 
-  handleMouseOver = d => {
+  handleMouseOver = (d) => {
     let success = 0;
     let fail = 0;
     let total = 0;
     const x =
       d3.event.pageX -
-      d3
-        .select(this.svg)
-        .node()
-        .getBoundingClientRect().x +
+      d3.select(this.svg).node().getBoundingClientRect().x +
       10;
     const y =
       d3.event.pageY -
-      d3
-        .select(this.svg)
-        .node()
-        .getBoundingClientRect().y -
+      d3.select(this.svg).node().getBoundingClientRect().y -
       10;
     const formatTooltipDate = d3.timeFormat('%m/%d');
     if (!d) {

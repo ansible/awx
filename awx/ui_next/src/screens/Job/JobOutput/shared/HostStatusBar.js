@@ -13,8 +13,8 @@ const BarWrapper = styled.div`
 `;
 
 const BarSegment = styled.div`
-  background-color: ${props => props.color || 'inherit'};
-  flex-grow: ${props => props.count || 0};
+  background-color: ${(props) => props.color || 'inherit'};
+  flex-grow: ${(props) => props.count || 0};
 `;
 BarSegment.displayName = 'BarSegment';
 
@@ -52,7 +52,7 @@ const HostStatusBar = ({ counts = {} }) => {
     },
   };
 
-  const barSegments = Object.keys(hostStatus).map(key => {
+  const barSegments = Object.keys(hostStatus).map((key) => {
     const count = counts[key] || 0;
     return (
       <Tooltip

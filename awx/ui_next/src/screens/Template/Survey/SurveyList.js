@@ -40,17 +40,12 @@ function SurveyList({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  const {
-    selected,
-    isAllSelected,
-    setSelected,
-    selectAll,
-    clearSelected,
-  } = useSelected(questions);
+  const { selected, isAllSelected, setSelected, selectAll, clearSelected } =
+    useSelected(questions);
 
-  const handleSelect = item => {
-    if (selected.some(q => q.variable === item.variable)) {
-      setSelected(selected.filter(q => q.variable !== item.variable));
+  const handleSelect = (item) => {
+    if (selected.some((q) => q.variable === item.variable)) {
+      setSelected(selected.filter((q) => q.variable !== item.variable));
     } else {
       setSelected(selected.concat(item));
     }
@@ -60,13 +55,13 @@ function SurveyList({
     if (isAllSelected) {
       await deleteSurvey();
     } else {
-      await updateSurvey(questions.filter(q => !selected.includes(q)));
+      await updateSurvey(questions.filter((q) => !selected.includes(q)));
     }
     setIsDeleteModalOpen(false);
     clearSelected();
   };
 
-  const moveUp = question => {
+  const moveUp = (question) => {
     const index = questions.indexOf(question);
     if (index < 1) {
       return;
@@ -76,7 +71,7 @@ function SurveyList({
     const end = questions.slice(index + 1);
     updateSurvey([...beginning, question, swapWith, ...end]);
   };
-  const moveDown = question => {
+  const moveDown = (question) => {
     const index = questions.indexOf(question);
     if (index === -1 || index > questions.length - 1) {
       return;
@@ -120,7 +115,7 @@ function SurveyList({
       ]}
     >
       <div>{t`This action will delete the following:`}</div>
-      {selected.map(question => (
+      {selected.map((question) => (
         <span key={question.variable}>
           <strong>{question.question_name}</strong>
           <br />
@@ -141,7 +136,7 @@ function SurveyList({
             isLast={index === questions.length - 1}
             isFirst={index === 0}
             question={question}
-            isChecked={selected.some(q => q.variable === question.variable)}
+            isChecked={selected.some((q) => q.variable === question.variable)}
             onSelect={() => handleSelect(question)}
             onMoveUp={moveUp}
             onMoveDown={moveDown}

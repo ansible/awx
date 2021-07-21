@@ -58,25 +58,10 @@ describe('<InventorySourceListItem />', () => {
       </table>
     );
     expect(wrapper.find('StatusIcon').length).toBe(1);
-    expect(
-      wrapper
-        .find('Link')
-        .at(1)
-        .prop('to')
-    ).toBe('/jobs/inventory/664');
+    expect(wrapper.find('Link').at(1).prop('to')).toBe('/jobs/inventory/664');
     expect(wrapper.find('.pf-c-table__check').length).toBe(1);
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Foo');
-    expect(
-      wrapper
-        .find('Td')
-        .at(3)
-        .text()
-    ).toBe('Source Bar');
+    expect(wrapper.find('Td').at(1).text()).toBe('Foo');
+    expect(wrapper.find('Td').at(3).text()).toBe('Source Bar');
     expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
   });
@@ -97,12 +82,7 @@ describe('<InventorySourceListItem />', () => {
     );
     wrapper.update();
     expect(wrapper.find('.pf-c-table__check').length).toBe(1);
-    expect(
-      wrapper
-        .find('Td')
-        .first()
-        .prop('select').isSelected
-    ).toEqual(true);
+    expect(wrapper.find('Td').first().prop('select').isSelected).toEqual(true);
   });
 
   test('should not render status icon', () => {

@@ -25,7 +25,12 @@ import HostGroups from './HostGroups';
 function Host({ setBreadcrumb }) {
   const location = useLocation();
   const match = useRouteMatch('/hosts/:id');
-  const { error, isLoading, result: host, request: fetchHost } = useRequest(
+  const {
+    error,
+    isLoading,
+    result: host,
+    request: fetchHost,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await HostsAPI.readDetail(match.params.id);
       setBreadcrumb(data);

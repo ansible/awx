@@ -105,7 +105,7 @@ describe('<InventoryRelatedGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryRelatedGroupList />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -147,21 +147,21 @@ describe('<InventoryRelatedGroupList />', () => {
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach((el) => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
   });
@@ -176,7 +176,7 @@ describe('<InventoryRelatedGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryRelatedGroupList />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should show add dropdown button according to permissions', async () => {
@@ -202,7 +202,7 @@ describe('<InventoryRelatedGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryRelatedGroupList />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('AddDropdown').length).toBe(0);
   });
 
@@ -213,7 +213,7 @@ describe('<InventoryRelatedGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryRelatedGroupList />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
     wrapper.update();

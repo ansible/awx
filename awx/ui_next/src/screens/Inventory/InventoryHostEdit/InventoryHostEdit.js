@@ -11,7 +11,7 @@ function InventoryHostEdit({ host, inventory }) {
   const detailsUrl = `/inventories/inventory/${inventory.id}/hosts/${host.id}/details`;
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await HostsAPI.update(host.id, values);
       history.push(detailsUrl);

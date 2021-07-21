@@ -18,10 +18,8 @@ export default function useSyncedSelectValue(value, onChange) {
     }
     const newOptions = [];
     if (value !== selections && options.length) {
-      const syncedValue = value.map(item => {
-        const match = options.find(i => {
-          return i.id === item.id;
-        });
+      const syncedValue = value.map((item) => {
+        const match = options.find((i) => i.id === item.id);
         if (!match) {
           newOptions.push(item);
         }
@@ -37,7 +35,7 @@ export default function useSyncedSelectValue(value, onChange) {
 
   const onSelect = (event, item) => {
     if (selections.includes(item)) {
-      onChange(selections.filter(i => i !== item));
+      onChange(selections.filter((i) => i !== item));
     } else {
       onChange(selections.concat(item));
     }
@@ -46,7 +44,7 @@ export default function useSyncedSelectValue(value, onChange) {
     selections: options.length ? addToStringToObjects(selections) : [],
     onSelect,
     options,
-    setOptions: newOpts => {
+    setOptions: (newOpts) => {
       if (isMounted.current) {
         setOptions(addToStringToObjects(newOpts));
       }
@@ -59,7 +57,7 @@ export default function useSyncedSelectValue(value, onChange) {
   all objects in the array have a toString method.
  */
 function addToStringToObjects(items = []) {
-  items.forEach(item => {
+  items.forEach((item) => {
     item.toString = toString;
   });
   return items;

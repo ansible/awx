@@ -28,24 +28,22 @@ function InventorySourceListItem({
   label,
   rowIndex,
 }) {
-  const generateLastJobTooltip = job => {
-    return (
-      <>
-        <div>{t`MOST RECENT SYNC`}</div>
+  const generateLastJobTooltip = (job) => (
+    <>
+      <div>{t`MOST RECENT SYNC`}</div>
+      <div>
+        {t`JOB ID:`} {job.id}
+      </div>
+      <div>
+        {t`STATUS:`} {job.status.toUpperCase()}
+      </div>
+      {job.finished && (
         <div>
-          {t`JOB ID:`} {job.id}
+          {t`FINISHED:`} {formatDateString(job.finished)}
         </div>
-        <div>
-          {t`STATUS:`} {job.status.toUpperCase()}
-        </div>
-        {job.finished && (
-          <div>
-            {t`FINISHED:`} {formatDateString(job.finished)}
-          </div>
-        )}
-      </>
-    );
-  };
+      )}
+    </>
+  );
 
   const missingExecutionEnvironment =
     source.custom_virtualenv && !source.execution_environment;

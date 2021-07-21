@@ -26,7 +26,7 @@ export default function useWsWorkflowOutput(workflowJobId, initialNodes) {
   }, [initialNodes]);
 
   useEffect(
-    function parseWsMessage() {
+    () => {
       async function refreshNodeObjects() {
         const refreshedNodes = [];
         const updatedNodeObjects = await fetchWorkflowNodes(workflowJobId);
@@ -34,7 +34,7 @@ export default function useWsWorkflowOutput(workflowJobId, initialNodes) {
           map[node.id] = node;
           return map;
         }, {});
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
           if (node.id === 1) {
             // This is our artificial start node
             refreshedNodes.push({
@@ -68,7 +68,8 @@ export default function useWsWorkflowOutput(workflowJobId, initialNodes) {
         }
 
         const index = nodes.findIndex(
-          node => node?.originalNodeObject?.id === lastMessage.workflow_node_id
+          (node) =>
+            node?.originalNodeObject?.id === lastMessage.workflow_node_id
         );
 
         if (index > -1) {

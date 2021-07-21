@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -48,7 +48,7 @@ function ErrorDetail({ error }) {
     const message = getErrorMessage(response);
 
     return (
-      <Fragment>
+      <>
         <CardBody>
           {response?.config?.method.toUpperCase()} {response?.config?.url}{' '}
           <strong>{response?.status}</strong>
@@ -56,7 +56,7 @@ function ErrorDetail({ error }) {
         <CardBody>
           {Array.isArray(message) ? (
             <ul>
-              {message.map(m =>
+              {message.map((m) =>
                 typeof m === 'string' ? <li key={m}>{m}</li> : null
               )}
             </ul>
@@ -64,13 +64,11 @@ function ErrorDetail({ error }) {
             message
           )}
         </CardBody>
-      </Fragment>
+      </>
     );
   };
 
-  const renderStack = () => {
-    return <CardBody>{error.stack}</CardBody>;
-  };
+  const renderStack = () => <CardBody>{error.stack}</CardBody>;
 
   return (
     <Expandable

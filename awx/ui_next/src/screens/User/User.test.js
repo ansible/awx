@@ -75,7 +75,7 @@ describe('<User />', () => {
         }
       );
     });
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 6);
+    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 6);
 
     /* eslint-disable react/button-has-type */
     expect(wrapper.find('Tabs TabButton').length).toEqual(6);
@@ -131,6 +131,6 @@ describe('<User />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

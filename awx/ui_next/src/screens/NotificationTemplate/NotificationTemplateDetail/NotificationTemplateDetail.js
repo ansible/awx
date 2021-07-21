@@ -53,7 +53,11 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
     </TextList>
   );
 
-  const { request: deleteTemplate, isLoading, error: deleteError } = useRequest(
+  const {
+    request: deleteTemplate,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
     useCallback(async () => {
       await NotificationTemplatesAPI.destroy(template.id);
       history.push(`/notification_templates`);

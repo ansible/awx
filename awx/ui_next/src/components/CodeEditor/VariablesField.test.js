@@ -140,10 +140,7 @@ describe('VariablesField', () => {
         )}
       </Formik>
     );
-    wrapper
-      .find('Button')
-      .at(1)
-      .simulate('click');
+    wrapper.find('Button').at(1).simulate('click');
     wrapper.update();
 
     const field = wrapper.find('CodeEditor');
@@ -173,7 +170,7 @@ describe('VariablesField', () => {
     const handleSubmit = jest.fn();
     const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }} onSubmit={handleSubmit}>
-        {formik => (
+        {(formik) => (
           <form onSubmit={formik.handleSubmit}>
             <VariablesField id="the-field" name="variables" label="Variables" />
             <button type="submit" id="submit">
@@ -200,7 +197,7 @@ describe('VariablesField', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
-          {formik => (
+          {(formik) => (
             <form onSubmit={formik.handleSubmit}>
               <VariablesField
                 id="the-field"
@@ -224,7 +221,7 @@ describe('VariablesField', () => {
     const value = '---';
     const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
-        {formik => (
+        {(formik) => (
           <form onSubmit={formik.handleSubmit}>
             <VariablesField id="the-field" name="variables" label="Variables" />
             <button type="submit" id="submit">
@@ -249,7 +246,7 @@ describe('VariablesField', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
-          {formik => (
+          {(formik) => (
             <form onSubmit={formik.handleSubmit}>
               <VariablesField
                 id="the-field"

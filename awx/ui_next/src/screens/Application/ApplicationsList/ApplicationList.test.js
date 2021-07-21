@@ -46,7 +46,7 @@ describe('<ApplicationsList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
-    await waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    await waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
   });
 
   test('should have data fetched and render 2 rows', async () => {
@@ -55,7 +55,7 @@ describe('<ApplicationsList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
-    await waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    await waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
     expect(wrapper.find('ApplicationListItem').length).toBe(2);
     expect(ApplicationsAPI.read).toBeCalled();
     expect(ApplicationsAPI.readOptions).toBeCalled();
@@ -67,7 +67,7 @@ describe('<ApplicationsList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
-    waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
 
     wrapper
       .find('.pf-c-table__check')
@@ -78,11 +78,7 @@ describe('<ApplicationsList/>', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
@@ -115,7 +111,7 @@ describe('<ApplicationsList/>', () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
 
-    await waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    await waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 
@@ -136,7 +132,7 @@ describe('<ApplicationsList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
-    waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
 
     wrapper
       .find('.pf-c-table__check')
@@ -147,11 +143,7 @@ describe('<ApplicationsList/>', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
@@ -175,7 +167,7 @@ describe('<ApplicationsList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
-    waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 
@@ -188,18 +180,12 @@ describe('<ApplicationsList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ApplicationsList />);
     });
-    waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
+    waitForElement(wrapper, 'ApplicationsList', (el) => el.length > 0);
     expect(
-      wrapper
-        .find('ApplicationListItem')
-        .at(0)
-        .find('PencilAltIcon').length
+      wrapper.find('ApplicationListItem').at(0).find('PencilAltIcon').length
     ).toBe(0);
     expect(
-      wrapper
-        .find('ApplicationListItem')
-        .at(1)
-        .find('PencilAltIcon').length
+      wrapper.find('ApplicationListItem').at(1).find('PencilAltIcon').length
     ).toBe(1);
   });
 });

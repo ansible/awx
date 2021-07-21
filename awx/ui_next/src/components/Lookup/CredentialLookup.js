@@ -84,7 +84,7 @@ function CredentialLookup({
 
       const searchKeys = Object.keys(
         actionsResponse.data.actions?.GET || {}
-      ).filter(key => actionsResponse.data.actions?.GET[key].filterable);
+      ).filter((key) => actionsResponse.data.actions?.GET[key].filterable);
       const item = searchKeys.indexOf('type');
       if (item) {
         searchKeys[item] = 'credential_type__kind';
@@ -95,7 +95,7 @@ function CredentialLookup({
         credentials: data.results,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: searchKeys,
       };
     }, [
@@ -115,7 +115,7 @@ function CredentialLookup({
   );
 
   const checkCredentialName = useCallback(
-    async name => {
+    async (name) => {
       if (!name) {
         onChange(null);
         return;
@@ -209,9 +209,9 @@ function CredentialLookup({
             relatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="credential"
-            selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
-            deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
-            sortSelectedItems={selectedItems =>
+            selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
+            sortSelectedItems={(selectedItems) =>
               dispatch({ type: 'SET_SELECTED_ITEMS', selectedItems })
             }
             multiple={multiple}

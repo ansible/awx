@@ -12,7 +12,7 @@ jest.setTimeout(120000);
 require('@nteract/mockument');
 
 // eslint-disable-next-line import/prefer-default-export
-export const asyncFlush = () => new Promise(resolve => setImmediate(resolve));
+export const asyncFlush = () => new Promise((resolve) => setImmediate(resolve));
 
 let hasConsoleError = false;
 let hasConsoleWarn = false;

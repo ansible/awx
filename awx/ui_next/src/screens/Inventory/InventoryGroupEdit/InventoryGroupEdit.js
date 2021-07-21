@@ -10,7 +10,7 @@ function InventoryGroupEdit({ inventoryGroup }) {
   const { id, groupId } = useParams();
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await GroupsAPI.update(groupId, values);
       history.push(`/inventories/inventory/${id}/groups/${groupId}`);

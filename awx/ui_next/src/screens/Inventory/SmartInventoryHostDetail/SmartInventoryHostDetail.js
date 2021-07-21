@@ -19,7 +19,10 @@ function SmartInventoryHostDetail({ host }) {
     summary_fields: { inventory, recent_jobs, created_by, modified_by },
   } = host;
 
-  const recentPlaybookJobs = recent_jobs?.map(job => ({ ...job, type: 'job' }));
+  const recentPlaybookJobs = recent_jobs?.map((job) => ({
+    ...job,
+    type: 'job',
+  }));
 
   return (
     <CardBody>

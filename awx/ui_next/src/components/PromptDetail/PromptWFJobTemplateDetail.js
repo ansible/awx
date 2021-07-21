@@ -50,7 +50,7 @@ function PromptWFJobTemplateDetail({ resource }) {
       ? 'smart_inventory'
       : 'inventory';
 
-  const recentJobs = summary_fields?.recent_jobs?.map(job => ({
+  const recentJobs = summary_fields?.recent_jobs?.map((job) => ({
     ...job,
     type: 'job',
   }));
@@ -117,7 +117,7 @@ function PromptWFJobTemplateDetail({ resource }) {
               numChips={5}
               totalChips={summary_fields.labels.results.length}
             >
-              {summary_fields.labels.results.map(label => (
+              {summary_fields.labels.results.map((label) => (
                 <Chip key={label.id} isReadOnly>
                   {label.name}
                 </Chip>

@@ -20,7 +20,12 @@ function MiscSystemDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: system } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: system,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('system');
       if (data.DEFAULT_EXECUTION_ENVIRONMENT) {
@@ -55,7 +60,7 @@ function MiscSystemDetail() {
       );
 
       const mergedData = {};
-      Object.keys(systemData).forEach(key => {
+      Object.keys(systemData).forEach((key) => {
         mergedData[key] = options[key];
         mergedData[key].value = systemData[key];
       });

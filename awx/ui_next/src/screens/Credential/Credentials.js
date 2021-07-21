@@ -14,7 +14,7 @@ function Credentials() {
     '/credentials/add': t`Create New Credential`,
   });
 
-  const buildBreadcrumbConfig = useCallback(credential => {
+  const buildBreadcrumbConfig = useCallback((credential) => {
     if (!credential) {
       return;
     }

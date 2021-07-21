@@ -46,7 +46,7 @@ export async function getRelatedResourceDeleteCounts(requests) {
 }
 
 export const relatedResourceDeleteRequests = {
-  credential: selected => [
+  credential: (selected) => [
     {
       request: () =>
         JobTemplatesAPI.read({
@@ -81,7 +81,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  credentialType: selected => [
+  credentialType: (selected) => [
     {
       request: async () =>
         CredentialsAPI.read({
@@ -91,7 +91,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  inventory: selected => [
+  inventory: (selected) => [
     {
       request: async () =>
         JobTemplatesAPI.read({
@@ -105,7 +105,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  inventorySource: inventorySourceId => [
+  inventorySource: (inventorySourceId) => [
     {
       request: async () =>
         WorkflowJobTemplateNodesAPI.read({
@@ -123,7 +123,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  project: selected => [
+  project: (selected) => [
     {
       request: () =>
         JobTemplatesAPI.read({
@@ -147,7 +147,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  template: selected => [
+  template: (selected) => [
     {
       request: async () =>
         WorkflowJobTemplateNodesAPI.read({
@@ -157,7 +157,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  organization: selected => [
+  organization: (selected) => [
     {
       request: async () =>
         CredentialsAPI.read({
@@ -208,7 +208,7 @@ export const relatedResourceDeleteRequests = {
       label: t`Applications`,
     },
   ],
-  executionEnvironment: selected => [
+  executionEnvironment: (selected) => [
     {
       request: async () =>
         UnifiedJobTemplatesAPI.read({
@@ -240,7 +240,7 @@ export const relatedResourceDeleteRequests = {
           });
 
           const responses = await Promise.all(
-            results.map(result =>
+            results.map((result) =>
               WorkflowJobTemplateNodesAPI.read({
                 unified_job_template: result.id,
               })
@@ -259,7 +259,7 @@ export const relatedResourceDeleteRequests = {
       label: [t`Workflow Job Template Nodes`],
     },
   ],
-  instanceGroup: selected => [
+  instanceGroup: (selected) => [
     {
       request: () => OrganizationsAPI.read({ instance_groups: selected.id }),
       label: t`Organizations`,

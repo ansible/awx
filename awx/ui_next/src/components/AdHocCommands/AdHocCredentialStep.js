@@ -58,10 +58,10 @@ function AdHocCredentialStep({ credentialTypeId }) {
         credentialCount: count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [credentialTypeId, history.location.search]),
     {
@@ -135,7 +135,7 @@ function AdHocCredentialStep({ credentialTypeId }) {
               },
             ]}
             name="credential"
-            selectItem={value => {
+            selectItem={(value) => {
               helpers.setValue([value]);
             }}
             deselectItem={() => {

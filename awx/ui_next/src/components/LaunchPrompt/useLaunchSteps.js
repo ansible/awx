@@ -17,10 +17,10 @@ function showCredentialPasswordsStep(credentials = [], launchConfig) {
 
   let credentialPasswordStepRequired = false;
 
-  credentials.forEach(credential => {
+  credentials.forEach((credential) => {
     if (!credential.inputs) {
       const launchConfigCredential = launchConfig.defaults.credentials.find(
-        defaultCred => defaultCred.id === credential.id
+        (defaultCred) => defaultCred.id === credential.id
       );
 
       if (launchConfigCredential?.passwords_needed.length > 0) {
@@ -60,30 +60,31 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
   const { resetForm } = useFormikContext();
-  const hasErrors = steps.some(step => step.hasError);
+  const hasErrors = steps.some((step) => step.hasError);
 
   steps.push(
     usePreviewStep(launchConfig, resource, surveyConfig, hasErrors, true)
   );
 
-  const pfSteps = steps.map(s => s.step).filter(s => s != null);
-  const stepsAreReady = !steps.some(s => !s.isReady);
+  const pfSteps = steps.map((s) => s.step).filter((s) => s != null);
+  const stepsAreReady = !steps.some((s) => !s.isReady);
 
   useEffect(() => {
     if (!stepsAreReady) {
       return;
     }
 
-    const initialValues = steps.reduce((acc, cur) => {
-      return {
+    const initialValues = steps.reduce(
+      (acc, cur) => ({
         ...acc,
         ...cur.initialValues,
-      };
-    }, {});
+      }),
+      {}
+    );
 
     const newFormValues = { ...initialValues };
 
-    Object.keys(formikValues).forEach(formikValueKey => {
+    Object.keys(formikValues).forEach((formikValueKey) => {
       if (
         formikValueKey === 'credential_passwords' &&
         Object.prototype.hasOwnProperty.call(
@@ -93,7 +94,7 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
       ) {
         const formikCredentialPasswords = formikValues.credential_passwords;
         Object.keys(formikCredentialPasswords).forEach(
-          credentialPasswordValueKey => {
+          (credentialPasswordValueKey) => {
             if (
               Object.prototype.hasOwnProperty.call(
                 newFormValues.credential_passwords,
@@ -121,23 +122,23 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formikValues.credentials, stepsAreReady]);
 
-  const stepWithError = steps.find(s => s.contentError);
+  const stepWithError = steps.find((s) => s.contentError);
   const contentError = stepWithError ? stepWithError.contentError : null;
 
   return {
     steps: pfSteps,
     isReady,
-    validateStep: stepId => {
-      steps.find(s => s?.step?.id === stepId).validate();
+    validateStep: (stepId) => {
+      steps.find((s) => s?.step?.id === stepId).validate();
     },
     visitStep: (prevStepId, setFieldTouched) => {
       setVisited({
         ...visited,
         [prevStepId]: true,
       });
-      steps.find(s => s?.step?.id === prevStepId).setTouched(setFieldTouched);
+      steps.find((s) => s?.step?.id === prevStepId).setTouched(setFieldTouched);
     },
-    visitAllSteps: setFieldTouched => {
+    visitAllSteps: (setFieldTouched) => {
       setVisited({
         inventory: true,
         credentials: true,
@@ -146,7 +147,7 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
         survey: true,
         preview: true,
       });
-      steps.forEach(s => s.setTouched(setFieldTouched));
+      steps.forEach((s) => s.setTouched(setFieldTouched));
     },
     contentError,
   };

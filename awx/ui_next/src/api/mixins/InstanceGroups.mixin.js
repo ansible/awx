@@ -1,13 +1,11 @@
 function isEqual(array1, array2) {
   return (
     array1.length === array2.length &&
-    array1.every((element, index) => {
-      return element.id === array2[index].id;
-    })
+    array1.every((element, index) => element.id === array2[index].id)
   );
 }
 
-const InstanceGroupsMixin = parent =>
+const InstanceGroupsMixin = (parent) =>
   class extends parent {
     readInstanceGroups(resourceId, params) {
       return this.http.get(`${this.baseUrl}${resourceId}/instance_groups/`, {

@@ -15,7 +15,7 @@ function Jobs() {
     '/jobs': t`Jobs`,
   });
 
-  const buildBreadcrumbConfig = useCallback(job => {
+  const buildBreadcrumbConfig = useCallback((job) => {
     if (!job) {
       return;
     }

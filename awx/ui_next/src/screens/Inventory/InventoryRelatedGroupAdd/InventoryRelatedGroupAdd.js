@@ -7,7 +7,7 @@ function InventoryRelatedGroupAdd() {
   const [error, setError] = useState(null);
   const history = useHistory();
   const { id, groupId } = useParams();
-  const associateInventoryGroup = async values => {
+  const associateInventoryGroup = async (values) => {
     values.inventory = id;
     try {
       const { data } = await GroupsAPI.create(values);

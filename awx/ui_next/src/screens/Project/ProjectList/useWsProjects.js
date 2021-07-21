@@ -16,7 +16,7 @@ export default function useWsProjects(initialProjects) {
     if (!lastMessage?.unified_job_id || lastMessage.type !== 'project_update') {
       return;
     }
-    const index = projects.findIndex(p => p.id === lastMessage.project_id);
+    const index = projects.findIndex((p) => p.id === lastMessage.project_id);
     if (index === -1) {
       return;
     }

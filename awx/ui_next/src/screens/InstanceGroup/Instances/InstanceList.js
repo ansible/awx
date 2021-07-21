@@ -60,10 +60,10 @@ function InstanceList() {
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           responseActions.data.actions?.GET || {}
-        ).filter(key => responseActions.data.actions?.GET[key].filterable),
+        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location.search, instanceGroupId]),
     {
@@ -75,13 +75,8 @@ function InstanceList() {
     }
   );
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(instances);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(instances);
 
   useEffect(() => {
     fetchInstances();
@@ -92,13 +87,15 @@ function InstanceList() {
     deleteItems: disassociateInstances,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(instance =>
-          InstanceGroupsAPI.disassociateInstance(instanceGroupId, instance.id)
-        )
-      );
-    }, [instanceGroupId, selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map((instance) =>
+            InstanceGroupsAPI.disassociateInstance(instanceGroupId, instance.id)
+          )
+        ),
+      [instanceGroupId, selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -108,9 +105,9 @@ function InstanceList() {
 
   const { request: handleAssociate, error: associateError } = useRequest(
     useCallback(
-      async instancesToAssociate => {
+      async (instancesToAssociate) => {
         await Promise.all(
-          instancesToAssociate.map(instance =>
+          instancesToAssociate.map((instance) =>
             InstanceGroupsAPI.associateInstance(instanceGroupId, instance.id)
           )
         );
@@ -133,11 +130,10 @@ function InstanceList() {
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   const fetchInstancesToAssociate = useCallback(
-    params => {
-      return InstancesAPI.read(
+    (params) =>
+      InstancesAPI.read(
         mergeParams(params, { not__rampart_groups__id: instanceGroupId })
-      );
-    },
+      ),
     [instanceGroupId]
   );
 
@@ -171,7 +167,7 @@ function InstanceList() {
             key: 'hostname',
           },
         ]}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}
@@ -222,7 +218,7 @@ function InstanceList() {
             value={instance.hostname}
             instance={instance}
             onSelect={() => handleSelect(instance)}
-            isSelected={selected.some(row => row.id === instance.id)}
+            isSelected={selected.some((row) => row.id === instance.id)}
             fetchInstances={fetchInstances}
             rowIndex={index}
           />

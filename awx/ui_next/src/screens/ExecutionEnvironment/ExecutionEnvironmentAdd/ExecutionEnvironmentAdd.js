@@ -11,7 +11,7 @@ function ExecutionEnvironmentAdd() {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       const { data: response } = await ExecutionEnvironmentsAPI.create({
         ...values,

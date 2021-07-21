@@ -28,8 +28,8 @@ function LineChart({ data, helpText }) {
     /* Scale */
     let smallestY;
     let largestY;
-    data.map(line =>
-      line.values.forEach(value => {
+    data.map((line) =>
+      line.values.forEach((value) => {
         if (smallestY === undefined) {
           smallestY = value.y;
         }
@@ -48,8 +48,8 @@ function LineChart({ data, helpText }) {
     const xScale = d3
       .scaleLinear()
       .domain(
-        d3.max(data[0].values, d => d.x) > 49
-          ? d3.extent(data[0].values, d => d.x)
+        d3.max(data[0].values, (d) => d.x) > 49
+          ? d3.extent(data[0].values, (d) => d.x)
           : [0, 50]
       )
       .range([0, width - margin]);
@@ -64,7 +64,7 @@ function LineChart({ data, helpText }) {
     /* Add SVG */
     d3.selectAll(`#chart > *`).remove();
 
-    const renderTooltip = d => {
+    const renderTooltip = (d) => {
       d3.selectAll(`.tooltip > *`).remove();
 
       d3.select('#chart')
@@ -74,8 +74,8 @@ function LineChart({ data, helpText }) {
         .attr('fill', 'white')
         .style('padding-left', '50px');
       const tooltip = {};
-      data.map(datum => {
-        datum.values.forEach(value => {
+      data.map((datum) => {
+        datum.values.forEach((value) => {
           if (d.x === value.x) {
             tooltip[datum.name] = value.y;
           }
@@ -163,8 +163,8 @@ function LineChart({ data, helpText }) {
     const line = d3
       .line()
       .curve(d3.curveMonotoneX)
-      .x(d => xScale(d.x))
-      .y(d => yScale(d.y));
+      .x((d) => xScale(d.x))
+      .y((d) => yScale(d.y));
 
     const lines = svg.append('g');
 
@@ -177,7 +177,7 @@ function LineChart({ data, helpText }) {
       .append('path')
       .attr('class', 'line')
       .style('fill', 'none')
-      .attr('d', d => line(d.values))
+      .attr('d', (d) => line(d.values))
       .style('stroke', (d, i) => color(i))
       .style('stroke-width', '3px');
 
@@ -189,7 +189,7 @@ function LineChart({ data, helpText }) {
       .append('g')
       .style('fill', (d, i) => color(i))
       .selectAll('circle')
-      .data(d => d.values)
+      .data((d) => d.values)
       .enter()
       .append('g')
       .attr('class', 'circle')
@@ -202,8 +202,8 @@ function LineChart({ data, helpText }) {
         removeTooltip();
       })
       .append('circle')
-      .attr('cx', d => xScale(d.x))
-      .attr('cy', d => yScale(d.y))
+      .attr('cx', (d) => xScale(d.x))
+      .attr('cy', (d) => yScale(d.y))
       .attr('r', circleRadius)
       .on('mouseover', () => {
         d3.select(this)
@@ -212,10 +212,7 @@ function LineChart({ data, helpText }) {
           .attr('r', circleRadiusHover);
       })
       .on('mouseout', () => {
-        d3.select(this)
-          .transition()
-          .duration(duration)
-          .attr('r', circleRadius);
+        d3.select(this).transition().duration(duration).attr('r', circleRadius);
       });
 
     /* Add Axis into SVG */
@@ -230,10 +227,7 @@ function LineChart({ data, helpText }) {
       .attr('transform', `translate(0, ${height - margin})`)
       .call(xAxis);
 
-    svg
-      .append('g')
-      .attr('class', 'y axis')
-      .call(yAxis);
+    svg.append('g').attr('class', 'y axis').call(yAxis);
   }, [data, helpText]);
 
   useEffect(() => {

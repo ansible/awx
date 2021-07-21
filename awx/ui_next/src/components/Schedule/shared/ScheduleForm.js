@@ -40,18 +40,18 @@ const generateRunOnTheDay = (days = []) => {
       RRule.FR,
       RRule.SA,
       RRule.SU,
-    ].every(element => days.indexOf(element) > -1)
+    ].every((element) => days.indexOf(element) > -1)
   ) {
     return 'day';
   }
   if (
     [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR].every(
-      element => days.indexOf(element) > -1
+      (element) => days.indexOf(element) > -1
     )
   ) {
     return 'weekday';
   }
-  if ([RRule.SA, RRule.SU].every(element => days.indexOf(element) > -1)) {
+  if ([RRule.SA, RRule.SU].every((element) => days.indexOf(element) > -1)) {
     return 'weekendDay';
   }
   if (days.indexOf(RRule.MO) > -1) {
@@ -217,13 +217,11 @@ function ScheduleForm({
         creds = results;
       }
 
-      const zones = data.map(zone => {
-        return {
-          value: zone.name,
-          key: zone.name,
-          label: zone.name,
-        };
-      });
+      const zones = data.map((zone) => ({
+        value: zone.name,
+        key: zone.name,
+        label: zone.name,
+      }));
 
       return {
         zoneOptions: zones,
@@ -255,7 +253,7 @@ function ScheduleForm({
   const hasMissingSurveyValue = useCallback(() => {
     let missingValues = false;
     if (launchConfig?.survey_enabled) {
-      surveyConfig.spec.forEach(question => {
+      surveyConfig.spec.forEach((question) => {
         const hasDefaultValue = Boolean(question.default);
         const hasSchedule = Object.keys(schedule).length;
         const isRequired = question.required;
@@ -266,7 +264,7 @@ function ScheduleForm({
             const hasMatchingKey = Object.keys(schedule?.extra_data).includes(
               question.variable
             );
-            Object.values(schedule?.extra_data).forEach(value => {
+            Object.values(schedule?.extra_data).forEach((value) => {
               if (!value || !hasMatchingKey) {
                 missingValues = true;
               } else {
@@ -288,9 +286,9 @@ function ScheduleForm({
       if (Object.keys(schedule).length > 0) {
         const defaultCredsWithoutOverrides = [];
 
-        const credentialHasOverride = templateDefaultCred => {
+        const credentialHasOverride = (templateDefaultCred) => {
           let hasOverride = false;
-          credentials.forEach(nodeCredential => {
+          credentials.forEach((nodeCredential) => {
             if (
               templateDefaultCred.credential_type ===
               nodeCredential.credential_type
@@ -312,7 +310,7 @@ function ScheduleForm({
         };
 
         if (resourceDefaultCredentials) {
-          resourceDefaultCredentials.forEach(defaultCred => {
+          resourceDefaultCredentials.forEach((defaultCred) => {
             if (!credentialHasOverride(defaultCred)) {
               defaultCredsWithoutOverrides.push(defaultCred);
             }
@@ -322,7 +320,7 @@ function ScheduleForm({
         return (
           credentials
             .concat(defaultCredsWithoutOverrides)
-            .filter(credential => {
+            .filter((credential) => {
               let credentialRequiresPass = false;
 
               Object.entries(credential.inputs).forEach(([key, value]) => {
@@ -338,7 +336,7 @@ function ScheduleForm({
 
       return launchConfig?.defaults?.credentials
         ? launchConfig.defaults.credentials.filter(
-            credential => credential?.passwords_needed.length > 0
+            (credential) => credential?.passwords_needed.length > 0
           ).length > 0
         : false;
     }
@@ -535,109 +533,104 @@ function ScheduleForm({
 
   return (
     <Config>
-      {() => {
-        return (
-          <Formik
-            initialValues={Object.assign(initialValues, overriddenValues)}
-            onSubmit={values => {
-              submitSchedule(values, launchConfig, surveyConfig, credentials);
-            }}
-            validate={values => {
-              const errors = {};
-              const {
-                end,
-                endDate,
-                frequency,
-                runOn,
-                runOnDayNumber,
-                startDate,
-              } = values;
+      {() => (
+        <Formik
+          initialValues={Object.assign(initialValues, overriddenValues)}
+          onSubmit={(values) => {
+            submitSchedule(values, launchConfig, surveyConfig, credentials);
+          }}
+          validate={(values) => {
+            const errors = {};
+            const {
+              end,
+              endDate,
+              frequency,
+              runOn,
+              runOnDayNumber,
+              startDate,
+            } = values;
 
-              if (
-                end === 'onDate' &&
-                new Date(startDate) >= new Date(endDate)
-              ) {
-                errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
-              }
+            if (end === 'onDate' && new Date(startDate) >= new Date(endDate)) {
+              errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
+            }
 
-              if (
-                (frequency === 'month' || frequency === 'year') &&
-                runOn === 'day' &&
-                (runOnDayNumber < 1 || runOnDayNumber > 31)
-              ) {
-                errors.runOn = t`Please select a day number between 1 and 31.`;
-              }
+            if (
+              (frequency === 'month' || frequency === 'year') &&
+              runOn === 'day' &&
+              (runOnDayNumber < 1 || runOnDayNumber > 31)
+            ) {
+              errors.runOn = t`Please select a day number between 1 and 31.`;
+            }
 
-              return errors;
-            }}
-          >
-            {formik => (
-              <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-                <FormColumnLayout>
-                  <ScheduleFormFields
-                    hasDaysToKeepField={hasDaysToKeepField}
-                    zoneOptions={zoneOptions}
-                    {...rest}
+            return errors;
+          }}
+        >
+          {(formik) => (
+            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+              <FormColumnLayout>
+                <ScheduleFormFields
+                  hasDaysToKeepField={hasDaysToKeepField}
+                  zoneOptions={zoneOptions}
+                  {...rest}
+                />
+                {isWizardOpen && (
+                  <SchedulePromptableFields
+                    schedule={schedule}
+                    credentials={credentials}
+                    surveyConfig={surveyConfig}
+                    launchConfig={launchConfig}
+                    resource={resource}
+                    onCloseWizard={() => {
+                      setIsWizardOpen(false);
+                    }}
+                    onSave={() => {
+                      setIsWizardOpen(false);
+                      setIsSaveDisabled(false);
+                    }}
+                    resourceDefaultCredentials={resourceDefaultCredentials}
                   />
-                  {isWizardOpen && (
-                    <SchedulePromptableFields
-                      schedule={schedule}
-                      credentials={credentials}
-                      surveyConfig={surveyConfig}
-                      launchConfig={launchConfig}
-                      resource={resource}
-                      onCloseWizard={() => {
-                        setIsWizardOpen(false);
-                      }}
-                      onSave={() => {
-                        setIsWizardOpen(false);
-                        setIsSaveDisabled(false);
-                      }}
-                      resourceDefaultCredentials={resourceDefaultCredentials}
-                    />
-                  )}
-                  <FormSubmitError error={submitError} />
-                  <FormFullWidthLayout>
-                    <ActionGroup>
-                      <Button
-                        ouiaId="schedule-form-save-button"
-                        aria-label={t`Save`}
-                        variant="primary"
-                        type="button"
-                        onClick={formik.handleSubmit}
-                        isDisabled={isSaveDisabled}
-                      >
-                        {t`Save`}
-                      </Button>
+                )}
+                <FormSubmitError error={submitError} />
+                <FormFullWidthLayout>
+                  <ActionGroup>
+                    <Button
+                      ouiaId="schedule-form-save-button"
+                      aria-label={t`Save`}
+                      variant="primary"
+                      type="button"
+                      onClick={formik.handleSubmit}
+                      isDisabled={isSaveDisabled}
+                    >
+                      {t`Save`}
+                    </Button>
 
-                      {isTemplate && showPromptButton && (
-                        <Button
-                          ouiaId="schedule-form-prompt-button"
-                          variant="secondary"
-                          type="button"
-                          aria-label={t`Prompt`}
-                          onClick={() => setIsWizardOpen(true)}
-                        >
-                          {t`Prompt`}
-                        </Button>
-                      )}
+                    {isTemplate && showPromptButton && (
                       <Button
-                        ouiaId="schedule-form-cancel-button"
-                        aria-label={t`Cancel`}
+                        ouiaId="schedule-form-prompt-button"
                         variant="secondary"
                         type="button"
-                        onClick={handleCancel}
+                        aria-label={t`Prompt`}
+                        onClick={() => setIsWizardOpen(true)}
                       >
-                        {t`Cancel`}
+                        {t`Prompt`}
                       </Button>
-                    </ActionGroup>
-                  </FormFullWidthLayout>
-                </FormColumnLayout>
-              </Form>
-            )}
-          </Formik>
-        );
-      }}
+                    )}
+                    <Button
+                      ouiaId="schedule-form-cancel-button"
+                      aria-label={t`Cancel`}
+                      variant="secondary"
+                      type="button"
+                      onClick={handleCancel}
+                    >
+                      {t`Cancel`}
+                    </Button>
+                  </ActionGroup>
+                </FormFullWidthLayout>
+              </FormColumnLayout>
+            </Form>
+          )}
+        </Formik>
+      )}
     </Config>
   );
 }

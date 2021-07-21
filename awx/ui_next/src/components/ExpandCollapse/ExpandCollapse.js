@@ -14,7 +14,7 @@ const Button = styled(PFButton)`
   margin: 0;
   height: 30px;
   width: 30px;
-  ${props =>
+  ${(props) =>
     props.isActive
       ? `
       background-color: #007bba;
@@ -33,7 +33,7 @@ const ToolbarItem = styled(PFToolbarItem)`
 // with ExpandingContainer
 function ExpandCollapse({ isCompact, onCompact, onExpand }) {
   return (
-    <Fragment>
+    <>
       <ToolbarItem>
         <Button
           ouiaId="toolbar-collapse-button"
@@ -56,7 +56,7 @@ function ExpandCollapse({ isCompact, onCompact, onExpand }) {
           <EqualsIcon />
         </Button>
       </ToolbarItem>
-    </Fragment>
+    </>
   );
 }
 

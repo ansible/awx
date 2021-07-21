@@ -32,7 +32,7 @@ describe('<SmartInventoryHostList />', () => {
         <SmartInventoryHostList inventory={clonedInventory} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterAll(() => {
@@ -54,14 +54,14 @@ describe('<SmartInventoryHostList />', () => {
       wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toEqual(true);
     });
     act(() => {
       wrapper.find('DataListToolbar').invoke('onSelectAll')(false);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toEqual(false);
     });
   });
@@ -75,6 +75,6 @@ describe('<SmartInventoryHostList />', () => {
         <SmartInventoryHostList inventory={mockInventory} />
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

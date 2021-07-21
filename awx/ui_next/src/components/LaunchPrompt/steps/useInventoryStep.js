@@ -27,7 +27,7 @@ export default function useInventoryStep(launchConfig, resource, visitedSteps) {
     isReady: true,
     contentError: null,
     hasError: launchConfig.ask_inventory_on_launch && formError,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('inventory', true, false);
     },
     validate: () => {

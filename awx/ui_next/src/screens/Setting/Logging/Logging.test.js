@@ -51,7 +51,7 @@ describe('<Logging />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('LoggingDetail').length).toBe(1);
   });
 
@@ -64,7 +64,7 @@ describe('<Logging />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('LoggingEdit').length).toBe(1);
   });
 
@@ -98,7 +98,7 @@ describe('<Logging />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('LoggingDetail').length).toBe(1);
     expect(wrapper.find('LoggingEdit').length).toBe(0);
   });

@@ -33,7 +33,7 @@ describe('<SmartInventory />', () => {
       wrapper = mountWithContexts(<SmartInventory setBreadcrumb={() => {}} />);
     });
     await waitForElement(wrapper, 'SmartInventory');
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 5);
+    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 5);
   });
 
   test('should show content error when api throws an error', async () => {
@@ -44,7 +44,7 @@ describe('<SmartInventory />', () => {
       wrapper = mountWithContexts(<SmartInventory setBreadcrumb={() => {}} />);
     });
     expect(InventoriesAPI.readDetail).toHaveBeenCalledTimes(1);
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
     expect(wrapper.find('ContentError Title').text()).toEqual('Not Found');
   });
 
@@ -69,6 +69,6 @@ describe('<SmartInventory />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

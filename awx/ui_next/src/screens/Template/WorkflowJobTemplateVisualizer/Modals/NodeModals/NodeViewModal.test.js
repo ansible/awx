@@ -13,13 +13,12 @@ import NodeViewModal from './NodeViewModal';
 
 jest.mock('../../../../../api');
 
-const waitForLoaded = async wrapper => {
-  return waitForElement(
+const waitForLoaded = async (wrapper) =>
+  waitForElement(
     wrapper,
     'NodeViewModal',
-    el => el.find('ContentLoading').length === 0
+    (el) => el.find('ContentLoading').length === 0
   );
-};
 
 describe('NodeViewModal', () => {
   let dispatch;

@@ -131,10 +131,7 @@ describe('<InventorySourceList />', () => {
   test('source data should render properly', async () => {
     expect(wrapper.find('InventorySourceListItem')).toHaveLength(2);
     expect(
-      wrapper
-        .find('InventorySourceListItem')
-        .first()
-        .prop('source')
+      wrapper.find('InventorySourceListItem').first().prop('source')
     ).toEqual(sources.data.results[0]);
   });
 
@@ -151,19 +148,13 @@ describe('<InventorySourceList />', () => {
     expect(deleteButton.prop('isDisabled')).toBe(true);
 
     await act(async () =>
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('onChange')({ id: 1 })
+      wrapper.find('.pf-c-table__check').first().find('input').prop('onChange')(
+        { id: 1 }
+      )
     );
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
 
     await act(async () =>
@@ -195,11 +186,9 @@ describe('<InventorySourceList />', () => {
     );
 
     await act(async () =>
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('onChange')({ id: 1 })
+      wrapper.find('.pf-c-table__check').first().find('input').prop('onChange')(
+        { id: 1 }
+      )
     );
     wrapper.update();
 

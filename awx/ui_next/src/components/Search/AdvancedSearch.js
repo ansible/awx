@@ -52,9 +52,8 @@ function AdvancedSearch({
   const [lookupSelection, setLookupSelection] = useState(null);
   const [keySelection, setKeySelection] = useState(null);
   const [searchValue, setSearchValue] = useState('');
-  const [relatedSearchKeySelected, setRelatedSearchKeySelected] = useState(
-    false
-  );
+  const [relatedSearchKeySelected, setRelatedSearchKeySelected] =
+    useState(false);
   const config = useConfig();
 
   useEffect(() => {
@@ -77,21 +76,21 @@ function AdvancedSearch({
     }
   }, [lookupSelection]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleAdvancedSearch = e => {
+  const handleAdvancedSearch = (e) => {
     // keeps page from fully reloading
     e.preventDefault();
 
     if (searchValue) {
       const actualPrefix = prefixSelection === 'and' ? null : prefixSelection;
       const actualSearchKey = [actualPrefix, keySelection, lookupSelection]
-        .filter(val => !!val)
+        .filter((val) => !!val)
         .join('__');
       onSearch(actualSearchKey, searchValue);
       setSearchValue('');
     }
   };
 
-  const handleAdvancedTextKeyDown = e => {
+  const handleAdvancedTextKeyDown = (e) => {
     if (e.key && e.key === 'Enter') {
       handleAdvancedSearch(e);
     }
@@ -319,7 +318,7 @@ function AdvancedSearch({
         maxHeight={maxSelectHeight}
         noResultsFoundText={t`No results found`}
       >
-        {allKeys.map(optionKey => (
+        {allKeys.map((optionKey) => (
           <SelectOption
             key={optionKey}
             value={optionKey}

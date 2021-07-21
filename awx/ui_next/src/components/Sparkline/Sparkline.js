@@ -11,7 +11,7 @@ import StatusIcon from '../StatusIcon';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 /* eslint-disable react/jsx-pascal-case */
-const Link = styled(props => <_Link {...props} />)`
+const Link = styled((props) => <_Link {...props} />)`
   margin-right: 5px;
 `;
 
@@ -22,8 +22,8 @@ const Wrapper = styled.div`
 /* eslint-enable react/jsx-pascal-case */
 
 const Sparkline = ({ jobs }) => {
-  const generateTooltip = job => (
-    <Fragment>
+  const generateTooltip = (job) => (
+    <>
       <div>
         {t`JOB ID:`} {job.id}
       </div>
@@ -35,10 +35,10 @@ const Sparkline = ({ jobs }) => {
           {t`FINISHED:`} {formatDateString(job.finished)}
         </div>
       )}
-    </Fragment>
+    </>
   );
 
-  const statusIcons = jobs.map(job => (
+  const statusIcons = jobs.map((job) => (
     <Tooltip position="top" content={generateTooltip(job)} key={job.id}>
       <Link
         aria-label={t`View job ${job.id}`}

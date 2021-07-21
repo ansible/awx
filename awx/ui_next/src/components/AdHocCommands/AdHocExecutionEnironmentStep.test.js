@@ -39,11 +39,11 @@ describe('<AdHocExecutionEnvironmentStep />', () => {
   });
 
   test('should mount properly', async () => {
-    await waitForElement(wrapper, 'OptionsList', el => el.length > 0);
+    await waitForElement(wrapper, 'OptionsList', (el) => el.length > 0);
   });
 
   test('should call api', async () => {
-    await waitForElement(wrapper, 'OptionsList', el => el.length > 0);
+    await waitForElement(wrapper, 'OptionsList', (el) => el.length > 0);
     expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalled();
     expect(wrapper.find('CheckboxListItem').length).toBe(2);
   });

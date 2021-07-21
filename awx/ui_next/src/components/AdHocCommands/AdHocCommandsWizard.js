@@ -58,7 +58,7 @@ function AdHocCommandsWizard({
 
 const FormikApp = withFormik({
   mapPropsToValues({ adHocItems, verbosityOptions }) {
-    const adHocItemStrings = adHocItems.map(item => item.name).join(', ');
+    const adHocItemStrings = adHocItems.map((item) => item.name).join(', ');
     return {
       limit: adHocItemStrings || 'all',
       credential: [],

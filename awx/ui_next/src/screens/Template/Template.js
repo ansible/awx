@@ -105,14 +105,13 @@ function Template({ setBreadcrumb }) {
     }
   }, [template, setBreadcrumb]);
 
-  const loadScheduleOptions = useCallback(() => {
-    return JobTemplatesAPI.readScheduleOptions(templateId);
-  }, [templateId]);
+  const loadScheduleOptions = useCallback(
+    () => JobTemplatesAPI.readScheduleOptions(templateId),
+    [templateId]
+  );
 
   const loadSchedules = useCallback(
-    params => {
-      return JobTemplatesAPI.readSchedules(templateId, params);
-    },
+    (params) => JobTemplatesAPI.readSchedules(templateId, params),
     [templateId]
   );
 

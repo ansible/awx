@@ -35,17 +35,17 @@ export default function useSurveyStep(
     isReady: true,
     contentError: null,
     hasError,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       if (!surveyConfig?.spec) {
         return;
       }
-      surveyConfig.spec.forEach(question => {
+      surveyConfig.spec.forEach((question) => {
         setFieldTouched(`survey_${question.variable}`, true, false);
       });
     },
     validate: () => {
       if (launchConfig.survey_enabled && surveyConfig.spec) {
-        surveyConfig.spec.forEach(question => {
+        surveyConfig.spec.forEach((question) => {
           const errMessage = validateSurveyField(
             question,
             values[`survey_${question.variable}`]
@@ -66,7 +66,7 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
 
   const values = {};
   if (surveyConfig?.spec) {
-    surveyConfig.spec.forEach(question => {
+    surveyConfig.spec.forEach((question) => {
       if (question.type === 'multiselect') {
         values[`survey_${question.variable}`] = question.default
           ? question.default.split('\n')
@@ -116,7 +116,7 @@ function validateSurveyField(question, value) {
 function checkForError(launchConfig, surveyConfig, values) {
   let hasError = false;
   if (launchConfig.survey_enabled && surveyConfig.spec) {
-    surveyConfig.spec.forEach(question => {
+    surveyConfig.spec.forEach((question) => {
       const value = values[`survey_${question.variable}`];
       const isTextField = ['text', 'textarea'].includes(question.type);
       const isNumeric = ['integer', 'float'].includes(question.type);

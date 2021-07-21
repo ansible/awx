@@ -74,7 +74,7 @@ describe('<MiscSystemEdit />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   test('initially renders without crashing', async () => {
@@ -184,7 +184,7 @@ describe('<MiscSystemEdit />', () => {
         </SettingsProvider>
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 });

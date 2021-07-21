@@ -16,9 +16,11 @@ function CopyButton({
   errorMessage,
   ouiaId,
 }) {
-  const { isLoading, error: copyError, request: copyItemToAPI } = useRequest(
-    copyItem
-  );
+  const {
+    isLoading,
+    error: copyError,
+    request: copyItemToAPI,
+  } = useRequest(copyItem);
 
   useEffect(() => {
     if (isLoading) {

@@ -21,31 +21,26 @@ const HelperTextWrapper = styled.div`
 
 const CheckIcon = styled(PFCheckIcon)`
   color: var(--pf-c-button--m-plain--disabled--Color);
-  ${props =>
+  ${(props) =>
     props.selected && `color: var(--pf-c-button--m-secondary--active--Color)`};
 `;
 
-const validate = () => {
-  return value => {
-    let message;
-    const hasValue = value.find(({ choice }) =>
-      choice.trim().length > 0 ? choice : undefined
-    );
-    if (!hasValue) {
-      message = t`There must be a value in at least one input`;
-    }
-    return message;
-  };
+const validate = () => (value) => {
+  let message;
+  const hasValue = value.find(({ choice }) =>
+    choice.trim().length > 0 ? choice : undefined
+  );
+  if (!hasValue) {
+    message = t`There must be a value in at least one input`;
+  }
+  return message;
 };
 function MultipleChoiceField({ label, tooltip }) {
-  const [
-    formattedChoicesField,
-    formattedChoicesMeta,
-    formattedChoicesHelpers,
-  ] = useField({
-    name: 'formattedChoices',
-    validate: validate(),
-  });
+  const [formattedChoicesField, formattedChoicesMeta, formattedChoicesHelpers] =
+    useField({
+      name: 'formattedChoices',
+      validate: validate(),
+    });
 
   const [typeField] = useField('type');
   const isValid = !(formattedChoicesMeta.touched && formattedChoicesMeta.error);
@@ -66,7 +61,7 @@ function MultipleChoiceField({ label, tooltip }) {
         </HelperTextWrapper>
       }
       helperTextInvalid={formattedChoicesMeta.error}
-      onBlur={e => {
+      onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
           formattedChoicesHelpers.setTouched();
         }
@@ -79,7 +74,7 @@ function MultipleChoiceField({ label, tooltip }) {
           <TextInput
             data-cy={choice ? `${choice}-input` : 'new-choice-input'}
             aria-label={choice || t`new choice`}
-            onKeyUp={e => {
+            onKeyUp={(e) => {
               if (
                 e.key === 'Enter' &&
                 choice.trim().length > 0 &&
@@ -107,7 +102,7 @@ function MultipleChoiceField({ label, tooltip }) {
               }
             }}
             value={choice}
-            onChange={value => {
+            onChange={(value) => {
               const newValues = formattedChoicesField.value.map(
                 (choiceField, index) =>
                   i === index

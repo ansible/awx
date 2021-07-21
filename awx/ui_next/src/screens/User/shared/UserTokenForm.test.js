@@ -48,7 +48,7 @@ describe('<UserTokenForm />', () => {
         <UserTokenForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('FormGroup[name="application"]').length).toBe(1);
     expect(wrapper.find('FormField[name="description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[name="scope"]').length).toBe(1);
@@ -60,7 +60,7 @@ describe('<UserTokenForm />', () => {
         <UserTokenForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     wrapper.update();
     await act(async () => {
       wrapper.find('ApplicationLookup').invoke('onChange')({
@@ -93,7 +93,7 @@ describe('<UserTokenForm />', () => {
         <UserTokenForm handleSubmit={handleSubmit} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     await act(async () => {
       wrapper.find('AnsibleSelect[name="scope"]').prop('onChange')({}, 'read');
@@ -114,7 +114,7 @@ describe('<UserTokenForm />', () => {
         <UserTokenForm handleSubmit={jest.fn()} handleCancel={handleCancel} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();
@@ -127,7 +127,7 @@ describe('<UserTokenForm />', () => {
         <UserTokenForm handleSubmit={handleSubmit} handleCancel={jest.fn()} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').prop('onClick')();

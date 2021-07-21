@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
@@ -10,15 +10,16 @@ import CheckboxListItem from '../CheckboxListItem';
 import { SelectedList } from '../SelectedList';
 import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
 
-const QS_Config = sortColumns => {
-  return getQSConfig('resource', {
+const QS_Config = (sortColumns) =>
+  getQSConfig('resource', {
     page: 1,
     page_size: 5,
     order_by: `${
-      sortColumns.filter(col => col.key === 'name').length ? 'name' : 'username'
+      sortColumns.filter((col) => col.key === 'name').length
+        ? 'name'
+        : 'username'
     }`,
   });
-};
 function SelectResourceStep({
   searchColumns,
   sortColumns,
@@ -54,10 +55,10 @@ function SelectResourceStep({
         itemCount: count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location, fetchItems, fetchOptions, sortColumns]),
     {
@@ -73,7 +74,7 @@ function SelectResourceStep({
   }, [readResourceList]);
 
   return (
-    <Fragment>
+    <>
       <div>
         {t`Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step.`}
       </div>
@@ -108,7 +109,7 @@ function SelectResourceStep({
         }
         renderRow={(item, index) => (
           <CheckboxListItem
-            isSelected={selectedResourceRows.some(i => i.id === item.id)}
+            isSelected={selectedResourceRows.some((i) => i.id === item.id)}
             itemId={item.id}
             item={item}
             rowIndex={index}
@@ -120,10 +121,10 @@ function SelectResourceStep({
             onDeselect={() => onRowClick(item)}
           />
         )}
-        renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+        renderToolbar={(props) => <DataListToolbar {...props} fillWidth />}
         showPageSizeOptions={false}
       />
-    </Fragment>
+    </>
   );
 }
 

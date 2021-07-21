@@ -16,7 +16,7 @@ function Hosts() {
     '/hosts/add': t`Create New Host`,
   });
 
-  const buildBreadcrumbConfig = useCallback(host => {
+  const buildBreadcrumbConfig = useCallback((host) => {
     if (!host) {
       return;
     }

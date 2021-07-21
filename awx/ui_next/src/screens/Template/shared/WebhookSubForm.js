@@ -29,15 +29,11 @@ function WebhookSubForm({ templateType }) {
   const { pathname } = useLocation();
   const { origin } = document.location;
 
-  const [
-    webhookServiceField,
-    webhookServiceMeta,
-    webhookServiceHelpers,
-  ] = useField('webhook_service');
+  const [webhookServiceField, webhookServiceMeta, webhookServiceHelpers] =
+    useField('webhook_service');
   const [webhookUrlField, , webhookUrlHelpers] = useField('webhook_url');
-  const [webhookKeyField, webhookKeyMeta, webhookKeyHelpers] = useField(
-    'webhook_key'
-  );
+  const [webhookKeyField, webhookKeyMeta, webhookKeyHelpers] =
+    useField('webhook_key');
   const [
     webhookCredentialField,
     webhookCredentialMeta,
@@ -85,7 +81,7 @@ function WebhookSubForm({ templateType }) {
   };
 
   const onCredentialChange = useCallback(
-    value => {
+    (value) => {
       setFieldValue('webhook_credential', value || null);
     },
     [setFieldValue]

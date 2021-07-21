@@ -63,7 +63,7 @@ function InventorySourceList() {
 
   const canSyncSources =
     sources.length > 0 &&
-    sources.every(source => source.summary_fields.user_capabilities.start);
+    sources.every((source) => source.summary_fields.user_capabilities.start);
   const {
     isLoading: isSyncAllLoading,
     error: syncAllError,
@@ -80,13 +80,8 @@ function InventorySourceList() {
     fetchSources();
   }, [fetchSources]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(sources);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(sources);
 
   const {
     isLoading: isDeleteLoading,
@@ -94,14 +89,16 @@ function InventorySourceList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id: sourceId }) =>
-          InventorySourcesAPI.destroy(sourceId)
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map(({ id: sourceId }) =>
+            InventorySourcesAPI.destroy(sourceId)
+          ),
+          []
         ),
-        []
-      );
-    }, [selected]),
+      [selected]
+    ),
     {
       fetchItems: fetchSources,
       allItemsSelected: isAllSelected,
@@ -110,20 +107,18 @@ function InventorySourceList() {
   );
   const { error: syncError, dismissError } = useDismissableError(syncAllError);
 
-  const deleteRelatedInventoryResources = resourceId => {
-    return [
-      InventorySourcesAPI.destroyHosts(resourceId),
-      InventorySourcesAPI.destroyGroups(resourceId),
-    ];
-  };
+  const deleteRelatedInventoryResources = (resourceId) => [
+    InventorySourcesAPI.destroyHosts(resourceId),
+    InventorySourcesAPI.destroyGroups(resourceId),
+  ];
 
   const {
     isLoading: deleteRelatedResourcesLoading,
     deletionError: deleteRelatedResourcesError,
     deleteItems: handleDeleteRelatedResources,
   } = useDeleteItems(
-    useCallback(async () => {
-      return (
+    useCallback(
+      async () =>
         Promise.all(
           selected
             .map(({ id: resourceId }) =>
@@ -131,9 +126,8 @@ function InventorySourceList() {
             )
             .flat()
         ),
-        []
-      );
-    }, [selected])
+      [selected]
+    )
   );
 
   const handleDelete = async () => {
@@ -166,7 +160,7 @@ function InventorySourceList() {
         pluralizedItemName={t`Inventory Sources`}
         qsConfig={QS_CONFIG}
         clearSelected={clearSelected}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DatalistToolbar
             {...props}
             isAllSelected={isAllSelected}
@@ -230,7 +224,7 @@ function InventorySourceList() {
               onSelect={() => handleSelect(inventorySource)}
               label={label[1]}
               detailUrl={`${listUrl}${inventorySource.id}`}
-              isSelected={selected.some(row => row.id === inventorySource.id)}
+              isSelected={selected.some((row) => row.id === inventorySource.id)}
               rowIndex={index}
             />
           );

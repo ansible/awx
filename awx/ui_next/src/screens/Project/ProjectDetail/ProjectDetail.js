@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -58,7 +58,11 @@ function ProjectDetail({ project }) {
   } = useWsProject(project);
   const history = useHistory();
 
-  const { request: deleteProject, isLoading, error: deleteError } = useRequest(
+  const {
+    request: deleteProject,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
     useCallback(async () => {
       await ProjectsAPI.destroy(id);
       history.push(`/projects`);
@@ -106,24 +110,22 @@ function ProjectDetail({ project }) {
     );
   }
 
-  const generateLastJobTooltip = job => {
-    return (
-      <Fragment>
-        <div>{t`MOST RECENT SYNC`}</div>
+  const generateLastJobTooltip = (job) => (
+    <>
+      <div>{t`MOST RECENT SYNC`}</div>
+      <div>
+        {t`JOB ID:`} {job.id}
+      </div>
+      <div>
+        {t`STATUS:`} {job.status.toUpperCase()}
+      </div>
+      {job.finished && (
         <div>
-          {t`JOB ID:`} {job.id}
+          {t`FINISHED:`} {formatDateString(job.finished)}
         </div>
-        <div>
-          {t`STATUS:`} {job.status.toUpperCase()}
-        </div>
-        {job.finished && (
-          <div>
-            {t`FINISHED:`} {formatDateString(job.finished)}
-          </div>
-        )}
-      </Fragment>
-    );
-  };
+      )}
+    </>
+  );
 
   let job = null;
 

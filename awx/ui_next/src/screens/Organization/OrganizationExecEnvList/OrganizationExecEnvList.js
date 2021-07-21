@@ -50,10 +50,10 @@ function OrganizationExecEnvList({ organization }) {
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           responseActions.data.actions?.GET || {}
-        ).filter(key => responseActions.data.actions?.GET[key].filterable),
+        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location, id]),
     {
@@ -101,7 +101,7 @@ function OrganizationExecEnvList({ organization }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
           )}
           headerRow={

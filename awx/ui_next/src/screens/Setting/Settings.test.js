@@ -48,7 +48,7 @@ describe('<Settings />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('Redirect').length).toBe(1);
     expect(wrapper.find('SettingList').length).toBe(0);
   });
@@ -70,7 +70,7 @@ describe('<Settings />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('SettingList').length).toBe(1);
   });
 
@@ -79,7 +79,7 @@ describe('<Settings />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<Settings />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 });

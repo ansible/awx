@@ -40,8 +40,8 @@ function ArrayTextField(props) {
         {...rest}
         {...field}
         value={value.join('\n')}
-        onChange={val => {
-          helpers.setValue(val.split('\n').map(v => v.trim()));
+        onChange={(val) => {
+          helpers.setValue(val.split('\n').map((v) => v.trim()));
         }}
       />
     </FormGroup>

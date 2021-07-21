@@ -92,11 +92,6 @@ describe('<UserRolesListItem/>', () => {
         </tbody>
       </table>
     );
-    expect(
-      wrapper
-        .find('Td')
-        .at(0)
-        .text()
-    ).toBe('System');
+    expect(wrapper.find('Td').at(0).text()).toBe('System');
   });
 });

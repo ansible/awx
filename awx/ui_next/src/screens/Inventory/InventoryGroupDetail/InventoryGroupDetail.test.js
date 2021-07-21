@@ -60,7 +60,11 @@ describe('<InventoryGroupDetail />', () => {
             },
           }
         );
-        await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+        await waitForElement(
+          wrapper,
+          'ContentLoading',
+          (el) => el.length === 0
+        );
       });
     });
     afterEach(() => {
@@ -144,7 +148,11 @@ describe('<InventoryGroupDetail />', () => {
             },
           }
         );
-        await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+        await waitForElement(
+          wrapper,
+          'ContentLoading',
+          (el) => el.length === 0
+        );
       });
 
       expect(wrapper.find('button[aria-label="Edit"]').length).toBe(0);

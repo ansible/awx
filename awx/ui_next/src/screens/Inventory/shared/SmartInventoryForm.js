@@ -24,18 +24,16 @@ import { InventoriesAPI } from 'api';
 
 const SmartInventoryFormFields = ({ inventory }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
-  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
-    'instance_groups'
-  );
+  const [organizationField, organizationMeta, organizationHelpers] =
+    useField('organization');
+  const [instanceGroupsField, , instanceGroupsHelpers] =
+    useField('instance_groups');
   const [hostFilterField, hostFilterMeta, hostFilterHelpers] = useField({
     name: 'host_filter',
     validate: required(null),
   });
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -72,7 +70,7 @@ const SmartInventoryFormFields = ({ inventory }) => {
         value={hostFilterField.value}
         organizationId={organizationField.value?.id}
         helperTextInvalid={hostFilterMeta.error}
-        onChange={value => {
+        onChange={(value) => {
           hostFilterHelpers.setValue(value);
         }}
         onBlur={() => hostFilterHelpers.setTouched()}
@@ -83,7 +81,7 @@ const SmartInventoryFormFields = ({ inventory }) => {
       />
       <InstanceGroupsLookup
         value={instanceGroupsField.value}
-        onChange={value => {
+        onChange={(value) => {
           instanceGroupsHelpers.setValue(value);
         }}
         tooltip={t`Select the Instance Groups for this Inventory to run on.`}
@@ -155,11 +153,11 @@ function SmartInventoryForm({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={values => {
+      onSubmit={(values) => {
         onSubmit(values);
       }}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <SmartInventoryFormFields inventory={inventory} />

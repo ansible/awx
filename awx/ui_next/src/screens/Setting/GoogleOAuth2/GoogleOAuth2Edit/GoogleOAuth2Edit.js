@@ -33,7 +33,7 @@ function GoogleOAuth2Edit() {
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('google-oauth2');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -51,7 +51,7 @@ function GoogleOAuth2Edit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/google_oauth2/details');
       },
@@ -67,7 +67,7 @@ function GoogleOAuth2Edit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       ...form,
       SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: formatJson(
@@ -97,7 +97,7 @@ function GoogleOAuth2Edit() {
     history.push('/settings/google_oauth2/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
         const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
@@ -119,7 +119,7 @@ function GoogleOAuth2Edit() {
           initialValues={initialValues(googleOAuth2)}
           onSubmit={handleSubmit}
         >
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField

@@ -96,7 +96,7 @@ function InventoryGroup({ setBreadcrumb, inventory }) {
   }
 
   let showCardHeader = true;
-  if (['add', 'edit'].some(name => location.pathname.includes(name))) {
+  if (['add', 'edit'].some((name) => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 

@@ -11,7 +11,7 @@ function ExecutionEnvironmentEdit({ executionEnvironment }) {
   const [submitError, setSubmitError] = useState(null);
   const detailsUrl = `/execution_environments/${executionEnvironment.id}/details`;
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await ExecutionEnvironmentsAPI.update(executionEnvironment.id, {
         ...values,

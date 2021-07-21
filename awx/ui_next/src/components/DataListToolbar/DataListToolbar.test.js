@@ -245,7 +245,7 @@ describe('<DataListToolbar />', () => {
 
     const search = toolbar.find('Search');
     expect(
-      search.prop('columns').filter(col => col.key === 'advanced').length
+      search.prop('columns').filter((col) => col.key === 'advanced').length
     ).toBe(1);
   });
 

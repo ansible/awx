@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -48,7 +48,7 @@ function Search({
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
     (() => {
-      const defaultColumn = columns.filter(col => col.isDefault);
+      const defaultColumn = columns.filter((col) => col.isDefault);
 
       if (defaultColumn.length !== 1) {
         throw new Error(
@@ -71,7 +71,7 @@ function Search({
     setSearchKey(actualSearchKey);
   };
 
-  const handleSearch = e => {
+  const handleSearch = (e) => {
     // keeps page from fully reloading
     e.preventDefault();
 
@@ -81,7 +81,7 @@ function Search({
     }
   };
 
-  const handleTextKeyDown = e => {
+  const handleTextKeyDown = (e) => {
     if (e.key && e.key === 'Enter') {
       handleSearch(e);
     }
@@ -97,7 +97,7 @@ function Search({
 
   const filterDefaultParams = (paramsArr, config) => {
     const defaultParamsKeys = Object.keys(config.defaultParams || {});
-    return paramsArr.filter(key => defaultParamsKeys.indexOf(key) === -1);
+    return paramsArr.filter((key) => defaultParamsKeys.indexOf(key) === -1);
   };
 
   const getLabelFromValue = (value, colKey) => {
@@ -125,7 +125,7 @@ function Search({
       qsConfig
     );
 
-    nonDefaultParams.forEach(key => {
+    nonDefaultParams.forEach((key) => {
       const columnKey = key;
       const label = columns.filter(
         ({ key: keyToCheck }) => columnKey === keyToCheck
@@ -138,7 +138,7 @@ function Search({
       queryParamsByKey[columnKey] = { key, label, chips: [] };
 
       if (Array.isArray(queryParams[key])) {
-        queryParams[key].forEach(val =>
+        queryParams[key].forEach((val) =>
           queryParamsByKey[columnKey].chips.push({
             key: `${key}:${val}`,
             node: getLabelFromValue(val, columnKey),
@@ -212,7 +212,7 @@ function Search({
             />
           )) ||
             (options && (
-              <Fragment>
+              <>
                 <Select
                   variant={SelectVariant.checkbox}
                   aria-label={name}
@@ -221,7 +221,7 @@ function Search({
                   onSelect={(event, selection) =>
                     handleFilterDropdownSelect(key, event, selection)
                   }
-                  selections={chipsByKey[key].chips.map(chip => {
+                  selections={chipsByKey[key].chips.map((chip) => {
                     const [, ...value] = chip.key.split(':');
                     return value.join(':');
                   })}
@@ -241,7 +241,7 @@ function Search({
                     </SelectOption>
                   ))}
                 </Select>
-              </Fragment>
+              </>
             )) ||
             (isBoolean && (
               <Select
@@ -270,7 +270,7 @@ function Search({
                   data-cy="search-text-input"
                   type={
                     (qsConfig.integerFields.find(
-                      field => field === searchKey
+                      (field) => field === searchKey
                     ) &&
                       'number') ||
                     'search'
@@ -299,9 +299,9 @@ function Search({
       {/* Add a ToolbarFilter for any key that doesn't have it's own
       search column so the chips show up */}
       {Object.keys(chipsByKey)
-        .filter(val => chipsByKey[val].chips.length > 0)
-        .filter(val => columns.map(val2 => val2.key).indexOf(val) === -1)
-        .map(leftoverKey => (
+        .filter((val) => chipsByKey[val].chips.length > 0)
+        .filter((val) => columns.map((val2) => val2.key).indexOf(val) === -1)
+        .map((leftoverKey) => (
           <ToolbarFilter
             chips={chipsByKey[leftoverKey] ? chipsByKey[leftoverKey].chips : []}
             deleteChip={(unusedKey, chip) => {

@@ -91,22 +91,16 @@ describe('<SubscriptionStep />', () => {
   });
 
   test('Username/password toggle button should show username credential fields', async () => {
-    expect(
-      wrapper
-        .find('ToggleGroupItem')
-        .last()
-        .props().isSelected
-    ).toBe(false);
+    expect(wrapper.find('ToggleGroupItem').last().props().isSelected).toBe(
+      false
+    );
     wrapper
       .find('ToggleGroupItem[text="Username / password"] button')
       .simulate('click');
     wrapper.update();
-    expect(
-      wrapper
-        .find('ToggleGroupItem')
-        .last()
-        .props().isSelected
-    ).toBe(true);
+    expect(wrapper.find('ToggleGroupItem').last().props().isSelected).toBe(
+      true
+    );
     await act(async () => {
       wrapper.find('input#username-field').simulate('change', {
         target: { value: 'username-cred', name: 'username' },

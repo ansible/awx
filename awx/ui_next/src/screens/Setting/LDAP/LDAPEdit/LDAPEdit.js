@@ -23,7 +23,7 @@ import { formatJson } from '../../shared/settingUtils';
 
 function filterByPrefix(data, prefix) {
   return Object.keys(data)
-    .filter(key => key.includes(prefix))
+    .filter((key) => key.includes(prefix))
     .reduce((obj, key) => {
       obj[key] = data[key];
       return obj;
@@ -40,12 +40,17 @@ function LDAPEdit() {
   const ldapCategory =
     category === 'default' ? 'AUTH_LDAP_' : `AUTH_LDAP_${category}_`;
 
-  const { isLoading, error, request: fetchLDAP, result: ldap } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchLDAP,
+    result: ldap,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('ldap');
 
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -59,7 +64,7 @@ function LDAPEdit() {
         AUTH_LDAP_3_: filterByPrefix(mergedData, 'AUTH_LDAP_3_'),
         AUTH_LDAP_4_: filterByPrefix(mergedData, 'AUTH_LDAP_4_'),
         AUTH_LDAP_5_: filterByPrefix(mergedData, 'AUTH_LDAP_5_'),
-        AUTH_LDAP_: Object.assign({}, mergedData),
+        AUTH_LDAP_: { ...mergedData },
       };
       Object.keys({
         ...allCategories.AUTH_LDAP_1_,
@@ -67,7 +72,7 @@ function LDAPEdit() {
         ...allCategories.AUTH_LDAP_3_,
         ...allCategories.AUTH_LDAP_4_,
         ...allCategories.AUTH_LDAP_5_,
-      }).forEach(keyToOmit => {
+      }).forEach((keyToOmit) => {
         delete allCategories.AUTH_LDAP_[keyToOmit];
       });
 
@@ -82,7 +87,7 @@ function LDAPEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push(`/settings/ldap/${category}/details`);
       },
@@ -91,7 +96,7 @@ function LDAPEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       [`${ldapCategory}BIND_DN`]: form[`${ldapCategory}BIND_DN`],
       [`${ldapCategory}BIND_PASSWORD`]: form[`${ldapCategory}BIND_PASSWORD`],
@@ -100,9 +105,8 @@ function LDAPEdit() {
       [`${ldapCategory}REQUIRE_GROUP`]: form[`${ldapCategory}REQUIRE_GROUP`],
       [`${ldapCategory}SERVER_URI`]: form[`${ldapCategory}SERVER_URI`],
       [`${ldapCategory}START_TLS`]: form[`${ldapCategory}START_TLS`],
-      [`${ldapCategory}USER_DN_TEMPLATE`]: form[
-        `${ldapCategory}USER_DN_TEMPLATE`
-      ],
+      [`${ldapCategory}USER_DN_TEMPLATE`]:
+        form[`${ldapCategory}USER_DN_TEMPLATE`],
       [`${ldapCategory}GROUP_SEARCH`]: formatJson(
         form[`${ldapCategory}GROUP_SEARCH`]
       ),
@@ -139,7 +143,7 @@ function LDAPEdit() {
     history.push(`/settings/ldap/${category}/details`);
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
         const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
@@ -158,7 +162,7 @@ function LDAPEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && ldap && (
         <Formik initialValues={initialValues(ldap)} onSubmit={handleSubmit}>
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField

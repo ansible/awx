@@ -51,18 +51,8 @@ describe('<ManagementJobListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe(managementJob.name);
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe(managementJob.description);
+    expect(wrapper.find('Td').at(1).text()).toBe(managementJob.name);
+    expect(wrapper.find('Td').at(2).text()).toBe(managementJob.description);
 
     expect(wrapper.find('RocketIcon').exists()).toBeTruthy();
   });

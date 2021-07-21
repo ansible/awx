@@ -20,7 +20,12 @@ function SAMLDetail() {
   const { GET: options } = useSettings();
   options.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT.type = 'certificate';
 
-  const { isLoading, error, request, result: saml } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: saml,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('saml');
       return data;
@@ -58,7 +63,7 @@ function SAMLDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && saml && (
           <DetailList>
-            {Object.keys(saml).map(key => {
+            {Object.keys(saml).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

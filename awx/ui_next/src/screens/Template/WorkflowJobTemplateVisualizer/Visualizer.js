@@ -57,9 +57,9 @@ const getAggregatedCredentials = (
 ) => {
   let theArray = [];
 
-  const isCredentialOverriden = templateDefaultCred => {
+  const isCredentialOverriden = (templateDefaultCred) => {
     let credentialHasOverride = false;
-    originalNodeOverride.forEach(overrideCred => {
+    originalNodeOverride.forEach((overrideCred) => {
       if (
         templateDefaultCred.credential_type === overrideCred.credential_type
       ) {
@@ -78,7 +78,7 @@ const getAggregatedCredentials = (
   };
 
   if (templateDefaultCredentials.length > 0) {
-    templateDefaultCredentials.forEach(defaultCred => {
+    templateDefaultCredentials.forEach((defaultCred) => {
       if (!isCredentialOverriden(defaultCred)) {
         theArray.push(defaultCred);
       }
@@ -163,7 +163,7 @@ function Visualizer({ template }) {
 
   const associateNodes = (newLinks, originalLinkMap) => {
     const associateNodeRequests = [];
-    newLinks.forEach(link => {
+    newLinks.forEach((link) => {
       switch (link.linkType) {
         case 'success':
           associateNodeRequests.push(
@@ -198,9 +198,9 @@ function Visualizer({ template }) {
 
   const disassociateNodes = (originalLinkMap, deletedNodeIds, linkMap) => {
     const disassociateNodeRequests = [];
-    Object.keys(originalLinkMap).forEach(key => {
+    Object.keys(originalLinkMap).forEach((key) => {
       const node = originalLinkMap[key];
-      node.success_nodes.forEach(successNodeId => {
+      node.success_nodes.forEach((successNodeId) => {
         if (
           !deletedNodeIds.includes(successNodeId) &&
           (!linkMap[node.id] ||
@@ -215,7 +215,7 @@ function Visualizer({ template }) {
           );
         }
       });
-      node.failure_nodes.forEach(failureNodeId => {
+      node.failure_nodes.forEach((failureNodeId) => {
         if (
           !deletedNodeIds.includes(failureNodeId) &&
           (!linkMap[node.id] ||
@@ -230,7 +230,7 @@ function Visualizer({ template }) {
           );
         }
       });
-      node.always_nodes.forEach(alwaysNodeId => {
+      node.always_nodes.forEach((alwaysNodeId) => {
         if (
           !deletedNodeIds.includes(alwaysNodeId) &&
           (!linkMap[node.id] ||
@@ -271,10 +271,10 @@ function Visualizer({ template }) {
   useEffect(() => {
     if (nodes) {
       const newNodePositions = {};
-      const nonDeletedNodes = nodes.filter(node => !node.isDeleted);
+      const nonDeletedNodes = nodes.filter((node) => !node.isDeleted);
       const g = layoutGraph(nonDeletedNodes, links);
 
-      g.nodes().forEach(node => {
+      g.nodes().forEach((node) => {
         newNodePositions[node] = g.node(node);
       });
 
@@ -295,7 +295,7 @@ function Visualizer({ template }) {
         const linkMap = {};
         const newLinks = [];
 
-        links.forEach(link => {
+        links.forEach((link) => {
           if (link.source.id !== 1) {
             const realLinkSourceId = originalLinkMap[link.source.id].id;
             const realLinkTargetId = originalLinkMap[link.target.id].id;
@@ -339,18 +339,14 @@ function Visualizer({ template }) {
         return [linkMap, newLinks];
       };
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         // node with id=1 is the artificial start node
         if (node.id === 1) {
           return;
         }
         if (node.originalNodeObject && !node.isDeleted) {
-          const {
-            id,
-            success_nodes,
-            failure_nodes,
-            always_nodes,
-          } = node.originalNodeObject;
+          const { id, success_nodes, failure_nodes, always_nodes } =
+            node.originalNodeObject;
           originalLinkMap[node.id] = {
             id,
             success_nodes,
@@ -404,7 +400,7 @@ function Visualizer({ template }) {
                 };
 
                 if (node.promptValues?.addedCredentials?.length > 0) {
-                  node.promptValues.addedCredentials.forEach(cred => {
+                  node.promptValues.addedCredentials.forEach((cred) => {
                     associateCredentialRequests.push(
                       WorkflowJobTemplateNodesAPI.associateCredentials(
                         data.id,
@@ -475,19 +471,17 @@ function Visualizer({ template }) {
                 unified_job_template: node.fullUnifiedJobTemplate.id,
                 all_parents_must_converge: node.all_parents_must_converge,
               }).then(() => {
-                const {
-                  added: addedCredentials,
-                  removed: removedCredentials,
-                } = getAddedAndRemoved(
-                  getAggregatedCredentials(
-                    node?.originalNodeCredentials,
-                    node.launchConfig?.defaults?.credentials
-                  ),
-                  node.promptValues?.credentials
-                );
+                const { added: addedCredentials, removed: removedCredentials } =
+                  getAddedAndRemoved(
+                    getAggregatedCredentials(
+                      node?.originalNodeCredentials,
+                      node.launchConfig?.defaults?.credentials
+                    ),
+                    node.promptValues?.credentials
+                  );
 
                 if (addedCredentials.length > 0) {
-                  addedCredentials.forEach(cred => {
+                  addedCredentials.forEach((cred) => {
                     associateCredentialRequests.push(
                       WorkflowJobTemplateNodesAPI.associateCredentials(
                         node.originalNodeObject.id,
@@ -497,7 +491,7 @@ function Visualizer({ template }) {
                   });
                 }
                 if (removedCredentials?.length > 0) {
-                  removedCredentials.forEach(cred =>
+                  removedCredentials.forEach((cred) =>
                     disassociateCredentialRequests.push(
                       WorkflowJobTemplateNodesAPI.disassociateCredentials(
                         node.originalNodeObject.id,
@@ -530,10 +524,8 @@ function Visualizer({ template }) {
     {}
   );
 
-  const {
-    error: nodeRequestError,
-    dismissError: dismissNodeRequestError,
-  } = useDismissableError(saveVisualizerError);
+  const { error: nodeRequestError, dismissError: dismissNodeRequestError } =
+    useDismissableError(saveVisualizerError);
 
   if (isLoading) {
     return (

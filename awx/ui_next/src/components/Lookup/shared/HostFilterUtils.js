@@ -17,16 +17,14 @@ export function toSearchParams(string = '') {
     });
   }
 
-  const unescapeString = v => {
+  const unescapeString = (v) =>
     //  This is necessary when editing a string that was initially
     //  escaped to allow white space
-    return v.replace(/"/g, '');
-  };
-
+    v.replace(/"/g, '');
   return orArr
     .join(' and ')
     .split(/ and | or /)
-    .map(s => s.split('='))
+    .map((s) => s.split('='))
     .reduce((searchParams, [k, v]) => {
       const key = decodeURIComponent(k);
       const value = decodeURIComponent(unescapeString(v));
@@ -51,10 +49,10 @@ export function toSearchParams(string = '') {
 export function toQueryString(config, searchParams = {}) {
   if (Object.keys(searchParams).length === 0) return '';
   return Object.keys(searchParams)
-    .flatMap(key => {
+    .flatMap((key) => {
       if (Array.isArray(searchParams[key])) {
         return searchParams[key].map(
-          val =>
+          (val) =>
             `${config.namespace}.${encodeURIComponent(
               key
             )}=${encodeURIComponent(val)}`
@@ -72,7 +70,7 @@ export function toQueryString(config, searchParams = {}) {
  * @param {string} value A string to be parsed
  * @return {string}  string
  */
-const escapeString = value => {
+const escapeString = (value) => {
   if (verifySpace(value)) {
     return `"${value}"`;
   }
@@ -84,9 +82,7 @@ const escapeString = value => {
  * @param {string} value A string to be parsed
  * @return {bool} true if a string has white spaces
  */
-const verifySpace = value => {
-  return value.trim().indexOf(' ') >= 0;
-};
+const verifySpace = (value) => value.trim().indexOf(' ') >= 0;
 
 /**
  * Convert params object to host filter string
@@ -96,23 +92,23 @@ const verifySpace = value => {
 export function toHostFilter(searchParams = {}) {
   const flattenSearchParams = Object.keys(searchParams)
     .sort()
-    .flatMap(key => {
+    .flatMap((key) => {
       if (Array.isArray(searchParams[key])) {
-        return searchParams[key].map(val => `${key}=${escapeString(val)}`);
+        return searchParams[key].map((val) => `${key}=${escapeString(val)}`);
       }
       return `${key}=${escapeString(searchParams[key])}`;
     });
 
   const filteredSearchParams = flattenSearchParams.filter(
-    el => el.indexOf('or__') === -1
+    (el) => el.indexOf('or__') === -1
   );
 
   const conditionalSearchParams = flattenSearchParams.filter(
-    el => !filteredSearchParams.includes(el)
+    (el) => !filteredSearchParams.includes(el)
   );
 
   const conditionalQuery = conditionalSearchParams
-    .map(el => el.replace('or__', 'or '))
+    .map((el) => el.replace('or__', 'or '))
     .join(' ')
     .trim();
 
@@ -137,9 +133,9 @@ export function toHostFilter(searchParams = {}) {
  * @return {object} Params object without namespaced keys
  */
 export function removeNamespacedKeys(config, obj = {}) {
-  const clonedObj = Object.assign({}, obj);
+  const clonedObj = { ...obj };
   const newObj = {};
-  Object.keys(clonedObj).forEach(nsKey => {
+  Object.keys(clonedObj).forEach((nsKey) => {
     let key = nsKey;
     if (nsKey.startsWith(config.namespace)) {
       key = nsKey.substr(config.namespace.length + 1);
@@ -156,9 +152,9 @@ export function removeNamespacedKeys(config, obj = {}) {
  * @return {string} Params object without default params
  */
 export function removeDefaultParams(config, obj = {}) {
-  const clonedObj = Object.assign({}, obj);
+  const clonedObj = { ...obj };
   const defaultKeys = Object.keys(config.defaultParams);
-  defaultKeys.forEach(keyToOmit => {
+  defaultKeys.forEach((keyToOmit) => {
     delete clonedObj[keyToOmit];
   });
   return clonedObj;

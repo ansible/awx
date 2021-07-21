@@ -39,7 +39,7 @@ function ProjectList() {
     error: fetchUpdatedProjectError,
     result: updatedProject,
   } = useRequest(
-    useCallback(async projectId => {
+    useCallback(async (projectId) => {
       if (!projectId) {
         return {};
       }
@@ -74,10 +74,10 @@ function ProjectList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -104,9 +104,8 @@ function ProjectList() {
     clearSelected,
   } = useSelected(projects);
 
-  const { expanded, isAllExpanded, handleExpand, expandAll } = useExpanded(
-    projects
-  );
+  const { expanded, isAllExpanded, handleExpand, expandAll } =
+    useExpanded(projects);
 
   const {
     isLoading: isDeleteLoading,
@@ -114,9 +113,10 @@ function ProjectList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(({ id }) => ProjectsAPI.destroy(id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map(({ id }) => ProjectsAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -138,7 +138,7 @@ function ProjectList() {
 
   useEffect(() => {
     if (updatedProject) {
-      const updatedProjects = projects.map(project =>
+      const updatedProjects = projects.map((project) =>
         project.id === updatedProject.id ? updatedProject : project
       );
       setProjects({
@@ -152,10 +152,8 @@ function ProjectList() {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [updatedProject]);
 
-  const {
-    error: projectError,
-    dismissError: dismissProjectError,
-  } = useDismissableError(fetchUpdatedProjectError);
+  const { error: projectError, dismissError: dismissProjectError } =
+    useDismissableError(fetchUpdatedProjectError);
 
   return (
     <>
@@ -214,7 +212,7 @@ function ProjectList() {
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 isAllExpanded={isAllExpanded}
@@ -250,16 +248,16 @@ function ProjectList() {
             )}
             renderRow={(project, index) => (
               <ProjectListItem
-                isExpanded={expanded.some(row => row.id === project.id)}
+                isExpanded={expanded.some((row) => row.id === project.id)}
                 onExpand={() => handleExpand(project)}
                 fetchProjects={fetchProjects}
                 key={project.id}
                 project={project}
                 detailUrl={`${match.url}/${project.id}`}
-                isSelected={selected.some(row => row.id === project.id)}
+                isSelected={selected.some((row) => row.id === project.id)}
                 onSelect={() => handleSelect(project)}
                 rowIndex={index}
-                onRefreshRow={projectId => fetchUpdatedProject(projectId)}
+                onRefreshRow={(projectId) => fetchUpdatedProject(projectId)}
               />
             )}
             emptyStateControls={

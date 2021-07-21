@@ -13,7 +13,7 @@ function InventorySourceEdit({ source, inventory }) {
 
   const { error, request, result } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         const { data } = await InventorySourcesAPI.replace(source.id, values);
         return data;
       },
@@ -28,7 +28,7 @@ function InventorySourceEdit({ source, inventory }) {
     }
   }, [result, detailsUrl, history]);
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     const {
       credential,
       source_path,

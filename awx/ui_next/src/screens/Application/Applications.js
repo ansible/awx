@@ -26,7 +26,7 @@ function Applications() {
     '/applications/add': t`Create New Application`,
   });
 
-  const buildBreadcrumbConfig = useCallback(application => {
+  const buildBreadcrumbConfig = useCallback((application) => {
     if (!application) {
       return;
     }
@@ -49,7 +49,7 @@ function Applications() {
       <Switch>
         <Route path="/applications/add">
           <ApplicationAdd
-            onSuccessfulAdd={app => setApplicationModalSource(app)}
+            onSuccessfulAdd={(app) => setApplicationModalSource(app)}
           />
         </Route>
         <Route path="/applications/:id">

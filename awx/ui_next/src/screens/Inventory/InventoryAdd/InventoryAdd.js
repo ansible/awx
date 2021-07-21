@@ -14,7 +14,7 @@ function InventoryAdd() {
     history.push('/inventories');
   };
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const { instanceGroups, organization, ...remainingValues } = values;
     try {
       const {

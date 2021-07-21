@@ -13,12 +13,12 @@ export default function useWsTemplates(initialTemplates) {
   }, [initialTemplates]);
 
   useEffect(
-    function parseWsMessage() {
+    () => {
       if (!lastMessage?.unified_job_id) {
         return;
       }
       const index = templates.findIndex(
-        t => t.id === lastMessage.unified_job_template_id
+        (t) => t.id === lastMessage.unified_job_template_id
       );
       if (index === -1) {
         return;
@@ -43,7 +43,7 @@ function updateTemplate(template, message) {
     finished: message.finished || null,
     type: message.type,
   };
-  const index = recentJobs.findIndex(j => j.id === job.id);
+  const index = recentJobs.findIndex((j) => j.id === job.id);
   if (index > -1) {
     recentJobs[index] = {
       ...recentJobs[index],

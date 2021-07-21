@@ -181,7 +181,9 @@ const OutputWrapper = styled.div`
   font-size: 15px;
   outline: 1px solid #d7d7d7;
   ${({ cssMap }) =>
-    Object.keys(cssMap).map(className => `.${className}{${cssMap[className]}}`)}
+    Object.keys(cssMap).map(
+      (className) => `.${className}{${cssMap[className]}}`
+    )}
 `;
 
 const OutputFooter = styled.div`
@@ -223,11 +225,11 @@ function connectJobSocket({ type, id }, onMessage) {
     );
   };
 
-  ws.onmessage = e => {
+  ws.onmessage = (e) => {
     onMessage(JSON.parse(e.data));
   };
 
-  ws.onclose = e => {
+  ws.onclose = (e) => {
     if (e.code !== 1000) {
       // eslint-disable-next-line no-console
       console.debug('Socket closed. Reconnecting...', e);
@@ -237,7 +239,7 @@ function connectJobSocket({ type, id }, onMessage) {
     }
   };
 
-  ws.onerror = err => {
+  ws.onerror = (err) => {
     // eslint-disable-next-line no-console
     console.debug('Socket error: ', err, 'Disconnecting...');
     ws.close();
@@ -330,7 +332,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     loadJobEvents();
 
     if (isJobRunning(job.status)) {
-      connectJobSocket(job, data => {
+      connectJobSocket(job, (data) => {
         if (data.group_name === 'job_events') {
           if (data.counter && data.counter > jobSocketCounter.current) {
             jobSocketCounter.current = data.counter;
@@ -390,10 +392,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     {}
   );
 
-  const {
-    error: dismissableCancelError,
-    dismissError: dismissCancelError,
-  } = useDismissableError(cancelError);
+  const { error: dismissableCancelError, dismissError: dismissCancelError } =
+    useDismissableError(cancelError);
 
   const {
     request: deleteJob,
@@ -407,10 +407,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }, [job.type, job.id, history])
   );
 
-  const {
-    error: dismissableDeleteError,
-    dismissError: dismissDeleteError,
-  } = useDismissableError(deleteError);
+  const { error: dismissableDeleteError, dismissError: dismissDeleteError } =
+    useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
     if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
@@ -429,7 +427,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     if (isMounted.current) {
       setHasContentLoading(true);
-      setCurrentlyLoading(prevCurrentlyLoading =>
+      setCurrentlyLoading((prevCurrentlyLoading) =>
         prevCurrentlyLoading.concat(loadRange)
       );
     }
@@ -483,7 +481,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             start_line: 0,
           };
           const firstIndex = fetchedEvents.findIndex(
-            jobEvent => jobEvent.counter === 1
+            (jobEvent) => jobEvent.counter === 1
           );
           if (firstIndex && fetchedEvents[firstIndex]?.stdout) {
             const stdoutLines = fetchedEvents[firstIndex].stdout.split('\r\n');
@@ -511,10 +509,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     } finally {
       if (isMounted.current) {
         setHasContentLoading(false);
-        setCurrentlyLoading(prevCurrentlyLoading =>
-          prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+        setCurrentlyLoading((prevCurrentlyLoading) =>
+          prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
         );
-        loadRange.forEach(n => {
+        loadRange.forEach((n) => {
           cache.clear(n);
         });
       }
@@ -528,7 +526,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     return currentlyLoading.includes(index);
   };
 
-  const handleHostEventClick = hostEventToOpen => {
+  const handleHostEventClick = (hostEventToOpen) => {
     setHostEvent(hostEventToOpen);
     setIsHostModalOpen(true);
   };
@@ -593,7 +591,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     );
 
     if (isMounted.current) {
-      setCurrentlyLoading(prevCurrentlyLoading =>
+      setCurrentlyLoading((prevCurrentlyLoading) =>
         prevCurrentlyLoading.concat(loadRange)
       );
     }
@@ -605,7 +603,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     return getJobModel(job.type)
       .readEvents(job.id, params)
-      .then(response => {
+      .then((response) => {
         if (isMounted.current) {
           const newResults = {};
           let newResultsCssMap = {};
@@ -614,25 +612,25 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             const { lineCssMap } = getLineTextHtml(jobEvent);
             newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
           });
-          setResults(prevResults => ({
+          setResults((prevResults) => ({
             ...prevResults,
             ...newResults,
           }));
-          setCssMap(prevCssMap => ({
+          setCssMap((prevCssMap) => ({
             ...prevCssMap,
             ...newResultsCssMap,
           }));
-          setCurrentlyLoading(prevCurrentlyLoading =>
-            prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+          setCurrentlyLoading((prevCurrentlyLoading) =>
+            prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
           );
-          loadRange.forEach(n => {
+          loadRange.forEach((n) => {
             cache.clear(n);
           });
         }
       });
   };
 
-  const scrollToRow = rowIndex => {
+  const scrollToRow = (rowIndex) => {
     if (listRef.current) {
       listRef.current.scrollToRow(rowIndex);
     }
@@ -696,14 +694,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const handleRemoveAllSearchTerms = () => {
     const oldParams = parseQueryString(QS_CONFIG, location.search);
-    Object.keys(oldParams).forEach(key => {
+    Object.keys(oldParams).forEach((key) => {
       oldParams[key] = null;
     });
     const qs = updateQueryString(QS_CONFIG, location.search, oldParams);
     pushHistoryState(qs);
   };
 
-  const pushHistoryState = qs => {
+  const pushHistoryState = (qs) => {
     const { pathname } = history.location;
     history.push(qs ? `${pathname}?${qs}` : pathname);
   };
@@ -717,7 +715,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
   };
 
-  const handleScroll = e => {
+  const handleScroll = (e) => {
     if (
       isFollowModeEnabled &&
       scrollTop.current > e.scrollTop &&
@@ -859,34 +857,32 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           >
             {({ onRowsRendered, registerChild }) => (
               <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
-                {({ width, height }) => {
-                  return (
-                    <>
-                      {hasContentLoading ? (
-                        <div style={{ width }}>
-                          <ContentLoading />
-                        </div>
-                      ) : (
-                        <List
-                          ref={ref => {
-                            registerChild(ref);
-                            listRef.current = ref;
-                          }}
-                          deferredMeasurementCache={cache}
-                          height={height || 1}
-                          onRowsRendered={onRowsRendered}
-                          rowCount={remoteRowCount}
-                          rowHeight={cache.rowHeight}
-                          rowRenderer={rowRenderer}
-                          scrollToAlignment="start"
-                          width={width || 1}
-                          overscanRowCount={20}
-                          onScroll={handleScroll}
-                        />
-                      )}
-                    </>
-                  );
-                }}
+                {({ width, height }) => (
+                  <>
+                    {hasContentLoading ? (
+                      <div style={{ width }}>
+                        <ContentLoading />
+                      </div>
+                    ) : (
+                      <List
+                        ref={(ref) => {
+                          registerChild(ref);
+                          listRef.current = ref;
+                        }}
+                        deferredMeasurementCache={cache}
+                        height={height || 1}
+                        onRowsRendered={onRowsRendered}
+                        rowCount={remoteRowCount}
+                        rowHeight={cache.rowHeight}
+                        rowRenderer={rowRenderer}
+                        scrollToAlignment="start"
+                        width={width || 1}
+                        overscanRowCount={20}
+                        onScroll={handleScroll}
+                      />
+                    )}
+                  </>
+                )}
               </AutoSizer>
             )}
           </InfiniteLoader>

@@ -39,7 +39,7 @@ function AnsibleSelect({
       className={className}
       isDisabled={isDisabled}
     >
-      {data.map(option => (
+      {data.map((option) => (
         <FormSelectOption
           key={option.key}
           value={option.value}

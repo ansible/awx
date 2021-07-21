@@ -49,10 +49,10 @@ function WorkflowApprovalsList() {
         count: response.data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -68,7 +68,7 @@ function WorkflowApprovalsList() {
   }, [fetchWorkflowApprovals]);
 
   const fetchWorkflowApprovalsById = useCallback(
-    async ids => {
+    async (ids) => {
       const params = { ...parseQueryString(QS_CONFIG, location.search) };
       params.id__in = ids.join(',');
       const { data } = await WorkflowApprovalsAPI.read(params);
@@ -84,13 +84,8 @@ function WorkflowApprovalsList() {
     QS_CONFIG
   );
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(workflowApprovals);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(workflowApprovals);
 
   const {
     isLoading: isDeleteLoading,
@@ -98,11 +93,11 @@ function WorkflowApprovalsList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      return Promise.all(
-        selected.map(({ id }) => WorkflowApprovalsAPI.destroy(id))
-      );
-    }, [selected]),
+    useCallback(
+      async () =>
+        Promise.all(selected.map(({ id }) => WorkflowApprovalsAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -120,11 +115,11 @@ function WorkflowApprovalsList() {
     isLoading: isApproveLoading,
     request: approveWorkflowApprovals,
   } = useRequest(
-    useCallback(async () => {
-      return Promise.all(
-        selected.map(({ id }) => WorkflowApprovalsAPI.approve(id))
-      );
-    }, [selected]),
+    useCallback(
+      async () =>
+        Promise.all(selected.map(({ id }) => WorkflowApprovalsAPI.approve(id))),
+      [selected]
+    ),
     {}
   );
 
@@ -138,11 +133,11 @@ function WorkflowApprovalsList() {
     isLoading: isDenyLoading,
     request: denyWorkflowApprovals,
   } = useRequest(
-    useCallback(async () => {
-      return Promise.all(
-        selected.map(({ id }) => WorkflowApprovalsAPI.deny(id))
-      );
-    }, [selected]),
+    useCallback(
+      async () =>
+        Promise.all(selected.map(({ id }) => WorkflowApprovalsAPI.deny(id))),
+      [selected]
+    ),
     {}
   );
 
@@ -151,10 +146,8 @@ function WorkflowApprovalsList() {
     clearSelected();
   };
 
-  const {
-    error: actionError,
-    dismissError: dismissActionError,
-  } = useDismissableError(approveApprovalError || denyApprovalError);
+  const { error: actionError, dismissError: dismissActionError } =
+    useDismissableError(approveApprovalError || denyApprovalError);
 
   return (
     <>
@@ -186,7 +179,7 @@ function WorkflowApprovalsList() {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -208,7 +201,7 @@ function WorkflowApprovalsList() {
                     onDelete={handleDelete}
                     itemsToDelete={selected}
                     pluralizedItemName={t`Workflow Approvals`}
-                    cannotDelete={item =>
+                    cannotDelete={(item) =>
                       item.status === 'pending' ||
                       !item.summary_fields.user_capabilities.delete
                     }
@@ -237,7 +230,7 @@ function WorkflowApprovalsList() {
                 workflowApproval={workflowApproval}
                 detailUrl={`${match.url}/${workflowApproval.id}`}
                 isSelected={selected.some(
-                  row => row.id === workflowApproval.id
+                  (row) => row.id === workflowApproval.id
                 )}
                 onSelect={() => handleSelect(workflowApproval)}
                 onSuccessfulAction={fetchWorkflowApprovals}

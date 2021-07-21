@@ -35,7 +35,7 @@ describe('getJobModel', () => {
       'workflow_job',
       'job',
       'default',
-    ].forEach(type => {
+    ].forEach((type) => {
       expect(getJobModel(type)).toHaveProperty('http');
       expect(getJobModel(type).jobEventSlug).toBeDefined();
       baseUrls.push(getJobModel(type).baseUrl);

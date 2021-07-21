@@ -38,7 +38,7 @@ function InstanceGroups() {
     '/instance_groups/container_group/add': t`Create new container group`,
   });
 
-  const buildBreadcrumbConfig = useCallback(instanceGroups => {
+  const buildBreadcrumbConfig = useCallback((instanceGroups) => {
     if (!instanceGroups) {
       return;
     }

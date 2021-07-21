@@ -14,7 +14,7 @@ function NotificationTemplates() {
     '/notification_templates/add': t`Create New Notification Template`,
   });
 
-  const updateBreadcrumbConfig = useCallback(notification => {
+  const updateBreadcrumbConfig = useCallback((notification) => {
     const { id } = notification;
     setBreadcrumbConfig({
       '/notification_templates': t`Notification Templates`,

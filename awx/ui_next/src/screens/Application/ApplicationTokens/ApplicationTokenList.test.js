@@ -126,11 +126,7 @@ describe('<ApplicationTokenList/>', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .at(0)
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').at(0).find('input').prop('checked')
     ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
@@ -191,11 +187,7 @@ describe('<ApplicationTokenList/>', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .at(0)
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').at(0).find('input').prop('checked')
     ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()

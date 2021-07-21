@@ -81,7 +81,7 @@ function ScheduleListItem({
         {Boolean(isMissingInventory || isMissingSurvey) && (
           <span>
             <Tooltip
-              content={[isMissingInventory, isMissingSurvey].map(message =>
+              content={[isMissingInventory, isMissingSurvey].map((message) =>
                 message ? <div key={message}>{message}</div> : null
               )}
               position="right"

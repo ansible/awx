@@ -27,7 +27,7 @@ import {
   VirtualizationSubForm,
 } from './InventorySourceSubForms';
 
-const buildSourceChoiceOptions = options => {
+const buildSourceChoiceOptions = (options) => {
   const sourceChoices = options.actions.GET.source.choices.map(
     ([choice, label]) => ({ label, key: choice, value: choice })
   );
@@ -39,13 +39,8 @@ const InventorySourceFormFields = ({
   sourceOptions,
   organizationId,
 }) => {
-  const {
-    values,
-    initialValues,
-    resetForm,
-    setFieldTouched,
-    setFieldValue,
-  } = useFormikContext();
+  const { values, initialValues, resetForm, setFieldTouched, setFieldValue } =
+    useFormikContext();
   const [sourceField, sourceMeta] = useField({
     name: 'source',
     validate: required(t`Set a value for this field`),
@@ -56,7 +51,7 @@ const InventorySourceFormFields = ({
     executionEnvironmentHelpers,
   ] = useField('execution_environment');
 
-  const resetSubFormFields = sourceType => {
+  const resetSubFormFields = (sourceType) => {
     if (sourceType === initialValues.source) {
       resetForm({
         values: {
@@ -84,7 +79,7 @@ const InventorySourceFormFields = ({
         enabled_value: '',
         host_filter: '',
       };
-      Object.keys(defaults).forEach(label => {
+      Object.keys(defaults).forEach((label) => {
         setFieldValue(label, defaults[label]);
         setFieldTouched(label, false);
       });
@@ -92,7 +87,7 @@ const InventorySourceFormFields = ({
   };
 
   const handleExecutionEnvironmentUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('execution_environment', value);
       setFieldTouched('execution_environment', true, false);
     },
@@ -293,11 +288,11 @@ const InventorySourceForm = ({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={values => {
+      onSubmit={(values) => {
         onSubmit(values);
       }}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <InventorySourceFormFields

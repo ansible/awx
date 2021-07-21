@@ -80,9 +80,9 @@ describe('<Search />', () => {
     );
 
     act(() => {
-      wrapper
-        .find('Select[aria-label="Simple key select"]')
-        .invoke('onSelect')({ target: { innerText: 'Description' } });
+      wrapper.find('Select[aria-label="Simple key select"]').invoke('onSelect')(
+        { target: { innerText: 'Description' } }
+      );
     });
     wrapper.update();
     wrapper.find(searchTextInput).instance().value = 'test-321';
@@ -119,18 +119,18 @@ describe('<Search />', () => {
     );
 
     act(() => {
-      wrapper
-        .find('Select[aria-label="Simple key select"]')
-        .invoke('onSelect')({ target: { innerText: 'Advanced' } });
+      wrapper.find('Select[aria-label="Simple key select"]').invoke('onSelect')(
+        { target: { innerText: 'Advanced' } }
+      );
     });
     wrapper.update();
     expect(onShowAdvancedSearch).toHaveBeenCalledTimes(1);
     expect(onShowAdvancedSearch).toBeCalledWith(true);
     jest.clearAllMocks();
     act(() => {
-      wrapper
-        .find('Select[aria-label="Simple key select"]')
-        .invoke('onSelect')({ target: { innerText: 'Description' } });
+      wrapper.find('Select[aria-label="Simple key select"]').invoke('onSelect')(
+        { target: { innerText: 'Description' } }
+      );
     });
     wrapper.update();
     expect(onShowAdvancedSearch).toHaveBeenCalledTimes(1);

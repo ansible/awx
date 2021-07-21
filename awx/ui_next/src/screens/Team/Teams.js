@@ -15,7 +15,7 @@ function Teams() {
     '/teams/add': t`Create New Team`,
   });
 
-  const buildBreadcrumbConfig = useCallback(team => {
+  const buildBreadcrumbConfig = useCallback((team) => {
     if (!team) {
       return;
     }

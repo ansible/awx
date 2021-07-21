@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox as PFCheckbox } from '@patternfly/react-core';
 import styled from 'styled-components';
@@ -28,10 +28,10 @@ class CheckboxCard extends Component {
           aria-label={name}
           id={`checkbox-card-${itemId}`}
           label={
-            <Fragment>
+            <>
               <div style={{ fontWeight: 'bold' }}>{name}</div>
               <div>{description}</div>
-            </Fragment>
+            </>
           }
           value={itemId}
         />

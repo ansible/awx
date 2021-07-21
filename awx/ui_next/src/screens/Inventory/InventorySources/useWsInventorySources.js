@@ -13,13 +13,13 @@ export default function useWsInventorySources(initialSources) {
   }, [initialSources]);
 
   useEffect(
-    function parseWsMessage() {
+    () => {
       if (!lastMessage?.unified_job_id || !lastMessage?.inventory_source_id) {
         return;
       }
 
       const sourceId = lastMessage.inventory_source_id;
-      const index = sources.findIndex(s => s.id === sourceId);
+      const index = sources.findIndex((s) => s.id === sourceId);
       if (index > -1) {
         setSources(updateSource(sources, index, lastMessage));
       }

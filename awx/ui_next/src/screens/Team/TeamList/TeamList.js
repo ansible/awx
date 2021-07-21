@@ -54,10 +54,10 @@ function TeamList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -73,13 +73,8 @@ function TeamList() {
     fetchTeams();
   }, [fetchTeams]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(teams);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(teams);
 
   const {
     isLoading: isDeleteLoading,
@@ -87,9 +82,10 @@ function TeamList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(team => TeamsAPI.destroy(team.id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map((team) => TeamsAPI.destroy(team.id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -149,7 +145,7 @@ function TeamList() {
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -178,7 +174,7 @@ function TeamList() {
                 key={team.id}
                 team={team}
                 detailUrl={`${match.url}/${team.id}`}
-                isSelected={selected.some(row => row.id === team.id)}
+                isSelected={selected.some((row) => row.id === team.id)}
                 onSelect={() => handleSelect(team)}
                 rowIndex={index}
               />

@@ -39,12 +39,10 @@ function CredentialTypeDetails({ credentialType }) {
     request: fetchDeleteDetails,
   } = useRequest(
     useCallback(async () => {
-      const {
-        results: deleteDetails,
-        error,
-      } = await getRelatedResourceDeleteCounts(
-        relatedResourceDeleteRequests.credentialType(credentialType)
-      );
+      const { results: deleteDetails, error } =
+        await getRelatedResourceDeleteCounts(
+          relatedResourceDeleteRequests.credentialType(credentialType)
+        );
       if (error) {
         throw new Error(error);
       }

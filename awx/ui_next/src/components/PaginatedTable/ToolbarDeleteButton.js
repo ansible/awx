@@ -34,7 +34,7 @@ const Label = styled.span`
   }
 `;
 
-const requiredField = props => {
+const requiredField = (props) => {
   const { name, username, image } = props;
   if (!name && !username && !image) {
     return new Error(
@@ -107,7 +107,7 @@ function ToolbarDeleteButton({
     toggleModal();
   };
 
-  const toggleModal = async isOpen => {
+  const toggleModal = async (isOpen) => {
     setIsLoading(true);
     setDeleteDetails(null);
     if (
@@ -138,7 +138,7 @@ function ToolbarDeleteButton({
   const renderTooltip = () => {
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
-      .map(item => item.name || item.username)
+      .map((item) => item.name || item.username)
       .join(', ');
     if (itemsToDelete.some(cannotDelete)) {
       return (
@@ -182,7 +182,7 @@ function ToolbarDeleteButton({
     }
     return (
       <div>
-        {deleteMessages.map(message => (
+        {deleteMessages.map((message) => (
           <div aria-label={message} key={message}>
             {message}
           </div>
@@ -283,7 +283,7 @@ function ToolbarDeleteButton({
           ]}
         >
           <div>{t`This action will delete the following:`}</div>
-          {itemsToDelete.map(item => (
+          {itemsToDelete.map((item) => (
             <span key={item.id}>
               <strong>{item.name || item.username || item.image}</strong>
               <br />
@@ -313,7 +313,7 @@ ToolbarDeleteButton.propTypes = {
 ToolbarDeleteButton.defaultProps = {
   pluralizedItemName: 'Items',
   warningMessage: null,
-  cannotDelete: item => !item.summary_fields.user_capabilities.delete,
+  cannotDelete: (item) => !item.summary_fields.user_capabilities.delete,
 };
 
 export default ToolbarDeleteButton;

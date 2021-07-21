@@ -25,7 +25,7 @@ function ExternalTestModal({
     request: testPluginMetadata,
   } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         const payload = {
           inputs: credentialType.inputs.fields.reduce(
             (filteredInputs, field) => {
@@ -52,7 +52,7 @@ function ExternalTestModal({
     null
   );
 
-  const handleTest = async values => {
+  const handleTest = async (values) => {
     await testPluginMetadata(values);
   };
 
@@ -70,7 +70,7 @@ function ExternalTestModal({
           },
           {}
         )}
-        onSubmit={values => handleTest(values)}
+        onSubmit={(values) => handleTest(values)}
       >
         {({ handleSubmit, setFieldValue }) => (
           <Modal
@@ -101,7 +101,7 @@ function ExternalTestModal({
           >
             <Form>
               <FormFullWidthLayout>
-                {credentialType.inputs.metadata.map(field => {
+                {credentialType.inputs.metadata.map((field) => {
                   const isRequired = credentialType.inputs?.required.includes(
                     field.id
                   );
@@ -123,13 +123,11 @@ function ExternalTestModal({
                             name={field.id}
                             value={field.default}
                             id={`credential-${field.id}`}
-                            data={field.choices.map(choice => {
-                              return {
-                                value: choice,
-                                key: choice,
-                                label: choice,
-                              };
-                            })}
+                            data={field.choices.map((choice) => ({
+                              value: choice,
+                              key: choice,
+                              label: choice,
+                            }))}
                             onChange={(event, value) => {
                               setFieldValue(field.id, value);
                             }}

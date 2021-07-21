@@ -32,8 +32,7 @@ const mockSingleDigitTimestampEventLineTextHtml = [
   { lineNumber: 0, html: '' },
   {
     lineNumber: 1,
-    html:
-      'PLAY [add hosts to inventory] **************************************************<span class="time">08:01:02</span>',
+    html: 'PLAY [add hosts to inventory] **************************************************<span class="time">08:01:02</span>',
   },
 ];
 
@@ -48,8 +47,7 @@ const mockOnPlayStartLineTextHtml = [
   { lineNumber: 0, html: '' },
   {
     lineNumber: 1,
-    html:
-      'PLAY [add hosts to inventory] **************************************************<span class="time">18:11:22</span>',
+    html: 'PLAY [add hosts to inventory] **************************************************<span class="time">18:11:22</span>',
   },
 ];
 
@@ -72,7 +70,7 @@ describe('<JobEvent />', () => {
     );
     let lineText = wrapper.find(selectors.lineText);
     expect(
-      lineText.filterWhere(e => e.text().includes('18:11:22'))
+      lineText.filterWhere((e) => e.text().includes('18:11:22'))
     ).toHaveLength(1);
 
     wrapper = mountWithContexts(
@@ -83,7 +81,7 @@ describe('<JobEvent />', () => {
     );
     lineText = wrapper.find(selectors.lineText);
     expect(
-      lineText.filterWhere(e => e.text().includes('08:01:02'))
+      lineText.filterWhere((e) => e.text().includes('08:01:02'))
     ).toHaveLength(1);
   });
 

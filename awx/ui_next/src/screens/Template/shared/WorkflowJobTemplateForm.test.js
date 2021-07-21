@@ -194,7 +194,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
       'VariablesField',
     ];
 
-    const assertField = field => {
+    const assertField = (field) => {
       expect(wrapper.find(`${field}`).length).toBe(1);
     };
     fields.map((field, index) => assertField(field, index));
@@ -221,7 +221,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     };
 
     await act(async () => {
-      inputsToChange.map(input => changeInputs(input));
+      inputsToChange.map((input) => changeInputs(input));
 
       wrapper.find('LabelSelect').invoke('onChange')([
         { name: 'Label 3', id: 3 },
@@ -245,7 +245,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
       );
     };
 
-    inputsToChange.map(input => assertChanges(input));
+    inputsToChange.map((input) => assertChanges(input));
   });
 
   test('test changes in FieldWithPrompt', async () => {

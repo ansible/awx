@@ -105,7 +105,7 @@ function SmartInventory({ setBreadcrumb }) {
 
   let showCardHeader = true;
 
-  if (['edit', 'hosts/'].some(name => location.pathname.includes(name))) {
+  if (['edit', 'hosts/'].some((name) => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 

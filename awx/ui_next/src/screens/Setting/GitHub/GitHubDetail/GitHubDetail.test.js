@@ -113,7 +113,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -167,7 +167,7 @@ describe('<GitHubDetail />', () => {
           }
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
       expect(wrapper.find('Button[aria-label="Edit"]').exists()).toBeFalsy();
     });
 
@@ -180,7 +180,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
       expect(wrapper.find('ContentError').length).toBe(1);
     });
   });
@@ -207,7 +207,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -258,7 +258,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -305,7 +305,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -361,7 +361,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -430,7 +430,7 @@ describe('<GitHubDetail />', () => {
           </SettingsProvider>
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {

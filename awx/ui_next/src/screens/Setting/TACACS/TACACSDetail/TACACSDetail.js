@@ -19,7 +19,12 @@ function TACACSDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: tacacs } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: tacacs,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('tacacsplus');
       return data;
@@ -57,7 +62,7 @@ function TACACSDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && tacacs && (
           <DetailList>
-            {Object.keys(tacacs).map(key => {
+            {Object.keys(tacacs).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

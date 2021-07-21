@@ -14,7 +14,7 @@ export default function useWsJob(initialJob) {
   }, [initialJob]);
 
   useEffect(
-    function parseWsMessage() {
+    () => {
       async function fetchJob() {
         const { data } = await getJobModel(job.type).readDetail(job.id);
         setJob(data);

@@ -120,7 +120,7 @@ describe('<ProjectEdit />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('form').simulate('submit');
     });
@@ -145,7 +145,7 @@ describe('<ProjectEdit />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('form').simulate('submit');
     });
@@ -162,7 +162,7 @@ describe('<ProjectEdit />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('ProjectEdit button[aria-label="Cancel"]').simulate('click');
     });

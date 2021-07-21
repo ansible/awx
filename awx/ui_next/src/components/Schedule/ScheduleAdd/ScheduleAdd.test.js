@@ -355,35 +355,19 @@ describe('<ScheduleAdd />', () => {
       wrapper.find('Button[aria-label="Prompt"]').prop('onClick')()
     );
     wrapper.update();
-    expect(
-      wrapper
-        .find('WizardNavItem')
-        .at(0)
-        .prop('isCurrent')
-    ).toBe(true);
+    expect(wrapper.find('WizardNavItem').at(0).prop('isCurrent')).toBe(true);
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-1').find('input').simulate('click');
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('td#check-action-item-1')
-        .find('input')
-        .prop('checked')
+      wrapper.find('td#check-action-item-1').find('input').prop('checked')
     ).toBe(true);
     await act(async () =>
       wrapper.find('WizardFooterInternal').prop('onNext')()
     );
     wrapper.update();
-    expect(
-      wrapper
-        .find('WizardNavItem')
-        .at(1)
-        .prop('isCurrent')
-    ).toBe(true);
+    expect(wrapper.find('WizardNavItem').at(1).prop('isCurrent')).toBe(true);
     await act(async () =>
       wrapper.find('WizardFooterInternal').prop('onNext')()
     );

@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
@@ -8,12 +8,12 @@ import Wizard from '../Wizard';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
 
-const readUsers = async queryParams =>
+const readUsers = async (queryParams) =>
   UsersAPI.read(Object.assign(queryParams, { is_superuser: false }));
 
 const readUsersOptions = async () => UsersAPI.readOptions();
 
-const readTeams = async queryParams => TeamsAPI.read(queryParams);
+const readTeams = async (queryParams) => TeamsAPI.read(queryParams);
 
 const readTeamsOptions = async () => TeamsAPI.readOptions();
 
@@ -77,9 +77,9 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
   const [currentStepId, setCurrentStepId] = useState(1);
   const [maxEnabledStep, setMaxEnabledStep] = useState(1);
 
-  const handleResourceCheckboxClick = user => {
+  const handleResourceCheckboxClick = (user) => {
     const selectedIndex = selectedResourceRows.findIndex(
-      selectedRow => selectedRow.id === user.id
+      (selectedRow) => selectedRow.id === user.id
     );
     if (selectedIndex > -1) {
       selectedResourceRows.splice(selectedIndex, 1);
@@ -98,9 +98,9 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
     }
   }, [currentStepId, history, maxEnabledStep]);
 
-  const handleRoleCheckboxClick = role => {
+  const handleRoleCheckboxClick = (role) => {
     const selectedIndex = selectedRoleRows.findIndex(
-      selectedRow => selectedRow.id === role.id
+      (selectedRow) => selectedRow.id === role.id
     );
 
     if (selectedIndex > -1) {
@@ -112,18 +112,18 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
     }
   };
 
-  const handleResourceSelect = resourceType => {
+  const handleResourceSelect = (resourceType) => {
     setSelectedResource(resourceType);
     setSelectedResourceRows([]);
     setSelectedRoleRows([]);
   };
 
-  const handleWizardNext = step => {
+  const handleWizardNext = (step) => {
     setCurrentStepId(step.id);
     setMaxEnabledStep(step.id);
   };
 
-  const handleWizardGoToStep = step => {
+  const handleWizardGoToStep = (step) => {
     setCurrentStepId(step.id);
   };
 
@@ -163,7 +163,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
   // showing role choices for team access
   const selectableRoles = { ...roles };
   if (selectedResource === 'teams') {
-    Object.keys(roles).forEach(key => {
+    Object.keys(roles).forEach((key) => {
       if (selectableRoles[key].user_only) {
         delete selectableRoles[key];
       }
@@ -219,7 +219,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
       id: 2,
       name: t`Select Items from List`,
       component: (
-        <Fragment>
+        <>
           {selectedResource === 'users' && (
             <SelectResourceStep
               searchColumns={userSearchColumns}
@@ -244,7 +244,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
               selectedResourceRows={selectedResourceRows}
             />
           )}
-        </Fragment>
+        </>
       ),
       enableNext: selectedResourceRows.length > 0,
       nextButtonText: t`Next`,
@@ -269,17 +269,17 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
     },
   ];
 
-  const currentStep = steps.find(step => step.id === currentStepId);
+  const currentStep = steps.find((step) => step.id === currentStepId);
 
   return (
     <Wizard
       style={{ overflow: 'scroll' }}
       isOpen
       onNext={handleWizardNext}
-      onBack={step => setCurrentStepId(step.id)}
+      onBack={(step) => setCurrentStepId(step.id)}
       onClose={onClose}
       onSave={handleWizardSave}
-      onGoToStep={step => handleWizardGoToStep(step)}
+      onGoToStep={(step) => handleWizardGoToStep(step)}
       steps={steps}
       title={wizardTitle}
       nextButtonText={currentStep.nextButtonText || undefined}

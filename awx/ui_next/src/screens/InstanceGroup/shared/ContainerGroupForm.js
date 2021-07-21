@@ -23,16 +23,15 @@ import { VariablesField } from 'components/CodeEditor';
 
 function ContainerGroupFormFields({ instanceGroup }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField(
-    'credential'
-  );
+  const [credentialField, credentialMeta, credentialHelpers] =
+    useField('credential');
 
   const [nameField] = useField('name');
 
   const [overrideField] = useField('override');
 
   const handleCredentialUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);
     },
@@ -111,11 +110,11 @@ function ContainerGroupForm({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={values => {
+      onSubmit={(values) => {
         onSubmit(values);
       }}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <ContainerGroupFormFields instanceGroup={instanceGroup} {...rest} />

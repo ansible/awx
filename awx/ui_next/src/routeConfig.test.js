@@ -8,10 +8,10 @@ const userProfile = {
   isExecEnvAdmin: false,
 };
 
-const filterPaths = sidebar => {
+const filterPaths = (sidebar) => {
   const visibleRoutes = [];
   sidebar.forEach(({ routes }) => {
-    routes.forEach(route => {
+    routes.forEach((route) => {
       visibleRoutes.push(route.path);
     });
   });

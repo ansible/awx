@@ -19,7 +19,12 @@ function RADIUSDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: radius } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: radius,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('radius');
       return data;
@@ -57,7 +62,7 @@ function RADIUSDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && radius && (
           <DetailList>
-            {Object.keys(radius).map(key => {
+            {Object.keys(radius).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

@@ -27,7 +27,7 @@ function NotificationTemplateAdd() {
     fetchDefaultMessages();
   }, [fetchDefaultMessages]);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       const { data } = await NotificationTemplatesAPI.create(values);
       history.push(`/notification_templates/${data.id}`);

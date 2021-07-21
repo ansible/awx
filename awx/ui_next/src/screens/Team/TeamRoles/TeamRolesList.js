@@ -68,10 +68,10 @@ function TeamRolesList({ me, team }) {
         isAdminOfOrg: orgAdminCount > 0,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [me.id, team.id, team.organization, search]),
     {
@@ -104,7 +104,7 @@ function TeamRolesList({ me, team }) {
   );
 
   const canAdd = team?.summary_fields?.user_capabilities?.edit || isAdminOfOrg;
-  const detailUrl = role => {
+  const detailUrl = (role) => {
     const { resource_id, resource_type } = role.summary_fields;
 
     if (!role || !resource_type) {
@@ -120,7 +120,7 @@ function TeamRolesList({ me, team }) {
     return `/${resource_type}s/${resource_id}/details`;
   };
 
-  const isSysAdmin = roles.some(role => role.name === 'System Administrator');
+  const isSysAdmin = roles.some((role) => role.name === 'System Administrator');
   if (isSysAdmin) {
     return (
       <EmptyState variant="full">
@@ -159,7 +159,7 @@ function TeamRolesList({ me, team }) {
         ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             qsConfig={QS_CONFIG}
@@ -202,7 +202,7 @@ function TeamRolesList({ me, team }) {
           }}
           title={t`Add team permissions`}
           onClose={() => setShowAddModal(false)}
-          onError={err => setAssociateError(err)}
+          onError={(err) => setAssociateError(err)}
         />
       )}
       {roleToDisassociate && (

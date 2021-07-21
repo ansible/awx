@@ -15,7 +15,7 @@ function ContainerGroupAdd() {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
 
-  const getPodSpecValue = value => {
+  const getPodSpecValue = (value) => {
     if (isJsonString(value)) {
       value = jsonToYaml(value);
     }
@@ -25,7 +25,7 @@ function ContainerGroupAdd() {
     return null;
   };
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       const { data: response } = await InstanceGroupsAPI.create({
         name: values.name,

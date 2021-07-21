@@ -90,17 +90,13 @@ function JobDetail({ job }) {
     }
   };
 
-  const buildInstanceGroupLink = item => {
-    return <Link to={`/instance_groups/${item.id}`}>{item.name}</Link>;
-  };
+  const buildInstanceGroupLink = (item) => (
+    <Link to={`/instance_groups/${item.id}`}>{item.name}</Link>
+  );
 
-  const buildContainerGroupLink = item => {
-    return (
-      <Link to={`/instance_groups/container_group/${item.id}`}>
-        {item.name}
-      </Link>
-    );
-  };
+  const buildContainerGroupLink = (item) => (
+    <Link to={`/instance_groups/container_group/${item.id}`}>{item.name}</Link>
+  );
 
   const buildProjectDetailValue = () => {
     if (projectUpdate) {
@@ -279,7 +275,7 @@ function JobDetail({ job }) {
             label={t`Credentials`}
             value={
               <ChipGroup numChips={5} totalChips={credentials.length}>
-                {credentials.map(c => (
+                {credentials.map((c) => (
                   <CredentialChip key={c.id} credential={c} isReadOnly />
                 ))}
               </ChipGroup>
@@ -292,7 +288,7 @@ function JobDetail({ job }) {
             label={t`Labels`}
             value={
               <ChipGroup numChips={5} totalChips={labels.results.length}>
-                {labels.results.map(l => (
+                {labels.results.map((l) => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}
                   </Chip>
@@ -310,7 +306,7 @@ function JobDetail({ job }) {
                 numChips={5}
                 totalChips={job.job_tags.split(',').length}
               >
-                {job.job_tags.split(',').map(jobTag => (
+                {job.job_tags.split(',').map((jobTag) => (
                   <Chip key={jobTag} isReadOnly>
                     {jobTag}
                   </Chip>
@@ -328,7 +324,7 @@ function JobDetail({ job }) {
                 numChips={5}
                 totalChips={job.skip_tags.split(',').length}
               >
-                {job.skip_tags.split(',').map(skipTag => (
+                {job.skip_tags.split(',').map((skipTag) => (
                   <Chip key={skipTag} isReadOnly>
                     {skipTag}
                   </Chip>

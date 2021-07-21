@@ -44,23 +44,19 @@ function WorkflowJobTemplateForm({
   );
   const [hasContentError, setContentError] = useState(null);
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
-  const [inventoryField, inventoryMeta, inventoryHelpers] = useField(
-    'inventory'
-  );
+  const [inventoryField, inventoryMeta, inventoryHelpers] =
+    useField('inventory');
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
+  const [organizationField, organizationMeta, organizationHelpers] =
+    useField('organization');
   const [scmField, , scmHelpers] = useField('scm_branch');
-  const [, webhookServiceMeta, webhookServiceHelpers] = useField(
-    'webhook_service'
-  );
+  const [, webhookServiceMeta, webhookServiceHelpers] =
+    useField('webhook_service');
   const [, webhookUrlMeta, webhookUrlHelpers] = useField('webhook_url');
   const [, webhookKeyMeta, webhookKeyHelpers] = useField('webhook_key');
-  const [, webhookCredentialMeta, webhookCredentialHelpers] = useField(
-    'webhook_credential'
-  );
+  const [, webhookCredentialMeta, webhookCredentialHelpers] =
+    useField('webhook_credential');
 
   useEffect(() => {
     if (enableWebhooks) {
@@ -78,7 +74,7 @@ function WorkflowJobTemplateForm({
   }, [enableWebhooks]);
 
   const handleOrganizationChange = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -86,7 +82,7 @@ function WorkflowJobTemplateForm({
   );
 
   const handleInventoryUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('inventory', value);
       setFieldTouched('inventory', true, false);
     },
@@ -167,7 +163,7 @@ function WorkflowJobTemplateForm({
             validated={
               !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
             }
-            onChange={value => {
+            onChange={(value) => {
               limitHelpers.setValue(value);
             }}
           />
@@ -183,7 +179,7 @@ function WorkflowJobTemplateForm({
           <TextInput
             id="wfjt-scm-branch"
             value={scmField.value}
-            onChange={value => {
+            onChange={(value) => {
               scmHelpers.setValue(value);
             }}
             aria-label={t`source control branch`}
@@ -204,7 +200,7 @@ function WorkflowJobTemplateForm({
         >
           <LabelSelect
             value={labelsField.value}
-            onChange={labels => labelsHelpers.setValue(labels)}
+            onChange={(labels) => labelsHelpers.setValue(labels)}
             onError={setContentError}
             createText={t`Create`}
           />
@@ -234,7 +230,7 @@ function WorkflowJobTemplateForm({
             }
             id="wfjt-enabled-webhooks"
             isChecked={enableWebhooks}
-            onChange={checked => {
+            onChange={(checked) => {
               setEnableWebhooks(checked);
             }}
           />

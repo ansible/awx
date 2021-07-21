@@ -127,7 +127,7 @@ describe('<ResourceAccessList />', () => {
       );
     });
 
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     wrapper.update();
   });
 
@@ -136,13 +136,13 @@ describe('<ResourceAccessList />', () => {
   });
 
   test('should fetch and display access records on mount', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(OrganizationsAPI.readAccessList).toHaveBeenCalled();
     expect(wrapper.find('ResourceAccessListItem').length).toBe(2);
   });
 
   test('should open and close confirmation dialog when deleting role', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('DeleteRoleConfirmationModal')).toHaveLength(0);
     const button = wrapper.find('Chip Button').at(0);
     await act(async () => {
@@ -160,7 +160,7 @@ describe('<ResourceAccessList />', () => {
   });
 
   test('should delete user role', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     const button = wrapper.find('Chip Button').at(0);
     await act(async () => {
       button.prop('onClick')();
@@ -177,7 +177,7 @@ describe('<ResourceAccessList />', () => {
   });
 
   test('should delete team role', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     const button = wrapper.find('Chip Button').at(1);
     await act(async () => {
       button.prop('onClick')();
@@ -194,7 +194,7 @@ describe('<ResourceAccessList />', () => {
   });
 
   test('should call api to get org details', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     expect(
       wrapper.find('PaginatedTable').prop('toolbarSearchColumns')

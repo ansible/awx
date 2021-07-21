@@ -7,9 +7,7 @@ import OrganizationForm from '../shared/OrganizationForm';
 
 const isEqual = (array1, array2) =>
   array1.length === array2.length &&
-  array1.every((element, index) => {
-    return element.id === array2[index].id;
-  });
+  array1.every((element, index) => element.id === array2[index].id);
 
 function OrganizationEdit({ organization }) {
   const detailsUrl = `/organizations/${organization.id}/details`;

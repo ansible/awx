@@ -180,7 +180,7 @@ describe('<ApplicationAdd/>', () => {
       });
     });
 
-    waitForElement(wrapper, 'FormSubmitError', el => el.length > 0);
+    waitForElement(wrapper, 'FormSubmitError', (el) => el.length > 0);
   });
   test('should render content error on failed read options request', async () => {
     ApplicationsAPI.readOptions.mockRejectedValue(

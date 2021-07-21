@@ -35,16 +35,13 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
     const width = getWidth();
 
     function transition(path) {
-      path
-        .transition()
-        .duration(1000)
-        .attrTween('stroke-dasharray', tweenDash);
+      path.transition().duration(1000).attrTween('stroke-dasharray', tweenDash);
     }
 
     function tweenDash(...params) {
       const l = params[2][params[1]].getTotalLength();
       const i = d3.interpolateString(`0,${l}`, `${l},${l}`);
-      return val => i(val);
+      return (val) => i(val);
     }
 
     const x = d3.scaleTime().rangeRound([0, width]);
@@ -85,7 +82,7 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
       const b_max = Math.max(b.RAN > b.FAIL ? b.RAN : b.FAIL);
       return a_max > b_max ? a_max : b_max;
     }, 0);
-    x.domain(d3.extent(formattedData, d => d.DATE));
+    x.domain(d3.extent(formattedData, (d) => d.DATE));
     y.domain([
       0,
       largestY > 4 ? largestY + Math.max(largestY / 10, 1) : 5,
@@ -94,15 +91,15 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
     const successLine = d3
       .line()
       .curve(d3.curveMonotoneX)
-      .x(d => x(d.DATE))
-      .y(d => y(d.RAN));
+      .x((d) => x(d.DATE))
+      .y((d) => y(d.RAN));
 
     const failLine = d3
       .line()
-      .defined(d => typeof d.FAIL === 'number')
+      .defined((d) => typeof d.FAIL === 'number')
       .curve(d3.curveMonotoneX)
-      .x(d => x(d.DATE))
-      .y(d => y(d.FAIL));
+      .x((d) => x(d.DATE))
+      .y((d) => y(d.FAIL));
     // Add the Y Axis
     svg
       .append('g')
@@ -137,11 +134,11 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
     const maxTicks = Math.round(
       formattedData.length / (formattedData.length / 2)
     );
-    ticks = formattedData.map(d => d.DATE);
+    ticks = formattedData.map((d) => d.DATE);
     if (formattedData.length === 31) {
       ticks = formattedData
         .map((d, i) => (i % maxTicks === 0 ? d.DATE : undefined))
-        .filter(item => item);
+        .filter((item) => item);
     }
 
     svg.select('.domain').attr('stroke', '#d7d7d7');
@@ -179,7 +176,7 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
       .style('stroke-dasharray', '3, 3')
       .style('opacity', '0');
 
-    const handleMouseOver = d => {
+    const handleMouseOver = (d) => {
       tooltip.handleMouseOver(d);
       // show vertical line
       vertical.transition().style('opacity', '1');
@@ -221,9 +218,9 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
         .attr('r', 3)
         .style('stroke', () => colors(1))
         .style('fill', () => colors(1))
-        .attr('cx', d => x(d.DATE))
-        .attr('cy', d => y(d.RAN))
-        .attr('id', d => `success-dot-${dateFormat(d.DATE)}`)
+        .attr('cx', (d) => x(d.DATE))
+        .attr('cy', (d) => y(d.RAN))
+        .attr('id', (d) => `success-dot-${dateFormat(d.DATE)}`)
         .on('mouseover', handleMouseOver)
         .on('mousemove', handleMouseMove)
         .on('mouseout', handleMouseOut);
@@ -251,9 +248,9 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
         .attr('r', 3)
         .style('stroke', () => colors(0))
         .style('fill', () => colors(0))
-        .attr('cx', d => x(d.DATE))
-        .attr('cy', d => y(d.FAIL))
-        .attr('id', d => `fail-dot-${dateFormat(d.DATE)}`)
+        .attr('cx', (d) => x(d.DATE))
+        .attr('cy', (d) => y(d.FAIL))
+        .attr('id', (d) => `fail-dot-${dateFormat(d.DATE)}`)
         .on('mouseover', handleMouseOver)
         .on('mousemove', handleMouseMove)
         .on('mouseout', handleMouseOut);
@@ -285,14 +282,13 @@ LineChart.propTypes = {
   height: number.isRequired,
 };
 
-const withPageContext = Component => {
-  return function contextComponent(props) {
+const withPageContext = (Component) =>
+  function contextComponent(props) {
     return (
       <PageContextConsumer>
-        {pageContext => <Component {...props} pageContext={pageContext} />}
+        {(pageContext) => <Component {...props} pageContext={pageContext} />}
       </PageContextConsumer>
     );
   };
-};
 
 export default withPageContext(LineChart);

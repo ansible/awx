@@ -63,8 +63,11 @@ function InstanceGroupForm({
     policy_instance_percentage: instanceGroup.policy_instance_percentage || 0,
   };
   return (
-    <Formik initialValues={initialValues} onSubmit={values => onSubmit(values)}>
-      {formik => (
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => onSubmit(values)}
+    >
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <InstanceGroupFormFields {...rest} />

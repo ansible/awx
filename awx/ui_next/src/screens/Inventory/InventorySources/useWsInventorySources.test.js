@@ -10,7 +10,7 @@ import useWsInventorySources from './useWsInventorySources';
 */
 jest.mock('../../../hooks/useThrottle', () => ({
   __esModule: true,
-  default: jest.fn(val => val),
+  default: jest.fn((val) => val),
 }));
 
 function TestInner() {

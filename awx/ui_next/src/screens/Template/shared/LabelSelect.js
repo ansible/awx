@@ -43,7 +43,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
     onChange
   );
 
-  const toggleExpanded = toggleValue => {
+  const toggleExpanded = (toggleValue) => {
     setIsExpanded(toggleValue);
   };
 
@@ -58,18 +58,17 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const renderOptions = opts => {
-    return opts.map(option => (
+  const renderOptions = (opts) =>
+    opts.map((option) => (
       <SelectOption key={option.id} aria-label={option.name} value={option}>
         {option.name}
       </SelectOption>
     ));
-  };
 
-  const onFilter = event => {
+  const onFilter = (event) => {
     if (event) {
       const str = event.target.value.toLowerCase();
-      const matches = options.filter(o => o.name.toLowerCase().includes(str));
+      const matches = options.filter((o) => o.name.toLowerCase().includes(str));
       return renderOptions(matches);
     }
     return null;
@@ -87,7 +86,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
       onClear={() => onChange([])}
       onFilter={onFilter}
       isCreatable
-      onCreateOption={label => {
+      onCreateOption={(label) => {
         label = label.trim();
         if (!options.includes(label)) {
           setOptions(options.concat({ name: label, id: label }));

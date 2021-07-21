@@ -111,12 +111,12 @@ describe('UsersList with full permissions', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UsersList />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     wrapper.update();
   });
 
   test('Users are retrieved from the api and the components finishes loading', async () => {
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(UsersAPI.read).toHaveBeenCalled();
   });
 
@@ -126,66 +126,50 @@ describe('UsersList with full permissions', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .props().checked
+      wrapper.find('.pf-c-table__check input').first().props().checked
     ).toBe(false);
     await act(async () => {
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .invoke('onChange')(true);
+      wrapper.find('.pf-c-table__check input').first().invoke('onChange')(true);
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .props().checked
+      wrapper.find('.pf-c-table__check input').first().props().checked
     ).toBe(true);
     await act(async () => {
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .invoke('onChange')(false);
+      wrapper.find('.pf-c-table__check input').first().invoke('onChange')(
+        false
+      );
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .props().checked
+      wrapper.find('.pf-c-table__check input').first().props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
     expect(wrapper.find('.pf-c-table__check input')).toHaveLength(2);
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
   });
 
   test('should call api delete users for each selected user', async () => {
     await act(async () => {
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .invoke('onChange')();
+      wrapper.find('.pf-c-table__check input').first().invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {
@@ -199,10 +183,7 @@ describe('UsersList with full permissions', () => {
     UsersAPI.destroy.mockImplementationOnce(() => Promise.reject(new Error()));
     expect(wrapper.find('Modal').length).toBe(0);
     await act(async () => {
-      wrapper
-        .find('.pf-c-table__check input')
-        .first()
-        .invoke('onChange')();
+      wrapper.find('.pf-c-table__check input').first().invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {

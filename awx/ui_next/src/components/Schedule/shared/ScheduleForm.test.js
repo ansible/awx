@@ -284,7 +284,7 @@ describe('<ScheduleForm />', () => {
       waitForElement(
         promptWrapper,
         'Button[aria-label="Prompt"]',
-        el => el.length > 0
+        (el) => el.length > 0
       );
     });
 
@@ -297,7 +297,7 @@ describe('<ScheduleForm />', () => {
         promptWrapper.find('Button[aria-label="Prompt"]').prop('onClick')()
       );
       promptWrapper.update();
-      waitForElement(promptWrapper, 'Wizard', el => el.length > 0);
+      waitForElement(promptWrapper, 'Wizard', (el) => el.length > 0);
       expect(promptWrapper.find('Wizard').length).toBe(1);
       expect(promptWrapper.find('StepName#inventory-step').length).toBe(2);
       expect(promptWrapper.find('StepName#preview-step').length).toBe(1);
@@ -343,12 +343,9 @@ describe('<ScheduleForm />', () => {
         promptWrapper.find('Button[aria-label="Prompt"]').prop('onClick')()
       );
       promptWrapper.update();
-      expect(
-        promptWrapper
-          .find('WizardNavItem')
-          .at(0)
-          .prop('isCurrent')
-      ).toBe(true);
+      expect(promptWrapper.find('WizardNavItem').at(0).prop('isCurrent')).toBe(
+        true
+      );
       await act(async () => {
         promptWrapper
           .find('td#check-action-item-1')
@@ -366,12 +363,9 @@ describe('<ScheduleForm />', () => {
         promptWrapper.find('WizardFooterInternal').prop('onNext')()
       );
       promptWrapper.update();
-      expect(
-        promptWrapper
-          .find('WizardNavItem')
-          .at(1)
-          .prop('isCurrent')
-      ).toBe(true);
+      expect(promptWrapper.find('WizardNavItem').at(1).prop('isCurrent')).toBe(
+        true
+      );
       await act(async () =>
         promptWrapper.find('WizardFooterInternal').prop('onNext')()
       );
@@ -420,7 +414,7 @@ describe('<ScheduleForm />', () => {
       waitForElement(
         wrapper,
         'Button[aria-label="Prompt"]',
-        el => el.length > 0
+        (el) => el.length > 0
       );
       expect(wrapper.find('Button[aria-label="Save"]').prop('isDisabled')).toBe(
         true
@@ -476,7 +470,7 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     test('initially renders expected fields and values', () => {
@@ -890,7 +884,7 @@ describe('<ScheduleForm />', () => {
       waitForElement(
         wrapper,
         'Button[aria-label="Prompt"]',
-        el => el.length > 0
+        (el) => el.length > 0
       );
 
       expect(wrapper.find('Button[aria-label="Save"]').prop('isDisabled')).toBe(

@@ -30,7 +30,7 @@ function GceFileUploadField() {
         value={file}
         filename={filename}
         filenamePlaceholder={t`Choose a .json file`}
-        onChange={async value => {
+        onChange={async (value) => {
           if (value) {
             try {
               setFile(value);

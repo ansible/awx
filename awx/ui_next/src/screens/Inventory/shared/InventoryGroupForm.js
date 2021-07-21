@@ -22,7 +22,7 @@ function InventoryGroupForm({ error, group = {}, handleSubmit, handleCancel }) {
     <Card>
       <CardBody>
         <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <FormField

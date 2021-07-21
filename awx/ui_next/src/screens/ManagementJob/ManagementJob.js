@@ -68,12 +68,12 @@ function ManagementJob({ setBreadcrumb }) {
   }, [result, setBreadcrumb]);
 
   const createSchedule = useCallback(
-    data =>
+    (data) =>
       SystemJobTemplatesAPI.createSchedule(result?.systemJobTemplate.id, data),
     [result]
   );
   const loadSchedules = useCallback(
-    params =>
+    (params) =>
       SystemJobTemplatesAPI.readSchedules(result?.systemJobTemplate.id, params),
     [result]
   );

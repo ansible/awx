@@ -16,7 +16,7 @@ function ActivityStreamListItem({ streamItem }) {
     streamItem: shape({}).isRequired,
   };
 
-  const buildUser = item => {
+  const buildUser = (item) => {
     let link;
     if (item?.summary_fields?.actor?.id) {
       link = (

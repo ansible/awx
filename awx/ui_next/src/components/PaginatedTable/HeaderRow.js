@@ -43,7 +43,7 @@ export default function HeaderRow({
         {isSelectable && <Th />}
         {React.Children.map(
           children,
-          child =>
+          (child) =>
             child &&
             React.cloneElement(child, {
               onSort,

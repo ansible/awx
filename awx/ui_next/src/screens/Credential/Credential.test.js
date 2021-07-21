@@ -32,8 +32,8 @@ describe('<Credential />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 3);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 3);
   });
 
   test('initially renders org-based credential successfully', async () => {
@@ -44,9 +44,9 @@ describe('<Credential />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     // org-based credential detail needs access tab
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 3);
+    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 3);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
@@ -70,6 +70,6 @@ describe('<Credential />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

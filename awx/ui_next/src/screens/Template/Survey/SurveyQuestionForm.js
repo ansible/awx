@@ -29,9 +29,8 @@ function AnswerTypeField() {
     name: 'type',
     validate: required(t`Select a value for this field`),
   });
-  const [choicesField, choicesMeta, choicesHelpers] = useField(
-    'formattedChoices'
-  );
+  const [choicesField, choicesMeta, choicesHelpers] =
+    useField('formattedChoices');
 
   const singleDefault = choicesField.value.map((c, i) =>
     i === 0
@@ -148,7 +147,7 @@ function SurveyQuestionForm({
       initialValues={initialValues}
       onSubmit={handleSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <FormField

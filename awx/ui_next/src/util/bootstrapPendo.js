@@ -1,15 +1,15 @@
 /* eslint-disable */
 function bootstrapPendo(pendoApiKey) {
-  (function(p, e, n, d, o) {
+  (function (p, e, n, d, o) {
     var v, w, x, y, z;
     o = p[d] = p[d] || {};
     o._q = [];
     v = ['initialize', 'identify', 'updateOptions', 'pageLoad'];
     for (w = 0, x = v.length; w < x; ++w)
-      (function(m) {
+      (function (m) {
         o[m] =
           o[m] ||
-          function() {
+          function () {
             o._q[m === v[0] ? 'unshift' : 'push'](
               [m].concat([].slice.call(arguments, 0))
             );

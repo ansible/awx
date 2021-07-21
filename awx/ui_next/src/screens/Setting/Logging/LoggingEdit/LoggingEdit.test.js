@@ -63,7 +63,7 @@ describe('<LoggingEdit />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   test('initially renders without crashing', () => {
@@ -90,16 +90,10 @@ describe('<LoggingEdit />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find(enableLoggingField)
-        .find('Switch')
-        .prop('isChecked')
+      wrapper.find(enableLoggingField).find('Switch').prop('isChecked')
     ).toBe(false);
     expect(
-      wrapper
-        .find(enableLoggingField)
-        .find('Switch')
-        .prop('isDisabled')
+      wrapper.find(enableLoggingField).find('Switch').prop('isDisabled')
     ).toBe(true);
   });
 
@@ -273,7 +267,7 @@ describe('<LoggingEdit />', () => {
         </SettingsProvider>
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 });

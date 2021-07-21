@@ -43,7 +43,7 @@ const Checkbox = styled(_Checkbox)`
 `;
 
 export function requiredPositiveInteger() {
-  return value => {
+  return (value) => {
     if (typeof value === 'number') {
       if (!Number.isInteger(value)) {
         return t`This field must be an integer`;
@@ -171,7 +171,7 @@ const FrequencyDetailSubform = () => {
       daysOfWeekHelpers.setValue(newDaysOfWeek);
     } else {
       daysOfWeekHelpers.setValue(
-        newDaysOfWeek.filter(selectedDay => selectedDay !== day)
+        newDaysOfWeek.filter((selectedDay) => selectedDay !== day)
       );
     }
   };
@@ -242,7 +242,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Sun`}
               isChecked={daysOfWeek.value.includes(RRule.SU)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.SU, checked);
               }}
               aria-label={t`Sunday`}
@@ -252,7 +252,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Mon`}
               isChecked={daysOfWeek.value.includes(RRule.MO)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.MO, checked);
               }}
               aria-label={t`Monday`}
@@ -262,7 +262,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Tue`}
               isChecked={daysOfWeek.value.includes(RRule.TU)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.TU, checked);
               }}
               aria-label={t`Tuesday`}
@@ -272,7 +272,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Wed`}
               isChecked={daysOfWeek.value.includes(RRule.WE)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.WE, checked);
               }}
               aria-label={t`Wednesday`}
@@ -282,7 +282,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Thu`}
               isChecked={daysOfWeek.value.includes(RRule.TH)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.TH, checked);
               }}
               aria-label={t`Thursday`}
@@ -292,7 +292,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Fri`}
               isChecked={daysOfWeek.value.includes(RRule.FR)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.FR, checked);
               }}
               aria-label={t`Friday`}
@@ -302,7 +302,7 @@ const FrequencyDetailSubform = () => {
             <Checkbox
               label={t`Sat`}
               isChecked={daysOfWeek.value.includes(RRule.SA)}
-              onChange={checked => {
+              onChange={(checked) => {
                 updateDaysOfWeek(RRule.SA, checked);
               }}
               aria-label={t`Saturday`}

@@ -22,14 +22,11 @@ describe('<UserTokens />', () => {
     });
     expect(wrapper.find('Modal[title="Token information"]').length).toBe(0);
     await act(async () => {
-      wrapper
-        .find('UserTokenAdd')
-        .props()
-        .onSuccessfulAdd({
-          expires: '3020-03-28T14:26:48.099297Z',
-          token: 'foobar',
-          refresh_token: 'aaaaaaaaaaaaaaaaaaaaaaaaaa',
-        });
+      wrapper.find('UserTokenAdd').props().onSuccessfulAdd({
+        expires: '3020-03-28T14:26:48.099297Z',
+        token: 'foobar',
+        refresh_token: 'aaaaaaaaaaaaaaaaaaaaaaaaaa',
+      });
     });
     wrapper.update();
     expect(wrapper.find('Modal[title="Token information"]').length).toBe(1);

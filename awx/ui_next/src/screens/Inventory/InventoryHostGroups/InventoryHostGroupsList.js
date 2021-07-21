@@ -71,10 +71,10 @@ function InventoryHostGroupsList() {
         actions: hostGroupOptions.data.actions,
         relatedSearchableKeys: (
           hostGroupOptions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           hostGroupOptions.data.actions?.GET || {}
-        ).filter(key => hostGroupOptions.data.actions?.GET[key].filterable),
+        ).filter((key) => hostGroupOptions.data.actions?.GET[key].filterable),
       };
     }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {
@@ -92,24 +92,21 @@ function InventoryHostGroupsList() {
     fetchGroups();
   }, [fetchGroups]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(groups);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(groups);
 
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateHosts,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(group => HostsAPI.disassociateGroup(hostId, group))
-      );
-    }, [hostId, selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map((group) => HostsAPI.disassociateGroup(hostId, group))
+        ),
+      [hostId, selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -123,12 +120,11 @@ function InventoryHostGroupsList() {
   };
 
   const fetchGroupsToAssociate = useCallback(
-    params => {
-      return InventoriesAPI.readGroups(
+    (params) =>
+      InventoriesAPI.readGroups(
         invId,
         mergeParams(params, { not__hosts: hostId })
-      );
-    },
+      ),
     [invId, hostId]
   );
 
@@ -139,9 +135,9 @@ function InventoryHostGroupsList() {
 
   const { request: handleAssociate, error: associateError } = useRequest(
     useCallback(
-      async groupsToAssociate => {
+      async (groupsToAssociate) => {
         await Promise.all(
-          groupsToAssociate.map(group =>
+          groupsToAssociate.map((group) =>
             HostsAPI.associateGroup(hostId, group.id)
           )
         );
@@ -197,12 +193,12 @@ function InventoryHostGroupsList() {
             key={item.id}
             group={item}
             inventoryId={item.summary_fields.inventory.id}
-            isSelected={selected.some(row => row.id === item.id)}
+            isSelected={selected.some((row) => row.id === item.id)}
             onSelect={() => handleSelect(item)}
             rowIndex={index}
           />
         )}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}

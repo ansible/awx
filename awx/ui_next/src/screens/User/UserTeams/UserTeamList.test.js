@@ -113,7 +113,7 @@ describe('<UserTeamList />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -224,19 +224,16 @@ describe('<UserTeamList />', () => {
         .find('ToolbarAddButton button[aria-label="Associate"]')
         .prop('onClick')();
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('CheckboxListItem')
-        .first()
-        .prop('onSelect')();
+      wrapper.find('CheckboxListItem').first().prop('onSelect')();
     });
     wrapper.update();
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').prop('onClick')();
     });
-    await waitForElement(wrapper, 'AssociateModal', el => el.length === 0);
+    await waitForElement(wrapper, 'AssociateModal', (el) => el.length === 0);
     expect(UsersAPI.associateRole).toHaveBeenCalledTimes(1);
     expect(TeamsAPI.read).toHaveBeenCalledTimes(1);
   });

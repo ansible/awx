@@ -14,17 +14,15 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
 
 function UserTokenDetail({ token }) {
-  const {
-    scope,
-    description,
-    created,
-    modified,
-    expires,
-    summary_fields,
-  } = token;
+  const { scope, description, created, modified, expires, summary_fields } =
+    token;
   const history = useHistory();
   const { id, tokenId } = useParams();
-  const { request: deleteToken, isLoading, error: deleteError } = useRequest(
+  const {
+    request: deleteToken,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
     useCallback(async () => {
       await TokensAPI.destroy(tokenId);
       history.push(`/users/${id}/tokens`);

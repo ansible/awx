@@ -13,12 +13,11 @@ import Popover from '../Popover';
 
 const InventoryLookupField = ({ isDisabled }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [inventoryField, inventoryMeta, inventoryHelpers] = useField(
-    'inventory'
-  );
+  const [inventoryField, inventoryMeta, inventoryHelpers] =
+    useField('inventory');
 
   const handleInventoryUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('inventory', value);
       setFieldTouched('inventory', true, false);
     },
@@ -76,55 +75,53 @@ const HostForm = ({
   isInventoryVisible,
   submitError,
   disableInventoryLookup,
-}) => {
-  return (
-    <Formik
-      initialValues={{
-        name: host.name,
-        description: host.description,
-        inventory: host.summary_fields?.inventory || null,
-        variables: host.variables,
-      }}
-      onSubmit={handleSubmit}
-    >
-      {formik => (
-        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <FormColumnLayout>
-            <FormField
-              id="host-name"
-              name="name"
-              type="text"
-              label={t`Name`}
-              validate={required(null)}
-              isRequired
+}) => (
+  <Formik
+    initialValues={{
+      name: host.name,
+      description: host.description,
+      inventory: host.summary_fields?.inventory || null,
+      variables: host.variables,
+    }}
+    onSubmit={handleSubmit}
+  >
+    {(formik) => (
+      <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+        <FormColumnLayout>
+          <FormField
+            id="host-name"
+            name="name"
+            type="text"
+            label={t`Name`}
+            validate={required(null)}
+            isRequired
+          />
+          <FormField
+            id="host-description"
+            name="description"
+            type="text"
+            label={t`Description`}
+          />
+          {isInventoryVisible && (
+            <InventoryLookupField isDisabled={disableInventoryLookup} />
+          )}
+          <FormFullWidthLayout>
+            <VariablesField
+              id="host-variables"
+              name="variables"
+              label={t`Variables`}
             />
-            <FormField
-              id="host-description"
-              name="description"
-              type="text"
-              label={t`Description`}
-            />
-            {isInventoryVisible && (
-              <InventoryLookupField isDisabled={disableInventoryLookup} />
-            )}
-            <FormFullWidthLayout>
-              <VariablesField
-                id="host-variables"
-                name="variables"
-                label={t`Variables`}
-              />
-            </FormFullWidthLayout>
-            {submitError && <FormSubmitError error={submitError} />}
-            <FormActionGroup
-              onCancel={handleCancel}
-              onSubmit={formik.handleSubmit}
-            />
-          </FormColumnLayout>
-        </Form>
-      )}
-    </Formik>
-  );
-};
+          </FormFullWidthLayout>
+          {submitError && <FormSubmitError error={submitError} />}
+          <FormActionGroup
+            onCancel={handleCancel}
+            onSubmit={formik.handleSubmit}
+          />
+        </FormColumnLayout>
+      </Form>
+    )}
+  </Formik>
+);
 
 HostForm.propTypes = {
   handleCancel: func.isRequired,

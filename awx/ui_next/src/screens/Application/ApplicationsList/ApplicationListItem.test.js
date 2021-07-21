@@ -47,18 +47,8 @@ describe('<ApplicationListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Foo');
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe('Organization');
+    expect(wrapper.find('Td').at(1).text()).toBe('Foo');
+    expect(wrapper.find('Td').at(2).text()).toBe('Organization');
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
   });
 });

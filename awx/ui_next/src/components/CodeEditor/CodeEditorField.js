@@ -43,7 +43,7 @@ function CodeEditorField({
         id={id}
         {...rest}
         {...field}
-        onChange={value => {
+        onChange={(value) => {
           helpers.setValue(value);
         }}
         mode={mode}

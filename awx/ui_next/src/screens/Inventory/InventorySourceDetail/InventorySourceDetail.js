@@ -192,7 +192,7 @@ function InventorySourceDetail({ inventorySource }) {
           <Detail
             fullWidth
             label={t`Credential`}
-            value={credentials.map(cred => (
+            value={credentials.map((cred) => (
               <CredentialChip key={cred?.id} credential={cred} isReadOnly />
             ))}
           />

@@ -101,7 +101,7 @@ function Inventory({ setBreadcrumb }) {
   let showCardHeader = true;
 
   if (
-    ['edit', 'add', 'groups/', 'hosts/', 'sources/'].some(name =>
+    ['edit', 'add', 'groups/', 'hosts/', 'sources/'].some((name) =>
       location.pathname.includes(name)
     )
   ) {

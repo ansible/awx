@@ -38,7 +38,7 @@ describe('<SmartInventoryDetail />', () => {
           <SmartInventoryDetail inventory={mockSmartInventory} />
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -100,7 +100,7 @@ describe('<SmartInventoryDetail />', () => {
       await waitForElement(
         wrapper,
         'Modal[title="Error!"]',
-        el => el.length === 1
+        (el) => el.length === 1
       );
       await act(async () => {
         wrapper.find('Modal[title="Error!"]').invoke('onClose')();
@@ -108,7 +108,7 @@ describe('<SmartInventoryDetail />', () => {
       await waitForElement(
         wrapper,
         'Modal[title="Error!"]',
-        el => el.length === 0
+        (el) => el.length === 0
       );
     });
   });
@@ -127,7 +127,7 @@ describe('<SmartInventoryDetail />', () => {
           <SmartInventoryDetail inventory={readOnlySmartInv} />
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
       expect(wrapper.find('Button[aria-label="edit"]').length).toBe(0);
     });
 
@@ -142,7 +142,7 @@ describe('<SmartInventoryDetail />', () => {
         );
       });
       expect(UnifiedJobsAPI.read).toHaveBeenCalledTimes(1);
-      await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+      await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
       expect(wrapper.find('ContentError Title').text()).toEqual(
         'Something went wrong...'
       );

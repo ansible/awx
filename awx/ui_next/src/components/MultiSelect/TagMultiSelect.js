@@ -12,29 +12,28 @@ function TagMultiSelect({ onChange, value }) {
   const onSelect = (event, item) => {
     let newValue;
     if (selections.includes(item)) {
-      newValue = selections.filter(i => i !== item);
+      newValue = selections.filter((i) => i !== item);
     } else {
       newValue = selections.concat(item);
     }
     onChange(arrayToString(newValue));
   };
 
-  const toggleExpanded = toggleValue => {
+  const toggleExpanded = (toggleValue) => {
     setIsExpanded(toggleValue);
   };
 
-  const renderOptions = opts => {
-    return opts.map(option => (
+  const renderOptions = (opts) =>
+    opts.map((option) => (
       <SelectOption key={option} value={option}>
         {option}
       </SelectOption>
     ));
-  };
 
-  const onFilter = event => {
+  const onFilter = (event) => {
     if (event) {
       const str = event.target.value.toLowerCase();
-      const matches = options.filter(o => o.toLowerCase().includes(str));
+      const matches = options.filter((o) => o.toLowerCase().includes(str));
       return renderOptions(matches);
     }
     return null;
@@ -48,7 +47,7 @@ function TagMultiSelect({ onChange, value }) {
       onClear={() => onChange('')}
       onFilter={onFilter}
       isCreatable
-      onCreateOption={name => {
+      onCreateOption={(name) => {
         name = name.trim();
         if (!options.includes(name)) {
           setOptions(options.concat(name));

@@ -30,7 +30,7 @@ describe('<TeamDetail />', () => {
 
   beforeEach(async () => {
     wrapper = mountWithContexts(<TeamDetail team={mockTeam} />);
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   test('initially renders successfully', async () => {
@@ -89,7 +89,7 @@ describe('<TeamDetail />', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Error!"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () => {
       wrapper.find('Modal[title="Error!"]').invoke('onClose')();
@@ -97,7 +97,7 @@ describe('<TeamDetail />', () => {
     await waitForElement(
       wrapper,
       'Modal[title="Error!"]',
-      el => el.length === 0
+      (el) => el.length === 0
     );
   });
 });

@@ -23,9 +23,8 @@ function JobCancelButton({
     }, [job.id, job.type]),
     {}
   );
-  const { error, dismissError: dismissCancelError } = useDismissableError(
-    cancelError
-  );
+  const { error, dismissError: dismissCancelError } =
+    useDismissableError(cancelError);
 
   const isAlreadyCancelled = cancelError?.response?.status === 405;
 

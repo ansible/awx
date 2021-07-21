@@ -113,7 +113,7 @@ describe('<InventoryHostList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryHostList />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -131,11 +131,7 @@ describe('<InventoryHostList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
 
     await act(async () => {
@@ -148,11 +144,7 @@ describe('<InventoryHostList />', () => {
 
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(true);
 
     await act(async () => {
@@ -165,31 +157,27 @@ describe('<InventoryHostList />', () => {
 
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
     expect.assertions(9);
-    wrapper.find('.pf-c-table__check').forEach(el => {
+    wrapper.find('.pf-c-table__check').forEach((el) => {
       expect(el.find('input').props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check').forEach(el => {
+    wrapper.find('.pf-c-table__check').forEach((el) => {
       expect(el.find('input').props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check').forEach(el => {
+    wrapper.find('.pf-c-table__check').forEach((el) => {
       expect(el.find('input').props().checked).toBe(false);
     });
   });
@@ -220,12 +208,12 @@ describe('<InventoryHostList />', () => {
     await waitForElement(
       wrapper,
       'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
+      (el) => el.props().isOpen === true && el.props().title === 'Error!'
     );
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });
-    await waitForElement(wrapper, 'Modal', el => el.length === 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length === 0);
   });
 
   test('delete button is disabled if user does not have delete capabilities on a selected host', async () => {
@@ -285,12 +273,12 @@ describe('<InventoryHostList />', () => {
     await waitForElement(
       wrapper,
       'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
+      (el) => el.props().isOpen === true && el.props().title === 'Error!'
     );
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });
-    await waitForElement(wrapper, 'Modal', el => el.length === 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length === 0);
   });
 
   test('should show content error if hosts are not successfully fetched from api', async () => {
@@ -308,7 +296,7 @@ describe('<InventoryHostList />', () => {
     await act(async () => {
       wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should show Add button for users with ability to POST', async () => {
@@ -328,7 +316,7 @@ describe('<InventoryHostList />', () => {
         <InventoryHostList inventory={mockInventory} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 
@@ -341,7 +329,7 @@ describe('<InventoryHostList />', () => {
         <InventoryHostList inventory={mockInventory} />
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should not render Run Commands button', async () => {

@@ -48,18 +48,12 @@ describe('<WorkflowApprovalList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('WorkflowApprovalListItem')
-        .first()
-        .invoke('onSelect')();
+      wrapper.find('WorkflowApprovalListItem').first().invoke('onSelect')();
     });
     wrapper.update();
 
     expect(
-      wrapper
-        .find('WorkflowApprovalListItem')
-        .first()
-        .prop('isSelected')
+      wrapper.find('WorkflowApprovalListItem').first().prop('isSelected')
     ).toEqual(true);
   });
 
@@ -76,15 +70,12 @@ describe('<WorkflowApprovalList />', () => {
 
     const items = wrapper.find('WorkflowApprovalListItem');
     expect(items).toHaveLength(3);
-    items.forEach(item => {
+    items.forEach((item) => {
       expect(item.prop('isSelected')).toEqual(true);
     });
 
     expect(
-      wrapper
-        .find('WorkflowApprovalListItem')
-        .first()
-        .prop('isSelected')
+      wrapper.find('WorkflowApprovalListItem').first().prop('isSelected')
     ).toEqual(true);
   });
 
@@ -95,10 +86,7 @@ describe('<WorkflowApprovalList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('WorkflowApprovalListItem')
-        .at(2)
-        .invoke('onSelect')();
+      wrapper.find('WorkflowApprovalListItem').at(2).invoke('onSelect')();
     });
     wrapper.update();
 
@@ -114,10 +102,7 @@ describe('<WorkflowApprovalList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('WorkflowApprovalListItem')
-        .at(1)
-        .invoke('onSelect')();
+      wrapper.find('WorkflowApprovalListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
@@ -145,10 +130,7 @@ describe('<WorkflowApprovalList />', () => {
     wrapper.update();
     expect(WorkflowApprovalsAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
-      wrapper
-        .find('WorkflowApprovalListItem')
-        .at(1)
-        .invoke('onSelect')();
+      wrapper.find('WorkflowApprovalListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
 

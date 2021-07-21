@@ -55,7 +55,7 @@ function Job({ setBreadcrumb }) {
       }
       if (
         jobDetailData?.summary_fields?.credentials?.find(
-          cred => cred.kind === 'vault'
+          (cred) => cred.kind === 'vault'
         )
       ) {
         const {
@@ -70,10 +70,10 @@ function Job({ setBreadcrumb }) {
         jobDetail: jobDetailData,
         eventRelatedSearchableKeys: (
           eventOptions?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         eventSearchableKeys: Object.keys(
           eventOptions?.actions?.GET || {}
-        ).filter(key => eventOptions?.actions?.GET[key].filterable),
+        ).filter((key) => eventOptions?.actions?.GET[key].filterable),
       };
     }, [id, type, setBreadcrumb]),
     {

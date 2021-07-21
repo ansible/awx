@@ -433,12 +433,7 @@ describe('<ProjectsListItem />', () => {
       </table>
     );
 
-    expect(
-      wrapper
-        .find('Tr')
-        .last()
-        .prop('isExpanded')
-    ).toBe(true);
+    expect(wrapper.find('Tr').last().prop('isExpanded')).toBe(true);
 
     function assertDetail(label, value) {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);

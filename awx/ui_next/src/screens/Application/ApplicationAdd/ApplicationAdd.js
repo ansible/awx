@@ -29,12 +29,12 @@ function ApplicationAdd({ onSuccessfulAdd }) {
         },
       } = await ApplicationsAPI.readOptions();
 
-      const authorization = authChoices.map(choice => ({
+      const authorization = authChoices.map((choice) => ({
         value: choice[0],
         label: choice[1],
         key: choice[0],
       }));
-      const clientType = clientChoices.map(choice => ({
+      const clientType = clientChoices.map((choice) => ({
         value: choice[0],
         label: choice[1],
         key: choice[0],

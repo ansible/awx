@@ -10,7 +10,7 @@ function InventoryHostAdd({ inventory }) {
   const hostsUrl = `/inventories/inventory/${inventory.id}/hosts`;
   const history = useHistory();
 
-  const handleSubmit = async formData => {
+  const handleSubmit = async (formData) => {
     try {
       const values = {
         ...formData,

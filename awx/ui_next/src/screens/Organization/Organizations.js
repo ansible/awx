@@ -1,4 +1,4 @@
-import React, { useCallback, useState, Fragment } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Route, withRouter, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -17,7 +17,7 @@ function Organizations() {
     '/organizations/add': t`Create New Organization`,
   });
 
-  const setBreadcrumb = useCallback(organization => {
+  const setBreadcrumb = useCallback((organization) => {
     if (!organization) {
       return;
     }
@@ -37,7 +37,7 @@ function Organizations() {
   }, []);
 
   return (
-    <Fragment>
+    <>
       <ScreenHeader
         streamType="organization"
         breadcrumbConfig={breadcrumbConfig}
@@ -57,7 +57,7 @@ function Organizations() {
           <OrganizationsList />
         </Route>
       </Switch>
-    </Fragment>
+    </>
   );
 }
 

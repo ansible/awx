@@ -66,7 +66,7 @@ describe('<ToolbarDeleteButton />', () => {
     await act(async () => {
       wrapper.find('button').prop('onClick')();
     });
-    await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length > 0);
     expect(CredentialsAPI.read).toBeCalled();
     expect(wrapper.find('Modal')).toHaveLength(1);
     expect(
@@ -108,7 +108,7 @@ describe('<ToolbarDeleteButton />', () => {
     await act(async () => {
       wrapper.find('button').prop('onClick')();
     });
-    await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length > 0);
     expect(CredentialsAPI.read).not.toBeCalled();
     expect(wrapper.find('Modal')).toHaveLength(1);
     expect(
@@ -146,7 +146,7 @@ describe('<ToolbarDeleteButton />', () => {
     await act(async () => {
       wrapper.find('button').prop('onClick')();
     });
-    await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length > 0);
     expect(CredentialsAPI.read).toBeCalled();
     expect(wrapper.find('Modal')).toHaveLength(1);
 
@@ -189,7 +189,7 @@ describe('<ToolbarDeleteButton />', () => {
 
     expect(wrapper.find('Modal')).toHaveLength(0);
     await act(async () => wrapper.find('button').simulate('click'));
-    await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length > 0);
     expect(CredentialsAPI.read).toBeCalled();
 
     wrapper.update();

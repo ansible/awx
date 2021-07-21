@@ -41,9 +41,8 @@ function SubscriptionStep() {
   );
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const [manifest, manifestMeta, manifestHelpers] = useField('manifest_file');
-  const [manifestFilename, , manifestFilenameHelpers] = useField(
-    'manifest_filename'
-  );
+  const [manifestFilename, , manifestFilenameHelpers] =
+    useField('manifest_filename');
   const [subscription, , subscriptionHelpers] = useField('subscription');
   const [username, usernameMeta, usernameHelpers] = useField('username');
   const [password, passwordMeta, passwordHelpers] = useField('password');
@@ -232,7 +231,7 @@ function SubscriptionStep() {
                 }}
                 selectedSubscripion={subscription?.value}
                 onClose={closeModal}
-                onConfirm={value => subscriptionHelpers.setValue(value)}
+                onConfirm={(value) => subscriptionHelpers.setValue(value)}
               />
             )}
           </Flex>

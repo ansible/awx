@@ -36,7 +36,7 @@ function JobTemplateEdit({ template, reloadTemplate }) {
     }
   }, [fetchProjectError]);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const {
       labels,
       instanceGroups,
@@ -83,12 +83,12 @@ function JobTemplateEdit({ template, reloadTemplate }) {
       labels
     );
 
-    const disassociationPromises = removed.map(label =>
+    const disassociationPromises = removed.map((label) =>
       JobTemplatesAPI.disassociateLabel(template.id, label)
     );
-    const associationPromises = added.map(label => {
-      return JobTemplatesAPI.associateLabel(template.id, label, orgId);
-    });
+    const associationPromises = added.map((label) =>
+      JobTemplatesAPI.associateLabel(template.id, label, orgId)
+    );
 
     const results = await Promise.all([
       ...disassociationPromises,
@@ -97,16 +97,16 @@ function JobTemplateEdit({ template, reloadTemplate }) {
     return results;
   };
 
-  const submitCredentials = async newCredentials => {
+  const submitCredentials = async (newCredentials) => {
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.credentials,
       newCredentials
     );
-    const disassociateCredentials = removed.map(cred =>
+    const disassociateCredentials = removed.map((cred) =>
       JobTemplatesAPI.disassociateCredentials(template.id, cred.id)
     );
     const disassociatePromise = await Promise.all(disassociateCredentials);
-    const associateCredentials = added.map(cred =>
+    const associateCredentials = added.map((cred) =>
       JobTemplatesAPI.associateCredentials(template.id, cred.id)
     );
     const associatePromise = await Promise.all(associateCredentials);

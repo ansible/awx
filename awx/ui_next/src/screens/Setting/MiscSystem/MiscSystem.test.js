@@ -32,7 +32,7 @@ describe('<MiscSystem />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('MiscSystemDetail').length).toBe(1);
   });
 
@@ -45,7 +45,7 @@ describe('<MiscSystem />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('MiscSystemEdit').length).toBe(1);
   });
 
@@ -79,7 +79,7 @@ describe('<MiscSystem />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('MiscSystemDetail').length).toBe(1);
     expect(wrapper.find('MiscSystemEdit').length).toBe(0);
   });

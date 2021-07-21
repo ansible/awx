@@ -49,7 +49,7 @@ function NodeModalForm({
 
   const clearQueryParams = () => {
     const parts = history.location.search.replace(/^\?/, '').split('&');
-    const otherParts = parts.filter(param =>
+    const otherParts = parts.filter((param) =>
       /^!(job_templates\.|projects\.|inventory_sources\.|workflow_job_templates\.)/.test(
         param
       )
@@ -111,7 +111,7 @@ function NodeModalForm({
     contentError || credentialError
   );
 
-  const nextButtonText = activeStep =>
+  const nextButtonText = (activeStep) =>
     activeStep.id === promptSteps[promptSteps?.length - 1]?.id ||
     activeStep.name === 'Preview'
       ? t`Save`
@@ -194,7 +194,7 @@ function NodeModalForm({
       onSave={() => {
         handleSaveNode();
       }}
-      onBack={async nextStep => {
+      onBack={async (nextStep) => {
         validateStep(nextStep.id);
       }}
       onGoToStep={async (nextStep, prevStep) => {
@@ -360,7 +360,7 @@ const NodeModal = ({ onSave, askLinkType, title }) => {
       }}
       onSave={() => onSaveForm}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <NodeModalInner
             onSave={onSaveForm}

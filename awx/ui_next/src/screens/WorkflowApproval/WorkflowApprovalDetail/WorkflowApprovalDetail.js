@@ -28,10 +28,8 @@ function WorkflowApprovalDetail({ workflowApproval }) {
     }, [workflowApprovalId, history])
   );
 
-  const {
-    error: deleteError,
-    dismissError: dismissDeleteError,
-  } = useDismissableError(deleteApprovalError);
+  const { error: deleteError, dismissError: dismissDeleteError } =
+    useDismissableError(deleteApprovalError);
 
   const {
     error: approveApprovalError,
@@ -45,10 +43,8 @@ function WorkflowApprovalDetail({ workflowApproval }) {
     {}
   );
 
-  const {
-    error: approveError,
-    dismissError: dismissApproveError,
-  } = useDismissableError(approveApprovalError);
+  const { error: approveError, dismissError: dismissApproveError } =
+    useDismissableError(approveApprovalError);
 
   const {
     error: denyApprovalError,
@@ -62,10 +58,8 @@ function WorkflowApprovalDetail({ workflowApproval }) {
     {}
   );
 
-  const {
-    error: denyError,
-    dismissError: dismissDenyError,
-  } = useDismissableError(denyApprovalError);
+  const { error: denyError, dismissError: dismissDenyError } =
+    useDismissableError(denyApprovalError);
 
   const sourceWorkflowJob =
     workflowApproval?.summary_fields?.source_workflow_job;

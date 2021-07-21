@@ -8,7 +8,7 @@ const ActionsGrid = styled.div`
   grid-gap: 16px;
   align-items: center;
 
-  ${props => {
+  ${(props) => {
     const columns = props.gridColumns || '40px '.repeat(props.numActions || 1);
     return css`
       grid-template-columns: ${columns};

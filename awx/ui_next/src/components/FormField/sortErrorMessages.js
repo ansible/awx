@@ -28,7 +28,7 @@ export default function sortErrorMessages(error, formValues = {}) {
 function parseFieldErrors(obj, formValues) {
   let fieldErrors = {};
   let formErrors = [];
-  Object.keys(obj).forEach(key => {
+  Object.keys(obj).forEach((key) => {
     const value = obj[key];
     if (typeof value === 'string') {
       if (typeof formValues[key] === 'undefined') {

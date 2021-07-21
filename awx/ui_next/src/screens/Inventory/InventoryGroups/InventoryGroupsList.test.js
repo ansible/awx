@@ -111,7 +111,7 @@ describe('<InventoryGroupsList />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -129,11 +129,7 @@ describe('<InventoryGroupsList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
 
     await act(async () => {
@@ -145,11 +141,7 @@ describe('<InventoryGroupsList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(true);
 
     await act(async () => {
@@ -161,31 +153,27 @@ describe('<InventoryGroupsList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
     expect.assertions(9);
-    wrapper.find('.pf-c-table__check').forEach(el => {
+    wrapper.find('.pf-c-table__check').forEach((el) => {
       expect(el.find('input').props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check').forEach(el => {
+    wrapper.find('.pf-c-table__check').forEach((el) => {
       expect(el.find('input').props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check').forEach(el => {
+    wrapper.find('.pf-c-table__check').forEach((el) => {
       expect(el.find('input').props().checked).toBe(false);
     });
   });
@@ -269,7 +257,7 @@ describe('<InventoryGroupsList/> error handling', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupsList />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length > 0);
   });
 
   test('should show content error if groups are not successfully fetched from api', async () => {
@@ -279,14 +267,14 @@ describe('<InventoryGroupsList/> error handling', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupsList />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length > 0);
   });
 
   test('should show error modal when group is not successfully deleted from api', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupsList />);
     });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     await act(async () => {
       wrapper
@@ -304,7 +292,7 @@ describe('<InventoryGroupsList/> error handling', () => {
     await waitForElement(
       wrapper,
       'AlertModal__Header',
-      el => el.text() === 'Delete Group?'
+      (el) => el.text() === 'Delete Group?'
     );
     await act(async () => {
       wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
@@ -318,7 +306,7 @@ describe('<InventoryGroupsList/> error handling', () => {
     await waitForElement(
       wrapper,
       'AlertModal[aria-label="deletion error"] Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
+      (el) => el.props().isOpen === true && el.props().title === 'Error!'
     );
 
     await act(async () => {

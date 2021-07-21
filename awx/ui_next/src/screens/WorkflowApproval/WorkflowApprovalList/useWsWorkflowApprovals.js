@@ -20,27 +20,24 @@ export default function useWsWorkflowApprovals(
     setWorkflowApprovals(initialWorkflowApprovals);
   }, [initialWorkflowApprovals]);
 
-  useEffect(
-    function reloadWorkflowApprovalsList() {
-      (async () => {
-        if (!throttledListRefresh) {
-          return;
-        }
-        setReloadEntireList(false);
-        fetchWorkflowApprovals();
-      })();
-    },
-    [throttledListRefresh, fetchWorkflowApprovals]
-  );
+  useEffect(() => {
+    (async () => {
+      if (!throttledListRefresh) {
+        return;
+      }
+      setReloadEntireList(false);
+      fetchWorkflowApprovals();
+    })();
+  }, [throttledListRefresh, fetchWorkflowApprovals]);
 
   useEffect(
-    function processWsMessage() {
+    () => {
       if (!(lastMessage?.type === 'workflow_approval')) {
         return;
       }
 
       const index = workflowApprovals.findIndex(
-        p => p.id === lastMessage.unified_job_id
+        (p) => p.id === lastMessage.unified_job_id
       );
 
       if (

@@ -47,7 +47,7 @@ const AceEditor = styled(ReactAce)`
     display: none;
   }
 
-  ${props =>
+  ${(props) =>
     props.hasErrors &&
     `
     && {
@@ -59,7 +59,7 @@ const AceEditor = styled(ReactAce)`
       border-bottom-width: var(--pf-c-form-control--invalid--BorderBottomWidth);
     }`}
 
-  ${props =>
+  ${(props) =>
     props.setOptions.readOnly &&
     `
     && .ace_cursor {
@@ -92,21 +92,18 @@ function CodeEditor({
   const wrapper = useRef(null);
   const editor = useRef(null);
 
-  useEffect(
-    function removeTextareaTabIndex() {
-      const editorInput = editor.current.refEditor?.querySelector('textarea');
-      if (!editorInput) {
-        return;
-      }
-      if (!readOnly) {
-        editorInput.tabIndex = -1;
-      }
-      editorInput.id = id;
-    },
-    [readOnly, id]
-  );
+  useEffect(() => {
+    const editorInput = editor.current.refEditor?.querySelector('textarea');
+    if (!editorInput) {
+      return;
+    }
+    if (!readOnly) {
+      editorInput.tabIndex = -1;
+    }
+    editorInput.id = id;
+  }, [readOnly, id]);
 
-  const listen = useCallback(event => {
+  const listen = useCallback((event) => {
     if (wrapper.current === document.activeElement && event.key === 'Enter') {
       const editorInput = editor.current.refEditor?.querySelector('textarea');
       if (!editorInput) {
@@ -118,7 +115,7 @@ function CodeEditor({
     }
   }, []);
 
-  useEffect(function addKeyEventListeners() {
+  useEffect(() => {
     const wrapperEl = wrapper.current;
     wrapperEl.addEventListener('keydown', listen);
 

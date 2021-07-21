@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -103,7 +103,7 @@ function CredentialDetail({ credential }) {
   const renderDetail = ({ id, label, type, ask_at_runtime }) => {
     if (inputSources[id]) {
       return (
-        <Fragment key={id}>
+        <React.Fragment key={id}>
           <Detail
             dataCy={`credential-${id}-detail`}
             id={`credential-${id}-detail`}
@@ -130,7 +130,7 @@ function CredentialDetail({ credential }) {
               hasErrors={false}
             />
           </PluginInputMetadata>
-        </Fragment>
+        </React.Fragment>
       );
     }
 
@@ -178,9 +178,8 @@ function CredentialDetail({ credential }) {
     fetchDetails();
   }, [fetchDetails]);
 
-  const deleteDetailsRequests = relatedResourceDeleteRequests.credential(
-    credential
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.credential(credential);
 
   const enabledBooleanFields = fields.filter(
     ({ id, type }) => type === 'boolean' && inputs[id]
@@ -236,7 +235,7 @@ function CredentialDetail({ credential }) {
           }
         />
 
-        {fields.map(field => renderDetail(field))}
+        {fields.map((field) => renderDetail(field))}
 
         <UserDateDetail
           dataCy="credential-created-detail"

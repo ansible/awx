@@ -18,7 +18,7 @@ function CustomMessagesSubForm({ defaultMessages, type }) {
   const config = useConfig();
   const mountedRef = useRef(null);
   useEffect(
-    function resetToDefaultMessages() {
+    () => {
       if (!mountedRef.current) {
         mountedRef.current = true;
         return;

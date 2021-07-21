@@ -15,7 +15,7 @@ function RolesStep({
   selectedRoleRows,
 }) {
   return (
-    <Fragment>
+    <>
       <div>
         {t`Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources.`}
       </div>
@@ -37,12 +37,12 @@ function RolesStep({
           marginTop: '20px',
         }}
       >
-        {Object.keys(roles).map(role => (
+        {Object.keys(roles).map((role) => (
           <CheckboxCard
             description={roles[role].description}
             itemId={roles[role].id}
             isSelected={selectedRoleRows.some(
-              item => item.id === roles[role].id
+              (item) => item.id === roles[role].id
             )}
             key={roles[role].id}
             name={roles[role].name}
@@ -50,7 +50,7 @@ function RolesStep({
           />
         ))}
       </div>
-    </Fragment>
+    </>
   );
 }
 

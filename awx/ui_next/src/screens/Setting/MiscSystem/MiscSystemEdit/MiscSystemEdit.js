@@ -28,7 +28,12 @@ function MiscSystemEdit() {
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
-  const { isLoading, error, request: fetchSystem, result: system } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchSystem,
+    result: system,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('system');
       const systemData = pluck(
@@ -52,7 +57,7 @@ function MiscSystemEdit() {
       );
 
       const mergedData = {};
-      Object.keys(systemData).forEach(key => {
+      Object.keys(systemData).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -70,7 +75,7 @@ function MiscSystemEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/miscellaneous_system/details');
       },
@@ -86,7 +91,7 @@ function MiscSystemEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       ...form,
       PROXY_IP_ALLOWED_LIST: formatJson(form.PROXY_IP_ALLOWED_LIST),
@@ -108,7 +113,7 @@ function MiscSystemEdit() {
     history.push('/settings/miscellaneous_system/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list') {
         acc[key] = JSON.stringify(fields[key].value, null, 2);
@@ -158,121 +163,119 @@ function MiscSystemEdit() {
           }}
           onSubmit={handleSubmit}
         >
-          {formik => {
-            return (
-              <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-                <FormColumnLayout>
-                  <BooleanField
-                    name="ACTIVITY_STREAM_ENABLED"
-                    config={system.ACTIVITY_STREAM_ENABLED}
-                  />
-                  <BooleanField
-                    name="ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC"
-                    config={system.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC}
-                  />
-                  <ExecutionEnvironmentLookup
-                    helperTextInvalid={
-                      formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
-                    }
-                    isValid={
-                      !formik.touched.DEFAULT_EXECUTION_ENVIRONMENT ||
-                      !formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
-                    }
-                    onBlur={() =>
-                      formik.setFieldTouched('DEFAULT_EXECUTION_ENVIRONMENT')
-                    }
-                    value={formik.values.DEFAULT_EXECUTION_ENVIRONMENT}
-                    onChange={value => {
-                      formik.setFieldValue(
-                        'DEFAULT_EXECUTION_ENVIRONMENT',
-                        value
-                      );
-                      formik.setFieldTouched(
-                        'DEFAULT_EXECUTION_ENVIRONMENT',
-                        true,
-                        false
-                      );
-                    }}
-                    popoverContent={t`The Execution Environment to be used when one has not been configured for a job template.`}
-                    isGlobalDefaultEnvironment
-                    fieldName="DEFAULT_EXECUTION_ENVIRONMENT"
-                  />
-                  <InputField
-                    name="TOWER_URL_BASE"
-                    config={system.TOWER_URL_BASE}
-                    isRequired
-                    type="url"
-                  />
-                  <BooleanField
-                    name="ORG_ADMINS_CAN_SEE_ALL_USERS"
-                    config={system.ORG_ADMINS_CAN_SEE_ALL_USERS}
-                  />
-                  <BooleanField
-                    name="MANAGE_ORGANIZATION_AUTH"
-                    config={system.MANAGE_ORGANIZATION_AUTH}
-                  />
-                  <BooleanField
-                    name="INSIGHTS_TRACKING_STATE"
-                    config={system.INSIGHTS_TRACKING_STATE}
-                  />
-                  <InputField
-                    name="REDHAT_USERNAME"
-                    config={system.REDHAT_USERNAME}
-                  />
-                  <EncryptedField
-                    name="REDHAT_PASSWORD"
-                    config={system.REDHAT_PASSWORD}
-                  />
-                  <InputField
-                    name="SUBSCRIPTIONS_USERNAME"
-                    config={system.SUBSCRIPTIONS_USERNAME}
-                  />
-                  <EncryptedField
-                    name="SUBSCRIPTIONS_PASSWORD"
-                    config={system.SUBSCRIPTIONS_PASSWORD}
-                  />
-                  <InputField
-                    name="AUTOMATION_ANALYTICS_URL"
-                    config={system.AUTOMATION_ANALYTICS_URL}
-                    type="url"
-                  />
-                  <InputField
-                    name="AUTOMATION_ANALYTICS_GATHER_INTERVAL"
-                    config={system.AUTOMATION_ANALYTICS_GATHER_INTERVAL}
-                    type="number"
-                    isRequired
-                  />
-                  <InputField
-                    name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
-                    config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}
-                  />
-                  <ObjectField
-                    name="REMOTE_HOST_HEADERS"
-                    config={system.REMOTE_HOST_HEADERS}
-                    isRequired
-                  />
-                  <ObjectField
-                    name="PROXY_IP_ALLOWED_LIST"
-                    config={system.PROXY_IP_ALLOWED_LIST}
-                    isRequired
-                  />
-                  {submitError && <FormSubmitError error={submitError} />}
-                  {revertError && <FormSubmitError error={revertError} />}
-                </FormColumnLayout>
-                <RevertFormActionGroup
-                  onCancel={handleCancel}
-                  onSubmit={formik.handleSubmit}
-                  onRevert={toggleModal}
+          {(formik) => (
+            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+              <FormColumnLayout>
+                <BooleanField
+                  name="ACTIVITY_STREAM_ENABLED"
+                  config={system.ACTIVITY_STREAM_ENABLED}
                 />
-                {isModalOpen && (
-                  <RevertAllAlert
-                    onClose={closeModal}
-                    onRevertAll={handleRevertAll}
-                  />
-                )}
-              </Form>
-            );
-          }}
+                <BooleanField
+                  name="ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC"
+                  config={system.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC}
+                />
+                <ExecutionEnvironmentLookup
+                  helperTextInvalid={
+                    formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
+                  }
+                  isValid={
+                    !formik.touched.DEFAULT_EXECUTION_ENVIRONMENT ||
+                    !formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
+                  }
+                  onBlur={() =>
+                    formik.setFieldTouched('DEFAULT_EXECUTION_ENVIRONMENT')
+                  }
+                  value={formik.values.DEFAULT_EXECUTION_ENVIRONMENT}
+                  onChange={(value) => {
+                    formik.setFieldValue(
+                      'DEFAULT_EXECUTION_ENVIRONMENT',
+                      value
+                    );
+                    formik.setFieldTouched(
+                      'DEFAULT_EXECUTION_ENVIRONMENT',
+                      true,
+                      false
+                    );
+                  }}
+                  popoverContent={t`The Execution Environment to be used when one has not been configured for a job template.`}
+                  isGlobalDefaultEnvironment
+                  fieldName="DEFAULT_EXECUTION_ENVIRONMENT"
+                />
+                <InputField
+                  name="TOWER_URL_BASE"
+                  config={system.TOWER_URL_BASE}
+                  isRequired
+                  type="url"
+                />
+                <BooleanField
+                  name="ORG_ADMINS_CAN_SEE_ALL_USERS"
+                  config={system.ORG_ADMINS_CAN_SEE_ALL_USERS}
+                />
+                <BooleanField
+                  name="MANAGE_ORGANIZATION_AUTH"
+                  config={system.MANAGE_ORGANIZATION_AUTH}
+                />
+                <BooleanField
+                  name="INSIGHTS_TRACKING_STATE"
+                  config={system.INSIGHTS_TRACKING_STATE}
+                />
+                <InputField
+                  name="REDHAT_USERNAME"
+                  config={system.REDHAT_USERNAME}
+                />
+                <EncryptedField
+                  name="REDHAT_PASSWORD"
+                  config={system.REDHAT_PASSWORD}
+                />
+                <InputField
+                  name="SUBSCRIPTIONS_USERNAME"
+                  config={system.SUBSCRIPTIONS_USERNAME}
+                />
+                <EncryptedField
+                  name="SUBSCRIPTIONS_PASSWORD"
+                  config={system.SUBSCRIPTIONS_PASSWORD}
+                />
+                <InputField
+                  name="AUTOMATION_ANALYTICS_URL"
+                  config={system.AUTOMATION_ANALYTICS_URL}
+                  type="url"
+                />
+                <InputField
+                  name="AUTOMATION_ANALYTICS_GATHER_INTERVAL"
+                  config={system.AUTOMATION_ANALYTICS_GATHER_INTERVAL}
+                  type="number"
+                  isRequired
+                />
+                <InputField
+                  name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
+                  config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}
+                />
+                <ObjectField
+                  name="REMOTE_HOST_HEADERS"
+                  config={system.REMOTE_HOST_HEADERS}
+                  isRequired
+                />
+                <ObjectField
+                  name="PROXY_IP_ALLOWED_LIST"
+                  config={system.PROXY_IP_ALLOWED_LIST}
+                  isRequired
+                />
+                {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
+              </FormColumnLayout>
+              <RevertFormActionGroup
+                onCancel={handleCancel}
+                onSubmit={formik.handleSubmit}
+                onRevert={toggleModal}
+              />
+              {isModalOpen && (
+                <RevertAllAlert
+                  onClose={closeModal}
+                  onRevertAll={handleRevertAll}
+                />
+              )}
+            </Form>
+          )}
         </Formik>
       )}
     </CardBody>

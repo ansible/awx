@@ -36,7 +36,7 @@ describe('useWsInventories hook', () => {
     */
     jest.mock('../../../hooks/useThrottle', () => ({
       __esModule: true,
-      default: jest.fn(val => val),
+      default: jest.fn((val) => val),
     }));
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};

@@ -64,9 +64,9 @@ function SubscriptionModal({
     fetchSubscriptions();
   }, [fetchSubscriptions]);
 
-  const handleSelect = item => {
-    if (selected.some(s => s.pool_id === item.pool_id)) {
-      setSelected(selected.filter(s => s.pool_id !== item.pool_id));
+  const handleSelect = (item) => {
+    if (selected.some((s) => s.pool_id === item.pool_id)) {
+      setSelected(selected.filter((s) => s.pool_id !== item.pool_id));
     } else {
       setSelected(selected.concat(item));
     }
@@ -150,14 +150,14 @@ function SubscriptionModal({
             </Tr>
           </Thead>
           <Tbody>
-            {subscriptions.map(subscription => (
+            {subscriptions.map((subscription) => (
               <Tr key={`row-${subscription.pool_id}`} id={subscription.pool_id}>
                 <Td
                   key={`row-${subscription.pool_id}`}
                   select={{
                     onSelect: () => handleSelect(subscription),
                     isSelected: selected.some(
-                      row => row.pool_id === subscription.pool_id
+                      (row) => row.pool_id === subscription.pool_id
                     ),
                     variant: 'radio',
                     rowIndex: `row-${subscription.pool_id}`,

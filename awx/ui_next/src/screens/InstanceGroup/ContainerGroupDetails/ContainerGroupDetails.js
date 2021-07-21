@@ -32,9 +32,8 @@ function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-  const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
-    instanceGroup
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.instanceGroup(instanceGroup);
   return (
     <CardBody>
       <DetailList>

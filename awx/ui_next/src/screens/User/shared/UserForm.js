@@ -43,14 +43,13 @@ function UserFormFields({ user }) {
     },
   ];
 
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
+  const [organizationField, organizationMeta, organizationHelpers] =
+    useField('organization');
 
   const [userTypeField, userTypeMeta] = useField('user_type');
 
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -184,7 +183,7 @@ function UserForm({ user, handleCancel, handleSubmit, submitError }) {
       }}
       onSubmit={handleValidateAndSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <UserFormFields user={user} />

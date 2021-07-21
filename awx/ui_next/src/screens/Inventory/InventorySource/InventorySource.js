@@ -59,15 +59,14 @@ function InventorySource({ inventory, setBreadcrumb, me }) {
   }, [inventory, source, setBreadcrumb]);
 
   const loadSchedules = useCallback(
-    params => {
-      return InventorySourcesAPI.readSchedules(source?.id, params);
-    },
+    (params) => InventorySourcesAPI.readSchedules(source?.id, params),
     [source]
   );
 
-  const loadScheduleOptions = useCallback(() => {
-    return InventorySourcesAPI.readScheduleOptions(source?.id);
-  }, [source]);
+  const loadScheduleOptions = useCallback(
+    () => InventorySourcesAPI.readScheduleOptions(source?.id),
+    [source]
+  );
 
   const tabsArray = [
     {
@@ -109,7 +108,7 @@ function InventorySource({ inventory, setBreadcrumb, me }) {
 
   let showCardHeader = true;
 
-  if (['edit', 'schedules/'].some(name => location.pathname.includes(name))) {
+  if (['edit', 'schedules/'].some((name) => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 
@@ -154,7 +153,7 @@ function InventorySource({ inventory, setBreadcrumb, me }) {
           >
             <Schedules
               apiModel={InventorySourcesAPI}
-              setBreadcrumb={schedule =>
+              setBreadcrumb={(schedule) =>
                 setBreadcrumb(inventory, source, schedule)
               }
               resource={source}

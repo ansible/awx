@@ -59,7 +59,7 @@ function OptionsList({
         <SelectedList
           label={t`Selected`}
           selected={value}
-          onRemove={item => deselectItem(item)}
+          onRemove={(item) => deselectItem(item)}
           isReadOnly={readOnly}
           renderItemChip={renderItemChip}
           displayKey={displayKey}
@@ -95,13 +95,13 @@ function OptionsList({
             itemId={item.id}
             name={multiple ? item[displayKey] : name}
             label={item[displayKey]}
-            isSelected={value.some(i => i.id === item.id)}
+            isSelected={value.some((i) => i.id === item.id)}
             onSelect={() => selectItem(item)}
             onDeselect={() => deselectItem(item)}
             isRadio={!multiple}
           />
         )}
-        renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+        renderToolbar={(props) => <DataListToolbar {...props} fillWidth />}
         showPageSizeOptions={false}
       />
     </ModalList>

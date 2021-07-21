@@ -143,7 +143,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
       page_size: 5,
     });
 
-    await waitForElement(wrapper, 'SelectResourceStep', el => el.length > 0);
+    await waitForElement(wrapper, 'SelectResourceStep', (el) => el.length > 0);
     expect(JobTemplatesAPI.read).toHaveBeenCalled();
     await act(async () =>
       wrapper
@@ -164,10 +164,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
     expect(wrapper.find('RolesStep').length).toBe(1);
 
     await act(async () =>
-      wrapper
-        .find('CheckboxCard')
-        .first()
-        .prop('onSelect')()
+      wrapper.find('CheckboxCard').first().prop('onSelect')()
     );
 
     await act(async () =>
@@ -224,7 +221,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
-    await waitForElement(wrapper, 'SelectResourceStep', el => el.length > 0);
+    await waitForElement(wrapper, 'SelectResourceStep', (el) => el.length > 0);
     expect(JobTemplatesAPI.read).toHaveBeenCalled();
     await act(async () =>
       wrapper
@@ -245,10 +242,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
     expect(wrapper.find('RolesStep').length).toBe(1);
 
     await act(async () =>
-      wrapper
-        .find('CheckboxCard')
-        .first()
-        .prop('onSelect')()
+      wrapper.find('CheckboxCard').first().prop('onSelect')()
     );
 
     await act(async () =>

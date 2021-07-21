@@ -81,7 +81,7 @@ function CredentialPluginInput(props) {
             typeof inputField.value === 'object' ? inputField.value : {}
           }
           onClose={() => handlePluginWizardClose()}
-          onSubmit={val => {
+          onSubmit={(val) => {
             val.touched = true;
             helpers.setValue(val);
             setShowPluginWizard(false);

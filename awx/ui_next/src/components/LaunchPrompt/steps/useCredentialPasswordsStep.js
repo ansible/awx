@@ -6,9 +6,7 @@ import StepName from './StepName';
 
 const STEP_ID = 'credentialPasswords';
 
-const isValueMissing = val => {
-  return !val || val === '';
-};
+const isValueMissing = (val) => !val || val === '';
 
 export default function useCredentialPasswordsStep(
   launchConfig,
@@ -38,8 +36,8 @@ export default function useCredentialPasswordsStep(
     isReady: true,
     contentError: null,
     hasError,
-    setTouched: setFieldTouched => {
-      Object.keys(values.credential_passwords).forEach(credentialValueKey =>
+    setTouched: (setFieldTouched) => {
+      Object.keys(values.credential_passwords).forEach((credentialValueKey) =>
         setFieldTouched(
           `credential_passwords['${credentialValueKey}']`,
           true,
@@ -48,7 +46,7 @@ export default function useCredentialPasswordsStep(
       );
     },
     validate: () => {
-      const setPasswordFieldError = fieldName => {
+      const setPasswordFieldError = (fieldName) => {
         setFieldError(fieldName, t`This field may not be blank`);
       };
 
@@ -56,20 +54,21 @@ export default function useCredentialPasswordsStep(
         !launchConfig.ask_credential_on_launch &&
         launchConfig.passwords_needed_to_start
       ) {
-        launchConfig.passwords_needed_to_start.forEach(password => {
+        launchConfig.passwords_needed_to_start.forEach((password) => {
           if (isValueMissing(values.credential_passwords[password])) {
             setPasswordFieldError(`credential_passwords['${password}']`);
           }
         });
       } else if (values.credentials) {
-        values.credentials.forEach(credential => {
+        values.credentials.forEach((credential) => {
           if (!credential.inputs) {
-            const launchConfigCredential = launchConfig.defaults.credentials.find(
-              defaultCred => defaultCred.id === credential.id
-            );
+            const launchConfigCredential =
+              launchConfig.defaults.credentials.find(
+                (defaultCred) => defaultCred.id === credential.id
+              );
 
             if (launchConfigCredential?.passwords_needed.length > 0) {
-              launchConfigCredential.passwords_needed.forEach(password => {
+              launchConfigCredential.passwords_needed.forEach((password) => {
                 if (isValueMissing(values.credential_passwords[password])) {
                   setPasswordFieldError(`credential_passwords['${password}']`);
                 }
@@ -137,20 +136,20 @@ function getInitialValues(launchConfig, selectedCredentials = []) {
     !launchConfig.ask_credential_on_launch &&
     launchConfig.passwords_needed_to_start
   ) {
-    launchConfig.passwords_needed_to_start.forEach(password => {
+    launchConfig.passwords_needed_to_start.forEach((password) => {
       initialValues.credential_passwords[password] = '';
     });
     return initialValues;
   }
 
-  selectedCredentials.forEach(credential => {
+  selectedCredentials.forEach((credential) => {
     if (!credential.inputs) {
       const launchConfigCredential = launchConfig.defaults.credentials.find(
-        defaultCred => defaultCred.id === credential.id
+        (defaultCred) => defaultCred.id === credential.id
       );
 
       if (launchConfigCredential?.passwords_needed.length > 0) {
-        launchConfigCredential.passwords_needed.forEach(password => {
+        launchConfigCredential.passwords_needed.forEach((password) => {
           initialValues.credential_passwords[password] = '';
         });
       }
@@ -189,20 +188,20 @@ function checkForError(launchConfig, values) {
     !launchConfig.ask_credential_on_launch &&
     launchConfig.passwords_needed_to_start
   ) {
-    launchConfig.passwords_needed_to_start.forEach(password => {
+    launchConfig.passwords_needed_to_start.forEach((password) => {
       if (isValueMissing(values.credential_passwords[password])) {
         hasError = true;
       }
     });
   } else if (values.credentials) {
-    values.credentials.forEach(credential => {
+    values.credentials.forEach((credential) => {
       if (!credential.inputs) {
         const launchConfigCredential = launchConfig.defaults.credentials.find(
-          defaultCred => defaultCred.id === credential.id
+          (defaultCred) => defaultCred.id === credential.id
         );
 
         if (launchConfigCredential?.passwords_needed.length > 0) {
-          launchConfigCredential.passwords_needed.forEach(password => {
+          launchConfigCredential.passwords_needed.forEach((password) => {
             if (isValueMissing(values.credential_passwords[password])) {
               hasError = true;
             }

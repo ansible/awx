@@ -78,14 +78,13 @@ function Project({ setBreadcrumb }) {
     }
   }, [project, setBreadcrumb]);
 
-  const loadScheduleOptions = useCallback(() => {
-    return ProjectsAPI.readScheduleOptions(project.id);
-  }, [project]);
+  const loadScheduleOptions = useCallback(
+    () => ProjectsAPI.readScheduleOptions(project.id),
+    [project]
+  );
 
   const loadSchedules = useCallback(
-    params => {
-      return ProjectsAPI.readSchedules(project.id, params);
-    },
+    (params) => ProjectsAPI.readSchedules(project.id, params),
     [project]
   );
 

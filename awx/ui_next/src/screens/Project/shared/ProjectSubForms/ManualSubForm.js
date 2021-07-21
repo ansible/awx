@@ -23,8 +23,8 @@ const ManualSubForm = ({
       label: t`Choose a Playbook Directory`,
     },
     ...localPaths
-      .filter(path => path)
-      .map(path => ({
+      .filter((path) => path)
+      .map((path) => ({
         value: path,
         key: path,
         label: path,

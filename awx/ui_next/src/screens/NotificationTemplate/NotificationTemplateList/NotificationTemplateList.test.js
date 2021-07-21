@@ -98,11 +98,7 @@ describe('<NotificationTemplateList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toEqual(false);
     await act(async () => {
       wrapper
@@ -114,11 +110,7 @@ describe('<NotificationTemplateList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toEqual(true);
   });
 
@@ -129,10 +121,7 @@ describe('<NotificationTemplateList />', () => {
     wrapper.update();
     expect(OrganizationsAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
-      wrapper
-        .find('Checkbox#select-all')
-        .props()
-        .onChange(true);
+      wrapper.find('Checkbox#select-all').props().onChange(true);
     });
     wrapper.update();
     await act(async () => {

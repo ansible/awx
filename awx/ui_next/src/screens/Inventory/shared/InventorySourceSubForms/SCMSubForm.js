@@ -27,16 +27,15 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
-  const [projectField, projectMeta, projectHelpers] = useField(
-    'source_project'
-  );
+  const [projectField, projectMeta, projectHelpers] =
+    useField('source_project');
   const [sourcePathField, sourcePathMeta, sourcePathHelpers] = useField({
     name: 'source_path',
     validate: required(t`Select a value for this field`),
   });
 
   const { error: sourcePathError, request: fetchSourcePath } = useRequest(
-    useCallback(async projectId => {
+    useCallback(async (projectId) => {
       const { data } = await ProjectsAPI.readInventories(projectId);
       setSourcePath([...data, '/ (project root)']);
     }, []),
@@ -53,7 +52,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   }, [fetchSourcePath, projectMeta.initialValue]);
 
   const handleProjectUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('source_project', value);
       setFieldValue('source_path', '');
       setFieldTouched('source_path', false);
@@ -66,7 +65,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   );
 
   const handleCredentialUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);
     },
@@ -132,12 +131,12 @@ const SCMSubForm = ({ autoPopulateProject }) => {
           placeholder={t`Select source path`}
           createText={t`Set source path to`}
           isCreatable
-          onCreateOption={value => {
+          onCreateOption={(value) => {
             value.trim();
             setSourcePath([...sourcePath, value]);
           }}
         >
-          {sourcePath.map(path => (
+          {sourcePath.map((path) => (
             <SelectOption key={path} id={path} value={path} />
           ))}
         </Select>

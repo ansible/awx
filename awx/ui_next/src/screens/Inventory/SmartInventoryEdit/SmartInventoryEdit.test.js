@@ -17,15 +17,12 @@ jest.mock('react-router-dom', () => ({
 }));
 jest.mock('../../../api');
 
-const mockSmartInv = Object.assign(
-  {},
-  {
-    ...mockSmartInventory,
-    organization: {
-      id: mockSmartInventory.organization,
-    },
-  }
-);
+const mockSmartInv = {
+  ...mockSmartInventory,
+  organization: {
+    id: mockSmartInventory.organization,
+  },
+};
 
 describe('<SmartInventoryEdit />', () => {
   let wrapper;
@@ -65,7 +62,7 @@ describe('<SmartInventoryEdit />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterAll(() => {
@@ -162,7 +159,7 @@ describe('<SmartInventoryEdit />', () => {
         <SmartInventoryEdit inventory={{ ...mockSmartInv }} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('Button[aria-label="Save"]').prop('isDisabled')).toBe(
       true
     );

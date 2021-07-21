@@ -18,7 +18,11 @@ function TeamDetail({ team }) {
   const history = useHistory();
   const { id } = useParams();
 
-  const { request: deleteTeam, isLoading, error: deleteError } = useRequest(
+  const {
+    request: deleteTeam,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
     useCallback(async () => {
       await TeamsAPI.destroy(id);
       history.push(`/teams`);

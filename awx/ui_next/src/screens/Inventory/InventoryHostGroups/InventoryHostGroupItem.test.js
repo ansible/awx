@@ -40,7 +40,7 @@ describe('<InventoryHostGroupItem />', () => {
   });
 
   test('edit button should be hidden from users without edit capabilities', () => {
-    const copyMockGroup = Object.assign({}, mockGroup);
+    const copyMockGroup = { ...mockGroup };
     copyMockGroup.summary_fields.user_capabilities.edit = false;
 
     wrapper = mountWithContexts(

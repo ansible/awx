@@ -15,7 +15,7 @@ export default function useRunTypeStep(askLinkType) {
     isReady: true,
     contentError: null,
     hasError: !!meta.error,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('linkType', true, false);
     },
     validate: () => {},

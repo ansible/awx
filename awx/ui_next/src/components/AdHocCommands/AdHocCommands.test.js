@@ -109,7 +109,7 @@ describe('<AdHocCommands />', () => {
     await waitForElement(
       wrapper,
       'button[aria-label="Run Command"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () =>
       wrapper.find('button[aria-label="Run Command"]').prop('onClick')()
@@ -164,7 +164,7 @@ describe('<AdHocCommands />', () => {
     await waitForElement(
       wrapper,
       'button[aria-label="Run Command"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () =>
       wrapper.find('button[aria-label="Run Command"]').prop('onClick')()
@@ -190,15 +190,12 @@ describe('<AdHocCommands />', () => {
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
-    await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     // second step of wizard
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-2')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-2').find('input').simulate('click');
     });
 
     wrapper.update();
@@ -211,13 +208,10 @@ describe('<AdHocCommands />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
     // third step of wizard
-    await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-4')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-4').find('input').simulate('click');
     });
 
     wrapper.update();
@@ -322,7 +316,7 @@ describe('<AdHocCommands />', () => {
     await waitForElement(
       wrapper,
       'button[aria-label="Run Command"]',
-      el => el.length === 1
+      (el) => el.length === 1
     );
     await act(async () =>
       wrapper.find('button[aria-label="Run Command"]').prop('onClick')()
@@ -353,15 +347,12 @@ describe('<AdHocCommands />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
 
-    await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     // second step of wizard
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-2')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-2').find('input').simulate('click');
     });
 
     wrapper.update();
@@ -374,13 +365,10 @@ describe('<AdHocCommands />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
     // third step of wizard
-    await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentEmpty', (el) => el.length === 0);
 
     await act(async () => {
-      wrapper
-        .find('td#check-action-item-4')
-        .find('input')
-        .simulate('click');
+      wrapper.find('td#check-action-item-4').find('input').simulate('click');
     });
 
     wrapper.update();
@@ -399,7 +387,7 @@ describe('<AdHocCommands />', () => {
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
-    await waitForElement(wrapper, 'ErrorDetail', el => el.length > 0);
+    await waitForElement(wrapper, 'ErrorDetail', (el) => el.length > 0);
   });
 
   test('should disable run command button due to lack of list items', async () => {
@@ -420,7 +408,7 @@ describe('<AdHocCommands />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     const runCommandsButton = wrapper.find('button[aria-label="Run Command"]');
     expect(runCommandsButton.prop('disabled')).toBe(true);
   });

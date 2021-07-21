@@ -106,7 +106,7 @@ describe('<GitHub />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('GitHubDetail').length).toBe(1);
     expect(wrapper.find('Detail[label="GitHub OAuth2 Key"]').length).toBe(1);
   });
@@ -125,7 +125,7 @@ describe('<GitHub />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('GitHubDetail').length).toBe(1);
     expect(
       wrapper.find('Detail[label="GitHub Organization OAuth2 Key"]').length
@@ -146,7 +146,7 @@ describe('<GitHub />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('GitHubEdit').length).toBe(1);
   });
 

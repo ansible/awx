@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Route, useRouteMatch, Switch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -37,7 +37,7 @@ function Users() {
     });
   }, []);
   return (
-    <Fragment>
+    <>
       <ScreenHeader streamType="user" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path={`${match.path}/add`}>
@@ -54,7 +54,7 @@ function Users() {
           <UsersList />
         </Route>
       </Switch>
-    </Fragment>
+    </>
   );
 }
 

@@ -21,25 +21,24 @@ function CredentialEdit({ credential }) {
   const { me = {} } = useConfig();
   const [isOrgLookupDisabled, setIsOrgLookupDisabled] = useState(false);
 
-  const { error: submitError, request: submitRequest, result } = useRequest(
+  const {
+    error: submitError,
+    request: submitRequest,
+    result,
+  } = useRequest(
     useCallback(
       async (values, credentialTypesMap, inputSourceMap) => {
-        const { inputs: credentialTypeInputs } = credentialTypesMap[
-          values.credential_type
-        ];
+        const { inputs: credentialTypeInputs } =
+          credentialTypesMap[values.credential_type];
 
-        const {
-          inputs,
-          organization,
-          passwordPrompts,
-          ...remainingValues
-        } = values;
+        const { inputs, organization, passwordPrompts, ...remainingValues } =
+          values;
 
         const nonPluginInputs = {};
         const pluginInputs = {};
         const possibleFields = credentialTypeInputs.fields || [];
 
-        possibleFields.forEach(field => {
+        possibleFields.forEach((field) => {
           const input = inputs[field.id];
           if (input?.credential && input?.inputs) {
             pluginInputs[field.id] = input;
@@ -74,7 +73,7 @@ function CredentialEdit({ credential }) {
           });
 
         const destroyInputSources = () =>
-          Object.values(inputSourceMap).map(inputSource => {
+          Object.values(inputSourceMap).map((inputSource) => {
             const { id, input_field_name } = inputSource;
             if (!inputs[input_field_name]?.credential) {
               return CredentialInputSourcesAPI.destroy(id);
@@ -170,7 +169,7 @@ function CredentialEdit({ credential }) {
     history.push(`${url}`);
   };
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     await submitRequest(values, credentialTypes, loadedInputSources);
   };
 

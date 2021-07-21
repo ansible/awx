@@ -21,7 +21,7 @@ const GridDL = styled.dl`
 `;
 
 const ResourceDeleted = styled.p`
-  margin-bottom: ${props => (props.job ? '10px' : '0px')};
+  margin-bottom: ${(props) => (props.job ? '10px' : '0px')};
 `;
 
 const StyledExclamationTriangleIcon = styled(ExclamationTriangleIcon)`

@@ -94,10 +94,11 @@ export function useDeleteItems(
 ) {
   const location = useLocation();
   const history = useHistory();
-  const { error: requestError, isLoading, request } = useRequest(
-    makeRequest,
-    null
-  );
+  const {
+    error: requestError,
+    isLoading,
+    request,
+  } = useRequest(makeRequest, null);
   const { error, dismissError } = useDismissableError(requestError);
 
   const deleteItems = async () => {

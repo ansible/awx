@@ -46,7 +46,7 @@ function InventoryEdit({ inventory }) {
     history.push(`${url}`);
   };
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const { instanceGroups, organization, ...remainingValues } = values;
     try {
       await InventoriesAPI.update(inventory.id, {

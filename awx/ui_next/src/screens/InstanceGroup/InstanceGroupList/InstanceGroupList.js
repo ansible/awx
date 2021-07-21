@@ -31,7 +31,7 @@ function modifyInstanceGroups(
   defaultControlPlane,
   defaultExecution
 ) {
-  return items.map(item => {
+  return items.map((item) => {
     const clonedItem = {
       ...item,
       summary_fields: {
@@ -106,10 +106,10 @@ function InstanceGroupList({
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           responseActions.data.actions?.GET || {}
-        ).filter(key => responseActions.data.actions?.GET[key].filterable),
+        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -125,13 +125,8 @@ function InstanceGroupList({
     fetchInstanceGroups();
   }, [fetchInstanceGroups]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(instanceGroups);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(instanceGroups);
 
   const modifiedSelected = modifyInstanceGroups(
     selected,
@@ -145,11 +140,11 @@ function InstanceGroupList({
     deleteItems: deleteInstanceGroups,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id }) => InstanceGroupsAPI.destroy(id))
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(selected.map(({ id }) => InstanceGroupsAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -176,7 +171,7 @@ function InstanceGroupList({
 
   let errorMessageDelete = '';
   const notdeletedable = selected.filter(
-    i => i.name === defaultControlPlane || i.name === defaultExecution
+    (i) => i.name === defaultControlPlane || i.name === defaultExecution
   );
 
   if (notdeletedable.length) {
@@ -226,11 +221,10 @@ function InstanceGroupList({
       />
     );
 
-  const getDetailUrl = item => {
-    return item.is_container_group
+  const getDetailUrl = (item) =>
+    item.is_container_group
       ? `${match.url}/container_group/${item.id}/details`
       : `${match.url}/${item.id}/details`;
-  };
   const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
     selected[0]
   );
@@ -255,7 +249,7 @@ function InstanceGroupList({
             clearSelected={clearSelected}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DatalistToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -300,7 +294,7 @@ function InstanceGroupList({
                 instanceGroup={instanceGroup}
                 detailUrl={getDetailUrl(instanceGroup)}
                 onSelect={() => handleSelect(instanceGroup)}
-                isSelected={selected.some(row => row.id === instanceGroup.id)}
+                isSelected={selected.some((row) => row.id === instanceGroup.id)}
                 rowIndex={index}
               />
             )}

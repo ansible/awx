@@ -89,10 +89,8 @@ function AWXLogin({ alt, isAuthenticated }) {
     }
   );
 
-  const {
-    error: loginInfoError,
-    dismissError: dismissLoginInfoError,
-  } = useDismissableError(customLoginInfoError);
+  const { error: loginInfoError, dismissError: dismissLoginInfoError } =
+    useDismissableError(customLoginInfoError);
 
   useEffect(() => {
     fetchCustomLoginInfo();
@@ -108,12 +106,10 @@ function AWXLogin({ alt, isAuthenticated }) {
     }, [])
   );
 
-  const {
-    error: authError,
-    dismissError: dismissAuthError,
-  } = useDismissableError(authenticationError);
+  const { error: authError, dismissError: dismissAuthError } =
+    useDismissableError(authenticationError);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     dismissAuthError();
     await authenticate(values);
     setAuthRedirectTo('/home');
@@ -176,7 +172,7 @@ function AWXLogin({ alt, isAuthenticated }) {
           }}
           onSubmit={handleSubmit}
         >
-          {formik => (
+          {(formik) => (
             <LoginForm
               data-cy="login-form"
               className={authError ? 'pf-m-error' : ''}
@@ -185,11 +181,11 @@ function AWXLogin({ alt, isAuthenticated }) {
               isValidPassword={!authError}
               isValidUsername={!authError}
               loginButtonLabel={t`Log In`}
-              onChangePassword={val => {
+              onChangePassword={(val) => {
                 formik.setFieldValue('password', val);
                 dismissAuthError();
               }}
-              onChangeUsername={val => {
+              onChangeUsername={(val) => {
                 formik.setFieldValue('username', val);
                 dismissAuthError();
               }}
@@ -219,7 +215,7 @@ function AWXLogin({ alt, isAuthenticated }) {
         socialMediaLoginContent={
           <>
             {socialAuthOptions &&
-              Object.keys(socialAuthOptions).map(authKey => {
+              Object.keys(socialAuthOptions).map((authKey) => {
                 const loginUrl = socialAuthOptions[authKey].login_url;
                 if (authKey === 'azuread-oauth2') {
                   return (

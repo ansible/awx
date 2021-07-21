@@ -1,4 +1,4 @@
-import React, { Fragment, useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import {
   string,
   bool,
@@ -29,7 +29,7 @@ import reducer, { initReducer } from './shared/reducer';
 
 const ChipHolder = styled.div`
   --pf-c-form-control--Height: auto;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isDisabled ? 'var(--pf-global--disabled-color--300)' : null};
 `;
 function Lookup(props) {
@@ -57,7 +57,7 @@ function Lookup(props) {
 
   useField({
     name: fieldName,
-    validate: val => {
+    validate: (val) => {
       if (!multiple && !val && typedText && typedText !== '') {
         return t`That value was not found. Please enter or select a valid value.`;
       }
@@ -91,7 +91,7 @@ function Lookup(props) {
   const clearQSParams = () => {
     const parts = history.location.search.replace(/^\?/, '').split('&');
     const ns = qsConfig.namespace;
-    const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
+    const otherParts = parts.filter((param) => !param.startsWith(`${ns}.`));
     history.push(`${history.location.pathname}?${otherParts.join('&')}`);
   };
 
@@ -106,7 +106,7 @@ function Lookup(props) {
     dispatch({ type: 'CLOSE_MODAL' });
   };
 
-  const removeItem = item => onChange(value.filter(i => i.id !== item.id));
+  const removeItem = (item) => onChange(value.filter((i) => i.id !== item.id));
 
   const closeModal = () => {
     clearQSParams();
@@ -124,7 +124,7 @@ function Lookup(props) {
   }
 
   return (
-    <Fragment>
+    <>
       <InputGroup onBlur={onBlur}>
         <Button
           aria-label={t`Search`}
@@ -138,7 +138,7 @@ function Lookup(props) {
         {multiple ? (
           <ChipHolder isDisabled={isDisabled} className="pf-c-form-control">
             <ChipGroup numChips={5} totalChips={items.length}>
-              {items.map(item =>
+              {items.map((item) =>
                 renderItemChip({
                   item,
                   removeItem,
@@ -151,7 +151,7 @@ function Lookup(props) {
           <TextInput
             id={`${id}-input`}
             value={typedText}
-            onChange={inputValue => {
+            onChange={(inputValue) => {
               setTypedText(inputValue);
               if (value?.name !== inputValue) {
                 debounceRequest(inputValue);
@@ -196,7 +196,7 @@ function Lookup(props) {
           canDelete,
         })}
       </Modal>
-    </Fragment>
+    </>
   );
 }
 

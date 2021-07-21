@@ -76,7 +76,7 @@ describe('<SubscriptionEdit />', () => {
           },
         });
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     test('initially renders without crashing', () => {
@@ -101,30 +101,18 @@ describe('<SubscriptionEdit />', () => {
     });
 
     test('subscription selection type toggle should default to manifest', () => {
-      expect(
-        wrapper
-          .find('ToggleGroupItem')
-          .first()
-          .text()
-      ).toBe('Subscription manifest');
-      expect(
-        wrapper
-          .find('ToggleGroupItem')
-          .first()
-          .props().isSelected
-      ).toBe(true);
-      expect(
-        wrapper
-          .find('ToggleGroupItem')
-          .last()
-          .text()
-      ).toBe('Username / password');
-      expect(
-        wrapper
-          .find('ToggleGroupItem')
-          .last()
-          .props().isSelected
-      ).toBe(false);
+      expect(wrapper.find('ToggleGroupItem').first().text()).toBe(
+        'Subscription manifest'
+      );
+      expect(wrapper.find('ToggleGroupItem').first().props().isSelected).toBe(
+        true
+      );
+      expect(wrapper.find('ToggleGroupItem').last().text()).toBe(
+        'Username / password'
+      );
+      expect(wrapper.find('ToggleGroupItem').last().props().isSelected).toBe(
+        false
+      );
     });
 
     test('file upload field should upload manifest file', async () => {
@@ -258,7 +246,7 @@ describe('<SubscriptionEdit />', () => {
           },
         });
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     test('should hide analytics step when editing a current subscription', async () => {
@@ -276,22 +264,16 @@ describe('<SubscriptionEdit />', () => {
     });
 
     test('Username/password toggle button should show username credential fields', async () => {
-      expect(
-        wrapper
-          .find('ToggleGroupItem')
-          .last()
-          .props().isSelected
-      ).toBe(false);
+      expect(wrapper.find('ToggleGroupItem').last().props().isSelected).toBe(
+        false
+      );
       wrapper
         .find('ToggleGroupItem[text="Username / password"] button')
         .simulate('click');
       wrapper.update();
-      expect(
-        wrapper
-          .find('ToggleGroupItem')
-          .last()
-          .props().isSelected
-      ).toBe(true);
+      expect(wrapper.find('ToggleGroupItem').last().props().isSelected).toBe(
+        true
+      );
       expect(wrapper.find('input#username-field').prop('value')).toEqual('');
       expect(wrapper.find('input#password-field').prop('value')).toEqual('');
       await act(async () => {
@@ -333,7 +315,11 @@ describe('<SubscriptionEdit />', () => {
         wrapper.find('Button[aria-label="Confirm selection"]').prop('onClick')()
       );
       wrapper.update();
-      await waitForElement(wrapper, 'SubscriptionModal', el => el.length === 0);
+      await waitForElement(
+        wrapper,
+        'SubscriptionModal',
+        (el) => el.length === 0
+      );
     });
 
     test('should show selected subscription name', () => {
@@ -379,7 +365,7 @@ describe('<SubscriptionEdit />', () => {
       waitForElement(
         wrapper,
         'Alert[title="Save successful"]',
-        el => el.length === 0
+        (el) => el.length === 0
       );
       await act(async () =>
         wrapper.find('button#subscription-wizard-submit').prop('onClick')()
@@ -414,7 +400,7 @@ describe('<SubscriptionEdit />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

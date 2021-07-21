@@ -14,7 +14,7 @@ function CredentialTypes() {
     '/credential_types/add': t`Create new credential type`,
   });
 
-  const buildBreadcrumbConfig = useCallback(credentialTypes => {
+  const buildBreadcrumbConfig = useCallback((credentialTypes) => {
     if (!credentialTypes) {
       return;
     }

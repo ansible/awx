@@ -7,7 +7,7 @@ import {
 import { t } from '@lingui/macro';
 
 const AWXPagination = styled(PFPagination)`
-  ${props =>
+  ${(props) =>
     props.perPageOptions &&
     !props.perPageOptions.length &&
     css`
@@ -17,7 +17,7 @@ const AWXPagination = styled(PFPagination)`
     `}
 `;
 
-export default props => (
+export default (props) => (
   <AWXPagination
     ouiaId="pagination"
     titles={{

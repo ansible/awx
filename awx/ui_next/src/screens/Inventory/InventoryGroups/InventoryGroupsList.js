@@ -61,10 +61,10 @@ function InventoryGroupsList() {
         actions: groupOptions.data.actions,
         relatedSearchableKeys: (
           groupOptions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           groupOptions.data.actions?.GET || {}
-        ).filter(key => groupOptions.data.actions?.GET[key].filterable),
+        ).filter((key) => groupOptions.data.actions?.GET[key].filterable),
       };
     }, [inventoryId, location]),
     {
@@ -82,18 +82,13 @@ function InventoryGroupsList() {
     fetchData();
   }, [fetchData]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(groups);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(groups);
 
   const renderTooltip = () => {
     const itemsUnableToDelete = selected
       .filter(cannotDelete)
-      .map(item => item.name)
+      .map((item) => item.name)
       .join(', ');
 
     if (selected.some(cannotDelete)) {
@@ -158,12 +153,12 @@ function InventoryGroupsList() {
             key={item.id}
             group={item}
             inventoryId={inventoryId}
-            isSelected={selected.some(row => row.id === item.id)}
+            isSelected={selected.some((row) => row.id === item.id)}
             onSelect={() => handleSelect(item)}
             rowIndex={index}
           />
         )}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}

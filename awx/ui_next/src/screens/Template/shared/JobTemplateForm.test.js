@@ -195,7 +195,7 @@ describe('<JobTemplateForm />', () => {
       );
     });
 
-    await waitForElement(wrapper, 'Spinner', el => el.length === 0);
+    await waitForElement(wrapper, 'Spinner', (el) => el.length === 0);
 
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
@@ -237,10 +237,7 @@ describe('<JobTemplateForm />', () => {
     });
 
     await act(async () => {
-      wrapper
-        .find('CredentialChip')
-        .at(0)
-        .prop('onClick')();
+      wrapper.find('CredentialChip').at(0).prop('onClick')();
     });
     wrapper.update();
 
@@ -418,7 +415,7 @@ describe('<JobTemplateForm />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
@@ -439,7 +436,7 @@ describe('<JobTemplateForm />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(handleCancel).toBeCalled();

@@ -42,7 +42,7 @@ describe('<DeleteButton />', () => {
       wrapper.find('button').prop('onClick')();
     });
 
-    await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    await waitForElement(wrapper, 'Modal', (el) => el.length > 0);
     expect(wrapper.find('Modal')).toHaveLength(1);
 
     expect(wrapper.find('div[aria-label="Delete this?"]')).toHaveLength(1);

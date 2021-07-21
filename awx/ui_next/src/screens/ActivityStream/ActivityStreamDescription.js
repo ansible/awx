@@ -31,8 +31,9 @@ const buildAnchor = (obj, resource, activity) => {
         } else {
           url = `/inventories/inventory/${
             activity.summary_fields.inventory[0].id
-          }/groups/${activity.changes.id ||
-            activity.changes.object1_pk}/details/`;
+          }/groups/${
+            activity.changes.id || activity.changes.object1_pk
+          }/details/`;
         }
         break;
       case 'host':
@@ -84,10 +85,8 @@ const buildAnchor = (obj, resource, activity) => {
         url = `/templates/workflow_job_template/${obj.id}/`;
         break;
       case 'workflow_job_template_node': {
-        const {
-          id: wfjt_id,
-          name: wfjt_name,
-        } = activity.summary_fields.workflow_job_template[0];
+        const { id: wfjt_id, name: wfjt_name } =
+          activity.summary_fields.workflow_job_template[0];
         url = `/templates/workflow_job_template/${wfjt_id}/`;
         name = wfjt_name;
         break;
@@ -130,25 +129,18 @@ const buildAnchor = (obj, resource, activity) => {
   }
 };
 
-const getPastTense = item => {
-  return /e$/.test(item) ? `${item}d` : `${item}ed`;
-};
+const getPastTense = (item) => (/e$/.test(item) ? `${item}d` : `${item}ed`);
 
-const isGroupRelationship = item => {
-  return (
-    item.object1 === 'group' &&
-    item.object2 === 'group' &&
-    item.summary_fields.group.length > 1
-  );
-};
+const isGroupRelationship = (item) =>
+  item.object1 === 'group' &&
+  item.object2 === 'group' &&
+  item.summary_fields.group.length > 1;
 
-const buildLabeledLink = (label, link) => {
-  return (
-    <span>
-      {label} {link}
-    </span>
-  );
-};
+const buildLabeledLink = (label, link) => (
+  <span>
+    {label} {link}
+  </span>
+);
 
 function ActivityStreamDescription({ activity }) {
   const labeledLinks = [];

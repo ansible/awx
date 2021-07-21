@@ -127,7 +127,7 @@ function SubscriptionEdit() {
     result: submitSuccessful,
     request: submitRequest,
   } = useRequest(
-    useCallback(async form => {
+    useCallback(async (form) => {
       if (form.manifest_file) {
         await ConfigAPI.create({
           manifest: form.manifest_file,
@@ -175,7 +175,7 @@ function SubscriptionEdit() {
   }, [submitSuccessful, history, subscriptionMgmtRoute]);
 
   const { error, dismissError } = useDismissableError(submitError);
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     dismissError();
     await submitRequest(values);
   };
@@ -227,9 +227,9 @@ function SubscriptionEdit() {
         }}
         onSubmit={handleSubmit}
       >
-        {formik => (
+        {(formik) => (
           <Form
-            onSubmit={e => {
+            onSubmit={(e) => {
               e.preventDefault();
             }}
           >

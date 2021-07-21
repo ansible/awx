@@ -46,14 +46,11 @@ function InventoryDetail({ inventory }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const {
-    organization,
-    user_capabilities: userCapabilities,
-  } = inventory.summary_fields;
+  const { organization, user_capabilities: userCapabilities } =
+    inventory.summary_fields;
 
-  const deleteDetailsRequests = relatedResourceDeleteRequests.inventory(
-    inventory
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.inventory(inventory);
 
   if (isLoading) {
     return <ContentLoading />;
@@ -87,7 +84,7 @@ function InventoryDetail({ inventory }) {
             label={t`Instance Groups`}
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
-                {instanceGroups.map(ig => (
+                {instanceGroups.map((ig) => (
                   <Chip key={ig.id} isReadOnly>
                     {ig.name}
                   </Chip>

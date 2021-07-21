@@ -65,10 +65,10 @@ function UserTeamList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [userId, location.search]),
     {
@@ -85,40 +85,35 @@ function UserTeamList() {
     fetchTeams();
   }, [fetchTeams]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(teams);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(teams);
 
-  const disassociateUserRoles = team => {
-    return [
-      UsersAPI.disassociateRole(
-        userId,
-        team.summary_fields.object_roles.admin_role.id
-      ),
-      UsersAPI.disassociateRole(
-        userId,
-        team.summary_fields.object_roles.member_role.id
-      ),
-      UsersAPI.disassociateRole(
-        userId,
-        team.summary_fields.object_roles.read_role.id
-      ),
-    ];
-  };
+  const disassociateUserRoles = (team) => [
+    UsersAPI.disassociateRole(
+      userId,
+      team.summary_fields.object_roles.admin_role.id
+    ),
+    UsersAPI.disassociateRole(
+      userId,
+      team.summary_fields.object_roles.member_role.id
+    ),
+    UsersAPI.disassociateRole(
+      userId,
+      team.summary_fields.object_roles.read_role.id
+    ),
+  ];
 
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateTeams,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.flatMap(team => disassociateUserRoles(team)));
+    useCallback(
+      () =>
+        Promise.all(selected.flatMap((team) => disassociateUserRoles(team))),
       /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [selected]),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -128,9 +123,9 @@ function UserTeamList() {
 
   const { request: handleAssociate, error: associateError } = useRequest(
     useCallback(
-      async teamsToAssociate => {
+      async (teamsToAssociate) => {
         await Promise.all(
-          teamsToAssociate.map(team =>
+          teamsToAssociate.map((team) =>
             UsersAPI.associateRole(
               userId,
               team.summary_fields.object_roles.member_role.id
@@ -156,20 +151,20 @@ function UserTeamList() {
     userOptions && Object.prototype.hasOwnProperty.call(userOptions, 'POST');
 
   const fetchTeamsToAssociate = useCallback(
-    params => {
-      return TeamsAPI.read(
+    (params) =>
+      TeamsAPI.read(
         mergeParams(params, {
           not__member_role__members__id: userId,
           not__admin_role__members__id: userId,
         })
-      );
-    },
+      ),
     [userId]
   );
 
-  const readTeamOptions = useCallback(() => UsersAPI.readTeamsOptions(userId), [
-    userId,
-  ]);
+  const readTeamOptions = useCallback(
+    () => UsersAPI.readTeamsOptions(userId),
+    [userId]
+  );
 
   return (
     <>
@@ -195,11 +190,11 @@ function UserTeamList() {
             team={team}
             detailUrl={`/teams/${team.id}/details`}
             onSelect={() => handleSelect(team)}
-            isSelected={selected.some(row => row.id === team.id)}
+            isSelected={selected.some((row) => row.id === team.id)}
             rowIndex={index}
           />
         )}
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}

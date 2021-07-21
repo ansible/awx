@@ -41,10 +41,10 @@ function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
         itemCount: count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse?.data?.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -56,7 +56,7 @@ function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
   );
 
   const checkApplicationName = useCallback(
-    async name => {
+    async (name) => {
       if (!name) {
         onChange(null);
         return;
@@ -128,8 +128,8 @@ function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
             relatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="application"
-            selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
-            deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+            selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
           />
         )}
       />

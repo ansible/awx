@@ -8,10 +8,10 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
   const history = useHistory();
   const match = useRouteMatch();
 
-  const handleSubmit = async question => {
+  const handleSubmit = async (question) => {
     const formData = { ...question };
     try {
-      if (survey?.spec?.some(q => q.variable === formData.variable)) {
+      if (survey?.spec?.some((q) => q.variable === formData.variable)) {
         setFormError(
           new Error(
             `Survey already contains a question with variable named “${formData.variable}”`

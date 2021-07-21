@@ -85,7 +85,7 @@ describe('<InstanceGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
-    await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
+    await waitForElement(wrapper, 'InstanceGroupList', (el) => el.length > 0);
     expect(wrapper.find('InstanceGroupListItem').length).toBe(4);
     expect(InstanceGroupsAPI.read).toBeCalled();
     expect(InstanceGroupsAPI.readOptions).toBeCalled();
@@ -95,7 +95,7 @@ describe('<InstanceGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
-    await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
+    await waitForElement(wrapper, 'InstanceGroupList', (el) => el.length > 0);
 
     wrapper
       .find('.pf-c-table__check')
@@ -105,11 +105,7 @@ describe('<InstanceGroupList />', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
 
     await act(async () => {
@@ -130,11 +126,11 @@ describe('<InstanceGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
-    await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
+    await waitForElement(wrapper, 'InstanceGroupList', (el) => el.length > 0);
 
     const instanceGroupIndex = [0, 1, 2, 3];
 
-    instanceGroupIndex.forEach(element => {
+    instanceGroupIndex.forEach((element) => {
       wrapper
         .find('.pf-c-table__check')
         .at(element)
@@ -172,7 +168,7 @@ describe('<InstanceGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
-    await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
+    await waitForElement(wrapper, 'InstanceGroupList', (el) => el.length > 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 
@@ -192,7 +188,7 @@ describe('<InstanceGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
-    waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
+    waitForElement(wrapper, 'InstanceGroupList', (el) => el.length > 0);
 
     wrapper
       .find('.pf-c-table__check')
@@ -201,11 +197,7 @@ describe('<InstanceGroupList />', () => {
       .simulate('change', 'a');
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
 
     await act(async () =>
@@ -228,7 +220,7 @@ describe('<InstanceGroupList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
-    waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
+    waitForElement(wrapper, 'InstanceGroupList', (el) => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 });

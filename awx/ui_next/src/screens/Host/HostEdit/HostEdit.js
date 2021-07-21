@@ -10,7 +10,7 @@ function HostEdit({ host }) {
   const detailsUrl = `/hosts/${host.id}/details`;
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       const dataToSend = { ...values };
       if (dataToSend.inventory) {

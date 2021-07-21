@@ -9,7 +9,5 @@ export function getLanguage(nav) {
 }
 
 export function getLanguageWithoutRegionCode(nav) {
-  return getLanguage(nav)
-    .toLowerCase()
-    .split(/[_-]+/)[0];
+  return getLanguage(nav).toLowerCase().split(/[_-]+/)[0];
 }

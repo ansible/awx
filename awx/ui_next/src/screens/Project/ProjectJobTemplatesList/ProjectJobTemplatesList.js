@@ -53,10 +53,10 @@ function ProjectJobTemplatesList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location, projectId]),
     {
@@ -72,13 +72,8 @@ function ProjectJobTemplatesList() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(jobTemplates);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(jobTemplates);
 
   const {
     isLoading: isDeleteLoading,
@@ -86,11 +81,13 @@ function ProjectJobTemplatesList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(template => JobTemplatesAPI.destroy(template.id))
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map((template) => JobTemplatesAPI.destroy(template.id))
+        ),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -138,7 +135,7 @@ function ProjectJobTemplatesList() {
           ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DatalistToolbar
               {...props}
               isAllSelected={isAllSelected}
@@ -170,7 +167,7 @@ function ProjectJobTemplatesList() {
               template={template}
               detailUrl={`/templates/${template.type}/${template.id}/details`}
               onSelect={() => handleSelect(template)}
-              isSelected={selected.some(row => row.id === template.id)}
+              isSelected={selected.some((row) => row.id === template.id)}
               rowIndex={index}
             />
           )}

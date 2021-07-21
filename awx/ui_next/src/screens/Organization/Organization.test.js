@@ -68,7 +68,7 @@ describe('<Organization />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 6
+      (el) => el.length === 6
     );
     expect(tabs.last().text()).toEqual('Notifications');
   });
@@ -90,9 +90,9 @@ describe('<Organization />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 5
+      (el) => el.length === 5
     );
-    tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
+    tabs.forEach((tab) => expect(tab.text()).not.toEqual('Notifications'));
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
@@ -119,6 +119,6 @@ describe('<Organization />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });

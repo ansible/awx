@@ -33,7 +33,7 @@ function ContainerGroupEdit({ instanceGroup }) {
     fetchInitialPodSpec();
   }, [fetchInitialPodSpec]);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await InstanceGroupsAPI.update(instanceGroup.id, {
         name: values.name,

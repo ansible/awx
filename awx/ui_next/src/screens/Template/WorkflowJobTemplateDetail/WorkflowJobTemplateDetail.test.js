@@ -155,13 +155,13 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     expect(labels.length).toBe(3);
     expect(sparkline.length).toBe(3);
 
-    const assertValue = value => {
+    const assertValue = (value) => {
       expect(wrapper.find(`${value.element}`).prop(`${value.prop}`)).toEqual(
         `${value.value}`
       );
     };
 
-    renderedValues.map(value => assertValue(value));
+    renderedValues.map((value) => assertValue(value));
   });
 
   test('should have proper number of delete detail requests', async () => {

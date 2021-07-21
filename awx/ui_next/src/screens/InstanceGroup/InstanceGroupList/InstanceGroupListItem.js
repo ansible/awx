@@ -29,9 +29,7 @@ function InstanceGroupListItem({
 }) {
   const labelId = `check-action-${instanceGroup.id}`;
 
-  const isContainerGroup = item => {
-    return item.is_container_group;
-  };
+  const isContainerGroup = (item) => item.is_container_group;
 
   function usedCapacity(item) {
     if (!isContainerGroup(item)) {

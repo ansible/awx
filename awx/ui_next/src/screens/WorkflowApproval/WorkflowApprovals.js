@@ -12,7 +12,7 @@ function WorkflowApprovals() {
     '/workflow_approvals': t`Workflow Approvals`,
   });
 
-  const updateBreadcrumbConfig = useCallback(workflowApproval => {
+  const updateBreadcrumbConfig = useCallback((workflowApproval) => {
     if (!workflowApproval) {
       return;
     }

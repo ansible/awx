@@ -31,9 +31,9 @@ function ApplicationDetails({
 
   const { error, dismissError } = useDismissableError(deletionError);
 
-  const getAuthorizationGrantType = type => {
+  const getAuthorizationGrantType = (type) => {
     let value;
-    authorizationOptions.filter(option => {
+    authorizationOptions.filter((option) => {
       if (option.value === type) {
         value = option.label;
       }
@@ -41,9 +41,9 @@ function ApplicationDetails({
     });
     return value;
   };
-  const getClientType = type => {
+  const getClientType = (type) => {
     let value;
-    clientTypeOptions.filter(option => {
+    clientTypeOptions.filter((option) => {
       if (option.value === type) {
         value = option.label;
       }

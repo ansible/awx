@@ -88,19 +88,13 @@ describe('<TeamList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('TeamListItem')
-        .first()
-        .invoke('onSelect')();
+      wrapper.find('TeamListItem').first().invoke('onSelect')();
     });
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('TeamListItem')
-        .first()
-        .prop('isSelected')
-    ).toEqual(true);
+    expect(wrapper.find('TeamListItem').first().prop('isSelected')).toEqual(
+      true
+    );
   });
 
   test('should select all', async () => {
@@ -117,16 +111,13 @@ describe('<TeamList />', () => {
 
     const items = wrapper.find('TeamListItem');
     expect(items).toHaveLength(3);
-    items.forEach(item => {
+    items.forEach((item) => {
       expect(item.prop('isSelected')).toEqual(true);
     });
 
-    expect(
-      wrapper
-        .find('TeamListItem')
-        .first()
-        .prop('isSelected')
-    ).toEqual(true);
+    expect(wrapper.find('TeamListItem').first().prop('isSelected')).toEqual(
+      true
+    );
   });
 
   test('should call delete api', async () => {
@@ -137,17 +128,11 @@ describe('<TeamList />', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find('TeamListItem')
-        .at(0)
-        .invoke('onSelect')();
+      wrapper.find('TeamListItem').at(0).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('TeamListItem')
-        .at(1)
-        .invoke('onSelect')();
+      wrapper.find('TeamListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
@@ -165,10 +150,7 @@ describe('<TeamList />', () => {
     wrapper.update();
     expect(TeamsAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
-      wrapper
-        .find('TeamListItem')
-        .at(0)
-        .invoke('onSelect')();
+      wrapper.find('TeamListItem').at(0).invoke('onSelect')();
     });
     wrapper.update();
     await act(async () => {
@@ -197,10 +179,7 @@ describe('<TeamList />', () => {
     wrapper.update();
     expect(TeamsAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
-      wrapper
-        .find('TeamListItem')
-        .at(0)
-        .invoke('onSelect')();
+      wrapper.find('TeamListItem').at(0).invoke('onSelect')();
     });
     wrapper.update();
 

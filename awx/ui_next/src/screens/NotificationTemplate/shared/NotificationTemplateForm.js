@@ -25,7 +25,7 @@ function NotificationTemplateFormFields({ defaultMessages, template }) {
   });
 
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -106,7 +106,7 @@ function NotificationTemplateForm({
   onCancel,
   submitError,
 }) {
-  const handleSubmit = values => {
+  const handleSubmit = (values) => {
     onSubmit(
       normalizeFields(
         {
@@ -120,12 +120,10 @@ function NotificationTemplateForm({
 
   const messages = template.messages || { workflow_approval: {} };
   const defs = defaultMessages[template.notification_type || 'email'];
-  const mergeDefaultMessages = (templ = {}, def) => {
-    return {
-      message: templ?.message || def.message || '',
-      body: templ?.body || def.body || '',
-    };
-  };
+  const mergeDefaultMessages = (templ = {}, def) => ({
+    message: templ?.message || def.message || '',
+    body: templ?.body || def.body || '',
+  });
 
   const { headers } = template?.notification_configuration || {};
 
@@ -176,7 +174,7 @@ function NotificationTemplateForm({
       }}
       onSubmit={handleSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <NotificationTemplateFormFields
@@ -225,7 +223,7 @@ function normalizeTypeFields(values) {
   const stripped = {};
   const fields = typeFieldNames[values.notification_type];
 
-  fields.forEach(fieldName => {
+  fields.forEach((fieldName) => {
     if (typeof values.notification_configuration[fieldName] !== 'undefined') {
       stripped[fieldName] = values.notification_configuration[fieldName];
     }
@@ -252,12 +250,10 @@ function normalizeMessageFields(values, defaults) {
   const { messages } = values;
   const defs = defaults[values.notification_type];
 
-  const nullIfDefault = (m, d) => {
-    return {
-      message: m.message === d.message ? null : m.message,
-      body: m.body === d.body ? null : m.body,
-    };
-  };
+  const nullIfDefault = (m, d) => ({
+    message: m.message === d.message ? null : m.message,
+    body: m.body === d.body ? null : m.body,
+  });
 
   const nonDefaultMessages = {
     started: nullIfDefault(messages.started, defs.started),

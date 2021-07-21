@@ -10,7 +10,7 @@ function InstanceGroupAdd() {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       const { data: response } = await InstanceGroupsAPI.create(values);
       history.push(`/instance_groups/${response.id}/details`);

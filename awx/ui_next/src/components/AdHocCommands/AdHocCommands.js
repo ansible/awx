@@ -65,7 +65,7 @@ function AdHocCommands({
     request: launchAdHocCommands,
   } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         const { data } = await InventoriesAPI.launchAdHocCommands(id, values);
         history.push(`/jobs/command/${data.id}/output`);
       },
@@ -74,7 +74,11 @@ function AdHocCommands({
     )
   );
 
-  const handleSubmit = async values => {
+  const { error, dismissError } = useDismissableError(
+    launchError || fetchError
+  );
+
+  const handleSubmit = async (values) => {
     const { credential, execution_environment, ...remainingValues } = values;
     const newCredential = credential[0].id;
 
@@ -85,13 +89,9 @@ function AdHocCommands({
     };
     await launchAdHocCommands(manipulatedValues);
   };
-  useEffect(() => onLaunchLoading(isLaunchLoading), [
-    isLaunchLoading,
-    onLaunchLoading,
-  ]);
-
-  const { error, dismissError } = useDismissableError(
-    launchError || fetchError
+  useEffect(
+    () => onLaunchLoading(isLaunchLoading),
+    [isLaunchLoading, onLaunchLoading]
   );
 
   if (error && isWizardOpen) {

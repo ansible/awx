@@ -107,7 +107,7 @@ function InventoryHost({ setBreadcrumb, inventory }) {
   }
 
   let showCardHeader = true;
-  if (['edit'].some(name => location.pathname.includes(name))) {
+  if (['edit'].some((name) => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 

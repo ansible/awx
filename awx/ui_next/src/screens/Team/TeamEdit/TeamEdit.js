@@ -12,7 +12,7 @@ function TeamEdit({ team }) {
   const history = useHistory();
   const [error, setError] = useState(null);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       const valuesToSend = { ...values };
       if (valuesToSend.organization) {

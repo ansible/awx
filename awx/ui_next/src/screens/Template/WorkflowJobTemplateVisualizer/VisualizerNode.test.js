@@ -85,15 +85,9 @@ describe('VisualizerNode', () => {
       expect(wrapper.find('WorkflowActionTooltipItem').length).toBe(5);
       wrapper.find('g').simulate('mouseleave');
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
-      wrapper
-        .find('foreignObject')
-        .first()
-        .simulate('mouseenter');
+      wrapper.find('foreignObject').first().simulate('mouseenter');
       expect(updateNodeHelp).toHaveBeenCalledWith(nodeWithJT);
-      wrapper
-        .find('foreignObject')
-        .first()
-        .simulate('mouseleave');
+      wrapper.find('foreignObject').first().simulate('mouseleave');
       expect(updateNodeHelp).toHaveBeenCalledWith(null);
     });
 
@@ -247,10 +241,7 @@ describe('VisualizerNode', () => {
     });
 
     test('Dispatches properly when node is clicked', () => {
-      wrapper
-        .find('foreignObject')
-        .first()
-        .simulate('click');
+      wrapper.find('foreignObject').first().simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'SET_ADD_LINK_TARGET_NODE',
         value: nodeWithJT,

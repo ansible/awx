@@ -10,7 +10,7 @@ function NotificationTemplateEdit({ template, defaultMessages }) {
   const history = useHistory();
   const [formError, setFormError] = useState(null);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     try {
       await NotificationTemplatesAPI.update(template.id, values);
       history.push(detailsUrl);

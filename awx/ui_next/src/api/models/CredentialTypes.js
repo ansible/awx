@@ -25,7 +25,7 @@ class CredentialTypes extends Base {
     }
     return results
       .concat(nextResults)
-      .filter(type => acceptableKinds.includes(type.kind));
+      .filter((type) => acceptableKinds.includes(type.kind));
   }
 
   test(id, data) {

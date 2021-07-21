@@ -27,14 +27,13 @@ function ManagementJobListItem({
   const [isLaunchLoading, setIsLaunchLoading] = useState(false);
 
   const [isManagementPromptOpen, setIsManagementPromptOpen] = useState(false);
-  const [isManagementPromptLoading, setIsManagementPromptLoading] = useState(
-    false
-  );
+  const [isManagementPromptLoading, setIsManagementPromptLoading] =
+    useState(false);
   const [managementPromptError, setManagementPromptError] = useState(null);
   const handleManagementPromptClick = () => setIsManagementPromptOpen(true);
   const handleManagementPromptClose = () => setIsManagementPromptOpen(false);
 
-  const handleManagementPromptConfirm = async days => {
+  const handleManagementPromptConfirm = async (days) => {
     setIsManagementPromptLoading(true);
     try {
       const { data } = await SystemJobTemplatesAPI.launch(id, {

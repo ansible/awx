@@ -14,7 +14,7 @@ function ExecutionEnvironments() {
     '/execution_environments/add': t`Create new execution environment`,
   });
 
-  const buildBreadcrumbConfig = useCallback(executionEnvironments => {
+  const buildBreadcrumbConfig = useCallback((executionEnvironments) => {
     if (!executionEnvironments) {
       return;
     }

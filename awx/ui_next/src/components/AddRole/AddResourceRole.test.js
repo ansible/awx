@@ -68,7 +68,7 @@ describe('<_AddResourceRole />', () => {
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
-        i18n={{ _: val => val.toString() }}
+        i18n={{ _: (val) => val.toString() }}
       />
     );
   });
@@ -93,7 +93,7 @@ describe('<_AddResourceRole />', () => {
     wrapper.update();
 
     // Step 2
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     expect(wrapper.find('Chip').length).toBe(0);
     act(() =>
       wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
@@ -161,7 +161,7 @@ describe('<_AddResourceRole />', () => {
     wrapper.update();
 
     // Step 2
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     act(() =>
       wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
@@ -213,7 +213,7 @@ describe('<_AddResourceRole />', () => {
     wrapper.update();
 
     // Step 2
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     act(() =>
       wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
@@ -246,7 +246,7 @@ describe('<_AddResourceRole />', () => {
     await waitForElement(
       wrapper,
       'SelectableCard[label="Users"]',
-      el => el.prop('isSelected') === true
+      (el) => el.prop('isSelected') === true
     );
     act(() => wrapper.find('SelectableCard[label="Teams"]').prop('onClick')());
     wrapper.update();
@@ -254,7 +254,7 @@ describe('<_AddResourceRole />', () => {
     await waitForElement(
       wrapper,
       'SelectableCard[label="Teams"]',
-      el => el.prop('isSelected') === true
+      (el) => el.prop('isSelected') === true
     );
   });
 
@@ -279,7 +279,7 @@ describe('<_AddResourceRole />', () => {
     wrapper.update();
 
     // Step 2
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     act(() =>
       wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
     );
@@ -322,17 +322,17 @@ describe('<_AddResourceRole />', () => {
     wrapper.update();
 
     // Make sure no teams have been selected
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     wrapper
       .find('DataListCheck')
-      .map(item => expect(item.prop('checked')).toBe(false));
+      .map((item) => expect(item.prop('checked')).toBe(false));
     act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
     wrapper.update();
 
     // Make sure that no roles have been selected
     wrapper
       .find('Checkbox')
-      .map(card => expect(card.prop('isChecked')).toBe(false));
+      .map((card) => expect(card.prop('isChecked')).toBe(false));
 
     // Make sure the save button is disabled
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
@@ -379,7 +379,7 @@ describe('<_AddResourceRole />', () => {
     wrapper.update();
 
     // Step 2
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     expect(wrapper.find('Chip').length).toBe(0);
     act(() =>
       wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)

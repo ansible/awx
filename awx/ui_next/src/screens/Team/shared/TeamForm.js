@@ -15,7 +15,7 @@ function TeamFormFields({ team }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
 
   const handleOrganizationUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('organization', value);
       setFieldTouched('organization', true, false);
     },
@@ -64,7 +64,7 @@ function TeamForm(props) {
       }}
       onSubmit={handleSubmit}
     >
-      {formik => (
+      {(formik) => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <TeamFormFields team={team} {...rest} />

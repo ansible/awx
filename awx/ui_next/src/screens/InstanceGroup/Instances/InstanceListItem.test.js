@@ -43,7 +43,7 @@ describe('<InstanceListItem/>', () => {
   let wrapper;
 
   beforeEach(() => {
-    useDebounce.mockImplementation(fn => fn);
+    useDebounce.mockImplementation((fn) => fn);
   });
 
   test('should mount successfully', async () => {
@@ -125,19 +125,9 @@ describe('<InstanceListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('awx');
+    expect(wrapper.find('Td').at(1).text()).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
-    expect(
-      wrapper
-        .find('Td')
-        .at(2)
-        .text()
-    ).toBe('Auto');
+    expect(wrapper.find('Td').at(2).text()).toBe('Auto');
     expect(
       wrapper
         .find('Td')
@@ -170,12 +160,9 @@ describe('<InstanceListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .first()
-        .prop('select').onSelect
-    ).toEqual(onSelect);
+    expect(wrapper.find('Td').first().prop('select').onSelect).toEqual(
+      onSelect
+    );
   });
 
   test('should display instance toggle', () => {

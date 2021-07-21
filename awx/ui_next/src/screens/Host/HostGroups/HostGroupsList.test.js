@@ -103,7 +103,7 @@ describe('<HostGroupsList />', () => {
         }
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -121,11 +121,7 @@ describe('<HostGroupsList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
 
     await act(async () => {
@@ -137,11 +133,7 @@ describe('<HostGroupsList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(true);
 
     await act(async () => {
@@ -153,31 +145,27 @@ describe('<HostGroupsList />', () => {
     });
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .props().checked
+      wrapper.find('.pf-c-table__check').first().find('input').props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
     expect.assertions(9);
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
   });
@@ -189,7 +177,7 @@ describe('<HostGroupsList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<HostGroupsList host={host} />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 
   test('should show add button according to permissions', async () => {
@@ -204,7 +192,7 @@ describe('<HostGroupsList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<HostGroupsList host={host} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 
@@ -235,18 +223,15 @@ describe('<HostGroupsList />', () => {
     await act(async () => {
       wrapper.find('ToolbarAddButton').simulate('click');
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('CheckboxListItem')
-        .first()
-        .invoke('onSelect')();
+      wrapper.find('CheckboxListItem').first().invoke('onSelect')();
     });
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
     });
-    await waitForElement(wrapper, 'AssociateModal', el => el.length === 0);
+    await waitForElement(wrapper, 'AssociateModal', (el) => el.length === 0);
     expect(InventoriesAPI.readGroups).toHaveBeenCalledTimes(1);
     expect(HostsAPI.associateGroup).toHaveBeenCalledTimes(1);
   });
@@ -256,14 +241,14 @@ describe('<HostGroupsList />', () => {
     expect(HostsAPI.disassociateGroup).toHaveBeenCalledTimes(0);
     expect(HostsAPI.readAllGroups).toHaveBeenCalledTimes(1);
 
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('.pf-c-table__check input').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(true);
     });
     wrapper.find('button[aria-label="Disassociate"]').simulate('click');

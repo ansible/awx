@@ -186,13 +186,11 @@ function CredentialField({ credentialType, fieldOptions }) {
     formikValues.passwordPrompts[fieldOptions.id];
 
   if (fieldOptions.choices) {
-    const selectOptions = fieldOptions.choices.map(choice => {
-      return {
-        value: choice,
-        key: choice,
-        label: choice,
-      };
-    });
+    const selectOptions = fieldOptions.choices.map((choice) => ({
+      value: choice,
+      key: choice,
+      label: choice,
+    }));
     return (
       <FormGroup
         fieldId={`credential-${fieldOptions.id}`}

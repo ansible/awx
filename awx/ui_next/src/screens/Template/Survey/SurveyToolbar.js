@@ -38,7 +38,7 @@ function SurveyToolbar({
           <Checkbox
             isDisabled={!canEdit}
             isChecked={isAllSelected}
-            onChange={isChecked => {
+            onChange={(isChecked) => {
               onSelectAll(isChecked);
             }}
             aria-label={t`Select all`}

@@ -11,7 +11,7 @@ import WorkflowActionTooltip from './WorkflowActionTooltip';
 import WorkflowActionTooltipItem from './WorkflowActionTooltipItem';
 
 const StartG = styled.g`
-  pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.ignorePointerEvents ? 'none' : 'auto')};
 `;
 
 const StartForeignObject = styled.foreignObject`

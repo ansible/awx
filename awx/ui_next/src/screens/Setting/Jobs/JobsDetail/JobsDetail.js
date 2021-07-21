@@ -20,7 +20,12 @@ function JobsDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: jobs } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: jobs,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('jobs');
 
@@ -32,7 +37,7 @@ function JobsDetail() {
       } = data;
 
       const mergedData = {};
-      Object.keys(jobsData).forEach(key => {
+      Object.keys(jobsData).forEach((key) => {
         mergedData[key] = options[key];
         mergedData[key].value = jobsData[key];
       });
@@ -72,19 +77,17 @@ function JobsDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && jobs && (
           <DetailList>
-            {jobs.map(([key, detail]) => {
-              return (
-                <SettingDetail
-                  key={key}
-                  id={key}
-                  helpText={detail?.help_text}
-                  label={detail?.label}
-                  type={detail?.type}
-                  unit={detail?.unit}
-                  value={detail?.value}
-                />
-              );
-            })}
+            {jobs.map(([key, detail]) => (
+              <SettingDetail
+                key={key}
+                id={key}
+                helpText={detail?.help_text}
+                label={detail?.label}
+                type={detail?.type}
+                unit={detail?.unit}
+                value={detail?.value}
+              />
+            ))}
           </DetailList>
         )}
         {me?.is_superuser && (

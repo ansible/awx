@@ -8,11 +8,11 @@ function RoutedTabs({ tabsArray }) {
   const location = useLocation();
 
   const getActiveTabId = () => {
-    const match = tabsArray.find(tab => tab.link === location.pathname);
+    const match = tabsArray.find((tab) => tab.link === location.pathname);
     if (match) {
       return match.id;
     }
-    const subpathMatch = tabsArray.find(tab =>
+    const subpathMatch = tabsArray.find((tab) =>
       location.pathname.startsWith(tab.link)
     );
     if (subpathMatch) {
@@ -22,7 +22,7 @@ function RoutedTabs({ tabsArray }) {
   };
 
   function handleTabSelect(event, eventKey) {
-    const match = tabsArray.find(tab => tab.id === eventKey);
+    const match = tabsArray.find((tab) => tab.id === eventKey);
     if (match) {
       history.push(match.link);
     }
@@ -30,7 +30,7 @@ function RoutedTabs({ tabsArray }) {
 
   return (
     <Tabs activeKey={getActiveTabId()} onSelect={handleTabSelect}>
-      {tabsArray.map(tab => (
+      {tabsArray.map((tab) => (
         <Tab
           aria-label={typeof tab.name === 'string' ? tab.name : null}
           eventKey={tab.id}

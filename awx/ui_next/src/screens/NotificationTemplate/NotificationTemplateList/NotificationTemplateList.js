@@ -61,10 +61,10 @@ function NotificationTemplatesList() {
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
           actionsResponse.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -80,13 +80,8 @@ function NotificationTemplatesList() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    clearSelected,
-    selectAll,
-  } = useSelected(templates);
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(templates);
 
   const {
     isLoading: isDeleteLoading,
@@ -94,11 +89,13 @@ function NotificationTemplatesList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ id }) => NotificationTemplatesAPI.destroy(id))
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map(({ id }) => NotificationTemplatesAPI.destroy(id))
+        ),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -111,13 +108,13 @@ function NotificationTemplatesList() {
     clearSelected();
   };
 
-  const addTestToast = useCallback(notification => {
-    setTestToasts(oldToasts => [...oldToasts, notification]);
+  const addTestToast = useCallback((notification) => {
+    setTestToasts((oldToasts) => [...oldToasts, notification]);
   }, []);
 
-  const removeTestToast = notificationId => {
-    setTestToasts(oldToasts =>
-      oldToasts.filter(toast => toast.id !== notificationId)
+  const removeTestToast = (notificationId) => {
+    setTestToasts((oldToasts) =>
+      oldToasts.filter((toast) => toast.id !== notificationId)
     );
   };
 
@@ -173,7 +170,7 @@ function NotificationTemplatesList() {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 isAllSelected={isAllSelected}
@@ -207,7 +204,7 @@ function NotificationTemplatesList() {
                 fetchTemplates={fetchTemplates}
                 template={template}
                 detailUrl={`${match.url}/${template.id}`}
-                isSelected={selected.some(row => row.id === template.id)}
+                isSelected={selected.some((row) => row.id === template.id)}
                 onSelect={() => handleSelect(template)}
                 rowIndex={index}
               />
@@ -229,8 +226,8 @@ function NotificationTemplatesList() {
       </AlertModal>
       <AlertGroup data-cy={alertGroupDataCy} isToast>
         {testToasts
-          .filter(notification => notification.status !== 'pending')
-          .map(notification => (
+          .filter((notification) => notification.status !== 'pending')
+          .map((notification) => (
             <Alert
               actionClose={
                 <AlertActionCloseButton

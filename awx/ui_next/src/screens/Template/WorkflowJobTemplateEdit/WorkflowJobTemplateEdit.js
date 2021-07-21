@@ -15,7 +15,7 @@ function WorkflowJobTemplateEdit({ template }) {
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const {
       labels,
       inventory,
@@ -48,6 +48,7 @@ function WorkflowJobTemplateEdit({ template }) {
     );
     let orgId = formOrgId || templateOrgId;
     if (!orgId) {
+      // eslint-disable-next-line no-useless-catch
       try {
         const {
           data: { results },
@@ -58,10 +59,10 @@ function WorkflowJobTemplateEdit({ template }) {
       }
     }
 
-    const disassociationPromises = await removed.map(label =>
+    const disassociationPromises = await removed.map((label) =>
       WorkflowJobTemplatesAPI.disassociateLabel(template.id, label)
     );
-    const associationPromises = await added.map(label =>
+    const associationPromises = await added.map((label) =>
       WorkflowJobTemplatesAPI.associateLabel(template.id, label, orgId)
     );
     const results = [...disassociationPromises, ...associationPromises];

@@ -25,13 +25,13 @@ export default function useWsInventories(
     setInventories(initialInventories);
   }, [initialInventories]);
 
-  const enqueueId = id => {
+  const enqueueId = (id) => {
     if (!inventoriesToFetch.includes(id)) {
-      setInventoriesToFetch(ids => ids.concat(id));
+      setInventoriesToFetch((ids) => ids.concat(id));
     }
   };
   useEffect(
-    function fetchUpdatedInventories() {
+    () => {
       (async () => {
         if (!throttledInventoriesToFetch.length) {
           return;
@@ -41,8 +41,8 @@ export default function useWsInventories(
           throttledInventoriesToFetch
         );
         const updated = [...inventories];
-        newInventories.forEach(inventory => {
-          const index = inventories.findIndex(i => i.id === inventory.id);
+        newInventories.forEach((inventory) => {
+          const index = inventories.findIndex((i) => i.id === inventory.id);
           if (index === -1) {
             return;
           }
@@ -56,7 +56,7 @@ export default function useWsInventories(
   );
 
   useEffect(
-    function processWsMessage() {
+    () => {
       if (
         !lastMessage?.inventory_id ||
         (lastMessage.type !== 'inventory_update' &&
@@ -65,7 +65,7 @@ export default function useWsInventories(
         return;
       }
       const index = inventories.findIndex(
-        p => p.id === lastMessage.inventory_id
+        (p) => p.id === lastMessage.inventory_id
       );
       if (index === -1) {
         return;

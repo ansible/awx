@@ -50,10 +50,7 @@ describe('<SelectedList />', () => {
         onRemove={onRemove}
       />
     );
-    wrapper
-      .find('.pf-c-chip button')
-      .first()
-      .simulate('click');
+    wrapper.find('.pf-c-chip button').first().simulate('click');
     expect(onRemove).toBeCalledWith({
       id: 1,
       name: 'foo',

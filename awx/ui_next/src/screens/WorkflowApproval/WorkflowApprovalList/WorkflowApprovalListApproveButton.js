@@ -20,7 +20,7 @@ function WorkflowApprovalListApproveButton({ onApprove, selectedItems }) {
 
     const itemsUnableToApprove = selectedItems
       .filter(cannotApprove)
-      .map(item => item.name)
+      .map((item) => item.name)
       .join(', ');
 
     if (selectedItems.some(cannotApprove)) {

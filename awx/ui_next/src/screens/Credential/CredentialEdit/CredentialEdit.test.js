@@ -355,7 +355,7 @@ describe('<CredentialEdit />', () => {
     });
 
     test('handleCancel returns the user to credential detail', async () => {
-      await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
       await act(async () => {
         wrapper.find('Button[aria-label="Cancel"]').simulate('click');
       });
@@ -364,7 +364,7 @@ describe('<CredentialEdit />', () => {
     });
 
     test('handleSubmit should post to the api', async () => {
-      await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
       await act(async () => {
         wrapper.find('CredentialForm').prop('onSubmit')({
           user: 1,

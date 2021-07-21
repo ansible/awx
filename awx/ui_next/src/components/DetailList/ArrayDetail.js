@@ -24,7 +24,7 @@ function ArrayDetail({ label, value, dataCy }) {
         {label}
       </DetailName>
       <Value component={TextListItemVariants.dd} data-cy={valueCy}>
-        {vals.map(v => (
+        {vals.map((v) => (
           <div key={v}>{v}</div>
         ))}
       </Value>

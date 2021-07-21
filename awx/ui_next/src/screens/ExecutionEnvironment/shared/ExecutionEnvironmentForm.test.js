@@ -140,7 +140,7 @@ describe('<ExecutionEnvironmentForm/>', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -234,7 +234,7 @@ describe('<ExecutionEnvironmentForm/>', () => {
         />
       );
     });
-    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(newWrapper, 'ContentLoading', (el) => el.length === 0);
     expect(newWrapper.find('OrganizationLookup').prop('isDisabled')).toEqual(
       true
     );
@@ -257,7 +257,7 @@ describe('<ExecutionEnvironmentForm/>', () => {
         />
       );
     });
-    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(newWrapper, 'ContentLoading', (el) => el.length === 0);
     expect(newWrapper.find('OrganizationLookup').prop('isDisabled')).toEqual(
       false
     );
@@ -284,7 +284,7 @@ describe('<ExecutionEnvironmentForm/>', () => {
         />
       );
     });
-    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(newWrapper, 'ContentLoading', (el) => el.length === 0);
     expect(newWrapper.find('OrganizationLookup').prop('isDisabled')).toEqual(
       true
     );

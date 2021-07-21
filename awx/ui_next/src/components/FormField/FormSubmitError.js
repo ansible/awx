@@ -29,7 +29,7 @@ function FormSubmitError({ error }) {
         isInline
         title={
           Array.isArray(errorMessage)
-            ? errorMessage.map(msg => <div key={msg}>{msg}</div>)
+            ? errorMessage.map((msg) => <div key={msg}>{msg}</div>)
             : errorMessage
         }
       />

@@ -26,14 +26,14 @@ import {
 import getNodeType from './shared/WorkflowJobTemplateVisualizerUtils';
 
 const NodeG = styled.g`
-  pointer-events: ${props => (props.noPointerEvents ? 'none' : 'initial')};
-  cursor: ${props => (props.job ? 'pointer' : 'default')};
+  pointer-events: ${(props) => (props.noPointerEvents ? 'none' : 'initial')};
+  cursor: ${(props) => (props.job ? 'pointer' : 'default')};
 `;
 
 const NodeContents = styled.div`
   font-size: 13px;
   padding: 0px 10px;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isInvalidLinkTarget ? '#D7D7D7' : '#FFFFFF'};
   height: 100%;
   display: flex;
@@ -67,9 +67,8 @@ function VisualizerNode({
   const [credentialsError, setCredentialsError] = useState(null);
   const [detailError, setDetailError] = useState(null);
   const dispatch = useContext(WorkflowDispatchContext);
-  const { addingLink, addLinkSourceNode, nodePositions, nodes } = useContext(
-    WorkflowStateContext
-  );
+  const { addingLink, addLinkSourceNode, nodePositions, nodes } =
+    useContext(WorkflowStateContext);
   const isAddLinkSourceNode =
     addLinkSourceNode && addLinkSourceNode.id === node.id;
 
@@ -78,7 +77,7 @@ function VisualizerNode({
 
   const updateNode = async () => {
     const updatedNodes = [...nodes];
-    const updatedNode = updatedNodes.find(n => n.id === node.id);
+    const updatedNode = updatedNodes.find((n) => n.id === node.id);
     if (
       !node.fullUnifiedJobTemplate &&
       node?.originalNodeObject?.summary_fields?.unified_job_template
@@ -244,9 +243,9 @@ function VisualizerNode({
         onMouseEnter={handleNodeMouseEnter}
         onMouseLeave={handleNodeMouseLeave}
         ref={ref}
-        transform={`translate(${nodePositions[node.id].x},${nodePositions[
-          node.id
-        ].y - nodePositions[1].y})`}
+        transform={`translate(${nodePositions[node.id].x},${
+          nodePositions[node.id].y - nodePositions[1].y
+        })`}
       >
         {(node.all_parents_must_converge ||
           node?.originalNodeObject?.all_parents_must_converge) && (

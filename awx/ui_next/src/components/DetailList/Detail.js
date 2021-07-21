@@ -8,7 +8,7 @@ const DetailName = styled(({ fullWidth, ...props }) => (
   <TextListItem {...props} />
 ))`
   font-weight: var(--pf-global--FontWeight--bold);
-  ${props =>
+  ${(props) =>
     props.fullWidth &&
     `
     grid-column: 1;
@@ -21,12 +21,12 @@ const DetailValue = styled(
   )
 )`
   word-break: break-all;
-  ${props =>
+  ${(props) =>
     props.fullWidth &&
     `
     grid-column: 2 / -1;
   `}
-  ${props =>
+  ${(props) =>
     (props.isEncrypted || props.isNotConfigured) &&
     `
     color: var(--pf-global--Color--400);

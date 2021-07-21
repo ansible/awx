@@ -3,7 +3,7 @@ import { isValidDate } from '@patternfly/react-core';
 
 export function required(message) {
   const errorMessage = message || t`This field must not be blank`;
-  return value => {
+  return (value) => {
     if (typeof value === 'string' && !value.trim()) {
       return errorMessage;
     }
@@ -18,7 +18,7 @@ export function required(message) {
 }
 
 export function validateTime() {
-  return value => {
+  return (value) => {
     const timeRegex = new RegExp(
       `^\\s*(\\d\\d?):([0-5])(\\d)\\s*([AaPp][Mm])?\\s*$`
     );
@@ -38,7 +38,7 @@ export function validateTime() {
 }
 
 export function maxLength(max) {
-  return value => {
+  return (value) => {
     if (value.trim().length > max) {
       return t`This field must not exceed ${max} characters`;
     }
@@ -47,7 +47,7 @@ export function maxLength(max) {
 }
 
 export function minLength(min) {
-  return value => {
+  return (value) => {
     if (value.trim().length < min) {
       return t`This field must be at least ${min} characters`;
     }
@@ -56,7 +56,7 @@ export function minLength(min) {
 }
 
 export function minMaxValue(min, max) {
-  return value => {
+  return (value) => {
     if (value < min || value > max) {
       return t`This field must be a number and have a value between ${min} and ${max}`;
     }
@@ -65,7 +65,7 @@ export function minMaxValue(min, max) {
 }
 
 export function requiredEmail() {
-  return value => {
+  return (value) => {
     if (!value) {
       return t`This field must not be blank`;
     }
@@ -90,7 +90,7 @@ export function requiredEmail() {
 }
 
 export function noWhiteSpace() {
-  return value => {
+  return (value) => {
     if (/\s/.test(value)) {
       return t`This field must not contain spaces`;
     }
@@ -99,7 +99,7 @@ export function noWhiteSpace() {
 }
 
 export function integer() {
-  return value => {
+  return (value) => {
     const str = String(value);
     if (!Number.isInteger(value) && /[^0-9]/.test(str)) {
       return t`This field must be an integer`;
@@ -109,7 +109,7 @@ export function integer() {
 }
 
 export function number() {
-  return value => {
+  return (value) => {
     const str = String(value);
     if (/^-?[0-9]*(\.[0-9]*)?$/.test(str)) {
       return undefined;
@@ -123,7 +123,7 @@ export function number() {
 }
 
 export function url() {
-  return value => {
+  return (value) => {
     if (!value) {
       return undefined;
     }
@@ -141,7 +141,7 @@ export function url() {
 }
 
 export function combine(validators) {
-  return value => {
+  return (value) => {
     for (let i = 0; i < validators.length; i++) {
       const validate = validators[i];
       const error = validate ? validate(value) : null;
@@ -154,7 +154,7 @@ export function combine(validators) {
 }
 
 export function regExp() {
-  return value => {
+  return (value) => {
     try {
       RegExp(value);
     } catch {

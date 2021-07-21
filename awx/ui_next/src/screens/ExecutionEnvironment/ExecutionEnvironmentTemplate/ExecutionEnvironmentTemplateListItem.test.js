@@ -27,18 +27,8 @@ describe('<ExecutionEnvironmentTemplateListItem/>', () => {
       );
     });
     expect(wrapper.find('ExecutionEnvironmentTemplateListItem').length).toBe(1);
-    expect(
-      wrapper
-        .find('Td')
-        .at(0)
-        .text()
-    ).toBe(template.name);
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Job Template');
+    expect(wrapper.find('Td').at(0).text()).toBe(template.name);
+    expect(wrapper.find('Td').at(1).text()).toBe('Job Template');
   });
 
   test('should distinguish template types', async () => {
@@ -55,11 +45,6 @@ describe('<ExecutionEnvironmentTemplateListItem/>', () => {
       );
     });
     expect(wrapper.find('ExecutionEnvironmentTemplateListItem').length).toBe(1);
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe('Workflow Job Template');
+    expect(wrapper.find('Td').at(1).text()).toBe('Workflow Job Template');
   });
 });

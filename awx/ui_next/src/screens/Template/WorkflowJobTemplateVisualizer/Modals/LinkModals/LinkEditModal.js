@@ -14,7 +14,7 @@ function LinkEditModal() {
           {t`Edit Link`}
         </Title>
       }
-      onConfirm={linkType => dispatch({ type: 'UPDATE_LINK', linkType })}
+      onConfirm={(linkType) => dispatch({ type: 'UPDATE_LINK', linkType })}
     />
   );
 }

@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -71,10 +71,10 @@ function ActivityStream() {
           count: response.data.count,
           relatedSearchableKeys: (
             actionsResponse?.data?.related_search_fields || []
-          ).map(val => val.slice(0, -8)),
+          ).map((val) => val.slice(0, -8)),
           searchableKeys: Object.keys(
             actionsResponse.data.actions?.GET || {}
-          ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+          ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
         };
       },
       [location] // eslint-disable-line react-hooks/exhaustive-deps
@@ -90,7 +90,7 @@ function ActivityStream() {
     fetchActivityStream();
   }, [fetchActivityStream]);
 
-  const pushHistoryState = urlParamsToAdd => {
+  const pushHistoryState = (urlParamsToAdd) => {
     const pageOneQs = updateQueryString(QS_CONFIG, location.search, {
       page: 1,
     });
@@ -102,7 +102,7 @@ function ActivityStream() {
   };
 
   return (
-    <Fragment>
+    <>
       <PageSection
         variant={light}
         className="pf-m-condensed"
@@ -253,16 +253,16 @@ function ActivityStream() {
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
-            renderToolbar={props => (
+            renderToolbar={(props) => (
               <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
             )}
-            renderRow={streamItem => (
+            renderRow={(streamItem) => (
               <ActivityStreamListItem streamItem={streamItem} />
             )}
           />
         </Card>
       </PageSection>
-    </Fragment>
+    </>
   );
 }
 

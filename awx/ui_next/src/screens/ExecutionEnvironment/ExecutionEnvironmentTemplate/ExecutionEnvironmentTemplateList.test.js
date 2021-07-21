@@ -67,7 +67,7 @@ describe('<ExecutionEnvironmentTemplateList/>', () => {
     await waitForElement(
       wrapper,
       'ExecutionEnvironmentTemplateList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
   });
 
@@ -90,7 +90,7 @@ describe('<ExecutionEnvironmentTemplateList/>', () => {
     await waitForElement(
       wrapper,
       'ExecutionEnvironmentTemplateList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
 
     expect(wrapper.find('ExecutionEnvironmentTemplateListItem').length).toBe(3);
@@ -109,7 +109,7 @@ describe('<ExecutionEnvironmentTemplateList/>', () => {
     waitForElement(
       wrapper,
       'ExecutionEnvironmentTemplateList',
-      el => el.length > 0
+      (el) => el.length > 0
     );
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });

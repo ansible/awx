@@ -66,7 +66,7 @@ class ListHeader extends React.Component {
   handleRemoveAll() {
     const { location, qsConfig } = this.props;
     const oldParams = parseQueryString(qsConfig, location.search);
-    Object.keys(oldParams).forEach(key => {
+    Object.keys(oldParams).forEach((key) => {
       oldParams[key] = null;
     });
     delete oldParams.page_size;
@@ -106,7 +106,7 @@ class ListHeader extends React.Component {
     const params = parseQueryString(qsConfig, location.search);
     const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
     return (
-      <Fragment>
+      <>
         {isEmpty ? (
           <Toolbar
             id={`${qsConfig.namespace}-list-toolbar`}
@@ -120,7 +120,7 @@ class ListHeader extends React.Component {
             </ToolbarContent>
           </Toolbar>
         ) : (
-          <Fragment>
+          <>
             {renderToolbar({
               itemCount,
               searchColumns,
@@ -135,9 +135,9 @@ class ListHeader extends React.Component {
               qsConfig,
               pagination,
             })}
-          </Fragment>
+          </>
         )}
-      </Fragment>
+      </>
     );
   }
 }
@@ -153,7 +153,7 @@ ListHeader.propTypes = {
 };
 
 ListHeader.defaultProps = {
-  renderToolbar: props => <DataListToolbar {...props} />,
+  renderToolbar: (props) => <DataListToolbar {...props} />,
   searchableKeys: [],
   sortColumns: null,
   relatedSearchableKeys: [],

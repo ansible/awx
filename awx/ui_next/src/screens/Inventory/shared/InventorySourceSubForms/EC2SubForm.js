@@ -19,7 +19,7 @@ const EC2SubForm = () => {
   const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
-    value => {
+    (value) => {
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);
     },

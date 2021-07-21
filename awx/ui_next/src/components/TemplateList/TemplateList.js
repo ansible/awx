@@ -68,10 +68,10 @@ function TemplateList({ defaultParams }) {
         wfjtActions: responses[2].data.actions,
         relatedSearchableKeys: (
           responses[3]?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           responses[3].data.actions?.GET || {}
-        ).filter(key => responses[3].data.actions?.GET[key].filterable),
+        ).filter((key) => responses[3].data.actions?.GET[key].filterable),
       };
     }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
     {
@@ -90,17 +90,11 @@ function TemplateList({ defaultParams }) {
 
   const templates = useWsTemplates(results);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(templates);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(templates);
 
-  const { expanded, isAllExpanded, handleExpand, expandAll } = useExpanded(
-    templates
-  );
+  const { expanded, isAllExpanded, handleExpand, expandAll } =
+    useExpanded(templates);
 
   const {
     isLoading: isDeleteLoading,
@@ -108,19 +102,21 @@ function TemplateList({ defaultParams }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(
-        selected.map(({ type, id }) => {
-          if (type === 'job_template') {
-            return JobTemplatesAPI.destroy(id);
-          }
-          if (type === 'workflow_job_template') {
-            return WorkflowJobTemplatesAPI.destroy(id);
-          }
-          return false;
-        })
-      );
-    }, [selected]),
+    useCallback(
+      () =>
+        Promise.all(
+          selected.map(({ type, id }) => {
+            if (type === 'job_template') {
+              return JobTemplatesAPI.destroy(id);
+            }
+            if (type === 'workflow_job_template') {
+              return WorkflowJobTemplatesAPI.destroy(id);
+            }
+            return false;
+          })
+        ),
+      [selected]
+    ),
     {
       qsConfig,
       allItemsSelected: isAllSelected,
@@ -231,7 +227,7 @@ function TemplateList({ defaultParams }) {
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DatalistToolbar
               {...props}
               isAllSelected={isAllSelected}
@@ -265,9 +261,9 @@ function TemplateList({ defaultParams }) {
               template={template}
               detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
-              isExpanded={expanded.some(row => row.id === template.id)}
+              isExpanded={expanded.some((row) => row.id === template.id)}
               onExpand={() => handleExpand(template)}
-              isSelected={selected.some(row => row.id === template.id)}
+              isSelected={selected.some((row) => row.id === template.id)}
               fetchTemplates={fetchTemplates}
               rowIndex={index}
             />

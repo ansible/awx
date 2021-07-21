@@ -68,9 +68,8 @@ function OrganizationDetail({ organization }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const deleteDetailsRequests = relatedResourceDeleteRequests.organization(
-    organization
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.organization(organization);
 
   if (hasContentLoading) {
     return <ContentLoading />;
@@ -80,11 +79,10 @@ function OrganizationDetail({ organization }) {
     return <ContentError error={contentError} />;
   }
 
-  const buildLinkURL = instance => {
-    return instance.is_container_group
+  const buildLinkURL = (instance) =>
+    instance.is_container_group
       ? '/instance_groups/container_group/'
       : '/instance_groups/';
-  };
 
   return (
     <CardBody>
@@ -119,7 +117,7 @@ function OrganizationDetail({ organization }) {
             label={t`Instance Groups`}
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
-                {instanceGroups.map(ig => (
+                {instanceGroups.map((ig) => (
                   <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
                     <Chip key={ig.id} isReadOnly>
                       {ig.name}
@@ -136,7 +134,7 @@ function OrganizationDetail({ organization }) {
             label={t`Galaxy Credentials`}
             value={
               <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
-                {galaxy_credentials.map(credential => (
+                {galaxy_credentials.map((credential) => (
                   <Link to={`/credentials/${credential.id}/details`}>
                     <CredentialChip
                       credential={credential}

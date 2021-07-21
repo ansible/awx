@@ -34,7 +34,7 @@ describe('<InventoryAdd />', () => {
       { name: 'Bizz', id: 1 },
       { name: 'Buzz', id: 2 },
     ];
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
 
     await act(async () => {
       wrapper.find('InventoryForm').prop('onSubmit')({
@@ -48,7 +48,7 @@ describe('<InventoryAdd />', () => {
       name: 'new Foo',
       organization: 2,
     });
-    instanceGroups.map(IG =>
+    instanceGroups.map((IG) =>
       expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(
         13,
         IG.id
@@ -58,7 +58,7 @@ describe('<InventoryAdd />', () => {
   });
 
   test('handleCancel should return the user back to the inventories list', async () => {
-    await waitForElement(wrapper, 'isLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('Button[aria-label="Cancel"]').simulate('click');
     });

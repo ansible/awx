@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { useLocation, withRouter } from 'react-router-dom';
@@ -48,13 +48,13 @@ function Sort({ columns, qsConfig, onSort }) {
     sortOrder = 'ascending';
   }
 
-  if (qsConfig.integerFields.find(field => field === sortKey)) {
+  if (qsConfig.integerFields.find((field) => field === sortKey)) {
     isNumeric = true;
   } else {
     isNumeric = false;
   }
 
-  const handleDropdownToggle = isOpen => {
+  const handleDropdownToggle = (isOpen) => {
     setIsSortDropdownOpen(isOpen);
   };
 
@@ -63,7 +63,7 @@ function Sort({ columns, qsConfig, onSort }) {
 
     const [{ key }] = columns.filter(({ name }) => name === innerText);
     sortKey = key;
-    if (qsConfig.integerFields.find(field => field === key)) {
+    if (qsConfig.integerFields.find((field) => field === key)) {
       isNumeric = true;
     } else {
       isNumeric = false;
@@ -106,7 +106,7 @@ function Sort({ columns, qsConfig, onSort }) {
       sortOrder === 'ascending' ? SortAlphaDownIcon : SortAlphaDownAltIcon;
   }
   return (
-    <Fragment>
+    <>
       {sortedColumnName && (
         <InputGroup>
           {(sortDropdownItems.length > 0 && (
@@ -133,7 +133,7 @@ function Sort({ columns, qsConfig, onSort }) {
           </Button>
         </InputGroup>
       )}
-    </Fragment>
+    </>
   );
 }
 

@@ -49,7 +49,7 @@ describe('<InventorySourceForm />', () => {
           <InventorySourceForm onCancel={() => {}} onSubmit={onSubmit} />
         );
       });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
     afterAll(() => {
@@ -117,7 +117,7 @@ describe('<InventorySourceForm />', () => {
         <InventorySourceForm onCancel={onCancel} onSubmit={() => {}} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(onCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     expect(onCancel).toBeCalled();
@@ -131,7 +131,7 @@ describe('<InventorySourceForm />', () => {
         <InventorySourceForm onCancel={() => {}} onSubmit={() => {}} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 });

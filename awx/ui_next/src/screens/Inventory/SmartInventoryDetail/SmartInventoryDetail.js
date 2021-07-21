@@ -69,7 +69,11 @@ function SmartInventoryDetail({ inventory }) {
     fetchData();
   }, [fetchData]);
 
-  const { error: deleteError, isLoading, request: handleDelete } = useRequest(
+  const {
+    error: deleteError,
+    isLoading,
+    request: handleDelete,
+  } = useRequest(
     useCallback(async () => {
       await InventoriesAPI.destroy(id);
       history.push(`/inventories`);
@@ -118,7 +122,7 @@ function SmartInventoryDetail({ inventory }) {
               label={t`Instance groups`}
               value={
                 <ChipGroup numChips={5} totalChips={instanceGroups.length}>
-                  {instanceGroups.map(ig => (
+                  {instanceGroups.map((ig) => (
                     <Chip key={ig.id} isReadOnly>
                       {ig.name}
                     </Chip>

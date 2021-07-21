@@ -45,11 +45,6 @@ describe('<OrganizationExecEnvListItem/>', () => {
         </table>
       );
     });
-    expect(
-      wrapper
-        .find('Td')
-        .at(1)
-        .text()
-    ).toBe(executionEnvironment.image);
+    expect(wrapper.find('Td').at(1).text()).toBe(executionEnvironment.image);
   });
 });

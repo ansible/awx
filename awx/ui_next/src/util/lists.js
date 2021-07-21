@@ -4,13 +4,13 @@ export function getAddedAndRemoved(original, current) {
   current = current || [];
   const added = [];
   const removed = [];
-  original.forEach(orig => {
-    if (!current.find(cur => cur.id === orig.id)) {
+  original.forEach((orig) => {
+    if (!current.find((cur) => cur.id === orig.id)) {
       removed.push(orig);
     }
   });
-  current.forEach(cur => {
-    if (!original.find(orig => orig.id === cur.id)) {
+  current.forEach((cur) => {
+    if (!original.find((orig) => orig.id === cur.id)) {
       added.push(cur);
     }
   });

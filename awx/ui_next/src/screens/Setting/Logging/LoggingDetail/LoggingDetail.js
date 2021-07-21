@@ -20,7 +20,12 @@ function LoggingDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: logging } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: logging,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('logging');
 
@@ -41,7 +46,7 @@ function LoggingDetail() {
       );
 
       const mergedData = {};
-      Object.keys(loggingData).forEach(key => {
+      Object.keys(loggingData).forEach((key) => {
         mergedData[key] = options[key];
         mergedData[key].value = loggingData[key];
       });

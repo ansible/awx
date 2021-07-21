@@ -58,9 +58,9 @@ function InventoryHostList() {
         actions: hostOptions.data.actions,
         relatedSearchableKeys: (
           hostOptions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(hostOptions.data.actions?.GET || {}).filter(
-          key => hostOptions.data.actions?.GET[key].filterable
+          (key) => hostOptions.data.actions?.GET[key].filterable
         ),
       };
     }, [id, search]),
@@ -79,13 +79,8 @@ function InventoryHostList() {
     fetchData();
   }, [fetchData]);
 
-  const {
-    selected,
-    isAllSelected,
-    handleSelect,
-    selectAll,
-    clearSelected,
-  } = useSelected(hosts);
+  const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
+    useSelected(hosts);
 
   const {
     isLoading: isDeleteLoading,
@@ -93,9 +88,10 @@ function InventoryHostList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map((host) => HostsAPI.destroy(host.id))),
+      [selected]
+    ),
     { qsConfig: QS_CONFIG, fetchItems: fetchData }
   );
 
@@ -144,7 +140,7 @@ function InventoryHostList() {
             <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>
         }
-        renderToolbar={props => (
+        renderToolbar={(props) => (
           <DataListToolbar
             {...props}
             isAllSelected={isAllSelected}
@@ -184,7 +180,7 @@ function InventoryHostList() {
             host={host}
             detailUrl={`/inventories/inventory/${id}/hosts/${host.id}/details`}
             editUrl={`/inventories/inventory/${id}/hosts/${host.id}/edit`}
-            isSelected={selected.some(row => row.id === host.id)}
+            isSelected={selected.some((row) => row.id === host.id)}
             onSelect={() => handleSelect(host)}
             rowIndex={index}
           />

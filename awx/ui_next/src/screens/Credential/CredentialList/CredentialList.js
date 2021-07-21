@@ -46,7 +46,7 @@ function CredentialList() {
       ]);
       const searchKeys = Object.keys(
         credActions.data.actions?.GET || {}
-      ).filter(key => credActions.data.actions?.GET[key].filterable);
+      ).filter((key) => credActions.data.actions?.GET[key].filterable);
       const item = searchKeys.indexOf('type');
       if (item) {
         searchKeys[item] = 'credential_type__kind';
@@ -57,7 +57,7 @@ function CredentialList() {
         actions: credActions.data.actions,
         relatedSearchableKeys: (
           credActions?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: searchKeys,
       };
     }, [location]),
@@ -89,9 +89,10 @@ function CredentialList() {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(() => {
-      return Promise.all(selected.map(({ id }) => CredentialsAPI.destroy(id)));
-    }, [selected]),
+    useCallback(
+      () => Promise.all(selected.map(({ id }) => CredentialsAPI.destroy(id))),
+      [selected]
+    ),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -153,12 +154,12 @@ function CredentialList() {
               credential={item}
               fetchCredentials={fetchCredentials}
               detailUrl={`/credentials/${item.id}/details`}
-              isSelected={selected.some(row => row.id === item.id)}
+              isSelected={selected.some((row) => row.id === item.id)}
               onSelect={() => handleSelect(item)}
               rowIndex={index}
             />
           )}
-          renderToolbar={props => (
+          renderToolbar={(props) => (
             <DataListToolbar
               {...props}
               isAllSelected={isAllSelected}

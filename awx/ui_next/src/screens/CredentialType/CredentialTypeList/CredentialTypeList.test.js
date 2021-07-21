@@ -53,7 +53,7 @@ describe('<CredentialTypeList', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
-    await waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    await waitForElement(wrapper, 'CredentialTypeList', (el) => el.length > 0);
   });
 
   test('should have proper number of delete detail requests', () => {
@@ -66,7 +66,7 @@ describe('<CredentialTypeList', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
-    await waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    await waitForElement(wrapper, 'CredentialTypeList', (el) => el.length > 0);
     expect(wrapper.find('CredentialTypeListItem').length).toBe(2);
     expect(CredentialTypesAPI.read).toBeCalled();
     expect(CredentialTypesAPI.readOptions).toBeCalled();
@@ -77,7 +77,7 @@ describe('<CredentialTypeList', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
-    await waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    await waitForElement(wrapper, 'CredentialTypeList', (el) => el.length > 0);
 
     wrapper
       .find('.pf-c-table__check')
@@ -87,11 +87,7 @@ describe('<CredentialTypeList', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
 
     await act(async () => {
@@ -115,7 +111,7 @@ describe('<CredentialTypeList', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
-    waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    waitForElement(wrapper, 'CredentialTypeList', (el) => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 
@@ -135,7 +131,7 @@ describe('<CredentialTypeList', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
-    await waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    await waitForElement(wrapper, 'CredentialTypeList', (el) => el.length > 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 
@@ -155,7 +151,7 @@ describe('<CredentialTypeList', () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
-    waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    waitForElement(wrapper, 'CredentialTypeList', (el) => el.length > 0);
 
     wrapper
       .find('.pf-c-table__check')
@@ -164,11 +160,7 @@ describe('<CredentialTypeList', () => {
       .simulate('change', 'a');
     wrapper.update();
     expect(
-      wrapper
-        .find('.pf-c-table__check')
-        .first()
-        .find('input')
-        .prop('checked')
+      wrapper.find('.pf-c-table__check').first().find('input').prop('checked')
     ).toBe(true);
 
     await act(async () =>

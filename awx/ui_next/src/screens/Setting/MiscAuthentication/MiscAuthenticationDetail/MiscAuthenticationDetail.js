@@ -18,7 +18,12 @@ function MiscAuthenticationDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
-  const { isLoading, error, request, result: authentication } = useRequest(
+  const {
+    isLoading,
+    error,
+    request,
+    result: authentication,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('authentication');
       return data;
@@ -56,7 +61,7 @@ function MiscAuthenticationDetail() {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && authentication && (
           <DetailList>
-            {Object.keys(authentication).map(key => {
+            {Object.keys(authentication).map((key) => {
               const record = options?.[key];
               return (
                 <SettingDetail

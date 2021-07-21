@@ -41,10 +41,10 @@ function JobListCancelButton({ jobsToCancel, onCancel }) {
   const renderTooltip = () => {
     const cannotCancelPermissions = jobsToCancel
       .filter(cannotCancelBecausePermissions)
-      .map(job => job.name);
+      .map((job) => job.name);
     const cannotCancelNotRunning = jobsToCancel
       .filter(cannotCancelBecauseNotRunning)
-      .map(job => job.name);
+      .map((job) => job.name);
     const numJobsUnableToCancel = cannotCancelPermissions.concat(
       cannotCancelNotRunning
     ).length;
@@ -170,7 +170,7 @@ function JobListCancelButton({ jobsToCancel, onCancel }) {
               other="This action will cancel the following jobs:"
             />
           </div>
-          {jobsToCancel.map(job => (
+          {jobsToCancel.map((job) => (
             <span key={job.id}>
               <strong>{job.name}</strong>
               <br />

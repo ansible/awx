@@ -32,7 +32,7 @@ describe('<MiscAuthentication />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('MiscAuthenticationDetail').length).toBe(1);
   });
 
@@ -45,7 +45,7 @@ describe('<MiscAuthentication />', () => {
         context: { router: { history } },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('MiscAuthenticationEdit').length).toBe(1);
   });
 
@@ -79,7 +79,7 @@ describe('<MiscAuthentication />', () => {
         },
       });
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('MiscAuthenticationDetail').length).toBe(1);
     expect(wrapper.find('MiscAuthenticationEdit').length).toBe(0);
   });

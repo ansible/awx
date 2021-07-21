@@ -25,7 +25,12 @@ function JobsEdit() {
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
-  const { isLoading, error, request: fetchJobs, result: jobs } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchJobs,
+    result: jobs,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('jobs');
       const {
@@ -35,7 +40,7 @@ function JobsEdit() {
         ...jobsData
       } = data;
       const mergedData = {};
-      Object.keys(jobsData).forEach(key => {
+      Object.keys(jobsData).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -54,7 +59,7 @@ function JobsEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/jobs/details');
       },
@@ -70,7 +75,7 @@ function JobsEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       ...form,
       AD_HOC_COMMANDS: formatJson(form.AD_HOC_COMMANDS),
@@ -94,7 +99,7 @@ function JobsEdit() {
     history.push('/settings/jobs/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
         const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
@@ -113,96 +118,94 @@ function JobsEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && jobs && (
         <Formik initialValues={initialValues(jobs)} onSubmit={handleSubmit}>
-          {formik => {
-            return (
-              <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-                <FormColumnLayout>
-                  <InputField
-                    name="AWX_ISOLATION_BASE_PATH"
-                    config={jobs.AWX_ISOLATION_BASE_PATH}
-                    isRequired
-                  />
-                  <InputField
-                    name="SCHEDULE_MAX_JOBS"
-                    config={jobs.SCHEDULE_MAX_JOBS}
-                    type="number"
-                    isRequired
-                  />
-                  <InputField
-                    name="DEFAULT_JOB_TIMEOUT"
-                    config={jobs.DEFAULT_JOB_TIMEOUT}
-                    type="number"
-                  />
-                  <InputField
-                    name="DEFAULT_INVENTORY_UPDATE_TIMEOUT"
-                    config={jobs.DEFAULT_INVENTORY_UPDATE_TIMEOUT}
-                    type="number"
-                  />
-                  <InputField
-                    name="DEFAULT_PROJECT_UPDATE_TIMEOUT"
-                    config={jobs.DEFAULT_PROJECT_UPDATE_TIMEOUT}
-                    type="number"
-                  />
-                  <InputField
-                    name="ANSIBLE_FACT_CACHE_TIMEOUT"
-                    config={jobs.ANSIBLE_FACT_CACHE_TIMEOUT}
-                    type="number"
-                  />
-                  <InputField
-                    name="MAX_FORKS"
-                    config={jobs.MAX_FORKS}
-                    type="number"
-                  />
-                  <BooleanField
-                    name="PROJECT_UPDATE_VVV"
-                    config={jobs.PROJECT_UPDATE_VVV}
-                  />
-                  <BooleanField
-                    name="GALAXY_IGNORE_CERTS"
-                    config={jobs.GALAXY_IGNORE_CERTS}
-                  />
-                  <BooleanField
-                    name="AWX_ROLES_ENABLED"
-                    config={jobs.AWX_ROLES_ENABLED}
-                  />
-                  <BooleanField
-                    name="AWX_COLLECTIONS_ENABLED"
-                    config={jobs.AWX_COLLECTIONS_ENABLED}
-                  />
-                  <BooleanField
-                    name="AWX_SHOW_PLAYBOOK_LINKS"
-                    config={jobs.AWX_SHOW_PLAYBOOK_LINKS}
-                  />
-                  <ObjectField
-                    name="AD_HOC_COMMANDS"
-                    config={jobs.AD_HOC_COMMANDS}
-                  />
-                  <ObjectField
-                    name="AWX_ANSIBLE_CALLBACK_PLUGINS"
-                    config={jobs.AWX_ANSIBLE_CALLBACK_PLUGINS}
-                  />
-                  <ObjectField
-                    name="AWX_ISOLATION_SHOW_PATHS"
-                    config={jobs.AWX_ISOLATION_SHOW_PATHS}
-                  />
-                  <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
-                  {submitError && <FormSubmitError error={submitError} />}
-                  {revertError && <FormSubmitError error={revertError} />}
-                </FormColumnLayout>
-                <RevertFormActionGroup
-                  onCancel={handleCancel}
-                  onSubmit={formik.handleSubmit}
-                  onRevert={toggleModal}
+          {(formik) => (
+            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+              <FormColumnLayout>
+                <InputField
+                  name="AWX_ISOLATION_BASE_PATH"
+                  config={jobs.AWX_ISOLATION_BASE_PATH}
+                  isRequired
                 />
-                {isModalOpen && (
-                  <RevertAllAlert
-                    onClose={closeModal}
-                    onRevertAll={handleRevertAll}
-                  />
-                )}
-              </Form>
-            );
-          }}
+                <InputField
+                  name="SCHEDULE_MAX_JOBS"
+                  config={jobs.SCHEDULE_MAX_JOBS}
+                  type="number"
+                  isRequired
+                />
+                <InputField
+                  name="DEFAULT_JOB_TIMEOUT"
+                  config={jobs.DEFAULT_JOB_TIMEOUT}
+                  type="number"
+                />
+                <InputField
+                  name="DEFAULT_INVENTORY_UPDATE_TIMEOUT"
+                  config={jobs.DEFAULT_INVENTORY_UPDATE_TIMEOUT}
+                  type="number"
+                />
+                <InputField
+                  name="DEFAULT_PROJECT_UPDATE_TIMEOUT"
+                  config={jobs.DEFAULT_PROJECT_UPDATE_TIMEOUT}
+                  type="number"
+                />
+                <InputField
+                  name="ANSIBLE_FACT_CACHE_TIMEOUT"
+                  config={jobs.ANSIBLE_FACT_CACHE_TIMEOUT}
+                  type="number"
+                />
+                <InputField
+                  name="MAX_FORKS"
+                  config={jobs.MAX_FORKS}
+                  type="number"
+                />
+                <BooleanField
+                  name="PROJECT_UPDATE_VVV"
+                  config={jobs.PROJECT_UPDATE_VVV}
+                />
+                <BooleanField
+                  name="GALAXY_IGNORE_CERTS"
+                  config={jobs.GALAXY_IGNORE_CERTS}
+                />
+                <BooleanField
+                  name="AWX_ROLES_ENABLED"
+                  config={jobs.AWX_ROLES_ENABLED}
+                />
+                <BooleanField
+                  name="AWX_COLLECTIONS_ENABLED"
+                  config={jobs.AWX_COLLECTIONS_ENABLED}
+                />
+                <BooleanField
+                  name="AWX_SHOW_PLAYBOOK_LINKS"
+                  config={jobs.AWX_SHOW_PLAYBOOK_LINKS}
+                />
+                <ObjectField
+                  name="AD_HOC_COMMANDS"
+                  config={jobs.AD_HOC_COMMANDS}
+                />
+                <ObjectField
+                  name="AWX_ANSIBLE_CALLBACK_PLUGINS"
+                  config={jobs.AWX_ANSIBLE_CALLBACK_PLUGINS}
+                />
+                <ObjectField
+                  name="AWX_ISOLATION_SHOW_PATHS"
+                  config={jobs.AWX_ISOLATION_SHOW_PATHS}
+                />
+                <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
+                {submitError && <FormSubmitError error={submitError} />}
+                {revertError && <FormSubmitError error={revertError} />}
+              </FormColumnLayout>
+              <RevertFormActionGroup
+                onCancel={handleCancel}
+                onSubmit={formik.handleSubmit}
+                onRevert={toggleModal}
+              />
+              {isModalOpen && (
+                <RevertAllAlert
+                  onClose={closeModal}
+                  onRevertAll={handleRevertAll}
+                />
+              )}
+            </Form>
+          )}
         </Formik>
       )}
     </CardBody>

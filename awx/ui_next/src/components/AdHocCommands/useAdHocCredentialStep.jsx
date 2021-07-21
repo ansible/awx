@@ -34,7 +34,7 @@ export default function useAdHocExecutionEnvironmentStep(
         helpers.setError('A credential must be selected');
       }
     },
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('credential', true, false);
     },
   };

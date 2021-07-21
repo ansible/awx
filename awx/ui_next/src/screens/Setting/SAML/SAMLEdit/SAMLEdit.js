@@ -25,11 +25,16 @@ function SAMLEdit() {
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
-  const { isLoading, error, request: fetchSAML, result: saml } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchSAML,
+    result: saml,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('saml');
       const mergedData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!options[key]) {
           return;
         }
@@ -47,7 +52,7 @@ function SAMLEdit() {
 
   const { error: submitError, request: submitForm } = useRequest(
     useCallback(
-      async values => {
+      async (values) => {
         await SettingsAPI.updateAll(values);
         history.push('/settings/saml/details');
       },
@@ -63,7 +68,7 @@ function SAMLEdit() {
     null
   );
 
-  const handleSubmit = async form => {
+  const handleSubmit = async (form) => {
     await submitForm({
       ...form,
       SOCIAL_AUTH_SAML_ORG_INFO: formatJson(form.SOCIAL_AUTH_SAML_ORG_INFO),
@@ -104,7 +109,7 @@ function SAMLEdit() {
     history.push('/settings/saml/details');
   };
 
-  const initialValues = fields =>
+  const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
         const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
@@ -123,7 +128,7 @@ function SAMLEdit() {
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && saml && (
         <Formik initialValues={initialValues(saml)} onSubmit={handleSubmit}>
-          {formik => (
+          {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField

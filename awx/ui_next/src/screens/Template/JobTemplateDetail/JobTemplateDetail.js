@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 
 import {
@@ -97,9 +97,8 @@ function JobTemplateDetail({ template }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    template
-  );
+  const deleteDetailsRequests =
+    relatedResourceDeleteRequests.template(template);
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
   const verbosityOptions = [
@@ -111,7 +110,7 @@ function JobTemplateDetail({ template }) {
     { verbosity: 5, details: t`5 (WinRM Debug)` },
   ];
   const verbosityDetails = verbosityOptions.filter(
-    option => option.verbosity === verbosity
+    (option) => option.verbosity === verbosity
   );
   const generateCallBackUrl = `${window.location.origin + url}callback/`;
   const renderOptionsField =
@@ -155,12 +154,12 @@ function JobTemplateDetail({ template }) {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
 
     return ask_inventory_on_launch ? (
-      <Fragment>
+      <>
         <Link to={`/inventories/${inventorykind}/${id}/details`}>
           {summary_fields.inventory.name}
         </Link>
         <span> {t`(Prompt on launch)`}</span>
-      </Fragment>
+      </>
     ) : (
       <Link to={`/inventories/${inventorykind}/${id}/details`}>
         {summary_fields.inventory.name}
@@ -234,13 +233,13 @@ function JobTemplateDetail({ template }) {
         <Detail label={t`Show Changes`} value={diff_mode ? t`On` : t`Off`} />
         <Detail label={t`Job Slicing`} value={job_slice_count} />
         {host_config_key && (
-          <React.Fragment>
+          <>
             <Detail label={t`Host Config Key`} value={host_config_key} />
             <Detail
               label={t`Provisioning Callback URL`}
               value={generateCallBackUrl}
             />
-          </React.Fragment>
+          </>
         )}
         {webhook_service && (
           <Detail
@@ -289,7 +288,7 @@ function JobTemplateDetail({ template }) {
                 numChips={5}
                 totalChips={summary_fields.credentials.length}
               >
-                {summary_fields.credentials.map(c => (
+                {summary_fields.credentials.map((c) => (
                   <Link to={`/credentials/${c.id}/details`} key={c.id}>
                     <CredentialChip key={c.id} credential={c} isReadOnly />
                   </Link>
@@ -307,7 +306,7 @@ function JobTemplateDetail({ template }) {
                 numChips={5}
                 totalChips={summary_fields.labels.results.length}
               >
-                {summary_fields.labels.results.map(l => (
+                {summary_fields.labels.results.map((l) => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}
                   </Chip>
@@ -322,7 +321,7 @@ function JobTemplateDetail({ template }) {
             label={t`Instance Groups`}
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
-                {instanceGroups.map(ig => (
+                {instanceGroups.map((ig) => (
                   <Chip key={ig.id} isReadOnly>
                     {ig.name}
                   </Chip>
@@ -337,7 +336,7 @@ function JobTemplateDetail({ template }) {
             label={t`Job Tags`}
             value={
               <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
-                {job_tags.split(',').map(jobTag => (
+                {job_tags.split(',').map((jobTag) => (
                   <Chip key={jobTag} isReadOnly>
                     {jobTag}
                   </Chip>
@@ -352,7 +351,7 @@ function JobTemplateDetail({ template }) {
             label={t`Skip Tags`}
             value={
               <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
-                {skip_tags.split(',').map(skipTag => (
+                {skip_tags.split(',').map((skipTag) => (
                   <Chip key={skipTag} isReadOnly>
                     {skipTag}
                   </Chip>

@@ -40,7 +40,7 @@ describe('<SmartInventoryForm />', () => {
         <SmartInventoryForm onCancel={() => {}} onSubmit={onSubmit} />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterAll(() => {
@@ -130,18 +130,8 @@ describe('<SmartInventoryForm />', () => {
         'HostFilterLookup ChipGroup[categoryName="name__contains"]'
       );
       expect(nameChipGroup.find('Chip').length).toBe(2);
-      expect(
-        nameChipGroup
-          .find('Chip')
-          .at(0)
-          .prop('children')
-      ).toBe('f');
-      expect(
-        nameChipGroup
-          .find('Chip')
-          .at(1)
-          .prop('children')
-      ).toBe('o');
+      expect(nameChipGroup.find('Chip').at(0).prop('children')).toBe('f');
+      expect(nameChipGroup.find('Chip').at(1).prop('children')).toBe('o');
     });
 
     test('should submit expected form values on save', async () => {
@@ -183,7 +173,7 @@ describe('<SmartInventoryForm />', () => {
         }
       );
     });
-    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(newWrapper, 'ContentLoading', (el) => el.length === 0);
     newWrapper.update();
     const nameChipGroup = newWrapper.find(
       'HostFilterLookup ChipGroup[categoryName="Name"]'

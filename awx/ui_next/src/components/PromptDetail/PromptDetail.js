@@ -83,7 +83,7 @@ function omitOverrides(resource, overrides, defaultConfig) {
     summary_fields: { ...resource.summary_fields },
     ...defaultConfig,
   };
-  Object.keys(overrides).forEach(keyToOmit => {
+  Object.keys(overrides).forEach((keyToOmit) => {
     delete clonedResource[keyToOmit];
     delete clonedResource?.summary_fields[keyToOmit];
   });
@@ -162,7 +162,7 @@ function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
                     numChips={5}
                     totalChips={overrides.credentials.length}
                   >
-                    {overrides.credentials.map(cred => (
+                    {overrides.credentials.map((cred) => (
                       <CredentialChip
                         key={cred.id}
                         credential={cred}
@@ -206,7 +206,7 @@ function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
                     }
                   >
                     {overrides.job_tags.length > 0 &&
-                      overrides.job_tags.split(',').map(jobTag => (
+                      overrides.job_tags.split(',').map((jobTag) => (
                         <Chip key={jobTag} isReadOnly>
                           {jobTag}
                         </Chip>
@@ -229,7 +229,7 @@ function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
                     }
                   >
                     {overrides.skip_tags.length > 0 &&
-                      overrides.skip_tags.split(',').map(skipTag => (
+                      overrides.skip_tags.split(',').map((skipTag) => (
                         <Chip key={skipTag} isReadOnly>
                           {skipTag}
                         </Chip>

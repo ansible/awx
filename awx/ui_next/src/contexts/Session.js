@@ -53,7 +53,7 @@ function useStorage(key) {
       setStorageVal(newVal);
     }
   });
-  const setValue = val => {
+  const setValue = (val) => {
     window.localStorage.setItem(key, JSON.stringify(val));
     setStorageVal(val);
   };

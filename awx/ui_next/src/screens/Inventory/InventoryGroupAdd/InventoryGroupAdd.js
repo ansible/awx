@@ -11,7 +11,7 @@ function InventoryGroupsAdd() {
   const { id } = useParams();
   const history = useHistory();
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     values.inventory = id;
     try {
       const { data } = await GroupsAPI.create(values);

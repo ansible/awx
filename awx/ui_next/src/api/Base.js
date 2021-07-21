@@ -16,7 +16,7 @@ const defaultHttp = axios.create({
   },
 });
 
-defaultHttp.interceptors.response.use(response => {
+defaultHttp.interceptors.response.use((response) => {
   const timeout = response?.headers['session-timeout'];
   if (timeout) {
     const timeoutDate = new Date().getTime() + timeout * 1000;

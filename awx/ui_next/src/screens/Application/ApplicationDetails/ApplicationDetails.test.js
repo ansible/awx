@@ -105,12 +105,9 @@ describe('<ApplicationDetails/>', () => {
       'foo'
     );
     expect(wrapper.find('Detail[label="Organization"]').length).toBe(1);
-    expect(
-      wrapper
-        .find('Link')
-        .at(0)
-        .prop('to')
-    ).toBe('/organizations/230/details');
+    expect(wrapper.find('Link').at(0).prop('to')).toBe(
+      '/organizations/230/details'
+    );
     expect(
       wrapper.find('Detail[label="Authorization grant type"]').prop('value')
     ).toBe('Authorization code');

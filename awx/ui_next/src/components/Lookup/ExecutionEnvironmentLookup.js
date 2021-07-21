@@ -107,10 +107,10 @@ function ExecutionEnvironmentLookup({
         count: data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [
       location,
@@ -129,7 +129,7 @@ function ExecutionEnvironmentLookup({
   );
 
   const checkExecutionEnvironmentName = useCallback(
-    async name => {
+    async (name) => {
       if (!name) {
         onChange(null);
         return;
@@ -190,8 +190,8 @@ function ExecutionEnvironmentLookup({
             name="executionEnvironments"
             qsConfig={QS_CONFIG}
             readOnly={!canDelete}
-            selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
-            deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+            selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
           />
         )}
       />

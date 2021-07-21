@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Fragment } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Dropdown, DropdownPosition } from '@patternfly/react-core';
@@ -11,7 +11,7 @@ function AddDropDownButton({ dropdownItems, ouiaId }) {
   const element = useRef(null);
 
   useEffect(() => {
-    const toggle = e => {
+    const toggle = (e) => {
       if (!isKebabified && (!element || !element.current.contains(e.target))) {
         setIsOpen(false);
       }
@@ -24,7 +24,7 @@ function AddDropDownButton({ dropdownItems, ouiaId }) {
   }, [isKebabified]);
 
   if (isKebabified) {
-    return <Fragment>{dropdownItems}</Fragment>;
+    return <>{dropdownItems}</>;
   }
 
   return (
