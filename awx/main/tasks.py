@@ -59,7 +59,6 @@ from receptorctl.socket_interface import ReceptorControl
 from dateutil.parser import parse as parse_date
 
 # AWX
-from awx import MODE
 from awx import __version__ as awx_application_version
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS
 from awx.main.access import access_registry
@@ -103,6 +102,7 @@ from awx.main.utils.common import (
     cleanup_new_process,
     create_partition,
     get_cpu_capacity,
+    get_mem_capacity,
     get_system_task_capacity,
 )
 from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec, CONTAINER_ROOT, to_container_path
@@ -466,6 +466,8 @@ def cluster_node_heartbeat():
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
             instance_list.remove(inst)
+        elif inst.version.startswith('ansible-runner'):  # TODO: use proper field when introduced
+            continue
         elif inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
@@ -1773,7 +1775,6 @@ class RunJob(BaseTask):
                 ]
             )
 
-        params['process_isolation'] = False if MODE == 'development' else True
         return params
 
     def pre_run_hook(self, job, private_data_dir):
@@ -2847,11 +2848,6 @@ class RunAdHocCommand(BaseTask):
         d[r'Password:\s*?$'] = 'ssh_password'
         return d
 
-    def build_execution_environment_params(self, instance, private_data_dir):
-        params = super(RunAdHocCommand, self).build_execution_environment_params(instance, private_data_dir)
-        params['process_isolation'] = False if MODE == 'development' else True
-        return params
-
 
 @task(queue=get_local_queuename)
 class RunSystemJob(BaseTask):
@@ -3000,7 +2996,8 @@ class AWXReceptorJob:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
     @classmethod
-    def check_heartbeat(cls, node):
+    def check_heartbeat(cls, node):  # TODO: rename most of these "heartbeat" things
+        logger.info(f'Checking capacity of execution node {node}')
         # make a private data dir and env dir
         private_data_dir = tempfile.mkdtemp(prefix='awx_heartbeat_', dir=settings.AWX_ISOLATION_BASE_PATH)
         env_path = os.path.join(private_data_dir, 'env')
@@ -3022,6 +3019,10 @@ class AWXReceptorJob:
         with open(fn, 'w') as f:
             os.chmod(fn, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
             f.write('localhost ansible_connection=local')
+        # we have to create the project directory because it is --workdir and crun needs it to exist
+        # https://github.com/ansible/ansible-runner/issues/758
+        project_path = os.path.join(private_data_dir, 'project')
+        os.makedirs(project_path, mode=0o700)
 
         runner_params = {
             'ident': str(uuid4()),
@@ -3033,7 +3034,7 @@ class AWXReceptorJob:
             'settings': {
                 "container_image": get_default_execution_environment().image,
                 "container_options": ['--user=root'],
-                "process_isolation": False if MODE == 'development' else True,
+                "process_isolation": True,
             },
         }
 
@@ -3067,6 +3068,7 @@ class AWXReceptorJob:
                         version = facts.get('ansible_local', {}).get('ansible_runner', {}).get('version', '')  # noqa
                         if version:
                             self.version = f'ansible-runner-{version}'
+                # TODO: save event_data["stdout"] and log when errors happen
 
             def finished_callback(self, runner_obj):
                 pass
@@ -3075,6 +3077,7 @@ class AWXReceptorJob:
                 pass
 
             def status_handler(self, status_data, runner_config):
+                # TODO: log error cases
                 pass
 
             def update_model(self, *args, **kw):
@@ -3085,12 +3088,13 @@ class AWXReceptorJob:
         res = receptor_job.run(work_type='ansible-runner')
         if res.status == 'successful':
             cpu = get_cpu_capacity(task.cpus)
-            mem = get_cpu_capacity(task.mem_mb)
+            mem = get_mem_capacity(task.mem_mb * 1000000)
+            logger.info(f'Calculated memory capacity: {task.mem_mb}, out: {mem}')
             instance = Instance.objects.get(hostname=node)
             instance.cpu = cpu[0]
             instance.cpu_capacity = cpu[1]
             instance.memory = mem[0]
-            instance.memory_capacity = mem[1]
+            instance.mem_capacity = mem[1]
             instance.capacity = get_system_task_capacity(
                 instance.capacity_adjustment,
                 instance.cpu_capacity,
@@ -3098,6 +3102,12 @@ class AWXReceptorJob:
             )
             instance.version = task.version
             instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+            logger.info(f'Updated capacity of {node} to cpu: {instance.cpu_capacity} mem: {instance.mem_capacity}')
+        else:
+            # TODO: error handling like we do with jobs
+            # receptorctl work results
+            # receptorctl work list
+            logger.info(f'Capacity check not successful for execution node {node}')
 
     def _run_internal(self, receptor_ctl, work_type=None):
         # Create a socketpair. Where the left side will be used for writing our payload

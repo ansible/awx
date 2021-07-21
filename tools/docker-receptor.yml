@@ -17,7 +17,7 @@ services:
     volumes:
       - "./docker-compose-cluster:/etc/receptor"
   receptor-hop:
-    image: quay.io/ansible/awx-ee:devel
+    image: quay.io/project-receptor/receptor:latest
     user: root
     container_name: tools_receptor_hop
     hostname: receptor-hop
@@ -29,8 +29,8 @@ services:
     volumes:
       - "../../docker-compose-cluster:/etc/receptor"
   receptor-1:
-    image: quay.io/ansible/awx-ee:devel
-    user: root
+    image: quay.io/awx/awx_devel:devel
+    user: "1000"
     container_name: tools_receptor_1
     hostname: receptor-1
     command: 'receptor --config /etc/receptor/awx-1-receptor.conf'
@@ -38,9 +38,11 @@ services:
       - receptor-hop
     volumes:
       - "../../docker-compose-cluster:/etc/receptor"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+    privileged: true
   receptor-2:
-    image: quay.io/ansible/awx-ee:devel
-    user: root
+    image: quay.io/awx/awx_devel:devel
+    user: "1000"
     container_name: tools_receptor_2
     hostname: receptor-2
     command: 'receptor --config /etc/receptor/awx-2-receptor.conf'
@@ -48,9 +50,11 @@ services:
       - receptor-hop
     volumes:
       - "../../docker-compose-cluster:/etc/receptor"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+    privileged: true
   receptor-3:
-    image: quay.io/ansible/awx-ee:devel
-    user: root
+    image: quay.io/awx/awx_devel:devel
+    user: "1000"
     container_name: tools_receptor_3
     hostname: receptor-3
     command: 'receptor --config /etc/receptor/awx-3-receptor.conf'
@@ -58,3 +62,5 @@ services:
       - receptor-hop
     volumes:
       - "../../docker-compose-cluster:/etc/receptor"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+    privileged: true
