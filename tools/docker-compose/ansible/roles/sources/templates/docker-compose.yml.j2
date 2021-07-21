@@ -70,7 +70,7 @@ services:
     hostname: execution_node_1
     command: 'receptor --config /etc/receptor/awx-1-receptor-standalone.conf'
     volumes:
-      - "../../docker-compose-cluster:/etc/receptor"
+      - "../../docker-compose:/etc/receptor"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
     privileged: true
 {% if cluster_node_count|int > 1 %}
