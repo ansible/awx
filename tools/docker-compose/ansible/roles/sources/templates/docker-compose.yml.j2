@@ -27,6 +27,7 @@ services:
     links:
       - postgres
       - redis_{{ container_postfix }}
+      - execution_node_1
     working_dir: "/awx_devel"
     volumes:
       - "../../../:/awx_devel"
@@ -40,7 +41,7 @@ services:
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "~/.kube/config:/var/lib/awx/.kube/config"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
-      - "receptor_{{ container_postfix }}:/var/run/receptor/"
+      - "execution_node_1:/var/run/receptor/"
     privileged: true
     tty: true
     ports:
@@ -62,6 +63,16 @@ services:
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
 {% endfor %}
+  execution_node_1:
+    image: quay.io/awx/awx_devel:devel
+    user: root
+    container_name: tools_execution_node_1
+    hostname: execution_node_1
+    command: 'receptor --config /etc/receptor/awx-1-receptor-standalone.conf'
+    volumes:
+      - "../../docker-compose-cluster:/etc/receptor"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+    privileged: true
 {% if cluster_node_count|int > 1 %}
   haproxy:
     image: haproxy
@@ -99,8 +110,8 @@ volumes:
     name: tools_awx_db
 {% for i in range(cluster_node_count|int) -%}
   {% set container_postfix = loop.index %}
-  receptor_{{ container_postfix }}:
-    name: tools_receptor_{{ container_postfix }}
+  execution_node_1:
+    name: tools_execution_node_1
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
