@@ -52,6 +52,14 @@ describe('StatusLabel', () => {
     expect(wrapper.text()).toEqual('Waiting');
   });
 
+  test('should render disabled', () => {
+    const wrapper = mount(<StatusLabel status="disabled" />);
+    expect(wrapper).toHaveLength(1);
+    expect(wrapper.find('MinusCircleIcon')).toHaveLength(1);
+    expect(wrapper.find('Label').prop('color')).toEqual('grey');
+    expect(wrapper.text()).toEqual('Disabled');
+  });
+
   test('should render canceled', () => {
     const wrapper = mount(<StatusLabel status="canceled" />);
     expect(wrapper).toHaveLength(1);
