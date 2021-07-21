@@ -38,30 +38,29 @@ global.console = {
   },
 };
 
-const logNetworkRequestError = url => {
+const logNetworkRequestError = (url) => {
   networkRequestUrl = url || true;
   return {
     status: 200,
     data: {},
   };
 };
-jest.mock('axios', () => {
-  return {
-    create: () => ({
-      get: logNetworkRequestError,
-      post: logNetworkRequestError,
-      delete: logNetworkRequestError,
-      put: logNetworkRequestError,
-      patch: logNetworkRequestError,
-      options: logNetworkRequestError,
-      interceptors: {
-        response: {
-          use: () => {},
-        },
+
+jest.mock('axios', () => ({
+  create: () => ({
+    get: logNetworkRequestError,
+    post: logNetworkRequestError,
+    delete: logNetworkRequestError,
+    put: logNetworkRequestError,
+    patch: logNetworkRequestError,
+    options: logNetworkRequestError,
+    interceptors: {
+      response: {
+        use: () => {},
       },
-    }),
-  };
-});
+    },
+  }),
+}));
 
 afterEach(() => {
   if (networkRequestUrl) {
