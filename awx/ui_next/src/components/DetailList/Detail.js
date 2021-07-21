@@ -29,7 +29,7 @@ const DetailValue = styled(
   ${(props) =>
     (props.isEncrypted || props.isNotConfigured) &&
     `
-    color: var(--pf-global--Color--400);
+    color: var(--pf-global--disabled-color--100);
   `}
 `;
 
