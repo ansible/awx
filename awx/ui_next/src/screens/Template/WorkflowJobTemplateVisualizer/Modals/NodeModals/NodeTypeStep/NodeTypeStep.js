@@ -40,6 +40,7 @@ TimeoutInput.displayName = 'TimeoutInput';
 
 const TimeoutLabel = styled.p`
   margin-left: 10px;
+  min-width: fit-content;
 `;
 
 function NodeTypeStep() {
