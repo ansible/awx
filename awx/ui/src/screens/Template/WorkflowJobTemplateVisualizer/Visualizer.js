@@ -52,7 +52,7 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
-const replaceIdentifier = node => {
+const replaceIdentifier = (node) => {
   if (stringIsUUID(node.originalNodeObject.identifier) && node.identifier) {
     return true;
   }
