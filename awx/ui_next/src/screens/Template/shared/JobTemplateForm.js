@@ -266,7 +266,7 @@ function JobTemplateForm({
           />
         </FieldWithPrompt>
         <FormGroup
-          fieldId="inventory-lookup"
+          fieldId="template-inventory"
           validated={
             !(inventoryMeta.touched || askInventoryOnLaunchField.value) ||
             !inventoryMeta.error
