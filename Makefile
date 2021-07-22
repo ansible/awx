@@ -545,7 +545,7 @@ docker-compose-elk: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-cluster: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-receptor.yml up
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-compose/_sources/docker-receptor.yml up
 
 docker-compose-cluster-elk: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
