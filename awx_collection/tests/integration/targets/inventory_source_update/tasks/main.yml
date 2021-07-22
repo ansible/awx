@@ -28,6 +28,14 @@
         scm_url: https://github.com/ansible/test-playbooks
         wait: true
 
+    - name: Create a git project with same name, different org
+      project:
+        name: "{{ project_name }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+
     - name: Create an Inventory
       inventory:
         name: "{{ inv_name }}"
