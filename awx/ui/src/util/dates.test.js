@@ -2,7 +2,6 @@ import { RRule } from 'rrule';
 import {
   dateToInputDateTime,
   formatDateString,
-  formatDateStringUTC,
   getRRuleDayConstants,
   secondsToDays,
   secondsToHHMMSS,
@@ -21,35 +20,20 @@ const i18n = {
 
 describe('formatDateString', () => {
   test('it returns the expected value', () => {
-    const lang = 'en-US';
-    expect(formatDateString(null, lang)).toEqual(null);
-    expect(formatDateString('', lang)).toEqual('Invalid Date');
-    expect(formatDateString({}, lang)).toEqual('Invalid Date');
-    expect(formatDateString(undefined, lang)).toEqual('Invalid Date');
-    expect(formatDateString('foobar', lang)).toEqual('Invalid Date');
-    expect(formatDateString('2018-011-31T01:14:52.969227Z', lang)).toEqual(
-      'Invalid Date'
+    expect(formatDateString(null)).toEqual(null);
+    expect(formatDateString('')).toEqual('Invalid DateTime');
+    expect(formatDateString({})).toEqual('Invalid DateTime');
+    expect(formatDateString(undefined)).toEqual('Invalid DateTime');
+    expect(formatDateString('foobar')).toEqual('Invalid DateTime');
+    expect(formatDateString('2018-011-31T01:14:52.969227Z', undefined)).toEqual(
+      'Invalid DateTime'
     );
-    expect(formatDateString('2018-01-31T01:14:52.969227Z', lang)).toEqual(
+    expect(formatDateString('2018-01-31T01:14:52.969227Z')).toEqual(
       '1/31/2018, 1:14:52 AM'
     );
-  });
-});
-
-describe('formatDateStringUTC', () => {
-  test('it returns the expected value', () => {
-    const lang = 'en-US';
-    expect(formatDateStringUTC(null, lang)).toEqual(null);
-    expect(formatDateStringUTC('', lang)).toEqual('Invalid Date');
-    expect(formatDateStringUTC({}, lang)).toEqual('Invalid Date');
-    expect(formatDateStringUTC(undefined, lang)).toEqual('Invalid Date');
-    expect(formatDateStringUTC('foobar', lang)).toEqual('Invalid Date');
-    expect(formatDateStringUTC('2018-011-31T01:14:52.969227Z', lang)).toEqual(
-      'Invalid Date'
-    );
-    expect(formatDateStringUTC('2018-01-31T01:14:52.969227Z', lang)).toEqual(
-      '1/31/2018, 1:14:52 AM'
-    );
+    expect(
+      formatDateString('2018-01-31T01:14:52.969227Z', 'America/Los_Angeles')
+    ).toEqual('1/30/2018, 5:14:52 PM');
   });
 });
 
@@ -68,9 +52,10 @@ describe('secondsToHHMMSS', () => {
 
 describe('dateToInputDateTime', () => {
   test('it returns the expected value', () => {
-    expect(
-      dateToInputDateTime(new Date('2018-01-31T01:14:52.969227Z'))
-    ).toEqual(['2018-01-31', '1:14 AM']);
+    expect(dateToInputDateTime('2018-01-31T01:14:52.969227Z')).toEqual([
+      '2018-01-31',
+      '1:14 AM',
+    ]);
   });
 });
 

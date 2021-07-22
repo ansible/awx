@@ -103,7 +103,7 @@ function ScheduleListItem({
           <DetailList stacked>
             <Detail
               label={t`Next Run`}
-              value={formatDateString(schedule.next_run)}
+              value={formatDateString(schedule.next_run, schedule.timezone)}
             />
           </DetailList>
         )}

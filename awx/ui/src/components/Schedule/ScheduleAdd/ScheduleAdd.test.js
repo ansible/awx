@@ -85,7 +85,7 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Run once schedule',
         startDate: '2020-03-25',
-        startTime: '10:00:00',
+        startTime: '10:00 AM',
         timezone: 'America/New_York',
       });
     });
@@ -108,7 +108,7 @@ describe('<ScheduleAdd />', () => {
         name: 'Run every 10 minutes 10 times',
         occurrences: 10,
         startDate: '2020-03-25',
-        startTime: '10:30:00',
+        startTime: '10:30 AM',
         timezone: 'America/New_York',
       });
     });
@@ -127,12 +127,12 @@ describe('<ScheduleAdd />', () => {
         description: 'test description',
         end: 'onDate',
         endDate: '2020-03-26',
-        endTime: '10:45:00',
+        endTime: '10:45 AM',
         frequency: 'hour',
         interval: 1,
         name: 'Run every hour until date',
         startDate: '2020-03-25',
-        startTime: '10:45:00',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -154,7 +154,7 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Run daily',
         startDate: '2020-03-25',
-        startTime: '10:45:00',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -178,7 +178,7 @@ describe('<ScheduleAdd />', () => {
         name: 'Run weekly on mon/wed/fri',
         occurrences: 1,
         startDate: '2020-03-25',
-        startTime: '10:45:00',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -201,7 +201,7 @@ describe('<ScheduleAdd />', () => {
         occurrences: 1,
         runOn: 'day',
         runOnDayNumber: 1,
-        startTime: '10:45',
+        startTime: '10:45 AM',
         startDate: '2020-04-01',
         timezone: 'America/New_York',
       });
@@ -221,7 +221,7 @@ describe('<ScheduleAdd />', () => {
         description: 'test description',
         end: 'never',
         endDate: '2020-03-26',
-        endTime: '11:00:00',
+        endTime: '11:00 AM',
         frequency: 'month',
         interval: 1,
         name: 'Run monthly on the last Tuesday',
@@ -230,7 +230,7 @@ describe('<ScheduleAdd />', () => {
         runOnTheDay: 'tuesday',
         runOnTheOccurrence: -1,
         startDate: '2020-03-31',
-        startTime: '11:00',
+        startTime: '11:00 AM',
         timezone: 'America/New_York',
       });
     });
@@ -255,7 +255,7 @@ describe('<ScheduleAdd />', () => {
         runOnDayMonth: 3,
         runOnDayNumber: 1,
         startDate: '2020-03-01',
-        startTime: '00:00',
+        startTime: '12:00 AM',
         timezone: 'America/New_York',
       });
     });
@@ -282,7 +282,7 @@ describe('<ScheduleAdd />', () => {
         runOnTheDay: 'friday',
         runOnTheMonth: 4,
         startDate: '2020-04-10',
-        startTime: '11:15',
+        startTime: '11:15 AM',
         timezone: 'America/New_York',
       });
     });
@@ -309,7 +309,7 @@ describe('<ScheduleAdd />', () => {
         runOnTheDay: 'weekday',
         runOnTheMonth: 10,
         startDate: '2020-04-10',
-        startTime: '11:15',
+        startTime: '11:15 AM',
         timezone: 'America/New_York',
       });
     });
@@ -378,7 +378,7 @@ describe('<ScheduleAdd />', () => {
         name: 'Schedule',
         end: 'never',
         endDate: '2021-01-29',
-        endTime: '14:15:00',
+        endTime: '2:15 PM',
         frequency: 'none',
         occurrences: 1,
         runOn: 'day',
@@ -394,7 +394,7 @@ describe('<ScheduleAdd />', () => {
           { name: 'cred 2', id: 20 },
         ],
         startDate: '2021-01-28',
-        startTime: '14:15:00',
+        startTime: '2:15 PM',
         timezone: 'America/New_York',
       });
     });
@@ -467,7 +467,7 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Run once schedule',
         startDate: '2020-03-25',
-        startTime: '10:00:00',
+        startTime: '10:00 AM',
         timezone: 'America/New_York',
       });
     });

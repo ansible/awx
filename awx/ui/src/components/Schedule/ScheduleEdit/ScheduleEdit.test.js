@@ -13,10 +13,6 @@ import ScheduleEdit from './ScheduleEdit';
 jest.mock('../../../api');
 
 let wrapper;
-const now = new Date();
-const closestQuarterHour = new Date(Math.ceil(now.getTime() / 900000) * 900000);
-const tomorrow = new Date(closestQuarterHour);
-tomorrow.setDate(tomorrow.getDate() + 1);
 const mockSchedule = {
   rrule:
     'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
@@ -204,7 +200,7 @@ describe('<ScheduleEdit />', () => {
         interval: 1,
         name: 'Run once schedule',
         startDate: '2020-03-25',
-        startTime: '10:00:00',
+        startTime: '10:00 AM',
         timezone: 'America/New_York',
       });
     });
@@ -228,7 +224,7 @@ describe('<ScheduleEdit />', () => {
         name: 'Run every 10 minutes 10 times',
         occurrences: 10,
         startDate: '2020-03-25',
-        startTime: '10:30:00',
+        startTime: '10:30 AM',
         timezone: 'America/New_York',
       });
     });
@@ -248,12 +244,12 @@ describe('<ScheduleEdit />', () => {
         description: 'test description',
         end: 'onDate',
         endDate: '2020-03-26',
-        endTime: '10:45:00',
+        endTime: '10:45 AM',
         frequency: 'hour',
         interval: 1,
         name: 'Run every hour until date',
         startDate: '2020-03-25',
-        startTime: '10:45:00',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -276,7 +272,7 @@ describe('<ScheduleEdit />', () => {
         interval: 1,
         name: 'Run daily',
         startDate: '2020-03-25',
-        startTime: '10:45:00',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -299,7 +295,7 @@ describe('<ScheduleEdit />', () => {
         name: 'Run weekly on mon/wed/fri',
         occurrences: 1,
         startDate: '2020-03-25',
-        startTime: '10:45:00',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -324,7 +320,7 @@ describe('<ScheduleEdit />', () => {
         runOn: 'day',
         runOnDayNumber: 1,
         startDate: '2020-04-01',
-        startTime: '10:45',
+        startTime: '10:45 AM',
         timezone: 'America/New_York',
       });
     });
@@ -352,7 +348,7 @@ describe('<ScheduleEdit />', () => {
         runOnTheDay: 'tuesday',
         runOnTheOccurrence: -1,
         startDate: '2020-03-31',
-        startTime: '11:00',
+        startTime: '11:00 AM',
         timezone: 'America/New_York',
       });
     });
@@ -380,7 +376,7 @@ describe('<ScheduleEdit />', () => {
         runOn: 'day',
         runOnDayMonth: 3,
         runOnDayNumber: 1,
-        startTime: '00:00',
+        startTime: '12:00 AM',
         startDate: '2020-03-01',
         timezone: 'America/New_York',
       });
@@ -408,7 +404,7 @@ describe('<ScheduleEdit />', () => {
         runOnTheOccurrence: 2,
         runOnTheDay: 'friday',
         runOnTheMonth: 4,
-        startTime: '11:15',
+        startTime: '11:15 AM',
         startDate: '2020-04-10',
         timezone: 'America/New_York',
       });
@@ -437,7 +433,7 @@ describe('<ScheduleEdit />', () => {
         runOnTheOccurrence: 1,
         runOnTheDay: 'weekday',
         runOnTheMonth: 10,
-        startTime: '11:15',
+        startTime: '11:15 AM',
         startDate: '2020-04-10',
         timezone: 'America/New_York',
       });
@@ -528,7 +524,7 @@ describe('<ScheduleEdit />', () => {
         name: mockSchedule.name,
         end: 'never',
         endDate: '2021-01-29',
-        endTime: '14:15:00',
+        endTime: '2:15 PM',
         frequency: 'none',
         occurrences: 1,
         runOn: 'day',
@@ -539,7 +535,7 @@ describe('<ScheduleEdit />', () => {
         runOnTheOccurrence: 1,
         skip_tags: '',
         startDate: '2021-01-28',
-        startTime: '14:15:00',
+        startTime: '2:15 PM',
         timezone: 'America/New_York',
         credentials: [
           { id: 3, name: 'Credential 3', kind: 'ssh', url: '' },
@@ -630,7 +626,7 @@ describe('<ScheduleEdit />', () => {
       name: 'foo',
       inventory: 702,
       rrule:
-        'DTSTART;TZID=America/New_York:20200402T184500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
+        'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
 
@@ -732,7 +728,7 @@ describe('<ScheduleEdit />', () => {
         interval: 1,
         name: 'Run once schedule',
         startDate: '2020-03-25',
-        startTime: '10:00:00',
+        startTime: '10:00 AM',
         timezone: 'America/New_York',
       });
     });

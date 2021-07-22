@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { shape, func } from 'prop-types';
 
+import { DateTime } from 'luxon';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { RRule } from 'rrule';
@@ -190,13 +191,11 @@ function ScheduleForm({
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
   let rruleError;
-  const now = new Date();
-  const closestQuarterHour = new Date(
-    Math.ceil(now.getTime() / 900000) * 900000
+  const now = DateTime.now();
+  const closestQuarterHour = DateTime.fromMillis(
+    Math.ceil(now.ts / 900000) * 900000
   );
-  const tomorrow = new Date(closestQuarterHour);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
+  const tomorrow = closestQuarterHour.plus({ days: 1 });
   const isTemplate =
     resource.type === 'workflow_job_template' ||
     resource.type === 'job_template';
@@ -376,9 +375,9 @@ function ScheduleForm({
   ) {
     showPromptButton = true;
   }
-  const [currentDate, time] = dateToInputDateTime(closestQuarterHour);
+  const [currentDate, time] = dateToInputDateTime(closestQuarterHour.toISO());
 
-  const [tomorrowDate] = dateToInputDateTime(tomorrow);
+  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
   const initialValues = {
     daysOfWeek: [],
     description: schedule.description || '',
@@ -448,7 +447,10 @@ function ScheduleForm({
         } = RRule.fromString(schedule.rrule.replace(' ', '\n'));
 
         if (dtstart) {
-          const [startDate, startTime] = dateToInputDateTime(schedule.dtstart);
+          const [startDate, startTime] = dateToInputDateTime(
+            schedule.dtstart,
+            schedule.timezone
+          );
 
           overriddenValues.startDate = startDate;
           overriddenValues.startTime = startTime;
@@ -457,7 +459,10 @@ function ScheduleForm({
         if (schedule.until) {
           overriddenValues.end = 'onDate';
 
-          const [endDate, endTime] = dateToInputDateTime(schedule.until);
+          const [endDate, endTime] = dateToInputDateTime(
+            schedule.until,
+            schedule.timezone
+          );
 
           overriddenValues.endDate = endDate;
           overriddenValues.endTime = endTime;
@@ -550,7 +555,10 @@ function ScheduleForm({
               startDate,
             } = values;
 
-            if (end === 'onDate' && new Date(startDate) >= new Date(endDate)) {
+            if (
+              end === 'onDate' &&
+              DateTime.fromISO(startDate) >= DateTime.fromISO(endDate)
+            ) {
               errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
             }
 

@@ -1,62 +1,43 @@
 /* eslint-disable import/prefer-default-export */
 import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
-import { getLanguage } from './language';
+import { DateTime, Duration } from 'luxon';
 
-const prependZeros = (value) => value.toString().padStart(2, 0);
-
-export function formatDateString(dateString, lang = getLanguage(navigator)) {
-  if (dateString === null) {
+export function formatDateString(dateObj, tz = null) {
+  if (dateObj === null) {
     return null;
   }
-  return new Date(dateString).toLocaleString(lang);
-}
 
-export function formatDateStringUTC(dateString, lang = getLanguage(navigator)) {
-  if (dateString === null) {
-    return null;
-  }
-  return new Date(dateString).toLocaleString(lang, { timeZone: 'UTC' });
+  return tz !== null
+    ? DateTime.fromISO(dateObj, { zone: tz }).toLocaleString(
+        DateTime.DATETIME_SHORT_WITH_SECONDS
+      )
+    : DateTime.fromISO(dateObj).toLocaleString(
+        DateTime.DATETIME_SHORT_WITH_SECONDS
+      );
 }
 
 export function secondsToHHMMSS(seconds) {
-  return new Date(seconds * 1000).toISOString().substr(11, 8);
+  return Duration.fromObject({ seconds }).toFormat('hh:mm:ss');
 }
 
 export function secondsToDays(seconds) {
-  let duration = Math.floor(parseInt(seconds, 10) / 86400);
-  if (duration < 0) {
-    duration = 0;
-  }
-  return duration.toString();
+  return Duration.fromObject({ seconds }).toFormat('d');
 }
 
 export function timeOfDay() {
-  const date = new Date();
-  const hour = date.getHours();
-  const minute = prependZeros(date.getMinutes());
-  const second = prependZeros(date.getSeconds());
-  const time =
-    hour > 12
-      ? `${hour - 12}:${minute}:${second} PM`
-      : `${hour}:${minute}:${second} AM`;
-  return time;
+  const dateTime = DateTime.local();
+  return dateTime.toFormat('hh:mm a');
 }
 
-export function dateToInputDateTime(dateObj) {
-  let date = dateObj;
-  if (typeof dateObj === 'string') {
-    date = new Date(dateObj);
+export function dateToInputDateTime(dt, tz = null) {
+  let dateTime;
+  if (tz) {
+    dateTime = DateTime.fromISO(dt, { zone: tz });
+  } else {
+    dateTime = DateTime.fromISO(dt);
   }
-  const year = date.getFullYear();
-  const month = prependZeros(date.getMonth() + 1);
-  const day = prependZeros(date.getDate());
-  const hour =
-    date.getHours() > 12 ? parseInt(date.getHours(), 10) - 12 : date.getHours();
-  const minute = prependZeros(date.getMinutes());
-  const amPmText = date.getHours() > 11 ? 'PM' : 'AM';
-
-  return [`${year}-${month}-${day}`, `${hour}:${minute} ${amPmText}`];
+  return [dateTime.toFormat('yyyy-LL-dd'), dateTime.toFormat('h:mm a')];
 }
 
 export function getRRuleDayConstants(dayString) {

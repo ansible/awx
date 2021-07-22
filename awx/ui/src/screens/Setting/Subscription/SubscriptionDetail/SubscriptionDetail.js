@@ -12,11 +12,7 @@ import RoutedTabs from 'components/RoutedTabs';
 import { CardBody, CardActionsRow } from 'components/Card';
 import { DetailList, Detail, NumberSinceDetail } from 'components/DetailList';
 import { useConfig } from 'contexts/Config';
-import {
-  formatDateString,
-  formatDateStringUTC,
-  secondsToDays,
-} from 'util/dates';
+import { formatDateString, secondsToDays } from 'util/dates';
 
 function SubscriptionDetail() {
   const { me = {}, license_info, version } = useConfig();
@@ -98,8 +94,9 @@ function SubscriptionDetail() {
             label={t`Expires on UTC`}
             value={
               license_info.license_date &&
-              formatDateStringUTC(
-                new Date(license_info.license_date * 1000).toISOString()
+              formatDateString(
+                new Date(license_info.license_date * 1000).toISOString(),
+                'UTC'
               )
             }
           />

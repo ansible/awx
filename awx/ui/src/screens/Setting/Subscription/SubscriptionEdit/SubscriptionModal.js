@@ -20,7 +20,7 @@ import {
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 
 import { ConfigAPI } from 'api';
-import { formatDateStringUTC } from 'util/dates';
+import { formatDateString } from 'util/dates';
 import useRequest from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
 import ErrorDetail from 'components/ErrorDetail';
@@ -168,8 +168,9 @@ function SubscriptionModal({
                   {subscription.instance_count}
                 </Td>
                 <Td dataLabel={t`Expires`} modifier="nowrap">
-                  {formatDateStringUTC(
-                    new Date(subscription.license_date * 1000).toISOString()
+                  {formatDateString(
+                    new Date(subscription.license_date * 1000).toISOString(),
+                    'UTC'
                   )}
                 </Td>
               </Tr>
