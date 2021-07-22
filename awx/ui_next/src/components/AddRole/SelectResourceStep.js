@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import useRequest from 'hooks/useRequest';
 import { SearchColumns, SortColumns } from 'types';
@@ -148,4 +148,4 @@ SelectResourceStep.defaultProps = {
 };
 
 export { SelectResourceStep as _SelectResourceStep };
-export default withRouter(SelectResourceStep);
+export default SelectResourceStep;

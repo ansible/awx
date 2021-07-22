@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { withRouter, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { number, func, bool, string } from 'prop-types';
 
 import styled from 'styled-components';
@@ -411,4 +411,4 @@ HostFilterLookup.defaultProps = {
   enableRelatedFuzzyFiltering: true,
 };
 
-export default withRouter(HostFilterLookup);
+export default HostFilterLookup;
