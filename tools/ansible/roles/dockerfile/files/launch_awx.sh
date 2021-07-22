@@ -13,7 +13,9 @@ if [ -n "${AWX_KUBE_DEVEL}" ]; then
     export SDB_NOTIFY_HOST=$MY_POD_IP
 fi
 
-wait-for-migrations || exit 1
+set -e
+
+wait-for-migrations
 
 awx-manage collectstatic --noinput --clear
 
