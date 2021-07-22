@@ -245,7 +245,7 @@ class Page(object):
         if all_pages and getattr(page, 'next', None):
             paged_results = [r.json()['results']]
             while page.next:
-                r = self.connection.get(self.next, query_parameters)
+                r = self.connection.get(self.next)
                 page = self.page_identity(r)
                 paged_results.append(r.json()['results'])
             json = r.json()
