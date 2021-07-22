@@ -131,6 +131,7 @@ setup(
             'aim = awx.main.credential_plugins.aim:aim_plugin',
             'centrify_vault_kv = awx.main.credential_plugins.centrify_vault:centrify_plugin',
             'thycotic_dsv = awx.main.credential_plugins.dsv:dsv_plugin',
+            'thycotic_tss = awx.main.credential_plugins.tss:tss_plugin',
         ],
     },
     data_files=proc_data_files(

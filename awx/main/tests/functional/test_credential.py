@@ -98,6 +98,7 @@ def test_default_cred_types():
         'scm',
         'ssh',
         'thycotic_dsv',
+        'thycotic_tss',
         'vault',
         'vmware',
     ]
