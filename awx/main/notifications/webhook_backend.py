@@ -72,7 +72,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 "{}".format(m.recipients()[0]),
                 auth=auth,
                 data=json.dumps(m.body, ensure_ascii=False).encode('utf-8'),
-                headers=get_awx_http_client_headers(),
+                headers=dict(list(get_awx_http_client_headers().items()) + list((self.headers or {}).items())),
                 verify=(not self.disable_ssl_verification),
             )
             if r.status_code >= 400:
