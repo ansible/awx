@@ -65,7 +65,7 @@ services:
 {% endfor %}
   execution_node_1:
     image: quay.io/awx/awx_devel:devel
-    user: root
+    user: "1000"
     container_name: tools_execution_node_1
     hostname: execution_node_1
     command: 'receptor --config /etc/receptor/awx-1-receptor-standalone.conf'
