@@ -81,3 +81,9 @@
     src: docker-compose.yml.j2
     dest: "{{ sources_dest }}/{{ compose_name }}"
     mode: '0600'
+
+- name: Render Docker-Compose (Receptor)
+  template:
+    src: docker-receptor.yml.j2
+    dest: "{{ sources_dest }}/docker-receptor.yml"
+    mode: '0600'
