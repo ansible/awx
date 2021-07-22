@@ -478,7 +478,8 @@ awx/projects:
 	@mkdir -p $@
 
 COMPOSE_UP_OPTS ?=
-CLUSTER_NODE_COUNT ?= 1
+CONTROL_PLANE_NODE_COUNT ?= 1
+EXECUTION_NODE_COUNT ?= 2
 MINIKUBE_CONTAINER_GROUP ?= false
 
 docker-compose-sources: .git/hooks/pre-commit
@@ -489,7 +490,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
-	    -e cluster_node_count=$(CLUSTER_NODE_COUNT) \
+	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
+	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
 
 
@@ -542,9 +544,6 @@ docker-refresh: docker-clean docker-compose
 # Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
-docker-compose-cluster: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-compose/_sources/docker-receptor.yml up
 
 docker-compose-cluster-elk: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
