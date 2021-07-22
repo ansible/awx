@@ -98,7 +98,7 @@ describe('<ApplicationAdd/>', () => {
     wrapper.update();
     expect(wrapper.find('input#name').prop('value')).toBe('new foo');
     expect(wrapper.find('input#description').prop('value')).toBe('new bar');
-    expect(wrapper.find('input#organization-input').prop('value')).toBe(
+    expect(wrapper.find('input#organization').prop('value')).toBe(
       'organization'
     );
     expect(
@@ -180,7 +180,7 @@ describe('<ApplicationAdd/>', () => {
       });
     });
 
-    waitForElement(wrapper, 'FormSubmitError', (el) => el.length > 0);
+    waitForElement(wrapper, 'FormSubmitError', el => el.length > 0);
   });
   test('should render content error on failed read options request', async () => {
     ApplicationsAPI.readOptions.mockRejectedValue(

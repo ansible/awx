@@ -274,7 +274,7 @@ describe('<JobTemplateEdit />', () => {
       data: { actions: { GET: {}, POST: {} } },
     });
 
-    useDebounce.mockImplementation((fn) => fn);
+    useDebounce.mockImplementation(fn => fn);
   });
 
   afterEach(() => {
@@ -321,7 +321,7 @@ describe('<JobTemplateEdit />', () => {
       { id: 5, name: 'Maple' },
       { id: 6, name: 'Tree' },
     ];
-    await waitForElement(wrapper, 'LabelSelect', (el) => el.length > 0);
+    await waitForElement(wrapper, 'LabelSelect', el => el.length > 0);
     act(() => {
       wrapper.find('LabelSelect').invoke('onChange')(labels);
       wrapper.update();
@@ -339,9 +339,7 @@ describe('<JobTemplateEdit />', () => {
         name: 'Other Inventory',
       });
 
-      wrapper.find('TextInput#execution-environments-input').invoke('onChange')(
-        ''
-      );
+      wrapper.find('TextInput#execution-environments').invoke('onChange')('');
     });
     wrapper.update();
 
@@ -384,7 +382,7 @@ describe('<JobTemplateEdit />', () => {
       cancelButton = await waitForElement(
         wrapper,
         'button[aria-label="Cancel"]',
-        (e) => e.length === 1
+        e => e.length === 1
       );
     });
     await act(async () => {

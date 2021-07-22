@@ -58,7 +58,7 @@ describe('<WebhookSubForm />', () => {
   });
 
   test('should render initial values properly', () => {
-    waitForElement(wrapper, 'Lookup__ChipHolder', (el) => el.lenth > 0);
+    waitForElement(wrapper, 'Lookup__ChipHolder', el => el.lenth > 0);
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('github');
     expect(
       wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
@@ -68,7 +68,7 @@ describe('<WebhookSubForm />', () => {
         .find('TextInputBase[aria-label="workflow job template webhook key"]')
         .prop('value')
     ).toBe('webhook key');
-    expect(wrapper.find('input#credential-input').prop('value')).toBe(
+    expect(wrapper.find('input#credential').prop('value')).toBe(
       'Github credential'
     );
   });
