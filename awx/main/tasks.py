@@ -3231,7 +3231,10 @@ class AWXReceptorJob:
             else:
                 work_type = 'kubernetes-incluster-auth'
         elif isinstance(self.task.instance, (Job, AdHocCommand)):
-            work_type = 'ansible-runner'
+            if self.task.instance.execution_node == self.task.instance.controller_node:
+                work_type = 'local'
+            else:
+                work_type = 'ansible-runner'
         else:
             work_type = 'local'
 
