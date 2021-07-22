@@ -352,6 +352,10 @@ def on_populate_user(sender, **kwargs):
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
 
+    # Boolean to determine if we should force an user update
+    # to avoid duplicate SQL update statements
+    force_user_update = False
+
     # Prefetch user's groups to prevent LDAP queries for each org/team when
     # checking membership.
     ldap_user._get_groups().get_group_dns()
@@ -362,6 +366,7 @@ def on_populate_user(sender, **kwargs):
         field_len = len(getattr(user, field))
         if field_len > max_len:
             setattr(user, field, getattr(user, field)[:max_len])
+            force_user_update = True
             logger.warn('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
 
     # Update organization membership based on group memberships.
@@ -391,8 +396,9 @@ def on_populate_user(sender, **kwargs):
         _update_m2m_from_groups(user, ldap_user, team.member_role.members, users_opts, remove)
 
     # Update user profile to store LDAP DN.
-    user.save()
-    profile = user.profile
-    if profile.ldap_dn != ldap_user.dn:
-        profile.ldap_dn = ldap_user.dn
-        profile.save()
+    if force_user_update:
+        user.save()
+        profile = user.profile
+        if profile.ldap_dn != ldap_user.dn:
+            profile.ldap_dn = ldap_user.dn
+            profile.save()
