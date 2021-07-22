@@ -1,19 +1,12 @@
 ---
 - node:
-    id: receptor-3
+    id: receptor-{{ item }}
 
 - log-level: info
-
-#- tls-client:
-#    name: mutual-tls-client
-#    cert: /etc/receptor/certs/receptor-3.crt
-#    key: /etc/receptor/certs/receptor-3.key
-#    rootcas: /etc/receptor/certs/ca.crt
 
 - tcp-peer:
     address: tools_receptor_hop:5555
     redial: true
-    #tls: mutual-tls-client
 
 - work-command:
     worktype: ansible-runner
