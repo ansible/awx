@@ -9,7 +9,7 @@
 #               ^-------------- <receptor-3>
 #
 ---
-version: '2'
+version: '2.1'
 services:
   awx_1:
     environment:
@@ -30,7 +30,7 @@ services:
       - "../../docker-compose-cluster:/etc/receptor"
   receptor-1:
     image: quay.io/awx/awx_devel:devel
-    user: "1000"
+    user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_1
     hostname: receptor-1
     command: 'receptor --config /etc/receptor/awx-1-receptor.conf'
@@ -42,7 +42,7 @@ services:
     privileged: true
   receptor-2:
     image: quay.io/awx/awx_devel:devel
-    user: "1000"
+    user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_2
     hostname: receptor-2
     command: 'receptor --config /etc/receptor/awx-2-receptor.conf'
@@ -54,7 +54,7 @@ services:
     privileged: true
   receptor-3:
     image: quay.io/awx/awx_devel:devel
-    user: "1000"
+    user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_3
     hostname: receptor-3
     command: 'receptor --config /etc/receptor/awx-3-receptor.conf'
