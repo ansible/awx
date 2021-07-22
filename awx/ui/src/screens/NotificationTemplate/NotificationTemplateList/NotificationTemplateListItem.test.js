@@ -30,6 +30,7 @@ describe('<NotificationTemplateListItem />', () => {
         <tbody>
           <NotificationTemplateListItem
             template={template}
+            onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
           />
         </tbody>
@@ -53,6 +54,7 @@ describe('<NotificationTemplateListItem />', () => {
         <tbody>
           <NotificationTemplateListItem
             template={template}
+            onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
           />
         </tbody>
@@ -73,6 +75,7 @@ describe('<NotificationTemplateListItem />', () => {
         <tbody>
           <NotificationTemplateListItem
             template={template}
+            onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
           />
         </tbody>
@@ -94,6 +97,7 @@ describe('<NotificationTemplateListItem />', () => {
         <tbody>
           <NotificationTemplateListItem
             template={template}
+            onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
           />
         </tbody>
@@ -121,6 +125,7 @@ describe('<NotificationTemplateListItem />', () => {
                 },
               },
             }}
+            onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
           />
         </tbody>

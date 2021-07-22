@@ -321,11 +321,14 @@ describe('Setting form fields', () => {
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(false);
     await act(async () => {
-      wrapper.find('Switch').invoke('onChange')();
+      wrapper.find('Switch').invoke('onChange')(true);
     });
     wrapper.update();
 
     expect(wrapper.find('AlertModal')).toHaveLength(1);
+    expect(
+      wrapper.find('BooleanField[name="DISABLE_LOCAL_AUTH"]')
+    ).toHaveLength(1);
     await act(async () =>
       wrapper
         .find('Button[ouiaId="confirm-misc-settings-modal"]')
@@ -336,7 +339,45 @@ describe('Setting form fields', () => {
     expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
   });
 
-  test('shold not toggle disable local auth', async () => {
+  test('should not render confirmation modal when toggling off', async () => {
+    const wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          DISABLE_LOCAL_AUTH: true,
+        }}
+      >
+        {() => (
+          <BooleanField
+            name="DISABLE_LOCAL_AUTH"
+            needsConfirmationModal
+            modalTitle="Confirm Disable Local Authorization"
+            config={{
+              category: 'Authentication',
+              category_slug: 'authentication',
+              default: false,
+              help_text:
+                'Controls whether users are prevented from using the built-in authentication system. You probably want to do this if you are using an LDAP or SAML integration.',
+              label: 'Disable the built-in authentication system',
+              required: true,
+              type: 'boolean',
+              value: false,
+            }}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('Switch')).toHaveLength(1);
+    expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
+    expect(wrapper.find('Switch').prop('isDisabled')).toBe(false);
+    await act(async () => {
+      wrapper.find('Switch').invoke('onChange')(false);
+    });
+    wrapper.update();
+    expect(wrapper.find('AlertModal')).toHaveLength(0);
+    expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
+  });
+
+  test('should not toggle disable local auth', async () => {
     const wrapper = mountWithContexts(
       <Formik
         initialValues={{
@@ -367,7 +408,7 @@ describe('Setting form fields', () => {
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(false);
     await act(async () => {
-      wrapper.find('Switch').invoke('onChange')();
+      wrapper.find('Switch').invoke('onChange')(true);
     });
     wrapper.update();
 
