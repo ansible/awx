@@ -11,7 +11,6 @@ import {
   WizardFooter,
   Form,
 } from '@patternfly/react-core';
-import AlertModal from 'components/AlertModal';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 

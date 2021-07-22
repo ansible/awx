@@ -15,7 +15,7 @@ function DaysToKeepStep() {
   const validators = [required(null), minMaxValue(0), integer()];
   return (
     <Form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
       }}
     >

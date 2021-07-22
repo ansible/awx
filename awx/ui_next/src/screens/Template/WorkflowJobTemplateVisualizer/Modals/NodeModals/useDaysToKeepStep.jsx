@@ -16,7 +16,7 @@ export default function useDaysToKeepStep() {
     isReady: true,
     contentError: null,
     hasError: !!daysToKeepMeta.error,
-    setTouched: setFieldTouched => {
+    setTouched: (setFieldTouched) => {
       setFieldTouched('daysToKeep', true, false);
     },
     validate: () => {},

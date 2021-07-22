@@ -2,15 +2,15 @@ import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { SystemJobTemplatesAPI } from '../../../../../../api';
-import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
-import useRequest from '../../../../../../util/useRequest';
-import DataListToolbar from '../../../../../../components/DataListToolbar';
-import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import { SystemJobTemplatesAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'hooks/useRequest';
+import DataListToolbar from 'components/DataListToolbar';
+import CheckboxListItem from 'components/CheckboxListItem';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
-} from '../../../../../../components/PaginatedTable';
+} from 'components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('system-job-templates', {
   page: 1,
@@ -45,10 +45,10 @@ function SystemJobTemplatesList({ nodeResource, onUpdateNodeResource }) {
         count: response.data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
-        ).map(val => val.slice(0, -8)),
+        ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -88,7 +88,7 @@ function SystemJobTemplatesList({ nodeResource, onUpdateNodeResource }) {
           isRadio
         />
       )}
-      renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+      renderToolbar={(props) => <DataListToolbar {...props} fillWidth />}
       showPageSizeOptions={false}
       toolbarSearchColumns={[
         {
