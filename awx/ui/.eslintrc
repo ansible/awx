@@ -13,7 +13,8 @@
     "airbnb",
     "prettier",
     "plugin:jsx-a11y/strict",
-    "plugin:i18next/recommended"
+    "plugin:i18next/recommended",
+    "plugin:import/react"
   ],
   "settings": {
     "react": {
@@ -21,7 +22,8 @@
     },
     "import/resolver": {
       "node": {
-        "paths": ["src"]
+        "paths": ["src"],
+        "extensions": [".js",".jsx"]
       }
     }
   },

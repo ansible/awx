@@ -111,7 +111,7 @@ def test_python_and_js_licenses():
     api_licenses = index_licenses('%s/../docs/licenses' % base_dir)
     ui_licenses = index_licenses('%s/../docs/licenses/ui' % base_dir)
     api_requirements = read_api_requirements('%s/../requirements' % base_dir)
-    ui_requirements = read_ui_requirements('%s/ui_next' % base_dir)
+    ui_requirements = read_ui_requirements('%s/ui' % base_dir)
 
     errors = []
     errors += remediate_licenses_and_requirements(ui_licenses, ui_requirements)

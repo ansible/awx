@@ -7,7 +7,7 @@ from awx.main.views import handle_400, handle_403, handle_404, handle_500, handl
 
 
 urlpatterns = [
-    url(r'', include('awx.ui_next.urls', namespace='ui_next')),
+    url(r'', include('awx.ui.urls', namespace='ui')),
     url(r'^api/', include('awx.api.urls', namespace='api')),
     url(r'^sso/', include('awx.sso.urls', namespace='sso')),
     url(r'^sso/', include('social_django.urls', namespace='social')),
