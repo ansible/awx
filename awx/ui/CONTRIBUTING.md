@@ -262,10 +262,10 @@ About.defaultProps = {
 
 There are currently a few custom hooks:
 
-1. [useRequest](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L21) encapsulates main actions related to requests.
-2. [useDismissableError](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L71) provides controls for "dismissing" an error message.
-3. [useDeleteItems](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L98) handles deletion of items from a paginated item list.
-4. [useSelected](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useSelected.js#L14) provides a way to read and update a selected list.
+1. [useRequest](https://github.com/ansible/awx/blob/devel/awx/ui/src/util/useRequest.js#L21) encapsulates main actions related to requests.
+2. [useDismissableError](https://github.com/ansible/awx/blob/devel/awx/ui/src/util/useRequest.js#L71) provides controls for "dismissing" an error message.
+3. [useDeleteItems](https://github.com/ansible/awx/blob/devel/awx/ui/src/util/useRequest.js#L98) handles deletion of items from a paginated item list.
+4. [useSelected](https://github.com/ansible/awx/blob/devel/awx/ui/src/util/useSelected.js#L14) provides a way to read and update a selected list.
 
 ### Naming Functions
 

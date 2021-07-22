@@ -383,49 +383,49 @@ bulk_data:
 # UI TASKS
 # --------------------------------------
 
-UI_BUILD_FLAG_FILE = awx/ui_next/.ui-built
+UI_BUILD_FLAG_FILE = awx/ui/.ui-built
 
 clean-ui:
 	rm -rf node_modules
-	rm -rf awx/ui_next/node_modules
-	rm -rf awx/ui_next/build
-	rm -rf awx/ui_next/src/locales/_build
+	rm -rf awx/ui/node_modules
+	rm -rf awx/ui/build
+	rm -rf awx/ui/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
 
-awx/ui_next/node_modules:
-	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui_next --loglevel warn ci
+awx/ui/node_modules:
+	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui --loglevel warn ci
 
 $(UI_BUILD_FLAG_FILE):
 	$(PYTHON) tools/scripts/compilemessages.py
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
 	mkdir -p awx/public/static/media
-	cp -r awx/ui_next/build/static/css/* awx/public/static/css
-	cp -r awx/ui_next/build/static/js/* awx/public/static/js
-	cp -r awx/ui_next/build/static/media/* awx/public/static/media
+	cp -r awx/ui/build/static/css/* awx/public/static/css
+	cp -r awx/ui/build/static/js/* awx/public/static/js
+	cp -r awx/ui/build/static/media/* awx/public/static/media
 	touch $@
 
-ui-release: awx/ui_next/node_modules $(UI_BUILD_FLAG_FILE)
+ui-release: awx/ui/node_modules $(UI_BUILD_FLAG_FILE)
 
-ui-devel: awx/ui_next/node_modules
+ui-devel: awx/ui/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
 
-ui-devel-instrumented: awx/ui_next/node_modules
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start-instrumented
+ui-devel-instrumented: awx/ui/node_modules
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
 
-ui-devel-test: awx/ui_next/node_modules
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start
+ui-devel-test: awx/ui/node_modules
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run start
 
 ui-lint:
-	$(NPM_BIN) --prefix awx/ui_next install
-	$(NPM_BIN) run --prefix awx/ui_next lint
-	$(NPM_BIN) run --prefix awx/ui_next prettier-check
+	$(NPM_BIN) --prefix awx/ui install
+	$(NPM_BIN) run --prefix awx/ui lint
+	$(NPM_BIN) run --prefix awx/ui prettier-check
 
 ui-test:
-	$(NPM_BIN) --prefix awx/ui_next install
-	$(NPM_BIN) run --prefix awx/ui_next test -- --coverage --maxWorkers=4 --watchAll=false
+	$(NPM_BIN) --prefix awx/ui install
+	$(NPM_BIN) run --prefix awx/ui test -- --coverage --maxWorkers=4 --watchAll=false
 
 
 # Build a pip-installable package into dist/ with a timestamped version number.
@@ -578,11 +578,11 @@ awx-kube-dev-build: Dockerfile.kube-dev
 
 # generate UI .pot file, an empty template of strings yet to be translated
 pot: $(UI_BUILD_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-template --clean
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-template --clean
 
 # generate UI .po files for each locale (will update translated strings for `en`)
 po: $(UI_BUILD_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings -- --clean
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
 # generate API django .pot .po
 LANG = "en-us"

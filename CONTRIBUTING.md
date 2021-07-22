@@ -6,21 +6,21 @@ Have questions about this document or anything not covered here? Come chat with 
 
 ## Table of contents
 
-* [Things to know prior to submitting code](#things-to-know-prior-to-submitting-code)
-* [Setting up your development environment](#setting-up-your-development-environment)
-  * [Prerequisites](#prerequisites)
-    * [Docker](#docker)
-    * [Docker compose](#docker-compose)
-    * [Frontend Development](#frontend-development)
-  * [Build and Run the Development Environment](#build-and-run-the-development-environment)
-    * [Fork and clone the AWX repo](#fork-and-clone-the-awx-repo)
-  * [Building API Documentation](#building-api-documentation)
-  * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
-  * [Purging containers and images](#purging-containers-and-images)
-* [What should I work on?](#what-should-i-work-on)
-* [Submitting Pull Requests](#submitting-pull-requests)
-* [PR Checks run by Zuul](#pr-checks-run-by-zuul)
-* [Reporting Issues](#reporting-issues)
+- [Things to know prior to submitting code](#things-to-know-prior-to-submitting-code)
+- [Setting up your development environment](#setting-up-your-development-environment)
+  - [Prerequisites](#prerequisites)
+    - [Docker](#docker)
+    - [Docker compose](#docker-compose)
+    - [Frontend Development](#frontend-development)
+  - [Build and Run the Development Environment](#build-and-run-the-development-environment)
+    - [Fork and clone the AWX repo](#fork-and-clone-the-awx-repo)
+  - [Building API Documentation](#building-api-documentation)
+  - [Accessing the AWX web interface](#accessing-the-awx-web-interface)
+  - [Purging containers and images](#purging-containers-and-images)
+- [What should I work on?](#what-should-i-work-on)
+- [Submitting Pull Requests](#submitting-pull-requests)
+- [PR Checks run by Zuul](#pr-checks-run-by-zuul)
+- [Reporting Issues](#reporting-issues)
 
 ## Things to know prior to submitting code
 
@@ -46,15 +46,15 @@ respectively.
 
 For Linux platforms, refer to the following from Docker:
 
-* **Fedora** - https://docs.docker.com/engine/installation/linux/docker-ce/fedora/
+- **Fedora** - https://docs.docker.com/engine/installation/linux/docker-ce/fedora/
 
-* **CentOS** - https://docs.docker.com/engine/installation/linux/docker-ce/centos/
+- **CentOS** - https://docs.docker.com/engine/installation/linux/docker-ce/centos/
 
-* **Ubuntu** - https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
+- **Ubuntu** - https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
 
-* **Debian** - https://docs.docker.com/engine/installation/linux/docker-ce/debian/
+- **Debian** - https://docs.docker.com/engine/installation/linux/docker-ce/debian/
 
-* **Arch** - https://wiki.archlinux.org/index.php/Docker
+- **Arch** - https://wiki.archlinux.org/index.php/Docker
 
 #### Docker Compose
 
@@ -66,7 +66,7 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 
 #### Frontend Development
 
-See [the ui development documentation](awx/ui_next/CONTRIBUTING.md).
+See [the ui development documentation](awx/ui/CONTRIBUTING.md).
 
 #### Fork and clone the AWX repo
 
@@ -74,19 +74,19 @@ If you have not done so already, you'll need to fork the AWX repo on GitHub. For
 
 ### Build and Run the Development Environment
 
-See the [README.md](./tools/docker-compose/README.md) for docs on how to build the awx_devel image and run the development environment.  
+See the [README.md](./tools/docker-compose/README.md) for docs on how to build the awx_devel image and run the development environment.
 
 ### Building API Documentation
 
 AWX includes support for building [Swagger/OpenAPI
-documentation](https://swagger.io).  To build the documentation locally, run:
+documentation](https://swagger.io). To build the documentation locally, run:
 
 ```bash
 (container)/awx_devel$ make swagger
 ```
 
 This will write a file named `swagger.json` that contains the API specification
-in OpenAPI format.  A variety of online tools are available for translating
+in OpenAPI format. A variety of online tools are available for translating
 this data into more consumable formats (such as HTML). http://editor.swagger.io
 is an example of one such service.
 
@@ -126,15 +126,15 @@ Fixes and Features for AWX will go through the Github pull request process. Subm
 
 Here are a few things you can do to help the visibility of your change, and increase the likelihood that it will be accepted:
 
-* No issues when running linters/code checkers
-  * Python: black: `(container)/awx_devel$ make black`
-  * Javascript: JsHint: `(container)/awx_devel$ make jshint`
-* No issues from unit tests
-  * Python: py.test: `(container)/awx_devel$ make test`
-  * JavaScript: Jasmine: `(container)/awx_devel$ make ui-test-ci`
-* Write tests for new functionality, update/add tests for bug fixes
-* Make the smallest change possible
-* Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
+- No issues when running linters/code checkers
+  - Python: black: `(container)/awx_devel$ make black`
+  - Javascript: `(container)/awx_devel$ make ui-lint`
+- No issues from unit tests
+  - Python: py.test: `(container)/awx_devel$ make test`
+  - JavaScript: `(container)/awx_devel$ make ui-test`
+- Write tests for new functionality, update/add tests for bug fixes
+- Make the smallest change possible
+- Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
 
 It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
@@ -146,21 +146,24 @@ Sometimes it might take us a while to fully review your PR. We try to keep the `
 All submitted PRs will have the linter and unit tests run against them via Zuul, and the status reported in the PR.
 
 ## PR Checks run by Zuul
+
 Zuul jobs for awx are defined in the [zuul-jobs](https://github.com/ansible/zuul-jobs) repo.
 
 Zuul runs the following checks that must pass:
-1) `tox-awx-api-lint`
-2) `tox-awx-ui-lint`
-3) `tox-awx-api`
-4) `tox-awx-ui`
-5) `tox-awx-swagger`
+
+1. `tox-awx-api-lint`
+2. `tox-awx-ui-lint`
+3. `tox-awx-api`
+4. `tox-awx-ui`
+5. `tox-awx-swagger`
 
 Zuul runs the following checks that are non-voting (can not pass but serve to inform PR reviewers):
-1) `tox-awx-detect-schema-change`
-    This check generates the schema and diffs it against a reference copy of the `devel` version of the schema.
-    Reviewers should inspect the `job-output.txt.gz` related to the check if their is a failure (grep for `diff -u -b` to find beginning of diff).
-    If the schema change is expected and makes sense in relation to the changes made by the PR, then you are good to go!
-    If not, the schema changes should be fixed, but this decision must be enforced by reviewers.
+
+1. `tox-awx-detect-schema-change`
+   This check generates the schema and diffs it against a reference copy of the `devel` version of the schema.
+   Reviewers should inspect the `job-output.txt.gz` related to the check if their is a failure (grep for `diff -u -b` to find beginning of diff).
+   If the schema change is expected and makes sense in relation to the changes made by the PR, then you are good to go!
+   If not, the schema changes should be fixed, but this decision must be enforced by reviewers.
 
 ## Reporting Issues
 
