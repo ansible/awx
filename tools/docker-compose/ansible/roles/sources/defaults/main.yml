@@ -5,5 +5,5 @@ awx_image: 'quay.io/ansible/awx_devel'
 pg_port: 5432
 pg_username: 'awx'
 pg_database: 'awx'
-cluster_node_count: 1
+control_plane_node_count: 1
 minikube_container_group: false
