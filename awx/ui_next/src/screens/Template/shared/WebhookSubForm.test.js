@@ -68,7 +68,7 @@ describe('<WebhookSubForm />', () => {
         .find('TextInputBase[aria-label="workflow job template webhook key"]')
         .prop('value')
     ).toBe('webhook key');
-    expect(wrapper.find('input#credential-input').prop('value')).toBe(
+    expect(wrapper.find('input#credential').prop('value')).toBe(
       'Github credential'
     );
   });

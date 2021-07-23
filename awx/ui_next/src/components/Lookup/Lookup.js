@@ -128,7 +128,7 @@ function Lookup(props) {
       <InputGroup onBlur={onBlur}>
         <Button
           aria-label={t`Search`}
-          id={id}
+          id={`${id}-open`}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.control}
           isDisabled={isLoading || isDisabled}
@@ -149,7 +149,7 @@ function Lookup(props) {
           </ChipHolder>
         ) : (
           <TextInput
-            id={`${id}-input`}
+            id={id}
             value={typedText}
             onChange={(inputValue) => {
               setTypedText(inputValue);

@@ -30,6 +30,7 @@ function ExecutionEnvironmentDetail({
   virtualEnvironment,
   verifyMissingVirtualEnv,
   helpText,
+  dataCy,
 }) {
   const config = useConfig();
   const docsLink = `${getDocsBaseUrl(
@@ -51,7 +52,7 @@ function ExecutionEnvironmentDetail({
           </Link>
         }
         helpText={helpText}
-        dataCy="execution-environment-detail"
+        dataCy={dataCy}
       />
     );
   }
@@ -89,7 +90,7 @@ function ExecutionEnvironmentDetail({
             </span>
           </>
         }
-        dataCy="missing-execution-environment-detail"
+        dataCy={`missing-${dataCy}`}
       />
     );
   }
@@ -113,7 +114,7 @@ function ExecutionEnvironmentDetail({
             </span>
           </>
         }
-        dataCy="execution-environment-detail"
+        dataCy={dataCy}
       />
     );
   }
@@ -127,6 +128,7 @@ ExecutionEnvironmentDetail.propTypes = {
   virtualEnvironment: string,
   verifyMissingVirtualEnv: bool,
   helpText: string,
+  dataCy: string,
 };
 
 ExecutionEnvironmentDetail.defaultProps = {
@@ -135,6 +137,7 @@ ExecutionEnvironmentDetail.defaultProps = {
   virtualEnvironment: '',
   verifyMissingVirtualEnv: true,
   helpText: '',
+  dataCy: 'execution-environment-detail',
 };
 
 export default ExecutionEnvironmentDetail;

@@ -20,6 +20,7 @@ const QS_CONFIG = getQSConfig('execution_environments', {
 });
 
 function ExecutionEnvironmentLookup({
+  id,
   globallyAvailable,
   helperTextInvalid,
   isDefaultEnvironment,
@@ -154,7 +155,7 @@ function ExecutionEnvironmentLookup({
   const renderLookup = () => (
     <>
       <Lookup
-        id="execution-environments"
+        id={id}
         header={t`Execution Environment`}
         value={value}
         onBlur={onBlur}
@@ -213,7 +214,7 @@ function ExecutionEnvironmentLookup({
 
   return (
     <FormGroup
-      fieldId="execution-environment-lookup"
+      fieldId={id}
       label={renderLabel(isGlobalDefaultEnvironment, isDefaultEnvironment)}
       labelIcon={popoverContent && <Popover content={popoverContent} />}
       helperTextInvalid={helperTextInvalid}
@@ -231,6 +232,7 @@ function ExecutionEnvironmentLookup({
 }
 
 ExecutionEnvironmentLookup.propTypes = {
+  id: string,
   value: ExecutionEnvironment,
   popoverContent: string,
   onChange: func.isRequired,
@@ -243,6 +245,7 @@ ExecutionEnvironmentLookup.propTypes = {
 };
 
 ExecutionEnvironmentLookup.defaultProps = {
+  id: 'execution-environments',
   popoverContent: '',
   isDefaultEnvironment: false,
   isGlobalDefaultEnvironment: false,

@@ -15,7 +15,7 @@ function ReLaunchDropDown({
   isPrimary = false,
   handleRelaunch,
   isLaunching,
-
+  id = 'relaunch-job',
   ouiaId,
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +75,7 @@ function ReLaunchDropDown({
             toggleIndicator={null}
             onToggle={onToggle}
             aria-label={t`relaunch jobs`}
-            id="relaunch_jobs"
+            id={id}
             isPrimary
           >
             {t`Relaunch`}
@@ -97,7 +97,7 @@ function ReLaunchDropDown({
           toggleIndicator={null}
           onToggle={onToggle}
           aria-label={t`relaunch jobs`}
-          id="relaunch_jobs"
+          id={id}
         >
           <RocketIcon />
         </DropdownToggle>

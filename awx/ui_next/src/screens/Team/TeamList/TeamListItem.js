@@ -31,7 +31,7 @@ function TeamListItem({ team, isSelected, onSelect, detailUrl, rowIndex }) {
         dataLabel={t`Selected`}
       />
       <Td id={labelId} dataLabel={t`Name`}>
-        <Link id={labelId} to={`${detailUrl}`}>
+        <Link to={`${detailUrl}`}>
           <b>{team.name}</b>
         </Link>
       </Td>

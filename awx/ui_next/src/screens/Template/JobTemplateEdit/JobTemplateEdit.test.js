@@ -339,9 +339,7 @@ describe('<JobTemplateEdit />', () => {
         name: 'Other Inventory',
       });
 
-      wrapper.find('TextInput#execution-environments-input').invoke('onChange')(
-        ''
-      );
+      wrapper.find('TextInput#execution-environments').invoke('onChange')('');
     });
     wrapper.update();
 

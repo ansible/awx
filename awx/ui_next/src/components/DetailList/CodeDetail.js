@@ -17,6 +17,7 @@ import Popover from '../Popover';
 function CodeDetail({ value, label, mode, rows, helpText, dataCy }) {
   const labelCy = dataCy ? `${dataCy}-label` : null;
   const valueCy = dataCy ? `${dataCy}-value` : null;
+  const editorId = dataCy ? `${dataCy}-editor` : 'code-editor';
 
   return (
     <>
@@ -27,12 +28,13 @@ function CodeDetail({ value, label, mode, rows, helpText, dataCy }) {
         data-cy={labelCy}
       >
         <div className="pf-c-form__label">
-          <span
+          <label
+            htmlFor={editorId}
             className="pf-c-form__label-text"
             css="font-weight: var(--pf-global--FontWeight--bold)"
           >
             {label}
-          </span>
+          </label>
           {helpText && (
             <Popover header={label} content={helpText} id={dataCy} />
           )}
@@ -45,6 +47,7 @@ function CodeDetail({ value, label, mode, rows, helpText, dataCy }) {
         data-cy={valueCy}
       >
         <CodeEditor
+          id={editorId}
           mode={mode}
           value={value}
           readOnly

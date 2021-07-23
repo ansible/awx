@@ -88,6 +88,7 @@ describe('<ApplicationEdit/>', () => {
     });
     expect(wrapper.find('ApplicationEdit').length).toBe(1);
   });
+
   test('should cancel form properly', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/applications/1/edit'],
@@ -110,6 +111,7 @@ describe('<ApplicationEdit/>', () => {
       expect(history.location.pathname).toBe('/applications/1/details');
     });
   });
+
   test('should throw error on submit', async () => {
     const error = {
       response: {
@@ -147,6 +149,7 @@ describe('<ApplicationEdit/>', () => {
     wrapper.update();
     expect(wrapper.find('FormSubmitError').length).toBe(1);
   });
+
   test('expect values to be updated and submitted properly', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/applications/1/edit'],
@@ -188,7 +191,7 @@ describe('<ApplicationEdit/>', () => {
     wrapper.update();
     expect(wrapper.find('input#name').prop('value')).toBe('new foo');
     expect(wrapper.find('input#description').prop('value')).toBe('new bar');
-    expect(wrapper.find('input#organization-input').prop('value')).toBe(
+    expect(wrapper.find('input#organization').prop('value')).toBe(
       'organization'
     );
     expect(
