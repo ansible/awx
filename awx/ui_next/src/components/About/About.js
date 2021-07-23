@@ -5,14 +5,9 @@ import { AboutModal } from '@patternfly/react-core';
 import useBrandName from 'hooks/useBrandName';
 
 function About({ version, isOpen, onClose }) {
-  const {
-    current: { brandName, componentName },
-  } = useBrandName();
+  const brandName = useBrandName();
   const createSpeechBubble = () => {
-    let text =
-      componentName !== ''
-        ? `${brandName} ${componentName} ${version}`
-        : `${brandName} ${version}`;
+    let text = `${brandName.current} ${version}`;
     let top = '';
     let bottom = '';
 
@@ -36,7 +31,7 @@ function About({ version, isOpen, onClose }) {
     <AboutModal
       isOpen={isOpen}
       onClose={onClose}
-      productName={brandName}
+      productName={brandName.current}
       trademark={`${copyright} ${new Date().getFullYear()} ${redHatInc}`}
       brandImageSrc="/static/media/logo-header.svg"
       brandImageAlt={t`Brand Image`}
