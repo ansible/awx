@@ -510,7 +510,9 @@ docker-compose-clean: awx/projects
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
 
 docker-compose-container-group-clean:
-	tools/docker-compose-minikube/_sources/minikube delete
+	@if [ -f "tools/docker-compose-minikube/_sources/minikube" ]; then \
+	    tools/docker-compose-minikube/_sources/minikube delete; \
+	fi
 	rm -rf tools/docker-compose-minikube/_sources/
 
 # Base development image build
