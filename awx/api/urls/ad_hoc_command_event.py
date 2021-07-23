@@ -3,11 +3,10 @@
 
 from django.conf.urls import url
 
-from awx.api.views import AdHocCommandEventList, AdHocCommandEventDetail
+from awx.api.views import AdHocCommandEventDetail
 
 
 urls = [
-    url(r'^$', AdHocCommandEventList.as_view(), name='ad_hoc_command_event_list'),
     url(r'^(?P<pk>[0-9]+)/$', AdHocCommandEventDetail.as_view(), name='ad_hoc_command_event_detail'),
 ]
 

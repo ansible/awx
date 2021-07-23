@@ -3906,18 +3906,6 @@ class AdHocCommandRelaunch(GenericAPIView):
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class AdHocCommandEventList(NoTruncateMixin, ListAPIView):
-
-    model = models.AdHocCommandEvent
-    serializer_class = serializers.AdHocCommandEventSerializer
-    search_fields = ('stdout',)
-
-    def get_queryset(self):
-        adhoc = self.get_parent_object()
-        self.check_parent_access(adhoc)
-        return adhoc.get_event_queryset()
-
-
 class AdHocCommandEventDetail(RetrieveAPIView):
 
     model = models.AdHocCommandEvent
