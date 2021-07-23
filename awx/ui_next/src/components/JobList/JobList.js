@@ -159,6 +159,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           hasContentLoading={isLoading || isDeleteLoading || isCancelLoading}
           items={jobs}
           itemCount={count}
+          emptyContentMessage={t`Please execute Jobs to populate this list.`}
           pluralizedItemName={t`Jobs`}
           qsConfig={qsConfig}
           toolbarSearchColumns={[

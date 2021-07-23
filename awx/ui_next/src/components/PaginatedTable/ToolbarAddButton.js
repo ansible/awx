@@ -10,7 +10,6 @@ import { useKebabifiedMenu } from 'contexts/Kebabified';
 function ToolbarAddButton({
   linkTo,
   onClick,
-
   isDisabled,
   defaultLabel = t`Add`,
   showToggleIndicator,
