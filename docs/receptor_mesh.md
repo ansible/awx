@@ -57,7 +57,8 @@ If ran in a container_group, user-space jobs run as the "kubernetes-runtime-auth
 Instances in control plane must be registered by the installer via `awx-manage`
 commands like `awx-manage register_queue` or `awx-manage register_instance`.
 
-Execution-only nodes are automatically discovered when they appear in the receptor mesh.
+Execution-only nodes are automatically discovered after they have been configured and join the receptor mesh.
+Control nodes should see them as a "Known Node".
 
 Control nodes check the receptor network (reported via `receptorctl status`) when their heartbeat task runs.
 Nodes on the receptor network are compared against the `Instance` model in the database.
