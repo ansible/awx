@@ -748,7 +748,7 @@ def main():
         'webhook_service',
     ):
         field_val = module.params.get(field_name)
-        if field_val:
+        if field_val is not None:
             new_fields[field_name] = field_val
 
     if 'extra_vars' in new_fields:
