@@ -1,29 +1,30 @@
 ## Receptor Mesh
 
-AWX uses a Receptor mesh to transmit "user-space" unified jobs:
+AWX uses a [Receptor](https://github.com/ansible/receptor) mesh to transmit "user-space" unified jobs:
  - jobs
  - ad hoc commands
  - inventory updates
 
 to the node where they run.
 
-https://github.com/ansible/receptor
-
 > NOTE: user-space jobs are what carry out the user's Ansible automation. These job types run inside of the designated execution environment so that the needed content is available.
+
+> NOTE: The word "node" corresponds to entries in the `Instance` database model, or the `/api/v2/instances/` endpoint, and is a machine participating in the cluster / mesh.
 
 ### Split of Control Plane versus Execution Plane
 
 Instances in the control plane run persistent AWX services (like the web server, task dispatcher, etc.), project updates, and management jobs.
 
 Hybrid instances in the control plane may also run user-space jobs.
+The task manager logic will not send user-space jobs to control-only nodes.
 
 The unified jobs API reports `controller_node` and `execution_node` fields.
-The execution node is where the job runs. The controller node prepares the private_data_dir for the job, and processes the receptor output stream.
+The execution node is where the job runs. The controller node prepares the `private_data_dir` for the job, and processes the receptor output stream.
 
-#### Receptor Configuration
+#### Receptor Configuration Work Type
 
-Execution nodes (all nodes that can run jobs) need to advertise the "ansible-runner" work type.
-All user-space jobs are submitted as a receptor work unit with this work type.
+Execution-only nodes need to advertise the "ansible-runner" work type.
+User-space jobs are submitted as a receptor work unit with this work type.
 
 An entry like this should appear in its `receptor.conf` (receptor configuration file):
 
@@ -35,22 +36,19 @@ An entry like this should appear in its `receptor.conf` (receptor configuration 
     allowruntimeparams: true
 ```
 
-Control (and hybrid) nodes need to advertise the "local" work type.
+Control (and hybrid) nodes advertise the "local" work type instead.
+So the entry is the same as above, except that it has `worktype: local`.
 Project updates are submitted as this work type.
-
-```
-- work-command:
-    worktype: local
-    command: ansible-runner
-    params: worker
-    allowruntimeparams: true
-```
-
 If user-space jobs run on a hybrid node, they will also run as the "local" work type.
 
 After the initial receptor integration, but before the control plane and execution plane split, all job types ran as the "local" work type on the same node as the control node.
 
-If ran in a container_group, user-space jobs run as the "kubernetes-runtime-auth" work type.
+Here is a listing of work types that you may encounter:
+
+ - `local` - any ansible-runner job ran in a traditional install
+ - `ansible-runner` - remote execution of user-space jobs
+ - `kubernetes-runtime-auth` - user-space jobs ran in a container group
+ - `kubernetes-runtime-auth` - project updates and management jobs on OpenShift Container Platform
 
 ### Auto-discovery of execution nodes
 
