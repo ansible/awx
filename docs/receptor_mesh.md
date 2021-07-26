@@ -11,15 +11,27 @@ to the node where they run.
 
 > NOTE: The word "node" corresponds to entries in the `Instance` database model, or the `/api/v2/instances/` endpoint, and is a machine participating in the cluster / mesh.
 
+The unified jobs API reports `controller_node` and `execution_node` fields.
+The execution node is where the job runs, and the controller node interfaces between the job and server functions.
+
+Before a job can start, the controller node prepares the `private_data_dir` needed for the job to run.
+Next, the controller node sends the data via `ansible-runner`'s `transmit`, and connects to the output stream with `process`.
+For details on these commands, see the [ansible-runner docs on remote execution](https://ansible-runner.readthedocs.io/en/latest/remote_jobs.html).
+
+On the other side, the execution node runs the job under `ansible-runner worker`.
+
 ### Split of Control Plane versus Execution Plane
 
-Instances in the control plane run persistent AWX services (like the web server, task dispatcher, etc.), project updates, and management jobs.
+Instances in the **control plane** run persistent AWX services (like the web server, task dispatcher, etc.), project updates, and management jobs. Instances in the **execution plane** run user-space jobs.
 
-Hybrid instances in the control plane may also run user-space jobs.
-The task manager logic will not send user-space jobs to control-only nodes.
+The task manager logic will not send user-space jobs to **control-only** nodes.
+In the inventory definition, the user can set a flag to designate this node type.
 
-The unified jobs API reports `controller_node` and `execution_node` fields.
-The execution node is where the job runs. The controller node prepares the `private_data_dir` for the job, and processes the receptor output stream.
+**Execution-only** nodes have a minimal set of software requirements needed to participate in the receptor mesh and run jobs under ansible-runner with podman isolation.
+These _only_ run user-space jobs, and may be geographically separated (with high latency) from the control plane.
+They may not even have a direct connection to the cluster, and use other receptor **hop** nodes to communicate.
+
+**Hybrid** (control & execution nodes) are instances in the control plane that are allowed to run user-space jobs.
 
 #### Receptor Configuration Work Type
 
@@ -40,8 +52,6 @@ Control (and hybrid) nodes advertise the "local" work type instead.
 So the entry is the same as above, except that it has `worktype: local`.
 Project updates are submitted as this work type.
 If user-space jobs run on a hybrid node, they will also run as the "local" work type.
-
-After the initial receptor integration, but before the control plane and execution plane split, all job types ran as the "local" work type on the same node as the control node.
 
 Here is a listing of work types that you may encounter:
 
