@@ -86,6 +86,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
+    NODE_TYPE_CHOICES = [("control", "Control plane node"), ("execution", "Execution plane node"), ("hybrid", "Controller and execution")]
+    node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
 
     class Meta:
         app_label = 'main'

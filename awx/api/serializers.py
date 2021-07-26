@@ -4799,6 +4799,7 @@ class InstanceSerializer(BaseSerializer):
             "mem_capacity",
             "enabled",
             "managed_by_policy",
+            "node_type",
         )
 
     def get_related(self, obj):
