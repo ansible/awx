@@ -58,7 +58,7 @@ Here is a listing of work types that you may encounter:
  - `local` - any ansible-runner job ran in a traditional install
  - `ansible-runner` - remote execution of user-space jobs
  - `kubernetes-runtime-auth` - user-space jobs ran in a container group
- - `kubernetes-runtime-auth` - project updates and management jobs on OpenShift Container Platform
+ - `kubernetes-incluster-auth` - project updates and management jobs on OpenShift Container Platform
 
 ### Auto-discovery of execution nodes
 
