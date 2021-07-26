@@ -4776,7 +4776,7 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version')
+        read_only_fields = ('uuid', 'hostname', 'version', 'node_type')
         fields = (
             "id",
             "type",
