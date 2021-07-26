@@ -18,11 +18,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str, help='Hostname used during provisioning')
+        parser.add_argument('--node_type', type=str, default="hybrid", choices=["control", "execution", "hybrid"], help='Instance Node type')
 
-    def _register_hostname(self, hostname):
+    def _register_hostname(self, hostname, node_type):
         if not hostname:
             return
-        (changed, instance) = Instance.objects.register(uuid=self.uuid, hostname=hostname)
+        (changed, instance) = Instance.objects.register(uuid=self.uuid, hostname=hostname, node_type=node_type)
         if changed:
             print('Successfully registered instance {}'.format(hostname))
         else:
@@ -35,6 +36,6 @@ class Command(BaseCommand):
             raise CommandError("Specify `--hostname` to use this command.")
         self.uuid = settings.SYSTEM_UUID
         self.changed = False
-        self._register_hostname(options.get('hostname'))
+        self._register_hostname(options.get('hostname'), options.get('node_type'))
         if self.changed:
             print('(changed: True)')
