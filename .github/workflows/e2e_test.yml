@@ -47,17 +47,17 @@ jobs:
         run: |
           docker pull gcr.io/ansible-tower-engineering/awx_cypress_base:stable
 
-      - name: Checkout tower-qa
+      - name: Checkout ${{ secrets.E2E_PROJECT }}
         uses: actions/checkout@v2
         with:
-          repository: ${{ github.repository_owner }}/tower-qa
+          repository: ${{ github.repository_owner }}/${{ secrets.E2E_PROJECT }}
           ssh-key: ${{ secrets.QA_REPO_KEY }}
-          path: tower-qa
+          path: ${{ secrets.E2E_PROJECT }}
           ref: devel
 
       - name: Build cypress
         run: |
-          cd tower-qa/ui-tests/awx-pf-tests
+          cd ${{ secrets.E2E_PROJECT }}/ui-tests/awx-pf-tests
           docker build -t awx-pf-tests .
 
       - name: Update default AWX password
@@ -80,7 +80,7 @@ jobs:
           export COMMIT_INFO_AUTHOR=$GITHUB_ACTOR
           export COMMIT_INFO_SHA=$GITHUB_SHA
           export COMMIT_INFO_REMOTE=$GITHUB_REPOSITORY_OWNER
-          cd tower-qa/ui-tests/awx-pf-tests
+          cd ${{ secrets.E2E_PROJECT }}/ui-tests/awx-pf-tests
           AWX_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' tools_awx_1)
           printenv > .env
           echo "Executing tests:"
