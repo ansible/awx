@@ -2,9 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { string, number, shape, arrayOf } from 'prop-types';
 import * as d3 from 'd3';
 import { t } from '@lingui/macro';
-
 import { PageContextConsumer } from '@patternfly/react-core';
-
 import ChartTooltip from './ChartTooltip';
 
 function LineChart({ id, data, height, pageContext, jobStatus }) {
@@ -176,15 +174,14 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
       .style('stroke-dasharray', '3, 3')
       .style('opacity', '0');
 
-    const handleMouseOver = (d) => {
-      tooltip.handleMouseOver(d);
+    const handleMouseOver = (event, d) => {
+      tooltip.handleMouseOver(event, d);
       // show vertical line
       vertical.transition().style('opacity', '1');
     };
-
-    const handleMouseMove = function mouseMove(...params) {
-      const intersectX = params[2][params[1]].cx.baseVal.value;
-      vertical.attr('d', () => `M${intersectX},${height} ${intersectX},${0}`);
+    const handleMouseMove = function mouseMove(event) {
+      const [pointerX] = d3.pointer(event);
+      vertical.attr('d', () => `M${pointerX},${height} ${pointerX},${0}`);
     };
 
     const handleMouseOut = () => {
@@ -221,7 +218,7 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
         .attr('cx', (d) => x(d.DATE))
         .attr('cy', (d) => y(d.RAN))
         .attr('id', (d) => `success-dot-${dateFormat(d.DATE)}`)
-        .on('mouseover', handleMouseOver)
+        .on('mouseover', (event, d) => handleMouseOver(event, d))
         .on('mousemove', handleMouseMove)
         .on('mouseout', handleMouseOut);
     }

@@ -1,6 +1,5 @@
 import 'styled-components/macro';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { bool } from 'prop-types';
@@ -28,13 +27,11 @@ import VisualizerNode from './VisualizerNode';
 const PotentialLink = styled.polyline`
   pointer-events: none;
 `;
-
 const WorkflowSVG = styled.svg`
   background-color: #f6f6f6;
   display: flex;
   height: 100%;
 `;
-
 function VisualizerGraph({ readOnly }) {
   const [helpText, setHelpText] = useState(null);
   const [linkHelp, setLinkHelp] = useState();
@@ -42,7 +39,6 @@ function VisualizerGraph({ readOnly }) {
   const [zoomPercentage, setZoomPercentage] = useState(100);
   const svgRef = useRef(null);
   const gRef = useRef(null);
-
   const {
     addLinkSourceNode,
     addingLink,
@@ -52,7 +48,6 @@ function VisualizerGraph({ readOnly }) {
     showLegend,
     showTools,
   } = useContext(WorkflowStateContext);
-
   const dispatch = useContext(WorkflowDispatchContext);
 
   const drawPotentialLinkToNode = (node) => {
@@ -66,13 +61,11 @@ function VisualizerGraph({ readOnly }) {
       const startY = sourceNodeY + wfConstants.nodeH / 2;
       const finishX = targetNodeX;
       const finishY = targetNodeY + wfConstants.nodeH / 2;
-
       d3.select('#workflow-potentialLink')
         .attr('points', `${startX},${startY} ${finishX},${finishY}`)
         .raise();
     }
   };
-
   const handleBackgroundClick = () => {
     setHelpText(null);
     dispatch({ type: 'CANCEL_LINK' });
@@ -88,7 +81,6 @@ function VisualizerGraph({ readOnly }) {
       nodePositions[addLinkSourceNode.id].y - nodePositions[1].y;
     const startX = sourceNodeX + wfConstants.nodeW;
     const startY = sourceNodeY + wfConstants.nodeH / 2;
-
     d3.select('#workflow-potentialLink')
       .attr(
         'points',
@@ -100,24 +92,20 @@ function VisualizerGraph({ readOnly }) {
       )
       .raise();
   };
-
   // This is the zoom function called by using the mousewheel/click and drag
-  const zoom = () => {
-    const translation = [d3.event.transform.x, d3.event.transform.y];
+  const zoom = (event) => {
+    const translation = [event.transform.x, event.transform.y];
     d3.select(gRef.current).attr(
       'transform',
-      `translate(${translation}) scale(${d3.event.transform.k})`
+      `translate(${translation}) scale(${event.transform.k})`
     );
-
-    setZoomPercentage(d3.event.transform.k * 100);
+    setZoomPercentage(event.transform.k * 100);
   };
 
   const handlePan = (direction) => {
     const transform = d3.zoomTransform(d3.select(svgRef.current).node());
-
     let { x: xPos, y: yPos } = transform;
     const { k: currentScale } = transform;
-
     switch (direction) {
       case 'up':
         yPos -= 50;
@@ -135,13 +123,11 @@ function VisualizerGraph({ readOnly }) {
         // Throw an error?
         break;
     }
-
     d3.select(svgRef.current).call(
       zoomRef.transform,
       d3.zoomIdentity.translate(xPos, yPos).scale(currentScale)
     );
   };
-
   const handlePanToMiddle = () => {
     const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
     d3.select(svgRef.current).call(
@@ -150,7 +136,6 @@ function VisualizerGraph({ readOnly }) {
         .translate(0, svgBoundingClientRect.height / 2 - 30)
         .scale(1)
     );
-
     setZoomPercentage(100);
   };
 
@@ -159,20 +144,17 @@ function VisualizerGraph({ readOnly }) {
     const currentScaleAndOffset = d3.zoomTransform(
       d3.select(svgRef.current).node()
     );
-
     const [translateX, translateY] = getTranslatePointsForZoom(
       svgBoundingClientRect,
       currentScaleAndOffset,
       newScale
     );
-
     d3.select(svgRef.current).call(
       zoomRef.transform,
       d3.zoomIdentity.translate(translateX, translateY).scale(newScale)
     );
     setZoomPercentage(newScale * 100);
   };
-
   const handleFitGraph = () => {
     const { k: currentScale } = d3.zoomTransform(
       d3.select(svgRef.current).node()
@@ -185,19 +167,16 @@ function VisualizerGraph({ readOnly }) {
     const gBBoxDimensions = d3.select(gRef.current).node().getBBox();
 
     const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
-
     const [scaleToFit, yTranslate] = getScaleAndOffsetToFit(
       gBoundingClientRect,
       svgBoundingClientRect,
       gBBoxDimensions,
       currentScale
     );
-
     d3.select(svgRef.current).call(
       zoomRef.transform,
       d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
     );
-
     setZoomPercentage(scaleToFit * 100);
   };
 
@@ -207,7 +186,6 @@ function VisualizerGraph({ readOnly }) {
   useEffect(() => {
     d3.select(svgRef.current).call(zoomRef);
   }, [zoomRef]);
-
   // Attempt to zoom the graph to fit the available screen space
   useEffect(() => {
     handleFitGraph();
@@ -218,7 +196,6 @@ function VisualizerGraph({ readOnly }) {
     // and https://github.com/facebook/react/issues/15865 amongst others
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <>
       {(helpText || nodeHelp || linkHelp) && (
@@ -327,9 +304,7 @@ function VisualizerGraph({ readOnly }) {
     </>
   );
 }
-
 VisualizerGraph.propTypes = {
   readOnly: bool.isRequired,
 };
-
 export default VisualizerGraph;

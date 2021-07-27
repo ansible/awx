@@ -1,6 +1,7 @@
+
 MIT License
 
-Copyright (c) 2018 Luca Ban - Mesqueeb
+Copyright (c) 2017 Alberto Leal <mailforalberto@gmail.com> (github.com/dashed)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -4,13 +4,11 @@ import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { AllHtmlEntities } from 'html-entities';
-import StatusIcon from 'components/StatusIcon';
-import { DetailList, Detail } from 'components/DetailList';
-import ContentEmpty from 'components/ContentEmpty';
-import CodeEditor from 'components/CodeEditor';
-
-const entities = new AllHtmlEntities();
+import { encode } from 'html-entities';
+import StatusIcon from '../../../components/StatusIcon';
+import { DetailList, Detail } from '../../../components/DetailList';
+import ContentEmpty from '../../../components/ContentEmpty';
+import CodeEditor from '../../../components/CodeEditor';
 
 const HostNameDetailValue = styled.div`
   align-items: center;
@@ -52,7 +50,7 @@ const processCodeEditorValue = (value) => {
   } else if (value === '') {
     codeEditorValue = ' ';
   } else if (typeof value === 'string') {
-    codeEditorValue = entities.encode(value);
+    codeEditorValue = encode(value);
   } else {
     codeEditorValue = value;
   }
