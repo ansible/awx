@@ -33,6 +33,7 @@ export default (props) => (
       optionsToggle: t`Select`,
       currPage: t`Current page`,
       paginationTitle: t`Pagination`,
+      ofWord: t`of`,
     }}
     dropDirection={DropdownDirection.up}
     {...props}
