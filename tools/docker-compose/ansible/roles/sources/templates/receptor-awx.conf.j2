@@ -1,12 +1,18 @@
 ---
 - node:
-    id: awx_1
+    id: awx_{{ item }}
 
 - log-level:
     debug
 
 - tcp-listener:
     port: 2222
+
+{% for i in range(item | int + 1, control_plane_node_count | int + 1) %}
+- tcp-peer:
+    address: awx_{{ i }}:2222
+    redial: true
+{% endfor %}
 
 #- tls-server:
 #    name: mutual-tls
@@ -38,7 +44,3 @@
     allowruntimeauth: true
     allowruntimepod: true
     allowruntimeparams: true
-
-- tcp-listener:
-     port: 4444
-     #tls: mutual-tls
