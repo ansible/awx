@@ -85,12 +85,19 @@
     dest: "{{ sources_dest }}/{{ compose_name }}"
     mode: '0600'
 
+- name: Render Receptor Config(s) for Control Plane
+  template:
+    src: "receptor-awx.conf.j2"
+    dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
+    mode: '0600'
+  with_sequence: start=1 end={{ control_plane_node_count }}
+
 - name: Render Receptor Hop Config
   template:
     src: "receptor-hop.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-hop.conf"
     mode: '0600'
-  
+
 - name: Render Receptor Worker Config(s)
   template:
     src: "receptor-worker.conf.j2"
