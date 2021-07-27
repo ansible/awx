@@ -515,6 +515,26 @@ def awx_k8s_reaper():
 
 
 @task(queue=get_local_queuename)
+def delete_k8s_credential(credential_id):
+    if not settings.RECEPTOR_RELEASE_WORK:
+        return
+
+    secret_name = "automation-{0}-image-pull-secret-{1}".format(settings.INSTALL_UUID[:5], credential_id)
+    from awx.main.scheduler.kubernetes import PodManager
+
+    for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
+        try:
+            logger.debug("Trying to delete imagePullSecret with name {} for {}".format(secret_name, group))
+            result = PodManager.delete_secret(group, credential_id)
+            if result.get("status") == "Success":
+                logger.debug("ImagePullSecret {} has been deleted from {}".format(secret_name, group))
+                break
+        except Exception:
+            logger.debug("Failed to delete imagePullSecret {} from {}".format(secret_name, group))
+            break
+
+
+@task(queue=get_local_queuename)
 def awx_periodic_scheduler():
     with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
         if acquired is False:

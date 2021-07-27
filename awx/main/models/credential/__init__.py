@@ -102,6 +102,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         related_name='credentials',
     )
+    can_used_in_k8s = models.BooleanField(default=False)
     inputs = CredentialInputField(
         blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
     )
@@ -312,6 +313,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 return input_source.get_input_value()
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
+
+    def delete(self, using=None, keep_parents=False):
+        if self.can_used_in_k8s:
+            from awx.main.tasks import delete_k8s_credential
+
+            delete_k8s_credential.delay(self.id)
+
+        return super(Credential, self).delete(using=using, keep_parents=keep_parents)
 
 
 class CredentialType(CommonModelNameNotUnique):

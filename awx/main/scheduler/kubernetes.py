@@ -54,6 +54,28 @@ class PodManager(object):
 
         return pods
 
+    @classmethod
+    def delete_secret(cls, instance_group, credential_id):
+        task = collections.namedtuple('Task', 'id instance_group')(id='', instance_group=instance_group)
+        pm = PodManager(task)
+        secret_name = "automation-{0}-image-pull-secret-{1}".format(settings.INSTALL_UUID[:5], credential_id)
+        try:
+            return pm.kube_api.delete_namespaced_secret(namespace=pm.namespace, name=secret_name)
+        except client.rest.ApiException as e:
+            error_msg = _('Invalid openshift or k8s cluster credential')
+            if e.status == 403:
+                error_msg = _(
+                    'Failed to delete imagePullSecret: {}. Check that openshift or k8s credential has permission to delete a secret.'.format(e.status)
+                )
+                logger.exception(error_msg)
+            full_error_msg = '{0}: {1}'.format(error_msg, str(e))
+            logger.exception(full_error_msg)
+            raise PermissionError(full_error_msg)
+        except Exception as e:
+            error_msg = 'Failed to delete imagePullSecret with name {}'.format(secret_name)
+            logger.exception('{0}: {1}'.format(error_msg, str(e)))
+            raise RuntimeError(error_msg)
+
     def create_secret(self, job):
         registry_cred = job.execution_environment.credential
         host = registry_cred.get_input('host')
@@ -141,6 +163,9 @@ class PodManager(object):
                 error_msg = 'Failed to create imagePullSecret for container group {}'.format(job.instance_group.name)
                 logger.exception(error_msg)
                 job.cancel(job_explanation=error_msg)
+
+        registry_cred.can_used_in_k8s = True
+        registry_cred.save()
 
         return secret.metadata.name
 
