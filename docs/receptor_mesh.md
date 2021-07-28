@@ -74,3 +74,33 @@ Nodes on the receptor network are compared against the `Instance` model in the d
 If a node appears in the mesh network which is not in the database, then a "health check" is started.
 This will submit a work unit to the execution node which then outputs important node data via `ansible-runner`.
 The `capacity` field will obtain a non-zero value through this process, which is necessary to run jobs.
+
+### Development Environment
+
+A "toy" cluster with execution nodes and a hop node is created by the docker-compose Makefile target.
+By default, it will create 1 hybrid node, 1 hop node, and 2 execution nodes.
+The number of nodes can be changed with environment variables, for example:
+
+```
+CONTROL_PLANE_NODE_COUNT=2 EXECUTION_NODE_COUNT=3 COMPOSE_TAG=devel make docker-compose
+```
+
+This will spin up a topology represented below.
+(names are the receptor node names, which differ from the AWX Instance names and network address in some cases)
+
+```
+<awx_1:2222>---v
+ -----v
+<awx_2:2222>
+     <receptor-hop:5555>
+             ^-------------- <receptor-1>
+             ^-------------- <receptor-2>
+             ^-------------- <receptor-3>
+```
+
+All execution (`receptor-*`) nodes connect to the hop node.
+Only the `awx_1` node connects to the hop node out of the AWX cluster.
+`awx_1` connects to `awx_2`, fulfilling the requirement that the AWX cluster is fully connected.
+
+For an example, if a job is launched with `awx_2` as the `controller_node` and `receptor-3` as the `execution_node`,
+then `awx_2` communicates to `receptor-3` via `awx_1` and then `receptor-hop`.
