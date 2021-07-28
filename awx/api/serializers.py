@@ -4776,7 +4776,7 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version')
+        read_only_fields = ('uuid', 'hostname', 'version', 'node_type')
         fields = (
             "id",
             "type",
@@ -4799,6 +4799,7 @@ class InstanceSerializer(BaseSerializer):
             "mem_capacity",
             "enabled",
             "managed_by_policy",
+            "node_type",
         )
 
     def get_related(self, obj):

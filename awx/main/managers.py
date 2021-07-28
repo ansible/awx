@@ -111,11 +111,13 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, uuid=None, hostname=None, ip_address=None):
+    def register(self, uuid=None, hostname=None, ip_address=None, node_type=None):
         if not uuid:
             uuid = settings.SYSTEM_UUID
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
+        if not node_type:
+            node_type = "hybrid"
         with advisory_lock('instance_registration_%s' % hostname):
             if settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 # detect any instances with the same IP address.
@@ -131,13 +133,19 @@ class InstanceManager(models.Manager):
             instance = self.filter(hostname=hostname)
             if instance.exists():
                 instance = instance.get()
+                update_fields = []
                 if instance.ip_address != ip_address:
                     instance.ip_address = ip_address
-                    instance.save(update_fields=['ip_address'])
+                    update_fields.append('ip_address')
+                if instance.node_type != node_type:
+                    instance.node_type = node_type
+                    update_fields.append('node_type')
+                if update_fields:
+                    instance.save(update_fields=update_fields)
                     return (True, instance)
                 else:
                     return (False, instance)
-            instance = self.create(uuid=uuid, hostname=hostname, ip_address=ip_address, capacity=0)
+            instance = self.create(uuid=uuid, hostname=hostname, ip_address=ip_address, capacity=0, node_type=node_type)
         return (True, instance)
 
     def get_or_register(self):
