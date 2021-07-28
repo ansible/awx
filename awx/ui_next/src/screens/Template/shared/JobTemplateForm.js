@@ -66,7 +66,9 @@ function JobTemplateForm({
     Boolean(template.webhook_service)
   );
   const isMounted = useIsMounted();
-  const brandName = useBrandName();
+  const {
+    current: { brandName },
+  } = useBrandName();
 
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
@@ -566,7 +568,7 @@ function JobTemplateForm({
                         &nbsp;
                         <Popover
                           content={t`Enables creation of a provisioning
-                              callback URL. Using the URL a host can contact ${brandName.current}
+                              callback URL. Using the URL a host can contact ${brandName}
                               and request a configuration update using this job
                               template.`}
                         />

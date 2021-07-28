@@ -45,11 +45,13 @@ const CardDescription = styled.div`
 
 function SettingList() {
   const config = useConfig();
-  const brandName = useBrandName();
+  const {
+    current: { brandName },
+  } = useBrandName();
   const settingRoutes = [
     {
       header: t`Authentication`,
-      description: t`Enable simplified login for your ${brandName.current} applications`,
+      description: t`Enable simplified login for your ${brandName} applications`,
       id: 'authentication',
       routes: [
         {
@@ -84,7 +86,7 @@ function SettingList() {
     },
     {
       header: t`Jobs`,
-      description: t`Update settings pertaining to Jobs within ${brandName.current}`,
+      description: t`Update settings pertaining to Jobs within ${brandName}`,
       id: 'jobs',
       routes: [
         {

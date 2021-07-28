@@ -22,7 +22,9 @@ const TooltipWrapper = styled.div`
 `;
 
 function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
-  const brandName = useBrandName();
+  const {
+    current: { brandName },
+  } = useBrandName();
   const [moduleNameField, moduleNameMeta, moduleNameHelpers] = useField({
     name: 'module_name',
     validate: required(null),
@@ -65,7 +67,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
             }
             labelIcon={
               <Popover
-                content={t`These are the modules that ${brandName.current} supports running commands against.`}
+                content={t`These are the modules that ${brandName} supports running commands against.`}
               />
             }
           >
