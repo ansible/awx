@@ -147,6 +147,11 @@ function ScheduleList({
     }
     return missingValues && t`This schedule is missing required survey values`;
   };
+  let emptyContentMessage = t`Please add a Schedule to populate this list.`;
+
+  if (location.pathname.startsWith('/schedules')) {
+    emptyContentMessage = t`Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source.`;
+  }
 
   return (
     <>
@@ -156,6 +161,8 @@ function ScheduleList({
         items={schedules}
         itemCount={itemCount}
         qsConfig={QS_CONFIG}
+        pluralizedItemName={t`Schedules`}
+        emptyContentMessage={emptyContentMessage}
         onRowClick={handleSelect}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
