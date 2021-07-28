@@ -128,6 +128,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @staticmethod
     def choose_online_control_plane_node():
+        # TODO: update query to use node_type field
         return random.choice(Instance.objects.filter(enabled=True).exclude(version__startswith='ansible-runner-').values_list('hostname', flat=True))
 
     def is_lost(self, ref_time=None):
@@ -157,9 +158,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.mem_capacity = mem[1]
         self.version = awx_application_version
         self.save(update_fields=['capacity', 'version', 'modified', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
-
-    def is_receptor(self):
-        return self.version.startswith('ansible-runner-')
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
@@ -233,9 +231,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def fit_task_to_most_remaining_capacity_instance(task, instances):
         instance_most_capacity = None
         for i in instances:
-            # TODO: change this to check if "execution" is in node_type field
-            if not i.version.startswith('ansible-runner'):
-                continue
+            # TODO: continue if node is control-only node type
             if i.remaining_capacity >= task.task_impact and (
                 instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
             ):
