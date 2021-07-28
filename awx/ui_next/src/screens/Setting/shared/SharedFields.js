@@ -10,8 +10,11 @@ import {
   Switch,
   TextArea,
   TextInput,
+  Tooltip,
+  ButtonVariant,
 } from '@patternfly/react-core';
 import FileUploadIcon from '@patternfly/react-icons/dist/js/icons/file-upload-icon';
+import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import AnsibleSelect from 'components/AnsibleSelect';
 import CodeEditor from 'components/CodeEditor';
@@ -22,12 +25,25 @@ import { combine, integer, minMaxValue, required, url } from 'util/validators';
 import AlertModal from 'components/AlertModal';
 import RevertButton from './RevertButton';
 
+const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`
+  && {
+    color: var(--pf-global--danger-color--100);
+  }
+`;
+
 const FormGroup = styled(PFFormGroup)`
   .pf-c-form__group-label {
     display: inline-flex;
     align-items: center;
     width: 100%;
   }
+`;
+
+const Selected = styled.div`
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  border-bottom-color: var(--pf-global--BorderColor--200);
 `;
 
 const SettingGroup = ({
@@ -114,7 +130,9 @@ const BooleanField = ({
             {t`Cancel`}
           </Button>,
         ]}
-      >{t`Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change.`}</AlertModal>
+      >
+        {t`Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change.`}
+      </AlertModal>
     );
   }
 
@@ -211,6 +229,106 @@ const EncryptedField = ({ name, config, isRequired = false }) => {
   ) : null;
 };
 EncryptedField.propTypes = {
+  name: string.isRequired,
+  config: shape({}).isRequired,
+};
+
+const InputAlertField = ({ name, config }) => {
+  const [field, meta] = useField({ name });
+  const isValid = !(meta.touched && meta.error);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDisable, setIsDisable] = useState(true);
+
+  const handleSetIsOpen = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleEnableTextInput = () => {
+    setIsDisable(false);
+  };
+
+  return config ? (
+    <>
+      <SettingGroup
+        defaultValue={config.default ?? ''}
+        fieldId={name}
+        helperTextInvalid={meta.error}
+        label={config.label}
+        popoverContent={config.help_text}
+        validated={isValid ? 'default' : 'error'}
+        isDisabled={isDisable}
+      >
+        <Selected>
+          {isDisable && (
+            <Tooltip
+              content={t`Edit Login redirect override URL`}
+              position="top"
+            >
+              <Button
+                onClick={() => {
+                  handleSetIsOpen();
+                }}
+                ouiaId="confirm-edit-login-redirect"
+                variant={ButtonVariant.control}
+              >
+                <ExclamationCircleIcon />
+              </Button>
+            </Tooltip>
+          )}
+          <TextInput
+            id={name}
+            placeholder={config.placeholder}
+            validated={isValid ? 'default' : 'error'}
+            value={field.value}
+            onBlur={field.onBlur}
+            onChange={(value, event) => {
+              field.onChange(event);
+            }}
+            isDisabled={isDisable}
+          />
+        </Selected>
+      </SettingGroup>
+      {isModalOpen && isDisable && (
+        <AlertModal
+          isOpen
+          title={t`Edit login redirect override URL`}
+          variant="danger"
+          aria-label={t`Edit login redirect override URL`}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          actions={[
+            <Button
+              key="confirm"
+              variant="danger"
+              aria-label={t`confirm edit login redirect`}
+              onClick={() => {
+                handleEnableTextInput();
+                setIsModalOpen(false);
+              }}
+            >
+              {t`Confirm`}
+            </Button>,
+            <Button
+              key="cancel"
+              variant="link"
+              aria-label={t`cancel edit login redirect`}
+              onClick={() => {
+                setIsModalOpen(false);
+              }}
+            >
+              {t`Cancel`}
+            </Button>,
+          ]}
+        >
+          {t`Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled.`}
+        </AlertModal>
+      )}
+    </>
+  ) : null;
+};
+
+InputAlertField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
 };
@@ -407,4 +525,5 @@ export {
   InputField,
   ObjectField,
   TextAreaField,
+  InputAlertField,
 };
