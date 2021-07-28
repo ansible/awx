@@ -9,6 +9,7 @@ import usePreviewStep from 'components/LaunchPrompt/steps/usePreviewStep';
 import { WorkflowStateContext } from 'contexts/Workflow';
 import { jsonToYaml } from 'util/yaml';
 import useNodeTypeStep from './NodeTypeStep/useNodeTypeStep';
+import useDaysToKeepStep from './useDaysToKeepStep';
 import useRunTypeStep from './useRunTypeStep';
 
 function showPreviewStep(nodeType, launchConfig) {
@@ -55,6 +56,34 @@ const getNodeToEditDefaultValues = (
       nodeToEdit.fullUnifiedJobTemplate.description || '';
     initialValues.timeoutMinutes = Math.floor(timeout / 60);
     initialValues.timeoutSeconds = timeout - Math.floor(timeout / 60) * 60;
+
+    return initialValues;
+  }
+
+  if (nodeToEdit?.fullUnifiedJobTemplate?.type === 'system_job_template') {
+    if (
+      nodeToEdit?.promptValues?.extra_data &&
+      Object.prototype.hasOwnProperty.call(
+        nodeToEdit.promptValues.extra_data,
+        'days'
+      )
+    ) {
+      initialValues.daysToKeep = parseInt(
+        nodeToEdit.promptValues.extra_data.days,
+        10
+      );
+    } else if (
+      nodeToEdit?.originalNodeObject?.extra_data &&
+      Object.prototype.hasOwnProperty.call(
+        nodeToEdit.originalNodeObject.extra_data,
+        'days'
+      )
+    ) {
+      initialValues.daysToKeep = parseInt(
+        nodeToEdit.originalNodeObject.extra_data.days,
+        10
+      );
+    }
 
     return initialValues;
   }
@@ -186,7 +215,6 @@ const getNodeToEditDefaultValues = (
 export default function useWorkflowNodeSteps(
   launchConfig,
   surveyConfig,
-
   resource,
   askLinkType,
   resourceDefaultCredentials
@@ -202,6 +230,7 @@ export default function useWorkflowNodeSteps(
   const steps = [
     useRunTypeStep(askLinkType),
     useNodeTypeStep(launchConfig),
+    useDaysToKeepStep(),
     useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(launchConfig, resource, resourceDefaultCredentials),
     useOtherPromptsStep(launchConfig, resource),
@@ -213,7 +242,6 @@ export default function useWorkflowNodeSteps(
   steps.push(
     usePreviewStep(
       launchConfig,
-
       resource,
       surveyConfig,
       hasErrors,

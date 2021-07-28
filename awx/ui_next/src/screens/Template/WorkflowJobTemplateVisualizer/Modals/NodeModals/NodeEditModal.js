@@ -44,6 +44,11 @@ function NodeEditModal() {
 
         node.launchConfig = config;
       }
+      if (nodeType === 'system_job_template') {
+        node.promptValues = {
+          extra_data: values?.extra_data,
+        };
+      }
     }
 
     dispatch({

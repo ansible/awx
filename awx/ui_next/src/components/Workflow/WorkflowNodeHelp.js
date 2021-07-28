@@ -62,6 +62,10 @@ function WorkflowNodeHelp({ node }) {
       case 'workflow_approval':
         nodeType = t`Workflow Approval`;
         break;
+      case 'system_job_template':
+      case 'system_job':
+        nodeType = t`Management Job`;
+        break;
       default:
         nodeType = '';
     }

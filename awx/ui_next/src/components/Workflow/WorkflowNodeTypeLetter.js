@@ -53,6 +53,10 @@ function WorkflowNodeTypeLetter({ node }) {
       case 'inventory_update':
         nodeTypeLetter = 'I';
         break;
+      case 'system_job_template':
+      case 'system_job':
+        nodeTypeLetter = 'M';
+        break;
       case 'workflow_job_template':
       case 'workflow_job':
         nodeTypeLetter = 'W';

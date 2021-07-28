@@ -2,6 +2,7 @@ import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
+  SystemJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
 } from 'api';
 
@@ -23,6 +24,9 @@ export default function getNodeType(node) {
     case 'workflow_approval_template':
     case 'workflow_approval':
       return ['approval', null];
+    case 'system_job_template':
+    case 'system_job':
+      return ['system_job_template', SystemJobTemplatesAPI];
     default:
       return [null, null];
   }

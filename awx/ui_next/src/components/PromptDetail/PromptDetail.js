@@ -1,18 +1,15 @@
 import 'styled-components/macro';
 import React from 'react';
 import { shape } from 'prop-types';
-
 import { t, Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Chip, Divider, Title } from '@patternfly/react-core';
 import { toTitleCase } from 'util/strings';
-
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { DetailList, Detail, UserDateDetail } from '../DetailList';
 import { VariablesDetail } from '../CodeEditor';
-
 import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';
 import PromptJobTemplateDetail from './PromptJobTemplateDetail';
@@ -139,123 +136,136 @@ function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
             user={details?.summary_fields?.modified_by}
           />
         )}
+        {details?.type === 'system_job_template' && (
+          <VariablesDetail
+            label={t`Variables`}
+            rows={4}
+            value={overrides.extra_vars}
+            name="extra_vars"
+          />
+        )}
       </DetailList>
 
-      {hasPromptData(launchConfig) && hasOverrides && (
-        <>
-          <PromptTitle headingLevel="h2">{t`Prompted Values`}</PromptTitle>
-          <PromptDivider />
-          <PromptDetailList aria-label={t`Prompt Overrides`}>
-            {launchConfig.ask_job_type_on_launch && (
-              <Detail
-                label={t`Job Type`}
-                value={toTitleCase(overrides.job_type)}
-              />
-            )}
-            {launchConfig.ask_credential_on_launch && (
-              <Detail
-                fullWidth
-                label={t`Credentials`}
-                rows={4}
-                value={
-                  <ChipGroup
-                    numChips={5}
-                    totalChips={overrides.credentials.length}
-                  >
-                    {overrides.credentials.map((cred) => (
-                      <CredentialChip
-                        key={cred.id}
-                        credential={cred}
-                        isReadOnly
-                      />
-                    ))}
-                  </ChipGroup>
-                }
-              />
-            )}
-            {launchConfig.ask_inventory_on_launch && (
-              <Detail label={t`Inventory`} value={overrides.inventory?.name} />
-            )}
-            {launchConfig.ask_scm_branch_on_launch && (
-              <Detail
-                label={t`Source Control Branch`}
-                value={overrides.scm_branch}
-              />
-            )}
-            {launchConfig.ask_limit_on_launch && (
-              <Detail label={t`Limit`} value={overrides.limit} />
-            )}
-            {Object.prototype.hasOwnProperty.call(overrides, 'verbosity') &&
-            launchConfig.ask_verbosity_on_launch ? (
-              <Detail
-                label={t`Verbosity`}
-                value={VERBOSITY[overrides.verbosity]}
-              />
-            ) : null}
-            {launchConfig.ask_tags_on_launch && (
-              <Detail
-                fullWidth
-                label={t`Job Tags`}
-                value={
-                  <ChipGroup
-                    numChips={5}
-                    totalChips={
-                      !overrides.job_tags || overrides.job_tags === ''
-                        ? 0
-                        : overrides.job_tags.split(',').length
-                    }
-                  >
-                    {overrides.job_tags.length > 0 &&
-                      overrides.job_tags.split(',').map((jobTag) => (
-                        <Chip key={jobTag} isReadOnly>
-                          {jobTag}
-                        </Chip>
+      {details?.type !== 'system_job_template' &&
+        hasPromptData(launchConfig) &&
+        hasOverrides && (
+          <>
+            <PromptTitle headingLevel="h2">{t`Prompted Values`}</PromptTitle>
+            <PromptDivider />
+            <PromptDetailList aria-label={t`Prompt Overrides`}>
+              {launchConfig.ask_job_type_on_launch && (
+                <Detail
+                  label={t`Job Type`}
+                  value={toTitleCase(overrides.job_type)}
+                />
+              )}
+              {launchConfig.ask_credential_on_launch && (
+                <Detail
+                  fullWidth
+                  label={t`Credentials`}
+                  rows={4}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={overrides.credentials.length}
+                    >
+                      {overrides.credentials.map((cred) => (
+                        <CredentialChip
+                          key={cred.id}
+                          credential={cred}
+                          isReadOnly
+                        />
                       ))}
-                  </ChipGroup>
-                }
-              />
-            )}
-            {launchConfig.ask_skip_tags_on_launch && (
-              <Detail
-                fullWidth
-                label={t`Skip Tags`}
-                value={
-                  <ChipGroup
-                    numChips={5}
-                    totalChips={
-                      !overrides.skip_tags || overrides.skip_tags === ''
-                        ? 0
-                        : overrides.skip_tags.split(',').length
-                    }
-                  >
-                    {overrides.skip_tags.length > 0 &&
-                      overrides.skip_tags.split(',').map((skipTag) => (
-                        <Chip key={skipTag} isReadOnly>
-                          {skipTag}
-                        </Chip>
-                      ))}
-                  </ChipGroup>
-                }
-              />
-            )}
-            {launchConfig.ask_diff_mode_on_launch && (
-              <Detail
-                label={t`Show Changes`}
-                value={overrides.diff_mode === true ? t`On` : t`Off`}
-              />
-            )}
-            {(launchConfig.survey_enabled ||
-              launchConfig.ask_variables_on_launch) && (
-              <VariablesDetail
-                label={t`Variables`}
-                rows={4}
-                value={overrides.extra_vars}
-                name="extra_vars"
-              />
-            )}
-          </PromptDetailList>
-        </>
-      )}
+                    </ChipGroup>
+                  }
+                />
+              )}
+              {launchConfig.ask_inventory_on_launch && (
+                <Detail
+                  label={t`Inventory`}
+                  value={overrides.inventory?.name}
+                />
+              )}
+              {launchConfig.ask_scm_branch_on_launch && (
+                <Detail
+                  label={t`Source Control Branch`}
+                  value={overrides.scm_branch}
+                />
+              )}
+              {launchConfig.ask_limit_on_launch && (
+                <Detail label={t`Limit`} value={overrides.limit} />
+              )}
+              {Object.prototype.hasOwnProperty.call(overrides, 'verbosity') &&
+              launchConfig.ask_verbosity_on_launch ? (
+                <Detail
+                  label={t`Verbosity`}
+                  value={VERBOSITY[overrides.verbosity]}
+                />
+              ) : null}
+              {launchConfig.ask_tags_on_launch && (
+                <Detail
+                  fullWidth
+                  label={t`Job Tags`}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={
+                        !overrides.job_tags || overrides.job_tags === ''
+                          ? 0
+                          : overrides.job_tags.split(',').length
+                      }
+                    >
+                      {overrides.job_tags.length > 0 &&
+                        overrides.job_tags.split(',').map((jobTag) => (
+                          <Chip key={jobTag} isReadOnly>
+                            {jobTag}
+                          </Chip>
+                        ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
+              {launchConfig.ask_skip_tags_on_launch && (
+                <Detail
+                  fullWidth
+                  label={t`Skip Tags`}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={
+                        !overrides.skip_tags || overrides.skip_tags === ''
+                          ? 0
+                          : overrides.skip_tags.split(',').length
+                      }
+                    >
+                      {overrides.skip_tags.length > 0 &&
+                        overrides.skip_tags.split(',').map((skipTag) => (
+                          <Chip key={skipTag} isReadOnly>
+                            {skipTag}
+                          </Chip>
+                        ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
+              {launchConfig.ask_diff_mode_on_launch && (
+                <Detail
+                  label={t`Show Changes`}
+                  value={overrides.diff_mode === true ? t`On` : t`Off`}
+                />
+              )}
+              {(launchConfig.survey_enabled ||
+                launchConfig.ask_variables_on_launch) && (
+                <VariablesDetail
+                  label={t`Variables`}
+                  rows={4}
+                  value={overrides.extra_vars}
+                  name="extra_vars"
+                />
+              )}
+            </PromptDetailList>
+          </>
+        )}
     </>
   );
 }

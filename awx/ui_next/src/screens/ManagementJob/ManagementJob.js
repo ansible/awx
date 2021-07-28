@@ -41,7 +41,7 @@ function ManagementJob({ setBreadcrumb }) {
             page_size: 1,
             role_level: 'notification_admin_role',
           }),
-        ]).then(([systemJobTemplate, notificationRoles]) => ({
+        ]).then(([{ data: systemJobTemplate }, notificationRoles]) => ({
           systemJobTemplate,
           notificationRoles,
         })),
