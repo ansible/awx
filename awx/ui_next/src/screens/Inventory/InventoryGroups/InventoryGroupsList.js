@@ -125,11 +125,7 @@ function InventoryGroupsList() {
           {
             name: t`Group type`,
             key: 'parents__isnull',
-            isBoolean: true,
-            booleanLabels: {
-              true: t`Show only root groups`,
-              false: t`Show all groups`,
-            },
+            options: [['true', t`Show only root groups`]],
           },
           {
             name: t`Created By (Username)`,
