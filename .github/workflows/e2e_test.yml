@@ -37,23 +37,16 @@ jobs:
         run: |
           DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose &> make-docker-compose-output.log &
 
-      - name: Log in to gcr.io
-        shell: bash
-        env:
-          GCR_PULL_SECRET: ${{ secrets.GCR_PULL_SECRET }}
-        run: |
-          echo "$GCR_PULL_SECRET" | docker login -u _json_key --password-stdin gcr.io
-
       - name: Pull awx_cypress_base image
         run: |
-          docker pull gcr.io/ansible-tower-engineering/awx_cypress_base:stable
+          docker pull quay.io/awx/awx_cypress_base:latest
 
-      - name: Checkout ${{ secrets.E2E_PROJECT }}
+      - name: Checkout test project
         uses: actions/checkout@v2
         with:
-          repository: ${{ github.repository_owner }}/${{ secrets.E2E_PROJECT }}
+          repository: ${{ github.repository_owner }}/tower-qa
           ssh-key: ${{ secrets.QA_REPO_KEY }}
-          path: ${{ secrets.E2E_PROJECT }}
+          path: tower-qa
           ref: devel
 
       - name: Build cypress
