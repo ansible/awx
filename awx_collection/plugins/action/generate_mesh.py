@@ -19,10 +19,10 @@ class ActionModule(ActionBase):
     _NODE_VALID_TYPES = {
         'automationcontroller': {
             'types': frozenset(('control', 'hybrid')),
-            'default_group': 'hybrid'},
+            'default_type': 'hybrid'},
         'execution_nodes': {
             'types': frozenset(('execution', 'hop')),
-            'default_group': 'execution'},
+            'default_type': 'execution'},
     }
 
     def ge(data=None):
@@ -101,7 +101,7 @@ class ActionModule(ActionBase):
         Members of given group_name must have a valid node_type.
         """
         if 'node_type' not in vars.keys():
-            return valid_types[group_name]['default_group']
+            return valid_types[group_name]['default_type']
 
         if vars['node_type'] not in valid_types[group_name]['types']:
             raise AnsibleError(
