@@ -99,6 +99,16 @@ function UserTokenList() {
 
   const canAdd = true;
 
+  const modifiedSelected = selected.map((item) => {
+    if (item.application === null) {
+      return {
+        ...item,
+        name: t`Personal Access Token`,
+      };
+    }
+    return item;
+  });
+
   return (
     <>
       <PaginatedTable
@@ -162,7 +172,7 @@ function UserTokenList() {
               <ToolbarDeleteButton
                 key="delete"
                 onDelete={handleDelete}
-                itemsToDelete={selected}
+                itemsToDelete={modifiedSelected}
                 pluralizedItemName={t`User tokens`}
               />,
             ]}
@@ -170,7 +180,7 @@ function UserTokenList() {
         )}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
-            <HeaderCell sortKey="application__name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="application__name">{t`Application Name`}</HeaderCell>
             <HeaderCell sortKey="scope">{t`Scope`}</HeaderCell>
             <HeaderCell sortKey="expires">{t`Expires`}</HeaderCell>
           </HeaderRow>

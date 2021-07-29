@@ -68,7 +68,7 @@ function UserTokenDetail({ token }) {
       </DetailList>
       <CardActionsRow>
         <DeleteButton
-          name={summary_fields?.application?.name}
+          name={summary_fields?.application?.name || t`Personal Access Token`}
           modalTitle={t`Delete User Token`}
           onConfirm={deleteToken}
           isDisabled={isLoading}

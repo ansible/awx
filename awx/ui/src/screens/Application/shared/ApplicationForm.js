@@ -83,7 +83,7 @@ function ApplicationFormFields({
         label={t`Authorization grant type`}
         labelIcon={
           <Popover
-            content={t`The Grant type the user must use for acquire tokens for this application`}
+            content={t`The Grant type the user must use to acquire tokens for this application`}
           />
         }
       >

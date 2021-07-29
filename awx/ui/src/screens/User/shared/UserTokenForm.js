@@ -46,7 +46,7 @@ function UserTokenFormFields() {
             <span>
               {t`Application`}
               <Popover
-                content={t`Select the application that this token will belong to.`}
+                content={t`Select the application that this token will belong to, or leave this field empty to create a Personal Access Token.`}
               />
             </span>
           }
