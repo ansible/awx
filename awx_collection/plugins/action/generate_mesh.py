@@ -8,9 +8,6 @@ from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 from datetime import datetime
 
-CONTROLLER_NODE_TYPES = ['control', 'hybrid']
-EXECUTION_NODE_TYPES = ['execution', 'hop']
-
 class ActionModule(ActionBase):
     __res = """
     strict digraph "" {
@@ -18,6 +15,15 @@ class ActionModule(ActionBase):
     subgraph cluster_0 {
         graph [label="Control Nodes", type=solid];
     """
+
+    _NODE_VALID_TYPES = {
+        'automationcontroller': {
+            'types': frozenset(('control', 'hybrid')),
+            'default_group': 'hybrid'},
+        'execution_nodes': {
+            'types': frozenset(('execution', 'hop')),
+            'default_group': 'execution'},
+    }
 
     def ge(data=None):
         res = {}
@@ -90,18 +96,19 @@ class ActionModule(ActionBase):
 
         return None
 
-    def assert_verify_node_type(self, task_vars=None, group_name=None, valid_types=None,):
+    def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
         """
         Members of given group_name must have a valid node_type.
         """
-        for host in task_vars.get('groups').get(group_name):
-            host_dict = dict(task_vars.get('hostvars').get(host))
-            if 'node_type' not in host_dict.keys() or host_dict['node_type'] not in valid_types:
-                raise AnsibleError(
-                    'The host %s must have one of the valid node_types: %s' %
-                    ( host, ', '.join(str(_) for _ in valid_types))
-                )
-        return
+        if 'node_type' not in vars.keys():
+            return valid_types[group_name]['default_group']
+
+        if vars['node_type'] not in valid_types[group_name]['types']:
+            raise AnsibleError(
+                'The host %s must have one of the valid node_types: %s' %
+                (host, ', '.join(str(_) for _ in list(valid_types[group_name]['types'])))
+            )
+        return vars['node_type']
 
 
     def assert_unique_group(self, task_vars=None):
@@ -125,34 +132,25 @@ class ActionModule(ActionBase):
         if task_vars is None:
             task_vars = dict()
 
+
+        super(ActionModule, self).run(tmp, task_vars)
+        result = []
+
         self.assert_unique_group(task_vars)
-        self.assert_verify_node_type(task_vars, group_name='automationcontroller', valid_types=CONTROLLER_NODE_TYPES)
-        self.assert_verify_node_type(task_vars, group_name='execution_nodes', valid_types=EXECUTION_NODE_TYPES)
 
-        result = super(ActionModule, self).run(tmp, task_vars)
-        # module_args = self._task.args.copy()
-        # module_return = self._execute_module(
-        #     module_name="ansible.builtin.ini",
-        #     module_args=module_args,
-        #     task_vars=task_vars,
-        #     tmp=tmp,
-        # )
+        for group in ['automationcontroller', 'execution_nodes']:
+            for host in task_vars.get('groups').get(group):
+                _host_vars = dict(task_vars.get('hostvars').get(host))
+                myhost_data = {}
+                myhost_data['name'] = host
+                myhost_data['peers'] = {}
+                myhost_data['node_type'] = self.assert_node_type(
+                    host=host,
+                    vars=_host_vars,
+                    group_name=group,
+                    valid_types=self._NODE_VALID_TYPES
+                )
 
-        ret = dict()
-        # remote_date = None
-        # if not module_return.get("failed"):
-        #     for key, value in module_return["ansible_facts"].items():
-        #         if key == "ansible_date_time":
-        #             remote_date = value["iso8601"]
+                result.append(myhost_data)
 
-        # if remote_date:
-        #     remote_date_obj = datetime.strptime(remote_date, "%Y-%m-%dT%H:%M:%SZ")
-        #     time_delta = datetime.utcnow() - remote_date_obj
-        #     ret["delta_seconds"] = time_delta.seconds
-        #     ret["delta_days"] = time_delta.days
-        #     ret["delta_microseconds"] = time_delta.microseconds
-
-        ret["hello"] = task_vars["hostvars"]
-
-        return dict(stdout=dict(ret))
-
+        return dict(stdout=result)
