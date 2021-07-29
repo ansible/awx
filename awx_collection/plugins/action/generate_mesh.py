@@ -90,7 +90,7 @@ class ActionModule(ActionBase):
 
         return None
 
-    def preflight_verify_node_type(self, task_vars=None, group_name=None, valid_types=None,):
+    def assert_verify_node_type(self, task_vars=None, group_name=None, valid_types=None,):
         """
         Members of given group_name must have a valid node_type.
         """
@@ -104,7 +104,7 @@ class ActionModule(ActionBase):
         return
 
 
-    def preflight_unique_group(self, task_vars=None):
+    def assert_unique_group(self, task_vars=None):
         """
         A given host cannot be part of the automationcontroller and execution_nodes group.
         """
@@ -125,10 +125,9 @@ class ActionModule(ActionBase):
         if task_vars is None:
             task_vars = dict()
 
-        # Series of preflight that must pass
-        self.preflight_unique_group(task_vars)
-        self.preflight_verify_node_type(task_vars, group_name='automationcontroller', valid_types=CONTROLLER_NODE_TYPES)
-        self.preflight_verify_node_type(task_vars, group_name='execution_nodes', valid_types=EXECUTION_NODE_TYPES)
+        self.assert_unique_group(task_vars)
+        self.assert_verify_node_type(task_vars, group_name='automationcontroller', valid_types=CONTROLLER_NODE_TYPES)
+        self.assert_verify_node_type(task_vars, group_name='execution_nodes', valid_types=EXECUTION_NODE_TYPES)
 
         result = super(ActionModule, self).run(tmp, task_vars)
         # module_args = self._task.args.copy()
