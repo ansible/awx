@@ -8,6 +8,8 @@ from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 from datetime import datetime
 
+CONTROLLER_NODE_TYPES = ['control', 'hybrid']
+EXECUTION_NODE_TYPES = ['execution', 'hop']
 
 class ActionModule(ActionBase):
     __res = """
@@ -88,14 +90,24 @@ class ActionModule(ActionBase):
 
         return None
 
+    def preflight_verify_node_type(self, task_vars=None, group_name=None, valid_types=None,):
+        """
+        Members of given group_name must have a valid node_type.
+        """
+        for host in task_vars.get('groups').get(group_name):
+            host_dict = dict(task_vars.get('hostvars').get(host))
+            if 'node_type' not in host_dict.keys() or host_dict['node_type'] not in valid_types:
+                raise AnsibleError(
+                    'The host %s must have one of the valid node_types: %s' %
+                    ( host, ', '.join(str(_) for _ in valid_types))
+                )
+        return
+
 
     def preflight_unique_group(self, task_vars=None):
         """
         A given host cannot be part of the automationcontroller and execution_nodes group.
         """
-        if task_vars is None:
-            return
-
         automation_group = task_vars.get('groups').get('automationcontroller')
         execution_nodes = task_vars.get('groups').get('execution_nodes')
 
@@ -113,7 +125,10 @@ class ActionModule(ActionBase):
         if task_vars is None:
             task_vars = dict()
 
+        # Series of preflight that must pass
         self.preflight_unique_group(task_vars)
+        self.preflight_verify_node_type(task_vars, group_name='automationcontroller', valid_types=CONTROLLER_NODE_TYPES)
+        self.preflight_verify_node_type(task_vars, group_name='execution_nodes', valid_types=EXECUTION_NODE_TYPES)
 
         result = super(ActionModule, self).run(tmp, task_vars)
         # module_args = self._task.args.copy()
