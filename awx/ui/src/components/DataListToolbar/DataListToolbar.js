@@ -200,7 +200,7 @@ DataListToolbar.propTypes = {
   clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
-  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  searchableKeys: PropTypes.arrayOf(PropTypes.string), // TODO: Update
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns,
   isAllSelected: PropTypes.bool,
