@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 from datetime import datetime
 
@@ -87,10 +88,32 @@ class ActionModule(ActionBase):
 
         return None
 
+
+    def preflight_unique_group(self, task_vars=None):
+        """
+        A given host cannot be part of the automationcontroller and execution_nodes group.
+        """
+        if task_vars is None:
+            return
+
+        automation_group = task_vars.get('groups').get('automationcontroller')
+        execution_nodes = task_vars.get('groups').get('execution_nodes')
+
+        if automation_group and execution_nodes:
+            intersection = list(set(automation_group) & set(execution_nodes))
+            if intersection:
+                raise AnsibleError(
+                    'The following hosts cannot be members of both [automationcontroller] and [execution_nodes] groups: %s' %
+                    ', '.join(str(_) for _ in intersection)
+                )
+        return
+
     def run(self, tmp=None, task_vars=None):
 
         if task_vars is None:
             task_vars = dict()
+
+        self.preflight_unique_group(task_vars)
 
         result = super(ActionModule, self).run(tmp, task_vars)
         # module_args = self._task.args.copy()
