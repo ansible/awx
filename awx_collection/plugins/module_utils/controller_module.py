@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
-from ansible.module_utils.six import string_types
+from ansible.module_utils.six import raise_from, string_types
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
@@ -238,10 +238,10 @@ class ControllerModule(AnsibleModule):
                             pass
 
                 except Exception as e:
-                    raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e)) from e
+                    raise_from(ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e)), e)
 
         except Exception as e:
-            raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)) from e
+            raise_from(ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)), e)
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
         for honorred_setting in self.short_params:
