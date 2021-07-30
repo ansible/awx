@@ -10,7 +10,7 @@ import {
   removeParams,
   updateQueryString,
 } from 'util/qs';
-import { QSConfig, SearchColumns, SortColumns } from 'types';
+import { QSConfig, SearchColumns, SortColumns, SearchableKeys } from 'types';
 import DataListToolbar from '../DataListToolbar';
 
 const EmptyStateControlsWrapper = styled.div`
@@ -146,7 +146,7 @@ ListHeader.propTypes = {
   itemCount: PropTypes.number.isRequired,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
-  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  searchableKeys: SearchableKeys,
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns,
   renderToolbar: PropTypes.func,

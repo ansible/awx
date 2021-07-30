@@ -421,3 +421,10 @@ export const ExecutionEnvironment = shape({
   description: string,
   pull: string,
 });
+
+export const SearchableKeys = arrayOf(
+  shape({
+    key: string.isRequired,
+    type: string.isRequired,
+  })
+);

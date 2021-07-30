@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { string, oneOfType, arrayOf, func } from 'prop-types';
 import { t } from '@lingui/macro';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 
@@ -137,5 +138,16 @@ function LookupTypeInput({ value, type, setValue, maxSelectHeight }) {
     </Select>
   );
 }
+LookupTypeInput.propTypes = {
+  type: string,
+  value: oneOfType([string, arrayOf(string)]),
+  setValue: func.isRequired,
+  maxSelectHeight: string,
+};
+LookupTypeInput.defaultProps = {
+  type: 'string',
+  value: '',
+  maxSelectHeight: '300px',
+};
 
 export default LookupTypeInput;

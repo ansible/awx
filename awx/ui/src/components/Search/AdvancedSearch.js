@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import { string, func, bool, arrayOf } from 'prop-types';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -16,6 +16,7 @@ import { SearchIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { useConfig } from 'contexts/Config';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { SearchableKeys } from 'types';
 import RelatedLookupTypeInput from './RelatedLookupTypeInput';
 import LookupTypeInput from './LookupTypeInput';
 
@@ -56,18 +57,15 @@ function AdvancedSearch({
   const [lookupSelection, setLookupSelection] = useState(null);
   const [keySelection, setKeySelection] = useState(null);
   const [searchValue, setSearchValue] = useState('');
-  // const [relatedSearchKeySelected, setRelatedSearchKeySelected] =
-  //   useState(false);
   const config = useConfig();
 
+  const selectedKey = searchableKeys.find((k) => k.key === keySelection);
   const relatedSearchKeySelected =
     keySelection &&
     relatedSearchableKeys.indexOf(keySelection) > -1 &&
-    !searchableKeys.find((k) => k.key === keySelection);
+    !selectedKey;
   const lookupKeyType =
-    keySelection && !relatedSearchKeySelected
-      ? searchableKeys.find((k) => k.key === keySelection).type
-      : null;
+    keySelection && !relatedSearchKeySelected ? selectedKey?.type : null;
 
   useEffect(() => {
     if (relatedSearchKeySelected) {
@@ -234,12 +232,12 @@ function AdvancedSearch({
 }
 
 AdvancedSearch.propTypes = {
-  onSearch: PropTypes.func.isRequired,
-  searchableKeys: PropTypes.arrayOf(PropTypes.string),
-  relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
-  maxSelectHeight: PropTypes.string,
-  enableNegativeFiltering: PropTypes.bool,
-  enableRelatedFuzzyFiltering: PropTypes.bool,
+  onSearch: func.isRequired,
+  searchableKeys: SearchableKeys,
+  relatedSearchableKeys: arrayOf(string),
+  maxSelectHeight: string,
+  enableNegativeFiltering: bool,
+  enableRelatedFuzzyFiltering: bool,
 };
 
 AdvancedSearch.defaultProps = {

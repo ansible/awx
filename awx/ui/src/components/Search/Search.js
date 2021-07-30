@@ -19,7 +19,7 @@ import {
 import { SearchIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { parseQueryString } from 'util/qs';
-import { QSConfig, SearchColumns } from 'types';
+import { QSConfig, SearchColumns, SearchableKeys } from 'types';
 import AdvancedSearch from './AdvancedSearch';
 import getChipsByKey from './getChipsByKey';
 
@@ -276,6 +276,7 @@ Search.propTypes = {
   maxSelectHeight: PropTypes.string,
   enableNegativeFiltering: PropTypes.bool,
   enableRelatedFuzzyFiltering: PropTypes.bool,
+  searchableKeys: SearchableKeys,
 };
 
 Search.defaultProps = {
@@ -285,6 +286,7 @@ Search.defaultProps = {
   maxSelectHeight: '300px',
   enableNegativeFiltering: true,
   enableRelatedFuzzyFiltering: true,
+  searchableKeys: [],
 };
 
 export default Search;

@@ -10,22 +10,14 @@ describe('<AdvancedSearch />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders without crashing', () => {
-    wrapper = mountWithContexts(
-      <AdvancedSearch
-        onSearch={jest.fn}
-        searchableKeys={[]}
-        relatedSearchableKeys={[]}
-      />
-    );
-    expect(wrapper.length).toBe(1);
-  });
-
   test('Remove duplicates from searchableKeys/relatedSearchableKeys list', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={jest.fn}
-        searchableKeys={['foo', 'bar']}
+        searchableKeys={[
+          { key: 'foo', type: 'string' },
+          { key: 'bar', type: 'string' },
+        ]}
         relatedSearchableKeys={['bar', 'baz']}
       />
     );
@@ -42,7 +34,10 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={advancedSearchMock}
-        searchableKeys={['foo', 'bar']}
+        searchableKeys={[
+          { key: 'foo', type: 'string' },
+          { key: 'bar', type: 'string' },
+        ]}
         relatedSearchableKeys={['bar', 'baz']}
       />
     );
@@ -155,7 +150,10 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={advancedSearchMock}
-        searchableKeys={['foo', 'bar']}
+        searchableKeys={[
+          { key: 'foo', type: 'string' },
+          { key: 'bar', type: 'string' },
+        ]}
         relatedSearchableKeys={['bar', 'baz']}
       />
     );
@@ -239,7 +237,7 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={advancedSearchMock}
-        searchableKeys={['foo']}
+        searchableKeys={[{ key: 'foo', type: 'string' }]}
         relatedSearchableKeys={[]}
       />
     );
@@ -278,7 +276,7 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={advancedSearchMock}
-        searchableKeys={['foo']}
+        searchableKeys={[{ key: 'foo', type: 'string' }]}
         relatedSearchableKeys={[]}
       />
     );
@@ -375,7 +373,10 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={jest.fn}
-        searchableKeys={['foo', 'bar']}
+        searchableKeys={[
+          { key: 'foo', type: 'string' },
+          { key: 'bar', type: 'string' },
+        ]}
         relatedSearchableKeys={['bar', 'baz']}
         enableNegativeFiltering={false}
       />
@@ -399,7 +400,10 @@ describe('<AdvancedSearch />', () => {
     wrapper = mountWithContexts(
       <AdvancedSearch
         onSearch={jest.fn}
-        searchableKeys={['foo', 'bar']}
+        searchableKeys={[
+          { key: 'foo', type: 'string' },
+          { key: 'bar', type: 'string' },
+        ]}
         relatedSearchableKeys={['bar', 'baz']}
         enableRelatedFuzzyFiltering={false}
       />
