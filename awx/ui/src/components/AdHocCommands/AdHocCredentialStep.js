@@ -9,6 +9,7 @@ import { CredentialsAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import Popover from '../Popover';
 
 import ContentError from '../ContentError';
@@ -59,9 +60,7 @@ function AdHocCredentialStep({ credentialTypeId }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [credentialTypeId, history.location.search]),
     {

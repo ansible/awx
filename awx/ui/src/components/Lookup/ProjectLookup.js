@@ -7,6 +7,7 @@ import { ProjectsAPI } from 'api';
 import { Project } from 'types';
 import useAutoPopulateLookup from 'hooks/useAutoPopulateLookup';
 import useRequest from 'hooks/useRequest';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import OptionsList from '../OptionsList';
 import Popover from '../Popover';
@@ -56,9 +57,7 @@ function ProjectLookup({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
         canEdit:
           Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };

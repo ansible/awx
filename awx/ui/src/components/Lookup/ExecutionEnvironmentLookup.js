@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 import { ExecutionEnvironmentsAPI, ProjectsAPI } from 'api';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import { ExecutionEnvironment } from 'types';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import useRequest from 'hooks/useRequest';
@@ -109,9 +110,7 @@ function ExecutionEnvironmentLookup({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [
       location,
