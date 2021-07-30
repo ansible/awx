@@ -46,6 +46,7 @@ describe('<JobDetail />', () => {
     );
 
     // StatusIcon adds visibly hidden accessibility text " successful "
+    assertDetail('Job ID', '2');
     assertDetail('Status', ' successful Successful');
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
