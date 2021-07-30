@@ -1,6 +1,5 @@
 from unittest import mock
 import pytest
-import json
 
 from requests.adapters import HTTPAdapter
 from requests.utils import select_proxy
