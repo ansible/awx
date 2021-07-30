@@ -47,6 +47,7 @@ body:
       multiple: false
       options:
         - kubernetes
+        - minikube
         - openshift
         - minishift
         - docker on linux
