@@ -20,6 +20,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from '../PaginatedTable';
 import AddDropDownButton from '../AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
@@ -69,9 +70,7 @@ function TemplateList({ defaultParams }) {
         relatedSearchableKeys: (
           responses[3]?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          responses[3].data.actions?.GET || {}
-        ).filter((key) => responses[3].data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(responses[3].data.actions?.GET),
       };
     }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
     {

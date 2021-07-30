@@ -13,6 +13,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useSelected from 'hooks/useSelected';
@@ -49,7 +50,6 @@ function OrganizationsList() {
         OrganizationsAPI.read(params),
         OrganizationsAPI.readOptions(),
       ]);
-      const keys = orgActions.data.actions?.GET || {};
       return {
         organizations: orgs.data.results,
         organizationCount: orgs.data.count,
@@ -57,15 +57,7 @@ function OrganizationsList() {
         relatedSearchableKeys: (
           orgActions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        // searchableKeys: Object.keys(orgActions.data.actions?.GET || {}).filter(
-        //   (key) => orgActions.data.actions?.GET[key].filterable
-        // ),
-        searchableKeys: Object.keys(keys)
-          .filter((key) => keys[key].filterable)
-          .map((key) => ({
-            key,
-            type: keys[key].type,
-          })),
+        searchableKeys: getSearchableKeys(orgActions.data.actions?.GET),
       };
     }, [location]),
     {

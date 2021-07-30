@@ -11,6 +11,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
 import InventoryGroupItem from './InventoryGroupItem';
@@ -62,9 +63,7 @@ function InventoryGroupsList() {
         relatedSearchableKeys: (
           groupOptions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          groupOptions.data.actions?.GET || {}
-        ).filter((key) => groupOptions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(groupOptions.data.actions?.GET),
       };
     }, [inventoryId, location]),
     {

@@ -7,6 +7,7 @@ import { OrganizationsAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest from 'hooks/useRequest';
@@ -39,9 +40,7 @@ function OrganizationTeamList({ id }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [id, location]),
     {

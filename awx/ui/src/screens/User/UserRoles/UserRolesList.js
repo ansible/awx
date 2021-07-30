@@ -16,6 +16,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
@@ -67,9 +68,7 @@ function UserRolesList({ user }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [user.id, search]),
     {

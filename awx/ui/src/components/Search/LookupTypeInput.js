@@ -104,24 +104,28 @@ function LookupTypeInput({ value, type, setValue, maxSelectHeight }) {
         key="gt"
         value="gt"
         description={t`Greater than comparison.`}
+        show={type !== 'json'}
       />
       <Option
         id="gte-option-select"
         key="gte"
         value="gte"
         description={t`Greater than or equal to comparison.`}
+        show={type !== 'json'}
       />
       <Option
         id="lt-option-select"
         key="lt"
         value="lt"
         description={t`Less than comparison.`}
+        show={type !== 'json'}
       />
       <Option
         id="lte-option-select"
         key="lte"
         value="lte"
         description={t`Less than or equal to comparison.`}
+        show={type !== 'json'}
       />
       <Option
         id="isnull-option-select"

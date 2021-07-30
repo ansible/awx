@@ -20,6 +20,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from '../PaginatedTable';
 import JobListItem from './JobListItem';
 import JobListCancelButton from './JobListCancelButton';
@@ -59,9 +60,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           relatedSearchableKeys: (
             actionsResponse?.data?.related_search_fields || []
           ).map((val) => val.slice(0, -8)),
-          searchableKeys: Object.keys(
-            actionsResponse.data.actions?.GET || {}
-          ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+          searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
         };
       },
       [location] // eslint-disable-line react-hooks/exhaustive-deps

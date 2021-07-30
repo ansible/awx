@@ -12,6 +12,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import { getQSConfig, parseQueryString } from 'util/qs';
@@ -44,9 +45,7 @@ function CredentialList() {
         CredentialsAPI.read(params),
         CredentialsAPI.readOptions(),
       ]);
-      const searchKeys = Object.keys(
-        credActions.data.actions?.GET || {}
-      ).filter((key) => credActions.data.actions?.GET[key].filterable);
+      const searchKeys = getSearchableKeys(credActions.data.actions?.GET);
       const item = searchKeys.indexOf('type');
       if (item) {
         searchKeys[item] = 'credential_type__kind';

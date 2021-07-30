@@ -16,6 +16,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import AssociateModal from 'components/AssociateModal';
 import DisassociateButton from 'components/DisassociateButton';
@@ -72,9 +73,7 @@ function InventoryHostGroupsList() {
         relatedSearchableKeys: (
           hostGroupOptions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          hostGroupOptions.data.actions?.GET || {}
-        ).filter((key) => hostGroupOptions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(hostGroupOptions.data.actions?.GET),
       };
     }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {

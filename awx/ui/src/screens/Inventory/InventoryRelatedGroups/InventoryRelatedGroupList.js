@@ -13,6 +13,7 @@ import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import AddDropDownButton from 'components/AddDropDownButton';
 import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
@@ -65,9 +66,7 @@ function InventoryRelatedGroupList() {
         relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
           (val) => val.slice(0, -8)
         ),
-        searchableKeys: Object.keys(actions.data.actions?.GET || {}).filter(
-          (key) => actions.data.actions?.GET[key].filterable
-        ),
+        searchableKeys: getSearchableKeys(actions.data.actions?.GET),
         canAdd:
           actions.data.actions &&
           Object.prototype.hasOwnProperty.call(actions.data.actions, 'POST'),

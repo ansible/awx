@@ -6,6 +6,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import DataListToolbar from 'components/DataListToolbar';
 import DisassociateButton from 'components/DisassociateButton';
@@ -66,9 +67,7 @@ function UserTeamList() {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [userId, location.search]),
     {

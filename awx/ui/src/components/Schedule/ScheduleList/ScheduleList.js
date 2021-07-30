@@ -14,6 +14,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from '../../PaginatedTable';
 import DataListToolbar from '../../DataListToolbar';
 import ScheduleListItem from './ScheduleListItem';
@@ -61,9 +62,7 @@ function ScheduleList({
         relatedSearchableKeys: (
           scheduleActions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          scheduleActions.data.actions?.GET || {}
-        ).filter((key) => scheduleActions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(scheduleActions.data.actions?.GET),
       };
     }, [location.search, loadSchedules, loadScheduleOptions]),
     {
