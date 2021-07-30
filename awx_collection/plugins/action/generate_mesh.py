@@ -4,9 +4,9 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 from datetime import datetime
-
 
 class ActionModule(ActionBase):
 
@@ -16,7 +16,16 @@ class ActionModule(ActionBase):
     subgraph cluster_0 {
         graph [label="Control Nodes", type=solid];
     """
-
+    
+    _NODE_VALID_TYPES = {
+        'automationcontroller': {
+            'types': frozenset(('control', 'hybrid')),
+            'default_type': 'hybrid'},
+        'execution_nodes': {
+            'types': frozenset(('execution', 'hop')),
+            'default_type': 'execution'},
+    }
+    
     def generate_control_plane_topology(type=None, data=None):
         res = {}
         for index, control_node in enumerate(data[type]["hosts"]):
@@ -83,14 +92,61 @@ class ActionModule(ActionBase):
                         raise Exception("Cycle Detected Between [{0}] <-> [{1}]".format(key, node))
         return None
 
+    def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
+        """
+        Members of given group_name must have a valid node_type.
+        """
+        if 'node_type' not in vars.keys():
+            return valid_types[group_name]['default_type']
+
+        if vars['node_type'] not in valid_types[group_name]['types']:
+            raise AnsibleError(
+                'The host %s must have one of the valid node_types: %s' %
+                (host, ', '.join(str(_) for _ in list(valid_types[group_name]['types'])))
+            )
+        return vars['node_type']
+
+
+    def assert_unique_group(self, task_vars=None):
+        """
+        A given host cannot be part of the automationcontroller and execution_nodes group.
+        """
+        automation_group = task_vars.get('groups').get('automationcontroller')
+        execution_nodes = task_vars.get('groups').get('execution_nodes')
+
+        if automation_group and execution_nodes:
+            intersection = list(set(automation_group) & set(execution_nodes))
+            if intersection:
+                raise AnsibleError(
+                    'The following hosts cannot be members of both [automationcontroller] and [execution_nodes] groups: %s' %
+                    ', '.join(str(_) for _ in intersection)
+                )
+        return
+
     def run(self, tmp=None, task_vars=None):
 
         if task_vars is None:
             task_vars = dict()
 
-        import sdb
+        super(ActionModule, self).run(tmp, task_vars)
+        result = []
 
-        sdb.set_trace()
+        self.assert_unique_group(task_vars)
+
+        for group in ['automationcontroller', 'execution_nodes']:
+            for host in task_vars.get('groups').get(group):
+                _host_vars = dict(task_vars.get('hostvars').get(host))
+                myhost_data = {}
+                myhost_data['name'] = host
+                myhost_data['peers'] = {}
+                myhost_data['node_type'] = self.assert_node_type(
+                    host=host,
+                    vars=_host_vars,
+                    group_name=group,
+                    valid_types=self._NODE_VALID_TYPES
+                )
+
+                result.append(myhost_data)
 
         result = super(ActionModule, self).run(tmp, task_vars)
 
