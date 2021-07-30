@@ -9,6 +9,7 @@ from datetime import datetime
 
 
 class ActionModule(ActionBase):
+
     __res = """
     strict digraph "" {
     rankdir = LR
@@ -16,13 +17,13 @@ class ActionModule(ActionBase):
         graph [label="Control Nodes", type=solid];
     """
 
-    def ge(data=None):
+    def generate_control_plane_topology(type=None, data=None):
         res = {}
-        for index, control_node in enumerate(data["control_nodes"]["hosts"]):
-            res[control_node] = data["control_nodes"]["hosts"][(index + 1) :]
+        for index, control_node in enumerate(data[type]["hosts"]):
+            res[control_node] = data[type]["hosts"][(index + 1) :]
         return res
 
-    def g(type=None, data=None):
+    def generate_topology_from_input(type=None, data=None):
         res = {}
         if type is None:
             return None
@@ -37,9 +38,7 @@ class ActionModule(ActionBase):
                     # handle groups
                     if peer in data.keys():
                         ## list comprehension to produce peers list. excludes circular reference to node
-                        res[node] = res[node] + [
-                            x for x in data[peer]["hosts"] if x != node
-                        ]
+                        res[node] = res[node] + [x for x in data[peer]["hosts"] if x != node]
                     else:
                         res[node].append(peer)
         return res
@@ -80,11 +79,8 @@ class ActionModule(ActionBase):
         for key, nodes in dict.items():
             for node in nodes:
                 if "peers" in (data["_meta"]["hostvars"][node].keys()):
-                    if key in (data["_meta"]["hostvars"][node]["peers"]).split(","): # comma seperated string
-                        raise Exception(
-                            "Cycle Detected Between [{0}] <-> [{1}]".format(key, node)
-                        )
-
+                    if key in (data["_meta"]["hostvars"][node]["peers"]).split(","):
+                        raise Exception("Cycle Detected Between [{0}] <-> [{1}]".format(key, node))
         return None
 
     def run(self, tmp=None, task_vars=None):
@@ -92,30 +88,14 @@ class ActionModule(ActionBase):
         if task_vars is None:
             task_vars = dict()
 
+        import sdb
+
+        sdb.set_trace()
+
         result = super(ActionModule, self).run(tmp, task_vars)
-        # module_args = self._task.args.copy()
-        # module_return = self._execute_module(
-        #     module_name="ansible.builtin.ini",
-        #     module_args=module_args,
-        #     task_vars=task_vars,
-        #     tmp=tmp,
-        # )
 
         ret = dict()
-        # remote_date = None
-        # if not module_return.get("failed"):
-        #     for key, value in module_return["ansible_facts"].items():
-        #         if key == "ansible_date_time":
-        #             remote_date = value["iso8601"]
-
-        # if remote_date:
-        #     remote_date_obj = datetime.strptime(remote_date, "%Y-%m-%dT%H:%M:%SZ")
-        #     time_delta = datetime.utcnow() - remote_date_obj
-        #     ret["delta_seconds"] = time_delta.seconds
-        #     ret["delta_days"] = time_delta.days
-        #     ret["delta_microseconds"] = time_delta.microseconds
 
         ret["hello"] = task_vars["hostvars"]
 
         return dict(stdout=dict(ret))
-
