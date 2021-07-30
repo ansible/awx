@@ -1,5 +1,6 @@
 from unittest import mock
 import pytest
+import json
 
 from requests.adapters import HTTPAdapter
 from requests.utils import select_proxy
@@ -173,3 +174,31 @@ def test_custom_environment_injection(post, user, organization):
 
         fake_send.side_effect = _send_side_effect
         template.send('subject', 'message')
+
+
+@pytest.mark.django_db
+def test_update_notification_template(admin, notification_template):
+    notification_template.messages['workflow_approval'] = {
+        "running": {
+            "message": None,
+            "body": None,
+        }
+    }
+    notification_template.save()
+
+    workflow_approval_message = {
+        "approved": {
+            "message": None,
+            "body": None,
+        },
+        "running": {
+            "message": "test-message",
+            "body": None,
+        },
+    }
+    notification_template.messages['workflow_approval'] = workflow_approval_message
+    notification_template.save()
+
+    subevents = sorted(notification_template.messages["workflow_approval"].keys())
+    assert subevents == ["approved", "running"]
+    assert notification_template.messages['workflow_approval'] == workflow_approval_message

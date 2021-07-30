@@ -153,3 +153,13 @@ def test_post_org_approval_notification(get, post, admin, notification_template,
     response = get(url, admin)
     assert response.status_code == 200
     assert len(response.data['results']) == 1
+
+
+@pytest.mark.django_db
+def test_post_wfj_notification(get, post, admin, workflow_job, notification):
+    workflow_job.notifications.add(notification)
+    workflow_job.save()
+    url = reverse("api:workflow_job_notifications_list", kwargs={'pk': workflow_job.pk})
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 1
