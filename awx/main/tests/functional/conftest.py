@@ -39,7 +39,7 @@ from awx.main.models.events import (
     InventoryUpdateEvent,
     SystemJobEvent,
 )
-from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJob
+from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
