@@ -39,7 +39,7 @@ from awx.main.models.events import (
     InventoryUpdateEvent,
     SystemJobEvent,
 )
-from awx.main.models.workflow import WorkflowJobTemplate
+from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJob
 from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
@@ -741,6 +741,30 @@ def system_job_factory(system_job_template, admin):
         return system_job_template.create_unified_job(_eager_fields={'status': initial_state, 'created_by': created_by})
 
     return factory
+
+
+@pytest.fixture
+def wfjt(workflow_job_template_factory, organization):
+    objects = workflow_job_template_factory('test_workflow', organization=organization, persisted=True)
+    return objects.workflow_job_template
+
+
+@pytest.fixture
+def wfjt_with_nodes(workflow_job_template_factory, organization, job_template):
+    objects = workflow_job_template_factory(
+        'test_workflow', organization=organization, workflow_job_template_nodes=[{'unified_job_template': job_template}], persisted=True
+    )
+    return objects.workflow_job_template
+
+
+@pytest.fixture
+def wfjt_node(wfjt_with_nodes):
+    return wfjt_with_nodes.workflow_job_template_nodes.all()[0]
+
+
+@pytest.fixture
+def workflow_job(wfjt):
+    return wfjt.workflow_jobs.create(name='test_workflow')
 
 
 def dumps(value):
