@@ -9,13 +9,14 @@ from ansible.plugins.action import ActionBase
 from datetime import datetime
 
 class ActionModule(ActionBase):
+
     __res = """
     strict digraph "" {
     rankdir = LR
     subgraph cluster_0 {
         graph [label="Control Nodes", type=solid];
     """
-
+    
     _NODE_VALID_TYPES = {
         'automationcontroller': {
             'types': frozenset(('control', 'hybrid')),
@@ -24,14 +25,14 @@ class ActionModule(ActionBase):
             'types': frozenset(('execution', 'hop')),
             'default_type': 'execution'},
     }
-
-    def ge(data=None):
+    
+    def generate_control_plane_topology(type=None, data=None):
         res = {}
-        for index, control_node in enumerate(data["control_nodes"]["hosts"]):
-            res[control_node] = data["control_nodes"]["hosts"][(index + 1) :]
+        for index, control_node in enumerate(data[type]["hosts"]):
+            res[control_node] = data[type]["hosts"][(index + 1) :]
         return res
 
-    def g(type=None, data=None):
+    def generate_topology_from_input(type=None, data=None):
         res = {}
         if type is None:
             return None
@@ -46,9 +47,7 @@ class ActionModule(ActionBase):
                     # handle groups
                     if peer in data.keys():
                         ## list comprehension to produce peers list. excludes circular reference to node
-                        res[node] = res[node] + [
-                            x for x in data[peer]["hosts"] if x != node
-                        ]
+                        res[node] = res[node] + [x for x in data[peer]["hosts"] if x != node]
                     else:
                         res[node].append(peer)
         return res
@@ -89,11 +88,8 @@ class ActionModule(ActionBase):
         for key, nodes in dict.items():
             for node in nodes:
                 if "peers" in (data["_meta"]["hostvars"][node].keys()):
-                    if key in (data["_meta"]["hostvars"][node]["peers"]).split(","): # comma seperated string
-                        raise Exception(
-                            "Cycle Detected Between [{0}] <-> [{1}]".format(key, node)
-                        )
-
+                    if key in (data["_meta"]["hostvars"][node]["peers"]).split(","):
+                        raise Exception("Cycle Detected Between [{0}] <-> [{1}]".format(key, node))
         return None
 
     def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
@@ -132,7 +128,6 @@ class ActionModule(ActionBase):
         if task_vars is None:
             task_vars = dict()
 
-
         super(ActionModule, self).run(tmp, task_vars)
         result = []
 
@@ -153,4 +148,10 @@ class ActionModule(ActionBase):
 
                 result.append(myhost_data)
 
-        return dict(stdout=result)
+        result = super(ActionModule, self).run(tmp, task_vars)
+
+        ret = dict()
+
+        ret["hello"] = task_vars["hostvars"]
+
+        return dict(stdout=dict(ret))
