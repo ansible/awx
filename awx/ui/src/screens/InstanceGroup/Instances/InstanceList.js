@@ -204,7 +204,8 @@ function InstanceList() {
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell>{t`Node Type`}</HeaderCell>
+            <HeaderCell>{t`Policy Type`}</HeaderCell>
             <HeaderCell>{t`Running Jobs`}</HeaderCell>
             <HeaderCell>{t`Total Jobs`}</HeaderCell>
             <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
