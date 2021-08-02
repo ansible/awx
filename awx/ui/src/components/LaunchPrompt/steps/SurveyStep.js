@@ -124,6 +124,7 @@ function MultipleChoiceField({ question }) {
         selections={field.value}
         variant={SelectVariant.single}
         id={id}
+        ouiaId={`single-survey-question-${question.variable}`}
         isOpen={isOpen}
         placeholderText={t`Select an option`}
         onClear={() => {
@@ -169,6 +170,7 @@ function MultiSelectField({ question }) {
       labelIcon={<Popover content={question.question_description} />}
     >
       <Select
+        ouiaId={`multi-survey-question-${question.variable}`}
         variant={SelectVariant.typeaheadMulti}
         id={id}
         placeholderText={!field.value.length && t`Select option(s)`}
