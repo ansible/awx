@@ -16,14 +16,13 @@ import {
 import { ToolbarAddButton } from 'components/PaginatedTable';
 
 const Toolbar = styled(_Toolbar)`
-  margin-left: 52px;
+  margin-left: 10px;
 `;
 
 function SurveyToolbar({
   canEdit,
   isAllSelected,
   onSelectAll,
-
   surveyEnabled,
   onToggleSurvey,
   isDeleteDisabled,

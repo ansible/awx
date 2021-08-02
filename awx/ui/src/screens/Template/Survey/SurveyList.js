@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 import { useRouteMatch } from 'react-router-dom';
 import {
-  DataList,
   Button as _Button,
   Title,
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
 } from '@patternfly/react-core';
+import { TableComposable, Thead, Tr, Th, Tbody } from '@patternfly/react-table';
 import { CubesIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import ContentLoading from 'components/ContentLoading';
@@ -23,6 +23,7 @@ import SurveyPreviewModal from './SurveyPreviewModal';
 
 const Button = styled(_Button)`
   margin: 20px;
+  max-width: 85px;
 `;
 
 function SurveyList({
@@ -129,20 +130,43 @@ function SurveyList({
     content = <ContentLoading />;
   } else {
     content = (
-      <DataList aria-label={t`Survey List`}>
-        {questions?.map((question, index) => (
-          <SurveyListItem
-            key={question.variable}
-            isLast={index === questions.length - 1}
-            isFirst={index === 0}
-            question={question}
-            isChecked={selected.some((q) => q.variable === question.variable)}
-            onSelect={() => handleSelect(question)}
-            onMoveUp={moveUp}
-            onMoveDown={moveDown}
-            canEdit={canEdit}
-          />
-        ))}
+      <>
+        <TableComposable>
+          <Thead>
+            <Tr>
+              <Th />
+              <Th>{t`Name`}</Th>
+              <Th>{t`Type`}</Th>
+              <Th>{t`Default`}</Th>
+              <Th>{t`Actions`}</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {questions?.map((question, index) => (
+              <SurveyListItem
+                key={question.variable}
+                isLast={index === questions.length - 1}
+                isFirst={index === 0}
+                question={question}
+                isChecked={selected.some(
+                  (q) => q.variable === question.variable
+                )}
+                onSelect={() => handleSelect(question)}
+                onMoveUp={moveUp}
+                onMoveDown={moveDown}
+                canEdit={canEdit}
+                rowIndex={index}
+              />
+            ))}
+          </Tbody>
+        </TableComposable>
+        <Button
+          onClick={() => setIsPreviewModalOpen(true)}
+          variant="primary"
+          aria-label={t`Preview`}
+        >
+          {t`Preview`}
+        </Button>
         {isDeleteModalOpen && deleteModal}
         {isPreviewModalOpen && (
           <SurveyPreviewModal
@@ -151,14 +175,7 @@ function SurveyList({
             questions={questions}
           />
         )}
-        <Button
-          onClick={() => setIsPreviewModalOpen(true)}
-          variant="primary"
-          aria-label={t`Preview`}
-        >
-          {t`Preview`}
-        </Button>
-      </DataList>
+      </>
     );
   }
 
