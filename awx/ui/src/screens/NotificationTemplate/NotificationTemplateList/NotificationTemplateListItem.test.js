@@ -5,6 +5,7 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import NotificationTemplateListItem from './NotificationTemplateListItem';
 
 jest.mock('../../../api/models/NotificationTemplates');
+jest.mock('../../../api/models/Notifications');
 
 const template = {
   id: 3,
@@ -77,6 +78,7 @@ describe('<NotificationTemplateListItem />', () => {
             template={template}
             onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
+            onAddToast={() => {}}
           />
         </tbody>
       </table>
