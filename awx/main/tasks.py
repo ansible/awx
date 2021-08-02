@@ -427,8 +427,9 @@ def discover_receptor_nodes():
         if changed:
             logger.info("Registered tower execution node '{}'".format(hostname))
             instance.capacity = 0
+            instance.node_type = 'execution'
             instance.version = RECEPTOR_PENDING
-            instance.save(update_fields=['capacity', 'version', 'modified'])
+            instance.save(update_fields=['capacity', 'version', 'modified', 'node_type'])
             check_heartbeat.apply_async([hostname])
         else:
             last_seen = parse_date(ad['Time'])
@@ -466,7 +467,8 @@ def cluster_node_heartbeat():
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
             instance_list.remove(inst)
-        elif inst.version.startswith('ansible-runner'):  # TODO: use proper field when introduced
+        elif inst.node_type == 'execution':
+            # Only considering control plane for this logic
             continue
         elif inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
