@@ -7,6 +7,8 @@ __metaclass__ = type
 from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 from datetime import datetime
+from collections import defaultdict
+
 
 class ActionModule(ActionBase):
 
@@ -16,56 +18,56 @@ class ActionModule(ActionBase):
     subgraph cluster_0 {
         graph [label="Control Nodes", type=solid];
     """
-    
+
+    _CONTROL_PLANE = "automationcontroller"
+    _EXECUTION_PLANE = "execution_nodes"
+
     _NODE_VALID_TYPES = {
-        'automationcontroller': {
-            'types': frozenset(('control', 'hybrid')),
-            'default_type': 'hybrid'},
-        'execution_nodes': {
-            'types': frozenset(('execution', 'hop')),
-            'default_type': 'execution'},
+        "automationcontroller": {
+            "types": frozenset(("control", "hybrid")),
+            "default_type": "hybrid",
+        },
+        "execution_nodes": {
+            "types": frozenset(("execution", "hop")),
+            "default_type": "execution",
+        },
     }
-    
-    def generate_control_plane_topology(type=None, data=None):
-        res = {}
-        for index, control_node in enumerate(data[type]["hosts"]):
-            res[control_node] = data[type]["hosts"][(index + 1) :]
+
+    def generate_control_plane_topology(self, data):
+        res = defaultdict(set)
+        for index, control_node in enumerate(data[self._CONTROL_PLANE]["hosts"]):
+            res[control_node] |= set(data[self._CONTROL_PLANE]["hosts"][(index + 1) :])
         return res
 
-    def generate_topology_from_input(type=None, data=None):
-        res = {}
-        if type is None:
-            return None
-        if type not in data.keys():
-            return None
-        for node in data[type]["hosts"]:
-            # check to see if vertex exists
-            if not node in res:
-                res[node] = []
-            if "peers" in (data["_meta"]["hostvars"][node].keys()):
-                for peer in (data["_meta"]["hostvars"][node]["peers"]).split(","):
-                    # handle groups
-                    if peer in data.keys():
-                        ## list comprehension to produce peers list. excludes circular reference to node
-                        res[node] = res[node] + [x for x in data[peer]["hosts"] if x != node]
-                    else:
-                        res[node].append(peer)
+    def connect_peers(self, group_name, data):
+        res = defaultdict(set)
+
+        for node in data["groups"][group_name]:
+            # if "peers" in data["hostvars"][node].keys():
+            res[node]
+            for peer in (
+                data["hostvars"][node].get("peers", "").split(",")
+            ):  # to-do: make work with yaml list
+                # handle groups
+                if not peer:
+                    continue
+                if peer in data["groups"]:
+                    ## list comprehension to produce peers list. excludes circular reference to node
+                    res[node] |= {x for x in data["groups"][peer] if x != node}
+                else:
+                    res[node].add(peer)
+
         return res
 
-    def deep_merge_dicts(lhs=None, rhs=None):
+    def deep_merge_dicts(*args):
 
-        local_lhs = lhs
-        local_rhs = rhs
+        data = defaultdict(set)
 
-        if local_lhs is None or local_rhs is None:
-            return
-        for key, value in local_rhs.items():
-            if key in local_lhs:
-                local_lhs[key] = local_lhs[key] + value
-            else:
-                local_lhs[key] = value
+        for d in args:
+            for k, v in d.items():
+                data[k] |= set(v)
 
-        return local_lhs
+        return dict(data)
 
     def generate_dot_syntax_from_dict(dict=None):
 
@@ -80,46 +82,48 @@ class ActionModule(ActionBase):
 
         return res
 
-    def detect_cycles(dict=None, data=None):
-
-        if dict is None:
-            return
-
-        for key, nodes in dict.items():
-            for node in nodes:
-                if "peers" in (data["_meta"]["hostvars"][node].keys()):
-                    if key in (data["_meta"]["hostvars"][node]["peers"]).split(","):
-                        raise Exception("Cycle Detected Between [{0}] <-> [{1}]".format(key, node))
-        return None
+    def detect_cycles(data):
+        conflicts = set()
+        for node, peers in data.items():  # k = host, v = set(hosts)
+            for host in peers:
+                if node in data.get(host, set()):
+                    conflicts.add(frozenset((node, host)))
+        if conflicts:
+            conflict_str = ", ".join(f"{n1} <-> {n2}" for n1, n2 in conflicts)
+            raise AnsibleError(
+                f"Two-way link(s) detected: {conflict_str}\nCannot have an inbound and outbound connection between the same two nodes"
+            )
 
     def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
         """
         Members of given group_name must have a valid node_type.
         """
-        if 'node_type' not in vars.keys():
-            return valid_types[group_name]['default_type']
+        if "node_type" not in vars.keys():
+            return valid_types[group_name]["default_type"]
 
-        if vars['node_type'] not in valid_types[group_name]['types']:
+        if vars["node_type"] not in valid_types[group_name]["types"]:
             raise AnsibleError(
-                'The host %s must have one of the valid node_types: %s' %
-                (host, ', '.join(str(_) for _ in list(valid_types[group_name]['types'])))
+                "The host {0} must have one of the valid node_types: {1}".format(
+                    host,
+                    ", ".join(str(i) for i in valid_types[group_name]["types"]),
+                )
             )
-        return vars['node_type']
-
+        return vars["node_type"]
 
     def assert_unique_group(self, task_vars=None):
         """
         A given host cannot be part of the automationcontroller and execution_nodes group.
         """
-        automation_group = task_vars.get('groups').get('automationcontroller')
-        execution_nodes = task_vars.get('groups').get('execution_nodes')
+        automation_group = task_vars.get("groups").get("automationcontroller")
+        execution_nodes = task_vars.get("groups").get("execution_nodes")
 
         if automation_group and execution_nodes:
             intersection = list(set(automation_group) & set(execution_nodes))
             if intersection:
                 raise AnsibleError(
-                    'The following hosts cannot be members of both [automationcontroller] and [execution_nodes] groups: %s' %
-                    ', '.join(str(_) for _ in intersection)
+                    "The following hosts cannot be members of both [automationcontroller] and [execution_nodes] groups: {0}".format(
+                        ", ".join(str(i) for i in intersection)
+                    )
                 )
         return
 
@@ -128,30 +132,26 @@ class ActionModule(ActionBase):
         if task_vars is None:
             task_vars = dict()
 
-        super(ActionModule, self).run(tmp, task_vars)
-        result = []
+        result = super(ActionModule, self).run(tmp, task_vars)
+
+        result = {}
 
         self.assert_unique_group(task_vars)
 
-        for group in ['automationcontroller', 'execution_nodes']:
-            for host in task_vars.get('groups').get(group):
-                _host_vars = dict(task_vars.get('hostvars').get(host))
+        for group in ["automationcontroller", "execution_nodes"]:
+            for host in task_vars.get("groups").get(group):
+                _host_vars = dict(task_vars.get("hostvars").get(host))
                 myhost_data = {}
-                myhost_data['name'] = host
-                myhost_data['peers'] = {}
-                myhost_data['node_type'] = self.assert_node_type(
+                myhost_data["name"] = host
+                myhost_data["peers"] = {}
+                myhost_data["node_type"] = self.assert_node_type(
                     host=host,
                     vars=_host_vars,
                     group_name=group,
-                    valid_types=self._NODE_VALID_TYPES
+                    valid_types=self._NODE_VALID_TYPES,
                 )
-
                 result.append(myhost_data)
 
-        result = super(ActionModule, self).run(tmp, task_vars)
+        d1 = self.connect_peers("automationcontroller", task_vars)
 
-        ret = dict()
-
-        ret["hello"] = task_vars["hostvars"]
-
-        return dict(stdout=dict(ret))
+        return dict(stdout={k: list(v) for k, v in d1.items()})
