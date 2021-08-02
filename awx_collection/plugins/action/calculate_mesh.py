@@ -12,7 +12,7 @@ from collections import defaultdict
 
 class ActionModule(ActionBase):
 
-    __res = """
+    __RES = """
     strict digraph "" {
     rankdir = LR
     subgraph cluster_0 {
@@ -35,31 +35,30 @@ class ActionModule(ActionBase):
 
     def generate_control_plane_topology(self, data):
         res = defaultdict(set)
-        for index, control_node in enumerate(data[self._CONTROL_PLANE]["hosts"]):
-            res[control_node] |= set(data[self._CONTROL_PLANE]["hosts"][(index + 1) :])
+        for index, control_node in enumerate(data["groups"][self._CONTROL_PLANE]):
+            res[control_node] |= set(data["groups"][self._CONTROL_PLANE][(index + 1) :])
         return res
 
-    def connect_peers(self, group_name, data):
+    def connect_peers(self, data):
         res = defaultdict(set)
 
-        for node in data["groups"][group_name]:
-            # if "peers" in data["hostvars"][node].keys():
-            res[node]
-            for peer in (
-                data["hostvars"][node].get("peers", "").split(",")
-            ):  # to-do: make work with yaml list
-                # handle groups
-                if not peer:
-                    continue
-                if peer in data["groups"]:
-                    ## list comprehension to produce peers list. excludes circular reference to node
-                    res[node] |= {x for x in data["groups"][peer] if x != node}
-                else:
-                    res[node].add(peer)
+        for group_name in self._NODE_VALID_TYPES:
+            for node in data["groups"][group_name]:
+                # if "peers" in data["hostvars"][node].keys():
+                res[node]
+                for peer in data["hostvars"][node].get("peers", "").split(","):  # to-do: make work with yaml list
+                    # handle groups
+                    if not peer:
+                        continue
+                    if peer in data["groups"]:
+                        ## list comprehension to produce peers list. excludes circular reference to node
+                        res[node] |= {x for x in data["groups"][peer] if x != node}
+                    else:
+                        res[node].add(peer)
 
         return res
 
-    def deep_merge_dicts(*args):
+    def deep_merge_dicts(self, *args):
 
         data = defaultdict(set)
 
@@ -90,9 +89,7 @@ class ActionModule(ActionBase):
                     conflicts.add(frozenset((node, host)))
         if conflicts:
             conflict_str = ", ".join(f"{n1} <-> {n2}" for n1, n2 in conflicts)
-            raise AnsibleError(
-                f"Two-way link(s) detected: {conflict_str}\nCannot have an inbound and outbound connection between the same two nodes"
-            )
+            raise AnsibleError(f"Two-way link(s) detected: {conflict_str}\nCannot have an inbound and outbound connection between the same two nodes")
 
     def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
         """
@@ -127,31 +124,38 @@ class ActionModule(ActionBase):
                 )
         return
 
+    def dump_graph(filename):
+        pass
+
     def run(self, tmp=None, task_vars=None):
 
         if task_vars is None:
-            task_vars = dict()
+            raise AnsibleError("task_vars is blank")
 
+        # data = {}
         result = super(ActionModule, self).run(tmp, task_vars)
-
-        result = {}
 
         self.assert_unique_group(task_vars)
 
-        for group in ["automationcontroller", "execution_nodes"]:
+        data = {}
+
+        # step 1 - generate defacto connectivity between control plane objects
+        d1 = self.generate_control_plane_topology(task_vars)
+        d2 = self.connect_peers(task_vars)
+        d3 = self.deep_merge_dicts(d1, d2)
+
+        for group in [self._CONTROL_PLANE, self._EXECUTION_PLANE]:
             for host in task_vars.get("groups").get(group):
                 _host_vars = dict(task_vars.get("hostvars").get(host))
                 myhost_data = {}
-                myhost_data["name"] = host
-                myhost_data["peers"] = {}
+                # myhost_data["name"] = host
+                myhost_data["peers"] = sorted(d3[host])
                 myhost_data["node_type"] = self.assert_node_type(
                     host=host,
                     vars=_host_vars,
                     group_name=group,
                     valid_types=self._NODE_VALID_TYPES,
                 )
-                result.append(myhost_data)
+                data[host] = myhost_data
 
-        d1 = self.connect_peers("automationcontroller", task_vars)
-
-        return dict(stdout={k: list(v) for k, v in d1.items()})
+        return dict(mesh=data)
