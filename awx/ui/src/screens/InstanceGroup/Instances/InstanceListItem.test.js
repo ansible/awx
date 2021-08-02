@@ -36,6 +36,7 @@ const instance = [
     mem_capacity: 1,
     enabled: true,
     managed_by_policy: true,
+    node_type: 'hybrid',
   },
 ];
 
@@ -127,7 +128,8 @@ describe('<InstanceListItem/>', () => {
     });
     expect(wrapper.find('Td').at(1).text()).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
-    expect(wrapper.find('Td').at(2).text()).toBe('Auto');
+    expect(wrapper.find('Td').at(2).text()).toBe('hybrid');
+    expect(wrapper.find('Td').at(3).text()).toBe('Auto');
     expect(
       wrapper
         .find('Td')
