@@ -68,7 +68,7 @@ class ActionModule(ActionBase):
 
         return dict(data)
 
-    def generate_dot_syntax_from_dict(dict=None):
+    def generate_dot_syntax_from_dict(self, dict=None):
 
         if dict is None:
             return
@@ -81,15 +81,15 @@ class ActionModule(ActionBase):
 
         return res
 
-    def detect_cycles(data):
+    def detect_cycles(self, data):
         conflicts = set()
         for node, peers in data.items():  # k = host, v = set(hosts)
             for host in peers:
                 if node in data.get(host, set()):
                     conflicts.add(frozenset((node, host)))
         if conflicts:
-            conflict_str = ", ".join(f"{n1} <-> {n2}" for n1, n2 in conflicts)
-            raise AnsibleError(f"Two-way link(s) detected: {conflict_str}\nCannot have an inbound and outbound connection between the same two nodes")
+            conflict_str = ", ".join(f"[{n1}] <-> [{n2}]" for n1, n2 in conflicts)
+            raise AnsibleError(fr"Two-way link(s) detected: {conflict_str} - Cannot have an inbound and outbound connection between the same two nodes")
 
     def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
         """
@@ -115,7 +115,7 @@ class ActionModule(ActionBase):
         execution_nodes = task_vars.get("groups").get("execution_nodes")
 
         if automation_group and execution_nodes:
-            intersection = list(set(automation_group) & set(execution_nodes))
+            intersection = set(automation_group) & set(execution_nodes)
             if intersection:
                 raise AnsibleError(
                     "The following hosts cannot be members of both [automationcontroller] and [execution_nodes] groups: {0}".format(
@@ -124,7 +124,7 @@ class ActionModule(ActionBase):
                 )
         return
 
-    def dump_graph(filename):
+    def write_dot_graph_to_file(self, filename="mesh.dot"):
         pass
 
     def run(self, tmp=None, task_vars=None):
@@ -132,24 +132,27 @@ class ActionModule(ActionBase):
         if task_vars is None:
             raise AnsibleError("task_vars is blank")
 
-        # data = {}
-        result = super(ActionModule, self).run(tmp, task_vars)
+        super(ActionModule, self).run(tmp, task_vars)
 
         self.assert_unique_group(task_vars)
 
+        # step 1 - generate a dict of peers connectivity
+        peers = self.deep_merge_dicts(
+            self.generate_control_plane_topology(task_vars),
+            self.connect_peers(task_vars),
+        )
+
+        # step 2 - detect cycles; fail gracefully if found
+        self.detect_cycles(peers)
+
+        # step 3 - create a skeleton return object and fill it in with peers and node_type
         data = {}
-
-        # step 1 - generate defacto connectivity between control plane objects
-        d1 = self.generate_control_plane_topology(task_vars)
-        d2 = self.connect_peers(task_vars)
-        d3 = self.deep_merge_dicts(d1, d2)
-
         for group in [self._CONTROL_PLANE, self._EXECUTION_PLANE]:
             for host in task_vars.get("groups").get(group):
                 _host_vars = dict(task_vars.get("hostvars").get(host))
                 myhost_data = {}
                 # myhost_data["name"] = host
-                myhost_data["peers"] = sorted(d3[host])
+                myhost_data["peers"] = sorted(peers[host])
                 myhost_data["node_type"] = self.assert_node_type(
                     host=host,
                     vars=_host_vars,
