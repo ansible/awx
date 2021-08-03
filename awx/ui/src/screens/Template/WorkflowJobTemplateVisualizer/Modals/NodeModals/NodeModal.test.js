@@ -536,6 +536,7 @@ describe('Edit existing node', () => {
             value={{
               nodeToEdit: {
                 id: 2,
+                identifier: 'Foo',
                 fullUnifiedJobTemplate: {
                   id: 1,
                   name: 'Test Project',
@@ -602,6 +603,7 @@ describe('Edit existing node', () => {
     expect(onSave).toBeCalledWith(
       {
         convergence: 'any',
+        identifier: 'Foo',
         approvalDescription: 'Test Approval Description',
         approvalName: 'Test Approval',
         linkType: 'success',
@@ -622,6 +624,7 @@ describe('Edit existing node', () => {
             value={{
               nodeToEdit: {
                 id: 2,
+                identifier: 'Foo',
                 fullUnifiedJobTemplate: {
                   id: 1,
                   name: 'Test Approval',
@@ -672,6 +675,7 @@ describe('Edit existing node', () => {
     expect(onSave).toBeCalledWith(
       {
         convergence: 'any',
+        identifier: 'Foo',
         linkType: 'success',
         nodeResource: {
           id: 1,

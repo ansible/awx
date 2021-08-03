@@ -65,12 +65,17 @@ const workflowContext = {
     {
       id: 2,
       originalNodeObject: {
+        identifier: 'Node identifier',
         summary_fields: {
           job: {
             name: 'Foo JT',
             type: 'job',
             status: 'successful',
             elapsed: 60,
+          },
+          unified_job_template: {
+            name: 'Foo JT',
+            type: 'job_template',
           },
         },
       },
@@ -185,9 +190,17 @@ describe('WorkflowOutputGraph', () => {
     expect(wrapper.find('WorkflowLinkHelp')).toHaveLength(0);
     wrapper.find('g#node-2').simulate('mouseenter');
     expect(wrapper.find('WorkflowNodeHelp')).toHaveLength(1);
-    expect(wrapper.find('WorkflowNodeHelp').contains(<b>Name</b>)).toEqual(
-      true
-    );
+    expect(
+      wrapper.find('WorkflowNodeHelp').contains(<b>Node Alias</b>)
+    ).toEqual(true);
+    expect(
+      wrapper
+        .find('WorkflowNodeHelp')
+        .containsMatchingElement(<dd>Node identifier</dd>)
+    ).toEqual(true);
+    expect(
+      wrapper.find('WorkflowNodeHelp').contains(<b>Resource Name</b>)
+    ).toEqual(true);
     expect(
       wrapper.find('WorkflowNodeHelp').containsMatchingElement(<dd>Foo JT</dd>)
     ).toEqual(true);

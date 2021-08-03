@@ -102,7 +102,6 @@ function updateNode(nodes, index, message) {
     job: {
       ...nodes[index]?.job,
       id: message.unified_job_id,
-      name: nodes[index]?.job?.name || nodes[index]?.unifiedJobTemplate?.name,
       status: message.status,
       type: message.type,
     },

@@ -9,6 +9,7 @@ import {
   WorkflowStateContext,
 } from 'contexts/Workflow';
 import { getAddedAndRemoved } from 'util/lists';
+import { stringIsUUID } from 'util/strings';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { layoutGraph } from 'components/Workflow/WorkflowUtils';
@@ -51,6 +52,20 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
+const replaceIdentifier = (node) => {
+  if (stringIsUUID(node.originalNodeObject.identifier) && node.identifier) {
+    return true;
+  }
+
+  if (
+    !stringIsUUID(node.originalNodeObject.identifier) &&
+    node.identifier !== node.originalNodeObject.identifier
+  ) {
+    return true;
+  }
+
+  return false;
+};
 const getAggregatedCredentials = (
   originalNodeOverride = [],
   templateDefaultCredentials = []
@@ -366,6 +381,7 @@ function Visualizer({ template }) {
             nodeRequests.push(
               WorkflowJobTemplatesAPI.createNode(template.id, {
                 all_parents_must_converge: node.all_parents_must_converge,
+                ...(node.identifier && { identifier: node.identifier }),
               }).then(({ data }) => {
                 node.originalNodeObject = data;
                 originalLinkMap[node.id] = {
@@ -390,6 +406,7 @@ function Visualizer({ template }) {
                 inventory: node.promptValues?.inventory?.id || null,
                 unified_job_template: node.fullUnifiedJobTemplate.id,
                 all_parents_must_converge: node.all_parents_must_converge,
+                ...(node.identifier && { identifier: node.identifier }),
               }).then(({ data }) => {
                 node.originalNodeObject = data;
                 originalLinkMap[node.id] = {
@@ -425,6 +442,9 @@ function Visualizer({ template }) {
                   node.originalNodeObject.id,
                   {
                     all_parents_must_converge: node.all_parents_must_converge,
+                    ...(replaceIdentifier(node) && {
+                      identifier: node.identifier,
+                    }),
                   }
                 ).then(({ data }) => {
                   node.originalNodeObject = data;
@@ -447,6 +467,9 @@ function Visualizer({ template }) {
                   node.originalNodeObject.id,
                   {
                     all_parents_must_converge: node.all_parents_must_converge,
+                    ...(replaceIdentifier(node) && {
+                      identifier: node.identifier,
+                    }),
                   }
                 ).then(({ data }) => {
                   node.originalNodeObject = data;
@@ -470,6 +493,9 @@ function Visualizer({ template }) {
                 inventory: node.promptValues?.inventory?.id || null,
                 unified_job_template: node.fullUnifiedJobTemplate.id,
                 all_parents_must_converge: node.all_parents_must_converge,
+                ...(replaceIdentifier(node) && {
+                  identifier: node.identifier,
+                }),
               }).then(() => {
                 const { added: addedCredentials, removed: removedCredentials } =
                   getAddedAndRemoved(

@@ -8,6 +8,7 @@ import useSurveyStep from 'components/LaunchPrompt/steps/useSurveyStep';
 import usePreviewStep from 'components/LaunchPrompt/steps/usePreviewStep';
 import { WorkflowStateContext } from 'contexts/Workflow';
 import { jsonToYaml } from 'util/yaml';
+import { stringIsUUID } from 'util/strings';
 import useNodeTypeStep from './NodeTypeStep/useNodeTypeStep';
 import useDaysToKeepStep from './useDaysToKeepStep';
 import useRunTypeStep from './useRunTypeStep';
@@ -37,6 +38,22 @@ const getNodeToEditDefaultValues = (
   nodeToEdit,
   resourceDefaultCredentials
 ) => {
+  let identifier = '';
+  if (
+    Object.prototype.hasOwnProperty.call(nodeToEdit, 'identifier') &&
+    nodeToEdit.identifier !== null
+  ) {
+    ({ identifier } = nodeToEdit);
+  } else if (
+    Object.prototype.hasOwnProperty.call(
+      nodeToEdit?.originalNodeObject,
+      'identifier'
+    ) &&
+    !stringIsUUID(nodeToEdit?.originalNodeObject?.identifier)
+  ) {
+    identifier = nodeToEdit?.originalNodeObject?.identifier;
+  }
+
   const initialValues = {
     nodeResource: nodeToEdit?.fullUnifiedJobTemplate || null,
     nodeType: nodeToEdit?.fullUnifiedJobTemplate?.type || 'job_template',
@@ -45,6 +62,7 @@ const getNodeToEditDefaultValues = (
       nodeToEdit?.originalNodeObject?.all_parents_must_converge
         ? 'all'
         : 'any',
+    identifier,
   };
 
   if (
@@ -274,6 +292,8 @@ export default function useWorkflowNodeSteps(
           }),
           {}
         );
+        initialValues.identifier = formikValues.identifier;
+        initialValues.convergence = formikValues.convergence;
       }
 
       const errors = formikErrors.nodeResource
@@ -289,15 +309,10 @@ export default function useWorkflowNodeSteps(
         errors.nodeResource = t`Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes`;
       }
 
-      if (initialValues.convergence === 'all') {
-        formikValues.convergence = 'all';
-      }
-
       resetForm({
         errors,
         values: {
           ...initialValues,
-          convergence: formikValues.convergence,
           nodeResource: formikValues.nodeResource,
           nodeType: formikValues.nodeType,
           linkType: formikValues.linkType,

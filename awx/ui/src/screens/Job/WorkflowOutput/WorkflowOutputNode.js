@@ -8,6 +8,7 @@ import { WorkflowStateContext } from 'contexts/Workflow';
 import StatusIcon from 'components/StatusIcon';
 import { WorkflowNodeTypeLetter } from 'components/Workflow';
 import { secondsToHHMMSS } from 'util/dates';
+import { stringIsUUID } from 'util/strings';
 import { constants as wfConstants } from 'components/Workflow/WorkflowUtils';
 
 const NodeG = styled.g`
@@ -67,9 +68,6 @@ function WorkflowOutputNode({ mouseEnter, mouseLeave, node }) {
   const history = useHistory();
   const { nodePositions } = useContext(WorkflowStateContext);
   const job = node?.originalNodeObject?.summary_fields?.job;
-  const jobName =
-    node?.originalNodeObject?.summary_fields?.unified_job_template?.name ||
-    node?.unifiedJobTemplate?.name;
 
   let borderColor = '#93969A';
 
@@ -93,6 +91,23 @@ function WorkflowOutputNode({ mouseEnter, mouseLeave, node }) {
       history.push(`/${basePath}/${job.id}/details`);
     }
   };
+
+  let nodeName;
+
+  if (
+    node?.identifier ||
+    (node?.originalNodeObject?.identifier &&
+      !stringIsUUID(node.originalNodeObject.identifier))
+  ) {
+    nodeName = node?.identifier
+      ? node?.identifier
+      : node?.originalNodeObject?.identifier;
+  } else {
+    nodeName =
+      node?.fullUnifiedJobTemplate?.name ||
+      node?.originalNodeObject?.summary_fields?.unified_job_template?.name ||
+      t`DELETED`;
+  }
 
   return (
     <NodeG
@@ -144,14 +159,14 @@ function WorkflowOutputNode({ mouseEnter, mouseLeave, node }) {
             <>
               <JobTopLine>
                 {job.status !== 'pending' && <StatusIcon status={job.status} />}
-                <p>{jobName}</p>
+                <p>{nodeName}</p>
               </JobTopLine>
               {!!job?.elapsed && (
                 <Elapsed>{secondsToHHMMSS(job.elapsed)}</Elapsed>
               )}
             </>
           ) : (
-            <NodeDefaultLabel>{jobName || t`DELETED`}</NodeDefaultLabel>
+            <NodeDefaultLabel>{nodeName}</NodeDefaultLabel>
           )}
         </NodeContents>
       </foreignObject>

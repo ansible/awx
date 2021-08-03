@@ -12,3 +12,8 @@ export const toTitleCase = (string) => {
 export const arrayToString = (value) => value.join(',');
 
 export const stringToArray = (value) => value.split(',').filter((val) => !!val);
+
+export const stringIsUUID = (value) =>
+  /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi.test(
+    value
+  );

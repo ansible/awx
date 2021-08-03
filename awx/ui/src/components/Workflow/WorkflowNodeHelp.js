@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import { shape } from 'prop-types';
 import { secondsToHHMMSS } from 'util/dates';
+import { stringIsUUID } from 'util/strings';
 
 const GridDL = styled.dl`
   column-gap: 15px;
@@ -37,6 +38,17 @@ function WorkflowNodeHelp({ node }) {
   const unifiedJobTemplate =
     node?.fullUnifiedJobTemplate ||
     node?.originalNodeObject?.summary_fields?.unified_job_template;
+  let identifier = null;
+  if (node?.identifier) {
+    ({ identifier } = node);
+  } else if (
+    node?.originalNodeObject?.identifier &&
+    !stringIsUUID(node.originalNodeObject.identifier)
+  ) {
+    ({
+      originalNodeObject: { identifier },
+    } = node);
+  }
   if (unifiedJobTemplate || job) {
     const type = unifiedJobTemplate
       ? unifiedJobTemplate.unified_job_type || unifiedJobTemplate.type
@@ -132,10 +144,18 @@ function WorkflowNodeHelp({ node }) {
       )}
       {job && (
         <GridDL>
+          {identifier && (
+            <>
+              <dt>
+                <b>{t`Node Alias`}</b>
+              </dt>
+              <dd id="workflow-node-help-alias">{identifier}</dd>
+            </>
+          )}
           <dt>
-            <b>{t`Name`}</b>
+            <b>{t`Resource Name`}</b>
           </dt>
-          <dd id="workflow-node-help-name">{job.name}</dd>
+          <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
           <dt>
             <b>{t`Type`}</b>
           </dt>
@@ -158,8 +178,16 @@ function WorkflowNodeHelp({ node }) {
       )}
       {unifiedJobTemplate && !job && (
         <GridDL>
+          {identifier && (
+            <>
+              <dt>
+                <b>{t`Node Alias`}</b>
+              </dt>
+              <dd id="workflow-node-help-alias">{identifier}</dd>
+            </>
+          )}
           <dt>
-            <b>{t`Name`}</b>
+            <b>{t`Resource Name`}</b>
           </dt>
           <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
           <dt>

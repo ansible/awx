@@ -2,14 +2,16 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import StepName from 'components/LaunchPrompt/steps/StepName';
+import { stringIsUUID } from 'util/strings';
 import NodeTypeStep from './NodeTypeStep';
 
 const STEP_ID = 'nodeType';
 
-export default function useNodeTypeStep() {
+export default function useNodeTypeStep(nodeToEdit) {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
+  const [, identifierMeta] = useField('identifier');
   const [nodeResourceField, nodeResourceMeta] = useField({
     name: 'nodeResource',
     validate: (value) => {
@@ -26,14 +28,16 @@ export default function useNodeTypeStep() {
     },
   });
 
-  const formError = !!meta.error || !!nodeResourceMeta.error;
+  const formError =
+    !!meta.error || !!nodeResourceMeta.error || identifierMeta.error;
 
   return {
     step: getStep(
       nodeTypeField,
       approvalNameField,
       nodeResourceField,
-      formError
+      formError,
+      nodeToEdit
     ),
     initialValues: getInitialValues(),
     isReady: true,
@@ -49,7 +53,8 @@ function getStep(
   nodeTypeField,
   approvalNameField,
   nodeResourceField,
-  formError
+  formError,
+  nodeToEdit
 ) {
   const isEnabled = () => {
     if (
@@ -70,7 +75,15 @@ function getStep(
         {t`Node type`}
       </StepName>
     ),
-    component: <NodeTypeStep />,
+    component: (
+      <NodeTypeStep
+        isIdentifierRequired={
+          nodeToEdit &&
+          nodeToEdit.originalNodeObject &&
+          !stringIsUUID(nodeToEdit.originalNodeObject?.identifier)
+        }
+      />
+    ),
     enableNext: isEnabled(),
   };
 }
@@ -83,5 +96,6 @@ function getInitialValues() {
     timeoutSeconds: 0,
     nodeType: 'job_template',
     convergence: 'any',
+    identifier: '',
   };
 }
