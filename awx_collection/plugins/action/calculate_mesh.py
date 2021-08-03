@@ -25,7 +25,15 @@ class ActionModule(ActionBase):
             "default_type": "execution",
         },
     }
-
+    
+    _REQUIRED_ATTRIBUTES = {
+        'receptor_log_level': 'info',
+        'receptor_control_service_name': 'control',
+        'receptor_control_filename': 'receptor.sock',
+        'receptor_listener_port': 2222,
+        'receptor_listener_protocol': 'tcp'
+    }
+  
     _GENERATE_DOT_FILE_PARAM = "generate_dot_file"
 
     def generate_control_plane_topology(self, data):
@@ -105,6 +113,15 @@ class ActionModule(ActionBase):
                 )
             )
         return vars["node_type"]
+
+    def assert_attributes(self, vars=None, attr=None):
+        """
+        Assert if a required attribute is present
+        otherwise return with a default value.
+        """
+        if attr not in vars.keys():
+            return self._REQUIRED_ATTRIBUTES[attr]
+        return vars[attr]
 
     def assert_unique_group(self, task_vars=None):
         """
@@ -188,6 +205,12 @@ class ActionModule(ActionBase):
                     group_name=group,
                     valid_types=self._NODE_VALID_TYPES,
                 )
+
+                # ensure all receptor attributes are set
+                for attr in self._REQUIRED_ATTRIBUTES.keys():
+                    myhost_data[attr] = self.assert_attributes(
+                        vars=_host_vars,
+                        attr=attr)
                 data[host] = myhost_data
 
         # step 4 - generate dot file if user expressed interest in doing so
