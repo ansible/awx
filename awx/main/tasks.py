@@ -2933,6 +2933,10 @@ class AWXReceptorJob:
 
         try:
             return self._run_internal(receptor_ctl)
+        except Exception as e:
+            self.task.instance.job_explanation = str(e)
+            self.task.instance.save(update_fields=["job_explanation"])
+            raise e
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
