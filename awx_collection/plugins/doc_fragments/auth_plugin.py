@@ -19,8 +19,6 @@ options:
             - name: CONTROLLER_HOST
             - name: TOWER_HOST
               deprecated:
-                removed_from_collection: awx.awx.controller
-                removed_in_version: "4.0.0"
                 alternatives: 'CONTROLLER_HOST'
     username:
         description: The user that you plan to use to access inventories on the controller.
@@ -28,8 +26,6 @@ options:
             - name: CONTROLLER_USERNAME
             - name: TOWER_USERNAME
               deprecated:
-                removed_from_collection: awx.awx.controller
-                removed_in_version: "4.0.0"
                 alternatives: 'CONTROLLER_USERNAME'
     password:
         description: The password for your controller user.
@@ -37,8 +33,6 @@ options:
             - name: CONTROLLER_PASSWORD
             - name: TOWER_PASSWORD
               deprecated:
-                removed_from_collection: awx.awx.controller
-                removed_in_version: "4.0.0"
                 alternatives: 'CONTROLLER_PASSWORD'
     oauth_token:
         description:
@@ -47,8 +41,6 @@ options:
             - name: CONTROLLER_OAUTH_TOKEN
             - name: TOWER_OAUTH_TOKEN
               deprecated:
-                removed_from_collection: awx.awx.controller
-                removed_in_version: "4.0.0"
                 alternatives: 'CONTROLLER_OAUTH_TOKEN'
     verify_ssl:
         description:
@@ -59,8 +51,6 @@ options:
             - name: CONTROLLER_VERIFY_SSL
             - name: TOWER_VERIFY_SSL
               deprecated:
-                removed_from_collection: awx.awx.controller
-                removed_in_version: "4.0.0"
                 alternatives: 'CONTROLLER_VERIFY_SSL'
         aliases: [ validate_certs ]
 
