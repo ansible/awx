@@ -33,16 +33,6 @@ options:
       required: False
       default: 1
       type: float
-    min_interval:
-      description:
-        - Minimum interval in seconds, to request an update from the controller.
-        - deprecated, use interval instead
-      type: float
-    max_interval:
-      description:
-        - Maximum interval in seconds, to request an update from the controller.
-        - deprecated, use interval instead
-      type: float
     timeout:
       description:
         - Maximum time in seconds to wait for a job to finish.
@@ -106,8 +96,6 @@ def main():
         job_id=dict(type='int', required=True),
         job_type=dict(choices=['project_updates', 'jobs', 'inventory_updates', 'workflow_jobs'], default='jobs'),
         timeout=dict(type='int'),
-        min_interval=dict(type='float'),
-        max_interval=dict(type='float'),
         interval=dict(type='float', default=1),
     )
 
@@ -118,24 +106,7 @@ def main():
     job_id = module.params.get('job_id')
     job_type = module.params.get('job_type')
     timeout = module.params.get('timeout')
-    min_interval = module.params.get('min_interval')
-    max_interval = module.params.get('max_interval')
     interval = module.params.get('interval')
-
-    if min_interval is not None or max_interval is not None:
-        # We can't tell if we got the default or if someone actually set this to 1.
-        # For now if we find 1 and had a min or max then we will do the average logic.
-        if interval == 1:
-            if not min_interval:
-                min_interval = 1
-            if not max_interval:
-                max_interval = 30
-            interval = abs((min_interval + max_interval) / 2)
-        module.deprecate(
-            collection_name="awx.awx",
-            msg="Min and max interval have been deprecated, please use interval instead; interval will be set to {0}".format(interval),
-            version="4.0.0",
-        )
 
     # Attempt to look up job based on the provided id
     job = module.get_one(

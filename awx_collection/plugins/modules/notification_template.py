@@ -63,141 +63,36 @@ options:
     notification_configuration:
       description:
         - The notification configuration file. Note providing this field would disable all notification-configuration-related fields.
+        - username (the mail server username)
+        - sender (the sender email address)
+        - recipients (the recipients email addresses)
+        - use_tls (the TLS trigger)
+        - host (the mail server host)
+        - use_ssl (the SSL trigger)
+        - password (the mail server password)
+        - port (the mail server port)
+        - channels (the destination Slack channels)
+        - token (the access token)
+        - account_token (the Twillio account token)
+        - from_number (the source phone number)
+        - to_numbers (the destination phone numbers)
+        - account_sid (the Twillio account SID)
+        - subdomain (the PagerDuty subdomain)
+        - service_key (the PagerDuty service/integration API key)
+        - client_name (the PagerDuty client identifier)
+        - message_from (the label to be shown with the notification)
+        - color (the notification color)
+        - notify (the notify channel trigger)
+        - url (the target URL)
+        - headers (the HTTP headers as JSON string)
+        - server (the IRC server address)
+        - nickname (the IRC nickname)
+        - targets (the destination channels or users)
       type: dict
     messages:
       description:
         - Optional custom messages for notification template.
       type: dict
-    username:
-      description:
-        - The mail server username.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    sender:
-      description:
-        - The sender email address.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    recipients:
-      description:
-        - The recipients email addresses.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: list
-      elements: str
-    use_tls:
-      description:
-        - The TLS trigger.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: bool
-    host:
-      description:
-        - The mail server host.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    use_ssl:
-      description:
-        - The SSL trigger.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: bool
-    password:
-      description:
-        - The mail server password.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    port:
-      description:
-        - The mail server port.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: int
-    channels:
-      description:
-        - The destination Slack channels.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: list
-      elements: str
-    token:
-      description:
-        - The access token.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    account_token:
-      description:
-        - The Twillio account token.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    from_number:
-      description:
-        - The source phone number.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    to_numbers:
-      description:
-        - The destination phone numbers.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: list
-      elements: str
-    account_sid:
-      description:
-        - The Twillio account SID.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    subdomain:
-      description:
-        - The PagerDuty subdomain.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    service_key:
-      description:
-        - The PagerDuty service/integration API key.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    client_name:
-      description:
-        - The PagerDuty client identifier.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    message_from:
-      description:
-        - The label to be shown with the notification.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    color:
-      description:
-        - The notification color.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      choices: ["yellow", "green", "red", "purple", "gray", "random"]
-      type: str
-    notify:
-      description:
-        - The notify channel trigger.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: bool
-    url:
-      description:
-        - The target URL.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    headers:
-      description:
-        - The HTTP headers as JSON string.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: dict
-    server:
-      description:
-        - The IRC server address.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    nickname:
-      description:
-        - The IRC nickname.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
-    targets:
-      description:
-        - The destination channels or users.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: list
-      elements: str
     state:
       description:
         - Desired state of the resource.
@@ -315,34 +210,6 @@ RETURN = ''' # '''
 
 from ..module_utils.controller_api import ControllerAPIModule
 
-OLD_INPUT_NAMES = (
-    'username',
-    'sender',
-    'recipients',
-    'use_tls',
-    'host',
-    'use_ssl',
-    'password',
-    'port',
-    'channels',
-    'token',
-    'account_token',
-    'from_number',
-    'to_numbers',
-    'account_sid',
-    'subdomain',
-    'service_key',
-    'client_name',
-    'message_from',
-    'color',
-    'notify',
-    'url',
-    'headers',
-    'server',
-    'nickname',
-    'targets',
-)
-
 
 def main():
     # Any additional arguments that are not fields of the item can be added here
@@ -355,31 +222,6 @@ def main():
         notification_type=dict(choices=['email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
         notification_configuration=dict(type='dict'),
         messages=dict(type='dict'),
-        username=dict(),
-        sender=dict(),
-        recipients=dict(type='list', elements='str'),
-        use_tls=dict(type='bool'),
-        host=dict(),
-        use_ssl=dict(type='bool'),
-        password=dict(no_log=True),
-        port=dict(type='int'),
-        channels=dict(type='list', elements='str'),
-        token=dict(no_log=True),
-        account_token=dict(no_log=True),
-        from_number=dict(),
-        to_numbers=dict(type='list', elements='str'),
-        account_sid=dict(),
-        subdomain=dict(),
-        service_key=dict(no_log=True),
-        client_name=dict(),
-        message_from=dict(),
-        color=dict(choices=['yellow', 'green', 'red', 'purple', 'gray', 'random']),
-        notify=dict(type='bool'),
-        url=dict(),
-        headers=dict(type='dict'),
-        server=dict(),
-        nickname=dict(),
-        targets=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -396,15 +238,6 @@ def main():
     notification_configuration = module.params.get('notification_configuration')
     messages = module.params.get('messages')
     state = module.params.get('state')
-
-    # Deprecation warnings for all other params
-    for legacy_input in OLD_INPUT_NAMES:
-        if module.params.get(legacy_input) is not None:
-            module.deprecate(
-                collection_name="awx.awx",
-                msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input),
-                version="4.0.0"
-            )
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
@@ -438,12 +271,7 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
-    # Create notification_configuration from legacy inputs
     final_notification_configuration = {}
-    for legacy_input in OLD_INPUT_NAMES:
-        if module.params.get(legacy_input) is not None:
-            final_notification_configuration[legacy_input] = module.params.get(legacy_input)
-    # Give anything in notification_configuration prescedence over the individual inputs
     if notification_configuration is not None:
         final_notification_configuration.update(notification_configuration)
 
