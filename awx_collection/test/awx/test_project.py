@@ -47,4 +47,4 @@ def test_create_project_copy_from(run_module, admin_user, organization, silence_
         dict(name=proj_name, copy_from='foo', scm_type='git', wait=False),
         admin_user,
     )
-    silence_warning.assert_called_with(f"A project with the name {proj_name} already exists.")
+    silence_warning.assert_called_with("A project with the name {0} already exists.".format(proj_name))
