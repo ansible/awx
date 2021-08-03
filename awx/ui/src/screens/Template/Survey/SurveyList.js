@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 import { useRouteMatch } from 'react-router-dom';
 import {
-  Button as _Button,
+  Button,
   Title,
   EmptyState,
   EmptyStateIcon,
@@ -11,7 +11,6 @@ import {
 } from '@patternfly/react-core';
 import { TableComposable, Thead, Tr, Th, Tbody } from '@patternfly/react-table';
 import { CubesIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
 import ContentLoading from 'components/ContentLoading';
 import AlertModal from 'components/AlertModal';
 import { ToolbarAddButton } from 'components/PaginatedTable';
@@ -19,12 +18,7 @@ import { ToolbarAddButton } from 'components/PaginatedTable';
 import useSelected from 'hooks/useSelected';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
-import SurveyPreviewModal from './SurveyPreviewModal';
-
-const Button = styled(_Button)`
-  margin: 20px;
-  max-width: 85px;
-`;
+import SurveyReorderModal from './SurveyReorderModal';
 
 function SurveyList({
   isLoading,
@@ -39,7 +33,7 @@ function SurveyList({
 
   const questions = survey?.spec || [];
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   const { selected, isAllSelected, setSelected, selectAll, clearSelected } =
     useSelected(questions);
@@ -62,26 +56,6 @@ function SurveyList({
     clearSelected();
   };
 
-  const moveUp = (question) => {
-    const index = questions.indexOf(question);
-    if (index < 1) {
-      return;
-    }
-    const beginning = questions.slice(0, index - 1);
-    const swapWith = questions[index - 1];
-    const end = questions.slice(index + 1);
-    updateSurvey([...beginning, question, swapWith, ...end]);
-  };
-  const moveDown = (question) => {
-    const index = questions.indexOf(question);
-    if (index === -1 || index > questions.length - 1) {
-      return;
-    }
-    const beginning = questions.slice(0, index);
-    const swapWith = questions[index + 1];
-    const end = questions.slice(index + 2);
-    updateSurvey([...beginning, swapWith, question, ...end]);
-  };
   const deleteModal = (
     <AlertModal
       variant="danger"
@@ -131,14 +105,14 @@ function SurveyList({
   } else {
     content = (
       <>
-        <TableComposable>
+        <TableComposable ouiaId="survey-list">
           <Thead>
             <Tr>
               <Th />
-              <Th>{t`Name`}</Th>
-              <Th>{t`Type`}</Th>
-              <Th>{t`Default`}</Th>
-              <Th>{t`Actions`}</Th>
+              <Th datalabel={t`Name`}>{t`Name`}</Th>
+              <Th datalabel={t`Type`}>{t`Type`}</Th>
+              <Th datalabel={t`Default`}>{t`Default`}</Th>
+              <Th datalabel={t`Actions`}>{t`Actions`}</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -152,27 +126,22 @@ function SurveyList({
                   (q) => q.variable === question.variable
                 )}
                 onSelect={() => handleSelect(question)}
-                onMoveUp={moveUp}
-                onMoveDown={moveDown}
                 canEdit={canEdit}
                 rowIndex={index}
               />
             ))}
           </Tbody>
         </TableComposable>
-        <Button
-          onClick={() => setIsPreviewModalOpen(true)}
-          variant="primary"
-          aria-label={t`Preview`}
-        >
-          {t`Preview`}
-        </Button>
         {isDeleteModalOpen && deleteModal}
-        {isPreviewModalOpen && (
-          <SurveyPreviewModal
-            isPreviewModalOpen={isPreviewModalOpen}
-            onToggleModalOpen={() => setIsPreviewModalOpen(false)}
+        {isOrderModalOpen && (
+          <SurveyReorderModal
+            isOrderModalOpen={isOrderModalOpen}
+            onCloseOrderModal={() => setIsOrderModalOpen(false)}
             questions={questions}
+            onSave={(newOrder) => {
+              updateSurvey(newOrder);
+              setIsOrderModalOpen(false);
+            }}
           />
         )}
       </>
@@ -194,6 +163,12 @@ function SurveyList({
   return (
     <>
       <SurveyToolbar
+        onOpenOrderModal={
+          questions.length > 1 &&
+          (() => {
+            setIsOrderModalOpen(true);
+          })
+        }
         isAllSelected={isAllSelected}
         onSelectAll={selectAll}
         surveyEnabled={surveyEnabled}

@@ -41,41 +41,8 @@ describe('<SurveyListItem />', () => {
         </table>
       );
     });
-    const moveUp = wrapper.find('Button[aria-label="move up"]');
-    const moveDown = wrapper.find('Button[aria-label="move down"]');
-    expect(moveUp.length).toBe(1);
-    expect(moveDown.length).toBe(1);
     expect(wrapper.find('SelectColumn').length).toBe(1);
     expect(wrapper.find('Td').length).toBe(5);
-  });
-
-  test('move up and move down buttons are disabled', () => {
-    let wrapper;
-    act(() => {
-      wrapper = mountWithContexts(
-        <table>
-          <tbody>
-            <SurveyListItem
-              rowIndex={1}
-              question={item}
-              isChecked={false}
-              isFirst
-              isLast
-              canEdit
-            />
-          </tbody>
-        </table>
-      );
-    });
-    const moveUp = wrapper
-      .find('Button[aria-label="move up"]')
-      .prop('isDisabled');
-    const moveDown = wrapper
-      .find('Button[aria-label="move down"]')
-      .prop('isDisabled');
-
-    expect(moveUp).toBe(true);
-    expect(moveDown).toBe(true);
   });
 
   test('required item has required asterisk', () => {

@@ -2,47 +2,26 @@ import 'styled-components/macro';
 import React from 'react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import {
-  Button as _Button,
-  Chip,
-  Stack,
-  StackItem,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Chip, Tooltip, Button } from '@patternfly/react-core';
+
 import { Tr, Td } from '@patternfly/react-table';
-import {
-  CaretDownIcon,
-  CaretUpIcon,
-  PencilAltIcon,
-} from '@patternfly/react-icons';
+import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import ChipGroup from 'components/ChipGroup';
 import { ActionItem, ActionsTd } from 'components/PaginatedTable';
-
-const StackButton = styled(_Button)`
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 20px;
-`;
 
 const Required = styled.span`
   color: var(--pf-global--danger-color--100);
   margin-left: var(--pf-global--spacer--xs);
 `;
 
-const EditButton = styled(_Button)``;
+const SurveyActionsTd = styled(ActionsTd)`
+  && {
+    padding-right: 35px;
+  }
+`;
 
-function SurveyListItem({
-  canEdit,
-  question,
-  isLast,
-  isFirst,
-  isChecked,
-  onSelect,
-  onMoveUp,
-  onMoveDown,
-  rowIndex,
-}) {
+function SurveyListItem({ canEdit, question, isChecked, onSelect, rowIndex }) {
   return (
     <Tr>
       <Td
@@ -96,53 +75,22 @@ function SurveyListItem({
             <span>{question.default}</span>
           )}
       </Td>
-      <ActionsTd dataLabel={t`Actions`}>
+      <SurveyActionsTd dataLabel={t`Actions`}>
         <ActionItem visible={canEdit}>
-          <EditButton variant="plain">
-            <Tooltip content={t`Edit Survey`} position="top">
-              <EditButton
-                ouiaId={`edit-survey-${question.variable}`}
-                aria-label={t`edit survey`}
-                variant="plain"
-                component={Link}
-                to={`survey/edit?question_variable=${encodeURIComponent(
-                  question.variable
-                )}`}
-              >
-                <PencilAltIcon />
-              </EditButton>
-            </Tooltip>
-          </EditButton>
+          <Tooltip content={t`Edit Survey`} position="top">
+            <Button
+              ouiaId={`edit-survey-${question.variable}`}
+              variant="plain"
+              component={Link}
+              to={`survey/edit?question_variable=${encodeURIComponent(
+                question.variable
+              )}`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </Tooltip>
         </ActionItem>
-        <ActionItem visible={canEdit}>
-          <>
-            <Stack>
-              <StackItem>
-                <StackButton
-                  ouiaId={`${question.variable}-move-up-button`}
-                  variant="plain"
-                  aria-label={t`move up`}
-                  isDisabled={isFirst || !canEdit}
-                  onClick={() => onMoveUp(question)}
-                >
-                  <CaretUpIcon />
-                </StackButton>
-              </StackItem>
-              <StackItem>
-                <StackButton
-                  ouiaId={`${question.variable}-move-down-button`}
-                  variant="plain"
-                  aria-label={t`move down`}
-                  isDisabled={isLast || !canEdit}
-                  onClick={() => onMoveDown(question)}
-                >
-                  <CaretDownIcon />
-                </StackButton>
-              </StackItem>
-            </Stack>
-          </>
-        </ActionItem>
-      </ActionsTd>
+      </SurveyActionsTd>
     </Tr>
   );
 }

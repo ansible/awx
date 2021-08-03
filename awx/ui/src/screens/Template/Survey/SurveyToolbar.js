@@ -12,11 +12,15 @@ import {
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
+  Tooltip,
 } from '@patternfly/react-core';
 import { ToolbarAddButton } from 'components/PaginatedTable';
 
 const Toolbar = styled(_Toolbar)`
   margin-left: 10px;
+`;
+const SwitchWrapper = styled(ToolbarItem)`
+  padding-left: 4px;
 `;
 
 function SurveyToolbar({
@@ -27,6 +31,7 @@ function SurveyToolbar({
   onToggleSurvey,
   isDeleteDisabled,
   onToggleDeleteModal,
+  onOpenOrderModal,
 }) {
   isDeleteDisabled = !canEdit || isDeleteDisabled;
   const match = useRouteMatch();
@@ -44,17 +49,6 @@ function SurveyToolbar({
             id="select-all"
           />
         </ToolbarItem>
-        <ToolbarItem>
-          <Switch
-            aria-label={t`Survey Toggle`}
-            id="survey-toggle"
-            label={t`On`}
-            labelOff={t`Off`}
-            isChecked={surveyEnabled}
-            isDisabled={!canEdit}
-            onChange={() => onToggleSurvey(!surveyEnabled)}
-          />
-        </ToolbarItem>
         <ToolbarGroup>
           <ToolbarItem>
             <ToolbarAddButton
@@ -62,17 +56,55 @@ function SurveyToolbar({
               linkTo={`${match.url}/add`}
             />
           </ToolbarItem>
+          {canEdit && onOpenOrderModal && (
+            <ToolbarItem>
+              <Tooltip
+                content={t`Click to rearrange the order of the survey questions`}
+              >
+                <Button
+                  onClick={() => {
+                    onOpenOrderModal();
+                  }}
+                  variant="secondary"
+                  ouiaId="edit-order"
+                >
+                  {t`Edit Order`}
+                </Button>
+              </Tooltip>
+            </ToolbarItem>
+          )}
           <ToolbarItem>
-            <Button
-              ouiaId="survey-delete-button"
-              variant="secondary"
-              isDisabled={isDeleteDisabled}
-              onClick={() => onToggleDeleteModal(true)}
+            <Tooltip
+              content={
+                isDeleteDisabled
+                  ? t`Select a question to delete`
+                  : t`Delete survey question`
+              }
             >
-              {t`Delete`}
-            </Button>
+              <div>
+                <Button
+                  ouiaId="survey-delete-button"
+                  variant="secondary"
+                  isDisabled={isDeleteDisabled}
+                  onClick={() => onToggleDeleteModal(true)}
+                >
+                  {t`Delete`}
+                </Button>
+              </div>
+            </Tooltip>
           </ToolbarItem>
         </ToolbarGroup>
+        <SwitchWrapper>
+          <Switch
+            aria-label={t`Survey Toggle`}
+            id="survey-toggle"
+            label={t`Survey Enabled`}
+            labelOff={t`Survey Disabled`}
+            isChecked={surveyEnabled}
+            isDisabled={!canEdit}
+            onChange={() => onToggleSurvey(!surveyEnabled)}
+          />
+        </SwitchWrapper>
       </ToolbarContent>
     </Toolbar>
   );
