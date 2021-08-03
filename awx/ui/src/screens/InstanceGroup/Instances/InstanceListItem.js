@@ -115,7 +115,8 @@ function InstanceListItem({
         <Td id={labelId} dataLabel={t`Name`}>
           {instance.hostname}
         </Td>
-        <Td dataLabel={t`Type`}>
+        <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
+        <Td dataLabel={t`Policy Type`}>
           {instance.managed_by_policy ? t`Auto` : t`Manual`}
         </Td>
         <Td dataLabel={t`Running Jobs`}>{instance.jobs_running}</Td>
