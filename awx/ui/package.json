@@ -1,6 +1,5 @@
 {
-  "name": "ui_next",
-  "version": "0.1.0",
+  "name": "ui",
   "private": true,
   "engines": {
     "node": "14.x"

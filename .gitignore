@@ -28,12 +28,12 @@ awx/ui/build_test
 awx/ui/client/languages
 awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
-awx/ui_next/node_modules/
-awx/ui_next/src/locales/*/messages.js
-awx/ui_next/coverage/
-awx/ui_next/build
-awx/ui_next/.env.local
-awx/ui_next/instrumented
+awx/ui/node_modules/
+awx/ui/src/locales/*/messages.js
+awx/ui/coverage/
+awx/ui/build
+awx/ui/.env.local
+awx/ui/instrumented
 rsyslog.pid
 tools/prometheus/data
 tools/docker-compose/ansible/awx_dump.sql
@@ -63,14 +63,12 @@ __pycache__
 /Gruntfile.js
 /Brocfile.js
 /bower.json
-/package.json
 /testem.yml
 **/coverage
 /.istanbul.yml
 **/node_modules/**
 /tmp
 **/npm-debug.log*
-**/package-lock.json
 
 # UI build flag files
 awx/ui/.deps_built
@@ -154,7 +152,7 @@ use_dev_supervisor.txt
 .idea/*
 *.unison.tmp
 *.#
-/awx/ui_next/.ui-built
+/awx/ui/.ui-built
 /Dockerfile
 /_build/
 /_build_kube_dev/

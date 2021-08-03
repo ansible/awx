@@ -25,6 +25,6 @@ class MigrationsNotran(TemplateView):
         return context
 
 
-app_name = 'ui_next'
+app_name = 'ui'
 
 urlpatterns = [url(r'^$', IndexView.as_view(), name='index'), url(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran')]

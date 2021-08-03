@@ -14,7 +14,7 @@
 - name: Copy logos for inclusion in sdist
   copy:
     src: "../../../awx-logos/awx/ui/client/assets/"
-    dest: "../../awx/ui_next/public/static/media/"
+    dest: "../../awx/ui/public/static/media/"
   when: awx_official|default(false)|bool
 
 # Calling Docker directly because docker-py doesnt support BuildKit

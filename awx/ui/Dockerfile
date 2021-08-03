@@ -4,7 +4,7 @@ ENV NPMRC_FILE=${NPMRC_FILE}
 ARG TARGET='https://awx:8043'
 ENV TARGET=${TARGET}
 ENV CI=true
-WORKDIR /ui_next
+WORKDIR /ui
 ADD public public
 ADD package.json package.json
 ADD package-lock.json package-lock.json
