@@ -12,13 +12,6 @@ from collections import defaultdict
 
 class ActionModule(ActionBase):
 
-    __RES = """
-    strict digraph "" {
-    rankdir = LR
-    subgraph cluster_0 {
-        graph [label="Control Nodes", type=solid];
-    """
-
     _CONTROL_PLANE = "automationcontroller"
     _EXECUTION_PLANE = "execution_nodes"
 
@@ -32,7 +25,7 @@ class ActionModule(ActionBase):
             "default_type": "execution",
         },
     }
-
+    
     _REQUIRED_ATTRIBUTES = {
         'receptor_log_level': 'info',
         'receptor_control_service_name': 'control',
@@ -40,7 +33,8 @@ class ActionModule(ActionBase):
         'receptor_listener_port': 2222,
         'receptor_listener_protocol': 'tcp'
     }
-
+  
+    _GENERATE_DOT_FILE_PARAM = "generate_dot_file"
 
     def generate_control_plane_topology(self, data):
         res = defaultdict(set)
@@ -55,7 +49,9 @@ class ActionModule(ActionBase):
             for node in data["groups"][group_name]:
                 # if "peers" in data["hostvars"][node].keys():
                 res[node]
-                for peer in data["hostvars"][node].get("peers", "").split(","):  # to-do: make work with yaml list
+                for peer in (
+                    data["hostvars"][node].get("peers", "").split(",")
+                ):  # to-do: make work with yaml list
                     # handle groups
                     if not peer:
                         continue
@@ -98,7 +94,9 @@ class ActionModule(ActionBase):
                     conflicts.add(frozenset((node, host)))
         if conflicts:
             conflict_str = ", ".join(f"[{n1}] <-> [{n2}]" for n1, n2 in conflicts)
-            raise AnsibleError(fr"Two-way link(s) detected: {conflict_str} - Cannot have an inbound and outbound connection between the same two nodes")
+            raise AnsibleError(
+                fr"Two-way link(s) detected: {conflict_str} - Cannot have an inbound and outbound connection between the same two nodes"
+            )
 
     def assert_node_type(self, host=None, vars=None, group_name=None, valid_types=None):
         """
@@ -142,8 +140,38 @@ class ActionModule(ActionBase):
                 )
         return
 
-    def write_dot_graph_to_file(self, filename="mesh.dot"):
-        pass
+    def write_dot_graph_to_file(self, task_vars, filename="mesh.dot"):
+        __RES = """
+        strict digraph "" {
+        rankdir = LR"""
+
+        __CONTROL = """
+        subgraph cluster_0 {
+            graph [label="Control Nodes", type=solid];
+        """
+
+        control_nodes = self.generate_control_plane_topology(task_vars)
+        execution_nodes = self.connect_peers(task_vars)
+
+        __REST = ""
+
+        # write control node relations
+        for node in control_nodes:
+            for peer in control_nodes[node]:
+                __CONTROL += '"{0}" -> "{1}";\n'.format(node, peer)
+
+        __CONTROL += "}\n"
+
+        # write execution node relations
+        for node in execution_nodes:
+            for peer in execution_nodes[node]:
+                __REST += '"{0}" -> "{1}";\n'.format(node, peer)
+
+        __REST += "}\n"
+
+        file = open(filename, mode="w")
+        file.write(__RES + __CONTROL + __REST)
+        file.close()
 
     def run(self, tmp=None, task_vars=None):
 
@@ -184,5 +212,11 @@ class ActionModule(ActionBase):
                         vars=_host_vars,
                         attr=attr)
                 data[host] = myhost_data
+
+        # step 4 - generate dot file if user expressed interest in doing so
+        if self._GENERATE_DOT_FILE_PARAM in self._task.args:
+            self.write_dot_graph_to_file(
+                task_vars, self._task.args[self._GENERATE_DOT_FILE_PARAM]
+            )
 
         return dict(mesh=data)
