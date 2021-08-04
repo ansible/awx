@@ -85,7 +85,7 @@ from awx.main.models import (
     SystemJobEvent,
     build_safe_env,
 )
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, RECEPTOR_PENDING
 from awx.main.exceptions import AwxTaskError, PostRunError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.dispatch.publish import task
@@ -121,7 +121,6 @@ from awx.main.analytics.subsystem_metrics import Metrics
 from rest_framework.exceptions import PermissionDenied
 
 RECEPTOR_SOCK = '/var/run/receptor/receptor.sock'
-RECEPTOR_PENDING = 'ansible-runner-???'
 
 
 __all__ = [
@@ -422,18 +421,14 @@ def discover_receptor_nodes():
         commands = ad['WorkCommands'] or []
         if 'ansible-runner' not in commands:
             continue
-        (changed, instance) = Instance.objects.register(hostname=hostname)
+        (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
         was_lost = instance.is_lost(ref_time=nowtime)
         if changed:
-            logger.info("Registered tower execution node '{}'".format(hostname))
-            instance.capacity = 0
-            instance.node_type = 'execution'
-            instance.version = RECEPTOR_PENDING
-            instance.save(update_fields=['capacity', 'version', 'modified', 'node_type'])
+            logger.info("Registered execution node '{}'".format(hostname))
             check_heartbeat.apply_async([hostname])
         else:
             last_seen = parse_date(ad['Time'])
-            logger.debug("Updated tower control node '{}' last seen {}".format(hostname, last_seen))
+            logger.debug("Updated execution node '{}' modified from {} to {}".format(hostname, instance.modified, last_seen))
             instance.modified = last_seen
             if instance.is_lost(ref_time=nowtime):
                 # if the instance hasn't advertised in awhile,
