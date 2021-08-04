@@ -120,8 +120,6 @@ from awx.main.analytics.subsystem_metrics import Metrics
 
 from rest_framework.exceptions import PermissionDenied
 
-RECEPTOR_SOCK = '/var/run/receptor/receptor.sock'
-
 
 __all__ = [
     'RunJob',
@@ -413,7 +411,7 @@ def check_heartbeat(node):
 
 
 def discover_receptor_nodes():
-    ctl = ReceptorControl(RECEPTOR_SOCK)
+    ctl = get_receptor_ctl()
     connections = ctl.simple_command('status')['Advertisements']
     nowtime = now()
     for ad in connections:
@@ -2981,9 +2979,7 @@ class AWXReceptorJob:
 
     def run(self, work_type=None):
         # We establish a connection to the Receptor socket
-        # TODO: Seems like we already have a method for doing this now?
-        # receptor_ctl = get_receptor_ctl()
-        receptor_ctl = ReceptorControl(RECEPTOR_SOCK)
+        receptor_ctl = get_receptor_ctl()
 
         try:
             return self._run_internal(receptor_ctl, work_type=work_type)
