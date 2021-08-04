@@ -108,11 +108,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.capacity - self.consumed_capacity
 
     @property
-    def role(self):
-        # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
-        return "awx"
-
-    @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(
             execution_node=self.hostname,
@@ -128,8 +123,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @staticmethod
     def choose_online_control_plane_node():
-        # TODO: update query to use node_type field
-        return random.choice(Instance.objects.filter(enabled=True).exclude(version__startswith='ansible-runner-').values_list('hostname', flat=True))
+        return random.choice(Instance.objects.filter(enabled=True).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True))
 
     def is_lost(self, ref_time=None):
         if ref_time is None:
@@ -206,8 +200,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def execution_capacity(self):
-        # TODO: update query to exclude based on node_type field
-        return sum([inst.capacity for inst in self.instances.all()])
+        return sum([inst.capacity for inst in self.instances.filter(node_type__in=['hybrid', 'execution'])])
 
     @property
     def jobs_running(self):
@@ -231,7 +224,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def fit_task_to_most_remaining_capacity_instance(task, instances):
         instance_most_capacity = None
         for i in instances:
-            # TODO: continue if node is control-only node type
+            if i.node_type == 'control':
+                continue
             if i.remaining_capacity >= task.task_impact and (
                 instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
             ):

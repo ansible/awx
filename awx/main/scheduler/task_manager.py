@@ -76,6 +76,7 @@ class TaskManager:
             SimpleNamespace(
                 obj=instance,
                 version=instance.version,
+                node_type=instance.node_type,
                 remaining_capacity=instance.remaining_capacity,
                 capacity=instance.capacity,
                 jobs_running=instance.jobs_running,
