@@ -94,48 +94,6 @@ const BooleanField = ({
   const [field, meta, helpers] = useField(name);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  if (isModalOpen) {
-    return (
-      <AlertModal
-        isOpen
-        title={modalTitle}
-        variant="danger"
-        aria-label={modalTitle}
-        onClose={() => {
-          setIsModalOpen(false);
-        }}
-        actions={[
-          <Button
-            ouiaId="confirm-misc-settings-modal"
-            key="confirm"
-            variant="danger"
-            aria-label={t`Confirm`}
-            onClick={() => {
-              helpers.setValue(true);
-              setIsModalOpen(false);
-            }}
-          >
-            {t`Confirm`}
-          </Button>,
-          <Button
-            ouiaId="cancel-misc-settings-modal"
-            key="cancel"
-            variant="link"
-            aria-label={t`Cancel`}
-            onClick={() => {
-              helpers.setValue(false);
-              setIsModalOpen(false);
-            }}
-          >
-            {t`Cancel`}
-          </Button>,
-        ]}
-      >
-        {t`Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change.`}
-      </AlertModal>
-    );
-  }
-
   return config ? (
     <SettingGroup
       defaultValue={config.default ?? false}
@@ -145,6 +103,43 @@ const BooleanField = ({
       label={config.label}
       popoverContent={config.help_text}
     >
+      {isModalOpen && (
+        <AlertModal
+          isOpen
+          title={modalTitle}
+          variant="danger"
+          aria-label={modalTitle}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          actions={[
+            <Button
+              ouiaId="confirm-misc-settings-modal"
+              key="confirm"
+              variant="danger"
+              aria-label={t`Confirm`}
+              onClick={() => {
+                helpers.setValue(true);
+                setIsModalOpen(false);
+              }}
+            >
+              {t`Confirm`}
+            </Button>,
+            <Button
+              ouiaId="cancel-misc-settings-modal"
+              key="cancel"
+              variant="link"
+              aria-label={t`Cancel`}
+              onClick={() => {
+                helpers.setValue(false);
+                setIsModalOpen(false);
+              }}
+            >
+              {t`Cancel`}
+            </Button>,
+          ]}
+        >{t`Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change.`}</AlertModal>
+      )}
       <Switch
         id={name}
         ouiaId={name}
@@ -152,11 +147,12 @@ const BooleanField = ({
         isDisabled={disabled}
         label={t`On`}
         labelOff={t`Off`}
-        onChange={() =>
-          needsConfirmationModal
-            ? setIsModalOpen(true)
-            : helpers.setValue(!field.value)
-        }
+        onChange={(isOn) => {
+          if (needsConfirmationModal && isOn) {
+            setIsModalOpen(true);
+          }
+          helpers.setValue(!field.value);
+        }}
         aria-label={ariaLabel || config.label}
       />
     </SettingGroup>
