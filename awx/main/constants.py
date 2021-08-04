@@ -77,3 +77,7 @@ LOGGER_BLOCKLIST = (
     # loggers that may be called getting logging settings
     'awx.conf',
 )
+
+# Reported version for node seen in receptor mesh but for which capacity check
+# failed or is in progress
+RECEPTOR_PENDING = 'ansible-runner-???'
