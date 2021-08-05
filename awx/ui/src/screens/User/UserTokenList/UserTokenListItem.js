@@ -16,16 +16,22 @@ function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
           isSelected,
           onSelect,
         }}
+        dataLabel={t`Selected`}
+        id={`token-${token.id}`}
       />
-      <Td dataLabel={t`Name`}>
+      <Td dataLabel={t`Name`} id={`token-name-${token.id}`}>
         <Link to={`/users/${id}/tokens/${token.id}/details`}>
           {token.summary_fields?.application
             ? token.summary_fields.application.name
             : t`Personal access token`}
         </Link>
       </Td>
-      <Td dataLabel={t`Scope`}>{toTitleCase(token.scope)}</Td>
-      <Td dataLabel={t`Expires`}>{formatDateString(token.expires)}</Td>
+      <Td dataLabel={t`Scope`} id={`token-scope-${token.id}`}>
+        {toTitleCase(token.scope)}
+      </Td>
+      <Td dataLabel={t`Expires`} id={`token-expires-${token.id}`}>
+        {formatDateString(token.expires)}
+      </Td>
     </Tr>
   );
 }

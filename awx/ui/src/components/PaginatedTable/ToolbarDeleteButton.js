@@ -273,6 +273,7 @@ function ToolbarDeleteButton({
               {t`Delete`}
             </Button>,
             <Button
+              ouiaId="delete-cancel"
               key="cancel"
               variant="link"
               aria-label={t`cancel delete`}
@@ -284,7 +285,7 @@ function ToolbarDeleteButton({
         >
           <div>{t`This action will delete the following:`}</div>
           {itemsToDelete.map((item) => (
-            <span key={item.id}>
+            <span key={item.id} id={`item-to-be-deleted-${item.id}`}>
               <strong>{item.name || item.username || item.image}</strong>
               <br />
             </span>
