@@ -78,7 +78,6 @@ describe('<NotificationTemplateListItem />', () => {
             template={template}
             onAddToast={jest.fn()}
             detailUrl="/notification_templates/3/detail"
-            onAddToast={() => {}}
           />
         </tbody>
       </table>
