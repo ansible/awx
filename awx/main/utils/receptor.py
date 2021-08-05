@@ -18,7 +18,7 @@ def worker_info(node_name):
 
     unit_id = result['unitid']
 
-    resultsock, resultfile = receptor_ctl.get_work_results(unit_id, return_socket=True, return_sockfile=True)
+    resultfile = receptor_ctl.get_work_results(unit_id)
 
     stdout = ''
 
@@ -32,11 +32,14 @@ def worker_info(node_name):
             if state_name != 'Running':
                 break
 
-    # 2.0.1 is the last version before --worker-info was introduced
     data = {}
 
     if state_name.lower() == 'failed':
-        if 'unrecognized arguments: --worker-info' in stdout:
+        work_detail = status.get('Detail', '')
+        if not work_detail.startswith('exit status'):
+            logger.info(f'Mesh-level error getting worker info from {node_name}, detail:\n{work_detail}')
+        elif 'unrecognized arguments: --worker-info' in stdout:
+            # 2.0.1 is the last version before --worker-info was introduced
             logger.info(f'Old version of ansible-runner on node {node_name} without --worker-info')
         else:
             logger.warn(f'Unknown ansible-runner error on node {node_name}, stdout:\n{stdout}')
