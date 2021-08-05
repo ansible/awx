@@ -120,6 +120,7 @@ function JobDetail({ job }) {
   return (
     <CardBody>
       <DetailList>
+        <Detail label={t`Job ID`} value={job.id} />
         <Detail
           fullWidth={Boolean(job.job_explanation)}
           label={t`Status`}
