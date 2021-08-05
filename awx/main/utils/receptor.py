@@ -14,7 +14,7 @@ def get_receptor_ctl():
 def worker_info(node_name):
     receptor_ctl = get_receptor_ctl()
 
-    result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": f"--worker-info"}, node=node_name)
+    result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": f"--worker-info"}, ttl='20s', node=node_name)
 
     unit_id = result['unitid']
 
