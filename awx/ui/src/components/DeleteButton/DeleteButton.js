@@ -20,7 +20,6 @@ function DeleteButton({
   onConfirm,
   modalTitle,
   name,
-
   variant,
   children,
   isDisabled,

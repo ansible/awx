@@ -21,7 +21,7 @@ function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
         <Link to={`/users/${id}/tokens/${token.id}/details`}>
           {token.summary_fields?.application
             ? token.summary_fields.application.name
-            : `Personal access token`}
+            : t`Personal access token`}
         </Link>
       </Td>
       <Td dataLabel={t`Scope`}>{toTitleCase(token.scope)}</Td>
