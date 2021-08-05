@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import { parseQueryString } from 'util/qs';
 import { QSConfig, SearchColumns } from 'types';
 import AdvancedSearch from './AdvancedSearch';
+import getChipsByKey from './getChipsByKey';
 
 const NoOptionDropdown = styled.div`
   align-self: stretch;
@@ -95,66 +96,11 @@ function Search({
     }
   };
 
-  const filterDefaultParams = (paramsArr, config) => {
-    const defaultParamsKeys = Object.keys(config.defaultParams || {});
-    return paramsArr.filter((key) => defaultParamsKeys.indexOf(key) === -1);
-  };
-
-  const getLabelFromValue = (value, colKey) => {
-    let label = value;
-    const currentSearchColumn = columns.find(({ key }) => key === colKey);
-    if (currentSearchColumn?.options?.length) {
-      [, label] = currentSearchColumn.options.find(
-        ([optVal]) => optVal === value
-      );
-    } else if (currentSearchColumn?.booleanLabels) {
-      label = currentSearchColumn.booleanLabels[value];
-    }
-    return (label || colKey).toString();
-  };
-
-  const getChipsByKey = () => {
-    const queryParams = parseQueryString(qsConfig, location.search);
-
-    const queryParamsByKey = {};
-    columns.forEach(({ name, key }) => {
-      queryParamsByKey[key] = { key, label: name, chips: [] };
-    });
-    const nonDefaultParams = filterDefaultParams(
-      Object.keys(queryParams || {}),
-      qsConfig
-    );
-
-    nonDefaultParams.forEach((key) => {
-      const columnKey = key;
-      const label = columns.filter(
-        ({ key: keyToCheck }) => columnKey === keyToCheck
-      ).length
-        ? `${
-            columns.find(({ key: keyToCheck }) => columnKey === keyToCheck).name
-          } (${key})`
-        : columnKey;
-
-      queryParamsByKey[columnKey] = { key, label, chips: [] };
-
-      if (Array.isArray(queryParams[key])) {
-        queryParams[key].forEach((val) =>
-          queryParamsByKey[columnKey].chips.push({
-            key: `${key}:${val}`,
-            node: getLabelFromValue(val, columnKey),
-          })
-        );
-      } else {
-        queryParamsByKey[columnKey].chips.push({
-          key: `${key}:${queryParams[key]}`,
-          node: getLabelFromValue(queryParams[key], columnKey),
-        });
-      }
-    });
-    return queryParamsByKey;
-  };
-
-  const chipsByKey = getChipsByKey();
+  const chipsByKey = getChipsByKey(
+    parseQueryString(qsConfig, location.search),
+    columns,
+    qsConfig
+  );
 
   const { name: searchColumnName } = columns.find(
     ({ key }) => key === searchKey
