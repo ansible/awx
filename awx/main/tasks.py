@@ -52,9 +52,6 @@ from gitdb.exc import BadName as BadGitName
 # Runner
 import ansible_runner
 
-# Receptor
-from receptorctl.socket_interface import ReceptorControl
-
 # dateutil
 from dateutil.parser import parse as parse_date
 
@@ -112,6 +109,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
+from awx.main.utils.receptor import get_receptor_ctl
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -800,10 +798,6 @@ def with_path_cleanup(f):
             self.cleanup_paths = []
 
     return _wrapped
-
-
-def get_receptor_ctl():
-    return ReceptorControl('/var/run/receptor/receptor.sock')
 
 
 class BaseTask(object):
