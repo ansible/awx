@@ -102,7 +102,7 @@ from awx.main.utils.common import (
     get_mem_effective_capacity,
     get_system_task_capacity,
 )
-from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec, CONTAINER_ROOT, to_container_path
+from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -180,8 +180,7 @@ def dispatch_startup():
 def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.capacity = 0  # No thank you to new jobs while shut down
-        this_inst.save(update_fields=['capacity', 'modified'])
+        this_inst.mark_offline(on_good_terms=True)  # No thank you to new jobs while shut down
         try:
             reaper.reap(this_inst)
         except Exception:
@@ -410,7 +409,11 @@ def check_heartbeat(node):
 
     if data['Errors']:
         formatted_error = "\n".join(data["Errors"])
-        logger.warn(f'Failed to find capacity of execution node {node}, errors:\n{formatted_error}')
+        if instance.capacity:
+            logger.warn(f'Health check marking execution node {node} as lost, errors:\n{formatted_error}')
+        else:
+            logger.info(f'Failed to find capacity of new or lost execution node {node}, errors:\n{formatted_error}')
+        instance.mark_offline()
     else:
         # TODO: spin off new instance method from refresh_capacity that calculates derived fields
         instance.cpu = data['CPU Capacity']  # TODO: rename field on runner side to not say "Capacity"
@@ -422,8 +425,8 @@ def check_heartbeat(node):
             instance.cpu_capacity,
             instance.mem_capacity,
         )
-        instance.version = data['Version']
-        instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+        instance.version = 'ansible-runner-' + data['Version']
+        instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'modified'])
         logger.info('Set capacity of execution node {} to {}, worker info data:\n{}'.format(node, instance.capacity, json.dumps(data, indent=2)))
 
 
@@ -439,15 +442,16 @@ def discover_receptor_nodes():
         (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
         was_lost = instance.is_lost(ref_time=nowtime)
         if changed:
-            logger.info("Registered execution node '{}'".format(hostname))
+            logger.warn("Registered execution node '{}'".format(hostname))
             check_heartbeat.apply_async([hostname])
         else:
             last_seen = parse_date(ad['Time'])
-            logger.debug("Updated execution node '{}' modified from {} to {}".format(hostname, instance.modified, last_seen))
+            if instance.modified == last_seen:
+                continue
             instance.modified = last_seen
             if instance.is_lost(ref_time=nowtime):
-                # if the instance hasn't advertised in awhile,
-                # don't save a new modified time
+                # if the instance hasn't advertised in awhile, don't save a new modified time
+                # this is so multiple cluster nodes do all make repetitive updates
                 continue
 
             instance.save(update_fields=['modified'])
@@ -455,7 +459,12 @@ def discover_receptor_nodes():
                 # if the instance *was* lost, but has appeared again,
                 # attempt to re-establish the initial capacity and version
                 # check
-                logger.warning('Execution node attempting to rejoin as instance {}.'.format(hostname))
+                logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
+                check_heartbeat.apply_async([hostname])
+            elif instance.capacity == 0:
+                # Periodically re-run the health check of errored nodes, in case someone fixed it
+                # TODO: perhaps decrease the frequency of these checks
+                logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
                 check_heartbeat.apply_async([hostname])
 
 
@@ -477,7 +486,7 @@ def cluster_node_heartbeat():
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
             instance_list.remove(inst)
-        elif inst.node_type == 'execution':
+        elif inst.node_type == 'execution':  # TODO: zero out capacity of execution nodes that are MIA
             # Only considering control plane for this logic
             continue
         elif inst.is_lost(ref_time=nowtime):
@@ -521,8 +530,7 @@ def cluster_node_heartbeat():
             # If auto deprovisining is on, don't bother setting the capacity to 0
             # since we will delete the node anyway.
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
-                other_inst.capacity = 0
-                other_inst.save(update_fields=['capacity'])
+                other_inst.mark_offline()
                 logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.modified))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
