@@ -42,6 +42,12 @@ def worker_info(node_name):
     stdout = resultfile.read()
     stdout = str(stdout, encoding='utf-8')
 
+    res = receptor_ctl.simple_command(f"work release {unit_id}")
+    if res != {'released': unit_id}:
+        logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node_name}, data: {res}')
+
+    receptor_ctl.close()
+
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')
         if not work_detail.startswith('exit status'):
@@ -63,9 +69,5 @@ def worker_info(node_name):
         else:
             error_list.extend(remote_data.pop('Errors'))  # merge both error lists
             data.update(remote_data)
-
-    res = receptor_ctl.simple_command(f"work release {unit_id}")
-    if res != {'released': unit_id}:
-        logger.warn(f'Could not confirm release of receptor work unit id {unit_id}, data: {res}')
 
     return data
