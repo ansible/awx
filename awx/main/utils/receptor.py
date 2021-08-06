@@ -25,28 +25,32 @@ def worker_info(node_name):
     data['transmit_timing'] = run_start - transmit_start
     data['run_timing'] = 0.0
 
-    resultfile = receptor_ctl.get_work_results(unit_id)
+    try:
 
-    stdout = ''
+        resultfile = receptor_ctl.get_work_results(unit_id)
 
-    while data['run_timing'] < 20.0:
-        status = receptor_ctl.simple_command(f'work status {unit_id}')
-        state_name = status.get('StateName')
-        if state_name not in ('Pending', 'Running'):
-            break
-        data['run_timing'] = time.time() - run_start
-        time.sleep(0.5)
-    else:
-        error_list.append(f'Timeout getting worker info on {node_name}, state remains in {state_name}')
+        stdout = ''
 
-    stdout = resultfile.read()
-    stdout = str(stdout, encoding='utf-8')
+        while data['run_timing'] < 20.0:
+            status = receptor_ctl.simple_command(f'work status {unit_id}')
+            state_name = status.get('StateName')
+            if state_name not in ('Pending', 'Running'):
+                break
+            data['run_timing'] = time.time() - run_start
+            time.sleep(0.5)
+        else:
+            error_list.append(f'Timeout getting worker info on {node_name}, state remains in {state_name}')
 
-    res = receptor_ctl.simple_command(f"work release {unit_id}")
-    if res != {'released': unit_id}:
-        logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node_name}, data: {res}')
+        stdout = resultfile.read()
+        stdout = str(stdout, encoding='utf-8')
 
-    receptor_ctl.close()
+    finally:
+
+        res = receptor_ctl.simple_command(f"work release {unit_id}")
+        if res != {'released': unit_id}:
+            logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node_name}, data: {res}')
+
+        receptor_ctl.close()
 
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')

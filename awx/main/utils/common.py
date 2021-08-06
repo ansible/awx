@@ -699,11 +699,24 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     return vars_dict
 
 
-def get_cpu_capacity(raw=None):
+def get_cpu_effective_capacity(cpu_count):
     from django.conf import settings
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+
+    if env_forkcpu:
+        forkcpu = int(env_forkcpu)
+    elif settings_forkcpu:
+        forkcpu = int(settings_forkcpu)
+    else:
+        forkcpu = 4
+
+    return cpu_count * forkcpu
+
+
+def get_cpu_capacity(raw=None):
+    from django.conf import settings
 
     settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
     env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
@@ -716,20 +729,27 @@ def get_cpu_capacity(raw=None):
     if raw is None:
         raw = psutil.cpu_count()
 
-    if env_forkcpu:
-        forkcpu = int(env_forkcpu)
-    elif settings_forkcpu:
-        forkcpu = int(settings_forkcpu)
-    else:
-        forkcpu = 4
-    return (raw, raw * forkcpu)
+    return (raw, get_cpu_effective_capacity(raw))
 
 
-def get_mem_capacity(raw_mb=None):
+def get_mem_effective_capacity(mem_mb):
     from django.conf import settings
 
     settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
+
+    if env_forkmem:
+        forkmem = int(env_forkmem)
+    elif settings_forkmem:
+        forkmem = int(settings_forkmem)
+    else:
+        forkmem = 100
+
+    return max(1, ((mem_mb // 1024 // 1024) - 2048) // forkmem)
+
+
+def get_mem_capacity(raw_mb=None):
+    from django.conf import settings
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
     env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
@@ -739,16 +759,9 @@ def get_mem_capacity(raw_mb=None):
     elif settings_absmem is not None:
         return 0, int(settings_absmem)
 
-    if env_forkmem:
-        forkmem = int(env_forkmem)
-    elif settings_forkmem:
-        forkmem = int(settings_forkmem)
-    else:
-        forkmem = 100
-
     if raw_mb is None:
         raw_mb = psutil.virtual_memory().total
-    return (raw_mb, max(1, ((raw_mb // 1024 // 1024) - 2048) // forkmem))
+    return (raw_mb, get_mem_effective_capacity(raw_mb))
 
 
 def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity=None):
