@@ -87,7 +87,12 @@ function omitOverrides(resource, overrides, defaultConfig) {
   return clonedResource;
 }
 
-function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
+function PromptDetail({
+  resource,
+  launchConfig = {},
+  overrides = {},
+  workflowNode = false,
+}) {
   const VERBOSITY = {
     0: t`0 (Normal)`,
     1: t`1 (Verbose)`,
@@ -109,6 +114,12 @@ function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
           label={t`Type`}
           value={toTitleCase(details.unified_job_type || details.type)}
         />
+        {workflowNode && (
+          <Detail
+            label={t`Convergence`}
+            value={workflowNode?.all_parents_must_converge ? t`All` : t`Any`}
+          />
+        )}
         <Detail label={t`Timeout`} value={formatTimeout(details?.timeout)} />
         {details?.type === 'project' && (
           <PromptProjectDetail resource={details} />

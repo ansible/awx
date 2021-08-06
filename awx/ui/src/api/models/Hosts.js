@@ -21,7 +21,7 @@ class Hosts extends Base {
   }
 
   readGroupsOptions(id) {
-    return this.http.options(`${this.baseUrl}${id}/all_groups/`);
+    return this.http.options(`${this.baseUrl}${id}/groups/`);
   }
 
   associateGroup(id, groupId) {
