@@ -170,6 +170,7 @@ function UserTokenList() {
                   ]
                 : []),
               <ToolbarDeleteButton
+                ouiaId="user-token-delete-button"
                 key="delete"
                 onDelete={handleDelete}
                 itemsToDelete={modifiedSelected}
