@@ -10,7 +10,7 @@ from requests.models import Response
 from unittest import mock
 
 awx_name = 'AWX'
-controller_name = 'Red Hat Automation Platform Controller'
+controller_name = 'Red Hat Ansible Automation Platform'
 ping_version = '1.2.3'
 
 
