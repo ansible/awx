@@ -21,7 +21,7 @@ class ControllerAPIModule(ControllerModule):
     # Those values can be found in awx/api/generics.py line 204
     collection_to_version = {
         'awx': 'AWX',
-        'controller': 'Red Hat Automation Platform Controller',
+        'controller': 'Red Hat Ansible Automation Platform',
     }
     session = None
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
