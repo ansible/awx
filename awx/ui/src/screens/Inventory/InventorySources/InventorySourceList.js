@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
-import { Button, Tooltip } from '@patternfly/react-core';
 
 import useRequest, {
   useDeleteItems,
@@ -14,6 +13,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  ToolbarSyncSourceButton,
 } from 'components/PaginatedTable';
 import useSelected from 'hooks/useSelected';
 import DatalistToolbar from 'components/DataListToolbar';
@@ -185,22 +185,7 @@ function InventorySourceList() {
                 }
               />,
               ...(canSyncSources
-                ? [
-                    <Tooltip
-                      key="update"
-                      content={t`Sync all sources`}
-                      position="top"
-                    >
-                      <Button
-                        ouiaId="sync-all-button"
-                        onClick={syncAll}
-                        aria-label={t`Sync all`}
-                        variant="secondary"
-                      >
-                        {t`Sync all`}
-                      </Button>
-                    </Tooltip>,
-                  ]
+                ? [<ToolbarSyncSourceButton onClick={syncAll} />]
                 : []),
             ]}
           />
