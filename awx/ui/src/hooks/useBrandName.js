@@ -1,19 +1,18 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { RootAPI } from 'api';
 
 export default function useBrandName() {
-  const platform = useRef({});
+  const [brandName, setBrandName] = useState('');
 
   useEffect(() => {
     async function fetchBrandName() {
       const {
-        data: { BRAND_NAME, COMPONENT_NAME },
+        data: { BRAND_NAME },
       } = await RootAPI.readAssetVariables();
-      platform.current.brandName = BRAND_NAME;
-      platform.current.componentName = COMPONENT_NAME || '';
+      setBrandName(BRAND_NAME);
     }
     fetchBrandName();
   }, []);
 
-  return platform;
+  return brandName;
 }

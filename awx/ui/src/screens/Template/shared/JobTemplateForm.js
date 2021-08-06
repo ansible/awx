@@ -66,9 +66,7 @@ function JobTemplateForm({
     Boolean(template.webhook_service)
   );
   const isMounted = useIsMounted();
-  const {
-    current: { brandName },
-  } = useBrandName();
+  const brandName = useBrandName();
 
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({

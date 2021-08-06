@@ -22,7 +22,6 @@ describe('<AppContainer />', () => {
     RootAPI.readAssetVariables.mockResolvedValue({
       data: {
         BRAND_NAME: 'AWX',
-        COMPONENT_NAME: '',
         PENDO_API_KEY: 'some-pendo-key',
       },
     });
@@ -100,7 +99,6 @@ describe('<AppContainer />', () => {
     RootAPI.readAssetVariables.mockResolvedValue({
       data: {
         BRAND_NAME: 'AWX',
-        COMPONENT_NAME: '',
         PENDO_API_KEY: '',
       },
     });

@@ -14,9 +14,8 @@ const ManualSubForm = ({
   project_base_dir,
   project_local_paths,
 }) => {
-  const {
-    current: { brandName },
-  } = useBrandName();
+  const brandName = useBrandName();
+
   const localPaths = [...new Set([...project_local_paths, localPath])];
   const options = [
     {

@@ -5,14 +5,17 @@ import { AboutModal } from '@patternfly/react-core';
 import useBrandName from 'hooks/useBrandName';
 
 function About({ version, isOpen, onClose }) {
-  const {
-    current: { brandName, componentName },
-  } = useBrandName();
+  const brandName = useBrandName();
+
   const createSpeechBubble = () => {
-    let text =
-      componentName !== ''
-        ? `${brandName} ${componentName} ${version}`
-        : `${brandName} ${version}`;
+    let text = '';
+    if (typeof brandName === 'string' && brandName.length > 0) {
+      text =
+        brandName.indexOf('AWX') === -1
+          ? `${brandName} Controller ${version}`
+          : `${brandName} ${version}`;
+    }
+
     let top = '';
     let bottom = '';
 

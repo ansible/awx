@@ -45,9 +45,8 @@ const CardDescription = styled.div`
 
 function SettingList() {
   const config = useConfig();
-  const {
-    current: { brandName },
-  } = useBrandName();
+  const brandName = useBrandName();
+
   const settingRoutes = [
     {
       header: t`Authentication`,
