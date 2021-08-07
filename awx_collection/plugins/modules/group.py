@@ -79,7 +79,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add group
-  group:
+  awx.awx.group:
     name: localhost
     description: "Local Host Group"
     inventory: "Local Inventory"
@@ -87,7 +87,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add group
-  group:
+  awx.awx.group:
     name: Cities
     description: "Local Host Group"
     inventory: Default Inventory

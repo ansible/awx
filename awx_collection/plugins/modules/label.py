@@ -48,7 +48,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add label to organization
-  label:
+  awx.awx.label:
     name: Custom Label
     organization: My Organization
 '''

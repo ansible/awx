@@ -74,7 +74,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add inventory
-  inventory:
+  awx.awx.inventory:
     name: "Foo Inventory"
     description: "Our Foo Cloud Servers"
     organization: "Bar Org"
@@ -82,7 +82,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Copy inventory
-  inventory:
+  awx.awx.inventory:
     name: Copy Foo Inventory
     copy_from: Default Inventory
     description: "Our Foo Cloud Servers"

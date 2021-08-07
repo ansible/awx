@@ -52,13 +52,13 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = """
 - name: Launch a workflow with a timeout of 10 seconds
-  workflow_launch:
+  awx.awx.workflow_launch:
     workflow_template: "Test Workflow"
     wait: False
   register: workflow
 
 - name: Wait for a workflow node to finish
-  workflow_node_wait:
+  awx.awx.workflow_node_wait:
     workflow_job_id: "{{ workflow.id }}"
     name: Approval Data Step
     timeout: 120

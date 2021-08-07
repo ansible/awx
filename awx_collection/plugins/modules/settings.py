@@ -42,25 +42,25 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Set the value of AWX_ISOLATION_BASE_PATH
-  settings:
+  awx.awx.settings:
     name: AWX_ISOLATION_BASE_PATH
     value: "/tmp"
   register: testing_settings
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS
-  settings:
+  awx.awx.settings:
     name: "AWX_ISOLATION_SHOW_PATHS"
     value: "'/var/lib/awx/projects/', '/tmp'"
   register: testing_settings
 
 - name: Set the LDAP Auth Bind Password
-  settings:
+  awx.awx.settings:
     name: "AUTH_LDAP_BIND_PASSWORD"
     value: "Password"
   no_log: true
 
 - name: Set all the LDAP Auth Bind Params
-  settings:
+  awx.awx.settings:
     settings:
       AUTH_LDAP_BIND_PASSWORD: "password"
       AUTH_LDAP_USER_ATTR_MAP:

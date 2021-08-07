@@ -290,7 +290,7 @@ notes:
 
 EXAMPLES = '''
 - name: Create Ping job template
-  job_template:
+  awx.awx.job_template:
     name: "Ping"
     job_type: "run"
     organization: "Default"
@@ -305,20 +305,20 @@ EXAMPLES = '''
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
 
 - name: Add start notification to Job Template
-  job_template:
+  awx.awx.job_template:
     name: "Ping"
     notification_templates_started:
       - Notification1
       - Notification2
 
 - name: Remove Notification1 start notification from Job Template
-  job_template:
+  awx.awx.job_template:
     name: "Ping"
     notification_templates_started:
       - Notification2
 
 - name: Copy Job Template
-  job_template:
+  awx.awx.job_template:
     name: copy job template
     copy_from: test job template
     job_type: "run"

@@ -66,19 +66,19 @@ extends_documentation_fragment: awx.awx.auth
 EXAMPLES = '''
 - block:
     - name: Create a new token using an existing token
-      token:
+      awx.awx.token:
         description: '{{ token_description }}'
         scope: "write"
         state: present
         controller_oauthtoken: "{{ my_existing_token }}"
 
     - name: Delete this token
-      token:
+      awx.awx.token:
         existing_token: "{{ token }}"
         state: absent
 
     - name: Create a new token using username/password
-      token:
+      awx.awx.token:
         description: '{{ token_description }}'
         scope: "write"
         state: present
@@ -86,18 +86,18 @@ EXAMPLES = '''
         controller_password: "{{ my_password }}"
 
     - name: Use our new token to make another call
-      job_list:
+      awx.awx.job_list:
         controller_oauthtoken: "{{ token }}"
 
   always:
     - name: Delete our Token with the token we created
-      token:
+      awx.awx.token:
         existing_token: "{{ token }}"
         state: absent
       when: token is defined
 
 - name: Delete a token by its id
-  token:
+  awx.awx.token:
     existing_token_id: 4
     state: absent
 '''

@@ -119,7 +119,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Build a schedule for Demo Job Template
-  schedule:
+  awx.awx.schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -127,7 +127,7 @@ EXAMPLES = '''
   register: result
 
 - name: Build the same schedule using the rrule plugin
-  schedule:
+  awx.awx.schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"

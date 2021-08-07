@@ -58,12 +58,12 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch a job
-  job_launch:
+  awx.awx.job_launch:
     job_template: "My Job Template"
   register: job
 
 - name: Wait for job max 120s
-  job_wait:
+  awx.awx.job_wait:
     job_id: "{{ job.id }}"
     timeout: 120
 '''

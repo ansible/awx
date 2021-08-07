@@ -138,7 +138,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add an inventory source
-  inventory_source:
+  awx.awx.inventory_source:
     name: "source-inventory"
     description: Source for inventory
     inventory: previously-created-inventory

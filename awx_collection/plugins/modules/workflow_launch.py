@@ -77,12 +77,12 @@ job_info:
 
 EXAMPLES = '''
 - name: Launch a workflow with a timeout of 10 seconds
-  workflow_launch:
+  awx.awx.workflow_launch:
     workflow_template: "Test Workflow"
     timeout: 10
 
 - name: Launch a Workflow with extra_vars without waiting
-  workflow_launch:
+  awx.awx.workflow_launch:
     workflow_template: "Test workflow"
     extra_vars:
       var1: My First Variable

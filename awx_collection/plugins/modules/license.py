@@ -38,7 +38,7 @@ RETURN = ''' # '''
 
 EXAMPLES = '''
 - name: Set the license using a file
-  license:
+  awx.awx.license:
     manifest: "/tmp/my_manifest.zip"
 '''
 

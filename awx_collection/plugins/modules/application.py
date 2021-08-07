@@ -69,7 +69,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add Foo application
-  application:
+  awx.awx.application:
     name: "Foo"
     description: "Foo bar application"
     organization: "test"
@@ -78,7 +78,7 @@ EXAMPLES = '''
     client-type: public
 
 - name: Add Foo application
-  application:
+  awx.awx.application:
     name: "Foo"
     description: "Foo bar application"
     organization: "test"

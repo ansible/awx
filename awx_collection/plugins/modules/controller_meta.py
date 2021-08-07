@@ -49,7 +49,7 @@ version:
 
 
 EXAMPLES = '''
-- controller_meta:
+- awx.awx.controller_meta:
   register: result
 
 - name: Show details about the collection

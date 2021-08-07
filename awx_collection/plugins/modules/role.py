@@ -131,14 +131,14 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add jdoe to the member role of My Team
-  role:
+  awx.awx.role:
     user: jdoe
     target_team: "My Team"
     role: member
     state: present
 
 - name: Add Joe to multiple job templates and a workflow
-  role:
+  awx.awx.role:
     user: joe
     role: execute
     workflow: test-role-workflow

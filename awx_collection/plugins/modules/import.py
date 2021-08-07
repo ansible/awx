@@ -35,16 +35,16 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Export all assets
-  export:
+  awx.awx.export:
     all: True
   register: export_output
 
 - name: Import all assets from our export
-  import:
+  awx.awx.import:
     assets: "{{ export_output.assets }}"
 
 - name: Load data from a json file created by a command like awx export --organization Default
-  import:
+  awx.awx.import:
     assets: "{{ lookup('file', 'org.json') | from_json() }}"
 '''
 

@@ -60,7 +60,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add host
-  host:
+  awx.awx.host:
     name: localhost
     description: "Local Host Group"
     inventory: "Local Inventory"

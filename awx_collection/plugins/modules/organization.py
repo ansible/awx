@@ -87,21 +87,21 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create organization
-  organization:
+  awx.awx.organization:
     name: "Foo"
     description: "Foo bar organization"
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Create organization using 'foo-venv' as default Python virtualenv
-  organization:
+  awx.awx.organization:
     name: "Foo"
     description: "Foo bar organization using foo-venv"
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Create organization that pulls content from galaxy.ansible.com
-  organization:
+  awx.awx.organization:
     name: "Foo"
     state: present
     galaxy_credentials:

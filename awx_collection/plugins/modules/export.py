@@ -83,15 +83,15 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Export all assets
-  export:
+  awx.awx.export:
     all: True
 
 - name: Export all inventories
-  export:
+  awx.awx.export:
     inventory: 'all'
 
 - name: Export a job template named "My Template" and all Credentials
-  export:
+  awx.awx.export:
     job_template: "My Template"
     credential: 'all'
 '''

@@ -47,7 +47,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Cancel command
-  ad_hoc_command_cancel:
+  awx.awx.ad_hoc_command_cancel:
     command_id: command.id
 '''
 
