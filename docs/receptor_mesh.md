@@ -108,13 +108,23 @@ This will spin up a topology represented below.
 (names are the receptor node names, which differ from the AWX Instance names and network address in some cases)
 
 ```
-<awx_1:2222>---v
- -----v
-<awx_2:2222>
-     <receptor-hop:5555>
-             ^-------------- <receptor-1>
-             ^-------------- <receptor-2>
-             ^-------------- <receptor-3>
+                                            ┌──────────────┐
+                                            │              │
+┌──────────────┐                 ┌──────────┤  receptor-1  │
+│              │                 │          │              │
+│    awx_1     │◄──────────┐     │          └──────────────┘
+│              │           │     ▼
+└──────┬───────┘    ┌──────┴───────┐        ┌──────────────┐
+       │            │              │        │              │
+       │            │ receptor-hop │◄───────┤  receptor-2  │
+       ▼            │              │        │              │
+┌──────────────┐    └──────────────┘        └──────────────┘
+│              │                 ▲
+│    awx_2     │                 │          ┌──────────────┐
+│              │                 │          │              │
+└──────────────┘                 └──────────┤  receptor-3  │
+                                            │              │
+                                            └──────────────┘
 ```
 
 All execution (`receptor-*`) nodes connect to the hop node.
