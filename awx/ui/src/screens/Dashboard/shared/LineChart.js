@@ -125,7 +125,7 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
       .attr('x', 0 - height / 2)
       .attr('dy', '1em')
       .style('text-anchor', 'middle')
-      .text('Job Runs');
+      .text(t`Job Runs`);
 
     // Add the X Axis
     let ticks;
@@ -165,7 +165,7 @@ function LineChart({ id, data, height, pageContext, jobStatus }) {
         `translate(${width / 2} , ${height + margin.top + 20})`
       )
       .style('text-anchor', 'middle')
-      .text('Date');
+      .text(t`Date`);
     const vertical = svg
       .append('path')
       .attr('class', 'mouse-line')
