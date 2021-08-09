@@ -192,6 +192,7 @@ function NodeViewModal({ readOnly }) {
         launchConfig={launchConfig}
         resource={fullUnifiedJobTemplate}
         overrides={overrides}
+        workflowNode={nodeToView.originalNodeObject}
       />
     );
   }
