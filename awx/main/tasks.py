@@ -404,7 +404,11 @@ def cleanup_execution_environment_images():
 
 @task(queue=get_local_queuename)
 def check_heartbeat(node):
-    instance = Instance.objects.get(hostname=node)
+    try:
+        instance = Instance.objects.get(hostname=node)
+    except Instance.DoesNotExist:
+        logger.warn(f'Instance record for {node} missing, could not check capacity.')
+        return
     data = worker_info(node)
 
     if data['Errors']:
@@ -426,7 +430,7 @@ def check_heartbeat(node):
             instance.mem_capacity,
         )
         instance.version = 'ansible-runner-' + data['Version']
-        instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'modified'])
+        instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
         logger.info('Set capacity of execution node {} to {}, worker info data:\n{}'.format(node, instance.capacity, json.dumps(data, indent=2)))
 
 
@@ -441,31 +445,30 @@ def discover_receptor_nodes():
             continue
         (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
         was_lost = instance.is_lost(ref_time=nowtime)
+        last_seen = parse_date(ad['Time'])
+        if instance.modified == last_seen:
+            continue
+        instance.modified = last_seen
+        if instance.is_lost(ref_time=nowtime):
+            # if the instance hasn't advertised in awhile, don't save a new modified time
+            # this is so multiple cluster nodes do all make repetitive updates
+            continue
+
+        instance.save(update_fields=['modified'])
         if changed:
             logger.warn("Registered execution node '{}'".format(hostname))
             check_heartbeat.apply_async([hostname])
-        else:
-            last_seen = parse_date(ad['Time'])
-            if instance.modified == last_seen:
-                continue
-            instance.modified = last_seen
-            if instance.is_lost(ref_time=nowtime):
-                # if the instance hasn't advertised in awhile, don't save a new modified time
-                # this is so multiple cluster nodes do all make repetitive updates
-                continue
-
-            instance.save(update_fields=['modified'])
-            if was_lost:
-                # if the instance *was* lost, but has appeared again,
-                # attempt to re-establish the initial capacity and version
-                # check
-                logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
-                check_heartbeat.apply_async([hostname])
-            elif instance.capacity == 0:
-                # Periodically re-run the health check of errored nodes, in case someone fixed it
-                # TODO: perhaps decrease the frequency of these checks
-                logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
-                check_heartbeat.apply_async([hostname])
+        elif was_lost:
+            # if the instance *was* lost, but has appeared again,
+            # attempt to re-establish the initial capacity and version
+            # check
+            logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
+            check_heartbeat.apply_async([hostname])
+        elif instance.capacity == 0:
+            # Periodically re-run the health check of errored nodes, in case someone fixed it
+            # TODO: perhaps decrease the frequency of these checks
+            logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
+            check_heartbeat.apply_async([hostname])
 
 
 @task(queue=get_local_queuename)
