@@ -49,15 +49,33 @@ options:
       type: str
     credential_type:
       description:
-        - Name of credential type.
-        - Will be preferred over kind
+        - The credential type being created.
+        - Can be a built-in credential type such as "Machine", or a custom credential type such as "My Credential Type"
       type: str
     inputs:
       description:
         - >-
           Credential inputs where the keys are var names used in templating.
           Refer to the Automation Platform Controller documentation for example syntax.
-        - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
+        - authorize (use this for net type)
+        - authorize_password (password for net credentials that require authorize)
+        - client (client or application ID for azure_rm type)
+        - security_token (STS token for aws type)
+        - secret (secret token for azure_rm type)
+        - tenant (tenant ID for azure_rm type)
+        - subscription (subscription ID for azure_rm type)
+        - domain (domain for openstack type)
+        - become_method (become method to use for privilege escalation; some examples are "None", "sudo", "su", "pbrun")
+        - become_username (become username; use "ASK" and launch job to be prompted)
+        - become_password (become password; use "ASK" and launch job to be prompted)
+        - vault_password (the vault password; use "ASK" and launch job to be prompted)
+        - project (project that should use this credential for GCP)
+        - host (the host for this credential)
+        - username (the username for this credential; ``access_key`` for AWS)
+        - password (the password for this credential; ``secret_key`` for AWS, ``api_key`` for RAX)
+        - ssh_key_data (SSH private key content; to extract the content from a file path, use the lookup function (see examples))
+        - vault_id (the vault identifier; this parameter is only valid if C(kind) is specified as C(vault).)
+        - ssh_key_unlock (unlock password for ssh_key; use "ASK" and launch job to be prompted)
       type: dict
     update_secrets:
       description:
@@ -72,119 +90,6 @@ options:
     team:
       description:
         - Team that should own this credential.
-      type: str
-
-    kind:
-      description:
-        - Type of credential being added.
-        - The ssh choice refers to a Tower Machine credential.
-        - Deprecated, please use credential_type
-      required: False
-      type: str
-      choices: ["aws", "controller", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
-                "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
-    host:
-      description:
-        - Host for this credential.
-        - Deprecated, will be removed in a future release
-      type: str
-    username:
-      description:
-        - Username for this credential. ``access_key`` for AWS.
-        - Deprecated, please use inputs
-      type: str
-    password:
-      description:
-        - Password for this credential. ``secret_key`` for AWS. ``api_key`` for RAX.
-        - Use "ASK" and launch job to be prompted.
-        - Deprecated, please use inputs
-      type: str
-    project:
-      description:
-        - Project that should use this credential for GCP.
-        - Deprecated, will be removed in a future release
-      type: str
-    ssh_key_data:
-      description:
-        - SSH private key content. To extract the content from a file path, use the lookup function (see examples).
-        - Deprecated, please use inputs
-      type: str
-    ssh_key_unlock:
-      description:
-        - Unlock password for ssh_key.
-        - Use "ASK" and launch job to be prompted.
-        - Deprecated, please use inputs
-      type: str
-    authorize:
-      description:
-        - Should use authorize for net type.
-        - Deprecated, please use inputs
-      type: bool
-    authorize_password:
-      description:
-        - Password for net credentials that require authorize.
-        - Deprecated, please use inputs
-      type: str
-    client:
-      description:
-        - Client or application ID for azure_rm type.
-        - Deprecated, please use inputs
-      type: str
-    security_token:
-      description:
-        - STS token for aws type.
-        - Deprecated, please use inputs
-      type: str
-    secret:
-      description:
-        - Secret token for azure_rm type.
-        - Deprecated, please use inputs
-      type: str
-    subscription:
-      description:
-        - Subscription ID for azure_rm type.
-        - Deprecated, please use inputs
-      type: str
-    tenant:
-      description:
-        - Tenant ID for azure_rm type.
-        - Deprecated, please use inputs
-      type: str
-    domain:
-      description:
-        - Domain for openstack type.
-        - Deprecated, please use inputs
-      type: str
-    become_method:
-      description:
-        - Become method to use for privilege escalation.
-        - Some examples are "None", "sudo", "su", "pbrun"
-        - Due to become plugins, these can be arbitrary
-        - Deprecated, please use inputs
-      type: str
-    become_username:
-      description:
-        - Become username.
-        - Use "ASK" and launch job to be prompted.
-        - Deprecated, please use inputs
-      type: str
-    become_password:
-      description:
-        - Become password.
-        - Use "ASK" and launch job to be prompted.
-        - Deprecated, please use inputs
-      type: str
-    vault_password:
-      description:
-        - Vault password.
-        - Use "ASK" and launch job to be prompted.
-        - Deprecated, please use inputs
-      type: str
-    vault_id:
-      description:
-        - Vault identifier.
-        - This parameter is only valid if C(kind) is specified as C(vault).
-        - Deprecated, please use inputs
       type: str
     state:
       description:
@@ -290,53 +195,6 @@ EXAMPLES = '''
 
 from ..module_utils.controller_api import ControllerAPIModule
 
-KIND_CHOICES = {
-    'aws': 'Amazon Web Services',
-    'controller': 'Red Hat Ansible Automation Platform',
-    'gce': 'Google Compute Engine',
-    'azure_rm': 'Microsoft Azure Resource Manager',
-    'openstack': 'OpenStack',
-    'satellite6': 'Red Hat Satellite 6',
-    'rhv': 'Red Hat Virtualization',
-    'vmware': 'VMware vCenter',
-    'aim': 'CyberArk AIM Central Credential Provider Lookup',
-    'conjur': 'CyberArk Conjur Secret Lookup',
-    'hashivault_kv': 'HashiCorp Vault Secret Lookup',
-    'hashivault_ssh': 'HashiCorp Vault Signed SSH',
-    'azure_kv': 'Microsoft Azure Key Vault',
-    'insights': 'Insights',
-    'kubernetes_bearer_token': 'OpenShift or Kubernetes API Bearer Token',
-    'net': 'Network',
-    'scm': 'Source Control',
-    'ssh': 'Machine',
-    'github_token': 'GitHub Personal Access Token',
-    'gitlab_token': 'GitLab Personal Access Token',
-    'vault': 'Vault',
-}
-
-
-OLD_INPUT_NAMES = (
-    'authorize',
-    'authorize_password',
-    'client',
-    'security_token',
-    'secret',
-    'tenant',
-    'subscription',
-    'domain',
-    'become_method',
-    'become_username',
-    'become_password',
-    'vault_password',
-    'project',
-    'host',
-    'username',
-    'password',
-    'ssh_key_data',
-    'vault_id',
-    'ssh_key_unlock',
-)
-
 
 def main():
     # Any additional arguments that are not fields of the item can be added here
@@ -351,33 +209,11 @@ def main():
         update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
-        # These are for backwards compatability
-        kind=dict(choices=list(KIND_CHOICES.keys())),
-        host=dict(),
-        username=dict(),
-        password=dict(no_log=True),
-        project=dict(),
-        ssh_key_data=dict(no_log=True),
-        ssh_key_unlock=dict(no_log=True),
-        authorize=dict(type='bool'),
-        authorize_password=dict(no_log=True),
-        client=dict(),
-        security_token=dict(no_log=False),
-        secret=dict(no_log=True),
-        subscription=dict(),
-        tenant=dict(),
-        domain=dict(),
-        become_method=dict(),
-        become_username=dict(),
-        become_password=dict(no_log=True),
-        vault_password=dict(no_log=True),
-        vault_id=dict(),
-        # End backwards compatability
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = ControllerAPIModule(argument_spec=argument_spec, required_one_of=[['kind', 'credential_type']])
+    module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -389,25 +225,9 @@ def main():
     inputs = module.params.get('inputs')
     user = module.params.get('user')
     team = module.params.get('team')
-    # The legacy arguments are put into a hash down below
-    kind = module.params.get('kind')
-    # End backwards compatability
     state = module.params.get('state')
 
-    # Deprecation warnings
-    for legacy_input in OLD_INPUT_NAMES:
-        if module.params.get(legacy_input) is not None:
-            module.deprecate(
-                collection_name="awx.awx",
-                msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input),
-                version="4.0.0")
-    if kind:
-        module.deprecate(
-            collection_name="awx.awx",
-            msg='The kind parameter has been deprecated, please use credential_type instead',
-            version="4.0.0")
-
-    cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
+    cred_type_id = module.resolve_name_to_id('credential_types', credential_type)
     if organization:
         org_id = module.resolve_name_to_id('organizations', organization)
 
@@ -444,26 +264,14 @@ def main():
     if team:
         team_id = module.resolve_name_to_id('teams', team)
 
-    # Create credential input from legacy inputs
-    has_inputs = False
-    credential_inputs = {}
-    for legacy_input in OLD_INPUT_NAMES:
-        if module.params.get(legacy_input) is not None:
-            has_inputs = True
-            credential_inputs[legacy_input] = module.params.get(legacy_input)
-
-    if inputs:
-        has_inputs = True
-        credential_inputs.update(inputs)
-
     # Create the data that gets sent for create and update
     credential_fields = {
         'name': new_name if new_name else (module.get_item_name(credential) if credential else name),
         'credential_type': cred_type_id,
     }
-    if has_inputs:
-        credential_fields['inputs'] = credential_inputs
 
+    if inputs:
+        credential_fields['inputs'] = inputs
     if description:
         credential_fields['description'] = description
     if organization:

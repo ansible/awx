@@ -23,13 +23,20 @@ def cred_type():
 
 
 @pytest.mark.django_db
-def test_create_machine_credential(run_module, admin_user, organization, silence_deprecation):
+def test_create_machine_credential(run_module, admin_user, organization):
     Organization.objects.create(name='test-org')
     # create the ssh credential type
     ct = CredentialType.defaults['ssh']()
     ct.save()
     # Example from docs
-    result = run_module('credential', dict(name='Test Machine Credential', organization=organization.name, kind='ssh', state='present'), admin_user)
+    result = run_module(
+        'credential',
+        dict(name='Test Machine Credential',
+             organization=organization.name,
+             credential_type='Machine',
+             state='present'),
+        admin_user,
+    )
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed'), result
 
@@ -41,7 +48,7 @@ def test_create_machine_credential(run_module, admin_user, organization, silence
 
 
 @pytest.mark.django_db
-def test_create_vault_credential(run_module, admin_user, organization, silence_deprecation):
+def test_create_vault_credential(run_module, admin_user, organization):
     # https://github.com/ansible/ansible/issues/61324
     Organization.objects.create(name='test-org')
     ct = CredentialType.defaults['vault']()
@@ -49,7 +56,11 @@ def test_create_vault_credential(run_module, admin_user, organization, silence_d
 
     result = run_module(
         'credential',
-        dict(name='Test Vault Credential', organization=organization.name, kind='vault', vault_id='bar', vault_password='foobar', state='present'),
+        dict(name='Test Vault Credential',
+             organization=organization.name,
+             credential_type='Vault',
+             inputs={'vault_id': 'bar', 'vault_password': 'foobar'},
+             state='present'),
         admin_user,
     )
     assert not result.get('failed', False), result.get('msg', result)
@@ -62,42 +73,6 @@ def test_create_vault_credential(run_module, admin_user, organization, silence_d
 
     assert result['name'] == "Test Vault Credential"
     assert result['id'] == cred.pk
-
-
-@pytest.mark.django_db
-def test_ct_precedence_over_kind(run_module, admin_user, organization, cred_type, silence_deprecation):
-    result = run_module(
-        'credential', dict(name='A credential', organization=organization.name, kind='ssh', credential_type=cred_type.name, state='present'), admin_user
-    )
-    assert not result.get('failed', False), result.get('msg', result)
-
-    cred = Credential.objects.get(name='A credential')
-
-    assert cred.credential_type == cred_type
-
-
-@pytest.mark.django_db
-def test_input_overrides_old_fields(run_module, admin_user, organization, silence_deprecation):
-    # create the vault credential type
-    ct = CredentialType.defaults['vault']()
-    ct.save()
-    result = run_module(
-        'credential',
-        dict(
-            name='A Vault credential',
-            organization=organization.name,
-            kind='vault',
-            vault_id='1234',
-            inputs={'vault_id': 'asdf'},
-            state='present',
-        ),
-        admin_user,
-    )
-    assert not result.get('failed', False), result.get('msg', result)
-
-    cred = Credential.objects.get(name='A Vault credential')
-
-    assert cred.inputs['vault_id'] == 'asdf'
 
 
 @pytest.mark.django_db

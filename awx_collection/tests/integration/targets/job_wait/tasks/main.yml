@@ -22,18 +22,6 @@
     extra_vars:
       sleep_interval: 300
 
-- name: Check deprecation warnings
-  job_wait:
-    min_interval: 10
-    max_interval: 20
-    job_id: "99999999"
-  register: result
-  ignore_errors: true
-
-- assert:
-    that:
-      - "'Min and max interval have been deprecated, please use interval instead; interval will be set to 15'"
-
 - name: Validate that interval superceeds min/max
   job_wait:
     min_interval: 10
