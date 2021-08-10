@@ -120,8 +120,9 @@ function JobDetail({ job }) {
   return (
     <CardBody>
       <DetailList>
-        <Detail label={t`Job ID`} value={job.id} />
+        <Detail dataCy="job-id" label={t`Job ID`} value={job.id} />
         <Detail
+          dataCy="job-status"
           fullWidth={Boolean(job.job_explanation)}
           label={t`Status`}
           value={
@@ -133,10 +134,19 @@ function JobDetail({ job }) {
             </StatusDetailValue>
           }
         />
-        <Detail label={t`Started`} value={formatDateString(job.started)} />
-        <Detail label={t`Finished`} value={formatDateString(job.finished)} />
+        <Detail
+          dataCy="job-started-date"
+          label={t`Started`}
+          value={formatDateString(job.started)}
+        />
+        <Detail
+          dataCy="job-finished-date"
+          label={t`Finished`}
+          value={formatDateString(job.finished)}
+        />
         {jobTemplate && (
           <Detail
+            dataCy="job-template"
             label={t`Job Template`}
             value={
               <Link to={`/templates/job_template/${jobTemplate.id}`}>
@@ -147,6 +157,7 @@ function JobDetail({ job }) {
         )}
         {workflowJobTemplate && (
           <Detail
+            dataCy="workflow-job-template"
             label={t`Workflow Job Template`}
             value={
               <Link
@@ -159,6 +170,7 @@ function JobDetail({ job }) {
         )}
         {source_workflow_job && (
           <Detail
+            dataCy="source-workflow-job"
             label={t`Source Workflow Job`}
             value={
               <Link to={`/jobs/workflow/${source_workflow_job.id}`}>
@@ -167,10 +179,15 @@ function JobDetail({ job }) {
             }
           />
         )}
-        <Detail label={t`Job Type`} value={jobTypes[job.type]} />
-        <LaunchedByDetail job={job} />
+        <Detail
+          dataCy="job-type"
+          label={t`Job Type`}
+          value={jobTypes[job.type]}
+        />
+        <LaunchedByDetail dataCy="job-launched-by" job={job} />
         {inventory && (
           <Detail
+            dataCy="job-inventory"
             label={t`Inventory`}
             value={
               <Link
@@ -187,6 +204,7 @@ function JobDetail({ job }) {
         )}
         {inventory_source && (
           <Detail
+            dataCy="job-inventory-source"
             label={t`Inventory Source`}
             value={
               <Link
@@ -199,7 +217,8 @@ function JobDetail({ job }) {
         )}
         {inventory_source && inventory_source.source === 'scm' && (
           <Detail
-            label={t`Project`}
+            dataCy="job-inventory-source-project"
+            label={t`Inventory Source Project`}
             value={
               <StatusDetailValue>
                 {source_project.status && (
@@ -213,7 +232,11 @@ function JobDetail({ job }) {
           />
         )}
         {project && (
-          <Detail label={t`Project`} value={buildProjectDetailValue()} />
+          <Detail
+            dataCy="job-project"
+            label={t`Project`}
+            value={buildProjectDetailValue()}
+          />
         )}
         {scmBranch && (
           <Detail
@@ -222,25 +245,44 @@ function JobDetail({ job }) {
             value={scmBranch}
           />
         )}
-        <Detail label={t`Revision`} value={job.scm_revision} />
-        <Detail label={t`Playbook`} value={job.playbook} />
-        <Detail label={t`Limit`} value={job.limit} />
-        <Detail label={t`Verbosity`} value={VERBOSITY[job.verbosity]} />
+        <Detail
+          dataCy="job-scm-revision"
+          label={t`Revision`}
+          value={job.scm_revision}
+        />
+        <Detail
+          dataCy="job-playbook"
+          label={t`Playbook`}
+          value={job.playbook}
+        />
+        <Detail dataCy="job-limit" label={t`Limit`} value={job.limit} />
+        <Detail
+          dataCy="job-verbosity"
+          label={t`Verbosity`}
+          value={VERBOSITY[job.verbosity]}
+        />
         {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
           <ExecutionEnvironmentDetail
+            dataCy="job-execution-environment"
             executionEnvironment={executionEnvironment}
             verifyMissingVirtualEnv={false}
           />
         )}
-        <Detail label={t`Execution Node`} value={job.execution_node} />
+        <Detail
+          dataCy="job-execution-node"
+          label={t`Execution Node`}
+          value={job.execution_node}
+        />
         {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
+            dataCy="job-instance-group"
             label={t`Instance Group`}
             value={buildInstanceGroupLink(instanceGroup)}
           />
         )}
         {instanceGroup && instanceGroup?.is_container_group && (
           <Detail
+            dataCy="job-container-group"
             label={t`Container Group`}
             value={buildContainerGroupLink(instanceGroup)}
           />
@@ -248,16 +290,22 @@ function JobDetail({ job }) {
         {typeof job.job_slice_number === 'number' &&
           typeof job.job_slice_count === 'number' && (
             <Detail
+              dataCy="job-slice"
               label={t`Job Slice`}
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
         {job.type === 'workflow_job' && job.is_sliced_job && (
-          <Detail label={t`Job Slice Parent`} value={t`True`} />
+          <Detail
+            dataCy="job-slice-parent"
+            label={t`Job Slice Parent`}
+            value={t`True`}
+          />
         )}
 
         {credential && (
           <Detail
+            dataCy="job-machine-credential"
             label={t`Machine Credential`}
             value={
               <ChipGroup numChips={5} totalChips={1}>
@@ -272,6 +320,7 @@ function JobDetail({ job }) {
         )}
         {credentials && credentials.length > 0 && (
           <Detail
+            dataCy="job-credentials"
             fullWidth
             label={t`Credentials`}
             value={
@@ -285,6 +334,7 @@ function JobDetail({ job }) {
         )}
         {labels && labels.count > 0 && (
           <Detail
+            dataCy="job-labels"
             fullWidth
             label={t`Labels`}
             value={
@@ -300,6 +350,7 @@ function JobDetail({ job }) {
         )}
         {job.job_tags && job.job_tags.length > 0 && (
           <Detail
+            dataCy="job-tags"
             fullWidth
             label={t`Job Tags`}
             value={
@@ -318,6 +369,7 @@ function JobDetail({ job }) {
         )}
         {job.skip_tags && job.skip_tags.length > 0 && (
           <Detail
+            dataCy="job-skip-tags"
             fullWidth
             label={t`Skip Tags`}
             value={
@@ -334,14 +386,27 @@ function JobDetail({ job }) {
             }
           />
         )}
-        <Detail label={t`Module Name`} value={job.module_name} />
-        <Detail label={t`Module Arguments`} value={job.module_args} />
+        <Detail
+          dataCy="job-module-name"
+          label={t`Module Name`}
+          value={job.module_name}
+        />
+        <Detail
+          dataCy="job-module-arguments"
+          label={t`Module Arguments`}
+          value={job.module_args}
+        />
         <UserDateDetail
+          dataCy="job-created"
           label={t`Created`}
           date={job.created}
           user={created_by}
         />
-        <UserDateDetail label={t`Last Modified`} date={job.modified} />
+        <UserDateDetail
+          dataCy="job-last-modified"
+          label={t`Last Modified`}
+          date={job.modified}
+        />
       </DetailList>
       {job.extra_vars && (
         <VariablesInput

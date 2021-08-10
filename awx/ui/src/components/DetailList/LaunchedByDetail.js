@@ -73,12 +73,13 @@ const getLaunchedByDetails = ({ summary_fields = {}, launch_type }) => {
   return { link, value };
 };
 
-export default function LaunchedByDetail({ job }) {
+export default function LaunchedByDetail({ job, dataCy = null }) {
   const { value: launchedByValue, link: launchedByLink } =
     getLaunchedByDetails(job) || {};
 
   return (
     <Detail
+      dataCy={dataCy}
       label={t`Launched By`}
       value={
         launchedByLink ? (
