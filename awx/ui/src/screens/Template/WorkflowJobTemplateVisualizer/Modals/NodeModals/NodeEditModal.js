@@ -11,6 +11,7 @@ function NodeEditModal() {
     const {
       approvalName,
       approvalDescription,
+      approveSelf,
       credentials,
       linkType,
       nodeResource,
@@ -29,6 +30,7 @@ function NodeEditModal() {
           description: approvalDescription,
           name: approvalName,
           timeout: Number(timeoutMinutes) * 60 + Number(timeoutSeconds),
+          approve_self: approveSelf,
           type: 'workflow_approval_template',
         },
         identifier,

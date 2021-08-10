@@ -2868,6 +2868,15 @@ class WorkflowApprovalAccess(BaseAccess):
         if (obj.workflow_job_template and self.user in obj.workflow_job_template.approval_role) or self.user.is_superuser:
             return True
 
+    def can_approve_self(self, obj):
+        if self.user.is_superuser:
+            return True
+
+        if obj.approve_self is True and self.user == obj.created_by:
+            return True
+
+        return False
+
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
     """

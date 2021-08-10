@@ -92,6 +92,7 @@ function getInitialValues() {
   return {
     approvalName: '',
     approvalDescription: '',
+    approveSelf: true,
     timeoutMinutes: 0,
     timeoutSeconds: 0,
     nodeType: 'job_template',

@@ -17,7 +17,7 @@ import { required } from 'util/validators';
 import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
 import Popover from 'components/Popover';
 import AnsibleSelect from 'components/AnsibleSelect';
-import FormField from 'components/FormField';
+import FormField, { CheckboxField } from 'components/FormField';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig, useUserProfile } from 'contexts/Config';
 import InventorySourcesList from './InventorySourcesList';
@@ -55,6 +55,7 @@ function NodeTypeStep({ isIdentifierRequired }) {
   const [timeoutSecondsField, , timeoutSecondsHelpers] =
     useField('timeoutSeconds');
   const [convergenceField, , convergenceFieldHelpers] = useField('convergence');
+  const [approveSelfField] = useField('approveSelf');
 
   const [isConvergenceOpen, setIsConvergenceOpen] = useState(false);
   const config = useConfig();
@@ -217,6 +218,17 @@ function NodeTypeStep({ isIdentifierRequired }) {
                       <Trans>sec</Trans>
                     </TimeoutLabel>
                   </div>
+                </FormGroup>
+                <FormGroup
+                  label={t`Options`}
+                  fieldId="approval-options"
+                >
+                <CheckboxField
+                        isChecked={approveSelfField.value}
+                        name="approveSelf"
+                        label={t`Allow user to approve their own tasks`}
+                        id="approve_self"
+                      />
                 </FormGroup>
               </>
             )}

@@ -89,6 +89,7 @@ const getNodeToEditDefaultValues = (
       nodeToEdit.fullUnifiedJobTemplate.description || '';
     initialValues.timeoutMinutes = Math.floor(timeout / 60);
     initialValues.timeoutSeconds = timeout - Math.floor(timeout / 60) * 60;
+    initialValues.approveSelf = nodeToEdit.fullUnifiedJobTemplate.approve_self;
 
     return initialValues;
   }

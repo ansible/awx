@@ -793,6 +793,7 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
     )
+    approve_self = models.BooleanField(default=True, help_text=_("Allow user to approve their own tasks"))
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -800,7 +801,7 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'timeout']
+        return ['name', 'description', 'timeout', 'approve_self']
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_approval_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -849,6 +850,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         editable=False,
         on_delete=models.SET_NULL,
     )
+    approve_self = models.BooleanField(default=True, help_text=_("Allow user to approve their own tasks"))
 
     def _set_default_dependencies_processed(self):
         self.dependencies_processed = True
