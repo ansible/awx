@@ -223,7 +223,7 @@ function NodeTypeStep({ isIdentifierRequired }) {
                   <CheckboxField
                     isChecked={approveSelfField.value}
                     name="approveSelf"
-                    label={t`Allow user to approve their own tasks`}
+                    label={t`Allow users to approve their own tasks`}
                     id="approve_self"
                   />
                 </FormGroup>
