@@ -85,6 +85,7 @@ function HostListItem({
           <ExpandableRowContent>
             <DetailList gutter="sm">
               <Detail
+                dataCy={`${host.name}-activity`}
                 label={t`Activity`}
                 value={
                   recentJobs.length > 0 ? (

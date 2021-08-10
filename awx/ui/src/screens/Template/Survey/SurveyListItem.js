@@ -25,6 +25,7 @@ function SurveyListItem({ canEdit, question, isChecked, onSelect, rowIndex }) {
   return (
     <Tr>
       <Td
+        data-cy={`${question.variable}-select`}
         select={{
           rowIndex,
           isSelected: isChecked,
@@ -32,7 +33,11 @@ function SurveyListItem({ canEdit, question, isChecked, onSelect, rowIndex }) {
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={`survey-list-item-${question.variable}`} dataLabel={t`Name`}>
+      <Td
+        data-cy={`${question.variable}-name`}
+        id={`survey-list-item-${question.variable}`}
+        dataLabel={t`Name`}
+      >
         <>
           <Link
             to={`survey/edit?question_variable=${encodeURIComponent(
@@ -52,7 +57,9 @@ function SurveyListItem({ canEdit, question, isChecked, onSelect, rowIndex }) {
           )}
         </>
       </Td>
-      <Td dataLabel={t`Type`}>{question.type}</Td>
+      <Td data-cy={`${question.variable}-type`} dataLabel={t`Type`}>
+        {question.type}
+      </Td>
       <Td dataLabel={t`Default`}>
         {[question.type].includes('password') && (
           <span>{t`encrypted`.toUpperCase()}</span>

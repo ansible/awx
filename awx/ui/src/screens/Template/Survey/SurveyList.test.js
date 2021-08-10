@@ -12,6 +12,7 @@ const surveyData = {
   description: 'description for survey',
   spec: [
     { question_name: 'Foo', type: 'text', default: 'Bar', variable: 'foo' },
+    { question_name: 'Bizz', type: 'text', default: 'bazz', variable: 'bizz' },
   ],
 };
 
