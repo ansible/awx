@@ -219,16 +219,13 @@ function NodeTypeStep({ isIdentifierRequired }) {
                     </TimeoutLabel>
                   </div>
                 </FormGroup>
-                <FormGroup
-                  label={t`Options`}
-                  fieldId="approval-options"
-                >
-                <CheckboxField
-                        isChecked={approveSelfField.value}
-                        name="approveSelf"
-                        label={t`Allow user to approve their own tasks`}
-                        id="approve_self"
-                      />
+                <FormGroup label={t`Options`} fieldId="approval-options">
+                  <CheckboxField
+                    isChecked={approveSelfField.value}
+                    name="approveSelf"
+                    label={t`Allow user to approve their own tasks`}
+                    id="approve_self"
+                  />
                 </FormGroup>
               </>
             )}

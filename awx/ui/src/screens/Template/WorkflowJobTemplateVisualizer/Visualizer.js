@@ -416,7 +416,7 @@ function Visualizer({ template }) {
                     name: node.fullUnifiedJobTemplate.name,
                     description: node.fullUnifiedJobTemplate.description,
                     timeout: node.fullUnifiedJobTemplate.timeout,
-                    approve_self: node.fullUnifiedJobTemplate.approve_self
+                    approve_self: node.fullUnifiedJobTemplate.approve_self,
                   })
                 );
               })
