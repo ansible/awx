@@ -3582,6 +3582,7 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
     can_approve_or_deny = serializers.SerializerMethodField()
     approval_expiration = serializers.SerializerMethodField()
     timed_out = serializers.ReadOnlyField()
+    approve_self = serializers.ReadOnlyField()
 
     class Meta:
         model = WorkflowApproval
