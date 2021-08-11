@@ -277,7 +277,7 @@ def random_utf8(*args, **kwargs):
 
 def random_title(num_words=2, non_ascii=True):
     if os.getenv('AWXKIT_FORCE_ONLY_ASCII', False):
-        non_ascii=False
+        non_ascii = False
     base = ''.join([random.choice(words) for word in range(num_words)])
     if non_ascii:
         title = ''.join([base, random_utf8(1)])
