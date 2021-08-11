@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useState } from 'react';
+import React from 'react';
 import { string, bool, func } from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -13,9 +13,16 @@ import HostToggle from 'components/HostToggle';
 import { DetailList, Detail } from 'components/DetailList';
 import Sparkline from 'components/Sparkline';
 
-function HostListItem({ host, isSelected, onSelect, detailUrl, rowIndex }) {
+function HostListItem({
+  host,
+  isSelected,
+  onSelect,
+  detailUrl,
+  rowIndex,
+  isExpanded,
+  onExpand,
+}) {
   const labelId = `check-action-${host.id}`;
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const {
     summary_fields: { recent_jobs: recentJobs = [] },
@@ -28,7 +35,7 @@ function HostListItem({ host, isSelected, onSelect, detailUrl, rowIndex }) {
           expand={{
             rowIndex,
             isExpanded,
-            onToggle: () => setIsExpanded(!isExpanded),
+            onToggle: onExpand,
           }}
         />
         <Td
@@ -78,6 +85,7 @@ function HostListItem({ host, isSelected, onSelect, detailUrl, rowIndex }) {
           <ExpandableRowContent>
             <DetailList gutter="sm">
               <Detail
+                dataCy={`${host.name}-activity`}
                 label={t`Activity`}
                 value={
                   recentJobs.length > 0 ? (

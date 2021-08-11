@@ -12,6 +12,7 @@ const surveyData = {
   description: 'description for survey',
   spec: [
     { question_name: 'Foo', type: 'text', default: 'Bar', variable: 'foo' },
+    { question_name: 'Bizz', type: 'text', default: 'bazz', variable: 'bizz' },
   ],
 };
 
@@ -59,9 +60,10 @@ describe('<SurveyList />', () => {
     });
     wrapper.update();
 
-    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('Button[ouiaId="survey-delete-button"]').prop('isDisabled')
+    ).toBe(true);
+    expect(wrapper.find('Button[ouiaId="edit-order"]')).toHaveLength(1);
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(false);
@@ -76,11 +78,11 @@ describe('<SurveyList />', () => {
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(true);
-    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
-      false
-    );
+    expect(
+      wrapper.find('Button[ouiaId="survey-delete-button"]').prop('isDisabled')
+    ).toBe(false);
     act(() => {
-      wrapper.find('Button[variant="secondary"]').invoke('onClick')();
+      wrapper.find('Button[ouiaId="survey-delete-button"]').invoke('onClick')();
     });
 
     wrapper.update();
@@ -91,38 +93,38 @@ describe('<SurveyList />', () => {
     expect(deleteSurvey).toHaveBeenCalled();
   });
 
-  test('should render Preview button ', async () => {
+  test('should render Edit Order button ', async () => {
     let wrapper;
 
     await act(async () => {
-      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} canEdit />);
     });
 
-    expect(wrapper.find('Button[aria-label="Preview"]').length).toBe(1);
+    expect(wrapper.find('Button[ouiaId="edit-order"]').length).toBe(1);
   });
 
-  test('Preview button should render Modal', async () => {
+  test('Edit Order button should render Modal', async () => {
     let wrapper;
 
     await act(async () => {
-      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} canEdit />);
     });
-    act(() => wrapper.find('Button[aria-label="Preview"]').prop('onClick')());
+    act(() => wrapper.find('Button[ouiaId="edit-order"]').prop('onClick')());
     wrapper.update();
 
-    expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
+    expect(wrapper.find('SurveyReorderModal').length).toBe(1);
   });
 
   test('Modal close button should close modal', async () => {
     let wrapper;
 
     await act(async () => {
-      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} canEdit />);
     });
-    act(() => wrapper.find('Button[aria-label="Preview"]').prop('onClick')());
+    act(() => wrapper.find('Button[ouiaId="edit-order"]').prop('onClick')());
     wrapper.update();
 
-    expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
+    expect(wrapper.find('SurveyReorderModal').length).toBe(1);
 
     act(() => wrapper.find('Modal').prop('onClose')());
 

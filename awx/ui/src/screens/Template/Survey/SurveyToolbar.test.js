@@ -17,16 +17,18 @@ describe('<SurveyToolbar />', () => {
           isAllSelected
           onToggleDeleteModal={jest.fn()}
           onToggleSurvey={jest.fn()}
+          canEdit={false}
         />
       );
     });
 
-    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('Button[ouiaId="survey-delete-button"]').prop('isDisabled')
+    ).toBe(true);
+    expect(wrapper.find('Button[ouiaId="edit-order"]')).toHaveLength(0);
   });
 
-  test('delete Button is enabled', () => {
+  test('delete Button is enabled and Edit order button is rendered', () => {
     let wrapper;
     act(() => {
       wrapper = mountWithContexts(
@@ -36,6 +38,7 @@ describe('<SurveyToolbar />', () => {
           isAllSelected
           onToggleDeleteModal={jest.fn()}
           onToggleSurvey={jest.fn()}
+          onOpenOrderModal={jest.fn()}
           canEdit
         />
       );
@@ -43,9 +46,10 @@ describe('<SurveyToolbar />', () => {
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(true);
-    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
-      false
-    );
+    expect(
+      wrapper.find('Button[ouiaId="survey-delete-button"]').prop('isDisabled')
+    ).toBe(false);
+    expect(wrapper.find('Button[ouiaId="edit-order"]')).toHaveLength(1);
   });
 
   test('switch is off', () => {
@@ -105,8 +109,9 @@ describe('<SurveyToolbar />', () => {
     );
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(true);
     expect(wrapper.find('ToolbarAddButton').prop('isDisabled')).toBe(true);
-    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('Button[ouiaId="survey-delete-button"]').prop('isDisabled')
+    ).toBe(true);
+    expect(wrapper.find('Button[ouiaId="edit-order"]')).toHaveLength(0);
   });
 });

@@ -5,7 +5,7 @@ import {
   mountWithContexts,
 } from '../../../../testUtils/enzymeHelpers';
 
-import SurveyPreviewModal from './SurveyPreviewModal';
+import SurveyReorderModal from './SurveyReorderModal';
 
 const questions = [
   {
@@ -65,59 +65,55 @@ const questions = [
   },
 ];
 
-describe('<SurveyPreviewModal />', () => {
+describe('<SurveyReorderModal />', () => {
   let wrapper;
   beforeAll(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <SurveyPreviewModal questions={questions} isPreviewModalOpen />
+        <SurveyReorderModal questions={questions} isOrderModalOpen />
       );
     });
     waitForElement(wrapper, 'Form');
   });
 
   test('Renders proper fields', async () => {
-    const question1 = wrapper.find('FormGroup[label="Text Question"]');
-    const question1Value = wrapper.find('TextInputBase').at(0);
+    const question1 = wrapper.find('td[aria-label="Text Question"]');
+    const question1Value = wrapper
+      .find('TextInput#survey-preview-text-dfgh')
+      .find('input');
 
-    const question2 = wrapper
-      .find('FormGroup[label="Select Question"]')
-      .find('label');
+    const question2 = wrapper.find('td[aria-label="Select Question"]');
     const question2Value = wrapper.find('Select[aria-label="Multiple Choice"]');
 
-    const question3 = wrapper
-      .find('FormGroup[label="Text Area Question"]')
-      .find('label');
+    const question3 = wrapper;
+    wrapper.find('td[aria-label="Text Area Question"]');
     const question3Value = wrapper.find('textarea');
 
-    const question4 = wrapper.find('FormGroup[label="Password Question"]');
-    const question4Value = wrapper.find('TextInputBase[type="password"]');
+    const question4 = wrapper.find('td[aria-label="Password Question"]');
+    const question4Value = wrapper.find('TextInputBase#survey-preview-text-c');
 
-    const question5 = wrapper
-      .find('FormGroup[label="Multiple select Question"]')
-      .find('label');
+    const question5 = wrapper.find('td[aria-label="Multiple select Question"]');
     const question5Value = wrapper
       .find('Select[aria-label="Multi-Select"]')
       .find('Chip');
-
-    expect(question1.text()).toBe('Text Question * ');
+    expect(question1).toHaveLength(1);
     expect(question1Value.prop('value')).toBe('Text Question Value');
-    expect(question1Value.prop('isDisabled')).toBe(true);
+    expect(question1Value.prop('disabled')).toBe(true);
 
-    expect(question2.text()).toBe('Select Question *');
-    expect(question2Value.find('.pf-c-select__toggle-text').text()).toBe(
+    expect(question2).toHaveLength(1);
+    expect(question2Value.prop('placeholderText')).toBe(
       'Select Question Value'
     );
     expect(question2Value.prop('isDisabled')).toBe(true);
 
-    expect(question3.text()).toBe('Text Area Question *');
+    expect(question3).toHaveLength(1);
     expect(question3Value.prop('value')).toBe('Text Area Question Value');
     expect(question3Value.prop('disabled')).toBe(true);
-    expect(question4.text()).toBe('Password Question * ');
-    expect(question4Value.prop('placeholder')).toBe('ENCRYPTED');
+    expect(question4).toHaveLength(1);
+    expect(question4Value.prop('value')).toBe('$encrypted$');
     expect(question4Value.prop('isDisabled')).toBe(true);
 
-    expect(question5.text()).toBe('Multiple select Question *');
+    expect(question5).toHaveLength(1);
     expect(question5Value.length).toBe(4);
     expect(
       wrapper.find('Select[aria-label="Multi-Select"]').prop('isDisabled')
