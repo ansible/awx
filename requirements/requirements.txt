@@ -4,8 +4,7 @@ aiohttp==3.6.2
     # via -r /awx_devel/requirements/requirements.in
 aioredis==1.3.1
     # via channels-redis
-ansible-runner==2.0.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements_git.txt
 ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25
@@ -303,8 +302,7 @@ pyyaml==5.4.1
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
-receptorctl==1.0.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements_git.txt
 redis==3.4.1
     # via
     #   -r /awx_devel/requirements/requirements.in

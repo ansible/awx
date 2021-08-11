@@ -60,6 +60,8 @@ def test_python_and_js_licenses():
                     (name, version) = reqt.link.filename.split('@', 1)
                     if name.endswith('.git'):
                         name = name[:-4]
+                    if name == 'receptor':
+                        name = 'receptorctl'
                 ret[name] = {'name': name, 'version': version}
         return ret
 
