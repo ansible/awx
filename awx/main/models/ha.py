@@ -131,6 +131,13 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         grace_period = 120
         return self.modified < ref_time - timedelta(seconds=grace_period)
 
+    def mark_offline(self, on_good_terms=False):
+        self.cpu = self.cpu_capacity = self.memory = self.mem_capacity = self.capacity = 0
+        update_fields = ['capacity', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity']
+        if on_good_terms:
+            update_fields.append('modified')
+        self.save()
+
     def refresh_capacity(self):
         cpu = get_cpu_capacity()
         mem = get_mem_capacity()
