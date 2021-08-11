@@ -72,8 +72,27 @@ Control nodes check the receptor network (reported via `receptorctl status`) whe
 Nodes on the receptor network are compared against the `Instance` model in the database.
 
 If a node appears in the mesh network which is not in the database, then a "health check" is started.
-This will submit a work unit to the execution node which then outputs important node data via `ansible-runner`.
 The `capacity` field will obtain a non-zero value through this process, which is necessary to run jobs.
+
+#### Health Check Mechanics
+
+All relevant data for health checks is reported from the ansible-runner command:
+
+```
+ansible-runner worker --worker-info
+```
+
+This will output YAML data to standard out containing CPU, memory, and other metrics used to compute `capacity`.
+
+AWX invokes this command by submitting a receptor work unit (of type `ansible-runner`) to the target execution node.
+If you have the development environment running, you can run a one-off health check of a node with this command:
+
+```
+echo "from awx.main.utils.receptor import worker_info; worker_info('receptor-1')" | awx-manage shell_plus --quiet
+```
+
+This must be ran as the awx user inside one of the hybrid or control nodes.
+This will not affect actual `Instance` record, but will just run the command and report the data.
 
 ### Development Environment
 
@@ -89,13 +108,23 @@ This will spin up a topology represented below.
 (names are the receptor node names, which differ from the AWX Instance names and network address in some cases)
 
 ```
-<awx_1:2222>---v
- -----v
-<awx_2:2222>
-     <receptor-hop:5555>
-             ^-------------- <receptor-1>
-             ^-------------- <receptor-2>
-             ^-------------- <receptor-3>
+                                            ┌──────────────┐
+                                            │              │
+┌──────────────┐                 ┌──────────┤  receptor-1  │
+│              │                 │          │              │
+│    awx_1     │◄──────────┐     │          └──────────────┘
+│              │           │     ▼
+└──────┬───────┘    ┌──────┴───────┐        ┌──────────────┐
+       │            │              │        │              │
+       │            │ receptor-hop │◄───────┤  receptor-2  │
+       ▼            │              │        │              │
+┌──────────────┐    └──────────────┘        └──────────────┘
+│              │                 ▲
+│    awx_2     │                 │          ┌──────────────┐
+│              │                 │          │              │
+└──────────────┘                 └──────────┤  receptor-3  │
+                                            │              │
+                                            └──────────────┘
 ```
 
 All execution (`receptor-*`) nodes connect to the hop node.
