@@ -1419,9 +1419,10 @@ class BaseTask(object):
                 # ensure failure notification sends even if playbook_on_stats event is not triggered
                 handle_success_and_failure_notifications.apply_async([self.instance.job.id])
 
-        except Exception:
+        except Exception as e:
             # this could catch programming or file system errors
             extra_update_fields['result_traceback'] = traceback.format_exc()
+            extra_update_fields['job_explanation'] = str(e)
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
         finally:
             logger.debug('%s finished running, producing %s events.', self.instance.log_format, self.event_ct)
@@ -2933,10 +2934,6 @@ class AWXReceptorJob:
 
         try:
             return self._run_internal(receptor_ctl)
-        except Exception as e:
-            self.task.instance.job_explanation = str(e)
-            self.task.instance.save(update_fields=["job_explanation"])
-            raise e
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
