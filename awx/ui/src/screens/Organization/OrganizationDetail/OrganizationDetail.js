@@ -135,7 +135,10 @@ function OrganizationDetail({ organization }) {
             value={
               <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
                 {galaxy_credentials.map((credential) => (
-                  <Link to={`/credentials/${credential.id}/details`}>
+                  <Link
+                    key={credential.id}
+                    to={`/credentials/${credential.id}/details`}
+                  >
                     <CredentialChip
                       credential={credential}
                       key={credential.id}

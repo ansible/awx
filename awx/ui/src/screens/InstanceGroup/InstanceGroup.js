@@ -66,7 +66,7 @@ function InstanceGroup({ setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {t`Back to instance groups`}
+          {t`Back to Instance Groups`}
         </>
       ),
       link: '/instance_groups',

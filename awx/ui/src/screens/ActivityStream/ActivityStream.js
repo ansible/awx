@@ -256,8 +256,8 @@ function ActivityStream() {
             renderToolbar={(props) => (
               <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
             )}
-            renderRow={(streamItem) => (
-              <ActivityStreamListItem streamItem={streamItem} />
+            renderRow={(streamItem, index) => (
+              <ActivityStreamListItem key={index} streamItem={streamItem} />
             )}
           />
         </Card>

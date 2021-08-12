@@ -89,6 +89,11 @@ function Lookup(props) {
   }, [state.selectedItems, multiple]);
 
   const clearQSParams = () => {
+    if (!history.location.search) {
+      // This prevents "Warning: Hash history cannot PUSH the same path;
+      // a new entry will not be added to the history stack" from appearing in the console.
+      return;
+    }
     const parts = history.location.search.replace(/^\?/, '').split('&');
     const ns = qsConfig.namespace;
     const otherParts = parts.filter((param) => !param.startsWith(`${ns}.`));

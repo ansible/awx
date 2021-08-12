@@ -32,7 +32,7 @@ describe('<InstanceGroup/>', () => {
 
   test('should render expected tabs', async () => {
     const expectedTabs = [
-      'Back to instance groups',
+      'Back to Instance Groups',
       'Details',
       'Instances',
       'Jobs',
