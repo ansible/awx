@@ -162,6 +162,14 @@ function LoggingEdit() {
                   name="LOG_AGGREGATOR_PASSWORD"
                   config={logging.LOG_AGGREGATOR_PASSWORD}
                 />
+                <InputField
+                  name="LOG_AGGREGATOR_THREAD_MIN_MESSAGES"
+                  config={logging.LOG_AGGREGATOR_THREAD_MIN_MESSAGES}
+                />
+                <InputField
+                  name="LOG_AGGREGATOR_WORKER_THREADS"
+                  config={logging.LOG_AGGREGATOR_WORKER_THREADS}
+                />
                 <BooleanField
                   name="LOG_AGGREGATOR_INDIVIDUAL_FACTS"
                   ariaLabel={t`Enable log system tracking facts individually`}

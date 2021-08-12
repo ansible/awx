@@ -751,6 +751,8 @@ LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
+LOG_AGGREGATOR_THREAD_MIN_MESSAGES = 50000
+LOG_AGGREGATOR_WORKER_THREADS = 1
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in a cluster,
