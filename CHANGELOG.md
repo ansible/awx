@@ -1,5 +1,24 @@
 # Changelog
 
+# 19.3.0 (August 12, 2021)
+
+- Fixed threading bug that would sometimes cause jobs to randomly fail (https://github.com/ansible/awx/pull/10537)
+- Fixed race where app would crash when postgres is not available (https://github.com/ansible/awx/pull/10583)
+- Add support for workflow node aliasing via identifier field (https://github.com/ansible/awx/pull/10592)
+- Add UI support for management jobs in workflows (https://github.com/ansible/awx/pull/10572)
+- Show PAT as part of bulk delete list (https://github.com/ansible/awx/pull/10794)
+- Return 404 for ad_hoc_command_events list api. Remove api endtpoint (https://github.com/ansible/awx/pull/10716)
+- Fix multiple accessibility violations (https://github.com/ansible/awx/pull/10713)
+- Fix ignoring --no-color for awx-manage list_instances command (https://github.com/ansible/awx/pull/10668)
+- Fix to handle ask_* parameters correctly when set false (https://github.com/ansible/awx/pull/10108)
+- Default source_project to organization for inventory source (https://github.com/ansible/awx/pull/10573)
+- Fix headers missing in webhook notification request (https://github.com/ansible/awx/pull/10566)
+- Avoid double LDAP updates (https://github.com/ansible/awx/pull/9703)
+- introduced a pre-flight check for postgres 12 (https://github.com/ansible/awx/pull/10425)
+- Fix Job Settings Page Break on Firefox (https://github.com/ansible/awx/pull/10523)
+- bumped django version to 2.2.20 (https://github.com/ansible/awx/pull/10564)
+- Add Thycotic SecretServer support (https://github.com/ansible/awx/pull/10632)
+
 # 19.2.2 (June 28, 2021)
 
 - Fixed bug where symlinks pointing to directories were not preserved (https://github.com/ansible/ansible-runner/pull/736)
