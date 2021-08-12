@@ -12,39 +12,25 @@ import {
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 import { encode } from 'html-entities';
-import {
-  Button,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-  ToolbarToggleGroup,
-  Tooltip,
-} from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { Button } from '@patternfly/react-core';
 
 import AlertModal from 'components/AlertModal';
 import { CardBody as _CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ErrorDetail from 'components/ErrorDetail';
-import Search from 'components/Search';
 import StatusIcon from 'components/StatusIcon';
 
 import { getJobModel, isJobRunning } from 'util/jobs';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useInterval from 'hooks/useInterval';
-import {
-  parseQueryString,
-  mergeParams,
-  removeParams,
-  getQSConfig,
-  updateQueryString,
-} from 'util/qs';
+import { parseQueryString, getQSConfig } from 'util/qs';
 import useIsMounted from 'hooks/useIsMounted';
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
 import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
+import JobOutputSearch from './JobOutputSearch';
 import { HostStatusBar, OutputToolbar } from './shared';
 import getRowRangePageSize from './shared/jobOutputUtils';
 
@@ -190,15 +176,6 @@ const OutputFooter = styled.div`
   border-right: 1px solid #d7d7d7;
   width: 75px;
   flex: 1;
-`;
-
-const SearchToolbar = styled(Toolbar)`
-  position: inherit !important;
-`;
-
-const SearchToolbarContent = styled(ToolbarContent)`
-  padding-left: 0px !important;
-  padding-right: 0px !important;
 `;
 
 let ws;
@@ -665,55 +642,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     previousWidth.current = width;
   };
 
-  const handleSearch = (key, value) => {
-    const params = parseQueryString(QS_CONFIG, location.search);
-    const qs = updateQueryString(
-      QS_CONFIG,
-      location.search,
-      mergeParams(params, { [key]: value })
-    );
-    pushHistoryState(qs);
-  };
-
-  const handleReplaceSearch = (key, value) => {
-    const qs = updateQueryString(QS_CONFIG, location.search, {
-      [key]: value,
-    });
-    pushHistoryState(qs);
-  };
-
-  const handleRemoveSearchTerm = (key, value) => {
-    const oldParams = parseQueryString(QS_CONFIG, location.search);
-    const updatedParams = removeParams(QS_CONFIG, oldParams, {
-      [key]: value,
-    });
-    const qs = updateQueryString(QS_CONFIG, location.search, updatedParams);
-    pushHistoryState(qs);
-  };
-
-  const handleRemoveAllSearchTerms = () => {
-    const oldParams = parseQueryString(QS_CONFIG, location.search);
-    Object.keys(oldParams).forEach((key) => {
-      oldParams[key] = null;
-    });
-    const qs = updateQueryString(QS_CONFIG, location.search, oldParams);
-    pushHistoryState(qs);
-  };
-
-  const pushHistoryState = (qs) => {
-    const { pathname } = history.location;
-    history.push(qs ? `${pathname}?${qs}` : pathname);
-  };
-
-  const handleFollowToggle = () => {
-    if (isFollowModeEnabled) {
-      setIsFollowModeEnabled(false);
-    } else {
-      setIsFollowModeEnabled(true);
-      scrollToRow(remoteRowCount - 1);
-    }
-  };
-
   const handleScroll = (e) => {
     if (
       isFollowModeEnabled &&
@@ -725,64 +653,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     scrollTop.current = e.scrollTop;
     scrollHeight.current = e.scrollHeight;
   };
-
-  const renderSearchComponent = () => (
-    <Search
-      qsConfig={QS_CONFIG}
-      columns={[
-        {
-          name: t`Stdout`,
-          key: 'stdout__icontains',
-          isDefault: true,
-        },
-        {
-          name: t`Event`,
-          key: 'event',
-          options: [
-            ['runner_on_failed', t`Host Failed`],
-            ['runner_on_start', t`Host Started`],
-            ['runner_on_ok', t`Host OK`],
-            ['runner_on_error', t`Host Failure`],
-            ['runner_on_skipped', t`Host Skipped`],
-            ['runner_on_unreachable', t`Host Unreachable`],
-            ['runner_on_no_hosts', t`No Hosts Remaining`],
-            ['runner_on_async_poll', t`Host Polling`],
-            ['runner_on_async_ok', t`Host Async OK`],
-            ['runner_on_async_failed', t`Host Async Failure`],
-            ['runner_item_on_ok', t`Item OK`],
-            ['runner_item_on_failed', t`Item Failed`],
-            ['runner_item_on_skipped', t`Item Skipped`],
-            ['runner_retry', t`Host Retry`],
-            ['runner_on_file_diff', t`File Difference`],
-            ['playbook_on_start', t`Playbook Started`],
-            ['playbook_on_notify', t`Running Handlers`],
-            ['playbook_on_include', t`Including File`],
-            ['playbook_on_no_hosts_matched', t`No Hosts Matched`],
-            ['playbook_on_no_hosts_remaining', t`No Hosts Remaining`],
-            ['playbook_on_task_start', t`Task Started`],
-            ['playbook_on_vars_prompt', t`Variables Prompted`],
-            ['playbook_on_setup', t`Gathering Facts`],
-            ['playbook_on_play_start', t`Play Started`],
-            ['playbook_on_stats', t`Playbook Complete`],
-            ['debug', t`Debug`],
-            ['verbose', t`Verbose`],
-            ['deprecated', t`Deprecated`],
-            ['warning', t`Warning`],
-            ['system_warning', t`System Warning`],
-            ['error', t`Error`],
-          ],
-        },
-        { name: t`Advanced`, key: 'advanced' },
-      ]}
-      searchableKeys={eventSearchableKeys}
-      relatedSearchableKeys={eventRelatedSearchableKeys}
-      onSearch={handleSearch}
-      onReplaceSearch={handleReplaceSearch}
-      onShowAdvancedSearch={() => {}}
-      onRemove={handleRemoveSearchTerm}
-      isDisabled={isJobRunning(job.status)}
-    />
-  );
 
   if (contentError) {
     return <ContentError error={contentError} />;
@@ -812,36 +682,16 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           />
         </OutputHeader>
         <HostStatusBar counts={job.host_status_counts} />
-        <SearchToolbar
-          id="job_output-toolbar"
-          clearAllFilters={handleRemoveAllSearchTerms}
-          collapseListedFiltersBreakpoint="lg"
-          clearFiltersButtonText={t`Clear all filters`}
-        >
-          <SearchToolbarContent>
-            <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
-              <ToolbarItem variant="search-filter">
-                {isJobRunning(job.status) ? (
-                  <Tooltip
-                    content={t`Search is disabled while the job is running`}
-                  >
-                    {renderSearchComponent()}
-                  </Tooltip>
-                ) : (
-                  renderSearchComponent()
-                )}
-              </ToolbarItem>
-            </ToolbarToggleGroup>
-            {isJobRunning(job.status) ? (
-              <Button
-                variant={isFollowModeEnabled ? 'secondary' : 'primary'}
-                onClick={handleFollowToggle}
-              >
-                {isFollowModeEnabled ? t`Unfollow` : t`Follow`}
-              </Button>
-            ) : null}
-          </SearchToolbarContent>
-        </SearchToolbar>
+        <JobOutputSearch
+          qsConfig={QS_CONFIG}
+          job={job}
+          eventRelatedSearchableKeys={eventRelatedSearchableKeys}
+          eventSearchableKeys={eventSearchableKeys}
+          remoteRowCount={remoteRowCount}
+          scrollToRow={scrollToRow}
+          isFollowModeEnabled={isFollowModeEnabled}
+          setIsFollowModeEnabled={setIsFollowModeEnabled}
+        />
         <PageControls
           onScrollFirst={handleScrollFirst}
           onScrollLast={handleScrollLast}
@@ -946,5 +796,4 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
 }
 
-export { JobOutput as _JobOutput };
 export default JobOutput;

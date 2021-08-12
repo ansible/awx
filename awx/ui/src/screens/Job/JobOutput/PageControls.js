@@ -2,7 +2,7 @@ import 'styled-components/macro';
 import React from 'react';
 
 import { t } from '@lingui/macro';
-import { Button as PFButton } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import {
   AngleDoubleUpIcon,
   AngleDoubleDownIcon,
@@ -14,14 +14,9 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   display: flex;
   height: 35px;
-  outline: 1px solid #d7d7d7;
+  border: 1px solid #d7d7d7;
   width: 100%;
   justify-content: flex-end;
-`;
-
-const Button = styled(PFButton)`
-  position: relative;
-  z-index: 1;
 `;
 
 const PageControls = ({
