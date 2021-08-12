@@ -846,7 +846,7 @@ def handle_work_error(task_id, *args, **kwargs):
 def handle_success_and_failure_notifications(job_id):
     uj = UnifiedJob.objects.get(pk=job_id)
     retries = 0
-    while retries < 5:
+    while retries < settings.AWX_NOTIFICATION_JOB_FINISH_MAX_RETRY:
         if uj.finished:
             uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
             return
