@@ -446,15 +446,16 @@ def discover_receptor_nodes():
         (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
         was_lost = instance.is_lost(ref_time=nowtime)
         last_seen = parse_date(ad['Time'])
-        if instance.modified == last_seen:
+        if instance.last_seen == last_seen:
             continue
-        instance.modified = last_seen
+        instance.last_seen = last_seen
+        # TODO: not working, adjust this so multiple cluster nodes do not make lots of updates
         if instance.is_lost(ref_time=nowtime):
-            # if the instance hasn't advertised in awhile, don't save a new modified time
+            # if the instance hasn't advertised in awhile, don't save a new last_seen time
             # this is so multiple cluster nodes do all make repetitive updates
             continue
 
-        instance.save(update_fields=['modified'])
+        instance.save(update_fields=['last_seen'])
         if changed:
             logger.warn("Registered execution node '{}'".format(hostname))
             check_heartbeat.apply_async([hostname])
@@ -479,19 +480,15 @@ def cluster_node_heartbeat():
     this_inst = None
     lost_instances = []
 
-    (changed, instance) = Instance.objects.get_or_register()
+    (changed, this_inst) = Instance.objects.get_or_register()
     if changed:
-        logger.info("Registered tower control node '{}'".format(instance.hostname))
+        logger.info("Registered tower control node '{}'".format(this_inst.hostname))
 
     discover_receptor_nodes()
 
     for inst in list(instance_list):
-        if inst.hostname == settings.CLUSTER_HOST_ID:
-            this_inst = inst
+        if inst.hostname == this_inst.hostname:
             instance_list.remove(inst)
-        elif inst.node_type == 'execution':  # TODO: zero out capacity of execution nodes that are MIA
-            # Only considering control plane for this logic
-            continue
         elif inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
@@ -506,7 +503,7 @@ def cluster_node_heartbeat():
         raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
     # IFF any node has a greater version than we do, then we'll shutdown services
     for other_inst in instance_list:
-        if other_inst.version == "" or other_inst.version.startswith('ansible-runner'):
+        if other_inst.version == "" or other_inst.version.startswith('ansible-runner') or other_inst.node_type == 'execution':
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
             logger.error(
@@ -534,7 +531,7 @@ def cluster_node_heartbeat():
             # since we will delete the node anyway.
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 other_inst.mark_offline()
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.modified))
+                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()

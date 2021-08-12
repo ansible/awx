@@ -52,6 +52,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     objects = InstanceManager()
 
+    # Fields set in instance registration
     uuid = models.CharField(max_length=40)
     hostname = models.CharField(max_length=250, unique=True)
     ip_address = models.CharField(
@@ -61,16 +62,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         max_length=50,
         unique=True,
     )
+    # Auto-fields, implementation is different from BaseModel
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    # Fields defined in health check or heartbeat
     version = models.CharField(max_length=120, blank=True)
-    capacity = models.PositiveIntegerField(
-        default=100,
-        editable=False,
-    )
-    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
-    enabled = models.BooleanField(default=True)
-    managed_by_policy = models.BooleanField(default=True)
     cpu = models.IntegerField(
         default=0,
         editable=False,
@@ -78,7 +74,22 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     memory = models.BigIntegerField(
         default=0,
         editable=False,
+        help_text=_('Total system memory of this instance in bytes.'),
     )
+    last_seen = models.DateTimeField(
+        null=True,
+        editable=False,
+        help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
+    )
+    # Capacity management
+    capacity = models.PositiveIntegerField(
+        default=100,
+        editable=False,
+    )
+    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
+    enabled = models.BooleanField(default=True)
+    managed_by_policy = models.BooleanField(default=True)
+
     cpu_capacity = models.IntegerField(
         default=0,
         editable=False,
@@ -126,17 +137,24 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return random.choice(Instance.objects.filter(enabled=True).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True))
 
     def is_lost(self, ref_time=None):
+        if self.last_seen is None:
+            return True
         if ref_time is None:
             ref_time = now()
-        grace_period = 120
-        return self.modified < ref_time - timedelta(seconds=grace_period)
+        grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 2
+        if self.node_type == 'execution':
+            grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
+        return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
     def mark_offline(self, on_good_terms=False):
-        self.cpu = self.cpu_capacity = self.memory = self.mem_capacity = self.capacity = 0
+        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0:
+            return
+        self.cpu_capacity = self.mem_capacity = self.capacity = 0
         update_fields = ['capacity', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity']
         if on_good_terms:
-            update_fields.append('modified')
-        self.save()
+            self.last_seen = now()
+            update_fields += ['last_seen']
+        self.save(update_fields=update_fields)
 
     def refresh_capacity(self):
         cpu = get_cpu_capacity()
@@ -158,7 +176,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.cpu_capacity = cpu[1]
         self.mem_capacity = mem[1]
         self.version = awx_application_version
-        self.save(update_fields=['capacity', 'version', 'modified', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+        self.last_seen = now()
+        self.save(update_fields=['capacity', 'version', 'last_seen', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
