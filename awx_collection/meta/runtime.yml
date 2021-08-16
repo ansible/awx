@@ -1,4 +1,5 @@
 ---
+requires_ansible: '>=2.9.10'
 action_groups:
   controller:
     - credential_input_source
