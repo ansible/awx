@@ -21,7 +21,7 @@ from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
-from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
+from awx.main.utils.common import measure_cpu, get_corrected_cpu, get_cpu_effective_capacity, measure_memory, get_corrected_memory, get_mem_effective_capacity
 from awx.main.models.mixins import RelatedJobsMixin
 
 __all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
@@ -146,38 +146,73 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
-    def mark_offline(self, on_good_terms=False):
+    def mark_offline(self, update_last_seen=False, perform_save=True):
         if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0:
             return
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
-        update_fields = ['capacity', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity']
-        if on_good_terms:
+        update_fields = ['capacity', 'cpu_capacity', 'mem_capacity']
+        if update_last_seen:
             self.last_seen = now()
             update_fields += ['last_seen']
-        self.save(update_fields=update_fields)
+        if perform_save:
+            self.save(update_fields=update_fields)
 
-    def refresh_capacity(self):
-        cpu = get_cpu_capacity()
-        mem = get_mem_capacity()
+    def set_capacity_value(self):
+        """Sets capacity according to capacity adjustment rule (no save)"""
+        lower_cap = min(self.mem_capacity, self.cpu_capacity)
+        higher_cap = max(self.mem_capacity, self.cpu_capacity)
+        self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
+
+    def refresh_capacity_fields(self):
+        """Update derived capacity fields from cpu and memory (no save)"""
+        self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
+        self.mem_capacity = get_mem_effective_capacity(self.memory)
+
         if self.enabled:
-            self.capacity = get_system_task_capacity(self.capacity_adjustment)
+            self.set_capacity_value()
         else:
             self.capacity = 0
 
+    def save_health_data(self, version, cpu, memory, last_seen=None, has_error=False):
+        update_fields = []
+
+        if last_seen is not None and self.last_seen != last_seen:
+            self.last_seen = last_seen
+            update_fields.append('last_seen')
+
+        if self.version != version:
+            self.version = version
+            update_fields.append('version')
+
+        new_cpu = get_corrected_cpu(cpu)
+        if new_cpu != self.cpu:
+            self.cpu = new_cpu
+            update_fields.append('cpu')
+
+        new_memory = get_corrected_memory(memory)
+        if new_memory != self.memory:
+            self.memory = new_memory
+            update_fields.append('memory')
+
+        if not has_error:
+            self.refresh_capacity_fields()
+        else:
+            self.mark_offline(perform_save=False)
+        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
+
+        self.save(update_fields=update_fields)
+
+    def local_health_check(self):
+        """Only call this method on the instance that this record represents"""
+        has_error = False
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            self.capacity = 0
+            has_error = True
 
-        self.cpu = cpu[0]
-        self.memory = mem[0]
-        self.cpu_capacity = cpu[1]
-        self.mem_capacity = mem[1]
-        self.version = awx_application_version
-        self.last_seen = now()
-        self.save(update_fields=['capacity', 'version', 'last_seen', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+        self.save_health_data(awx_application_version, measure_cpu(), measure_memory(), last_seen=now(), has_error=has_error)
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):

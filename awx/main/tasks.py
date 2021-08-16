@@ -98,9 +98,6 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
     create_partition,
-    get_cpu_effective_capacity,
-    get_mem_effective_capacity,
-    get_system_task_capacity,
 )
 from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
@@ -180,7 +177,7 @@ def dispatch_startup():
 def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.mark_offline(on_good_terms=True)  # No thank you to new jobs while shut down
+        this_inst.mark_offline(update_last_seen=True)  # No thank you to new jobs while shut down
         try:
             reaper.reap(this_inst)
         except Exception:
@@ -411,26 +408,22 @@ def check_heartbeat(node):
         return
     data = worker_info(node)
 
+    prior_capacity = instance.capacity
+
+    instance.save_health_data(
+        'ansible-runner-' + data.get('Version', '???'),
+        data.get('CPU Capacity', 0),  # TODO: rename field on runner side to not say "Capacity"
+        data.get('Memory Capacity', 0) * 1000,  # TODO: double-check the multiplier here
+        has_error=bool(data.get('Errors')),
+    )
+
     if data['Errors']:
         formatted_error = "\n".join(data["Errors"])
-        if instance.capacity:
+        if prior_capacity:
             logger.warn(f'Health check marking execution node {node} as lost, errors:\n{formatted_error}')
         else:
             logger.info(f'Failed to find capacity of new or lost execution node {node}, errors:\n{formatted_error}')
-        instance.mark_offline()
     else:
-        # TODO: spin off new instance method from refresh_capacity that calculates derived fields
-        instance.cpu = data['CPU Capacity']  # TODO: rename field on runner side to not say "Capacity"
-        instance.cpu_capacity = get_cpu_effective_capacity(instance.cpu)
-        instance.memory = data['Memory Capacity'] * 1000  # TODO: double-check the multiplier here
-        instance.mem_capacity = get_mem_effective_capacity(instance.memory)
-        instance.capacity = get_system_task_capacity(
-            instance.capacity_adjustment,
-            instance.cpu_capacity,
-            instance.mem_capacity,
-        )
-        instance.version = 'ansible-runner-' + data['Version']
-        instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
         logger.info('Set capacity of execution node {} to {}, worker info data:\n{}'.format(node, instance.capacity, json.dumps(data, indent=2)))
 
 
@@ -495,7 +488,7 @@ def cluster_node_heartbeat():
 
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
-        this_inst.refresh_capacity()
+        this_inst.local_health_check()
         if startup_event:
             logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
             return
