@@ -449,7 +449,7 @@ def inspect_execution_nodes(instance_list):
         was_lost = instance.is_lost(ref_time=nowtime)
         last_seen = parse_date(ad['Time'])
 
-        if instance.last_seen >= last_seen:
+        if instance.last_seen and instance.last_seen >= last_seen:
             continue
         instance.last_seen = last_seen
         instance.save(update_fields=['last_seen'])
@@ -478,16 +478,20 @@ def cluster_node_heartbeat():
     this_inst = None
     lost_instances = []
 
-    (changed, this_inst) = Instance.objects.get_or_register()
-    if changed:
-        logger.info("Registered tower control node '{}'".format(this_inst.hostname))
+    for inst in instance_list:
+        if inst.hostname == settings.CLUSTER_HOST_ID:
+            this_inst = inst
+            instance_list.remove(inst)
+            break
+    else:
+        (changed, this_inst) = Instance.objects.get_or_register()
+        if changed:
+            logger.info("Registered tower control node '{}'".format(this_inst.hostname))
 
     inspect_execution_nodes(instance_list)
 
     for inst in list(instance_list):
-        if inst.hostname == this_inst.hostname:
-            instance_list.remove(inst)
-        elif inst.is_lost(ref_time=nowtime):
+        if inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
 

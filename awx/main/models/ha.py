@@ -147,14 +147,16 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
     def mark_offline(self, update_last_seen=False, perform_save=True):
-        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0:
+        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and (not update_last_seen):
             return
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
-        update_fields = ['capacity', 'cpu_capacity', 'mem_capacity']
         if update_last_seen:
             self.last_seen = now()
-            update_fields += ['last_seen']
+
         if perform_save:
+            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity']
+            if update_last_seen:
+                update_fields += ['last_seen']
             self.save(update_fields=update_fields)
 
     def set_capacity_value(self):
