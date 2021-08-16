@@ -1,11 +1,11 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
-import { shape } from 'prop-types';
+import { shape, string } from 'prop-types';
 import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
-import { formatDateString, formatDateStringUTC } from 'util/dates';
+import { formatDateString } from 'util/dates';
 import { DetailName, DetailValue } from '../../DetailList';
 import MultiButtonToggle from '../../MultiButtonToggle';
 
@@ -22,7 +22,7 @@ const OccurrencesLabel = styled.div`
   }
 `;
 
-function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
+function ScheduleOccurrences({ preview = { local: [], utc: [] }, tz }) {
   const [mode, setMode] = useState('local');
 
   if (preview.local.length < 2) {
@@ -64,8 +64,8 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
         {preview[mode].map((dateStr) => (
           <div key={dateStr}>
             {mode === 'local'
-              ? formatDateString(dateStr)
-              : formatDateStringUTC(dateStr)}
+              ? formatDateString(dateStr, tz)
+              : formatDateString(dateStr, 'UTC')}
           </div>
         ))}
       </DetailValue>
@@ -75,10 +75,12 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
 
 ScheduleOccurrences.propTypes = {
   preview: shape(),
+  tz: string,
 };
 
 ScheduleOccurrences.defaultProps = {
   preview: { local: [], utc: [] },
+  tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
 };
 
 export default ScheduleOccurrences;

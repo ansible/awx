@@ -21,6 +21,7 @@
     "has-ansi": "4.0.0",
     "html-entities": "2.3.2",
     "js-yaml": "^3.13.1",
+    "luxon": "^2.0.1",
     "prop-types": "^15.6.2",
     "react": "^16.13.1",
     "react-ace": "^9.3.0",

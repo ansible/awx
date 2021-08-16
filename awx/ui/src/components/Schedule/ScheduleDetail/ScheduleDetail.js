@@ -250,15 +250,21 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
       <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} />
         <Detail label={t`Description`} value={description} />
-        <Detail label={t`First Run`} value={formatDateString(dtstart)} />
-        <Detail label={t`Next Run`} value={formatDateString(next_run)} />
-        <Detail label={t`Last Run`} value={formatDateString(dtend)} />
+        <Detail
+          label={t`First Run`}
+          value={formatDateString(dtstart, timezone)}
+        />
+        <Detail
+          label={t`Next Run`}
+          value={formatDateString(next_run, timezone)}
+        />
+        <Detail label={t`Last Run`} value={formatDateString(dtend, timezone)} />
         <Detail label={t`Local Time Zone`} value={timezone} />
         <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
         {hasDaysToKeepField ? (
           <Detail label={t`Days of Data to Keep`} value={daysToKeep} />
         ) : null}
-        <ScheduleOccurrences preview={preview} />
+        <ScheduleOccurrences preview={preview} tz={timezone} />
         <UserDateDetail
           label={t`Created`}
           date={created}

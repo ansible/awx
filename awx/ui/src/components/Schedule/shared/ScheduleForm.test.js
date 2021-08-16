@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { DateTime } from 'luxon';
 
 import { dateToInputDateTime } from 'util/dates';
 import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from 'api';
@@ -105,7 +106,7 @@ const nonRRuleValuesMatch = () => {
     wrapper.find('DatePicker[aria-label="Start date"]').prop('value')
   ).toBe('2020-04-02');
   expect(wrapper.find('TimePicker[aria-label="Start time"]').prop('time')).toBe(
-    '6:45 PM'
+    '2:45 PM'
   );
   expect(wrapper.find('select#schedule-timezone').prop('value')).toBe(
     'America/New_York'
@@ -474,11 +475,11 @@ describe('<ScheduleForm />', () => {
     });
 
     test('initially renders expected fields and values', () => {
-      const now = new Date();
-      const closestQuarterHour = new Date(
-        Math.ceil(now.getTime() / 900000) * 900000
+      const now = DateTime.now();
+      const closestQuarterHour = DateTime.fromMillis(
+        Math.ceil(now.ts / 900000) * 900000
       );
-      const [date, time] = dateToInputDateTime(closestQuarterHour);
+      const [date, time] = dateToInputDateTime(closestQuarterHour.toISO());
       expect(wrapper.find('ScheduleForm').length).toBe(1);
       defaultFieldsVisible();
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(0);

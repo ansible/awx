@@ -1,14 +1,12 @@
 import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
+import { DateTime } from 'luxon';
 import { getRRuleDayConstants } from 'util/dates';
 
-const parseTime = (time) => {
-  const [hour, minute, ampm] = time.split(/[: ]/);
-  const timeHour =
-    ampm === 'PM' && hour !== '12' ? `${parseInt(hour, 10) + 12}` : `${hour}`;
-
-  return [timeHour, minute];
-};
+const parseTime = (time) => [
+  DateTime.fromFormat(time, 'h:mm a').hour,
+  DateTime.fromFormat(time, 'h:mm a').minute,
+];
 
 export default function buildRuleObj(values) {
   // Dates are formatted like "YYYY-MM-DD"
