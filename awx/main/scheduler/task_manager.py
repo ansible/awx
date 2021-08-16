@@ -255,12 +255,6 @@ class TaskManager:
         }
         dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
-        try:
-            controller_node = Instance.choose_online_control_plane_node()
-        except IndexError:
-            logger.warning("No control plane nodes available to manage {}".format(task.log_format))
-            return
-
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
@@ -298,8 +292,13 @@ class TaskManager:
             else:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
+                try:
+                    controller_node = Instance.choose_online_control_plane_node()
+                except IndexError:
+                    logger.warning("No control plane nodes available to manage {}".format(task.log_format))
+                    return
                 task.controller_node = controller_node
-                logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, controller_node))
+                logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, task.controller_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
