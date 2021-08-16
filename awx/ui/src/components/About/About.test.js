@@ -17,7 +17,7 @@ describe('<About />', () => {
     const modal = wrapper.find('AboutModal');
     expect(modal).toHaveLength(1);
     expect(modal.prop('onClose')).toEqual(onClose);
-    expect(modal.prop('productName')).toEqual('AWX');
+    expect(modal.prop('productName')).toEqual({ current: 'AWX' });
     expect(modal.prop('isOpen')).toEqual(true);
   });
 });
