@@ -11,7 +11,7 @@ ARG VENV_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/venv"
 ARG COLLECTION_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/vendor/awx_ansible_collections"
 
 # Build container
-FROM centos:8 as builder
+FROM rockylinux/rockylinux:8 as builder
 
 ARG VENV_BASE
 ARG COLLECTION_BASE
@@ -89,7 +89,7 @@ RUN mkdir -p -m 755 /var/lib/awx && echo "{{ awx_version }}" > /var/lib/awx/.tow
 {% endif %}
 
 # Final container(s)
-FROM centos:8
+FROM rockylinux/rockylinux:8
 
 ARG VENV_BASE
 ARG COLLECTION_BASE
@@ -148,8 +148,8 @@ RUN dnf -y update && \
     vim-minimal \
     which \
     unzip \
-    xmlsec1-openssl && \
-    dnf -y install centos-release-stream && dnf -y install "rsyslog >= 8.1911.0" && dnf -y remove centos-release-stream && \
+    xmlsec1-openssl \
+    rsyslog && \
     dnf -y clean all
 
 # Install kubectl
@@ -182,7 +182,7 @@ COPY --from=builder /var/lib/awx /var/lib/awx
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 
 # customization start
-COPY --from=builder /opt/ansible_mitogen /opt/ansible_mitogen
+COPY --from=builder /opt/mitogen-0.2.9 /opt/mitogen-0.2.9
 COPY --from=builder /opt/envs /opt/envs
 # customization end
 {% endif %}
