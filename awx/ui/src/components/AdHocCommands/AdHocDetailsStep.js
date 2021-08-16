@@ -22,9 +22,7 @@ const TooltipWrapper = styled.div`
 `;
 
 function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
-  const {
-    current: { brandName },
-  } = useBrandName();
+  const brandName = useBrandName();
   const [moduleNameField, moduleNameMeta, moduleNameHelpers] = useField({
     name: 'module_name',
     validate: required(null),
