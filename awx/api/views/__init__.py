@@ -370,6 +370,15 @@ class InstanceDetail(RetrieveUpdateAPIView):
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
 
+    def update(self, request, *args, **kwargs):
+        r = super(InstanceDetail, self).update(request, *args, **kwargs)
+        if status.is_success(r.status_code):
+            obj = self.get_object()
+            obj.set_capacity_value()
+            obj.save(update_fields=['capacity'])
+            r.data = serializers.InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
+        return r
+
 
 class InstanceUnifiedJobsList(SubListAPIView):
 

@@ -98,9 +98,6 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
     create_partition,
-    get_cpu_effective_capacity,
-    get_mem_effective_capacity,
-    get_system_task_capacity,
 )
 from awx.main.utils.execution_environments import get_default_pod_spec, CONTAINER_ROOT, to_container_path
 from awx.main.utils.ansible import read_ansible_config
@@ -180,7 +177,7 @@ def dispatch_startup():
 def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.mark_offline(on_good_terms=True)  # No thank you to new jobs while shut down
+        this_inst.mark_offline(update_last_seen=True)  # No thank you to new jobs while shut down
         try:
             reaper.reap(this_inst)
         except Exception:
@@ -403,7 +400,7 @@ def cleanup_execution_environment_images():
 
 
 @task(queue=get_local_queuename)
-def check_heartbeat(node):
+def execution_node_health_check(node):
     try:
         instance = Instance.objects.get(hostname=node)
     except Instance.DoesNotExist:
@@ -411,64 +408,66 @@ def check_heartbeat(node):
         return
     data = worker_info(node)
 
+    prior_capacity = instance.capacity
+
+    instance.save_health_data(
+        'ansible-runner-' + data.get('Version', '???'),
+        data.get('CPU Capacity', 0),  # TODO: rename field on runner side to not say "Capacity"
+        data.get('Memory Capacity', 0) * 1000,  # TODO: double-check the multiplier here
+        has_error=bool(data.get('Errors')),
+    )
+
     if data['Errors']:
         formatted_error = "\n".join(data["Errors"])
-        if instance.capacity:
+        if prior_capacity:
             logger.warn(f'Health check marking execution node {node} as lost, errors:\n{formatted_error}')
         else:
             logger.info(f'Failed to find capacity of new or lost execution node {node}, errors:\n{formatted_error}')
-        instance.mark_offline()
     else:
-        # TODO: spin off new instance method from refresh_capacity that calculates derived fields
-        instance.cpu = data['CPU Capacity']  # TODO: rename field on runner side to not say "Capacity"
-        instance.cpu_capacity = get_cpu_effective_capacity(instance.cpu)
-        instance.memory = data['Memory Capacity'] * 1000  # TODO: double-check the multiplier here
-        instance.mem_capacity = get_mem_effective_capacity(instance.memory)
-        instance.capacity = get_system_task_capacity(
-            instance.capacity_adjustment,
-            instance.cpu_capacity,
-            instance.mem_capacity,
-        )
-        instance.version = 'ansible-runner-' + data['Version']
-        instance.save(update_fields=['capacity', 'version', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
         logger.info('Set capacity of execution node {} to {}, worker info data:\n{}'.format(node, instance.capacity, json.dumps(data, indent=2)))
 
 
-def discover_receptor_nodes():
+def inspect_execution_nodes(instance_list):
+    node_lookup = {}
+    for inst in instance_list:
+        if inst.node_type == 'execution':
+            node_lookup[inst.hostname] = inst
+
     ctl = get_receptor_ctl()
     connections = ctl.simple_command('status')['Advertisements']
     nowtime = now()
     for ad in connections:
         hostname = ad['NodeID']
-        commands = ad['WorkCommands'] or []
+        commands = ad.get('WorkCommands') or []
         if 'ansible-runner' not in commands:
             continue
-        (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
+        changed = False
+        if hostname in node_lookup:
+            instance = node_lookup[hostname]
+        else:
+            (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
         was_lost = instance.is_lost(ref_time=nowtime)
         last_seen = parse_date(ad['Time'])
-        if instance.modified == last_seen:
-            continue
-        instance.modified = last_seen
-        if instance.is_lost(ref_time=nowtime):
-            # if the instance hasn't advertised in awhile, don't save a new modified time
-            # this is so multiple cluster nodes do all make repetitive updates
-            continue
 
-        instance.save(update_fields=['modified'])
+        if instance.last_seen and instance.last_seen >= last_seen:
+            continue
+        instance.last_seen = last_seen
+        instance.save(update_fields=['last_seen'])
+
         if changed:
             logger.warn("Registered execution node '{}'".format(hostname))
-            check_heartbeat.apply_async([hostname])
+            execution_node_health_check.apply_async([hostname])
         elif was_lost:
             # if the instance *was* lost, but has appeared again,
             # attempt to re-establish the initial capacity and version
             # check
             logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
-            check_heartbeat.apply_async([hostname])
+            execution_node_health_check.apply_async([hostname])
         elif instance.capacity == 0:
             # Periodically re-run the health check of errored nodes, in case someone fixed it
             # TODO: perhaps decrease the frequency of these checks
             logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
-            check_heartbeat.apply_async([hostname])
+            execution_node_health_check.apply_async([hostname])
 
 
 @task(queue=get_local_queuename)
@@ -479,34 +478,34 @@ def cluster_node_heartbeat():
     this_inst = None
     lost_instances = []
 
-    (changed, instance) = Instance.objects.get_or_register()
-    if changed:
-        logger.info("Registered tower control node '{}'".format(instance.hostname))
-
-    discover_receptor_nodes()
-
-    for inst in list(instance_list):
+    for inst in instance_list:
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
             instance_list.remove(inst)
-        elif inst.node_type == 'execution':  # TODO: zero out capacity of execution nodes that are MIA
-            # Only considering control plane for this logic
-            continue
-        elif inst.is_lost(ref_time=nowtime):
+            break
+    else:
+        (changed, this_inst) = Instance.objects.get_or_register()
+        if changed:
+            logger.info("Registered tower control node '{}'".format(this_inst.hostname))
+
+    inspect_execution_nodes(instance_list)
+
+    for inst in list(instance_list):
+        if inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
 
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
-        this_inst.refresh_capacity()
-        if startup_event:
+        this_inst.local_health_check()
+        if startup_event and this_inst.capacity != 0:
             logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
             return
     else:
         raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
     # IFF any node has a greater version than we do, then we'll shutdown services
     for other_inst in instance_list:
-        if other_inst.version == "" or other_inst.version.startswith('ansible-runner'):
+        if other_inst.version == "" or other_inst.version.startswith('ansible-runner') or other_inst.node_type == 'execution':
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
             logger.error(
@@ -534,7 +533,7 @@ def cluster_node_heartbeat():
             # since we will delete the node anyway.
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 other_inst.mark_offline()
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.modified))
+                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()
