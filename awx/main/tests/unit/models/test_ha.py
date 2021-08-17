@@ -1,10 +1,19 @@
 import pytest
 from unittest import mock
 from unittest.mock import Mock
+from decimal import Decimal
 
-from awx.main.models import (
-    InstanceGroup,
-)
+from awx.main.models import InstanceGroup, Instance
+
+
+@pytest.mark.parametrize('capacity_adjustment', [0.0, 0.25, 0.5, 0.75, 1, 1.5, 3])
+def test_capacity_adjustment_no_save(capacity_adjustment):
+    inst = Instance(hostname='test-host', capacity_adjustment=Decimal(capacity_adjustment), capacity=0, cpu_capacity=10, mem_capacity=1000)
+    assert inst.capacity == 0
+    assert inst.capacity_adjustment == capacity_adjustment  # sanity
+    inst.set_capacity_value()
+    assert inst.capacity > 0
+    assert inst.capacity == (float(inst.capacity_adjustment) * abs(inst.mem_capacity - inst.cpu_capacity) + min(inst.mem_capacity, inst.cpu_capacity))
 
 
 def T(impact):

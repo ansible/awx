@@ -20,24 +20,27 @@ def test_orphan_unified_job_creation(instance, inventory):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2, 8))
-@mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000, 62))
+@mock.patch('awx.main.tasks.inspect_execution_nodes', lambda *args, **kwargs: None)
+@mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu: 8)
+@mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem: 62)
 def test_job_capacity_and_with_inactive_node():
     i = Instance.objects.create(hostname='test-1')
-    with mock.patch.object(redis.client.Redis, 'ping', lambda self: True):
-        i.refresh_capacity()
+    i.save_health_data('18.0.1', 2, 8000)
+    assert i.enabled is True
+    assert i.capacity_adjustment == 1.0
     assert i.capacity == 62
     i.enabled = False
     i.save()
     with override_settings(CLUSTER_HOST_ID=i.hostname):
-        cluster_node_heartbeat()
+        with mock.patch.object(redis.client.Redis, 'ping', lambda self: True):
+            cluster_node_heartbeat()
         i = Instance.objects.get(id=i.id)
         assert i.capacity == 0
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2, 8))
-@mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000, 62))
+@mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu: 8)
+@mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem: 62)
 def test_job_capacity_with_redis_disabled():
     i = Instance.objects.create(hostname='test-1')
 
@@ -45,7 +48,7 @@ def test_job_capacity_with_redis_disabled():
         raise redis.ConnectionError()
 
     with mock.patch.object(redis.client.Redis, 'ping', _raise):
-        i.refresh_capacity()
+        i.local_health_check()
     assert i.capacity == 0
 
 
