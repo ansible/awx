@@ -2,12 +2,19 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { CellMeasurerCache } from 'react-virtualized';
+import {
+  AutoSizer,
+  CellMeasurer,
+  CellMeasurerCache,
+  InfiniteLoader,
+  List,
+} from 'react-virtualized';
 import { Button } from '@patternfly/react-core';
 
 import AlertModal from 'components/AlertModal';
 import { CardBody as _CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import ErrorDetail from 'components/ErrorDetail';
 import StatusIcon from 'components/StatusIcon';
 
@@ -16,7 +23,11 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useInterval from 'hooks/useInterval';
 import { parseQueryString, getQSConfig } from 'util/qs';
 import useIsMounted from 'hooks/useIsMounted';
-import JobOutputPane from './JobOutputPane';
+import JobEvent from './JobEvent';
+import JobEventSkeleton from './JobEventSkeleton';
+import PageControls from './PageControls';
+import HostEventModal from './HostEventModal';
+import JobOutputSearch from './JobOutputSearch';
 import { HostStatusBar, OutputToolbar } from './shared';
 import getRowRangePageSize from './shared/jobOutputUtils';
 import getLineTextHtml from './getLineTextHtml';
@@ -43,6 +54,27 @@ const HeaderTitle = styled.div`
 const OutputHeader = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const OutputWrapper = styled.div`
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  font-family: monospace;
+  font-size: 15px;
+  outline: 1px solid #d7d7d7;
+  ${({ cssMap }) =>
+    Object.keys(cssMap).map(
+      (className) => `.${className}{${cssMap[className]}}`
+    )}
+`;
+
+const OutputFooter = styled.div`
+  background-color: #ebebeb;
+  border-right: 1px solid #d7d7d7;
+  width: 75px;
+  flex: 1;
 `;
 
 let ws;
@@ -97,6 +129,23 @@ function range(low, high) {
   return numbers;
 }
 
+function isHostEvent(jobEvent) {
+  const { event, event_data, host, type } = jobEvent;
+  let isHost;
+  if (typeof host === 'number' || (event_data && event_data.res)) {
+    isHost = true;
+  } else if (
+    type === 'project_update_event' &&
+    event !== 'runner_on_skipped' &&
+    event_data.host
+  ) {
+    isHost = true;
+  } else {
+    isHost = false;
+  }
+  return isHost;
+}
+
 const cache = new CellMeasurerCache({
   fixedWidth: true,
   defaultHeight: 25,
@@ -126,13 +175,18 @@ const getEventRequestParams = (job, remoteRowCount, requestRange) => {
 function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const location = useLocation();
   const listRef = useRef(null);
+  const previousWidth = useRef(0);
   const jobSocketCounter = useRef(0);
   const isMounted = useIsMounted();
+  const scrollTop = useRef(0);
+  const scrollHeight = useRef(0);
   const history = useHistory();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
   const [currentlyLoading, setCurrentlyLoading] = useState([]);
   const [hasContentLoading, setHasContentLoading] = useState(true);
+  const [hostEvent, setHostEvent] = useState({});
+  const [isHostModalOpen, setIsHostModalOpen] = useState(false);
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
@@ -149,7 +203,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     isMonitoringWebsocket ? 5000 : null
   );
 
-  // A
   useEffect(() => {
     loadJobEvents();
 
@@ -181,14 +234,12 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     };
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // B
   useEffect(() => {
     if (listRef.current?.recomputeRowHeights) {
       listRef.current.recomputeRowHeights();
     }
   }, [currentlyLoading, cssMap, remoteRowCount]);
 
-  // C
   useEffect(() => {
     if (jobStatus && !isJobRunning(jobStatus)) {
       if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
@@ -343,6 +394,165 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
   };
 
+  const isRowLoaded = ({ index }) => {
+    if (results[index]) {
+      return true;
+    }
+    return currentlyLoading.includes(index);
+  };
+
+  const handleHostEventClick = (hostEventToOpen) => {
+    setHostEvent(hostEventToOpen);
+    setIsHostModalOpen(true);
+  };
+
+  const handleHostModalClose = () => {
+    setIsHostModalOpen(false);
+  };
+
+  const rowRenderer = ({ index, parent, key, style }) => {
+    if (listRef.current && isFollowModeEnabled) {
+      setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
+    }
+    let actualLineTextHtml = [];
+    if (results[index]) {
+      const { lineTextHtml } = getLineTextHtml(results[index]);
+      actualLineTextHtml = lineTextHtml;
+    }
+
+    return (
+      <CellMeasurer
+        key={key}
+        cache={cache}
+        parent={parent}
+        rowIndex={index}
+        columnIndex={0}
+      >
+        {results[index] ? (
+          <JobEvent
+            isClickable={isHostEvent(results[index])}
+            onJobEventClick={() => handleHostEventClick(results[index])}
+            className="row"
+            style={style}
+            lineTextHtml={actualLineTextHtml}
+            index={index}
+            {...results[index]}
+          />
+        ) : (
+          <JobEventSkeleton
+            className="row"
+            style={style}
+            counter={index}
+            contentLength={80}
+          />
+        )}
+      </CellMeasurer>
+    );
+  };
+
+  const loadMoreRows = ({ startIndex, stopIndex }) => {
+    if (startIndex === 0 && stopIndex === 0) {
+      return Promise.resolve(null);
+    }
+
+    if (stopIndex > startIndex + 50) {
+      stopIndex = startIndex + 50;
+    }
+
+    const [requestParams, loadRange, firstIndex] = getEventRequestParams(
+      job,
+      remoteRowCount,
+      [startIndex, stopIndex]
+    );
+
+    if (isMounted.current) {
+      setCurrentlyLoading((prevCurrentlyLoading) =>
+        prevCurrentlyLoading.concat(loadRange)
+      );
+    }
+
+    const params = {
+      ...requestParams,
+      ...parseQueryString(QS_CONFIG, location.search),
+    };
+
+    return getJobModel(job.type)
+      .readEvents(job.id, params)
+      .then((response) => {
+        if (isMounted.current) {
+          const newResults = {};
+          let newResultsCssMap = {};
+          response.data.results.forEach((jobEvent, index) => {
+            newResults[firstIndex + index] = jobEvent;
+            const { lineCssMap } = getLineTextHtml(jobEvent);
+            newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
+          });
+          setResults((prevResults) => ({
+            ...prevResults,
+            ...newResults,
+          }));
+          setCssMap((prevCssMap) => ({
+            ...prevCssMap,
+            ...newResultsCssMap,
+          }));
+          setCurrentlyLoading((prevCurrentlyLoading) =>
+            prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
+          );
+          loadRange.forEach((n) => {
+            cache.clear(n);
+          });
+        }
+      });
+  };
+
+  const scrollToRow = (rowIndex) => {
+    if (listRef.current) {
+      listRef.current.scrollToRow(rowIndex);
+    }
+  };
+
+  const handleScrollPrevious = () => {
+    const startIndex = listRef.current.Grid._renderedRowStartIndex;
+    const stopIndex = listRef.current.Grid._renderedRowStopIndex;
+    const scrollRange = stopIndex - startIndex + 1;
+    scrollToRow(Math.max(0, startIndex - scrollRange));
+  };
+
+  const handleScrollNext = () => {
+    const stopIndex = listRef.current.Grid._renderedRowStopIndex;
+    scrollToRow(stopIndex - 1);
+  };
+
+  const handleScrollFirst = () => {
+    scrollToRow(0);
+  };
+
+  const handleScrollLast = () => {
+    scrollToRow(remoteRowCount - 1);
+  };
+
+  const handleResize = ({ width }) => {
+    if (width !== previousWidth) {
+      cache.clearAll();
+      if (listRef.current?.recomputeRowHeights) {
+        listRef.current.recomputeRowHeights();
+      }
+    }
+    previousWidth.current = width;
+  };
+
+  const handleScroll = (e) => {
+    if (
+      isFollowModeEnabled &&
+      scrollTop.current > e.scrollTop &&
+      scrollHeight.current === e.scrollHeight
+    ) {
+      setIsFollowModeEnabled(false);
+    }
+    scrollTop.current = e.scrollTop;
+    scrollHeight.current = e.scrollHeight;
+  };
+
   if (contentError) {
     return <ContentError error={contentError} />;
   }
@@ -350,6 +560,13 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   return (
     <>
       <CardBody>
+        {isHostModalOpen && (
+          <HostEventModal
+            onClose={handleHostModalClose}
+            isOpen={isHostModalOpen}
+            hostEvent={hostEvent}
+          />
+        )}
         <OutputHeader>
           <HeaderTitle>
             <StatusIcon status={job.status} />
@@ -364,25 +581,61 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           />
         </OutputHeader>
         <HostStatusBar counts={job.host_status_counts} />
-        <JobOutputPane
+        <JobOutputSearch
           qsConfig={QS_CONFIG}
           job={job}
           eventRelatedSearchableKeys={eventRelatedSearchableKeys}
           eventSearchableKeys={eventSearchableKeys}
-          results={results}
-          setResults={setResults}
-          currentlyLoading={currentlyLoading}
-          setCurrentlyLoading={setCurrentlyLoading}
-          hasContentLoading={hasContentLoading}
-          listRef={listRef}
           remoteRowCount={remoteRowCount}
+          scrollToRow={scrollToRow}
           isFollowModeEnabled={isFollowModeEnabled}
           setIsFollowModeEnabled={setIsFollowModeEnabled}
-          cache={cache}
-          cssMap={cssMap}
-          setCssMap={setCssMap}
-          getEventRequestParams={getEventRequestParams}
         />
+        <PageControls
+          onScrollFirst={handleScrollFirst}
+          onScrollLast={handleScrollLast}
+          onScrollNext={handleScrollNext}
+          onScrollPrevious={handleScrollPrevious}
+        />
+        <OutputWrapper cssMap={cssMap}>
+          <InfiniteLoader
+            isRowLoaded={isRowLoaded}
+            loadMoreRows={loadMoreRows}
+            rowCount={remoteRowCount}
+          >
+            {({ onRowsRendered, registerChild }) => (
+              <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
+                {({ width, height }) => (
+                  <>
+                    {hasContentLoading ? (
+                      <div style={{ width }}>
+                        <ContentLoading />
+                      </div>
+                    ) : (
+                      <List
+                        ref={(ref) => {
+                          registerChild(ref);
+                          listRef.current = ref;
+                        }}
+                        deferredMeasurementCache={cache}
+                        height={height || 1}
+                        onRowsRendered={onRowsRendered}
+                        rowCount={remoteRowCount}
+                        rowHeight={cache.rowHeight}
+                        rowRenderer={rowRenderer}
+                        scrollToAlignment="start"
+                        width={width || 1}
+                        overscanRowCount={20}
+                        onScroll={handleScroll}
+                      />
+                    )}
+                  </>
+                )}
+              </AutoSizer>
+            )}
+          </InfiniteLoader>
+          <OutputFooter />
+        </OutputWrapper>
       </CardBody>
       {showCancelModal && isJobRunning(job.status) && (
         <AlertModal
