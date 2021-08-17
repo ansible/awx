@@ -61,7 +61,7 @@
 - block:
     - name: "Wait for up to a minute until the job enters the can_cancel: False state"
       debug:
-        msg: "The job can_cancel status has transitioned into False, we can proveed with testing"
+        msg: "The job can_cancel status has transitioned into False, we can proceed with testing"
       until: not job_status
       retries: 6
       delay: 10
