@@ -161,19 +161,18 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
-        lower_cap = min(self.mem_capacity, self.cpu_capacity)
-        higher_cap = max(self.mem_capacity, self.cpu_capacity)
-        self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
+        if self.enabled:
+            lower_cap = min(self.mem_capacity, self.cpu_capacity)
+            higher_cap = max(self.mem_capacity, self.cpu_capacity)
+            self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
+        else:
+            self.capacity = 0
 
     def refresh_capacity_fields(self):
         """Update derived capacity fields from cpu and memory (no save)"""
         self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
         self.mem_capacity = get_mem_effective_capacity(self.memory)
-
-        if self.enabled:
-            self.set_capacity_value()
-        else:
-            self.capacity = 0
+        self.set_capacity_value()
 
     def save_health_data(self, version, cpu, memory, last_seen=None, has_error=False):
         update_fields = []
