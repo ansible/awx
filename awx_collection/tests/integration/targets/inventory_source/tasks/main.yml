@@ -9,13 +9,14 @@
   credential:
     description: Credentials for Openstack Test project
     name: "{{ openstack_cred }}"
-    kind: openstack
+    credential_type: OpenStack
     organization: Default
-    project: Test
-    username: admin
-    host: https://example.org:5000
-    password: passw0rd
-    domain: test
+    inputs:
+      project: Test
+      username: admin
+      host: https://example.org:5000
+      password: passw0rd
+      domain: test
   register: credential_result
 
 - name: Add an inventory
@@ -57,13 +58,14 @@
   credential:
     description: Credentials for Openstack Test project
     name: "{{ openstack_cred }}"
-    kind: openstack
+    credential_type: OpenStack
     organization: Default
-    project: Test
-    username: admin
-    host: https://example.org:5000
-    password: passw0rd
-    domain: test
+    inputs:
+      project: Test
+      username: admin
+      host: https://example.org:5000
+      password: passw0rd
+      domain: test
     state: absent
 
 - assert:

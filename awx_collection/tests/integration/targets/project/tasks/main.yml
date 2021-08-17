@@ -14,7 +14,7 @@
       credential:
         name: "{{ scm_cred_name }}"
         organization: Default
-        kind: scm
+        credential_type: Source Control
       register: result
 
     - assert:
@@ -59,7 +59,7 @@
 
     - name: Create credential
       credential:
-        kind: scm
+        credential_type: Source Control
         name: "{{ cred_name }}"
         organization: "{{ org_name }}"
       register: result
@@ -207,7 +207,7 @@
       credential:
         name: "{{ scm_cred_name }}"
         organization: Default
-        kind: scm
+        credential_type: Source Control
         state: absent
       register: result
 
@@ -228,7 +228,7 @@
 
     - name: Delete credential
       credential:
-        kind: scm
+        credential_type: Source Control
         name: "{{ cred_name }}"
         organization: "{{ org_name }}"
         state: absent

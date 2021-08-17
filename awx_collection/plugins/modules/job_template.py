@@ -495,10 +495,10 @@ def main():
         if field_val is not None:
             new_fields[field_name] = field_val
 
-        # Special treatment of extra_vars parameter
-        extra_vars = module.params.get('extra_vars')
-        if extra_vars is not None:
-            new_fields['extra_vars'] = json.dumps(extra_vars)
+    # Special treatment of extra_vars parameter
+    extra_vars = module.params.get('extra_vars')
+    if extra_vars is not None:
+        new_fields['extra_vars'] = json.dumps(extra_vars)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory = module.params.get('inventory')
