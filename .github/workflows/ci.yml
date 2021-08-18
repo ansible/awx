@@ -1,5 +1,7 @@
 ---
 name: CI
+env:
+  BRANCH: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:
   push:
@@ -19,16 +21,16 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
 
       - name: Run API Tests
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /start_tests.sh
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh
   api-lint:
     runs-on: ubuntu-latest
     permissions:
@@ -43,16 +45,16 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
 
       - name: Run API Linters
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /var/lib/awx/venv/awx/bin/tox -e linters
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /var/lib/awx/venv/awx/bin/tox -e linters
   api-swagger:
     runs-on: ubuntu-latest
     permissions:
@@ -67,16 +69,16 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} || :
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }}  make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }}  make docker-compose-build
 
       - name: Generate API Reference
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /start_tests.sh swagger
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh swagger
   awx-collection:
     runs-on: ubuntu-latest
     permissions:
@@ -91,16 +93,16 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }}  make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }}  make docker-compose-build
 
       - name: Run Collection Tests
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /start_tests.sh test_collection_all
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh test_collection_all
   api-schema:
     runs-on: ubuntu-latest
     permissions:
@@ -115,16 +117,16 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }}  make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }}  make docker-compose-build
 
       - name: Check API Schema
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} /start_tests.sh detect-schema-change
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh detect-schema-change
   ui-lint:
     runs-on: ubuntu-latest
     permissions:
@@ -139,16 +141,16 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
 
       - name: Run UI Linters
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} make ui-lint
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} make ui-lint
   ui-test:
     runs-on: ubuntu-latest
     permissions:
@@ -163,13 +165,13 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
 
       - name: Build image
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
 
       - name: Run UI Tests
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }} make ui-test
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} make ui-test
