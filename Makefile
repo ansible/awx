@@ -181,7 +181,7 @@ init:
 			receptor --cert-makereq bits=2048 commonname="$$node test cert" dnsname=$$node nodeid=$$node outreq=/etc/receptor/certs/$$node.csr outkey=/etc/receptor/certs/$$node.key; \
 			receptor --cert-signreq req=/etc/receptor/certs/$$node.csr cacert=/etc/receptor/certs/ca.crt cakey=/etc/receptor/certs/ca.key outcert=/etc/receptor/certs/$$node.crt verify=yes; \
 		done; \
-	fi; \
+	fi
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
