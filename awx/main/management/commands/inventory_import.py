@@ -300,41 +300,17 @@ class Command(BaseCommand):
             self._cached_host_pk_set = frozenset(self.inventory_source.hosts.values_list('pk', flat=True))
         return self._cached_host_pk_set
 
-    def _delete_hosts(self):
+    def _delete_hosts(self, del_host_pks):
         """
-        For each host in the database that is NOT in the local list, delete
-        it. When importing from a cloud inventory source attached to a
-        specific group, only delete hosts beneath that group.  Delete each
-        host individually so signal handlers will run.
+        If overwrite is set, then delete any host associated with the inventory source
+        which was not returned by the import.
+        This list is produced by other methods.
+        This methods takes the list of host pks to delete (inv src hosts not returned by the update)
+        and it deletes those.
         """
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
         hosts_qs = self.inventory_source.hosts
-        # Build list of all host pks, remove all that should not be deleted.
-        del_host_pks = set(self._existing_host_pks())  # makes mutable copy
-        if self.instance_id_var:
-            all_instance_ids = list(self.mem_instance_id_map.keys())
-            instance_ids = []
-            for offset in range(0, len(all_instance_ids), self._batch_size):
-                instance_ids = all_instance_ids[offset : (offset + self._batch_size)]
-                for host_pk in hosts_qs.filter(instance_id__in=instance_ids).values_list('pk', flat=True):
-                    del_host_pks.discard(host_pk)
-            for host_pk in set([v for k, v in self.db_instance_id_map.items() if k in instance_ids]):
-                del_host_pks.discard(host_pk)
-            all_host_names = list(set(self.mem_instance_id_map.values()) - set(self.all_group.all_hosts.keys()))
-        else:
-            all_host_names = list(self.all_group.all_hosts.keys())
-        logger.info('all host names')
-        logger.info(all_host_names)
-        logger.info('mem id map')
-        logger.info(self.mem_instance_id_map)
-        for offset in range(0, len(all_host_names), self._batch_size):
-            host_names = all_host_names[offset : (offset + self._batch_size)]
-            logger.info('host names')
-            logger.info(host_names)
-            for host_pk in hosts_qs.filter(name__in=host_names).values_list('pk', flat=True):
-                logger.info('deleting {}'.format(host_pk))
-                del_host_pks.discard(host_pk)
         # Now delete all remaining hosts in batches.
         all_del_pks = sorted(list(del_host_pks))
         for offset in range(0, len(all_del_pks), self._batch_size):
@@ -661,6 +637,8 @@ class Command(BaseCommand):
         if settings.SQL_DEBUG:
             logger.warning('host updates took %d queries for %d hosts', len(connection.queries) - queries_before, len(self.all_group.all_hosts))
 
+        return host_pks_updated  # used to delete hosts if using overwrite
+
     @transaction.atomic
     def _create_update_group_children(self):
         """
@@ -734,14 +712,17 @@ class Command(BaseCommand):
         self._build_db_instance_id_map()
         self._build_mem_instance_id_map()
         if self.overwrite:
-            self._delete_hosts()
+            prior_host_pks = self._existing_host_pks()
             self._delete_groups()
             self._delete_group_children_and_hosts()
         self._update_inventory()
         self._create_update_groups()
-        self._create_update_hosts()
+        host_pks_updated = self._create_update_hosts()
         self._create_update_group_children()
         self._create_update_group_hosts()
+        if self.overwrite:
+            # any hosts that were not updated, delete them
+            self._delete_hosts(prior_host_pks - host_pks_updated)
 
     def remote_tower_license_compare(self, local_license_type):
         # this requires https://github.com/ansible/ansible/pull/52747
