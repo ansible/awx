@@ -18,7 +18,7 @@
 - name: Wait for a job template to complete
   job_wait:
     job_id: "{{ result.id }}"
-    max_interval: 10
+    interval: 10
     timeout: 120
   register: result
 
@@ -173,7 +173,7 @@
 - name: Wait for a job template to complete
   job_wait:
     job_id: "{{ result.id }}"
-    max_interval: 10
+    interval: 10
     timeout: 120
   register: result
 

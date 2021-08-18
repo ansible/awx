@@ -37,20 +37,20 @@
   credential:
     name: "{{ cred1 }}"
     organization: Default
-    kind: tower
+    credential_type: Red Hat Ansible Automation Platform
   register: cred1_result
 
 - name: Create Credential2
   credential:
     name: "{{ cred2 }}"
     organization: Default
-    kind: ssh
+    credential_type: Machine
 
 - name: Create Credential3
   credential:
     name: "{{ cred3 }}"
     organization: Default
-    kind: ssh
+    credential_type: Machine
 
 - name: Create Labels
   label:
@@ -75,15 +75,16 @@
     name: "{{ email_not }}"
     organization: Default
     notification_type: email
-    username: user
-    password: s3cr3t
-    sender: tower@example.com
-    recipients:
-      - user1@example.com
-    host: smtp.example.com
-    port: 25
-    use_tls: false
-    use_ssl: false
+    notification_configuration:
+      username: user
+      password: s3cr3t
+      sender: tower@example.com
+      recipients:
+        - user1@example.com
+      host: smtp.example.com
+      port: 25
+      use_tls: false
+      use_ssl: false
     state: present
 
 - name: Add webhook notification
@@ -91,9 +92,10 @@
     name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
-    url: http://www.example.com/hook
-    headers:
-      X-Custom-Header: value123
+    notification_configuration:
+      url: http://www.example.com/hook
+      headers:
+        X-Custom-Header: value123
     state: present
   register: result
 
@@ -386,21 +388,21 @@
   credential:
     name: "{{ cred1 }}"
     organization: Default
-    kind: tower
+    credential_type: Red Hat Ansible Automation Platform
     state: absent
 
 - name: Delete Credential2
   credential:
     name: "{{ cred2 }}"
     organization: Default
-    kind: ssh
+    credential_type: Machine
     state: absent
 
 - name: Delete Credential3
   credential:
     name: "{{ cred3 }}"
     organization: Default
-    kind: ssh
+    credential_type: Machine
     state: absent
 
 # You can't delete a label directly so no cleanup needed

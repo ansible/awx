@@ -29,7 +29,7 @@
   credential:
     name: "{{ scm_cred_name }}"
     organization: Default
-    kind: scm
+    credential_type: Source Control
   register: result
 
 - assert:
@@ -41,15 +41,16 @@
     name: "{{ email_not }}"
     organization: Default
     notification_type: email
-    username: user
-    password: s3cr3t
-    sender: tower@example.com
-    recipients:
-      - user1@example.com
-    host: smtp.example.com
-    port: 25
-    use_tls: false
-    use_ssl: false
+    notification_configuration:
+      username: user
+      password: s3cr3t
+      sender: tower@example.com
+      recipients:
+        - user1@example.com
+      host: smtp.example.com
+      port: 25
+      use_tls: false
+      use_ssl: false
     state: present
 
 - name: Add webhook notification
@@ -57,9 +58,10 @@
     name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
-    url: http://www.example.com/hook
-    headers:
-      X-Custom-Header: value123
+    notification_configuration:
+      url: http://www.example.com/hook
+      headers:
+        X-Custom-Header: value123
     state: present
   register: result
 
@@ -664,7 +666,7 @@
   credential:
     name: "{{ scm_cred_name }}"
     organization: Default
-    kind: scm
+    credential_type: Source Control
     state: absent
   register: result
 

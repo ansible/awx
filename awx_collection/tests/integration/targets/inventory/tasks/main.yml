@@ -26,7 +26,7 @@
       credential:
         name: "{{ cred_name1 }}"
         organization: Default
-        kind: insights
+        credential_type: Insights
         inputs:
           username: joe
           password: secret
@@ -180,5 +180,5 @@
       credential:
         name: "{{ cred_name1 }}"
         organization: "Default"
-        kind: insights
+        credential_type: Insights
         state: absent

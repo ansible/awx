@@ -15,16 +15,17 @@
     variables:
       ansible_connection: local
 
-- name: create an unused SSH / Machine credential
+- name: Create an unused SSH / Machine credential
   credential:
     name: dummy
-    kind: ssh
-    ssh_key_data: |
-      -----BEGIN EC PRIVATE KEY-----
-      MHcCAQEEIIUl6R1xgzR6siIUArz4XBPtGZ09aetma2eWf1v3uYymoAoGCCqGSM49
-      AwEHoUQDQgAENJNjgeZDAh/+BY860s0yqrLDprXJflY0GvHIr7lX3ieCtrzOMCVU
-      QWzw35pc5tvuP34SSi0ZE1E+7cVMDDOF3w==
-      -----END EC PRIVATE KEY-----
+    credential_type: Machine
+    inputs:
+      ssh_key_data: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIIUl6R1xgzR6siIUArz4XBPtGZ09aetma2eWf1v3uYymoAoGCCqGSM49
+        AwEHoUQDQgAENJNjgeZDAh/+BY860s0yqrLDprXJflY0GvHIr7lX3ieCtrzOMCVU
+        QWzw35pc5tvuP34SSi0ZE1E+7cVMDDOF3w==
+        -----END EC PRIVATE KEY-----
     organization: Default
 
 - block:
@@ -51,5 +52,5 @@
     - name: Delete dummy credential
       credential:
         name: dummy
-        kind: ssh
+        credential_type: Machine
         state: absent

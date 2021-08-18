@@ -1,16 +1,17 @@
 ---
-- name: generate random string for project
+- name: Generate random string for project
   set_fact:
     rand_string: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-- name: Generate manual project dir name
+
+- name: Generate manual project name
   set_fact:
-    project_name: "manual project {{ rand_string }}"
+    project_name: "Manual_Project_{{ rand_string }}"
 
 - name: Generate manual project dir name
   set_fact:
     project_dir_name: "proj_{{ rand_string }}"
 
-- name: create a project directory for manual project
+- name: Create a project directory for manual project
   import_tasks: create_project_dir.yml
 
 - name: Create a manual project
