@@ -61,15 +61,47 @@ class TestMigrationCases:
     and then later import it with the correct id.
     """
 
-    @pytest.mark.parametrize('id_var_seq', [('', 'foo'), ('foo', '')])  # second is problem case
-    @pytest.mark.parametrize('host_names', [('host-1', 'foo'), ('foo', 'host-1')])
+    @pytest.mark.parametrize('id_var', ('', 'foo.id', 'foo.id,other', 'other,foo.id'), ids=['none', 'simple', 'complex', 'backward'])
+    @pytest.mark.parametrize('host_name', ('host-1', 'fooval'), ids=['arbitrary', 'id'])
+    @pytest.mark.parametrize('has_var', (True, False))
+    def test_single_host_not_recreated(self, inventory, id_var, host_name, has_var):
+        inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
+
+        options = dict(overwrite=True, overwrite_vars=False, instance_id_var=id_var)
+
+        vars = {'foo': {'id': 'fooval'}}
+        data = {
+            '_meta': {'hostvars': {host_name: vars if has_var else {'unrelated': 'value'}}},
+            "ungrouped": {"hosts": [host_name]},
+        }
+        old_id = None
+
+        for i in range(3):
+            inventory_import.Command().perform_update(options.copy(), data.copy(), inv_src.create_unified_job())
+
+            assert inventory.hosts.count() == inv_src.hosts.count() == 1
+            host = inventory.hosts.first()
+            assert host.name == host_name
+            assert host.instance_id in ('fooval', '')
+            if has_var:
+                assert yaml.safe_load(host.variables) == vars
+            else:
+                assert yaml.safe_load(host.variables) == {'unrelated': 'value'}
+
+            if old_id is not None:
+                assert host.id == old_id
+            old_id = host.id
+
+    @pytest.mark.parametrize('id_var_seq', [('', 'foo.id,other'), ('foo.id,other', '')], ids=['gained', 'lost'])  # second is problem case
+    # we may have to reject some of these where name changes
+    @pytest.mark.parametrize('host_names', [('host-1', 'fooval'), ('fooval', 'host-1'), ('host-1', 'host-1'), ('fooval', 'fooval')])
     def test_host_gains_or_loses_instance_id(self, inventory, id_var_seq, host_names):
-        cmd = inventory_import.Command()
         inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
 
         options = dict(overwrite=True, overwrite_vars=False)
 
-        vars = {'foo': 'fooval'}
+        vars = {'foo': {'id': 'fooval'}}
+        old_id = None
 
         for id_var, host_name in zip(id_var_seq, host_names):
             options['instance_id_var'] = id_var
@@ -77,7 +109,7 @@ class TestMigrationCases:
                 '_meta': {'hostvars': {host_name: vars}},
                 "ungrouped": {"hosts": [host_name]},
             }
-            cmd.perform_update(options, data.copy(), inv_src.create_unified_job())
+            inventory_import.Command().perform_update(options, data.copy(), inv_src.create_unified_job())
 
             assert inventory.hosts.count() == inv_src.hosts.count() == 1
             host = inventory.hosts.first()
@@ -85,31 +117,41 @@ class TestMigrationCases:
             assert host.instance_id == ('fooval' if id_var else '')
             assert yaml.safe_load(host.variables) == vars
 
+            if old_id is not None:
+                assert host.id == old_id
+            old_id = host.id
+
     def test_name_and_id_confusion(self, inventory):
-        cmd = inventory_import.Command()
         inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
 
-        CASES = [('', ['host-1', 'foo']), ('foo', ['host-1'])]
+        CASES = [('', ['host-1', 'fooval']), ('other,foo.id', ['host-1', 'fooval'])]
 
         options = dict(overwrite=True, overwrite_vars=False)
 
-        vars = {'foo': 'fooval'}
+        vars = {'foo': {'id': 'fooval'}}
         data = {
             '_meta': {'hostvars': {}},
             "ungrouped": {"hosts": []},
         }
+        id_set = None
 
         for id_var, hosts in CASES:
             options['instance_id_var'] = id_var
 
             data['_meta']['hostvars'] = {}
             for host_name in hosts:
-                data['_meta']['hostvars'][host_name] = vars
+                data['_meta']['hostvars'][host_name] = vars if id_var else {}
             data['ungrouped']['hosts'] = hosts
 
-            cmd.perform_update(options, data.copy(), inv_src.create_unified_job())
+            inventory_import.Command().perform_update(options, data.copy(), inv_src.create_unified_job())
 
-            assert inventory.hosts.count() == inv_src.hosts.count() == len(hosts), [(host.name, host.instance_id) for host in inventory.hosts.all()]
+            new_ids = set(inventory.hosts.values_list('id', flat=True))
+            if id_set is not None:
+                assert new_ids == id_set
+            id_set = new_ids
+
+            assert inventory.hosts.count() == len(hosts), [(host.name, host.instance_id) for host in inventory.hosts.all()]
+            assert inv_src.hosts.count() == len(hosts), [(host.name, host.instance_id) for host in inventory.hosts.all()]
             for host_name in hosts:
                 host = inventory.hosts.get(name=host_name)
                 assert host.instance_id == ('fooval' if id_var else '')
