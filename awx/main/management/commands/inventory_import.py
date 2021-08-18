@@ -324,9 +324,16 @@ class Command(BaseCommand):
             all_host_names = list(set(self.mem_instance_id_map.values()) - set(self.all_group.all_hosts.keys()))
         else:
             all_host_names = list(self.all_group.all_hosts.keys())
+        logger.info('all host names')
+        logger.info(all_host_names)
+        logger.info('mem id map')
+        logger.info(self.mem_instance_id_map)
         for offset in range(0, len(all_host_names), self._batch_size):
             host_names = all_host_names[offset : (offset + self._batch_size)]
+            logger.info('host names')
+            logger.info(host_names)
             for host_pk in hosts_qs.filter(name__in=host_names).values_list('pk', flat=True):
+                logger.info('deleting {}'.format(host_pk))
                 del_host_pks.discard(host_pk)
         # Now delete all remaining hosts in batches.
         all_del_pks = sorted(list(del_host_pks))

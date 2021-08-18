@@ -5,6 +5,7 @@
 import pytest
 from unittest import mock
 import os
+import yaml
 
 # Django
 from django.core.management.base import CommandError
@@ -53,6 +54,68 @@ def mock_logging(self, level):
 
 
 @pytest.mark.django_db
+@mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
+class TestMigrationCases:
+    """In the case that we have any bugs with the declared instance ID variables
+    then it is inevitable that we will, at some point, import a host with a blank ID
+    and then later import it with the correct id.
+    """
+
+    @pytest.mark.parametrize('id_var_seq', [('', 'foo'), ('foo', '')])  # second is problem case
+    @pytest.mark.parametrize('host_names', [('host-1', 'foo'), ('foo', 'host-1')])
+    def test_host_gains_or_loses_instance_id(self, inventory, id_var_seq, host_names):
+        cmd = inventory_import.Command()
+        inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
+
+        options = dict(overwrite=True, overwrite_vars=False)
+
+        vars = {'foo': 'fooval'}
+
+        for id_var, host_name in zip(id_var_seq, host_names):
+            options['instance_id_var'] = id_var
+            data = {
+                '_meta': {'hostvars': {host_name: vars}},
+                "ungrouped": {"hosts": [host_name]},
+            }
+            cmd.perform_update(options, data.copy(), inv_src.create_unified_job())
+
+            assert inventory.hosts.count() == inv_src.hosts.count() == 1
+            host = inventory.hosts.first()
+            assert host.name == host_name
+            assert host.instance_id == ('fooval' if id_var else '')
+            assert yaml.safe_load(host.variables) == vars
+
+    def test_name_and_id_confusion(self, inventory):
+        cmd = inventory_import.Command()
+        inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
+
+        CASES = [('', ['host-1', 'foo']), ('foo', ['host-1'])]
+
+        options = dict(overwrite=True, overwrite_vars=False)
+
+        vars = {'foo': 'fooval'}
+        data = {
+            '_meta': {'hostvars': {}},
+            "ungrouped": {"hosts": []},
+        }
+
+        for id_var, hosts in CASES:
+            options['instance_id_var'] = id_var
+
+            data['_meta']['hostvars'] = {}
+            for host_name in hosts:
+                data['_meta']['hostvars'][host_name] = vars
+            data['ungrouped']['hosts'] = hosts
+
+            cmd.perform_update(options, data.copy(), inv_src.create_unified_job())
+
+            assert inventory.hosts.count() == inv_src.hosts.count() == len(hosts), [(host.name, host.instance_id) for host in inventory.hosts.all()]
+            for host_name in hosts:
+                host = inventory.hosts.get(name=host_name)
+                assert host.instance_id == ('fooval' if id_var else '')
+
+
+@pytest.mark.django_db
 @pytest.mark.inventory_import
 @mock.patch.object(inventory_import.Command, 'check_license', mock.MagicMock())
 @mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
@@ -89,7 +152,7 @@ class TestINIImports:
     def test_inventory_single_ini_import(self, inventory, capsys):
         inventory_import.AnsibleInventoryLoader._data = TEST_INVENTORY_CONTENT
         cmd = inventory_import.Command()
-        r = cmd.handle(inventory_id=inventory.pk, source=__file__, method='backport')
+        r = cmd.handle(inventory_id=inventory.pk, source=__file__)
         out, err = capsys.readouterr()
         assert r is None
         assert out == ''
