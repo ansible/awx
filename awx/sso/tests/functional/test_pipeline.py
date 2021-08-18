@@ -32,7 +32,16 @@ class TestSAMLMap:
     def backend(self):
         class Backend:
             s = {
-                'ORGANIZATION_MAP': {'Default': {'remove': True, 'admins': 'foobar', 'remove_admins': True, 'users': 'foo', 'remove_users': True}},
+                'ORGANIZATION_MAP': {
+                    'Default': {
+                        'remove': True,
+                        'admins': 'foobar',
+                        'remove_admins': True,
+                        'users': 'foo',
+                        'remove_users': True,
+                        'organization_alias': '',
+                    }
+                },
                 'TEAM_MAP': {'Blue': {'organization': 'Default', 'remove': True, 'users': ''}, 'Red': {'organization': 'Default', 'remove': True, 'users': ''}},
             }
 
@@ -76,6 +85,11 @@ class TestSAMLMap:
 
         assert org.admin_role.members.count() == 2
         assert org.member_role.members.count() == 2
+
+        # Test organization alias feature
+        backend.setting('ORGANIZATION_MAP')['Default']['organization_alias'] = 'Default_Alias'
+        update_user_orgs(backend, None, u1)
+        assert Organization.objects.get(name="Default_Alias") is not None
 
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
@@ -191,7 +205,28 @@ class TestSAMLAttr:
 
         return MockSettings()
 
-    def test_update_user_orgs_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings):
+    @pytest.fixture
+    def backend(self):
+        class Backend:
+            s = {
+                'ORGANIZATION_MAP': {
+                    'Default1': {
+                        'remove': True,
+                        'admins': 'foobar',
+                        'remove_admins': True,
+                        'users': 'foo',
+                        'remove_users': True,
+                        'organization_alias': 'o1_alias',
+                    }
+                }
+            }
+
+            def setting(self, key):
+                return self.s[key]
+
+        return Backend()
+
+    def test_update_user_orgs_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings, backend):
         with mock.patch('django.conf.settings', mock_settings):
             o1, o2, o3 = orgs
             u1, u2, u3 = users
@@ -223,6 +258,9 @@ class TestSAMLAttr:
             assert o1.member_role.members.count() == 3
             assert o2.member_role.members.count() == 3
             assert o3.member_role.members.count() == 1
+
+            update_user_orgs_by_saml_attr(backend, None, u1, **kwargs)
+            assert Organization.objects.get(name="o1_alias").member_role.members.count() == 1
 
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
@@ -298,11 +336,11 @@ class TestSAMLAttr:
             update_user_teams_by_saml_attr(None, None, u1, **kwargs)
 
             assert Team.objects.filter(name='Yellow', organization__name='Default4').count() == 0
-            assert Team.objects.filter(name='Yellow_Alias', organization__name='Default4_Alias').count() == 1
-            assert Team.objects.get(name='Yellow_Alias', organization__name='Default4_Alias').member_role.members.count() == 1
+            assert Team.objects.filter(name='Yellow_Alias', organization__name='Default4').count() == 1
+            assert Team.objects.get(name='Yellow_Alias', organization__name='Default4').member_role.members.count() == 1
 
         # only Org 4 got created/updated
-        org = Organization.objects.get(name='Default4_Alias')
+        org = Organization.objects.get(name='Default4')
         assert org.galaxy_credentials.count() == 1
         assert org.galaxy_credentials.first().name == 'Ansible Galaxy'
 
