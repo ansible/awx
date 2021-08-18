@@ -9206,7 +9206,7 @@ msgstr "Bienvenue sur la plate-forme Red Hat Ansible Automation ! Veuillez compl
 
 #: screens/Login/Login.js:157
 msgid "Welcome to {brandName}!"
-msgstr "Beinvenue à {brandName} !"
+msgstr "Bienvenue à {brandName} !"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:154
 msgid ""
