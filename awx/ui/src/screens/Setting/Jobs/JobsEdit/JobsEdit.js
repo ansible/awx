@@ -138,6 +138,11 @@ function JobsEdit() {
                   type="number"
                 />
                 <InputField
+                  name="DEFAULT_JOB_IDLE_TIMEOUT"
+                  config={jobs.DEFAULT_JOB_IDLE_TIMEOUT}
+                  type="number"
+                />
+                <InputField
                   name="DEFAULT_INVENTORY_UPDATE_TIMEOUT"
                   config={jobs.DEFAULT_INVENTORY_UPDATE_TIMEOUT}
                   type="number"

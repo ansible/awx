@@ -340,6 +340,17 @@
         "unit": "seconds",
         "default": 0
       },
+      "DEFAULT_JOB_IDLE_TIMEOUT": {
+        "type": "integer",
+        "required": false,
+        "label": "Default Job Idle Timeout",
+        "help_text": "If no output is detected from ansible in this number of seconds the execution will be terminated.",
+        "min_value": 0,
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "unit": "seconds",
+        "default": 600
+      },
       "DEFAULT_INVENTORY_UPDATE_TIMEOUT": {
         "type": "integer",
         "required": false,
@@ -3981,6 +3992,16 @@
         "type": "integer",
         "label": "Default Job Timeout",
         "help_text": "Maximum time in seconds to allow jobs to run. Use value of 0 to indicate that no timeout should be imposed. A timeout set on an individual job template will override this.",
+        "min_value": 0,
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false,
+        "unit": "seconds"
+      },
+      "DEFAULT_JOB_IDLE_TIMEOUT": {
+        "type": "integer",
+        "label": "Default Job Idle Timeout",
+        "help_text": "If no output is detected from ansible in this number of seconds the execution will be terminated.",
         "min_value": 0,
         "category": "Jobs",
         "category_slug": "jobs",

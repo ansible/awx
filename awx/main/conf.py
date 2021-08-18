@@ -409,6 +409,18 @@ register(
 )
 
 register(
+    'DEFAULT_JOB_IDLE_TIMEOUT',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=600,
+    label=_('Default Job Idle Timeout'),
+    help_text=_('If no output is detected from ansible in this number of seconds the execution will be terminated.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    unit=_('seconds'),
+)
+
+register(
     'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
     field_class=fields.IntegerField,
     min_value=0,
