@@ -268,12 +268,12 @@ class Command(BaseCommand):
         """
         self.db_instance_id_map = {}
         if self.instance_id_var:
-            host_qs = self.inventory_source.hosts.all().only('id', 'instance_id', 'variables')
+            host_qs = self.inventory_source.hosts.all().only('id', 'instance_id', 'variables').iterator()
             for host in host_qs:
                 instance_id = self._get_instance_id(host.variables_dict)
                 if instance_id:
                     self.db_instance_id_map[instance_id] = host.id
-                elif host.instance_id:
+                elif host.instance_id and host.instance_id not in self.db_instance_id_map:
                     self.db_instance_id_map[host.instance_id] = host.id
         else:
             host_qs = self.inventory_source.hosts.filter(instance_id__isnull=False)

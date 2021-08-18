@@ -67,7 +67,7 @@ class TestMigrationCases:
     def test_single_host_not_recreated(self, inventory, id_var, host_name, has_var):
         inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
 
-        options = dict(overwrite=True, overwrite_vars=False, instance_id_var=id_var)
+        options = dict(overwrite=True, instance_id_var=id_var)
 
         vars = {'foo': {'id': 'fooval'}}
         data = {
@@ -93,23 +93,22 @@ class TestMigrationCases:
             old_id = host.id
 
     @pytest.mark.parametrize('id_var_seq', [('', 'foo.id,other'), ('foo.id,other', '')], ids=['gained', 'lost'])  # second is problem case
-    # we may have to reject some of these where name changes
-    @pytest.mark.parametrize('host_names', [('host-1', 'fooval'), ('fooval', 'host-1'), ('host-1', 'host-1'), ('fooval', 'fooval')])
-    def test_host_gains_or_loses_instance_id(self, inventory, id_var_seq, host_names):
+    @pytest.mark.parametrize('host_name', ('host-1', 'fooval'), ids=['arbitrary', 'id'])
+    def test_host_gains_or_loses_instance_id(self, inventory, id_var_seq, host_name):
         inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
 
-        options = dict(overwrite=True, overwrite_vars=False)
+        options = dict(overwrite=True)
 
         vars = {'foo': {'id': 'fooval'}}
         old_id = None
 
-        for id_var, host_name in zip(id_var_seq, host_names):
+        for id_var in id_var_seq:
             options['instance_id_var'] = id_var
             data = {
                 '_meta': {'hostvars': {host_name: vars}},
                 "ungrouped": {"hosts": [host_name]},
             }
-            inventory_import.Command().perform_update(options, data.copy(), inv_src.create_unified_job())
+            inventory_import.Command().perform_update(options.copy(), data.copy(), inv_src.create_unified_job())
 
             assert inventory.hosts.count() == inv_src.hosts.count() == 1
             host = inventory.hosts.first()
@@ -127,7 +126,7 @@ class TestMigrationCases:
 
         CASES = [('', ['host-1', 'fooval']), ('foo.id', second_list)]
 
-        options = dict(overwrite=True, overwrite_vars=False)
+        options = dict(overwrite=True)
 
         vars = {'foo': {'id': 'fooval'}}
         data = {
@@ -144,7 +143,7 @@ class TestMigrationCases:
                 data['_meta']['hostvars'][host_name] = vars if id_var else {}
             data['ungrouped']['hosts'] = hosts
 
-            inventory_import.Command().perform_update(options, data.copy(), inv_src.create_unified_job())
+            inventory_import.Command().perform_update(options.copy(), data.copy(), inv_src.create_unified_job())
 
             new_ids = set(inventory.hosts.values_list('id', flat=True))
             if id_set is not None:
