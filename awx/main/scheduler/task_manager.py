@@ -75,7 +75,6 @@ class TaskManager:
         instances_partial = [
             SimpleNamespace(
                 obj=instance,
-                version=instance.version,
                 node_type=instance.node_type,
                 remaining_capacity=instance.remaining_capacity,
                 capacity=instance.capacity,
