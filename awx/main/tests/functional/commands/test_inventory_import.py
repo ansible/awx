@@ -121,10 +121,11 @@ class TestMigrationCases:
                 assert host.id == old_id
             old_id = host.id
 
-    def test_name_and_id_confusion(self, inventory):
+    @pytest.mark.parametrize('second_list', [('host-1', 'fooval'), ('host-1',), ('fooval',)])
+    def test_name_and_id_confusion(self, inventory, second_list):
         inv_src = InventorySource.objects.create(inventory=inventory, source='gce')
 
-        CASES = [('', ['host-1', 'fooval']), ('other,foo.id', ['host-1', 'fooval'])]
+        CASES = [('', ['host-1', 'fooval']), ('foo.id', second_list)]
 
         options = dict(overwrite=True, overwrite_vars=False)
 
@@ -147,7 +148,7 @@ class TestMigrationCases:
 
             new_ids = set(inventory.hosts.values_list('id', flat=True))
             if id_set is not None:
-                assert new_ids == id_set
+                assert not (new_ids - id_set)
             id_set = new_ids
 
             assert inventory.hosts.count() == len(hosts), [(host.name, host.instance_id) for host in inventory.hosts.all()]
