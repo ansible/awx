@@ -275,6 +275,11 @@ class Command(BaseCommand):
                     self.db_instance_id_map[instance_id] = host.id
                 elif host.instance_id:
                     self.db_instance_id_map[host.instance_id] = host.id
+        else:
+            host_qs = self.inventory_source.hosts.filter(instance_id__isnull=False)
+            for host in host_qs:
+                self.db_instance_id_map[host.instance_id] = host.id
+        logger.info('DB instance id map:\n{}'.format(json.dumps(self.db_instance_id_map, indent=2)))
 
     def _build_mem_instance_id_map(self):
         """
@@ -290,6 +295,7 @@ class Command(BaseCommand):
                     continue
                 mem_host.instance_id = instance_id
                 self.mem_instance_id_map[instance_id] = mem_host.name
+        logger.info('Memory instance id map:\n{}'.format(json.dumps(self.mem_instance_id_map, indent=2)))
 
     def _existing_host_pks(self):
         """Returns cached set of existing / previous host primary key values
