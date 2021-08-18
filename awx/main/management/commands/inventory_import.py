@@ -268,13 +268,13 @@ class Command(BaseCommand):
         """
         self.db_instance_id_map = {}
         if self.instance_id_var:
-            host_qs = self.inventory_source.hosts.all()
-            host_qs = host_qs.filter(instance_id='', variables__contains=self.instance_id_var.split('.')[0])
+            host_qs = self.inventory_source.hosts.all().only('id', 'instance_id', 'variables')
             for host in host_qs:
                 instance_id = self._get_instance_id(host.variables_dict)
-                if not instance_id:
-                    continue
-                self.db_instance_id_map[instance_id] = host.pk
+                if instance_id:
+                    self.db_instance_id_map[instance_id] = host.id
+                elif host.instance_id:
+                    self.db_instance_id_map[host.instance_id] = host.id
 
     def _build_mem_instance_id_map(self):
         """
