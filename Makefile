@@ -470,6 +470,7 @@ awx/projects:
 	@mkdir -p $@
 
 COMPOSE_UP_OPTS ?=
+COMPOSE_OPTS ?=
 CLUSTER_NODE_COUNT ?= 1
 MINIKUBE_CONTAINER_GROUP ?= false
 
@@ -486,7 +487,7 @@ docker-compose-sources: .git/hooks/pre-commit
 
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml up $(COMPOSE_UP_OPTS)
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS)
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
