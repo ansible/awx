@@ -1369,8 +1369,9 @@ class BaseTask(object):
                 },
             }
 
-            if settings.DEFAULT_JOB_IDLE_TIMEOUT > 0:
-                params['settings']['idle_timeout'] = settings.DEFAULT_JOB_IDLE_TIMEOUT
+            idle_timeout = getattr(settings, 'DEFAULT_JOB_IDLE_TIMEOUT', 0)
+            if idle_timeout > 0:
+                params['settings']['idle_timeout'] = idle_timeout
 
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)
