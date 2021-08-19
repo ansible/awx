@@ -10,6 +10,7 @@ import subprocess
 import sys
 import time
 import traceback
+from collections import OrderedDict
 
 # Django
 from django.conf import settings
@@ -268,18 +269,14 @@ class Command(BaseCommand):
         """
         self.db_instance_id_map = {}
         if self.instance_id_var:
-            host_qs = self.inventory_source.hosts.all().only('id', 'instance_id', 'variables').iterator()
-            for host in host_qs:
-                instance_id = self._get_instance_id(host.variables_dict)
-                if instance_id:
-                    self.db_instance_id_map[instance_id] = host.id
-                elif host.instance_id and host.instance_id not in self.db_instance_id_map:
-                    self.db_instance_id_map[host.instance_id] = host.id
-        else:
-            host_qs = self.inventory_source.hosts.filter(instance_id__isnull=False)
-            for host in host_qs:
-                self.db_instance_id_map[host.instance_id] = host.id
-        logger.info('DB instance id map:\n{}'.format(json.dumps(self.db_instance_id_map, indent=2)))
+            host_qs = self.inventory_source.hosts.all()
+            for instance_id_part in reversed(self.instance_id_var.split(',')):
+                host_qs = host_qs.filter(instance_id='', variables__contains=instance_id_part.split('.')[0])
+                for host in host_qs:
+                    instance_id = self._get_instance_id(host.variables_dict)
+                    if not instance_id:
+                        continue
+                    self.db_instance_id_map[instance_id] = host.pk
 
     def _build_mem_instance_id_map(self):
         """
@@ -295,7 +292,6 @@ class Command(BaseCommand):
                     continue
                 mem_host.instance_id = instance_id
                 self.mem_instance_id_map[instance_id] = mem_host.name
-        logger.info('Memory instance id map:\n{}'.format(json.dumps(self.mem_instance_id_map, indent=2)))
 
     def _existing_host_pks(self):
         """Returns cached set of existing / previous host primary key values
@@ -306,17 +302,19 @@ class Command(BaseCommand):
             self._cached_host_pk_set = frozenset(self.inventory_source.hosts.values_list('pk', flat=True))
         return self._cached_host_pk_set
 
-    def _delete_hosts(self, del_host_pks):
+    def _delete_hosts(self, pk_mem_host_map):
         """
-        If overwrite is set, then delete any host associated with the inventory source
-        which was not returned by the import.
-        This list is produced by other methods.
-        This methods takes the list of host pks to delete (inv src hosts not returned by the update)
-        and it deletes those.
+        For each host in the database that is NOT in the local list, delete
+        it. When importing from a cloud inventory source attached to a
+        specific group, only delete hosts beneath that group.  Delete each
+        host individually so signal handlers will run.
         """
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
+
         hosts_qs = self.inventory_source.hosts
+        del_host_pks = hosts_qs.exclude(pk__in=pk_mem_host_map.keys()).values_list('pk', flat=True)
+
         # Now delete all remaining hosts in batches.
         all_del_pks = sorted(list(del_host_pks))
         for offset in range(0, len(all_del_pks), self._batch_size):
@@ -557,7 +555,63 @@ class Command(BaseCommand):
                 logger.debug('Host "%s" is now disabled', mem_host.name)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
-    def _create_update_hosts(self):
+    def _build_pk_mem_host_map(self):
+        """
+        Creates and returns a data structure that maps DB hosts to in-memory host that
+        they correspond to - meaning that those hosts will be updated to in-memory host values
+        """
+        mem_host_pk_map = OrderedDict()  # keys are mem_host name, values are matching DB host pk
+        host_pks_updated = set()  # same as items of mem_host_pk_map but used for efficiency
+        mem_host_pk_map_by_id = {}  # incomplete mapping by new instance_id to be sorted and pushed to mem_host_pk_map
+        mem_host_instance_id_map = {}
+        for k, v in self.all_group.all_hosts.items():
+            instance_id = self._get_instance_id(v.variables)
+            if instance_id in self.db_instance_id_map:
+                mem_host_pk_map_by_id[self.db_instance_id_map[instance_id]] = v
+            elif instance_id:
+                mem_host_instance_id_map[instance_id] = v
+
+        # Update all existing hosts where we know the PK based on instance_id.
+        all_host_pks = sorted(mem_host_pk_map_by_id.keys())
+        for offset in range(0, len(all_host_pks), self._batch_size):
+            host_pks = all_host_pks[offset : (offset + self._batch_size)]
+            for db_host in self.inventory.hosts.only('pk').filter(pk__in=host_pks):
+                if db_host.pk in host_pks_updated:
+                    continue
+                mem_host = mem_host_pk_map_by_id[db_host.pk]
+                mem_host_pk_map[mem_host.name] = db_host.pk
+                host_pks_updated.add(db_host.pk)
+
+        # Update all existing hosts where we know the DB (the prior) instance_id.
+        all_instance_ids = sorted(mem_host_instance_id_map.keys())
+        for offset in range(0, len(all_instance_ids), self._batch_size):
+            instance_ids = all_instance_ids[offset : (offset + self._batch_size)]
+            for db_host in self.inventory.hosts.only('pk', 'instance_id').filter(instance_id__in=instance_ids):
+                if db_host.pk in host_pks_updated:
+                    continue
+                mem_host = mem_host_instance_id_map[db_host.instance_id]
+                mem_host_pk_map[mem_host.name] = db_host.pk
+                host_pks_updated.add(db_host.pk)
+
+        # Update all existing hosts by name.
+        all_host_names = sorted(self.all_group.all_hosts.keys())
+        for offset in range(0, len(all_host_names), self._batch_size):
+            host_names = all_host_names[offset : (offset + self._batch_size)]
+            for db_host in self.inventory.hosts.only('pk', 'name').filter(name__in=host_names):
+                if db_host.pk in host_pks_updated:
+                    continue
+                mem_host = self.all_group.all_hosts[db_host.name]
+                mem_host_pk_map[mem_host.name] = db_host.pk
+                host_pks_updated.add(db_host.pk)
+
+        # Rotate the dictionary so that lookups are done by the host pk
+        pk_mem_host_map = OrderedDict()
+        for name, host_pk in mem_host_pk_map.items():
+            pk_mem_host_map[host_pk] = name
+
+        return pk_mem_host_map  # keys are DB host pk, keys are matching mem host name
+
+    def _create_update_hosts(self, pk_mem_host_map):
         """
         For each host in the local list, create it if it doesn't exist in the
         database.  Otherwise, update/replace database variables from the
@@ -566,57 +620,22 @@ class Command(BaseCommand):
         """
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        host_pks_updated = set()
-        mem_host_pk_map = {}
-        mem_host_instance_id_map = {}
-        mem_host_name_map = {}
-        mem_host_names_to_update = set(self.all_group.all_hosts.keys())
-        for k, v in self.all_group.all_hosts.items():
-            mem_host_name_map[k] = v
-            instance_id = self._get_instance_id(v.variables)
-            if instance_id in self.db_instance_id_map:
-                mem_host_pk_map[self.db_instance_id_map[instance_id]] = v
-            elif instance_id:
-                mem_host_instance_id_map[instance_id] = v
 
-        # Update all existing hosts where we know the PK based on instance_id.
-        all_host_pks = sorted(mem_host_pk_map.keys())
+        updated_mem_host_names = set()
+
+        all_host_pks = sorted(pk_mem_host_map.keys())
         for offset in range(0, len(all_host_pks), self._batch_size):
             host_pks = all_host_pks[offset : (offset + self._batch_size)]
             for db_host in self.inventory.hosts.filter(pk__in=host_pks):
-                if db_host.pk in host_pks_updated:
-                    continue
-                mem_host = mem_host_pk_map[db_host.pk]
+                mem_host_name = pk_mem_host_map[db_host.pk]
+                mem_host = self.all_group.all_hosts[mem_host_name]
                 self._update_db_host_from_mem_host(db_host, mem_host)
-                host_pks_updated.add(db_host.pk)
-                mem_host_names_to_update.discard(mem_host.name)
+                updated_mem_host_names.add(mem_host.name)
 
-        # Update all existing hosts where we know the instance_id.
-        all_instance_ids = sorted(mem_host_instance_id_map.keys())
-        for offset in range(0, len(all_instance_ids), self._batch_size):
-            instance_ids = all_instance_ids[offset : (offset + self._batch_size)]
-            for db_host in self.inventory.hosts.filter(instance_id__in=instance_ids):
-                if db_host.pk in host_pks_updated:
-                    continue
-                mem_host = mem_host_instance_id_map[db_host.instance_id]
-                self._update_db_host_from_mem_host(db_host, mem_host)
-                host_pks_updated.add(db_host.pk)
-                mem_host_names_to_update.discard(mem_host.name)
-
-        # Update all existing hosts by name.
-        all_host_names = sorted(mem_host_name_map.keys())
-        for offset in range(0, len(all_host_names), self._batch_size):
-            host_names = all_host_names[offset : (offset + self._batch_size)]
-            for db_host in self.inventory.hosts.filter(name__in=host_names):
-                if db_host.pk in host_pks_updated:
-                    continue
-                mem_host = mem_host_name_map[db_host.name]
-                self._update_db_host_from_mem_host(db_host, mem_host)
-                host_pks_updated.add(db_host.pk)
-                mem_host_names_to_update.discard(mem_host.name)
+        mem_host_names_to_create = set(self.all_group.all_hosts.keys()) - updated_mem_host_names
 
         # Create any new hosts.
-        for mem_host_name in sorted(mem_host_names_to_update):
+        for mem_host_name in sorted(mem_host_names_to_create):
             mem_host = self.all_group.all_hosts[mem_host_name]
             import_vars = mem_host.variables
             host_desc = import_vars.pop('_awx_description', 'imported')
@@ -642,8 +661,6 @@ class Command(BaseCommand):
 
         if settings.SQL_DEBUG:
             logger.warning('host updates took %d queries for %d hosts', len(connection.queries) - queries_before, len(self.all_group.all_hosts))
-
-        return host_pks_updated  # used to delete hosts if using overwrite
 
     @transaction.atomic
     def _create_update_group_children(self):
@@ -717,18 +734,16 @@ class Command(BaseCommand):
         self._batch_size = 500
         self._build_db_instance_id_map()
         self._build_mem_instance_id_map()
+        pk_mem_host_map = self._build_pk_mem_host_map()
         if self.overwrite:
-            prior_host_pks = self._existing_host_pks()
+            self._delete_hosts(pk_mem_host_map)
             self._delete_groups()
             self._delete_group_children_and_hosts()
         self._update_inventory()
         self._create_update_groups()
-        host_pks_updated = self._create_update_hosts()
+        self._create_update_hosts(pk_mem_host_map)
         self._create_update_group_children()
         self._create_update_group_hosts()
-        if self.overwrite:
-            # any hosts that were not updated, delete them
-            self._delete_hosts(prior_host_pks - host_pks_updated)
 
     def remote_tower_license_compare(self, local_license_type):
         # this requires https://github.com/ansible/ansible/pull/52747
