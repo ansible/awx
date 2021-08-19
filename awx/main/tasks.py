@@ -1365,10 +1365,12 @@ class BaseTask(object):
                 'envvars': env,
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
-                    'idle_timeout': settings.DEFAULT_JOB_IDLE_TIMEOUT,
                     'suppress_ansible_output': True,
                 },
             }
+
+            if settings.DEFAULT_JOB_IDLE_TIMEOUT > 0:
+                params['settings']['idle_timeout'] = settings.DEFAULT_JOB_IDLE_TIMEOUT
 
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)

@@ -64,7 +64,7 @@ describe('<JobsDetail />', () => {
     );
     assertDetail(wrapper, 'Maximum Scheduled Jobs', '10');
     assertDetail(wrapper, 'Default Job Timeout', '0 seconds');
-    assertDetail(wrapper, 'Default Job Idle Timeout', '600 seconds');
+    assertDetail(wrapper, 'Default Job Idle Timeout', '0 seconds');
     assertDetail(wrapper, 'Default Inventory Update Timeout', '0 seconds');
     assertDetail(wrapper, 'Default Project Update Timeout', '0 seconds');
     assertDetail(wrapper, 'Per-Host Ansible Fact Cache Timeout', '0 seconds');
