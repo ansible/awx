@@ -61,6 +61,34 @@ describe('<JobListItem />', () => {
     expect(wrapper.find('LaunchButton').length).toBe(1);
   });
 
+  test('should render souce data in expanded view', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            isExpanded
+            inventorySourceLabels={[
+              ['scm', 'Sourced from Project'],
+              ['file', 'File, Directory or Script'],
+            ]}
+            job={{
+              ...mockJob,
+              type: 'inventory_update',
+              source: 'scm',
+              summary_fields: { user_capabilities: { start: false } },
+            }}
+            detailUrl={`/jobs/playbook/${mockJob.id}`}
+            onSelect={() => {}}
+            isSelected={false}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('ExpandableRowContent')).toHaveLength(1);
+    expect(
+      wrapper.find('dd[data-cy="job-inventory-source-type-value"]').text()
+    ).toBe('Sourced from Project');
+  });
   test('launch button hidden from users without launch capabilities', () => {
     wrapper = mountWithContexts(
       <table>

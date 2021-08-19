@@ -50,7 +50,7 @@ const VERBOSITY = {
   4: '4 (Connection Debug)',
 };
 
-function JobDetail({ job }) {
+function JobDetail({ job, inventorySourceLabels }) {
   const { me } = useConfig();
   const {
     created_by,
@@ -203,17 +203,28 @@ function JobDetail({ job }) {
           />
         )}
         {inventory_source && (
-          <Detail
-            dataCy="job-inventory-source"
-            label={t`Inventory Source`}
-            value={
-              <Link
-                to={`/inventories/inventory/${inventory.id}/sources/${inventory_source.id}`}
-              >
-                {inventory_source.name}
-              </Link>
-            }
-          />
+          <>
+            <Detail
+              dataCy="job-inventory-source"
+              label={t`Inventory Source`}
+              value={
+                <Link
+                  to={`/inventories/inventory/${inventory.id}/sources/${inventory_source.id}`}
+                >
+                  {inventory_source.name}
+                </Link>
+              }
+            />
+            {inventorySourceLabels.length > 0 && (
+              <Detail
+                dataCy="job-inventory-source-type"
+                label={t`Source`}
+                value={inventorySourceLabels.map(([string, label]) =>
+                  string === job.source ? label : null
+                )}
+              />
+            )}
+          </>
         )}
         {inventory_source && inventory_source.source === 'scm' && (
           <Detail

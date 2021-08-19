@@ -28,6 +28,7 @@ function JobListItem({
   onSelect,
   showTypeColumn = false,
   isSuperUser = false,
+  inventorySourceLabels,
 }) {
   const labelId = `check-action-${job.id}`;
 
@@ -151,6 +152,16 @@ function JobListItem({
         <Td colSpan={showTypeColumn ? 6 : 5}>
           <ExpandableRowContent>
             <DetailList>
+              {job.type === 'inventory_update' &&
+                inventorySourceLabels.length > 0 && (
+                  <Detail
+                    dataCy="job-inventory-source-type"
+                    label={t`Source`}
+                    value={inventorySourceLabels.map(([string, label]) =>
+                      string === job.source ? label : null
+                    )}
+                  />
+                )}
               <LaunchedByDetail job={job} />
               {job_template && (
                 <Detail

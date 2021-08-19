@@ -143,6 +143,42 @@ describe('<JobDetail />', () => {
     assertDetail('Job Type', 'Run Command');
   });
 
+  test('should display source data', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          source: 'scm',
+          type: 'inventory_update',
+          module_name: 'command',
+          module_args: 'echo hello_world',
+          summary_fields: {
+            ...mockJobData.summary_fields,
+            inventory_source: { id: 1, name: 'Inventory Source' },
+            credential: {
+              id: 2,
+              name: 'Machine cred',
+              description: '',
+              kind: 'ssh',
+              cloud: false,
+              kubernetes: false,
+              credential_type_id: 1,
+            },
+            source_workflow_job: {
+              id: 1234,
+              name: 'Test Source Workflow',
+            },
+          },
+        }}
+        inventorySourceLabels={[
+          ['scm', 'Sourced from Project'],
+          ['file', 'File, Directory or Script'],
+        ]}
+      />
+    );
+    assertDetail('Source', 'Sourced from Project');
+  });
+
   test('should show schedule that launched workflow job', async () => {
     wrapper = mountWithContexts(
       <JobDetail

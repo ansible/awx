@@ -12,7 +12,7 @@ import useSelected from 'hooks/useSelected';
 import useExpanded from 'hooks/useExpanded';
 import { isJobRunning, getJobModel } from 'util/jobs';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import { UnifiedJobsAPI } from 'api';
+import { UnifiedJobsAPI, InventorySourcesAPI } from 'api';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
@@ -41,7 +41,13 @@ function JobList({ defaultParams, showTypeColumn = false }) {
   const { me } = useConfig();
   const location = useLocation();
   const {
-    result: { results, count, relatedSearchableKeys, searchableKeys },
+    result: {
+      results,
+      count,
+      relatedSearchableKeys,
+      searchableKeys,
+      inventorySourceChoices,
+    },
     error: contentError,
     isLoading,
     request: fetchJobs,
@@ -49,13 +55,28 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     useCallback(
       async () => {
         const params = parseQueryString(qsConfig, location.search);
-        const [response, actionsResponse] = await Promise.all([
+        const [
+          response,
+          actionsResponse,
+          {
+            data: {
+              actions: {
+                GET: {
+                  source: { choices },
+                },
+              },
+            },
+          },
+        ] = await Promise.all([
           UnifiedJobsAPI.read({ ...params }),
           UnifiedJobsAPI.readOptions(),
+          InventorySourcesAPI.readOptions(),
         ]);
+
         return {
           results: response.data.results,
           count: response.data.count,
+          inventorySourceChoices: choices,
           relatedSearchableKeys: (
             actionsResponse?.data?.related_search_fields || []
           ).map((val) => val.slice(0, -8)),
@@ -69,6 +90,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     {
       results: [],
       count: 0,
+      inventorySourceChoices: [],
       relatedSearchableKeys: [],
       searchableKeys: [],
     }
@@ -264,6 +286,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           renderRow={(job, index) => (
             <JobListItem
               key={job.id}
+              inventorySourceLabels={inventorySourceChoices}
               job={job}
               isExpanded={expanded.some((row) => row.id === job.id)}
               onExpand={() => handleExpand(job)}

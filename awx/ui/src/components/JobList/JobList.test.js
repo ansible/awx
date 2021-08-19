@@ -8,6 +8,7 @@ import {
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
+  InventorySourcesAPI,
 } from 'api';
 import {
   mountWithContexts,
@@ -138,6 +139,20 @@ describe('<JobList />', () => {
           POST: {},
         },
         related_search_fields: [],
+      },
+    });
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            source: {
+              choices: [
+                ['scm', 'Sourced from Project'],
+                ['file', 'File, Directory or Script'],
+              ],
+            },
+          },
+        },
       },
     });
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
