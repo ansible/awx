@@ -61,7 +61,7 @@ function getStep(
       (nodeTypeField.value !== 'workflow_approval_template' &&
         nodeResourceField.value === null) ||
       (nodeTypeField.value === 'workflow_approval_template' &&
-        approvalNameField.value === undefined) ||
+        approvalNameField.value === '') ||
       formError
     ) {
       return false;
