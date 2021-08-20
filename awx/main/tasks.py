@@ -943,6 +943,7 @@ class BaseTask(object):
             runner_subfolder = os.path.join(path, subfolder)
             if not os.path.exists(runner_subfolder):
                 os.mkdir(runner_subfolder)
+                os.chmod(runner_subfolder, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
         return path
 
     def build_private_data_files(self, instance, private_data_dir):
@@ -1022,13 +1023,14 @@ class BaseTask(object):
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
         env_path = os.path.join(private_data_dir, 'env')
         try:
-            os.mkdir(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
+            os.mkdir(env_path)
+            os.chmod(env_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
 
         path = os.path.join(env_path, 'extravars')
-        handle = os.open(path, os.O_RDWR | os.O_CREAT, stat.S_IREAD | stat.S_IWRITE)
+        handle = os.open(path, os.O_RDWR | os.O_CREAT, stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IWGRP)
         f = os.fdopen(handle, 'w')
         if settings.ALLOW_JINJA_IN_EXTRA_VARS == 'always':
             f.write(yaml.safe_dump(vars))
@@ -1112,13 +1114,14 @@ class BaseTask(object):
     def write_args_file(self, private_data_dir, args):
         env_path = os.path.join(private_data_dir, 'env')
         try:
-            os.mkdir(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
+            os.mkdir(env_path)
+            os.chmod(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
 
         path = os.path.join(env_path, 'cmdline')
-        handle = os.open(path, os.O_RDWR | os.O_CREAT, stat.S_IREAD | stat.S_IWRITE)
+        handle = os.open(path, os.O_RDWR | os.O_CREAT, stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IWGRP)
         f = os.fdopen(handle, 'w')
         f.write(ansible_runner.utils.args2cmdline(*args))
         f.close()
@@ -2304,7 +2307,8 @@ class RunProjectUpdate(BaseTask):
         if p.scm_type == 'git':
             git_repo = git.Repo(project_path)
             if not os.path.exists(destination_folder):
-                os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
+                os.mkdir(destination_folder)
+                os.chmod(desitnation_folder, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
             tmp_branch_name = 'awx_internal/{}'.format(uuid4())
             # always clone based on specific job revision
             if not p.scm_revision:
@@ -2510,7 +2514,7 @@ class RunInventoryUpdate(BaseTask):
 
     def write_args_file(self, private_data_dir, args):
         path = os.path.join(private_data_dir, 'args')
-        handle = os.open(path, os.O_RDWR | os.O_CREAT, stat.S_IREAD | stat.S_IWRITE)
+        handle = os.open(path, os.O_RDWR | os.O_CREAT, stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IWGRP)
         f = os.fdopen(handle, 'w')
         f.write(' '.join(args))
         f.close()
