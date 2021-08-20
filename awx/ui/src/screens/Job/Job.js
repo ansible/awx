@@ -11,6 +11,7 @@ import {
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
+import { InventorySourcesAPI } from 'api';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import RoutedTabs from 'components/RoutedTabs';
@@ -41,7 +42,12 @@ function Job({ setBreadcrumb }) {
     isLoading,
     error,
     request: fetchJob,
-    result: { jobDetail, eventRelatedSearchableKeys, eventSearchableKeys },
+    result: {
+      jobDetail,
+      eventRelatedSearchableKeys,
+      eventSearchableKeys,
+      inventorySourceChoices,
+    },
   } = useRequest(
     useCallback(async () => {
       let eventOptions = {};
@@ -63,9 +69,16 @@ function Job({ setBreadcrumb }) {
 
         jobDetailData.summary_fields.credentials = results;
       }
+
       setBreadcrumb(jobDetailData);
+      let choices;
+      if (jobDetailData.type === 'inventory_update') {
+        choices = await InventorySourcesAPI.readOptions();
+      }
 
       return {
+        inventorySourceChoices:
+          choices?.data?.actions?.GET?.source?.choices || [],
         jobDetail: jobDetailData,
         eventRelatedSearchableKeys: (
           eventOptions?.related_search_fields || []
@@ -77,6 +90,7 @@ function Job({ setBreadcrumb }) {
     }, [id, type, setBreadcrumb]),
     {
       jobDetail: null,
+      inventorySourceChoices: [],
       eventRelatedSearchableKeys: [],
       eventSearchableKeys: [],
     }
@@ -145,7 +159,10 @@ function Job({ setBreadcrumb }) {
               key={job.type === 'workflow_job' ? 'workflow-details' : 'details'}
               path="/jobs/:typeSegment/:id/details"
             >
-              <JobDetail job={job} />
+              <JobDetail
+                job={job}
+                inventorySourceLabels={inventorySourceChoices}
+              />
             </Route>,
             <Route key="output" path="/jobs/:typeSegment/:id/output">
               {job.type === 'workflow_job' ? (
