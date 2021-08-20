@@ -640,12 +640,12 @@ register(
 register(
     'LOG_AGGREGATOR_THREAD_MIN_MESSAGES',
     field_class=fields.IntegerField,
-    default=50000,
+    default=0,
     min_value=1,
     label=_('Number of messages per one worker thread'),
     help_text=_(
         'Specify the number of messages a worker thread is processing before another worker thread is created '
-        'the external log aggregator (defaults to 50000). '
+        'the external log aggregator (Use value of 0 to used default is 50000). '
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -656,7 +656,7 @@ register(
     default=1,
     min_value=1,
     label=_('Maximum number of worker threads'),
-    help_text=_('Specifies the maximum number of worker threads that can be run parallel ' 'the external log aggregator (defaults to 1). '),
+    help_text=_('Specifies the maximum number of worker threads that can be run parallel the external log aggregator (Use value of 0 to used default is 1). '),
     category=_('Logging'),
     category_slug='logging',
 )

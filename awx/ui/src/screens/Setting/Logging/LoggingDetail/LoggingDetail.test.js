@@ -59,8 +59,8 @@ describe('<LoggingDetail />', () => {
     assertDetail(wrapper, 'Logging Aggregator Protocol', 'https');
     assertDetail(wrapper, 'TCP Connection Timeout', '5 seconds');
     assertDetail(wrapper, 'Logging Aggregator Level Threshold', 'INFO');
-    assertDetail(wrapper, 'Number of messages per one worker thread', '50000');
-    assertDetail(wrapper, 'Maximum number of worker threads', '1');
+    assertDetail(wrapper, 'Number of messages per one worker thread', '0');
+    assertDetail(wrapper, 'Maximum number of worker threads', '0');
     assertDetail(
       wrapper,
       'Enable/disable HTTPS certificate verification',
