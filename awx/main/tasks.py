@@ -968,7 +968,8 @@ class BaseTask(object):
         if private_data is not None:
             artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
             if not os.path.exists(artifact_dir):
-                os.makedirs(artifact_dir, mode=0o770)
+                os.makedirs(artifact_dir)
+                os.chmod(artifact_dir, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
             for credential, data in private_data.get('credentials', {}).items():
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
