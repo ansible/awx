@@ -270,6 +270,68 @@ describe('VisualizerNode', () => {
     });
   });
 
+  describe('Node should display convergence label', () => {
+    test('Should display ALL convergence label', async () => {
+      const wrapper = mountWithContexts(
+        <WorkflowDispatchContext.Provider value={dispatch}>
+          <WorkflowStateContext.Provider value={mockedContext}>
+            <svg>
+              <VisualizerNode
+                node={{
+                  id: 2,
+                  originalNodeObject: {
+                    all_parents_must_converge: true,
+                    always_nodes: [],
+                    created: '2020-11-19T21:47:55.278081Z',
+                    diff_mode: null,
+                    extra_data: {},
+                    failure_nodes: [],
+                    id: 49,
+                    identifier: 'f03b62c5-40f8-49e4-97c3-5bb20c91ec91',
+                    inventory: null,
+                    job_tags: null,
+                    job_type: null,
+                    limit: null,
+                    modified: '2020-11-19T21:47:55.278156Z',
+                    related: {
+                      credentials:
+                        '/api/v2/workflow_job_template_nodes/49/credentials/',
+                    },
+                    scm_branch: null,
+                    skip_tags: null,
+                    success_nodes: [],
+                    summary_fields: {
+                      workflow_job_template: { id: 15 },
+                      unified_job_template: {
+                        id: 7,
+                        description: '',
+                        name: 'Example',
+                        unified_job_type: 'job',
+                      },
+                    },
+                    type: 'workflow_job_template_node',
+                    unified_job_template: 7,
+                    url: '/api/v2/workflow_job_template_nodes/49/',
+                    verbosity: null,
+                    workflowMakerNodeId: 2,
+                    workflow_job_template: 15,
+                  },
+                }}
+                readOnly={false}
+                updateHelpText={updateHelpText}
+                updateNodeHelp={updateNodeHelp}
+              />
+            </svg>
+          </WorkflowStateContext.Provider>
+        </WorkflowDispatchContext.Provider>
+      );
+      expect(wrapper.find('p[data-cy="convergence-label"]').length).toBe(1);
+      expect(
+        wrapper.find('p[data-cy="convergence-label"]').prop('children')
+      ).toEqual('ALL');
+    });
+  });
+
   describe('Node without full unified job template', () => {
     let wrapper;
     beforeEach(() => {
@@ -336,6 +398,7 @@ describe('VisualizerNode', () => {
           .simulate('click');
       });
       expect(JobTemplatesAPI.readDetail).toHaveBeenCalledWith(7);
+      expect(wrapper.find('p[data-cy="convergence-label"]').length).toBe(0);
     });
 
     test('Displays error fetching full unified job template', async () => {
