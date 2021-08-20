@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-icons';
 import RoutedTabs from 'components/RoutedTabs';
 import { CardBody, CardActionsRow } from 'components/Card';
-import { DetailList, Detail, NumberSinceDetail } from 'components/DetailList';
+import { DetailList, Detail } from 'components/DetailList';
 import { useConfig } from 'contexts/Config';
 import { formatDateString, secondsToDays } from 'util/dates';
 
@@ -127,15 +127,17 @@ function SubscriptionDetail() {
             label={t`Hosts imported`}
             value={license_info.current_instances}
           />
-          <NumberSinceDetail
+          <Detail
             dataCy="subscription-hosts-automated"
             label={t`Hosts automated`}
-            number={license_info.automated_instances}
-            date={
-              license_info.automated_since &&
-              formatDateString(
-                new Date(license_info.automated_since * 1000).toISOString()
-              )
+            value={
+              <>
+                {license_info.automated_instances} <Trans>since</Trans>{' '}
+                {license_info.automated_since &&
+                  formatDateString(
+                    new Date(license_info.automated_since * 1000).toISOString()
+                  )}
+              </>
             }
           />
           <Detail
