@@ -30,6 +30,13 @@ import {
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
 import DateTimePicker from './DateTimePicker';
+import buildRuleObj from './buildRuleObj';
+
+const NUM_DAYS_PER_FREQUENCY = {
+  week: 7,
+  month: 31,
+  year: 365,
+};
 
 const generateRunOnTheDay = (days = []) => {
   if (
@@ -557,6 +564,19 @@ function ScheduleForm({
 
             if (
               end === 'onDate' &&
+              DateTime.fromISO(endDate)
+                .diff(DateTime.fromISO(startDate), 'days')
+                .toObject().days < NUM_DAYS_PER_FREQUENCY[frequency]
+            ) {
+              const rule = new RRule(buildRuleObj(values));
+              if (rule.all().length === 0) {
+                errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
+                errors.endDate = t`Selected date range must have at least 1 schedule occurrence.`;
+              }
+            }
+
+            if (
+              end === 'onDate' &&
               DateTime.fromISO(startDate) >= DateTime.fromISO(endDate)
             ) {
               errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
@@ -569,7 +589,6 @@ function ScheduleForm({
             ) {
               errors.runOn = t`Please select a day number between 1 and 31.`;
             }
-
             return errors;
           }}
         >
