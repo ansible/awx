@@ -1021,7 +1021,7 @@ class BaseTask(object):
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
         env_path = os.path.join(private_data_dir, 'env')
         try:
-            os.mkdir(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            os.mkdir(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
@@ -1111,7 +1111,7 @@ class BaseTask(object):
     def write_args_file(self, private_data_dir, args):
         env_path = os.path.join(private_data_dir, 'env')
         try:
-            os.mkdir(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            os.mkdir(env_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
@@ -1625,7 +1625,7 @@ class RunJob(BaseTask):
         # Create a directory for ControlPath sockets that is unique to each job
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
-            os.mkdir(cp_dir, 0o700)
+            os.mkdir(cp_dir, 0o770)
         # FIXME: more elegant way to manage this path in container
         env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = '/runner/cp'
 
@@ -2302,7 +2302,7 @@ class RunProjectUpdate(BaseTask):
         if p.scm_type == 'git':
             git_repo = git.Repo(project_path)
             if not os.path.exists(destination_folder):
-                os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+                os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP | stat.S_IWGRP)
             tmp_branch_name = 'awx_internal/{}'.format(uuid4())
             # always clone based on specific job revision
             if not p.scm_revision:
