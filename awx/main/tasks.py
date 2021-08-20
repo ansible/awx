@@ -1510,6 +1510,10 @@ class BaseTask(object):
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
+        # Last ditch effort to expose any trackbacks that were stored
+        if not extra_update_fields.get('result_traceback') and self.instance.result_traceback:
+            extra_update_fields['result_traceback'] = self.instance.result_traceback
+
         self.instance = self.update_model(pk)
         self.instance = self.update_model(pk, status=status, emitted_events=self.event_ct, **extra_update_fields)
 
@@ -3077,7 +3081,12 @@ class AWXReceptorJob:
                     return res
 
                 if not self.task.instance.result_traceback:
-                    raise RuntimeError(detail)
+                    try:
+                        resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
+                        lines = resultsock.readlines()
+                        self.task.instance.result_traceback = b"".join(lines).decode()
+                    except Exception:
+                        raise RuntimeError(detail)
 
         return res
 
