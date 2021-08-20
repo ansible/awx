@@ -994,7 +994,7 @@ def create_temporary_fifo(data):
     :param data(bytes): Data to write to the pipe.
     """
     path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
-    os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
+    os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
     threading.Thread(target=lambda p, d: open(p, 'wb').write(d), args=(path, data)).start()
     return path

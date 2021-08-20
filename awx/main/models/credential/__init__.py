@@ -506,7 +506,7 @@ class CredentialType(CommonModelNameNotUnique):
             _, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
             with open(path, 'w') as f:
                 f.write(data)
-            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
             container_path = to_container_path(path, private_data_dir)
 
             # determine if filename indicates single file or many
@@ -539,7 +539,7 @@ class CredentialType(CommonModelNameNotUnique):
                 f = os.fdopen(handle, 'w')
                 f.write(safe_dump(vars))
                 f.close()
-                os.chmod(path, stat.S_IRUSR)
+                os.chmod(path, stat.S_IRUSR | stat.S_IRGRP)
                 return path
 
             if extra_vars:
