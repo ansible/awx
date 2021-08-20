@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import { useHistory } from 'react-router-dom';
+import { DateTime } from 'luxon';
 import { RootAPI, MeAPI } from 'api';
 import { isAuthenticated } from 'util/auth';
 import { SESSION_TIMEOUT_KEY } from '../constants';
@@ -66,8 +67,8 @@ SessionContext.displayName = 'SessionContext';
 function SessionProvider({ children }) {
   const history = useHistory();
   const isSessionExpired = useRef(false);
-  const sessionTimeoutId = useRef();
-  const sessionIntervalId = useRef();
+  const sessionTimeoutId = useRef(null);
+  const sessionIntervalId = useRef(null);
   const [sessionTimeout, setSessionTimeout] = useStorage(SESSION_TIMEOUT_KEY);
   const [sessionCountdown, setSessionCountdown] = useState(0);
   const [authRedirectTo, setAuthRedirectTo] = useState('/');
@@ -89,8 +90,15 @@ function SessionProvider({ children }) {
       return () => {};
     }
 
-    const calcRemaining = () =>
-      parseInt(sessionTimeout, 10) - new Date().getTime();
+    const calcRemaining = () => {
+      if (sessionTimeout) {
+        return Math.max(
+          parseInt(sessionTimeout, 10) - DateTime.now().toMillis(),
+          0
+        );
+      }
+      return 0;
+    };
 
     const handleSessionTimeout = () => {
       let countDown = SESSION_WARNING_DURATION;
@@ -110,10 +118,12 @@ function SessionProvider({ children }) {
     clearTimeout(sessionTimeoutId.current);
     clearInterval(sessionIntervalId.current);
 
+    const calcTimeOut = calcRemaining() - SESSION_WARNING_DURATION * 1000;
+
     isSessionExpired.current = false;
     sessionTimeoutId.current = setTimeout(
       handleSessionTimeout,
-      Math.min(calcRemaining() - SESSION_WARNING_DURATION * 1000, MAX_TIMEOUT)
+      calcTimeOut <= 0 ? MAX_TIMEOUT : Math.min(calcTimeOut, MAX_TIMEOUT)
     );
 
     return () => {
