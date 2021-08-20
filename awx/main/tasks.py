@@ -966,6 +966,9 @@ class BaseTask(object):
         private_data = self.build_private_data(instance, private_data_dir)
         private_data_files = {'credentials': {}}
         if private_data is not None:
+            artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
+            if not os.path.exists(artifact_dir):
+                os.makedirs(artifact_dir, mode=0o770)
             for credential, data in private_data.get('credentials', {}).items():
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
@@ -993,9 +996,6 @@ class BaseTask(object):
                     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
                 private_data_files['credentials'][credential] = path
             for credential, data in private_data.get('certificates', {}).items():
-                artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
-                if not os.path.exists(artifact_dir):
-                    os.makedirs(artifact_dir, mode=0o700)
                 path = os.path.join(artifact_dir, 'ssh_key_data-cert.pub')
                 with open(path, 'w') as f:
                     f.write(data)
