@@ -56,6 +56,29 @@ describe('InventorySourceDetail', () => {
     jest.clearAllMocks();
   });
 
+  test('should render cancel button while job is running', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail
+          inventorySource={{
+            ...mockInvSource,
+            summary_fields: {
+              ...mockInvSource.summary_fields,
+              current_job: {
+                id: 42,
+                status: 'running',
+              },
+            },
+          }}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    expect(wrapper.find('InventorySourceDetail')).toHaveLength(1);
+
+    expect(wrapper.find('JobCancelButton').length).toBe(1);
+  });
+
   test('should render expected details', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
