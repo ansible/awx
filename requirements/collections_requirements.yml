@@ -1,6 +1,7 @@
 ---
 collections:
   - name: awx.awx
+    version: 19.2.2
   - name: azure.azcollection
   - name: amazon.aws
   - name: theforeman.foreman
