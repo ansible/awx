@@ -68,13 +68,23 @@ class InstanceGroupMembershipMixin(object):
     membership.
     """
 
+    def attach_validate(self, request):
+        parent = self.get_parent_object()
+        sub_id, res = super().attach_validate(request)
+        if res:  # handle an error
+            return sub_id, res
+        sub = get_object_or_400(self.model, pk=sub_id)
+        attach_errors = self.is_valid_relation(parent, sub)
+        if attach_errors:
+            return sub_id, Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
+        return sub_id, res
+
     def attach(self, request, *args, **kwargs):
         response = super(InstanceGroupMembershipMixin, self).attach(request, *args, **kwargs)
         sub_id, res = self.attach_validate(request)
         if status.is_success(response.status_code):
             if self.parent_model is Instance:
-                ig_obj = get_object_or_400(self.model, pk=sub_id)
-                inst_name = ig_obj.hostname
+                inst_name = self.get_parent_object().hostname
             else:
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
             with transaction.atomic():
@@ -91,11 +101,12 @@ class InstanceGroupMembershipMixin(object):
         return response
 
     def unattach_validate(self, request):
+        parent = self.get_parent_object()
         (sub_id, res) = super(InstanceGroupMembershipMixin, self).unattach_validate(request)
         if res:
             return (sub_id, res)
         sub = get_object_or_400(self.model, pk=sub_id)
-        attach_errors = self.is_valid_relation(None, sub)
+        attach_errors = self.is_valid_relation(parent, sub)
         if attach_errors:
             return (sub_id, Response(attach_errors, status=status.HTTP_400_BAD_REQUEST))
         return (sub_id, res)

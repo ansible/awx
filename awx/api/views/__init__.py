@@ -402,6 +402,11 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
     parent_model = models.Instance
     relationship = 'rampart_groups'
 
+    def is_valid_relation(self, parent, sub, created=False):
+        if parent.node_type == 'control':
+            return {'msg': _(f"Cannot change instance group membership of control-only node: {parent.hostname}.")}
+        return None
+
 
 class InstanceGroupList(ListCreateAPIView):
 
@@ -443,6 +448,11 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     parent_model = models.InstanceGroup
     relationship = "instances"
     search_fields = ('hostname',)
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.node_type == 'control':
+            return {'msg': _(f"Cannot change instance group membership of control-only node: {sub.hostname}.")}
+        return None
 
 
 class ScheduleList(ListCreateAPIView):
