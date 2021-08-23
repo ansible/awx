@@ -38,6 +38,33 @@ const instance = [
     managed_by_policy: true,
     node_type: 'hybrid',
   },
+  {
+    id: 2,
+    type: 'instance',
+    url: '/api/v2/instances/1/',
+    related: {
+      jobs: '/api/v2/instances/1/jobs/',
+      instance_groups: '/api/v2/instances/1/instance_groups/',
+    },
+    uuid: '00000000-0000-0000-0000-000000000001',
+    hostname: 'awx-control',
+    created: '2020-07-14T19:03:49.000054Z',
+    modified: '2020-08-12T20:08:02.836748Z',
+    capacity_adjustment: '0.40',
+    version: '13.0.0',
+    capacity: 10,
+    consumed_capacity: 0,
+    percent_capacity_remaining: 60.0,
+    jobs_running: 0,
+    jobs_total: 68,
+    cpu: 6,
+    memory: 2087469056,
+    cpu_capacity: 24,
+    mem_capacity: 1,
+    enabled: true,
+    managed_by_policy: true,
+    node_type: 'control',
+  },
 ];
 
 describe('<InstanceListItem/>', () => {
@@ -165,6 +192,24 @@ describe('<InstanceListItem/>', () => {
     expect(wrapper.find('Td').first().prop('select').onSelect).toEqual(
       onSelect
     );
+  });
+
+  test('should disable checkbox', async () => {
+    const onSelect = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[1]}
+              onSelect={onSelect}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>
+      );
+    });
+    expect(wrapper.find('Td').first().prop('select').disable).toEqual(true);
   });
 
   test('should display instance toggle', () => {

@@ -108,7 +108,7 @@ function InstanceListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: false,
+            disable: instance.node_type === 'control',
           }}
           dataLabel={t`Selected`}
         />
