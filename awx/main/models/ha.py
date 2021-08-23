@@ -3,6 +3,7 @@
 
 from decimal import Decimal
 import random
+import logging
 
 from django.core.validators import MinValueValidator
 from django.db import models, connection
@@ -25,6 +26,8 @@ from awx.main.utils.common import measure_cpu, get_corrected_cpu, get_cpu_effect
 from awx.main.models.mixins import RelatedJobsMixin
 
 __all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
+
+logger = logging.getLogger('awx.main.models.ha')
 
 
 class HasPolicyEditsMixin(HasEditsMixin):
@@ -174,12 +177,18 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
-    def save_health_data(self, version, cpu, memory, last_seen=None, has_error=False):
+    def save_health_data(self, version, cpu, memory, uuid=None, last_seen=None, has_error=False):
         update_fields = []
 
         if last_seen is not None and self.last_seen != last_seen:
             self.last_seen = last_seen
             update_fields.append('last_seen')
+
+        if uuid is not None and self.uuid != uuid:
+            if self.uuid is not None:
+                logger.warn(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
+            self.uuid = uuid
+            update_fields.append('uuid')
 
         if self.version != version:
             self.version = version

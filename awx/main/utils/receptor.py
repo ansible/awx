@@ -16,7 +16,7 @@ def worker_info(node_name):
     receptor_ctl = get_receptor_ctl()
     transmit_start = time.time()
     error_list = []
-    data = {'Errors': error_list, 'transmit_timing': 0.0}
+    data = {'errors': error_list, 'transmit_timing': 0.0}
 
     result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": f"--worker-info"}, ttl='20s', node=node_name)
 
@@ -71,7 +71,12 @@ def worker_info(node_name):
         if not isinstance(remote_data, dict):
             error_list.append(f'Remote node {node_name} --worker-info output is not a YAML dict, output:{stdout}')
         else:
-            error_list.extend(remote_data.pop('Errors'))  # merge both error lists
+            error_list.extend(remote_data.pop('errors', []))  # merge both error lists
             data.update(remote_data)
+
+    # see tasks.py usage of keys
+    missing_keys = set(('runner_version', 'mem_in_bytes', 'cpu_count')) - set(data.keys())
+    if missing_keys:
+        data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
 
     return data
