@@ -207,11 +207,27 @@ ansible_repo:
 	virtualenv -p python3 $(VENV_BASE)/ansible_repo
 	cat requirements/ansible_repo.txt | $(VENV_BASE)/ansible_repo/bin/pip install -r /dev/stdin
 
+ansible_infra:
+	virtualenv -p python3 $(VENV_BASE)/ansible_infra
+	cat requirements/ansible_infra.txt | $(VENV_BASE)/ansible_infra/bin/pip install -r /dev/stdin
+
+ansible_cpanel:
+	virtualenv -p python3 $(VENV_BASE)/ansible_cpanel
+	cat requirements/ansible_cpanel.txt | $(VENV_BASE)/ansible_cpanel/bin/pip install -r /dev/stdin
+
 ansible_cloud:
 	virtualenv -p python3 $(VENV_BASE)/ansible_cloud
 	cat requirements/ansible_cloud.txt | $(VENV_BASE)/ansible_cloud/bin/pip install -r /dev/stdin
 
-requirements_hostinger: requirements_custom_envs ansible_repo ansible_cloud
+ansible_network:
+	virtualenv -p python3 $(VENV_BASE)/ansible_network
+	cat requirements/ansible_network.txt | $(VENV_BASE)/ansible_network/bin/pip install -r /dev/stdin
+
+ansible_ovzcloud:
+	virtualenv -p python3 $(VENV_BASE)/ansible_ovzcloud
+	cat requirements/ansible_ovzcloud.txt | $(VENV_BASE)/ansible_ovzcloud/bin/pip install -r /dev/stdin
+
+requirements_hostinger: requirements_custom_envs ansible_repo ansible_cloud ansible_infra ansible_cpanel ansible_network ansible_ovzcloud
 # customization end
 
 # Install third-party requirements needed for AWX's environment.

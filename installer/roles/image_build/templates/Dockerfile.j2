@@ -75,6 +75,14 @@ ADD requirements/hostinger/ansible_repo.txt \
     /tmp/requirements/
 ADD requirements/hostinger/ansible_cloud.txt \
     /tmp/requirements/
+ADD requirements/hostinger/ansible_infra.txt \
+    /tmp/requirements/
+ADD requirements/hostinger/ansible_cpanel.txt \
+    /tmp/requirements/
+ADD requirements/hostinger/ansible_network.txt \
+    /tmp/requirements/
+ADD requirements/hostinger/ansible_ovzcloud.txt \
+    /tmp/requirements/
 RUN cd /tmp && VENV_BASE="/opt/envs" make requirements_hostinger
 # customization end
 
