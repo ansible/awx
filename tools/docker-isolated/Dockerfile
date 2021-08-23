@@ -1,20 +1,31 @@
-ARG TAG=latest
-FROM ansible/awx_devel:${TAG}
+ARG VERSION
+
+FROM ${VERSION}
+
+ENV UID=1000
+ENV HOMEDIR=ansible
+
+USER 0
 
 RUN dnf install -y gcc python36-devel openssh-server
-RUN python3 -m ensurepip && pip3 install "virtualenv < 20" ansible-runner
-RUN dnf remove -y gcc python36-devel && rm -rf /var/cache/dnf
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20" "ansible-runner < 2"
 
-RUN rm -f /etc/ssh/ssh_host_ecdsa_key /etc/ssh/ssh_host_rsa_key
-RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_ecdsa_key
-RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
-RUN sed -i "s/#UsePrivilegeSeparation.*/UsePrivilegeSeparation no/g" /etc/ssh/sshd_config
-RUN sed -i "s/UsePAM.*/UsePAM yes/g" /etc/ssh/sshd_config
-RUN sed -i "s/#StrictModes.*/StrictModes no/g" /etc/ssh/sshd_config
-RUN mkdir -p /root/.ssh
-RUN ln -s /awx_devel/authorized_keys /root/.ssh/authorized_keys
+RUN dnf remove -y gcc python36-devel && dnf clean all && rm -rf /var/cache/dnf
+
+RUN rm -f /etc/ssh/*_key
+RUN ssh-keygen -q -A -N ""
+RUN sed -i "s/UsePAM.*/UsePAM yes/g" /etc/ssh/sshd_config && echo "Port 2022" >> /etc/ssh/sshd_config
+
+RUN useradd -u ${UID} -d /home/${HOMEDIR} awx && \
+    mkdir /home/${HOMEDIR}/.ssh && \
+    chmod 700 /home/${HOMEDIR}/.ssh && \
+    chown awx:awx /home/${HOMEDIR}/.ssh && \
+    mkdir /var/lib/awx/.ansible && \
+    chown awx:awx /var/lib/awx/.ansible
+
+RUN rm -rf /run/nologin
+
+EXPOSE 2022
 
 ENTRYPOINT ["tini", "--"]
-CMD ["/usr/sbin/sshd", "-D"]
-
-EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D", "-e"]
