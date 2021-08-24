@@ -88,16 +88,6 @@ configures Github OAuth2 integration), so we need to
 _overwrite_ this in-memory value at the top of every request so
 that we have the latest version
 
-### django-oauth-toolkit
-
-Version 1.2.0 of this project has a bug that error when revoking tokens.
-This is fixed in the master branch but is not yet released.
-
-When upgrading past 1.2.0 in the future, the `0025` migration needs to be
-edited, just like the old migration was edited in the project:
-https://github.com/jazzband/django-oauth-toolkit/commit/96538876d0d7ea0319ba5286f9bde842a906e1c5
-The field can simply have the validator method `validate_uris` removed.
-
 ### azure-keyvault
 
 Upgrading to 4.0.0 causes error because imports changed.

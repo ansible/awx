@@ -67,6 +67,7 @@ cryptography==2.9.2
     #   adal
     #   autobahn
     #   azure-keyvault
+    #   jwcrypto
     #   pyopenssl
     #   service-identity
     #   social-auth-core
@@ -83,6 +84,8 @@ defusedxml==0.6.0
     #   python3-openid
     #   python3-saml
     #   social-auth-core
+deprecated==1.2.12
+    # via jwcrypto
 dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
@@ -112,7 +115,7 @@ django-guid==2.2.0
     # via -r /awx_devel/requirements/requirements.in
 django-jsonfield==1.2.0
     # via -r /awx_devel/requirements/requirements.in
-django-oauth-toolkit==1.1.3
+django-oauth-toolkit==1.5.0
     # via -r /awx_devel/requirements/requirements.in
 django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
@@ -189,6 +192,8 @@ json-log-formatter==0.3.0
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==3.2.0
     # via -r /awx_devel/requirements/requirements.in
+jwcrypto==1.0
+    # via django-oauth-toolkit
 kubernetes==11.0.0
     # via openshift
 lockfile==0.12.2
@@ -343,6 +348,7 @@ six==1.14.0
     #   automat
     #   cryptography
     #   django-extensions
+    #   django-oauth-toolkit
     #   django-pglocks
     #   google-auth
     #   isodate
@@ -403,6 +409,8 @@ websocket-client==0.57.0
     #   slackclient
 wheel==0.36.2
     # via -r /awx_devel/requirements/requirements.in
+wrapt==1.12.1
+    # via deprecated
 xmlsec==1.3.3
     # via python3-saml
 yarl==1.4.2
