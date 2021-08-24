@@ -104,17 +104,6 @@ Imports as used in `awx/main/notifications/slack_backend.py` changed
 in version 2.0. This plugin code will need to change and be re-tested
 as the upgrade takes place.
 
-### django-jsonfield
-
-Instead of calling a `loads()` operation, the returned value is casted into
-a string in some cases, introduced in the change:
-
-https://github.com/adamchainz/django-jsonfield/pull/14
-
-This breaks a very large amount of AWX code that assumes these fields
-are returned as dicts. Upgrading this library will require a refactor
-to accomidate this change.
-
 ### pip and setuptools
 
 The offline installer needs to have functionality confirmed before upgrading these.

@@ -113,7 +113,7 @@ django-extensions==2.2.9
     # via -r /awx_devel/requirements/requirements.in
 django-guid==2.2.0
     # via -r /awx_devel/requirements/requirements.in
-django-jsonfield==1.2.0
+django-jsonfield==1.4.1
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.5.0
     # via -r /awx_devel/requirements/requirements.in
@@ -348,6 +348,7 @@ six==1.14.0
     #   automat
     #   cryptography
     #   django-extensions
+    #   django-jsonfield
     #   django-oauth-toolkit
     #   django-pglocks
     #   google-auth

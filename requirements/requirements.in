@@ -15,7 +15,7 @@ django-cors-headers>=3.5.0
 django-crum
 django-extensions>=2.2.9  # https://github.com/ansible/awx/pull/6441
 django-guid==2.2.0  # pinned to match Django 2.2
-django-jsonfield==1.2.0  # see UPGRADE BLOCKERs
+django-jsonfield==1.4.1  # see UPGRADE BLOCKERs
 django-oauth-toolkit==1.5.0
 django-polymorphic
 django-pglocks

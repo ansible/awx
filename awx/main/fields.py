@@ -78,7 +78,9 @@ class JSONField(upstream_JSONField):
     def from_db_value(self, value, expression, connection):
         if value in {'', None} and not self.null:
             return {}
-        return super(JSONField, self).from_db_value(value, expression, connection)
+        if isinstance(value, str):
+            return json.loads(value)
+        return value
 
 
 class JSONBField(upstream_JSONBField):
