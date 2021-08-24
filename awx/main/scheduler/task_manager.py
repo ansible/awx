@@ -88,7 +88,14 @@ class TaskManager:
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(
-                graph=DependencyGraph(), capacity_total=0, execution_capacity=0, control_capacity=0, consumed_capacity=0, instances=[]
+                graph=DependencyGraph(),
+                capacity_total=0,
+                execution_capacity=0,
+                control_capacity=0,
+                consumed_capacity=0,
+                consumed_control=0,
+                consumed_execution=0,
+                instances=[],
             )
             for instance in rampart_group.instances.all():
                 if not instance.enabled:
@@ -301,12 +308,15 @@ class TaskManager:
             else:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
-                try:
-                    controller_node = Instance.choose_online_control_plane_node()
-                except IndexError:
-                    logger.warning("No control plane nodes available to manage {}".format(task.log_format))
-                    return
-                task.controller_node = controller_node
+                if instance.node_type == 'execution':
+                    try:
+                        task.controller_node = Instance.choose_online_control_plane_node()
+                    except IndexError:
+                        logger.warning("No control plane nodes available to manage {}".format(task.log_format))
+                        return
+                else:
+                    # control plane nodes will manage jobs locally for performance and resilience
+                    task.controller_node = task.execution_node
                 logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, task.controller_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
@@ -314,7 +324,7 @@ class TaskManager:
                 task.log_lifecycle("waiting")
 
             if rampart_group is not None:
-                self.consume_capacity(task, rampart_group.name)
+                self.consume_capacity(task, rampart_group.name, instance=instance)
 
         def post_commit():
             if task.status != 'failed' and type(task) is not WorkflowJob:
@@ -492,6 +502,7 @@ class TaskManager:
             preferred_instance_groups = task.preferred_instance_groups
 
             found_acceptable_queue = False
+            on_control_plane = True
             if isinstance(task, WorkflowJob):
                 if task.unified_job_template_id in running_workflow_templates:
                     if not task.allow_simultaneous:
@@ -501,6 +512,8 @@ class TaskManager:
                     running_workflow_templates.add(task.unified_job_template_id)
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
+            elif isinstance(task, (Job, AdHocCommand, InventoryUpdate)):
+                on_control_plane = False
 
             for rampart_group in preferred_instance_groups:
                 if task.can_run_containerized and rampart_group.is_container_group:
@@ -513,7 +526,7 @@ class TaskManager:
                     logger.debug("Skipping group {}, task cannot run on control plane".format(rampart_group.name))
                     continue
 
-                remaining_capacity = self.get_remaining_capacity(rampart_group.name)
+                remaining_capacity = self.get_remaining_capacity(rampart_group.name, on_control_plane=on_control_plane)
                 if task.task_impact > 0 and self.get_remaining_capacity(rampart_group.name) <= 0:
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
                     continue
@@ -591,15 +604,21 @@ class TaskManager:
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
-    def consume_capacity(self, task, instance_group):
+    def consume_capacity(self, task, instance_group, instance=None):
         logger.debug(
             '{} consumed {} capacity units from {} with prior total of {}'.format(
                 task.log_format, task.task_impact, instance_group, self.graph[instance_group]['consumed_capacity']
             )
         )
         self.graph[instance_group]['consumed_capacity'] += task.task_impact
+        if instance is None or instance.node_type in ('hybrid', 'control'):
+            self.graph[instance_group]['consumed_control'] += task.task_impact
+        if instance is None or instance.node_type in ('hybrid', 'execution'):
+            self.graph[instance_group]['consumed_execution'] += task.task_impact
 
-    def get_remaining_capacity(self, instance_group):
+    def get_remaining_capacity(self, instance_group, on_control_plane=False):
+        if on_control_plane:
+            return self.graph[instance_group]['control_capacity'] - self.graph[instance_group]['consumed_control']
         return self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['consumed_capacity']
 
     def process_tasks(self, all_sorted_tasks):
