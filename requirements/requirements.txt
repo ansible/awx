@@ -14,6 +14,7 @@ asgiref==3.2.5
     #   channels
     #   channels-redis
     #   daphne
+    #   django
 async-timeout==3.0.1
     # via
     #   aiohttp
@@ -86,7 +87,7 @@ dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
-django==2.2.20
+django==3.0.14
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
