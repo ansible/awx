@@ -270,10 +270,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         return sum([inst.capacity for inst in self.instances.all()])
 
     @property
-    def execution_capacity(self):
-        return sum([inst.capacity for inst in self.instances.filter(node_type__in=['hybrid', 'execution'])])
-
-    @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(status__in=('running', 'waiting'), instance_group=self).count()
 
