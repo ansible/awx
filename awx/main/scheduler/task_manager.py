@@ -87,7 +87,17 @@ class TaskManager:
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
-            self.graph[rampart_group.name] = dict(graph=DependencyGraph(), capacity_total=rampart_group.execution_capacity, consumed_capacity=0, instances=[])
+            self.graph[rampart_group.name] = dict(
+                graph=DependencyGraph(), capacity_total=0, execution_capacity=0, control_capacity=0, consumed_capacity=0, instances=[]
+            )
+            for instance in rampart_group.instances.all():
+                if not instance.enabled:
+                    continue
+                if instance.node_type in ('control', 'hybrid'):
+                    self.graph[rampart_group.name]['control_capacity'] += instance.capacity
+                if instance.node_type in ('execution', 'hybrid'):
+                    self.graph[rampart_group.name]['execution_capacity'] += instance.capacity
+                self.graph[rampart_group.name]['capacity_total'] += instance.capacity
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])

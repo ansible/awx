@@ -7,6 +7,7 @@ from awx.main.scheduler import TaskManager
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import encrypt_field
 from awx.main.models import WorkflowJobTemplate, JobTemplate, Job
+from awx.main.models.ha import Instance, InstanceGroup
 
 
 @pytest.mark.django_db
@@ -98,6 +99,21 @@ class TestJobLifeCycle:
             else:
                 self.run_tm(tm, expect_schedule=[mock.call()])
             wfjts[0].refresh_from_db()
+
+    def test_project_update_control_instance(self, project):
+        ig = InstanceGroup.objects.create(name='controlplane')
+        inst = Instance.objects.create(hostname='awx-1', node_type='control', capacity=500)
+        ig.instances.add(inst)
+        pu = project.create_unified_job()
+        pu.signal_start()
+        tm = TaskManager()
+
+        # Submits the project update to the correct queue, same control and execution node
+        self.run_tm(tm)
+
+        pu.refresh_from_db()
+        assert pu.status == 'waiting'
+        assert [pu.execution_node, pu.controller_node] == [inst.hostname, inst.hostname]
 
 
 @pytest.mark.django_db
