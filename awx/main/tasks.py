@@ -3078,7 +3078,13 @@ class AWXReceptorJob:
                     return res
 
                 if not self.task.instance.result_traceback:
-                    raise RuntimeError(detail)
+                    try:
+                        resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
+                        lines = resultsock.readlines()
+                        self.task.instance.result_traceback = b"".join(lines).decode()
+                        self.task.instance.save(update_fields=['result_traceback'])
+                    except Exception:
+                        raise RuntimeError(detail)
 
         return res
 
