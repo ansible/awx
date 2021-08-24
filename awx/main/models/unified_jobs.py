@@ -740,15 +740,13 @@ class UnifiedJob(
         raise NotImplementedError  # Implement in subclasses.
 
     @property
-    def can_run_on_control_plane(self):
-        if settings.IS_K8S:
-            return False
-
-        return True
-
-    @property
-    def can_run_containerized(self):
-        return False
+    def capacity_type(self):
+        model_name = self._meta.model_name
+        if model_name in ('job', 'inventoryupdate', 'adhoccommand'):
+            return 'execution'
+        elif model_name == 'workflowjob':
+            return None
+        return 'control'
 
     def _get_parent_field_name(self):
         return 'unified_job_template'  # Override in subclasses.

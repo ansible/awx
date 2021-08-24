@@ -288,10 +288,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         app_label = 'main'
 
     @staticmethod
-    def fit_task_to_most_remaining_capacity_instance(task, instances, node_type='execution'):
+    def fit_task_to_most_remaining_capacity_instance(task, instances):
         instance_most_capacity = None
         for i in instances:
-            if i.node_type not in (node_type, 'hybrid'):
+            if i.node_type not in (task.capacity_type, 'hybrid'):
                 continue
             if i.remaining_capacity >= task.task_impact and (
                 instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
@@ -300,10 +300,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         return instance_most_capacity
 
     @staticmethod
-    def find_largest_idle_instance(instances, node_type='execution'):
+    def find_largest_idle_instance(instances, capacity_type='execution'):
         largest_instance = None
         for i in instances:
-            if i.node_type not in (node_type, 'hybrid'):
+            if i.node_type not in (capacity_type, 'hybrid'):
                 continue
             if i.jobs_running == 0:
                 if largest_instance is None:

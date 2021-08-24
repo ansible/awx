@@ -744,10 +744,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return artifacts
 
     @property
-    def can_run_containerized(self):
-        return True
-
-    @property
     def is_container_group_task(self):
         return bool(self.instance_group and self.instance_group.is_container_group)
 
@@ -1235,10 +1231,6 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         if self.has_unpartitioned_events:
             return UnpartitionedSystemJobEvent
         return SystemJobEvent
-
-    @property
-    def can_run_on_control_plane(self):
-        return True
 
     @property
     def task_impact(self):

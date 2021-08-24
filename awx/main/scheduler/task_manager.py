@@ -298,7 +298,7 @@ class TaskManager:
                 task.instance_group = rampart_group
                 if match is None:
                     logger.warn('No available capacity to run containerized <{}>.'.format(task.log_format))
-                elif task.can_run_containerized and any(ig.is_container_group for ig in task.preferred_instance_groups):
+                elif task.capacity_type == 'execution' and any(ig.is_container_group for ig in task.preferred_instance_groups):
                     task.controller_node = match.hostname
                 else:
                     # project updates and inventory updates don't *actually* run in pods, so
@@ -502,7 +502,6 @@ class TaskManager:
             preferred_instance_groups = task.preferred_instance_groups
 
             found_acceptable_queue = False
-            on_control_plane = True
             if isinstance(task, WorkflowJob):
                 if task.unified_job_template_id in running_workflow_templates:
                     if not task.allow_simultaneous:
@@ -512,28 +511,26 @@ class TaskManager:
                     running_workflow_templates.add(task.unified_job_template_id)
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
-            elif isinstance(task, (Job, AdHocCommand, InventoryUpdate)):
-                on_control_plane = False
 
             for rampart_group in preferred_instance_groups:
-                if task.can_run_containerized and rampart_group.is_container_group:
+                if task.capacity_type == 'execution' and rampart_group.is_container_group:
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
 
-                if not task.can_run_on_control_plane:
+                if settings.IS_K8S and task.capacity_type == 'execution':
                     logger.debug("Skipping group {}, task cannot run on control plane".format(rampart_group.name))
                     continue
 
-                remaining_capacity = self.get_remaining_capacity(rampart_group.name, on_control_plane=on_control_plane)
-                if task.task_impact > 0 and self.get_remaining_capacity(rampart_group.name) <= 0:
+                remaining_capacity = self.get_remaining_capacity(rampart_group.name, capacity_type=task.capacity_type)
+                if task.task_impact > 0 and remaining_capacity <= 0:
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
                     continue
 
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                    task, self.graph[rampart_group.name]['instances'], node_type='control' if on_control_plane else 'execution'
-                ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'])
+                    task, self.graph[rampart_group.name]['instances']
+                ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'], capacity_type=task.capacity_type)
 
                 if execution_instance or rampart_group.is_container_group:
                     if not rampart_group.is_container_group:
@@ -616,10 +613,8 @@ class TaskManager:
         if instance is None or instance.node_type in ('hybrid', 'execution'):
             self.graph[instance_group]['consumed_execution'] += task.task_impact
 
-    def get_remaining_capacity(self, instance_group, on_control_plane=False):
-        if on_control_plane:
-            return self.graph[instance_group]['control_capacity'] - self.graph[instance_group]['consumed_control']
-        return self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['consumed_capacity']
+    def get_remaining_capacity(self, instance_group, capacity_type='execution'):
+        return self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}']
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]

@@ -1214,10 +1214,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     def is_container_group_task(self):
         return bool(self.instance_group and self.instance_group.is_container_group)
 
-    @property
-    def can_run_containerized(self):
-        return True
-
     def _get_parent_field_name(self):
         return 'inventory_source'
 
