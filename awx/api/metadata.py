@@ -9,8 +9,8 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.fields import PositiveIntegerField, BooleanField
 from django.db.models.fields.related import ForeignKey
 from django.http import Http404
-from django.utils.encoding import force_text, smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str, smart_str
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework import exceptions
@@ -53,7 +53,7 @@ class Metadata(metadata.SimpleMetadata):
         for attr in text_attrs:
             value = getattr(field, attr, None)
             if value is not None and value != '':
-                field_info[attr] = force_text(value, strings_only=True)
+                field_info[attr] = force_str(value, strings_only=True)
 
         placeholder = getattr(field, 'placeholder', serializers.empty)
         if placeholder is not serializers.empty:
@@ -77,7 +77,7 @@ class Metadata(metadata.SimpleMetadata):
             }
             if field.field_name in field_help_text:
                 opts = serializer.Meta.model._meta.concrete_model._meta
-                verbose_name = smart_text(opts.verbose_name)
+                verbose_name = smart_str(opts.verbose_name)
                 field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
 
             if field.field_name == 'type':

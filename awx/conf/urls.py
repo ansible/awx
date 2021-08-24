@@ -2,12 +2,12 @@
 # All Rights Reserved.
 
 
-from django.conf.urls import url
+from django.urls import re_path
 from awx.conf.views import SettingCategoryList, SettingSingletonDetail, SettingLoggingTest
 
 
 urlpatterns = [
-    url(r'^$', SettingCategoryList.as_view(), name='setting_category_list'),
-    url(r'^(?P<category_slug>[a-z0-9-]+)/$', SettingSingletonDetail.as_view(), name='setting_singleton_detail'),
-    url(r'^logging/test/$', SettingLoggingTest.as_view(), name='setting_logging_test'),
+    re_path(r'^$', SettingCategoryList.as_view(), name='setting_category_list'),
+    re_path(r'^(?P<category_slug>[a-z0-9-]+)/$', SettingSingletonDetail.as_view(), name='setting_singleton_detail'),
+    re_path(r'^logging/test/$', SettingLoggingTest.as_view(), name='setting_logging_test'),
 ]

@@ -8,7 +8,7 @@ from django.db.models import Count
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.exceptions import PermissionDenied

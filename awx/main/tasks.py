@@ -37,7 +37,7 @@ from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _, gettext_noop
+from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django_guid.middleware import GuidMiddleware

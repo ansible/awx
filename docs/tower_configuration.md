@@ -37,7 +37,7 @@ Each Django app in AWX should have a `conf.py` file where related settings get r
 # ...
 
 # Django
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.conf import fields, register

@@ -10,8 +10,8 @@ from django.db import models, DatabaseError, connection
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import force_str
 
 from awx.api.versioning import reverse
 from awx.main import consumers
@@ -396,7 +396,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
                     connection.on_commit(_send_notifications)
 
         for field in ('playbook', 'play', 'task', 'role'):
-            value = force_text(event_data.get(field, '')).strip()
+            value = force_str(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
         if settings.LOG_AGGREGATOR_ENABLED:

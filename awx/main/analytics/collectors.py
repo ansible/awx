@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from psycopg2.errors import UntranslatableCharacter
 

@@ -19,7 +19,7 @@ from django.db import models
 # from django.core.cache import cache
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import FieldDoesNotExist
 
 # REST Framework

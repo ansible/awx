@@ -8,7 +8,7 @@ import logging
 from django.conf import settings
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied

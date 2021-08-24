@@ -4,8 +4,8 @@
 import logging
 from slackclient import SlackClient
 
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
@@ -45,7 +45,7 @@ class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
                     else:
                         raise RuntimeError("Slack Notification unable to send {}: {} ({})".format(r, m.subject, ret['error']))
             except Exception as e:
-                logger.error(smart_text(_("Exception sending messages: {}").format(e)))
+                logger.error(smart_str(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:
                     raise
         return sent_messages

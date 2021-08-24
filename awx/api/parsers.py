@@ -5,7 +5,7 @@ import json
 # Django
 from django.conf import settings
 from django.utils.encoding import smart_str
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework import parsers

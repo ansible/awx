@@ -1,7 +1,7 @@
 import redis
 import logging
 
-from django.conf.urls import url
+from django.urls import re_path
 from django.conf import settings
 
 from channels.auth import AuthMiddlewareStack
@@ -27,8 +27,8 @@ class AWXProtocolTypeRouter(ProtocolTypeRouter):
 
 
 websocket_urlpatterns = [
-    url(r'websocket/$', consumers.EventConsumer),
-    url(r'websocket/broadcast/$', consumers.BroadcastConsumer),
+    re_path(r'websocket/$', consumers.EventConsumer),
+    re_path(r'websocket/broadcast/$', consumers.BroadcastConsumer),
 ]
 
 application = AWXProtocolTypeRouter(
