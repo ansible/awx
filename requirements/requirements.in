@@ -26,7 +26,7 @@ django-solo
 django-split-settings
 django-taggit
 djangorestframework>=3.12.1
-djangorestframework-yaml
+djangorestframework-yaml==2.0.0
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
 jinja2>=2.11.0  # required for ChainableUndefined

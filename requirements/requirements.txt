@@ -135,7 +135,7 @@ django-taggit==1.2.0
     # via -r /awx_devel/requirements/requirements.in
 djangorestframework==3.12.1
     # via -r /awx_devel/requirements/requirements.in
-djangorestframework-yaml==1.0.3
+djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.16
     # via python-daemon
