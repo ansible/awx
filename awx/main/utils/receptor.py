@@ -8,8 +8,24 @@ from receptorctl.socket_interface import ReceptorControl
 logger = logging.getLogger('awx.main.utils.receptor')
 
 
+def get_receptor_sockfile():
+    receptor_conf = '/etc/receptor/receptor.conf'
+    with open(receptor_conf, 'r') as f:
+        data = yaml.safe_load(f)
+    for section in data:
+        for entry_name, entry_data in section.items():
+            if entry_name == 'control-service':
+                if 'filename' in entry_data:
+                    return entry_data['filename']
+                else:
+                    raise RuntimeError(f'Receptor conf {receptor_conf} control-service entry does not have a filename parameter')
+    else:
+        raise RuntimeError(f'Receptor conf {receptor_conf} does not have control-service entry needed to get sockfile')
+
+
 def get_receptor_ctl():
-    return ReceptorControl('/var/run/receptor/receptor.sock')
+    receptor_sockfile = get_receptor_sockfile()
+    return ReceptorControl(receptor_sockfile)
 
 
 def worker_info(node_name):
