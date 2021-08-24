@@ -446,7 +446,8 @@ def inspect_execution_nodes(instance_list):
         if hostname in node_lookup:
             instance = node_lookup[hostname]
         else:
-            (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
+            defaults = dict(enabled=False)
+            (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution', defaults=defaults)
         was_lost = instance.is_lost(ref_time=nowtime)
         last_seen = parse_date(ad['Time'])
 
