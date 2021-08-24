@@ -1,7 +1,7 @@
 ---
 version: '2.1'
 services:
-{% for i in range(cluster_node_count|int) %}
+{% for i in range(control_plane_node_count|int) %}
   {% set container_postfix = loop.index %}
   {% set awx_sdb_port_start = 7899 + (loop.index0*1000) | int %}
   {% set awx_sdb_port_end = 7999 + (loop.index0*1000) | int %}
@@ -35,16 +35,16 @@ services:
       - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
-      - "../../docker-compose/receptor.conf:/etc/receptor/receptor.conf"
+      - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "~/.kube/config:/var/lib/awx/.kube/config"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
-      - "receptor_{{ container_postfix }}:/var/run/receptor/"
     privileged: true
     tty: true
     ports:
       - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
-{% if cluster_node_count|int == 1 %}
+{% if control_plane_node_count|int == 1 %}
       - "6899:6899"
       - "8080:8080"  # unused but mapped for debugging
       - "8888:8888"  # jupyter notebook
@@ -61,7 +61,7 @@ services:
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
 {% endfor %}
-{% if cluster_node_count|int > 1 %}
+{% if control_plane_node_count|int > 1 %}
   haproxy:
     image: haproxy
     user: "{{ ansible_user_uid }}"
@@ -72,7 +72,7 @@ services:
       - "8043:8043"
       - "1936:1936"
     depends_on:
-  {% for i in range(cluster_node_count|int) -%}
+  {% for i in range(control_plane_node_count|int) -%}
   {% set container_postfix = loop.index %}
     - "awx_{{ container_postfix }}"
   {% endfor %}
@@ -93,13 +93,40 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db:/var/lib/postgresql/data"
+{% if execution_node_count|int > 0 %}
+  receptor-hop:
+    image: quay.io/project-receptor/receptor:latest
+    user: root
+    container_name: tools_receptor_hop
+    hostname: receptor-hop
+    command: 'receptor --config /etc/receptor/receptor.conf'
+    links:
+      - awx_1
+    ports:
+      - "5555:5555"
+    volumes:
+      - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
+  {% for i in range(execution_node_count|int) -%}
+  receptor-{{ loop.index }}:
+    image: quay.io/awx/awx_devel:devel
+    user: "{{ ansible_user_uid }}"
+    container_name: tools_receptor_{{ loop.index }}
+    hostname: receptor-1
+    command: 'receptor --config /etc/receptor/receptor.conf'
+    links:
+      - receptor-hop
+    volumes:
+      - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+    privileged: true
+  {% endfor %}
+{% endif %}
+
 volumes:
   awx_db:
     name: tools_awx_db
-{% for i in range(cluster_node_count|int) -%}
+{% for i in range(control_plane_node_count|int) -%}
   {% set container_postfix = loop.index %}
-  receptor_{{ container_postfix }}:
-    name: tools_receptor_{{ container_postfix }}
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}

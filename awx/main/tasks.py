@@ -52,8 +52,8 @@ from gitdb.exc import BadName as BadGitName
 # Runner
 import ansible_runner
 
-# Receptor
-from receptorctl.socket_interface import ReceptorControl
+# dateutil
+from dateutil.parser import parse as parse_date
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -106,6 +106,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
+from awx.main.utils.receptor import get_receptor_ctl, worker_info
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -176,8 +177,7 @@ def dispatch_startup():
 def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.capacity = 0  # No thank you to new jobs while shut down
-        this_inst.save(update_fields=['capacity', 'modified'])
+        this_inst.mark_offline(update_last_seen=True)  # No thank you to new jobs while shut down
         try:
             reaper.reap(this_inst)
         except Exception:
@@ -400,6 +400,78 @@ def cleanup_execution_environment_images():
 
 
 @task(queue=get_local_queuename)
+def execution_node_health_check(node):
+    try:
+        instance = Instance.objects.get(hostname=node)
+    except Instance.DoesNotExist:
+        logger.warn(f'Instance record for {node} missing, could not check capacity.')
+        return
+    data = worker_info(node)
+
+    prior_capacity = instance.capacity
+
+    instance.save_health_data(
+        version='ansible-runner-' + data.get('runner_version', '???'),
+        cpu=data.get('cpu_count', 0),
+        memory=data.get('mem_in_bytes', 0),
+        uuid=data.get('uuid'),
+        has_error=bool(data.get('errors')),
+    )
+
+    if data['errors']:
+        formatted_error = "\n".join(data["errors"])
+        if prior_capacity:
+            logger.warn(f'Health check marking execution node {node} as lost, errors:\n{formatted_error}')
+        else:
+            logger.info(f'Failed to find capacity of new or lost execution node {node}, errors:\n{formatted_error}')
+    else:
+        logger.info('Set capacity of execution node {} to {}, worker info data:\n{}'.format(node, instance.capacity, json.dumps(data, indent=2)))
+
+
+def inspect_execution_nodes(instance_list):
+    node_lookup = {}
+    for inst in instance_list:
+        if inst.node_type == 'execution':
+            node_lookup[inst.hostname] = inst
+
+    ctl = get_receptor_ctl()
+    connections = ctl.simple_command('status')['Advertisements']
+    nowtime = now()
+    for ad in connections:
+        hostname = ad['NodeID']
+        commands = ad.get('WorkCommands') or []
+        if 'ansible-runner' not in commands:
+            continue
+        changed = False
+        if hostname in node_lookup:
+            instance = node_lookup[hostname]
+        else:
+            (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution')
+        was_lost = instance.is_lost(ref_time=nowtime)
+        last_seen = parse_date(ad['Time'])
+
+        if instance.last_seen and instance.last_seen >= last_seen:
+            continue
+        instance.last_seen = last_seen
+        instance.save(update_fields=['last_seen'])
+
+        if changed:
+            logger.warn("Registered execution node '{}'".format(hostname))
+            execution_node_health_check.apply_async([hostname])
+        elif was_lost:
+            # if the instance *was* lost, but has appeared again,
+            # attempt to re-establish the initial capacity and version
+            # check
+            logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
+            execution_node_health_check.apply_async([hostname])
+        elif instance.capacity == 0:
+            # Periodically re-run the health check of errored nodes, in case someone fixed it
+            # TODO: perhaps decrease the frequency of these checks
+            logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
+            execution_node_health_check.apply_async([hostname])
+
+
+@task(queue=get_local_queuename)
 def cluster_node_heartbeat():
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
@@ -407,28 +479,34 @@ def cluster_node_heartbeat():
     this_inst = None
     lost_instances = []
 
-    (changed, instance) = Instance.objects.get_or_register()
-    if changed:
-        logger.info("Registered tower node '{}'".format(instance.hostname))
-
-    for inst in list(instance_list):
+    for inst in instance_list:
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
             instance_list.remove(inst)
-        elif inst.is_lost(ref_time=nowtime):
+            break
+    else:
+        (changed, this_inst) = Instance.objects.get_or_register()
+        if changed:
+            logger.info("Registered tower control node '{}'".format(this_inst.hostname))
+
+    inspect_execution_nodes(instance_list)
+
+    for inst in list(instance_list):
+        if inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
+
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
-        this_inst.refresh_capacity()
-        if startup_event:
+        this_inst.local_health_check()
+        if startup_event and this_inst.capacity != 0:
             logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
             return
     else:
         raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
     # IFF any node has a greater version than we do, then we'll shutdown services
     for other_inst in instance_list:
-        if other_inst.version == "":
+        if other_inst.version == "" or other_inst.version.startswith('ansible-runner') or other_inst.node_type == 'execution':
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
             logger.error(
@@ -440,6 +518,7 @@ def cluster_node_heartbeat():
             # The heartbeat task will reset the capacity to the system capacity after upgrade.
             stop_local_services(communicate=False)
             raise RuntimeError("Shutting down.")
+
     for other_inst in lost_instances:
         try:
             reaper.reap(other_inst)
@@ -454,9 +533,8 @@ def cluster_node_heartbeat():
             # If auto deprovisining is on, don't bother setting the capacity to 0
             # since we will delete the node anyway.
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
-                other_inst.capacity = 0
-                other_inst.save(update_fields=['capacity'])
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.modified))
+                other_inst.mark_offline()
+                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()
@@ -750,10 +828,6 @@ def with_path_cleanup(f):
             self.cleanup_paths = []
 
     return _wrapped
-
-
-def get_receptor_ctl():
-    return ReceptorControl('/var/run/receptor/receptor.sock')
 
 
 class BaseTask(object):
@@ -2927,18 +3001,18 @@ class AWXReceptorJob:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
             self.runner_params['settings'].update(execution_environment_params)
 
-    def run(self):
+    def run(self, work_type=None):
         # We establish a connection to the Receptor socket
         receptor_ctl = get_receptor_ctl()
 
         try:
-            return self._run_internal(receptor_ctl)
+            return self._run_internal(receptor_ctl, work_type=work_type)
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
-    def _run_internal(self, receptor_ctl):
+    def _run_internal(self, receptor_ctl, work_type=None):
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
         # reading.
@@ -2949,7 +3023,14 @@ class AWXReceptorJob:
 
         # submit our work, passing
         # in the right side of our socketpair for reading.
-        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params)
+        _kw = {}
+        work_type = work_type or self.work_type
+        if work_type == 'ansible-runner':
+            _kw['node'] = self.task.instance.execution_node
+            logger.debug(f'receptorctl.submit_work(node={_kw["node"]})')
+        else:
+            logger.debug(f'receptorctl.submit_work({work_type})')
+        result = receptor_ctl.submit_work(worktype=work_type, payload=sockout.makefile('rb'), params=self.receptor_params, **_kw)
         self.unit_id = result['unitid']
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
 
@@ -2997,7 +3078,13 @@ class AWXReceptorJob:
                     return res
 
                 if not self.task.instance.result_traceback:
-                    raise RuntimeError(detail)
+                    try:
+                        resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
+                        lines = resultsock.readlines()
+                        self.task.instance.result_traceback = b"".join(lines).decode()
+                        self.task.instance.save(update_fields=['result_traceback'])
+                    except Exception:
+                        raise RuntimeError(detail)
 
         return res
 
@@ -3005,7 +3092,7 @@ class AWXReceptorJob:
     # write our payload to the left side of our socketpair.
     @cleanup_new_process
     def transmit(self, _socket):
-        if not settings.IS_K8S and self.work_type == 'local':
+        if not settings.IS_K8S and self.work_type == 'local' and 'only_transmit_kwargs' not in self.runner_params:
             self.runner_params['only_transmit_kwargs'] = True
 
         try:
@@ -3052,6 +3139,11 @@ class AWXReceptorJob:
                 work_type = 'kubernetes-runtime-auth'
             else:
                 work_type = 'kubernetes-incluster-auth'
+        elif isinstance(self.task.instance, (Job, AdHocCommand)):
+            if self.task.instance.execution_node == self.task.instance.controller_node:
+                work_type = 'local'
+            else:
+                work_type = 'ansible-runner'
         else:
             work_type = 'local'
 

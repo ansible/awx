@@ -173,7 +173,15 @@ init:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;
+	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;\
+	if [ ! -f /etc/receptor/certs/awx.key ]; then \
+		rm -f /etc/receptor/certs/*; \
+		receptor --cert-init commonname="AWX Test CA" bits=2048 outcert=/etc/receptor/certs/ca.crt outkey=/etc/receptor/certs/ca.key; \
+		for node in $(RECEPTOR_MUTUAL_TLS); do \
+			receptor --cert-makereq bits=2048 commonname="$$node test cert" dnsname=$$node nodeid=$$node outreq=/etc/receptor/certs/$$node.csr outkey=/etc/receptor/certs/$$node.key; \
+			receptor --cert-signreq req=/etc/receptor/certs/$$node.csr cacert=/etc/receptor/certs/ca.crt cakey=/etc/receptor/certs/ca.key outcert=/etc/receptor/certs/$$node.crt verify=yes; \
+		done; \
+	fi
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -471,7 +479,8 @@ awx/projects:
 
 COMPOSE_UP_OPTS ?=
 COMPOSE_OPTS ?=
-CLUSTER_NODE_COUNT ?= 1
+CONTROL_PLANE_NODE_COUNT ?= 1
+EXECUTION_NODE_COUNT ?= 2
 MINIKUBE_CONTAINER_GROUP ?= false
 
 docker-compose-sources: .git/hooks/pre-commit
@@ -482,7 +491,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
-	    -e cluster_node_count=$(CLUSTER_NODE_COUNT) \
+	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
+	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
 
 

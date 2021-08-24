@@ -2,6 +2,8 @@
 # All Rights Reserved.
 
 from decimal import Decimal
+import random
+import logging
 
 from django.core.validators import MinValueValidator
 from django.db import models, connection
@@ -20,10 +22,12 @@ from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
-from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
+from awx.main.utils.common import measure_cpu, get_corrected_cpu, get_cpu_effective_capacity, measure_memory, get_corrected_memory, get_mem_effective_capacity
 from awx.main.models.mixins import RelatedJobsMixin
 
 __all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
+
+logger = logging.getLogger('awx.main.models.ha')
 
 
 class HasPolicyEditsMixin(HasEditsMixin):
@@ -51,6 +55,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     objects = InstanceManager()
 
+    # Fields set in instance registration
     uuid = models.CharField(max_length=40)
     hostname = models.CharField(max_length=250, unique=True)
     ip_address = models.CharField(
@@ -60,16 +65,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         max_length=50,
         unique=True,
     )
+    # Auto-fields, implementation is different from BaseModel
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    # Fields defined in health check or heartbeat
     version = models.CharField(max_length=120, blank=True)
-    capacity = models.PositiveIntegerField(
-        default=100,
-        editable=False,
-    )
-    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
-    enabled = models.BooleanField(default=True)
-    managed_by_policy = models.BooleanField(default=True)
     cpu = models.IntegerField(
         default=0,
         editable=False,
@@ -77,7 +77,22 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     memory = models.BigIntegerField(
         default=0,
         editable=False,
+        help_text=_('Total system memory of this instance in bytes.'),
     )
+    last_seen = models.DateTimeField(
+        null=True,
+        editable=False,
+        help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
+    )
+    # Capacity management
+    capacity = models.PositiveIntegerField(
+        default=100,
+        editable=False,
+    )
+    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
+    enabled = models.BooleanField(default=True)
+    managed_by_policy = models.BooleanField(default=True)
+
     cpu_capacity = models.IntegerField(
         default=0,
         editable=False,
@@ -107,11 +122,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.capacity - self.consumed_capacity
 
     @property
-    def role(self):
-        # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
-        return "awx"
-
-    @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(
             execution_node=self.hostname,
@@ -125,33 +135,94 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
+    @staticmethod
+    def choose_online_control_plane_node():
+        return random.choice(Instance.objects.filter(enabled=True).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True))
+
     def is_lost(self, ref_time=None):
+        if self.last_seen is None:
+            return True
         if ref_time is None:
             ref_time = now()
-        grace_period = 120
-        return self.modified < ref_time - timedelta(seconds=grace_period)
+        grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 2
+        if self.node_type == 'execution':
+            grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
+        return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
-    def refresh_capacity(self):
-        cpu = get_cpu_capacity()
-        mem = get_mem_capacity()
+    def mark_offline(self, update_last_seen=False, perform_save=True):
+        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and (not update_last_seen):
+            return
+        self.cpu_capacity = self.mem_capacity = self.capacity = 0
+        if update_last_seen:
+            self.last_seen = now()
+
+        if perform_save:
+            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity']
+            if update_last_seen:
+                update_fields += ['last_seen']
+            self.save(update_fields=update_fields)
+
+    def set_capacity_value(self):
+        """Sets capacity according to capacity adjustment rule (no save)"""
         if self.enabled:
-            self.capacity = get_system_task_capacity(self.capacity_adjustment)
+            lower_cap = min(self.mem_capacity, self.cpu_capacity)
+            higher_cap = max(self.mem_capacity, self.cpu_capacity)
+            self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
         else:
             self.capacity = 0
 
+    def refresh_capacity_fields(self):
+        """Update derived capacity fields from cpu and memory (no save)"""
+        self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
+        self.mem_capacity = get_mem_effective_capacity(self.memory)
+        self.set_capacity_value()
+
+    def save_health_data(self, version, cpu, memory, uuid=None, last_seen=None, has_error=False):
+        update_fields = []
+
+        if last_seen is not None and self.last_seen != last_seen:
+            self.last_seen = last_seen
+            update_fields.append('last_seen')
+
+        if uuid is not None and self.uuid != uuid:
+            if self.uuid is not None:
+                logger.warn(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
+            self.uuid = uuid
+            update_fields.append('uuid')
+
+        if self.version != version:
+            self.version = version
+            update_fields.append('version')
+
+        new_cpu = get_corrected_cpu(cpu)
+        if new_cpu != self.cpu:
+            self.cpu = new_cpu
+            update_fields.append('cpu')
+
+        new_memory = get_corrected_memory(memory)
+        if new_memory != self.memory:
+            self.memory = new_memory
+            update_fields.append('memory')
+
+        if not has_error:
+            self.refresh_capacity_fields()
+        else:
+            self.mark_offline(perform_save=False)
+        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
+
+        self.save(update_fields=update_fields)
+
+    def local_health_check(self):
+        """Only call this method on the instance that this record represents"""
+        has_error = False
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            self.capacity = 0
+            has_error = True
 
-        self.cpu = cpu[0]
-        self.memory = mem[0]
-        self.cpu_capacity = cpu[1]
-        self.mem_capacity = mem[1]
-        self.version = awx_application_version
-        self.save(update_fields=['capacity', 'version', 'modified', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+        self.save_health_data(awx_application_version, measure_cpu(), measure_memory(), last_seen=now(), has_error=has_error)
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
@@ -199,6 +270,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         return sum([inst.capacity for inst in self.instances.all()])
 
     @property
+    def execution_capacity(self):
+        return sum([inst.capacity for inst in self.instances.filter(node_type__in=['hybrid', 'execution'])])
+
+    @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(status__in=('running', 'waiting'), instance_group=self).count()
 
@@ -220,6 +295,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     def fit_task_to_most_remaining_capacity_instance(task, instances):
         instance_most_capacity = None
         for i in instances:
+            if i.node_type == 'control':
+                continue
             if i.remaining_capacity >= task.task_impact and (
                 instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
             ):

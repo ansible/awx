@@ -1,0 +1,18 @@
+---
+- node:
+    id: receptor-{{ item }}
+
+- log-level: info
+
+- tcp-peer:
+    address: tools_receptor_hop:5555
+    redial: true
+
+- work-command:
+    worktype: ansible-runner
+    command: ansible-runner
+    params: worker
+    allowruntimeparams: true
+
+- control-service:
+    service: control

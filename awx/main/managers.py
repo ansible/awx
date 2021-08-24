@@ -10,6 +10,7 @@ from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
+from awx.main.constants import RECEPTOR_PENDING
 
 ___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager']
 
@@ -104,20 +105,18 @@ class InstanceManager(models.Manager):
         """Return the currently active instance."""
         # If we are running unit tests, return a stub record.
         if settings.IS_TESTING(sys.argv) or hasattr(sys, '_called_from_test'):
-            return self.model(id=1, hostname='localhost', uuid='00000000-0000-0000-0000-000000000000')
+            return self.model(id=1, hostname=settings.CLUSTER_HOST_ID, uuid='00000000-0000-0000-0000-000000000000')
 
         node = self.filter(hostname=settings.CLUSTER_HOST_ID)
         if node.exists():
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, uuid=None, hostname=None, ip_address=None, node_type=None):
+    def register(self, uuid=None, hostname=None, ip_address=None, node_type='hybrid', defaults=None):
         if not uuid:
             uuid = settings.SYSTEM_UUID
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
-        if not node_type:
-            node_type = "hybrid"
         with advisory_lock('instance_registration_%s' % hostname):
             if settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 # detect any instances with the same IP address.
@@ -130,6 +129,7 @@ class InstanceManager(models.Manager):
                         other_inst.save(update_fields=['ip_address'])
                         logger.warning("IP address {0} conflict detected, ip address unset for host {1}.".format(ip_address, other_hostname))
 
+            # Return existing instance that matches hostname
             instance = self.filter(hostname=hostname)
             if instance.exists():
                 instance = instance.get()
@@ -145,7 +145,14 @@ class InstanceManager(models.Manager):
                     return (True, instance)
                 else:
                     return (False, instance)
-            instance = self.create(uuid=uuid, hostname=hostname, ip_address=ip_address, capacity=0, node_type=node_type)
+
+            # Create new instance, and fill in default values
+            create_defaults = dict(capacity=0, uuid=uuid)
+            if defaults is not None:
+                create_defaults.update(defaults)
+            if node_type == 'execution' and 'version' not in create_defaults:
+                create_defaults['version'] = RECEPTOR_PENDING
+            instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults)
         return (True, instance)
 
     def get_or_register(self):

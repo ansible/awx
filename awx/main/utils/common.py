@@ -18,8 +18,6 @@ import tempfile
 import psutil
 from functools import reduce, wraps
 
-from decimal import Decimal
-
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
@@ -72,9 +70,6 @@ __all__ = [
     'set_current_apps',
     'extract_ansible_vars',
     'get_search_fields',
-    'get_system_task_capacity',
-    'get_cpu_capacity',
-    'get_mem_capacity',
     'model_to_dict',
     'NullablePromptPseudoField',
     'model_instance_diff',
@@ -699,11 +694,31 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     return vars_dict
 
 
-def get_cpu_capacity():
+def get_cpu_effective_capacity(cpu_count):
     from django.conf import settings
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+
+    if env_forkcpu:
+        forkcpu = int(env_forkcpu)
+    elif settings_forkcpu:
+        forkcpu = int(settings_forkcpu)
+    else:
+        forkcpu = 4
+
+    return cpu_count * forkcpu
+
+
+def measure_cpu():  # TODO: replace with import from ansible-runner
+    return psutil.cpu_count()
+
+
+def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
+    """Some environments will do a correction to the reported CPU number
+    because the given OpenShift value is a lie
+    """
+    from django.conf import settings
 
     settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
     env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
@@ -713,22 +728,31 @@ def get_cpu_capacity():
     elif settings_abscpu is not None:
         return 0, int(settings_abscpu)
 
-    cpu = psutil.cpu_count()
-
-    if env_forkcpu:
-        forkcpu = int(env_forkcpu)
-    elif settings_forkcpu:
-        forkcpu = int(settings_forkcpu)
-    else:
-        forkcpu = 4
-    return (cpu, cpu * forkcpu)
+    return cpu_count  # no correction
 
 
-def get_mem_capacity():
+def get_mem_effective_capacity(mem_mb):
     from django.conf import settings
 
     settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
+
+    if env_forkmem:
+        forkmem = int(env_forkmem)
+    elif settings_forkmem:
+        forkmem = int(settings_forkmem)
+    else:
+        forkmem = 100
+
+    return max(1, ((mem_mb // 1024 // 1024) - 2048) // forkmem)
+
+
+def measure_memory():  # TODO: replace with import from ansible-runner
+    return psutil.virtual_memory().total
+
+
+def get_corrected_memory(memory):
+    from django.conf import settings
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
     env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
@@ -738,40 +762,7 @@ def get_mem_capacity():
     elif settings_absmem is not None:
         return 0, int(settings_absmem)
 
-    if env_forkmem:
-        forkmem = int(env_forkmem)
-    elif settings_forkmem:
-        forkmem = int(settings_forkmem)
-    else:
-        forkmem = 100
-
-    mem = psutil.virtual_memory().total
-    return (mem, max(1, ((mem // 1024 // 1024) - 2048) // forkmem))
-
-
-def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity=None):
-    """
-    Measure system memory and use it as a baseline for determining the system's capacity
-    """
-    from django.conf import settings
-
-    settings_forks = getattr(settings, 'SYSTEM_TASK_FORKS_CAPACITY', None)
-    env_forks = os.getenv('SYSTEM_TASK_FORKS_CAPACITY', None)
-
-    if env_forks:
-        return int(env_forks)
-    elif settings_forks:
-        return int(settings_forks)
-
-    if cpu_capacity is None:
-        _, cpu_cap = get_cpu_capacity()
-    else:
-        cpu_cap = cpu_capacity
-    if mem_capacity is None:
-        _, mem_cap = get_mem_capacity()
-    else:
-        mem_cap = mem_capacity
-    return min(mem_cap, cpu_cap) + ((max(mem_cap, cpu_cap) - min(mem_cap, cpu_cap)) * scale)
+    return memory
 
 
 _inventory_updates = threading.local()

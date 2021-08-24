@@ -1,11 +1,24 @@
 ---
 - node:
-    id: foo
+    id: awx_{{ item }}
 
-- log-level: debug
+- log-level: info
 
 - tcp-listener:
     port: 2222
+
+{% for i in range(item | int + 1, control_plane_node_count | int + 1) %}
+- tcp-peer:
+    address: awx_{{ i }}:2222
+    redial: true
+{% endfor %}
+
+#- tls-server:
+#    name: mutual-tls
+#    cert: /etc/receptor/certs/awx.crt
+#    key: /etc/receptor/certs/awx.key
+#    requireclientcert: true
+#    clientcas: /etc/receptor/certs/ca.crt
 
 - control-service:
     service: control

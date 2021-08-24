@@ -1,0 +1,12 @@
+---
+- node:
+    id: receptor-hop
+
+- log-level: info
+
+- tcp-peer:
+    address: awx_1:2222
+    redial: true
+
+- tcp-listener:
+    port: 5555
