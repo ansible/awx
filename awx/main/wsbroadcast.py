@@ -4,6 +4,7 @@ import asyncio
 
 import aiohttp
 from aiohttp import client_exceptions
+from asgiref.sync import sync_to_async
 
 from channels.layers import get_channel_layer
 
@@ -30,6 +31,7 @@ def unwrap_broadcast_msg(payload: dict):
     return (payload['group'], payload['message'])
 
 
+@sync_to_async
 def get_broadcast_hosts():
     Instance = apps.get_model('main', 'Instance')
     instances = (
@@ -170,7 +172,7 @@ class BroadcastWebsocketManager(object):
     async def run_per_host_websocket(self):
 
         while True:
-            known_hosts = get_broadcast_hosts()
+            known_hosts = await get_broadcast_hosts()
             future_remote_hosts = known_hosts.keys()
             current_remote_hosts = self.broadcast_tasks.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
