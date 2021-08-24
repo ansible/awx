@@ -9,7 +9,6 @@ import ldap
 import awx
 
 # Django
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 # Django Auth LDAP
@@ -101,7 +100,7 @@ class HybridDictField(fields.DictField):
         fields = copy.deepcopy(self._declared_fields)
         return {
             key: field.to_representation(val) if val is not None else None
-            for key, val, field in ((six.text_type(key), val, fields.get(key, self.child)) for key, val in value.items())
+            for key, val, field in ((str(key), val, fields.get(key, self.child)) for key, val in value.items())
             if not field.write_only
         }
 
@@ -117,7 +116,7 @@ class HybridDictField(fields.DictField):
 
         for key in keys:
             value = data.get(key, empty)
-            key = six.text_type(key)
+            key = str(key)
             field = fields.get(key, self.child)
             try:
                 if field.read_only:
