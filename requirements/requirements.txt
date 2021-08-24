@@ -9,7 +9,7 @@ ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25
     # via -r /awx_devel/requirements/requirements.in
-asgiref==3.2.5
+asgiref==3.4.1
     # via
     #   channels
     #   channels-redis
@@ -90,7 +90,7 @@ dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
-django==3.0.14
+django==3.1.13
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
