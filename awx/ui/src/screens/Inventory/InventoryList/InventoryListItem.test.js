@@ -95,9 +95,7 @@ describe('<InventoryListItem />', () => {
       </table>
     );
     expect(wrapper.find('StatusLabel').length).toBe(1);
-    expect(wrapper.find('StatusLabel').prop('tooltipContent')).toBe(
-      `${inventory.inventory_sources_with_failures} sources with sync failures.`
-    );
+    expect(wrapper.find('StatusLabel').prop('status')).toBe('error');
     expect(wrapper.find('Td').at(1).text()).toBe('Inventory');
     expect(wrapper.find('Td').at(2).text()).toBe('Error');
     expect(wrapper.find('Td').at(3).text()).toBe('Inventory');

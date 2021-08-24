@@ -57,7 +57,7 @@ describe('<InventorySourceListItem />', () => {
         </tbody>
       </table>
     );
-    expect(wrapper.find('StatusIcon').length).toBe(1);
+    expect(wrapper.find('StatusLabel').length).toBe(1);
     expect(wrapper.find('Link').at(1).prop('to')).toBe('/jobs/inventory/664');
     expect(wrapper.find('.pf-c-table__check').length).toBe(1);
     expect(wrapper.find('Td').at(1).text()).toBe('Foo');

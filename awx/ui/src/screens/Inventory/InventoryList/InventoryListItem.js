@@ -4,7 +4,7 @@ import { string, bool, func } from 'prop-types';
 import { Button, Label } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { t } from '@lingui/macro';
+import { t, Plural } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { timeOfDay } from 'util/dates';
 import { InventoriesAPI } from 'api';
@@ -58,7 +58,13 @@ function InventoryListItem({
   let tooltipContent = '';
   if (inventory.has_inventory_sources) {
     if (inventory.inventory_sources_with_failures > 0) {
-      tooltipContent = t`${inventory.inventory_sources_with_failures} sources with sync failures.`;
+      tooltipContent = (
+        <Plural
+          value={inventory.inventory_sources_with_failures}
+          one="# source with sync failures."
+          other="# sources with sync failures."
+        />
+      );
     } else {
       tooltipContent = t`No inventory sync failures.`;
     }

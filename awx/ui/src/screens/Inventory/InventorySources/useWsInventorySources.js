@@ -37,7 +37,7 @@ function updateSource(sources, index, message) {
     last_updated: message.finished,
     summary_fields: {
       ...sources[index].summary_fields,
-      last_job: {
+      current_job: {
         id: message.unified_job_id,
         status: message.status,
         finished: message.finished,
