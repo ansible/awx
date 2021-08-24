@@ -411,14 +411,15 @@ def execution_node_health_check(node):
     prior_capacity = instance.capacity
 
     instance.save_health_data(
-        'ansible-runner-' + data.get('Version', '???'),
-        data.get('CPU Capacity', 0),  # TODO: rename field on runner side to not say "Capacity"
-        data.get('Memory Capacity', 0) * 1000,  # TODO: double-check the multiplier here
-        has_error=bool(data.get('Errors')),
+        version='ansible-runner-' + data.get('runner_version', '???'),
+        cpu=data.get('cpu_count', 0),
+        memory=data.get('mem_in_bytes', 0),
+        uuid=data.get('uuid'),
+        has_error=bool(data.get('errors')),
     )
 
-    if data['Errors']:
-        formatted_error = "\n".join(data["Errors"])
+    if data['errors']:
+        formatted_error = "\n".join(data["errors"])
         if prior_capacity:
             logger.warn(f'Health check marking execution node {node} as lost, errors:\n{formatted_error}')
         else:
