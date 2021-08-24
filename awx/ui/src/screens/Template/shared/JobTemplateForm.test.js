@@ -15,7 +15,6 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 import JobTemplateForm from './JobTemplateForm';
 
 jest.mock('../../../api');
@@ -420,7 +419,6 @@ describe('<JobTemplateForm />', () => {
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
     });
-    await sleep(1);
     expect(handleSubmit).toBeCalled();
   });
 

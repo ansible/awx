@@ -6,7 +6,6 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import UserTokenForm from './UserTokenForm';
-import { sleep } from '../../../../testUtils/testUtils';
 
 jest.mock('../../../api');
 const applications = {
@@ -102,7 +101,6 @@ describe('<UserTokenForm />', () => {
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').prop('onClick')();
     });
-    await sleep(1);
 
     expect(handleSubmit).toBeCalled();
   });
@@ -132,7 +130,6 @@ describe('<UserTokenForm />', () => {
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').prop('onClick')();
     });
-    await sleep(1);
     wrapper.update();
     expect(
       wrapper.find('FormGroup[name="scope"]').prop('helperTextInvalid')

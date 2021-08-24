@@ -3,7 +3,6 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { JobsAPI, ProjectUpdatesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 import JobDetail from './JobDetail';
 import mockJobData from '../shared/data.job.json';
 
@@ -249,7 +248,6 @@ describe('<JobDetail />', () => {
   test('should properly delete job', async () => {
     wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');
-    await sleep(1);
     wrapper.update();
     const modal = wrapper.find('Modal[aria-label="Alert modal"]');
     expect(modal.length).toBe(1);
@@ -296,7 +294,6 @@ describe('<JobDetail />', () => {
     const detail = wrapper.find('JobDetail');
     async function assertMissingDetail(label) {
       expect(detail.length).toBe(1);
-      await sleep(0);
       expect(detail.find(`Detail[label="${label}"] dt`).text()).toBe(label);
       expect(detail.find(`Detail[label="${label}"] dd`).text()).toBe('DELETED');
     }

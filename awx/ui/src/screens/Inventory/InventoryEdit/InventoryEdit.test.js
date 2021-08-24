@@ -6,7 +6,6 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import InventoryEdit from './InventoryEdit';
 
@@ -105,7 +104,6 @@ describe('<InventoryEdit />', () => {
         instanceGroups,
       });
     });
-    await sleep(0);
     expect(InventoriesAPI.orderInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id,
       instanceGroups,
