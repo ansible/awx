@@ -100,10 +100,23 @@ class TestJobLifeCycle:
                 self.run_tm(tm, expect_schedule=[mock.call()])
             wfjts[0].refresh_from_db()
 
-    def test_project_update_control_instance(self, project):
+    @pytest.fixture
+    def control_instance(self):
+        '''Control instance in the controlplane automatic IG'''
         ig = InstanceGroup.objects.create(name='controlplane')
-        inst = Instance.objects.create(hostname='awx-1', node_type='control', capacity=500)
+        inst = Instance.objects.create(hostname='control-1', node_type='control', capacity=500)
         ig.instances.add(inst)
+        return inst
+
+    @pytest.fixture
+    def execution_instance(self):
+        '''Execution node in the automatic default IG'''
+        ig = InstanceGroup.objects.create(name='default')
+        inst = Instance.objects.create(hostname='receptor-1', node_type='execution', capacity=500)
+        ig.instances.add(inst)
+        return inst
+
+    def test_project_update_control_instance(self, project, control_instance):
         pu = project.create_unified_job()
         pu.signal_start()
         tm = TaskManager()
@@ -113,7 +126,19 @@ class TestJobLifeCycle:
 
         pu.refresh_from_db()
         assert pu.status == 'waiting'
-        assert [pu.execution_node, pu.controller_node] == [inst.hostname, inst.hostname]
+        assert [pu.execution_node, pu.controller_node] == [control_instance.hostname, control_instance.hostname]
+
+    def test_job_execution_instance(self, job_template, control_instance, execution_instance):
+        job = job_template.create_unified_job()
+        job.signal_start()
+        tm = TaskManager()
+
+        # Submits the project update to the correct queue, same control and execution node
+        self.run_tm(tm)
+
+        job.refresh_from_db()
+        assert job.status == 'waiting'
+        assert [job.execution_node, job.controller_node] == [execution_instance.hostname, control_instance.hostname]
 
 
 @pytest.mark.django_db

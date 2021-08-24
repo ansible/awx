@@ -532,7 +532,7 @@ class TaskManager:
                     continue
 
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                    task, self.graph[rampart_group.name]['instances']
+                    task, self.graph[rampart_group.name]['instances'], node_type='control' if on_control_plane else 'execution'
                 ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'])
 
                 if execution_instance or rampart_group.is_container_group:
