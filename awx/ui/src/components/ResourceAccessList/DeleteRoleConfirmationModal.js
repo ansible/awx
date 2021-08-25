@@ -8,10 +8,9 @@ import { Role } from 'types';
 import AlertModal from '../AlertModal';
 
 function DeleteRoleConfirmationModal({ role, username, onCancel, onConfirm }) {
-  const isTeamRole = () =>
+  const sourceOfRole = () =>
     typeof role.team_id !== 'undefined' ? t`Team` : t`User`;
-
-  const title = t`Remove ${isTeamRole()} Access`;
+  const title = t`Remove ${sourceOfRole()} Access`;
   return (
     <AlertModal
       variant="danger"
@@ -38,7 +37,7 @@ function DeleteRoleConfirmationModal({ role, username, onCancel, onConfirm }) {
         </Button>,
       ]}
     >
-      {isTeamRole() ? (
+      {sourceOfRole() === 'Team' ? (
         <>
           {t`Are you sure you want to remove ${role.name} access from ${role.team_name}?  Doing so affects all members of the team.`}
           <br />
