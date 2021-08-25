@@ -47,7 +47,7 @@ from awx.main.utils.common import (
     getattr_dne,
     schedule_task_manager,
     get_event_partition_epoch,
-    get_capacity_type
+    get_capacity_type,
 )
 from awx.main.utils.encryption import encrypt_dict, decrypt_field
 from awx.main.utils import polymorphic
