@@ -46,6 +46,7 @@ RUN dnf -y update && \
     python3-pip \
     python3-psycopg2 \
     python3-setuptools \
+    python39 \
     swig \
     unzip \
     xmlsec1-devel \
@@ -63,6 +64,7 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
     requirements/collections_requirements.yml \
+    requirements/hostinger/ansible_default_overrides.txt \
     /tmp/requirements/
 
 RUN cd /tmp && make requirements_awx requirements_ansible_py3
@@ -71,18 +73,16 @@ RUN cd /tmp && make requirements_collections
 # customization start
 RUN cd /opt && curl https://codeload.github.com/mitogen-hq/mitogen/tar.gz/v0.2.9 -o v0.2.9.tar.gz && \
     tar zxf v0.2.9.tar.gz && rm v0.2.9.tar.gz
+
 ADD requirements/hostinger/ansible_repo.txt \
+    requirements/hostinger/ansible_cloud.txt \
+    requirements/hostinger/ansible_cloud_legacy.txt \
+    requirements/hostinger/ansible_infra.txt \
+    requirements/hostinger/ansible_cpanel.txt \
+    requirements/hostinger/ansible_network.txt \
+    requirements/hostinger/ansible_ovzcloud.txt \
     /tmp/requirements/
-ADD requirements/hostinger/ansible_cloud.txt \
-    /tmp/requirements/
-ADD requirements/hostinger/ansible_infra.txt \
-    /tmp/requirements/
-ADD requirements/hostinger/ansible_cpanel.txt \
-    /tmp/requirements/
-ADD requirements/hostinger/ansible_network.txt \
-    /tmp/requirements/
-ADD requirements/hostinger/ansible_ovzcloud.txt \
-    /tmp/requirements/
+
 RUN cd /tmp && VENV_BASE="/opt/envs" make requirements_hostinger
 # customization end
 
@@ -150,6 +150,7 @@ RUN dnf -y update && \
     python3-pip \
     python3-psycopg2 \
     python3-setuptools \
+    python39 \
     rsync \
     subversion \
     sudo \

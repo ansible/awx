@@ -191,6 +191,7 @@ requirements_ansible_py3: virtualenv_ansible_py3
 	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	cat requirements/ansible_default_overrides.txt | ANSIBLE_SKIP_CONFLICT_CHECK=1 $(VENV_BASE)/ansible/bin/pip3 install -r /dev/stdin
 	# Same effect as using --system-site-packages flag on venv creation
 	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
 
@@ -208,7 +209,7 @@ ansible_repo:
 	cat requirements/ansible_repo.txt | $(VENV_BASE)/ansible_repo/bin/pip install -r /dev/stdin
 
 ansible_infra:
-	virtualenv -p python3 $(VENV_BASE)/ansible_infra
+	virtualenv -p python3.9 $(VENV_BASE)/ansible_infra
 	cat requirements/ansible_infra.txt | $(VENV_BASE)/ansible_infra/bin/pip install -r /dev/stdin
 
 ansible_cpanel:
@@ -216,8 +217,12 @@ ansible_cpanel:
 	cat requirements/ansible_cpanel.txt | $(VENV_BASE)/ansible_cpanel/bin/pip install -r /dev/stdin
 
 ansible_cloud:
-	virtualenv -p python3 $(VENV_BASE)/ansible_cloud
+	virtualenv -p python3.9 $(VENV_BASE)/ansible_cloud
 	cat requirements/ansible_cloud.txt | $(VENV_BASE)/ansible_cloud/bin/pip install -r /dev/stdin
+
+ansible_cloud_legacy:
+	virtualenv -p python3 $(VENV_BASE)/ansible_cloud_legacy
+	cat requirements/ansible_cloud_legacy.txt | $(VENV_BASE)/ansible_cloud_legacy/bin/pip install -r /dev/stdin
 
 ansible_network:
 	virtualenv -p python3 $(VENV_BASE)/ansible_network
@@ -227,7 +232,7 @@ ansible_ovzcloud:
 	virtualenv -p python3 $(VENV_BASE)/ansible_ovzcloud
 	cat requirements/ansible_ovzcloud.txt | $(VENV_BASE)/ansible_ovzcloud/bin/pip install -r /dev/stdin
 
-requirements_hostinger: requirements_custom_envs ansible_repo ansible_cloud ansible_infra ansible_cpanel ansible_network ansible_ovzcloud
+requirements_hostinger: requirements_custom_envs ansible_repo ansible_cloud ansible_cloud_legacy ansible_infra ansible_cpanel ansible_network ansible_ovzcloud
 # customization end
 
 # Install third-party requirements needed for AWX's environment.
