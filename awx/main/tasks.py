@@ -449,15 +449,7 @@ def inspect_execution_nodes(instance_list):
             else:
                 defaults = dict(enabled=False)
                 (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution', defaults=defaults)
-                logger.warn("Registered execution node '{}' (marked as disabled by default)".format(hostname))
-
-                default_ig = InstanceGroup.objects.get(name='default')
-                if instance.hostname not in default_ig.policy_instance_list:
-                    default_ig.policy_instance_list += [instance.hostname]
-                    default_ig.save()
-                    logger.warn("Updated `default` instance group's policy_instance_list to include execution node '{}'".format(hostname))
-                else:
-                    logger.warn("`default` instance group's policy_instance_list already listed execution node '{}'".format(hostname))
+                logger.warn("Registered execution node '{}' (marked disabled by default)".format(hostname))
 
             was_lost = instance.is_lost(ref_time=nowtime)
             last_seen = parse_date(ad['Time'])
@@ -468,6 +460,17 @@ def inspect_execution_nodes(instance_list):
             instance.save(update_fields=['last_seen'])
 
             if changed:
+                try:
+                    default_ig = InstanceGroup.objects.get(name='default')
+                    if instance.hostname not in default_ig.policy_instance_list:
+                        default_ig.policy_instance_list += [instance.hostname]
+                        default_ig.save()
+                        logger.warn("Updated `default` instance group's policy_instance_list to include execution node '{}'".format(hostname))
+                    else:
+                        logger.warn("`default` instance group's policy_instance_list already listed execution node '{}'".format(hostname))
+                except InstanceGroup.DoesNotExist:
+                    logger.error(f"Unable to add execution node '{hostname}' to 'default' instance group; group not found.")
+
                 execution_node_health_check.apply_async([hostname])
             elif was_lost:
                 # if the instance *was* lost, but has appeared again,
