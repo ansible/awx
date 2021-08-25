@@ -7,10 +7,11 @@ ENV HOMEDIR=ansible
 
 USER 0
 
-RUN dnf install -y gcc python36-devel openssh-server
-RUN python3 -m ensurepip && pip3 install "virtualenv < 20" "ansible-runner < 2"
+RUN dnf install -y gcc python39-devel openssh-server
+RUN python3.9 -m ensurepip && pip3.9 install psutil "virtualenv < 20" "ansible-runner == 2.0.2"
 
-RUN dnf remove -y gcc python36-devel && dnf clean all && rm -rf /var/cache/dnf
+RUN dnf remove -y gcc python39-devel && dnf clean all && rm -rf /var/cache/dnf && \
+    alternatives --set python /usr/bin/python3 && alternatives --set python3 /usr/bin/python3.9
 
 RUN rm -f /etc/ssh/*_key
 RUN ssh-keygen -q -A -N ""
