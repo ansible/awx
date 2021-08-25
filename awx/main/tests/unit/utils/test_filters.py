@@ -223,27 +223,7 @@ class TestSmartFilterQueryFromStringNoDB:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            (
-                'ansible_facts__a="true" and ansible_facts__b="true" and ansible_facts__c="true"',
-                (
-                    Q(**{u"ansible_facts__contains": {u"a": u"true"}})
-                    & Q(**{u"ansible_facts__contains": {u"b": u"true"}})
-                    & Q(**{u"ansible_facts__contains": {u"c": u"true"}})
-                ),
-            ),
-            (
-                'ansible_facts__a="true" or ansible_facts__b="true" or ansible_facts__c="true"',
-                (
-                    Q(**{u"ansible_facts__contains": {u"a": u"true"}})
-                    | Q(**{u"ansible_facts__contains": {u"b": u"true"}})
-                    | Q(**{u"ansible_facts__contains": {u"c": u"true"}})
-                ),
-            ),
             ('search=foo', Q(Q(**{u"description__icontains": u"foo"}) | Q(**{u"name__icontains": u"foo"}))),
-            (
-                'search=foo and ansible_facts__a="null"',
-                Q(Q(**{u"description__icontains": u"foo"}) | Q(**{u"name__icontains": u"foo"})) & Q(**{u"ansible_facts__contains": {u"a": u"\"null\""}}),
-            ),
             ('name=foo or name=bar and name=foobar', Q(name="foo") | Q(name="bar") & Q(name="foobar")),
         ],
     )

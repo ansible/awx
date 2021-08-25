@@ -8,7 +8,7 @@ from django.db.models.fields.related_descriptors import ReverseManyToOneDescript
 
 from rest_framework.serializers import ValidationError as DRFValidationError
 
-from awx.main.models import Credential, CredentialType, BaseModel
+from awx.main.models import Credential, CredentialType, UnifiedJobTemplate
 from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDescriptor
 
 
@@ -35,7 +35,7 @@ from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDesc
     ],
 )
 def test_custom_error_messages(schema, given, message):
-    instance = BaseModel()
+    instance = UnifiedJobTemplate()
 
     class MockFieldSubclass(JSONSchemaField):
         def schema(self, model_instance):
