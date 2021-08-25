@@ -10,6 +10,7 @@ from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.common import get_capacity_type
 from awx.main.constants import RECEPTOR_PENDING
 
 ___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager']
@@ -207,6 +208,8 @@ class InstanceGroupManager(models.Manager):
         if name not in graph:
             graph[name] = {}
         graph[name]['consumed_capacity'] = 0
+        for capacity_type in ('execution', 'control'):
+            graph[name][f'consumed_{capacity_type}_capacity'] = 0
         if breakdown:
             graph[name]['committed_capacity'] = 0
             graph[name]['running_capacity'] = 0
@@ -242,6 +245,8 @@ class InstanceGroupManager(models.Manager):
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
                     graph[group_name]['consumed_capacity'] += impact
+                    capacity_type = get_capacity_type(t)
+                    graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
                     if breakdown:
                         graph[group_name]['committed_capacity'] += impact
             elif t.status == 'running':
@@ -259,6 +264,8 @@ class InstanceGroupManager(models.Manager):
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
                     graph[group_name]['consumed_capacity'] += impact
+                    capacity_type = get_capacity_type(t)
+                    graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
                     if breakdown:
                         graph[group_name]['running_capacity'] += impact
             else:

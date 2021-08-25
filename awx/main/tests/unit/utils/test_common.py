@@ -104,16 +104,30 @@ def test_get_type_for_model(model, name):
     assert common.get_type_for_model(model) == name
 
 
-@pytest.mark.django_db
 def test_get_model_for_invalid_type():
     with pytest.raises(LookupError):
         common.get_model_for_type('foobar')
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize("model_type,model_class", [(name, cls) for cls, name in TEST_MODELS])
 def test_get_model_for_valid_type(model_type, model_class):
     assert common.get_model_for_type(model_type) == model_class
+
+
+@pytest.mark.parametrize("model_type,model_class", [(name, cls) for cls, name in TEST_MODELS])
+def test_get_capacity_type(model_type, model_class):
+    if model_type in ('job', 'ad_hoc_command', 'inventory_update', 'job_template'):
+        expectation = 'execution'
+    elif model_type in ('project_update', 'system_job'):
+        expectation = 'control'
+    else:
+        expectation = None
+    if model_type in ('unified_job', 'unified_job_template', 'inventory'):
+        with pytest.raises(RuntimeError):
+            common.get_capacity_type(model_class)
+    else:
+        assert common.get_capacity_type(model_class) == expectation
+        assert common.get_capacity_type(model_class()) == expectation
 
 
 @pytest.fixture

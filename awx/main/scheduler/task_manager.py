@@ -89,22 +89,19 @@ class TaskManager:
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(
                 graph=DependencyGraph(),
-                capacity_total=0,
                 execution_capacity=0,
                 control_capacity=0,
                 consumed_capacity=0,
-                consumed_control=0,
-                consumed_execution=0,
+                consumed_control_capacity=0,
+                consumed_execution_capacity=0,
                 instances=[],
             )
             for instance in rampart_group.instances.all():
                 if not instance.enabled:
                     continue
-                if instance.node_type in ('control', 'hybrid'):
-                    self.graph[rampart_group.name]['control_capacity'] += instance.capacity
-                if instance.node_type in ('execution', 'hybrid'):
-                    self.graph[rampart_group.name]['execution_capacity'] += instance.capacity
-                self.graph[rampart_group.name]['capacity_total'] += instance.capacity
+                for capacity_type in ('control', 'execution'):
+                    if instance.node_type in (capacity_type, 'hybrid'):
+                        self.graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
@@ -609,13 +606,12 @@ class TaskManager:
             )
         )
         self.graph[instance_group]['consumed_capacity'] += task.task_impact
-        if instance is None or instance.node_type in ('hybrid', 'control'):
-            self.graph[instance_group]['consumed_control'] += task.task_impact
-        if instance is None or instance.node_type in ('hybrid', 'execution'):
-            self.graph[instance_group]['consumed_execution'] += task.task_impact
+        for capacity_type in ('control', 'execution'):
+            if instance is None or instance.node_type in ('hybrid', capacity_type):
+                self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += task.task_impact
 
     def get_remaining_capacity(self, instance_group, capacity_type='execution'):
-        return self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}']
+        return self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]

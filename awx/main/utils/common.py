@@ -574,6 +574,20 @@ def get_model_for_type(type_name):
     return apps.get_model(use_app, model_str)
 
 
+def get_capacity_type(uj):
+    '''Used for UnifiedJob.capacity_type property, static method will work for partial objects'''
+    model_name = uj._meta.concrete_model._meta.model_name
+    if model_name in ('job', 'inventoryupdate', 'adhoccommand', 'jobtemplate', 'inventorysource'):
+        return 'execution'
+    elif model_name == 'workflowjob':
+        return None
+    elif model_name.startswith('unified'):
+        raise RuntimeError(f'Capacity type is undefined for {model_name} model')
+    elif model_name in ('projectupdate', 'systemjob', 'project', 'systemjobtemplate'):
+        return 'control'
+    raise RuntimeError(f'Capacity type does not apply to {model_name} model')
+
+
 def prefetch_page_capabilities(model, page, prefetch_list, user):
     """
     Given a `page` list of objects, a nested dictionary of user_capabilities
