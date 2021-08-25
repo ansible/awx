@@ -103,11 +103,11 @@ django==3.2.6
     #   django-polymorphic
     #   django-taggit
     #   djangorestframework
-django-auth-ldap==2.1.0
+django-auth-ldap==2.4.0
     # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.7.0
     # via -r /awx_devel/requirements/requirements.in
-django-crum==0.7.5
+django-crum==0.7.9
     # via -r /awx_devel/requirements/requirements.in
 django-extensions==2.2.9
     # via -r /awx_devel/requirements/requirements.in
