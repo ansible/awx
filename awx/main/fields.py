@@ -84,6 +84,12 @@ class JSONField(upstream_JSONField):
 
 
 class JSONBField(upstream_JSONBField):
+    def __init__(self, *args, **kwargs):
+        # FIXME: properly move to django.db.models.JSONField so we can stop silencing the warning
+        self.system_check_removed_details = None
+        self.system_check_deprecated_details = None
+        super(upstream_JSONBField, self).__init__(*args, **kwargs)
+
     def get_prep_lookup(self, lookup_type, value):
         if isinstance(value, str) and value == "null":
             return 'null'
