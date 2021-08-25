@@ -160,7 +160,10 @@ class InstanceManager(models.Manager):
             from awx.main.management.commands.register_queue import RegisterQueue
 
             pod_ip = os.environ.get('MY_POD_IP')
-            registered = self.register(ip_address=pod_ip)
+            if settings.IS_K8S:
+                registered = self.register(ip_address=pod_ip, node_type='control')
+            else:
+                registered = self.register(ip_address=pod_ip)
             RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
             RegisterQueue(settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True).register()
             return registered
