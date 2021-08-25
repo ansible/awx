@@ -429,7 +429,7 @@ def execution_node_health_check(node):
 
 
 def inspect_execution_nodes(instance_list):
-    with advisory_lock('inspect_execution_nodes_lock', wait=True):
+    with advisory_lock('inspect_execution_nodes_lock', wait=False):
         node_lookup = {}
         for inst in instance_list:
             if inst.node_type == 'execution':
