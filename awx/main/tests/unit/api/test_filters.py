@@ -23,7 +23,7 @@ from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
 
 # Django
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 
 
 def test_related():

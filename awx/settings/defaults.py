@@ -13,7 +13,8 @@ from django.conf import global_settings
 # Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]
 for setting in dir(global_settings):
-    if setting == setting.upper():
+    # FIXME: Remove in later django when it's not a mutally exclusive setting
+    if setting == setting.upper() and setting != 'PASSWORD_RESET_TIMEOUT_DAYS':
         setattr(this_module, setting, getattr(global_settings, setting))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
