@@ -464,7 +464,7 @@ def inspect_execution_nodes(instance_list):
                     default_ig = InstanceGroup.objects.get(name='default')
                     if instance.hostname not in default_ig.policy_instance_list:
                         default_ig.policy_instance_list += [instance.hostname]
-                        default_ig.save()
+                        default_ig.save(update_fields=['policy_instance_list'])
                         logger.warn("Updated `default` instance group's policy_instance_list to include execution node '{}'".format(hostname))
                     else:
                         logger.warn("`default` instance group's policy_instance_list already listed execution node '{}'".format(hostname))
