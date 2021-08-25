@@ -116,29 +116,31 @@ class TestJobLifeCycle:
         ig.instances.add(inst)
         return inst
 
-    def test_project_update_control_instance(self, project, control_instance):
+    def test_control_and_execution_instance(self, project, system_job_template, job_template, inventory_source, control_instance, execution_instance):
+        assert Instance.objects.count() == 2
+
         pu = project.create_unified_job()
-        pu.signal_start()
-        tm = TaskManager()
-
-        # Submits the project update to the correct queue, same control and execution node
-        self.run_tm(tm)
-
-        pu.refresh_from_db()
-        assert pu.status == 'waiting'
-        assert [pu.execution_node, pu.controller_node] == [control_instance.hostname, control_instance.hostname]
-
-    def test_job_execution_instance(self, job_template, control_instance, execution_instance):
+        sj = system_job_template.create_unified_job()
         job = job_template.create_unified_job()
-        job.signal_start()
-        tm = TaskManager()
+        inv_update = inventory_source.create_unified_job()
 
-        # Submits the project update to the correct queue, same control and execution node
+        all_ujs = (pu, sj, job, inv_update)
+        for uj in all_ujs:
+            uj.signal_start()
+
+        tm = TaskManager()
         self.run_tm(tm)
 
-        job.refresh_from_db()
-        assert job.status == 'waiting'
-        assert [job.execution_node, job.controller_node] == [execution_instance.hostname, control_instance.hostname]
+        for uj in all_ujs:
+            uj.refresh_from_db()
+            assert uj.status == 'waiting'
+
+        for uj in (pu, sj):  # control plane jobs
+            assert uj.capacity_type == 'control'
+            assert [uj.execution_node, uj.controller_node] == [control_instance.hostname, control_instance.hostname], uj
+        for uj in (job, inv_update):  # user-space jobs
+            assert uj.capacity_type == 'execution'
+            assert [uj.execution_node, uj.controller_node] == [execution_instance.hostname, control_instance.hostname], uj
 
 
 @pytest.mark.django_db

@@ -121,7 +121,7 @@ def run_computed_fields_right_away(request):
 
 @pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
-def project(instance, organization):
+def project(organization):
     prj = Project.objects.create(
         name="test-proj",
         description="test-proj-desc",
@@ -136,7 +136,7 @@ def project(instance, organization):
 
 @pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
-def manual_project(instance, organization):
+def manual_project(organization):
     prj = Project.objects.create(
         name="test-manual-proj",
         description="manual-proj-desc",
@@ -196,7 +196,7 @@ def instance(settings):
 
 
 @pytest.fixture
-def organization(instance):
+def organization():
     return Organization.objects.create(name="test-org", description="test-org-desc")
 
 
