@@ -17,6 +17,7 @@ VERSION := $(shell cat VERSION)
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
+MAIN_NODE_TYPE ?= hybrid
 
 VENV_BASE ?= /var/lib/awx/venv/
 SCL_PREFIX ?=
@@ -172,7 +173,7 @@ init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
+	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST) --node_type=$(MAIN_NODE_TYPE); \
 	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;\
 	if [ ! -f /etc/receptor/certs/awx.key ]; then \
 		rm -f /etc/receptor/certs/*; \

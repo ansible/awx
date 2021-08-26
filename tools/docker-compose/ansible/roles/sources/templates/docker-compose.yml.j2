@@ -17,6 +17,7 @@ services:
       SDB_HOST: 0.0.0.0
       SDB_PORT: {{ awx_sdb_port_start }}
       AWX_GROUP_QUEUES: tower
+      MAIN_NODE_TYPE: "${MAIN_NODE_TYPE:-hybrid}"
       RECEPTORCTL_SOCKET: /var/run/receptor/receptor.sock
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
