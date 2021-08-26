@@ -138,10 +138,18 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   }, [fetchCredentialsAndPreview]);
 
   const rule = rrulestr(rrule);
-  const repeatFrequency =
+  let repeatFrequency =
     rule.options.freq === RRule.MINUTELY && dtstart === dtend
       ? t`None (Run Once)`
       : rule.toText().replace(/^\w/, (c) => c.toUpperCase());
+  // We should allow rrule tot handle this issue, and they have in version 2.6.8.
+  // (https://github.com/jakubroztocil/rrule/commit/ab9c564a83de2f9688d6671f2a6df273ceb902bf)
+  // However, we are unable to upgrade to that version because that
+  // version throws and unexpected warning.
+  // (https://github.com/jakubroztocil/rrule/issues/427)
+  if (repeatFrequency.split(' ')[1] === 'minutes') {
+    repeatFrequency = t`Every minute for ${rule.options.count} times`;
+  }
 
   const {
     ask_credential_on_launch,
