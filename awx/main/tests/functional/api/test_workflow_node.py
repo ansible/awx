@@ -265,6 +265,7 @@ class TestApprovalNodes:
             wa.save()
         assert wa.expires is None
     def test_node_with_approve_self_approve_success(self, post, alice, job_template):
+    def test_approve_self_node_approve_success(self, post, alice, job_template):
         wfjt = WorkflowJobTemplate.objects.create(name='foobar')
         wfjt.admin_role.members.add(alice)
         node = wfjt.workflow_nodes.create(unified_job_template=job_template)
@@ -282,7 +283,26 @@ class TestApprovalNodes:
         approval.save()
         post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}), user=alice, expect=204)
 
-    def test_node_with_approve_self_approve_fail(self, post, alice, job_template):
+    def test_approve_self_node_approve_custom_user_success(self, post, alice, bob, job_template):
+        wfjt = WorkflowJobTemplate.objects.create(name='foobar')
+        wfjt.admin_role.members.add(alice)
+        wfjt.admin_role.members.add(bob)
+        node = wfjt.workflow_nodes.create(unified_job_template=job_template)
+        url = reverse('api:workflow_job_template_node_create_approval', kwargs={'pk': node.pk, 'version': 'v2'})
+        post(url, {'name': 'Approve Test', 'description': '', 'timeout': 0, 'approve_self': False}, user=alice, expect=201)
+        post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}), user=alice, expect=201)
+        wf_job = WorkflowJob.objects.first()
+        TaskManager().schedule()
+        TaskManager().schedule()
+        wfj_node = wf_job.workflow_nodes.first()
+        approval = wfj_node.job
+        assert approval.name == 'Approve Test'
+        # Django-crum is not working for tests
+        approval.created_by = alice
+        approval.save()
+        post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}), user=bob, expect=204)
+
+    def test_approve_self_node_approve_fail(self, post, alice, job_template):
         wfjt = WorkflowJobTemplate.objects.create(name='foobar')
         wfjt.admin_role.members.add(alice)
         node = wfjt.workflow_nodes.create(unified_job_template=job_template)

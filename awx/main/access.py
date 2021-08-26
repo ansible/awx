@@ -2872,10 +2872,15 @@ class WorkflowApprovalAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        if obj.approve_self is True and self.user == obj.created_by:
-            return True
+        if obj.approve_self is False and self.user == obj.created_by:
+            return False
 
-        return False
+        return True
+
+    def get_user_capabilities(self, obj, **kwargs):
+        user_capabilities = super(WorkflowApprovalAccess, self).get_user_capabilities(obj, **kwargs)
+        user_capabilities['approve'] = self.can_approve_self(obj)
+        return user_capabilities
 
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
