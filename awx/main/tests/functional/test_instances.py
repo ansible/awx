@@ -68,7 +68,7 @@ class TestPolicyTaskScheduling:
 
 
 @pytest.mark.django_db
-def test_instance_dup(org_admin, organization, project, instance_factory, instance_group_factory, get, system_auditor):
+def test_instance_dup(org_admin, organization, project, instance_factory, instance_group_factory, get, system_auditor, instance):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -83,7 +83,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     api_num_instances_oa = list(list_response2.data.items())[0][1]
 
     assert actual_num_instances == api_num_instances_auditor
-    # Note: The org_admin will not see the default 'tower' node because it is not in it's group, as expected
+    # Note: The org_admin will not see the default 'tower' node (instance fixture) because it is not in it's group, as expected
     assert api_num_instances_oa == (actual_num_instances - 1)
 
 

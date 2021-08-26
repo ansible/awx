@@ -554,10 +554,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         return websocket_data
 
     @property
-    def can_run_on_control_plane(self):
-        return True
-
-    @property
     def event_class(self):
         if self.has_unpartitioned_events:
             return UnpartitionedProjectUpdateEvent

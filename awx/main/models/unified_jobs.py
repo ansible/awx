@@ -36,21 +36,21 @@ from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
-from awx.main.utils import (
+from awx.main.utils.common import (
     camelcase_to_underscore,
     get_model_for_type,
-    encrypt_dict,
-    decrypt_field,
     _inventory_updates,
     copy_model_by_class,
     copy_m2m_relationships,
     get_type_for_model,
     parse_yaml_or_json,
     getattr_dne,
-    polymorphic,
     schedule_task_manager,
     get_event_partition_epoch,
+    get_capacity_type,
 )
+from awx.main.utils.encryption import encrypt_dict, decrypt_field
+from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -740,15 +740,8 @@ class UnifiedJob(
         raise NotImplementedError  # Implement in subclasses.
 
     @property
-    def can_run_on_control_plane(self):
-        if settings.IS_K8S:
-            return False
-
-        return True
-
-    @property
-    def can_run_containerized(self):
-        return False
+    def capacity_type(self):
+        return get_capacity_type(self)
 
     def _get_parent_field_name(self):
         return 'unified_job_template'  # Override in subclasses.

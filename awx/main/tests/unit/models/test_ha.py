@@ -17,8 +17,9 @@ def test_capacity_adjustment_no_save(capacity_adjustment):
 
 
 def T(impact):
-    j = mock.Mock(spec_set=['task_impact'])
+    j = mock.Mock(spec_set=['task_impact', 'capacity_type'])
     j.task_impact = impact
+    j.capacity_type = 'execution'
     return j
 
 
@@ -35,11 +36,13 @@ def Is(param):
             inst = Mock()
             inst.capacity = capacity
             inst.jobs_running = jobs_running
+            inst.node_type = 'execution'
             instances.append(inst)
     else:
         for i in param:
             inst = Mock()
             inst.remaining_capacity = i
+            inst.node_type = 'execution'
             instances.append(inst)
     return instances
 

@@ -3,10 +3,16 @@ import pytest
 from awx.main.models import InstanceGroup
 
 
+class FakeMeta(object):
+    model_name = 'job'
+
+
 class FakeObject(object):
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
+            self._meta = FakeMeta()
+            self._meta.concrete_model = self
 
 
 class Job(FakeObject):
@@ -85,7 +91,7 @@ def test_offline_node_running(sample_cluster):
     ig_small.instance_list[0].capacity = 0
     tasks = [Job(status='running', execution_node='i1', instance_group=ig_small)]
     capacities = InstanceGroup.objects.capacity_values(qs=[default, ig_large, ig_small], tasks=tasks)
-    assert capacities['ig_small']['consumed_capacity'] == 43
+    assert capacities['ig_small']['consumed_execution_capacity'] == 43
 
 
 def test_offline_node_waiting(sample_cluster):
@@ -96,7 +102,7 @@ def test_offline_node_waiting(sample_cluster):
     ig_small.instance_list[0].capacity = 0
     tasks = [Job(status='waiting', instance_group=ig_small)]
     capacities = InstanceGroup.objects.capacity_values(qs=[default, ig_large, ig_small], tasks=tasks)
-    assert capacities['ig_small']['consumed_capacity'] == 43
+    assert capacities['ig_small']['consumed_execution_capacity'] == 43
 
 
 def test_RBAC_reduced_filter(sample_cluster):

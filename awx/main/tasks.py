@@ -3001,18 +3001,18 @@ class AWXReceptorJob:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
             self.runner_params['settings'].update(execution_environment_params)
 
-    def run(self, work_type=None):
+    def run(self):
         # We establish a connection to the Receptor socket
         receptor_ctl = get_receptor_ctl()
 
         try:
-            return self._run_internal(receptor_ctl, work_type=work_type)
+            return self._run_internal(receptor_ctl)
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
-    def _run_internal(self, receptor_ctl, work_type=None):
+    def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
         # reading.
@@ -3024,13 +3024,9 @@ class AWXReceptorJob:
         # submit our work, passing
         # in the right side of our socketpair for reading.
         _kw = {}
-        work_type = work_type or self.work_type
-        if work_type == 'ansible-runner':
+        if self.work_type == 'ansible-runner':
             _kw['node'] = self.task.instance.execution_node
-            logger.debug(f'receptorctl.submit_work(node={_kw["node"]})')
-        else:
-            logger.debug(f'receptorctl.submit_work({work_type})')
-        result = receptor_ctl.submit_work(worktype=work_type, payload=sockout.makefile('rb'), params=self.receptor_params, **_kw)
+        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, **_kw)
         self.unit_id = result['unitid']
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
 
@@ -3136,18 +3132,11 @@ class AWXReceptorJob:
     def work_type(self):
         if self.task.instance.is_container_group_task:
             if self.credential:
-                work_type = 'kubernetes-runtime-auth'
-            else:
-                work_type = 'kubernetes-incluster-auth'
-        elif isinstance(self.task.instance, (Job, AdHocCommand)):
-            if self.task.instance.execution_node == self.task.instance.controller_node:
-                work_type = 'local'
-            else:
-                work_type = 'ansible-runner'
-        else:
-            work_type = 'local'
-
-        return work_type
+                return 'kubernetes-runtime-auth'
+            return 'kubernetes-incluster-auth'
+        if self.task.instance.execution_node == settings.CLUSTER_HOST_ID or self.task.instance.execution_node == self.task.instance.controller_node:
+            return 'local'
+        return 'ansible-runner'
 
     @cleanup_new_process
     def cancel_watcher(self, processor_future):

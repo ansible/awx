@@ -7,6 +7,7 @@ from awx.main.scheduler import TaskManager
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import encrypt_field
 from awx.main.models import WorkflowJobTemplate, JobTemplate, Job
+from awx.main.models.ha import Instance, InstanceGroup
 
 
 @pytest.mark.django_db
@@ -98,6 +99,48 @@ class TestJobLifeCycle:
             else:
                 self.run_tm(tm, expect_schedule=[mock.call()])
             wfjts[0].refresh_from_db()
+
+    @pytest.fixture
+    def control_instance(self):
+        '''Control instance in the controlplane automatic IG'''
+        ig = InstanceGroup.objects.create(name='controlplane')
+        inst = Instance.objects.create(hostname='control-1', node_type='control', capacity=500)
+        ig.instances.add(inst)
+        return inst
+
+    @pytest.fixture
+    def execution_instance(self):
+        '''Execution node in the automatic default IG'''
+        ig = InstanceGroup.objects.create(name='default')
+        inst = Instance.objects.create(hostname='receptor-1', node_type='execution', capacity=500)
+        ig.instances.add(inst)
+        return inst
+
+    def test_control_and_execution_instance(self, project, system_job_template, job_template, inventory_source, control_instance, execution_instance):
+        assert Instance.objects.count() == 2
+
+        pu = project.create_unified_job()
+        sj = system_job_template.create_unified_job()
+        job = job_template.create_unified_job()
+        inv_update = inventory_source.create_unified_job()
+
+        all_ujs = (pu, sj, job, inv_update)
+        for uj in all_ujs:
+            uj.signal_start()
+
+        tm = TaskManager()
+        self.run_tm(tm)
+
+        for uj in all_ujs:
+            uj.refresh_from_db()
+            assert uj.status == 'waiting'
+
+        for uj in (pu, sj):  # control plane jobs
+            assert uj.capacity_type == 'control'
+            assert [uj.execution_node, uj.controller_node] == [control_instance.hostname, control_instance.hostname], uj
+        for uj in (job, inv_update):  # user-space jobs
+            assert uj.capacity_type == 'execution'
+            assert [uj.execution_node, uj.controller_node] == [execution_instance.hostname, control_instance.hostname], uj
 
 
 @pytest.mark.django_db
