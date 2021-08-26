@@ -4,7 +4,7 @@ from django.db.models.deletion import (
     Collector,
     get_candidate_relations_to_delete,
 )
-from collections import Counter, OrderedDict
+from collections import Counter, OrderedDict, defaultdict
 from django.db import transaction
 from django.db.models import sql
 
@@ -62,9 +62,7 @@ class AWXCollector(Collector):
         # deleting, and therefore do not affect the order in which objects have
         # to be deleted.
         if source is not None and not nullable:
-            if reverse_dependency:
-                source, model = model, source
-            self.dependencies.setdefault(source._meta.concrete_model, set()).add(model._meta.concrete_model)
+            self.add_dependency(source, model, reverse_dependency=reverse_dependency)
         return objs
 
     def add_field_update(self, field, value, objs):
@@ -79,7 +77,9 @@ class AWXCollector(Collector):
         self.field_updates[model].setdefault((field, value), [])
         self.field_updates[model][(field, value)].append(objs)
 
-    def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None, reverse_dependency=False, keep_parents=False):
+    def collect(
+        self, objs, source=None, nullable=False, collect_related=True, source_attr=None, reverse_dependency=False, keep_parents=False, fail_on_restricted=False
+    ):
         """
         Add 'objs' to the collection of objects to be deleted as well as all
         parent instances.  'objs' must be a homogeneous iterable collection of
@@ -96,6 +96,12 @@ class AWXCollector(Collector):
         direction of an FK rather than the reverse direction.)
 
         If 'keep_parents' is True, data of parent model's will be not deleted.
+
+        If 'fail_on_restricted' is False, error won't be raised even if it's
+        prohibited to delete such objects due to RESTRICT, that defers
+        restricted object checking in recursive calls where the top-level call
+        may need to collect more objects to determine whether restricted ones
+        can be deleted.
         """
 
         if hasattr(objs, 'polymorphic_disabled'):
@@ -117,26 +123,36 @@ class AWXCollector(Collector):
             for ptr in concrete_model._meta.parents.keys():
                 if ptr:
                     parent_objs = ptr.objects.filter(pk__in=new_objs.values_list('pk', flat=True))
-                    self.collect(parent_objs, source=model, collect_related=False, reverse_dependency=True)
-        if collect_related:
-            parents = model._meta.parents
-            for related in get_candidate_relations_to_delete(model._meta):
-                # Preserve parent reverse relationships if keep_parents=True.
-                if keep_parents and related.model in parents:
-                    continue
-                field = related.field
-                if field.remote_field.on_delete == DO_NOTHING:
-                    continue
-                related_qs = self.related_objects(related, new_objs)
-                if self.can_fast_delete(related_qs, from_field=field):
-                    self.fast_deletes.append(related_qs)
-                elif related_qs:
-                    field.remote_field.on_delete(self, field, related_qs, self.using)
-            for field in model._meta.private_fields:
-                if hasattr(field, 'bulk_related_objects'):
-                    # It's something like generic foreign key.
-                    sub_objs = bulk_related_objects(field, new_objs, self.using)
-                    self.collect(sub_objs, source=model, nullable=True)
+                    self.collect(parent_objs, source=model, collect_related=False, reverse_dependency=True, fail_on_restricted=False)
+        if not collect_related:
+            return
+
+        parents = model._meta.parents
+        model_fast_deletes = defaultdict(list)
+        for related in get_candidate_relations_to_delete(model._meta):
+            # Preserve parent reverse relationships if keep_parents=True.
+            if keep_parents and related.model in parents:
+                continue
+            field = related.field
+            if field.remote_field.on_delete == DO_NOTHING:
+                continue
+            related_model = related.related_model
+            if self.can_fast_delete(related_model, from_field=field):
+                model_fast_deletes[related_model].append(field)
+                continue
+            related_qs = self.related_objects(related_model, [field], new_objs)
+            if self.can_fast_delete(related_qs, from_field=field):
+                self.fast_deletes.append(related_qs)
+            elif related_qs:
+                field.remote_field.on_delete(self, field, related_qs, self.using)
+        for related_model, related_fields in model_fast_deletes.items():
+            related_qs = self.related_objects(related_model, related_fields, new_objs)
+            self.fast_deletes.append(related_qs)
+        for field in model._meta.private_fields:
+            if hasattr(field, 'bulk_related_objects'):
+                # It's something like generic foreign key.
+                sub_objs = bulk_related_objects(field, new_objs, self.using)
+                self.collect(sub_objs, source=model, nullable=True, fail_on_restricted=False)
 
     def delete(self):
         self.sort()
