@@ -96,9 +96,18 @@ This will not affect actual `Instance` record, but will just run the command and
 
 ### Development Environment
 
-A "toy" cluster with execution nodes and a hop node is created by the docker-compose Makefile target.
+A cluster (of containers) with execution nodes and a hop node is created by the docker-compose Makefile target.
 By default, it will create 1 hybrid node, 1 hop node, and 2 execution nodes.
-The number of nodes can be changed with environment variables, for example:
+You can switch the type of AWX nodes between hybrid and control with this syntax.
+
+```
+MAIN_NODE_TYPE=control COMPOSE_TAG=devel make docker-compose
+```
+
+Running the above command will create a cluster of 1 control node, 1 hop node, and 2 execution nodes.
+
+
+The number of nodes can be changed:
 
 ```
 CONTROL_PLANE_NODE_COUNT=2 EXECUTION_NODE_COUNT=3 COMPOSE_TAG=devel make docker-compose
