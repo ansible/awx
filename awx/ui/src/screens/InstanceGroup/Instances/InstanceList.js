@@ -9,6 +9,7 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import DisassociateButton from 'components/DisassociateButton';
 import AssociateModal from 'components/AssociateModal';
@@ -61,9 +62,7 @@ function InstanceList() {
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          responseActions.data.actions?.GET || {}
-        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(responseActions.data.actions?.GET),
       };
     }, [location.search, instanceGroupId]),
     {

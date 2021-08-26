@@ -20,7 +20,7 @@ import {
   AngleRightIcon,
   SearchIcon,
 } from '@patternfly/react-icons';
-import { SearchColumns, SortColumns, QSConfig } from 'types';
+import { SearchColumns, SortColumns, QSConfig, SearchableKeys } from 'types';
 import { KebabifiedProvider } from 'contexts/Kebabified';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
@@ -200,7 +200,7 @@ DataListToolbar.propTypes = {
   clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
-  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  searchableKeys: SearchableKeys,
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns,
   isAllSelected: PropTypes.bool,

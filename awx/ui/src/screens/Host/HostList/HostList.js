@@ -11,6 +11,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
@@ -68,9 +69,7 @@ function HostList() {
         relatedSearchableKeys: (
           results[1]?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(results[1].data.actions?.GET || {}).filter(
-          (key) => results[1].data.actions?.GET[key].filterable
-        ),
+        searchableKeys: getSearchableKeys(results[1].data.actions?.GET),
       };
     }, [location]),
     {

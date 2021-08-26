@@ -11,6 +11,7 @@ import CheckboxListItem from 'components/CheckboxListItem';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 
 const QS_CONFIG = getQSConfig('job-templates', {
@@ -42,9 +43,7 @@ function JobTemplatesList({ nodeResource, onUpdateNodeResource }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [location]),
     {

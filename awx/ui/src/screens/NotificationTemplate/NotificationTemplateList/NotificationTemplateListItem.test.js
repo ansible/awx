@@ -5,6 +5,7 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import NotificationTemplateListItem from './NotificationTemplateListItem';
 
 jest.mock('../../../api/models/NotificationTemplates');
+jest.mock('../../../api/models/Notifications');
 
 const template = {
   id: 3,

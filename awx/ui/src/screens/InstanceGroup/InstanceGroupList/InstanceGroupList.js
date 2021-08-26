@@ -13,6 +13,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
@@ -107,9 +108,7 @@ function InstanceGroupList({
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          responseActions.data.actions?.GET || {}
-        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(responseActions.data.actions?.GET),
       };
     }, [location]),
     {

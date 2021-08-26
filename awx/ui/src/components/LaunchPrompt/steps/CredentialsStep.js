@@ -7,6 +7,7 @@ import { useField } from 'formik';
 import styled from 'styled-components';
 import { Alert, ToolbarItem } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest from 'hooks/useRequest';
 import AnsibleSelect from '../../AnsibleSelect';
@@ -88,9 +89,7 @@ function CredentialsStep({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [selectedType, history.location.search]),
     { credentials: [], count: 0, relatedSearchableKeys: [], searchableKeys: [] }

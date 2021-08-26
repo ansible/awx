@@ -15,6 +15,7 @@ import { InventorySourcesAPI } from 'api';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import RoutedTabs from 'components/RoutedTabs';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import { getJobModel } from 'util/jobs';
 import JobDetail from './JobDetail';
@@ -83,9 +84,7 @@ function Job({ setBreadcrumb }) {
         eventRelatedSearchableKeys: (
           eventOptions?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        eventSearchableKeys: Object.keys(
-          eventOptions?.actions?.GET || {}
-        ).filter((key) => eventOptions?.actions?.GET[key].filterable),
+        eventSearchableKeys: getSearchableKeys(eventOptions?.actions?.GET),
       };
     }, [id, type, setBreadcrumb]),
     {

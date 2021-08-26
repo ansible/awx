@@ -15,6 +15,7 @@ import PaginatedTable, {
   HeaderCell,
   HeaderRow,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import AssociateModal from 'components/AssociateModal';
 import DisassociateButton from 'components/DisassociateButton';
@@ -66,9 +67,7 @@ function HostGroupsList({ host }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [hostId, search]),
     {

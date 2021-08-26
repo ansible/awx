@@ -11,6 +11,7 @@ import DatalistToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 
 import ExecutionEnvironmentTemplateListItem from './ExecutionEnvironmentTemplateListItem';
@@ -56,9 +57,7 @@ function ExecutionEnvironmentTemplateList({ executionEnvironment }) {
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          responseActions.data.actions?.GET || {}
-        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(responseActions.data.actions?.GET),
       };
     }, [location, id]),
     {

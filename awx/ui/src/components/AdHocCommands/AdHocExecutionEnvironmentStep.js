@@ -6,6 +6,7 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import { ExecutionEnvironmentsAPI } from 'api';
 
 import { parseQueryString, getQSConfig, mergeParams } from 'util/qs';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import Popover from '../Popover';
 import ContentError from '../ContentError';
@@ -60,9 +61,7 @@ function AdHocExecutionEnvironmentStep({ organizationId }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [history.location.search, organizationId]),
     {

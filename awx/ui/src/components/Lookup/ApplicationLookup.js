@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ApplicationsAPI } from 'api';
 import { Application } from 'types';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest from 'hooks/useRequest';
 import Lookup from './Lookup';
@@ -42,9 +43,7 @@ function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse?.data?.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse?.data?.actions?.GET),
       };
     }, [location]),
     {

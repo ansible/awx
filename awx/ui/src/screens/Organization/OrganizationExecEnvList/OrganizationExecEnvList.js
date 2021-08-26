@@ -10,6 +10,7 @@ import useRequest from 'hooks/useRequest';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import DatalistToolbar from 'components/DataListToolbar';
 
@@ -51,9 +52,7 @@ function OrganizationExecEnvList({ organization }) {
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          responseActions.data.actions?.GET || {}
-        ).filter((key) => responseActions.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(responseActions.data.actions?.GET),
       };
     }, [location, id]),
     {

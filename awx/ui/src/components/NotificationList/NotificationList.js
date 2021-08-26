@@ -9,7 +9,11 @@ import { NotificationTemplatesAPI } from 'api';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import NotificationListItem from './NotificationListItem';
-import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+  getSearchableKeys,
+} from '../PaginatedTable';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -89,9 +93,7 @@ function NotificationList({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
 
       if (showApprovalsToggle) {

@@ -16,6 +16,7 @@ import PaginatedTable, {
   HeaderCell,
   HeaderRow,
   ToolbarAddButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import ErrorDetail from 'components/ErrorDetail';
@@ -69,9 +70,7 @@ function TeamRolesList({ me, team }) {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [me.id, team.id, team.organization, search]),
     {

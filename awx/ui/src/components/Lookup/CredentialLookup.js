@@ -14,6 +14,7 @@ import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from 'api';
 import { Credential } from 'types';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import useAutoPopulateLookup from 'hooks/useAutoPopulateLookup';
 import useRequest from 'hooks/useRequest';
@@ -82,12 +83,10 @@ function CredentialLookup({
         autoPopulateLookup(data.results);
       }
 
-      const searchKeys = Object.keys(
-        actionsResponse.data.actions?.GET || {}
-      ).filter((key) => actionsResponse.data.actions?.GET[key].filterable);
-      const item = searchKeys.indexOf('type');
+      const searchKeys = getSearchableKeys(actionsResponse.data.actions?.GET);
+      const item = searchKeys.find((k) => k.key === 'type');
       if (item) {
-        searchKeys[item] = 'credential_type__kind';
+        item.key = 'credential_type__kind';
       }
 
       return {

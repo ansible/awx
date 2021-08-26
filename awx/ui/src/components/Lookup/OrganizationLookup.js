@@ -6,6 +6,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { OrganizationsAPI } from 'api';
 import { Organization } from 'types';
 import { getQSConfig, parseQueryString } from 'util/qs';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import useAutoPopulateLookup from 'hooks/useAutoPopulateLookup';
 import OptionsList from '../OptionsList';
@@ -57,9 +58,7 @@ function OrganizationLookup({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [autoPopulate, autoPopulateLookup, history.location.search]),
     {

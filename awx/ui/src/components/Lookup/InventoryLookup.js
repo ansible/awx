@@ -74,14 +74,17 @@ function InventoryLookup({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => {
-          if (['kind', 'host_filter'].includes(key) && hideSmartInventories) {
-            return false;
-          }
-          return actionsResponse.data.actions?.GET[key].filterable;
-        }),
+        searchableKeys: Object.keys(actionsResponse.data.actions?.GET || {})
+          .filter((key) => {
+            if (['kind', 'host_filter'].includes(key) && hideSmartInventories) {
+              return false;
+            }
+            return actionsResponse.data.actions?.GET[key].filterable;
+          })
+          .map((key) => ({
+            key,
+            type: actionsResponse.data.actions?.GET[key].type,
+          })),
         canEdit:
           Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };

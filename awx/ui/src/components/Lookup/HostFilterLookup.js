@@ -21,7 +21,11 @@ import ChipGroup from '../ChipGroup';
 import Popover from '../Popover';
 import DataListToolbar from '../DataListToolbar';
 import LookupErrorMessage from './shared/LookupErrorMessage';
-import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+  getSearchableKeys,
+} from '../PaginatedTable';
 import HostListItem from './HostListItem';
 import {
   removeDefaultParams,
@@ -157,9 +161,7 @@ function HostFilterLookup({
           relatedSearchableKeys: (actions?.related_search_fields || []).map(
             parseRelatedSearchFields
           ),
-          searchableKeys: Object.keys(actions?.actions.GET || {}).filter(
-            (key) => actions.actions?.GET[key].filterable
-          ),
+          searchableKeys: getSearchableKeys(actions?.actions.GET),
         };
       },
       [location.search]

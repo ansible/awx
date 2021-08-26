@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import { string, func, bool, arrayOf } from 'prop-types';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -16,6 +16,9 @@ import { SearchIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { useConfig } from 'contexts/Config';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { SearchableKeys } from 'types';
+import RelatedLookupTypeInput from './RelatedLookupTypeInput';
+import LookupTypeInput from './LookupTypeInput';
 
 const AdvancedGroup = styled.div`
   display: flex;
@@ -42,31 +45,33 @@ function AdvancedSearch({
   // for now, I'm spreading set to get rid of duplicate keys...when they are grouped
   // we might want to revisit that.
   const allKeys = [
-    ...new Set([...(searchableKeys || []), ...(relatedSearchableKeys || [])]),
+    ...new Set([
+      ...(searchableKeys.map((k) => k.key) || []),
+      ...(relatedSearchableKeys || []),
+    ]),
   ];
 
   const [isPrefixDropdownOpen, setIsPrefixDropdownOpen] = useState(false);
-  const [isLookupDropdownOpen, setIsLookupDropdownOpen] = useState(false);
   const [isKeyDropdownOpen, setIsKeyDropdownOpen] = useState(false);
   const [prefixSelection, setPrefixSelection] = useState(null);
   const [lookupSelection, setLookupSelection] = useState(null);
   const [keySelection, setKeySelection] = useState(null);
   const [searchValue, setSearchValue] = useState('');
-  const [relatedSearchKeySelected, setRelatedSearchKeySelected] =
-    useState(false);
   const config = useConfig();
 
+  const selectedKey = searchableKeys.find((k) => k.key === keySelection);
+  const relatedSearchKeySelected =
+    keySelection &&
+    relatedSearchableKeys.indexOf(keySelection) > -1 &&
+    !selectedKey;
+  const lookupKeyType =
+    keySelection && !relatedSearchKeySelected ? selectedKey?.type : null;
+
   useEffect(() => {
-    if (
-      keySelection &&
-      relatedSearchableKeys.indexOf(keySelection) > -1 &&
-      searchableKeys.indexOf(keySelection) === -1
-    ) {
+    if (relatedSearchKeySelected) {
       setLookupSelection('name__icontains');
-      setRelatedSearchKeySelected(true);
     } else {
       setLookupSelection(null);
-      setRelatedSearchKeySelected(false);
     }
   }, [keySelection]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -136,160 +141,6 @@ function AdvancedSearch({
     </Select>
   );
 
-  const renderRelatedLookupType = () => (
-    <Select
-      ouiaId="set-lookup-typeahead"
-      aria-label={t`Related search type`}
-      className="lookupSelect"
-      variant={SelectVariant.typeahead}
-      typeAheadAriaLabel={t`Related search type typeahead`}
-      onToggle={setIsLookupDropdownOpen}
-      onSelect={(event, selection) => setLookupSelection(selection)}
-      selections={lookupSelection}
-      isOpen={isLookupDropdownOpen}
-      placeholderText={t`Related search type`}
-      maxHeight={maxSelectHeight}
-      noResultsFoundText={t`No results found`}
-    >
-      <SelectOption
-        id="name-option-select"
-        key="name__icontains"
-        value="name__icontains"
-        description={t`Fuzzy search on name field.`}
-      />
-      <SelectOption
-        id="id-option-select"
-        key="id"
-        value="id"
-        description={t`Exact search on id field.`}
-      />
-      {enableRelatedFuzzyFiltering && (
-        <SelectOption
-          id="search-option-select"
-          key="search"
-          value="search"
-          description={t`Fuzzy search on id, name or description fields.`}
-        />
-      )}
-    </Select>
-  );
-
-  const renderLookupType = () => (
-    <Select
-      ouiaId="set-lookup-typeahead"
-      aria-label={t`Lookup select`}
-      className="lookupSelect"
-      variant={SelectVariant.typeahead}
-      typeAheadAriaLabel={t`Lookup typeahead`}
-      onToggle={setIsLookupDropdownOpen}
-      onSelect={(event, selection) => setLookupSelection(selection)}
-      onClear={() => setLookupSelection(null)}
-      selections={lookupSelection}
-      isOpen={isLookupDropdownOpen}
-      placeholderText={t`Lookup type`}
-      maxHeight={maxSelectHeight}
-      noResultsFoundText={t`No results found`}
-    >
-      <SelectOption
-        id="exact-option-select"
-        key="exact"
-        value="exact"
-        description={t`Exact match (default lookup if not specified).`}
-      />
-      <SelectOption
-        id="iexact-option-select"
-        key="iexact"
-        value="iexact"
-        description={t`Case-insensitive version of exact.`}
-      />
-
-      <SelectOption
-        id="contains-option-select"
-        key="contains"
-        value="contains"
-        description={t`Field contains value.`}
-      />
-      <SelectOption
-        id="icontains-option-select"
-        key="icontains"
-        value="icontains"
-        description={t`Case-insensitive version of contains`}
-      />
-      <SelectOption
-        id="startswith-option-select"
-        key="startswith"
-        value="startswith"
-        description={t`Field starts with value.`}
-      />
-      <SelectOption
-        id="istartswith-option-select"
-        key="istartswith"
-        value="istartswith"
-        description={t`Case-insensitive version of startswith.`}
-      />
-      <SelectOption
-        id="endswith-option-select"
-        key="endswith"
-        value="endswith"
-        description={t`Field ends with value.`}
-      />
-      <SelectOption
-        id="iendswith-option-select"
-        key="iendswith"
-        value="iendswith"
-        description={t`Case-insensitive version of endswith.`}
-      />
-      <SelectOption
-        id="regex-option-select"
-        key="regex"
-        value="regex"
-        description={t`Field matches the given regular expression.`}
-      />
-      <SelectOption
-        id="iregex-option-select"
-        key="iregex"
-        value="iregex"
-        description={t`Case-insensitive version of regex.`}
-      />
-      <SelectOption
-        id="gt-option-select"
-        key="gt"
-        value="gt"
-        description={t`Greater than comparison.`}
-      />
-      <SelectOption
-        id="gte-option-select"
-        key="gte"
-        value="gte"
-        description={t`Greater than or equal to comparison.`}
-      />
-      <SelectOption
-        id="lt-option-select"
-        key="lt"
-        value="lt"
-        description={t`Less than comparison.`}
-      />
-      <SelectOption
-        id="lte-option-select"
-        key="lte"
-        value="lte"
-        description={t`Less than or equal to comparison.`}
-      />
-      <SelectOption
-        id="isnull-option-select"
-        key="isnull"
-        value="isnull"
-        description={t`Check whether the given field or related object is null; expects a boolean value.`}
-      />
-      <SelectOption
-        id="in-option-select"
-        key="in"
-        value="in"
-        description={t`Check whether the given field's value is present in the list provided; expects a comma-separated list of items.`}
-      />
-    </Select>
-  );
-
   return (
     <AdvancedGroup>
       {lookupSelection === 'search' ? (
@@ -328,9 +179,21 @@ function AdvancedSearch({
           </SelectOption>
         ))}
       </Select>
-      {relatedSearchKeySelected
-        ? renderRelatedLookupType()
-        : renderLookupType()}
+      {relatedSearchKeySelected ? (
+        <RelatedLookupTypeInput
+          value={lookupSelection}
+          setValue={setLookupSelection}
+          maxSelectHeight={maxSelectHeight}
+          enableFuzzyFiltering={enableRelatedFuzzyFiltering}
+        />
+      ) : (
+        <LookupTypeInput
+          value={lookupSelection}
+          type={lookupKeyType}
+          setValue={setLookupSelection}
+          maxSelectHeight={maxSelectHeight}
+        />
+      )}
       <InputGroup>
         <TextInput
           data-cy="advanced-search-text-input"
@@ -369,12 +232,12 @@ function AdvancedSearch({
 }
 
 AdvancedSearch.propTypes = {
-  onSearch: PropTypes.func.isRequired,
-  searchableKeys: PropTypes.arrayOf(PropTypes.string),
-  relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
-  maxSelectHeight: PropTypes.string,
-  enableNegativeFiltering: PropTypes.bool,
-  enableRelatedFuzzyFiltering: PropTypes.bool,
+  onSearch: func.isRequired,
+  searchableKeys: SearchableKeys,
+  relatedSearchableKeys: arrayOf(string),
+  maxSelectHeight: string,
+  enableNegativeFiltering: bool,
+  enableRelatedFuzzyFiltering: bool,
 };
 
 AdvancedSearch.defaultProps = {

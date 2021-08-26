@@ -8,7 +8,11 @@ import { getQSConfig, parseQueryString } from 'util/qs';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import { SelectedList } from '../SelectedList';
-import PaginatedTable, { HeaderCell, HeaderRow } from '../PaginatedTable';
+import PaginatedTable, {
+  HeaderCell,
+  HeaderRow,
+  getSearchableKeys,
+} from '../PaginatedTable';
 
 const QS_Config = (sortColumns) =>
   getQSConfig('resource', {
@@ -56,9 +60,7 @@ function SelectResourceStep({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [location, fetchItems, fetchOptions, sortColumns]),
     {

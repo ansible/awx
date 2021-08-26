@@ -17,6 +17,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderCell,
   HeaderRow,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import AssociateModal from 'components/AssociateModal';
 import DisassociateButton from 'components/DisassociateButton';
@@ -67,9 +68,7 @@ function InventoryGroupHostList() {
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [groupId, inventoryId, location.search]),
     {

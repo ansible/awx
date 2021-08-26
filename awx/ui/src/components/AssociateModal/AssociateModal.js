@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useSelected from 'hooks/useSelected';
@@ -53,9 +54,7 @@ function AssociateModal({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [fetchRequest, optionsRequest, history.location.search, displayKey]),
     {

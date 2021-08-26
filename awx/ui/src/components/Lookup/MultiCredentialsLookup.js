@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import { getSearchableKeys } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useIsMounted from 'hooks/useIsMounted';
@@ -100,9 +101,7 @@ function MultiCredentialsLookup({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter((key) => actionsResponse.data.actions?.GET[key].filterable),
+        searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
     }, [selectedType, history.location]),
     {

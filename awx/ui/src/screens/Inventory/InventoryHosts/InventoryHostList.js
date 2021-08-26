@@ -12,6 +12,7 @@ import PaginatedTable, {
   HeaderCell,
   ToolbarAddButton,
   ToolbarDeleteButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import useSelected from 'hooks/useSelected';
 import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
@@ -59,9 +60,7 @@ function InventoryHostList() {
         relatedSearchableKeys: (
           hostOptions?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
-        searchableKeys: Object.keys(hostOptions.data.actions?.GET || {}).filter(
-          (key) => hostOptions.data.actions?.GET[key].filterable
-        ),
+        searchableKeys: getSearchableKeys(hostOptions.data.actions?.GET),
       };
     }, [id, search]),
     {

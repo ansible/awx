@@ -7,7 +7,7 @@ import { t } from '@lingui/macro';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { parseQueryString, updateQueryString } from 'util/qs';
-import { QSConfig, SearchColumns } from 'types';
+import { QSConfig, SearchColumns, SearchableKeys } from 'types';
 import ListHeader from '../ListHeader';
 import ContentEmpty from '../ContentEmpty';
 import ContentError from '../ContentError';
@@ -184,7 +184,7 @@ PaginatedTable.propTypes = {
   qsConfig: QSConfig.isRequired,
   renderRow: PropTypes.func.isRequired,
   toolbarSearchColumns: SearchColumns,
-  toolbarSearchableKeys: PropTypes.arrayOf(PropTypes.string),
+  toolbarSearchableKeys: SearchableKeys,
   toolbarRelatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   showPageSizeOptions: PropTypes.bool,
   renderToolbar: PropTypes.func,

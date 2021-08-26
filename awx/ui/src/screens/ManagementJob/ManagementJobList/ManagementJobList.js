@@ -11,6 +11,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import { useConfig } from 'contexts/Config';
 import { parseQueryString, getQSConfig } from 'util/qs';
@@ -25,9 +26,7 @@ const QS_CONFIG = getQSConfig('system_job_templates', {
 
 const buildSearchKeys = (options) => {
   const actions = options?.data?.actions?.GET || {};
-  const searchableKeys = Object.keys(actions).filter(
-    (key) => actions[key].filterable
-  );
+  const searchableKeys = getSearchableKeys(actions);
   const relatedSearchableKeys = options?.data?.related_search_fields || [];
 
   return { searchableKeys, relatedSearchableKeys };
