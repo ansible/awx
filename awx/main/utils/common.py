@@ -15,7 +15,6 @@ import urllib.parse
 import threading
 import contextlib
 import tempfile
-import psutil
 from functools import reduce, wraps
 
 # Django
@@ -724,10 +723,6 @@ def get_cpu_effective_capacity(cpu_count):
     return cpu_count * forkcpu
 
 
-def measure_cpu():  # TODO: replace with import from ansible-runner
-    return psutil.cpu_count()
-
-
 def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     """Some environments will do a correction to the reported CPU number
     because the given OpenShift value is a lie
@@ -759,10 +754,6 @@ def get_mem_effective_capacity(mem_mb):
         forkmem = 100
 
     return max(1, ((mem_mb // 1024 // 1024) - 2048) // forkmem)
-
-
-def measure_memory():  # TODO: replace with import from ansible-runner
-    return psutil.virtual_memory().total
 
 
 def get_corrected_memory(memory):

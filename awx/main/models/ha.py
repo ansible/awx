@@ -22,8 +22,11 @@ from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
-from awx.main.utils.common import measure_cpu, get_corrected_cpu, get_cpu_effective_capacity, measure_memory, get_corrected_memory, get_mem_effective_capacity
+from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
 from awx.main.models.mixins import RelatedJobsMixin
+
+# ansible-runner
+from ansible_runner.utils.capacity import get_cpu_count, get_mem_in_bytes
 
 __all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
 
@@ -222,7 +225,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         except redis.ConnectionError:
             has_error = True
 
-        self.save_health_data(awx_application_version, measure_cpu(), measure_memory(), last_seen=now(), has_error=has_error)
+        self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), last_seen=now(), has_error=has_error)
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
