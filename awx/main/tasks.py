@@ -3132,15 +3132,11 @@ class AWXReceptorJob:
     def work_type(self):
         if self.task.instance.is_container_group_task:
             if self.credential:
-                work_type = 'kubernetes-runtime-auth'
-            else:
-                work_type = 'kubernetes-incluster-auth'
+                return 'kubernetes-runtime-auth'
+            return 'kubernetes-incluster-auth'
         if self.task.instance.execution_node == settings.CLUSTER_HOST_ID or self.task.instance.execution_node == self.task.instance.controller_node:
-            work_type = 'local'
-        else:
-            work_type = 'ansible-runner'
-
-        return work_type
+            return 'local'
+        return 'ansible-runner'
 
     @cleanup_new_process
     def cancel_watcher(self, processor_future):
