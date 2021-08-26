@@ -106,7 +106,7 @@ function InstanceListItem({
         <Td
           select={{
             rowIndex,
-            isSelected,
+            isSelected: isSelected && instance.node_type !== 'control',
             onSelect,
             disable: instance.node_type === 'control',
           }}
