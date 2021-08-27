@@ -22,6 +22,7 @@ import {
   requiredEmail,
   url,
   minMaxValue,
+  twilioPhoneNumber,
 } from 'util/validators';
 import { NotificationType } from 'types';
 
@@ -398,7 +399,7 @@ function TwilioFields() {
         label={t`Source phone number`}
         name="notification_configuration.from_number"
         type="text"
-        validate={required(null)}
+        validate={combine([required(null), twilioPhoneNumber()])}
         isRequired
         tooltip={t`Enter the number associated with the "Messaging
           Service" in Twilio in the format +18005550199.`}
@@ -408,10 +409,10 @@ function TwilioFields() {
         label={t`Destination SMS number(s)`}
         name="notification_configuration.to_numbers"
         type="textarea"
-        validate={required(null)}
+        validate={combine([required(null), twilioPhoneNumber()])}
         isRequired
         tooltip={t`Enter one phone number per line to specify where to
-          route SMS messages.`}
+          route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation`}
       />
       <FormField
         id="twilio-account-sid"

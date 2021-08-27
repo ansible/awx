@@ -92,7 +92,7 @@
           "data-cy",
           "fieldName"
         ],
-        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg", "hh:mm AM/PM"],
+        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg", "hh:mm AM/PM", "Twilio"],
         "ignoreComponent": [
           "AboutModal",
           "code",

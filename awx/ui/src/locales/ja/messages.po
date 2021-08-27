@@ -125,11 +125,11 @@ msgstr "すべて"
 msgid "API Service/Integration Key"
 msgstr "API サービス/統合キー"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:288
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:289
 msgid "API Token"
 msgstr "API トークン"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:303
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:304
 msgid "API service/integration key"
 msgstr "API サービス/統合キー"
 
@@ -161,11 +161,11 @@ msgid "Access Token Expiration"
 msgstr "アクセストークンの有効期限"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:299
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:418
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:419
 msgid "Account SID"
 msgstr "アカウント SID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:391
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:392
 msgid "Account token"
 msgstr "アカウントトークン"
 
@@ -761,7 +761,7 @@ msgid ""
 "path used to locate playbooks."
 msgstr "Playbook を見つけるために使用されるベースパスです。このパス内にあるディレクトリーは Playbook ディレクトリーのドロップダウンに一覧表示されます。ベースパスと選択されたPlaybook ディレクトリーは、Playbook を見つけるために使用される完全なパスを提供します。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:443
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:444
 msgid "Basic auth password"
 msgstr "Basic 認証パスワード"
 
@@ -980,7 +980,7 @@ msgid "Changes"
 msgstr "変更"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:209
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:263
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:264
 msgid "Channel"
 msgstr "チャネル"
 
@@ -1030,7 +1030,7 @@ msgstr "モジュールの選択"
 msgid "Choose a source"
 msgstr "ソースの選択"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:486
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:487
 msgid "Choose an HTTP method"
 msgstr "HTTP メソッドの選択"
 
@@ -1112,7 +1112,7 @@ msgstr "クライアント ID"
 msgid "Client Identifier"
 msgstr "クライアント識別子"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:311
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:312
 msgid "Client identifier"
 msgstr "クライアント識別子"
 
@@ -1422,7 +1422,7 @@ msgstr "ユーザートークンの作成"
 
 #: components/Lookup/ApplicationLookup.js:114
 #: components/PromptDetail/PromptDetail.js:138
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:277
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:269
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:100
 #: screens/Credential/CredentialDetail/CredentialDetail.js:243
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:86
@@ -1573,7 +1573,7 @@ msgstr "認証情報タイプが見つかりません。"
 #: components/Lookup/MultiCredentialsLookup.js:209
 #: components/PromptDetail/PromptDetail.js:176
 #: components/PromptDetail/PromptJobTemplateDetail.js:193
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:331
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:323
 #: components/TemplateList/TemplateListItem.js:315
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:77
 #: routeConfig.js:68
@@ -1652,7 +1652,7 @@ msgstr ""
 msgid "Day"
 msgstr "日"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:265
 #: components/Schedule/shared/ScheduleForm.js:164
 msgid "Days of Data to Keep"
 msgstr "データの保持日数"
@@ -1716,7 +1716,7 @@ msgstr "システムレベルの機能および関数の定義"
 #: components/PaginatedTable/ToolbarDeleteButton.js:250
 #: components/PaginatedTable/ToolbarDeleteButton.js:273
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:28
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:398
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:123
 #: screens/Credential/CredentialDetail/CredentialDetail.js:294
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:120
@@ -1795,7 +1795,7 @@ msgstr "プロジェクトの削除"
 msgid "Delete Questions"
 msgstr "質問の削除"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:402
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:394
 msgid "Delete Schedule"
 msgstr "スケジュールの削除"
 
@@ -1931,7 +1931,7 @@ msgstr "非推奨"
 #: components/Lookup/ApplicationLookup.js:122
 #: components/NotificationList/NotificationList.js:186
 #: components/PromptDetail/PromptDetail.js:112
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:260
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:252
 #: components/Schedule/ScheduleList/ScheduleList.js:193
 #: components/Schedule/shared/ScheduleForm.js:112
 #: components/TemplateList/TemplateList.js:195
@@ -2007,15 +2007,15 @@ msgstr "送信先チャネルまたはユーザー"
 msgid "Destination SMS Number(s)"
 msgstr "送信先 SMS 番号"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:408
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:409
 msgid "Destination SMS number(s)"
 msgstr "送信先 SMS 番号"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:359
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:360
 msgid "Destination channels"
 msgstr "送信先チャネル"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:226
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:227
 msgid "Destination channels or users"
 msgstr "送信先チャネルまたはユーザー"
 
@@ -2113,11 +2113,11 @@ msgstr "詳細タブ"
 msgid "Disable SSL Verification"
 msgstr "SSL 検証の無効化"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:184
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:237
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:276
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:347
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:456
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:185
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:238
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:277
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:348
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:457
 msgid "Disable SSL verification"
 msgstr "SSL 検証の無効化"
 
@@ -2223,7 +2223,7 @@ msgstr ""
 msgid "E-mail"
 msgstr "メール"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:123
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:124
 msgid "E-mail options"
 msgstr "メールオプション"
 
@@ -2240,8 +2240,8 @@ msgid ""
 "revision of the project prior to starting the job."
 msgstr "このプロジェクトでジョブを実行する際は常に、ジョブの開始前にプロジェクトのリビジョンを更新します。"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:392
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:396
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:384
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:388
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:110
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:112
 #: screens/Credential/CredentialDetail/CredentialDetail.js:281
@@ -2660,36 +2660,48 @@ msgstr "JSON または YAML 構文のいずれかを使用してインベント�
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:180
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "各行に、コンマなしでアノテーションタグを 1 つ入力してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:231
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:232
 msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
 msgstr "各行に 1 つの IRC チャンネルまたはユーザー名を入力します。チャンネルのシャープ記号 (#) およびユーザーのアットマーク (@) 記号は不要です。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:364
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 msgstr "各行に 1 つの Slack チャンネルを入力します。チャンネルにはシャープ記号 (#) が必要です。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:89
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
 msgstr "各行に 1 つのメールアドレスを入力し、この通知タイプの受信者リストを作成します。"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages."
+#~ msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのルート先を指定します。"
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:416
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
+#~ msgstr ""
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:414
 msgid ""
 "Enter one phone number per line to specify where to\n"
-"route SMS messages."
-msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのルート先を指定します。"
+"route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
+msgstr ""
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:403
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:404
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
@@ -2781,7 +2793,7 @@ msgstr "ワークフローの保存中にエラー!"
 #: components/PaginatedTable/ToolbarDeleteButton.js:205
 #: components/ResourceAccessList/ResourceAccessList.js:233
 #: components/ResourceAccessList/ResourceAccessList.js:245
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:414
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
 #: components/Schedule/ScheduleList/ScheduleList.js:238
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:72
 #: components/Schedule/shared/SchedulePromptableFields.js:70
@@ -2878,10 +2890,6 @@ msgstr "イベントの概要はありません"
 #: screens/ActivityStream/ActivityStream.js:220
 msgid "Events"
 msgstr "イベント"
-
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
-msgid "Every minute for {0} times"
-msgstr ""
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -3277,7 +3285,7 @@ msgstr "ロールを削除できませんでした。"
 msgid "Failed to delete role."
 msgstr "ロールを削除できませんでした。"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:417
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:409
 msgid "Failed to delete schedule."
 msgstr "スケジュールを削除できませんでした。"
 
@@ -3482,7 +3490,7 @@ msgstr "最初"
 msgid "First Name"
 msgstr "名"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:262
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:254
 msgid "First Run"
 msgstr "初回実行日時"
 
@@ -3683,12 +3691,12 @@ msgstr "Google OAuth2"
 msgid "Grafana"
 msgstr "Grafana"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:157
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:158
 msgid "Grafana API key"
 msgstr "Grafana API キー"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:141
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:146
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:147
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -3727,12 +3735,12 @@ msgid "Groups"
 msgstr "グループ"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:330
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:463
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:464
 msgid "HTTP Headers"
 msgstr "HTTP ヘッダー"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:325
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:477
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:478
 msgid "HTTP Method"
 msgstr "HTTP メソッド"
 
@@ -3755,7 +3763,7 @@ msgid "Hipchat"
 msgstr "Hipchat"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:75
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:76
 msgid "Host"
 msgstr "ホスト"
 
@@ -3896,11 +3904,11 @@ msgstr "ダッシュボード ID"
 msgid "ID of the Panel"
 msgstr "パネル ID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:164
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:165
 msgid "ID of the dashboard (optional)"
 msgstr "ダッシュボード ID (オプション)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:170
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:171
 msgid "ID of the panel (optional)"
 msgstr "パネル ID (オプション)"
 
@@ -3921,26 +3929,26 @@ msgstr "IRC サーバーアドレス"
 msgid "IRC Server Port"
 msgstr "IRC サーバーポート"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:218
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:219
 msgid "IRC nick"
 msgstr "IRC ニック"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:210
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:211
 msgid "IRC server address"
 msgstr "IRC サーバーアドレス"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:196
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:197
 msgid "IRC server password"
 msgstr "IRC サーバーパスワード"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:201
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:202
 msgid "IRC server port"
 msgstr "IRC サーバーポート"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:214
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:259
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:269
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:340
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:270
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:341
 msgid "Icon URL"
 msgstr "アイコン URL"
 
@@ -4210,7 +4218,7 @@ msgstr "ソースを含むインベントリーはコピーできません。"
 #: components/PromptDetail/PromptJobTemplateDetail.js:124
 #: components/PromptDetail/PromptJobTemplateDetail.js:134
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:77
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:297
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:289
 #: components/TemplateList/TemplateListItem.js:277
 #: components/TemplateList/TemplateListItem.js:287
 #: screens/Host/HostDetail/HostDetail.js:75
@@ -4400,7 +4408,7 @@ msgstr "ジョブステータス"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:57
 #: components/PromptDetail/PromptDetail.js:219
 #: components/PromptDetail/PromptJobTemplateDetail.js:242
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:344
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:336
 #: screens/Job/JobDetail/JobDetail.js:366
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:336
 #: screens/Template/shared/JobTemplateForm.js:519
@@ -4442,7 +4450,7 @@ msgstr "ノードの作成時または編集時に、パスワードの入力を
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:110
 #: components/PromptDetail/PromptDetail.js:169
 #: components/PromptDetail/PromptJobTemplateDetail.js:107
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:293
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:285
 #: screens/Job/JobDetail/JobDetail.js:184
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:182
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:137
@@ -4600,7 +4608,7 @@ msgid "Last Login"
 msgstr "前回のログイン"
 
 #: components/PromptDetail/PromptDetail.js:145
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:282
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:274
 #: components/TemplateList/TemplateListItem.js:308
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:101
 #: screens/Application/ApplicationsList/ApplicationListItem.js:43
@@ -4642,7 +4650,7 @@ msgstr "姓"
 msgid "Last Ran"
 msgstr "最終実行日時"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:269
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:261
 msgid "Last Run"
 msgstr "最終実行"
 
@@ -4743,7 +4751,7 @@ msgstr "Less than or equal to の比較条件"
 #: components/PromptDetail/PromptDetail.js:207
 #: components/PromptDetail/PromptJobTemplateDetail.js:155
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:88
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:321
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:313
 #: screens/Job/JobDetail/JobDetail.js:269
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:230
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:147
@@ -4764,7 +4772,7 @@ msgstr "ロード中"
 msgid "Local"
 msgstr ""
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:270
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:262
 msgid "Local Time Zone"
 msgstr "ローカルタイムゾーン"
 
@@ -5125,7 +5133,7 @@ msgstr "複数の選択オプション"
 #: components/PaginatedTable/PaginatedTable.js:72
 #: components/PromptDetail/PromptDetail.js:111
 #: components/ResourceAccessList/ResourceAccessListItem.js:55
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:259
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:251
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
@@ -5333,7 +5341,7 @@ msgstr "新規"
 msgid "Next"
 msgstr "次へ"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:266
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:258
 #: components/Schedule/ScheduleList/ScheduleList.js:170
 #: components/Schedule/ScheduleList/ScheduleListItem.js:101
 #: components/Schedule/ScheduleList/ScheduleListItem.js:105
@@ -5513,7 +5521,7 @@ msgstr "通知テンプレート"
 msgid "Notification Type"
 msgstr "通知タイプ"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:376
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:377
 msgid "Notification color"
 msgstr "通知の色"
 
@@ -5572,7 +5580,7 @@ msgstr "10 月"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:186
 #: components/PromptDetail/PromptDetail.js:265
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:325
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:317
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:58
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:85
@@ -5589,7 +5597,7 @@ msgstr "オフ"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:185
 #: components/PromptDetail/PromptDetail.js:265
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:325
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:317
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:57
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:85
@@ -5762,11 +5770,11 @@ msgstr ""
 msgid "Overwrite variables"
 msgstr "変数の上書き"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:489
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
 msgid "POST"
 msgstr "POST"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:491
 msgid "PUT"
 msgstr "PUT"
 
@@ -5779,7 +5787,7 @@ msgstr "Pagerduty"
 msgid "Pagerduty Subdomain"
 msgstr "Pagerduty サブドメイン"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:295
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:296
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty サブドメイン"
 
@@ -5820,7 +5828,7 @@ msgid "Pass extra command line variables to the playbook. This is the -e or --ex
 msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
 #: screens/Login/Login.js:193
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:70
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:71
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:101
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:214
 #: screens/Template/Survey/SurveyQuestionForm.js:82
@@ -5951,7 +5959,7 @@ msgstr "このリストに入力するには {pluralizedItemName} を追加し�
 msgid "Please click the Start button to begin."
 msgstr "開始ボタンをクリックして開始してください。"
 
-#: util/validators.js:143
+#: util/validators.js:160
 msgid "Please enter a valid URL"
 msgstr "有効な URL を入力してください。"
 
@@ -6017,7 +6025,7 @@ msgid ""
 msgstr "検索フィルターを使用して、このインベントリーのホストにデータを入力します (例: ansible_facts.ansible_distribution:\"RedHat\")。詳細な構文と例については、ドキュメントを参照してください。構文と例の詳細については、Ansible Tower のドキュメントを参照してください。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:124
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:103
 msgid "Port"
 msgstr "ポート"
 
@@ -6143,7 +6151,7 @@ msgid "Prompt | {0}"
 msgstr "プロンプト | {0}"
 
 #: components/PromptDetail/PromptDetail.js:164
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:289
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:281
 msgid "Prompted Values"
 msgstr "プロンプト値"
 
@@ -6255,7 +6263,7 @@ msgstr ""
 msgid "Recipient List"
 msgstr "受信者リスト"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:83
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:84
 msgid "Recipient list"
 msgstr "受信者リスト"
 
@@ -6430,7 +6438,7 @@ msgstr "このリンクを削除すると、ブランチの残りの部分が孤
 msgid "Reorder"
 msgstr ""
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:263
 msgid "Repeat Frequency"
 msgstr "繰り返しの頻度"
 
@@ -6968,7 +6976,7 @@ msgstr "サブスクリプションの選択"
 #: screens/Inventory/shared/SmartInventoryForm.js:67
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:24
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:431
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:432
 #: screens/Project/shared/ProjectForm.js:189
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.js:39
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:36
@@ -7184,7 +7192,7 @@ msgstr ""
 msgid "Sender Email"
 msgstr "送信者のメール"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:94
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:95
 msgid "Sender e-mail"
 msgstr "送信者のメール"
 
@@ -7268,7 +7276,7 @@ msgstr "表示"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:173
 #: components/PromptDetail/PromptDetail.js:264
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:324
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:495
 msgid "Show Changes"
@@ -7345,7 +7353,7 @@ msgstr "簡易キー選択"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:69
 #: components/PromptDetail/PromptDetail.js:242
 #: components/PromptDetail/PromptJobTemplateDetail.js:257
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:362
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:354
 #: screens/Job/JobDetail/JobDetail.js:385
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:351
 #: screens/Template/shared/JobTemplateForm.js:535
@@ -7439,7 +7447,7 @@ msgstr "ソース"
 #: components/PromptDetail/PromptJobTemplateDetail.js:152
 #: components/PromptDetail/PromptProjectDetail.js:98
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:87
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:319
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:311
 #: screens/Job/JobDetail/JobDetail.js:255
 #: screens/Project/ProjectDetail/ProjectDetail.js:201
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:227
@@ -7516,7 +7524,7 @@ msgstr "ソースコントロールのブランチ"
 msgid "Source details"
 msgstr "ソース詳細"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:398
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:399
 msgid "Source phone number"
 msgstr "発信元の電話番号"
 
@@ -7534,13 +7542,13 @@ msgstr "プロジェクトから取得"
 msgid "Sources"
 msgstr "ソース"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:465
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:466
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
 msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:379
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:380
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
@@ -7867,16 +7875,16 @@ msgstr "タグは、Playbook のサイズが大きい場合にプレイまたは
 msgid "Tags for the Annotation"
 msgstr "アノテーションのタグ"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:176
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:177
 msgid "Tags for the annotation (optional)"
 msgstr "アノテーションのタグ (オプション)"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:199
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:249
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:313
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:249
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:326
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:448
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:250
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:327
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:449
 msgid "Target URL"
 msgstr "ターゲット URL"
 
@@ -8002,7 +8010,7 @@ msgstr "ジョブテンプレート用に構成されていない場合に使用
 msgid "The Grant type the user must use to acquire tokens for this application"
 msgstr ""
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:119
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
@@ -8016,7 +8024,7 @@ msgid ""
 "timeout."
 msgstr "ジョブが取り消される前の実行時間 (秒数)。デフォルト値は 0 で、ジョブのタイムアウトがありません。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:151
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:152
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
@@ -8255,7 +8263,7 @@ msgstr ""
 msgid "This field must be a number and have a value less than {max}"
 msgstr ""
 
-#: util/validators.js:167
+#: util/validators.js:184
 msgid "This field must be a regular expression"
 msgstr "このフィールドは正規表現である必要があります"
 
@@ -8412,7 +8420,7 @@ msgstr "タイムアウト"
 
 #: components/PromptDetail/PromptDetail.js:123
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:129
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:112
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:113
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:232
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:177
 #: screens/Template/shared/JobTemplateForm.js:488
@@ -8482,7 +8490,7 @@ msgstr "スケジュールの切り替え"
 msgid "Toggle tools"
 msgstr "ツールの切り替え"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:369
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:370
 #: screens/User/UserTokens/UserTokens.js:64
 msgid "Token"
 msgstr "トークン"
@@ -8620,7 +8628,7 @@ msgid "Type"
 msgstr "タイプ"
 
 #: screens/Credential/shared/TypeInputsSubForm.js:25
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:45
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:46
 #: screens/Project/shared/ProjectForm.js:246
 msgid "Type Details"
 msgstr "タイプの詳細"
@@ -8733,12 +8741,12 @@ msgid "Upload a Red Hat Subscription Manifest containing your subscription. To g
 msgstr "サブスクリプションを含む Red Hat Subscription Manifest をアップロードします。サブスクリプションマニフェストを生成するには、Red Hat カスタマーポータルの <0>サブスクリプション割り当て</0> にアクセスします。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:45
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:128
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:129
 msgid "Use SSL"
 msgstr "SSL の使用"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:50
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:133
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:134
 msgid "Use TLS"
 msgstr "TLS の使用"
 
@@ -8818,10 +8826,10 @@ msgstr "ユーザートークン"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:204
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:254
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:308
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:64
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:257
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:334
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:437
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:65
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:258
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:335
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:438
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:206
 #: screens/User/UserDetail/UserDetail.js:68
@@ -8859,7 +8867,7 @@ msgstr "VMware vCenter"
 #: components/PromptDetail/PromptDetail.js:271
 #: components/PromptDetail/PromptJobTemplateDetail.js:271
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:131
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:381
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:373
 #: screens/Host/HostDetail/HostDetail.js:96
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:97
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:37
@@ -8898,7 +8906,7 @@ msgstr "詳細"
 #: components/PromptDetail/PromptDetail.js:212
 #: components/PromptDetail/PromptInventorySourceDetail.js:118
 #: components/PromptDetail/PromptJobTemplateDetail.js:156
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:308
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:183
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:87
 #: screens/Job/JobDetail/JobDetail.js:272
@@ -9702,6 +9710,10 @@ msgstr "{0, plural, one {以下のグループを削除してもよろしいで�
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr "{0, plural, one {グループを削除しますか?} other {グループを削除しますか?}}"
 
+#: util/validators.js:138
+msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
+msgstr ""
+
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:178
 msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
 msgstr ""
@@ -9840,10 +9852,6 @@ msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 
 #: components/DetailList/NumberSinceDetail.js:19
 #~ msgid "{number} since {dateStr}"
-#~ msgstr ""
-
-#: components/DetailList/NumberSinceDetail.js:13
-#~ msgid "{number} since {date}"
 #~ msgstr ""
 
 #: components/PaginatedTable/PaginatedTable.js:79

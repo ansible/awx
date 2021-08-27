@@ -128,11 +128,11 @@ msgstr "ALL"
 msgid "API Service/Integration Key"
 msgstr "API Service/Integration Key"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:288
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:289
 msgid "API Token"
 msgstr "API Token"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:303
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:304
 msgid "API service/integration key"
 msgstr "API service/integration key"
 
@@ -164,11 +164,11 @@ msgid "Access Token Expiration"
 msgstr "Access Token Expiration"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:299
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:418
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:419
 msgid "Account SID"
 msgstr "Account SID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:391
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:392
 msgid "Account token"
 msgstr "Account token"
 
@@ -774,7 +774,7 @@ msgstr ""
 "Together the base path and selected playbook directory provide the full\n"
 "path used to locate playbooks."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:443
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:444
 msgid "Basic auth password"
 msgstr "Basic auth password"
 
@@ -1001,7 +1001,7 @@ msgid "Changes"
 msgstr "Changes"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:209
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:263
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:264
 msgid "Channel"
 msgstr "Channel"
 
@@ -1051,7 +1051,7 @@ msgstr "Choose a module"
 msgid "Choose a source"
 msgstr "Choose a source"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:486
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:487
 msgid "Choose an HTTP method"
 msgstr "Choose an HTTP method"
 
@@ -1136,7 +1136,7 @@ msgstr "Client ID"
 msgid "Client Identifier"
 msgstr "Client Identifier"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:311
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:312
 msgid "Client identifier"
 msgstr "Client identifier"
 
@@ -1452,7 +1452,7 @@ msgstr "Create user token"
 
 #: components/Lookup/ApplicationLookup.js:114
 #: components/PromptDetail/PromptDetail.js:138
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:277
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:269
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:100
 #: screens/Credential/CredentialDetail/CredentialDetail.js:243
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:86
@@ -1603,7 +1603,7 @@ msgstr "Credential type not found."
 #: components/Lookup/MultiCredentialsLookup.js:209
 #: components/PromptDetail/PromptDetail.js:176
 #: components/PromptDetail/PromptJobTemplateDetail.js:193
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:331
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:323
 #: components/TemplateList/TemplateListItem.js:315
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:77
 #: routeConfig.js:68
@@ -1682,7 +1682,7 @@ msgstr "Date"
 msgid "Day"
 msgstr "Day"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:265
 #: components/Schedule/shared/ScheduleForm.js:164
 msgid "Days of Data to Keep"
 msgstr "Days of Data to Keep"
@@ -1746,7 +1746,7 @@ msgstr "Define system-level features and functions"
 #: components/PaginatedTable/ToolbarDeleteButton.js:250
 #: components/PaginatedTable/ToolbarDeleteButton.js:273
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:28
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:398
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:123
 #: screens/Credential/CredentialDetail/CredentialDetail.js:294
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:120
@@ -1825,7 +1825,7 @@ msgstr "Delete Project"
 msgid "Delete Questions"
 msgstr "Delete Questions"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:402
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:394
 msgid "Delete Schedule"
 msgstr "Delete Schedule"
 
@@ -1965,7 +1965,7 @@ msgstr "Deprecated"
 #: components/Lookup/ApplicationLookup.js:122
 #: components/NotificationList/NotificationList.js:186
 #: components/PromptDetail/PromptDetail.js:112
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:260
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:252
 #: components/Schedule/ScheduleList/ScheduleList.js:193
 #: components/Schedule/shared/ScheduleForm.js:112
 #: components/TemplateList/TemplateList.js:195
@@ -2041,15 +2041,15 @@ msgstr "Destination Channels or Users"
 msgid "Destination SMS Number(s)"
 msgstr "Destination SMS Number(s)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:408
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:409
 msgid "Destination SMS number(s)"
 msgstr "Destination SMS number(s)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:359
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:360
 msgid "Destination channels"
 msgstr "Destination channels"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:226
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:227
 msgid "Destination channels or users"
 msgstr "Destination channels or users"
 
@@ -2147,11 +2147,11 @@ msgstr "Details tab"
 msgid "Disable SSL Verification"
 msgstr "Disable SSL Verification"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:184
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:237
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:276
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:347
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:456
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:185
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:238
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:277
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:348
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:457
 msgid "Disable SSL verification"
 msgstr "Disable SSL verification"
 
@@ -2260,7 +2260,7 @@ msgstr "Dragging started for item id: {newId}."
 msgid "E-mail"
 msgstr "E-mail"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:123
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:124
 msgid "E-mail options"
 msgstr "E-mail options"
 
@@ -2282,8 +2282,8 @@ msgstr ""
 "Each time a job runs using this project, update the\n"
 "revision of the project prior to starting the job."
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:392
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:396
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:384
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:388
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:110
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:112
 #: screens/Credential/CredentialDetail/CredentialDetail.js:281
@@ -2717,11 +2717,11 @@ msgstr ""
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:180
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "Enter one Annotation Tag per line, without commas."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:231
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:232
 msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
@@ -2731,7 +2731,7 @@ msgstr ""
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:364
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
@@ -2739,7 +2739,7 @@ msgstr ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:89
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
@@ -2748,14 +2748,30 @@ msgstr ""
 "list for this type of notification."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages."
+#~ msgstr ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages."
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:416
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
+#~ msgstr ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:414
 msgid ""
 "Enter one phone number per line to specify where to\n"
-"route SMS messages."
+"route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
 msgstr ""
 "Enter one phone number per line to specify where to\n"
-"route SMS messages."
+"route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:403
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:404
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
@@ -2849,7 +2865,7 @@ msgstr "Error saving the workflow!"
 #: components/PaginatedTable/ToolbarDeleteButton.js:205
 #: components/ResourceAccessList/ResourceAccessList.js:233
 #: components/ResourceAccessList/ResourceAccessList.js:245
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:414
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
 #: components/Schedule/ScheduleList/ScheduleList.js:238
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:72
 #: components/Schedule/shared/SchedulePromptableFields.js:70
@@ -2946,10 +2962,6 @@ msgstr "Event summary not available"
 #: screens/ActivityStream/ActivityStream.js:220
 msgid "Events"
 msgstr "Events"
-
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
-msgid "Every minute for {0} times"
-msgstr "Every minute for {0} times"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -3345,7 +3357,7 @@ msgstr "Failed to delete role"
 msgid "Failed to delete role."
 msgstr "Failed to delete role."
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:417
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:409
 msgid "Failed to delete schedule."
 msgstr "Failed to delete schedule."
 
@@ -3550,7 +3562,7 @@ msgstr ""
 msgid "First Name"
 msgstr "First Name"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:262
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:254
 msgid "First Run"
 msgstr "First Run"
 
@@ -3758,12 +3770,12 @@ msgstr "Google OAuth2"
 msgid "Grafana"
 msgstr "Grafana"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:157
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:158
 msgid "Grafana API key"
 msgstr "Grafana API key"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:141
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:146
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:147
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -3802,12 +3814,12 @@ msgid "Groups"
 msgstr "Groups"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:330
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:463
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:464
 msgid "HTTP Headers"
 msgstr "HTTP Headers"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:325
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:477
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:478
 msgid "HTTP Method"
 msgstr "HTTP Method"
 
@@ -3830,7 +3842,7 @@ msgid "Hipchat"
 msgstr "Hipchat"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:75
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:76
 msgid "Host"
 msgstr "Host"
 
@@ -3971,11 +3983,11 @@ msgstr "ID of the Dashboard"
 msgid "ID of the Panel"
 msgstr "ID of the Panel"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:164
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:165
 msgid "ID of the dashboard (optional)"
 msgstr "ID of the dashboard (optional)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:170
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:171
 msgid "ID of the panel (optional)"
 msgstr "ID of the panel (optional)"
 
@@ -3996,26 +4008,26 @@ msgstr "IRC Server Address"
 msgid "IRC Server Port"
 msgstr "IRC Server Port"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:218
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:219
 msgid "IRC nick"
 msgstr "IRC nick"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:210
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:211
 msgid "IRC server address"
 msgstr "IRC server address"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:196
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:197
 msgid "IRC server password"
 msgstr "IRC server password"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:201
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:202
 msgid "IRC server port"
 msgstr "IRC server port"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:214
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:259
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:269
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:340
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:270
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:341
 msgid "Icon URL"
 msgstr "Icon URL"
 
@@ -4315,7 +4327,7 @@ msgstr "Inventories with sources cannot be copied"
 #: components/PromptDetail/PromptJobTemplateDetail.js:124
 #: components/PromptDetail/PromptJobTemplateDetail.js:134
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:77
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:297
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:289
 #: components/TemplateList/TemplateListItem.js:277
 #: components/TemplateList/TemplateListItem.js:287
 #: screens/Host/HostDetail/HostDetail.js:75
@@ -4505,7 +4517,7 @@ msgstr "Job Status"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:57
 #: components/PromptDetail/PromptDetail.js:219
 #: components/PromptDetail/PromptJobTemplateDetail.js:242
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:344
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:336
 #: screens/Job/JobDetail/JobDetail.js:366
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:336
 #: screens/Template/shared/JobTemplateForm.js:519
@@ -4547,7 +4559,7 @@ msgstr "Job Templates with credentials that prompt for passwords cannot be selec
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:110
 #: components/PromptDetail/PromptDetail.js:169
 #: components/PromptDetail/PromptJobTemplateDetail.js:107
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:293
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:285
 #: screens/Job/JobDetail/JobDetail.js:184
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:182
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:137
@@ -4705,7 +4717,7 @@ msgid "Last Login"
 msgstr "Last Login"
 
 #: components/PromptDetail/PromptDetail.js:145
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:282
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:274
 #: components/TemplateList/TemplateListItem.js:308
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:101
 #: screens/Application/ApplicationsList/ApplicationListItem.js:43
@@ -4747,7 +4759,7 @@ msgstr ""
 msgid "Last Ran"
 msgstr "Last Ran"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:269
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:261
 msgid "Last Run"
 msgstr "Last Run"
 
@@ -4848,7 +4860,7 @@ msgstr "Less than or equal to comparison."
 #: components/PromptDetail/PromptDetail.js:207
 #: components/PromptDetail/PromptJobTemplateDetail.js:155
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:88
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:321
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:313
 #: screens/Job/JobDetail/JobDetail.js:269
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:230
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:147
@@ -4869,7 +4881,7 @@ msgstr "Loading"
 msgid "Local"
 msgstr "Local"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:270
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:262
 msgid "Local Time Zone"
 msgstr "Local Time Zone"
 
@@ -5234,7 +5246,7 @@ msgstr "Multiple Choice Options"
 #: components/PaginatedTable/PaginatedTable.js:72
 #: components/PromptDetail/PromptDetail.js:111
 #: components/ResourceAccessList/ResourceAccessListItem.js:55
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:259
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:251
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
@@ -5442,7 +5454,7 @@ msgstr "New"
 msgid "Next"
 msgstr ""
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:266
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:258
 #: components/Schedule/ScheduleList/ScheduleList.js:170
 #: components/Schedule/ScheduleList/ScheduleListItem.js:101
 #: components/Schedule/ScheduleList/ScheduleListItem.js:105
@@ -5635,7 +5647,7 @@ msgstr ""
 msgid "Notification Type"
 msgstr "Notification Type"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:376
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:377
 msgid "Notification color"
 msgstr "Notification color"
 
@@ -5694,7 +5706,7 @@ msgstr "October"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:186
 #: components/PromptDetail/PromptDetail.js:265
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:325
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:317
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:58
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:85
@@ -5711,7 +5723,7 @@ msgstr "Off"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:185
 #: components/PromptDetail/PromptDetail.js:265
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:325
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:317
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:57
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:85
@@ -5887,11 +5899,11 @@ msgstr "Overwrite local variables from remote inventory source"
 msgid "Overwrite variables"
 msgstr "Overwrite variables"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:489
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
 msgid "POST"
 msgstr "POST"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:491
 msgid "PUT"
 msgstr "PUT"
 
@@ -5904,7 +5916,7 @@ msgstr "Pagerduty"
 msgid "Pagerduty Subdomain"
 msgstr "Pagerduty Subdomain"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:295
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:296
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty subdomain"
 
@@ -5949,7 +5961,7 @@ msgid "Pass extra command line variables to the playbook. This is the -e or --ex
 msgstr "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 
 #: screens/Login/Login.js:193
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:70
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:71
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:101
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:214
 #: screens/Template/Survey/SurveyQuestionForm.js:82
@@ -6080,7 +6092,7 @@ msgstr "Please add {pluralizedItemName} to populate this list"
 msgid "Please click the Start button to begin."
 msgstr "Please click the Start button to begin."
 
-#: util/validators.js:143
+#: util/validators.js:160
 msgid "Please enter a valid URL"
 msgstr "Please enter a valid URL"
 
@@ -6151,7 +6163,7 @@ msgstr ""
 "examples."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:124
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:103
 msgid "Port"
 msgstr "Port"
 
@@ -6283,7 +6295,7 @@ msgid "Prompt | {0}"
 msgstr "Prompt | {0}"
 
 #: components/PromptDetail/PromptDetail.js:164
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:289
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:281
 msgid "Prompted Values"
 msgstr "Prompted Values"
 
@@ -6409,7 +6421,7 @@ msgstr "Recent jobs"
 msgid "Recipient List"
 msgstr "Recipient List"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:83
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:84
 msgid "Recipient list"
 msgstr "Recipient list"
 
@@ -6586,7 +6598,7 @@ msgstr "Removing this link will orphan the rest of the branch and cause it to be
 msgid "Reorder"
 msgstr "Reorder"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:263
 msgid "Repeat Frequency"
 msgstr "Repeat Frequency"
 
@@ -7128,7 +7140,7 @@ msgstr "Select a subscription"
 #: screens/Inventory/shared/SmartInventoryForm.js:67
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:24
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:431
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:432
 #: screens/Project/shared/ProjectForm.js:189
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.js:39
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:36
@@ -7361,7 +7373,7 @@ msgstr "Selected date range must have at least 1 schedule occurrence."
 msgid "Sender Email"
 msgstr "Sender Email"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:94
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:95
 msgid "Sender e-mail"
 msgstr "Sender e-mail"
 
@@ -7445,7 +7457,7 @@ msgstr "Show"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:173
 #: components/PromptDetail/PromptDetail.js:264
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:324
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:495
 msgid "Show Changes"
@@ -7522,7 +7534,7 @@ msgstr "Simple key select"
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:69
 #: components/PromptDetail/PromptDetail.js:242
 #: components/PromptDetail/PromptJobTemplateDetail.js:257
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:362
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:354
 #: screens/Job/JobDetail/JobDetail.js:385
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:351
 #: screens/Template/shared/JobTemplateForm.js:535
@@ -7625,7 +7637,7 @@ msgstr "Source"
 #: components/PromptDetail/PromptJobTemplateDetail.js:152
 #: components/PromptDetail/PromptProjectDetail.js:98
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:87
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:319
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:311
 #: screens/Job/JobDetail/JobDetail.js:255
 #: screens/Project/ProjectDetail/ProjectDetail.js:201
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:227
@@ -7702,7 +7714,7 @@ msgstr "Source control branch"
 msgid "Source details"
 msgstr "Source details"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:398
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:399
 msgid "Source phone number"
 msgstr "Source phone number"
 
@@ -7720,7 +7732,7 @@ msgstr "Sourced from a project"
 msgid "Sources"
 msgstr "Sources"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:465
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:466
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
@@ -7728,7 +7740,7 @@ msgstr ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:379
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:380
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
@@ -8072,16 +8084,16 @@ msgstr ""
 msgid "Tags for the Annotation"
 msgstr "Tags for the Annotation"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:176
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:177
 msgid "Tags for the annotation (optional)"
 msgstr "Tags for the annotation (optional)"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:199
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:249
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:313
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:249
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:326
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:448
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:250
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:327
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:449
 msgid "Target URL"
 msgstr "Target URL"
 
@@ -8207,7 +8219,7 @@ msgstr "The Execution Environment to be used when one has not been configured fo
 msgid "The Grant type the user must use to acquire tokens for this application"
 msgstr "The Grant type the user must use to acquire tokens for this application"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:119
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
@@ -8227,7 +8239,7 @@ msgstr ""
 "before the job is canceled. Defaults to 0 for no job\n"
 "timeout."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:151
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:152
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
@@ -8504,7 +8516,7 @@ msgstr "This field must be a number and have a value greater than {min}"
 msgid "This field must be a number and have a value less than {max}"
 msgstr "This field must be a number and have a value less than {max}"
 
-#: util/validators.js:167
+#: util/validators.js:184
 msgid "This field must be a regular expression"
 msgstr "This field must be a regular expression"
 
@@ -8674,7 +8686,7 @@ msgstr "Timed out"
 
 #: components/PromptDetail/PromptDetail.js:123
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:129
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:112
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:113
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:232
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:177
 #: screens/Template/shared/JobTemplateForm.js:488
@@ -8744,7 +8756,7 @@ msgstr "Toggle schedule"
 msgid "Toggle tools"
 msgstr "Toggle tools"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:369
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:370
 #: screens/User/UserTokens/UserTokens.js:64
 msgid "Token"
 msgstr "Token"
@@ -8882,7 +8894,7 @@ msgid "Type"
 msgstr "Type"
 
 #: screens/Credential/shared/TypeInputsSubForm.js:25
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:45
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:46
 #: screens/Project/shared/ProjectForm.js:246
 msgid "Type Details"
 msgstr "Type Details"
@@ -8997,12 +9009,12 @@ msgid "Upload a Red Hat Subscription Manifest containing your subscription. To g
 msgstr "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <0>subscription allocations</0> on the Red Hat Customer Portal."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:45
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:128
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:129
 msgid "Use SSL"
 msgstr "Use SSL"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:50
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:133
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:134
 msgid "Use TLS"
 msgstr "Use TLS"
 
@@ -9085,10 +9097,10 @@ msgstr "User tokens"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:204
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:254
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:308
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:64
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:257
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:334
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:437
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:65
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:258
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:335
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:438
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:206
 #: screens/User/UserDetail/UserDetail.js:68
@@ -9126,7 +9138,7 @@ msgstr "VMware vCenter"
 #: components/PromptDetail/PromptDetail.js:271
 #: components/PromptDetail/PromptJobTemplateDetail.js:271
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:131
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:381
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:373
 #: screens/Host/HostDetail/HostDetail.js:96
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:97
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:37
@@ -9165,7 +9177,7 @@ msgstr "Verbose"
 #: components/PromptDetail/PromptDetail.js:212
 #: components/PromptDetail/PromptInventorySourceDetail.js:118
 #: components/PromptDetail/PromptJobTemplateDetail.js:156
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:308
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:183
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:87
 #: screens/Job/JobDetail/JobDetail.js:272
@@ -9979,6 +9991,10 @@ msgstr "{0, plural, one {Are you sure you want delete the group below?} other {A
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 
+#: util/validators.js:138
+msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
+msgstr "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
+
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:178
 msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
 msgstr "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
@@ -10118,10 +10134,6 @@ msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 #: components/DetailList/NumberSinceDetail.js:19
 #~ msgid "{number} since {dateStr}"
 #~ msgstr "{number} since {dateStr}"
-
-#: components/DetailList/NumberSinceDetail.js:13
-#~ msgid "{number} since {date}"
-#~ msgstr "{number} since {date}"
 
 #: components/PaginatedTable/PaginatedTable.js:79
 msgid "{pluralizedItemName} List"
