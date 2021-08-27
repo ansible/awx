@@ -95,6 +95,7 @@ describe('<HostList />', () => {
           GET: {},
           POST: {},
         },
+        related_search_fields: ['first_key__search', 'ansible_facts'],
       },
     });
   });
@@ -120,6 +121,10 @@ describe('<HostList />', () => {
       wrapper = mountWithContexts(<HostList />);
     });
     await waitForLoaded(wrapper);
+
+    expect(
+      wrapper.find('PaginatedTable').props().toolbarRelatedSearchableKeys
+    ).toStrictEqual(['first_key', 'ansible_facts']);
 
     expect(HostsAPI.read).toHaveBeenCalled();
     expect(wrapper.find('HostListItem')).toHaveLength(3);

@@ -27,7 +27,10 @@ const QS_CONFIG = getQSConfig('system_job_templates', {
 const buildSearchKeys = (options) => {
   const actions = options?.data?.actions?.GET || {};
   const searchableKeys = getSearchableKeys(actions);
-  const relatedSearchableKeys = options?.data?.related_search_fields || [];
+
+  const relatedSearchableKeys = (
+    options?.data?.related_search_fields || []
+  ).map((val) => val.slice(0, -8));
 
   return { searchableKeys, relatedSearchableKeys };
 };

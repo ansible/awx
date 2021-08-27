@@ -36,7 +36,14 @@ function InventorySourceList() {
   const {
     isLoading,
     error: fetchError,
-    result: { result, sourceCount, sourceChoices, sourceChoicesOptions },
+    result: {
+      result,
+      sourceCount,
+      sourceChoices,
+      sourceChoicesOptions,
+      searchableKeys,
+      relatedSearchableKeys,
+    },
     request: fetchSources,
   } = useRequest(
     useCallback(async () => {
@@ -50,12 +57,20 @@ function InventorySourceList() {
         sourceCount: results[0].data.count,
         sourceChoices: results[1].data.actions.GET.source.choices,
         sourceChoicesOptions: results[1].data.actions,
+        searchableKeys: Object.keys(results[1].data.actions?.GET || {}).filter(
+          (key) => results[1].data.actions?.GET[key].filterable
+        ),
+        relatedSearchableKeys: (
+          results[1]?.data?.related_search_fields || []
+        ).map((val) => val.slice(0, -8)),
       };
     }, [id, search]),
     {
       result: [],
       sourceCount: 0,
       sourceChoices: [],
+      searchableKeys: [],
+      relatedSearchableKeys: [],
     }
   );
 
@@ -149,6 +164,8 @@ function InventorySourceList() {
     <>
       <PaginatedTable
         contentError={fetchError}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         hasContentLoading={
           isLoading ||
           isDeleteLoading ||

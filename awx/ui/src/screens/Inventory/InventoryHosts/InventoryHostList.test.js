@@ -91,6 +91,7 @@ describe('<InventoryHostList />', () => {
           GET: {},
           POST: {},
         },
+        related_search_fields: ['first_key__search', 'ansible_facts'],
       },
     });
 
@@ -123,6 +124,9 @@ describe('<InventoryHostList />', () => {
   test('should fetch hosts from api and render them in the list', async () => {
     expect(InventoriesAPI.readHosts).toHaveBeenCalled();
     expect(wrapper.find('InventoryHostItem').length).toBe(3);
+    expect(
+      wrapper.find('PaginatedTable').props().toolbarRelatedSearchableKeys
+    ).toStrictEqual(['first_key', 'ansible_facts']);
   });
 
   test('should render Run Commands button', async () => {
