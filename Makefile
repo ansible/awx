@@ -537,7 +537,7 @@ docker-compose-build:
 
 docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	docker images | grep "awx_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
+	docker images | grep "awx_devel" | awk '{print $$3}' | xargs docker rmi
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 	docker volume rm tools_awx_db
