@@ -23,8 +23,9 @@ $ docker push registry.example.com/awx:test
 
 ## Using this image with the awx-operator
 
-In the spec section of the `my-awx.yml` file described in the [install docs](./../INSTALL.md#deploy-awx),
-specify the new custom image.
+In the [Advanced Configuration](https://github.com/ansible/awx-operator/blob/devel/README.md#advanced-configuration)
+section of the [README.md](https://github.com/ansible/awx-operator/blob/devel/README.md) of the AWX Operator repository,
+update the `spec` section of the `awx-demo.yml` file as follows:
 
 ```
 spec:
