@@ -628,7 +628,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         selected_groups = template_groups + organization_groups
 
         controlplane_ig = self.control_plane_instance_group
-        if controlplane_ig[0] not in selected_groups:
+        if controlplane_ig and controlplane_ig[0] and controlplane_ig[0] not in selected_groups:
             selected_groups += controlplane_ig
 
         return selected_groups
