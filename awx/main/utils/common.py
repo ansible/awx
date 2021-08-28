@@ -15,7 +15,6 @@ import urllib.parse
 import threading
 import contextlib
 import tempfile
-import psutil
 from functools import reduce, wraps
 
 # Django
@@ -711,6 +710,14 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
 def get_cpu_effective_capacity(cpu_count):
     from django.conf import settings
 
+    settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
+    env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
+
+    if env_abscpu is not None:
+        return int(env_abscpu)
+    elif settings_abscpu is not None:
+        return int(settings_abscpu)
+
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
 
@@ -724,10 +731,6 @@ def get_cpu_effective_capacity(cpu_count):
     return cpu_count * forkcpu
 
 
-def measure_cpu():  # TODO: replace with import from ansible-runner
-    return psutil.cpu_count()
-
-
 def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     """Some environments will do a correction to the reported CPU number
     because the given OpenShift value is a lie
@@ -737,16 +740,22 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
     env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
 
-    if env_abscpu is not None:
-        return 0, int(env_abscpu)
-    elif settings_abscpu is not None:
-        return 0, int(settings_abscpu)
+    if env_abscpu is not None or settings_abscpu is not None:
+        return 0
 
     return cpu_count  # no correction
 
 
 def get_mem_effective_capacity(mem_mb):
     from django.conf import settings
+
+    settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
+    env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
+
+    if env_absmem is not None:
+        return int(env_absmem)
+    elif settings_absmem is not None:
+        return int(settings_absmem)
 
     settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
@@ -761,20 +770,14 @@ def get_mem_effective_capacity(mem_mb):
     return max(1, ((mem_mb // 1024 // 1024) - 2048) // forkmem)
 
 
-def measure_memory():  # TODO: replace with import from ansible-runner
-    return psutil.virtual_memory().total
-
-
 def get_corrected_memory(memory):
     from django.conf import settings
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
     env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
 
-    if env_absmem is not None:
-        return 0, int(env_absmem)
-    elif settings_absmem is not None:
-        return 0, int(settings_absmem)
+    if env_absmem is not None or settings_absmem is not None:
+        return 0
 
     return memory
 
