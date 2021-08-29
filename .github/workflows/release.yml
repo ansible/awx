@@ -33,14 +33,24 @@ jobs:
 
           exit 0
 
-      - name: Generate changelog and release AWX
+      - name: Generate changelog
+        uses: shanemcd/simple-changelog-generator@v1
+        id: changelog
+        with:
+          repo: "${{ github.repository }}"
+
+      - name: Write changelog to file
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip
-          pip3 install ansible-core
+          cat << 'EOF' > /tmp/changelog
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
+
+      - name: Release AWX
+        run: |
           ansible-playbook -v tools/ansible/release.yml \
-            -e repo=${{ github.repository }} \
+            -e changelog_path=/tmp/changelog \
             -e version=${{ github.event.inputs.version }} \
-            -e github_token=${{ secrets.GITHUB_TOKEN }}
+            -e github_token=${{ secrets.GITHUB_TOKEN }} \
+            -e repo=${{ github.repository }}
 
 

@@ -1,5 +1,29 @@
 ---
 - hosts: localhost
   connection: local
-  roles:
-    - release
+  vars:
+    payload:
+      body: "{{ lookup('file', changelog_path) | replace('\\n', '\n') }}"
+      name: "{{ version }}"
+      tag_name: "{{ version }}"
+      draft: true
+  tasks:
+    - name: Prepare Release Data
+      set_fact:
+        payload:
+          body: "{{ lookup('file', changelog_path) }}"
+          name: "{{ version }}"
+          tag_name: "{{ version }}"
+          draft: true
+
+    - name: Publish Release
+      uri:
+        url: "https://api.github.com/repos/{{ repo }}/releases"
+        method: "POST"
+        headers:
+          Accept: "application/vnd.github.v3+json"
+          Authorization: "Bearer {{ github_token }}"
+        body: "{{ payload | to_json }}"
+        status_code:
+          - 200
+          - 201
