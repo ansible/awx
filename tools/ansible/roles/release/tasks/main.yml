@@ -1,0 +1,79 @@
+---
+- name: Look up latest release of AWX
+  uri:
+    url: "https://api.github.com/repos/{{ repo }}/releases/latest"
+  register: res
+
+- name: Record latest tag information
+  set_fact:
+    latest_tag: "{{ res.json.name }}"
+    created_at: "{{ res.json.created_at }}"
+
+- name: Construct search query
+  set_fact:
+    search_query: "{{ ('repo:' + repo + ' type:pr is:merged merged:>=' + created_at) | urlencode }}"
+
+- name: Find PRs since last release
+  uri:
+    url: "https://api.github.com/search/issues?q={{ search_query }}"
+    headers:
+      Accept: "application/vnd.github.v3+json"
+  register: new_merged_prs
+
+- name: Search PR descriptions for changelog entries
+  command: awk '/<!--- changelog-entry/{flag=1;next}/-->/{flag=0}flag'
+  args:
+    stdin: "{{ item.body }}"
+  loop: "{{ new_merged_prs.json['items'] }}"
+  changed_when: false
+  register: raw_changelog_entries
+
+- name: Parse changelog entries
+  set_fact:
+    parsed_changelog_entries: |
+      {{ parsed_changelog_entries | combine({item.item.pull_request.html_url: (item.stdout | from_yaml)}) }}
+  loop: "{{ raw_changelog_entries.results }}"
+
+- name: Construct final changelog blob
+  set_fact:
+    final_changelog: |
+      {%- set entries = {} -%}
+      {%- for entry in raw_changelog_entries.results -%}
+        {%- set parsed_entry = (entry.stdout | from_yaml) -%}
+        {%- if parsed_entry and parsed_entry.msg != "" -%}
+          {%- set msg = parsed_entry.msg -%}
+          {%- set pr_number = entry.item.number -%}
+          {%- set pr_url = entry.item.pull_request.html_url -%}
+          {%- set contributor_login = entry.item.user.login -%}
+          {%- set contributor_url = entry.item.user.html_url -%}
+          {%- set _ = entries.update({pr_url: {"msg": msg, "pr_number": pr_number, "contributor_login": contributor_login, "contributor_url": contributor_url}}) -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {% if entries|length > 0 %}
+      Changes:
+
+      {% endif %}
+      {%- for key, value in entries.items() -%}
+      - {{ value.msg }} ([#{{ value.pr_number }}]({{ key }}), [@{{ value.contributor_login }}]({{ value.contributor_url }}))
+      {% endfor %}
+
+- name: Prepare Release Data
+  set_fact:
+    payload:
+      body: "{{ final_changelog }}"
+      name: "{{ version }}"
+      tag_name: "{{ version }}"
+      draft: true
+
+- name: Publish Release
+  uri:
+    url: "https://api.github.com/repos/{{ repo }}/releases"
+    method: "POST"
+    headers:
+      Accept: "application/vnd.github.v3+json"
+      Authorization: "Bearer {{ github_token }}"
+    body: "{{ payload | to_json }}"
+    status_code:
+      - 200
+      - 201
