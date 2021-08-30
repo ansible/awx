@@ -30,7 +30,7 @@ def test_multi_group_basic_job_launch(instance_factory, default_instance_group, 
 
 
 @pytest.mark.django_db
-def test_multi_group_with_shared_dependency(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
+def test_multi_group_with_shared_dependency(instance_factory, controlplane_instance_group, mocker, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     ig1 = instance_group_factory("ig1", instances=[i1])
@@ -54,7 +54,7 @@ def test_multi_group_with_shared_dependency(instance_factory, default_instance_g
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         pu = p.project_updates.first()
-        TaskManager.start_task.assert_called_once_with(pu, default_instance_group, [j1, j2], default_instance_group.instances.all()[0])
+        TaskManager.start_task.assert_called_once_with(pu, controlplane_instance_group, [j1, j2], controlplane_instance_group.instances.all()[0])
         pu.finished = pu.created + timedelta(seconds=1)
         pu.status = "successful"
         pu.save()

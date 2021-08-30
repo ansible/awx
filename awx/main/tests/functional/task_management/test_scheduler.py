@@ -212,9 +212,9 @@ def test_multi_jt_capacity_blocking(default_instance_group, job_template_factory
 
 
 @pytest.mark.django_db
-def test_single_job_dependencies_project_launch(default_instance_group, job_template_factory, mocker):
+def test_single_job_dependencies_project_launch(controlplane_instance_group, job_template_factory, mocker):
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
-    instance = default_instance_group.instances.all()[0]
+    instance = controlplane_instance_group.instances.all()[0]
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
     j.save()
@@ -231,12 +231,12 @@ def test_single_job_dependencies_project_launch(default_instance_group, job_temp
             mock_pu.assert_called_once_with(j)
             pu = [x for x in p.project_updates.all()]
             assert len(pu) == 1
-            TaskManager.start_task.assert_called_once_with(pu[0], default_instance_group, [j], instance)
+            TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, [j], instance)
             pu[0].status = "successful"
             pu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, default_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
 
 
 @pytest.mark.django_db
@@ -297,8 +297,8 @@ def test_job_dependency_with_already_updated(default_instance_group, job_templat
 
 
 @pytest.mark.django_db
-def test_shared_dependencies_launch(default_instance_group, job_template_factory, mocker, inventory_source_factory):
-    instance = default_instance_group.instances.all()[0]
+def test_shared_dependencies_launch(controlplane_instance_group, job_template_factory, mocker, inventory_source_factory):
+    instance = controlplane_instance_group.instances.all()[0]
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["first_job", "second_job"])
     j1 = objects.jobs["first_job"]
     j1.status = 'pending'
@@ -326,7 +326,7 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
         pu = p.project_updates.first()
         iu = ii.inventory_updates.first()
         TaskManager.start_task.assert_has_calls(
-            [mock.call(iu, default_instance_group, [j1, j2, pu], instance), mock.call(pu, default_instance_group, [j1, j2, iu], instance)]
+            [mock.call(iu, controlplane_instance_group, [j1, j2, pu], instance), mock.call(pu, controlplane_instance_group, [j1, j2, iu], instance)]
         )
         pu.status = "successful"
         pu.finished = pu.created + timedelta(seconds=1)
@@ -336,12 +336,12 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
         iu.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j1, default_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j1, controlplane_instance_group, [], instance)
         j1.status = "successful"
         j1.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j2, default_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j2, controlplane_instance_group, [], instance)
     pu = [x for x in p.project_updates.all()]
     iu = [x for x in ii.inventory_updates.all()]
     assert len(pu) == 1
