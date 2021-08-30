@@ -22,7 +22,7 @@ On the other side, the execution node runs the job under `ansible-runner worker`
 
 ### Split of Control Plane versus Execution Plane
 
-Instances in the **control plane** run persistent AWX services (like the web server, task dispatcher, etc.), project updates, and management jobs. Instances in the **execution plane** run user-space jobs.
+Instances in the **control plane** run persistent AWX services (like the web server, task dispatcher, etc.), project updates, and management jobs.
 
 The task manager logic will not send user-space jobs to **control-only** nodes.
 In the inventory definition, the user can set a flag to designate this node type.
@@ -30,6 +30,7 @@ In the inventory definition, the user can set a flag to designate this node type
 **Execution-only** nodes have a minimal set of software requirements needed to participate in the receptor mesh and run jobs under ansible-runner with podman isolation.
 These _only_ run user-space jobs, and may be geographically separated (with high latency) from the control plane.
 They may not even have a direct connection to the cluster, and use other receptor **hop** nodes to communicate.
+The hop and execution-only nodes may be referred to collectively as the **execution plane**.
 
 **Hybrid** (control & execution nodes) are instances in the control plane that are allowed to run user-space jobs.
 
