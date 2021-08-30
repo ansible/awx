@@ -16,7 +16,7 @@ describe('<DateTimePicker/>', () => {
           <DateTimePicker
             dateFieldName="startDate"
             timeFieldName="startTime"
-            label="Start"
+            label="Start date/time"
           />
         </Formik>
       );
@@ -35,7 +35,7 @@ describe('<DateTimePicker/>', () => {
           <DateTimePicker
             dateFieldName="startDate"
             timeFieldName="startTime"
-            label="Start"
+            label="Start date/time"
           />
         </Formik>
       );

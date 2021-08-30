@@ -378,7 +378,7 @@ msgid ""
 "like the Ansible inventory .ini file format."
 msgstr "因 SCM 修订版本变更进行每次项目更新后，请在执行作业任务前从所选源刷新清单。这是面向静态内容，如 Ansible 清单 .ini 文件格式。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:504
+#: components/Schedule/shared/FrequencyDetailSubform.js:506
 msgid "After number of occurrences"
 msgstr "发生次数后"
 
@@ -525,7 +525,7 @@ msgstr "已批准 - {0}。详情请参阅活动流。"
 msgid "Approved by {0} - {1}"
 msgstr "于 {0} - {1} 批准"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:123
+#: components/Schedule/shared/FrequencyDetailSubform.js:125
 msgid "April"
 msgstr "4 月"
 
@@ -604,7 +604,7 @@ msgstr "关联模态"
 msgid "At least one value must be selected for this field."
 msgstr "此字段至少选择一个值。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:143
+#: components/Schedule/shared/FrequencyDetailSubform.js:145
 msgid "August"
 msgstr "8 月"
 
@@ -824,8 +824,8 @@ msgstr "缓存超时（秒）"
 #: components/Lookup/Lookup.js:194
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:36
-#: components/Schedule/shared/ScheduleForm.js:647
-#: components/Schedule/shared/ScheduleForm.js:652
+#: components/Schedule/shared/ScheduleForm.js:646
+#: components/Schedule/shared/ScheduleForm.js:651
 #: components/Schedule/shared/SchedulePromptableFields.js:133
 #: screens/Credential/shared/CredentialForm.js:342
 #: screens/Credential/shared/CredentialForm.js:347
@@ -1646,14 +1646,14 @@ msgstr "数据保留的周期"
 msgid "Date"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:337
-#: components/Schedule/shared/FrequencyDetailSubform.js:441
-#: components/Schedule/shared/ScheduleForm.js:153
+#: components/Schedule/shared/FrequencyDetailSubform.js:339
+#: components/Schedule/shared/FrequencyDetailSubform.js:443
+#: components/Schedule/shared/ScheduleForm.js:154
 msgid "Day"
 msgstr "天"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:265
-#: components/Schedule/shared/ScheduleForm.js:164
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
+#: components/Schedule/shared/ScheduleForm.js:165
 msgid "Days of Data to Keep"
 msgstr "要保留数据的天数"
 
@@ -1673,7 +1673,7 @@ msgstr ""
 msgid "Debug"
 msgstr "调试"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:163
+#: components/Schedule/shared/FrequencyDetailSubform.js:165
 msgid "December"
 msgstr "12 月"
 
@@ -1933,7 +1933,7 @@ msgstr "已弃用"
 #: components/PromptDetail/PromptDetail.js:112
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:252
 #: components/Schedule/ScheduleList/ScheduleList.js:193
-#: components/Schedule/shared/ScheduleForm.js:112
+#: components/Schedule/shared/ScheduleForm.js:113
 #: components/TemplateList/TemplateList.js:195
 #: components/TemplateList/TemplateListItem.js:251
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:63
@@ -2620,8 +2620,7 @@ msgstr ""
 msgid "Encrypted"
 msgstr "已加密"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:488
-#: components/Schedule/shared/FrequencyDetailSubform.js:540
+#: components/Schedule/shared/FrequencyDetailSubform.js:490
 msgid "End"
 msgstr "结束"
 
@@ -2629,9 +2628,21 @@ msgstr "结束"
 msgid "End User License Agreement"
 msgstr "最终用户许可证协议"
 
+#: components/Schedule/shared/DateTimePicker.js:51
+msgid "End date"
+msgstr ""
+
+#: components/Schedule/shared/FrequencyDetailSubform.js:542
+msgid "End date/time"
+msgstr ""
+
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
 msgstr "结束与预期值不匹配"
+
+#: components/Schedule/shared/DateTimePicker.js:61
+msgid "End time"
+msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -3425,7 +3436,7 @@ msgstr "失败"
 msgid "False"
 msgstr "false"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:113
+#: components/Schedule/shared/FrequencyDetailSubform.js:115
 msgid "February"
 msgstr "2 月"
 
@@ -3449,7 +3460,7 @@ msgstr "字段与给出的正则表达式匹配。"
 msgid "Field starts with value."
 msgstr "字段以值开头。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:397
+#: components/Schedule/shared/FrequencyDetailSubform.js:399
 msgid "Fifth"
 msgstr "第五"
 
@@ -3475,7 +3486,7 @@ msgstr "完成时间"
 msgid "Finished"
 msgstr "完成"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:385
+#: components/Schedule/shared/FrequencyDetailSubform.js:387
 msgid "First"
 msgstr "第一"
 
@@ -3542,25 +3553,25 @@ msgstr "有关详情请参阅"
 msgid "Forks"
 msgstr "分叉"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:395
+#: components/Schedule/shared/FrequencyDetailSubform.js:397
 msgid "Fourth"
 msgstr "第六"
 
-#: components/Schedule/shared/ScheduleForm.js:174
+#: components/Schedule/shared/ScheduleForm.js:175
 msgid "Frequency Details"
 msgstr "频率详情"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:196
+#: components/Schedule/shared/FrequencyDetailSubform.js:198
 #: components/Schedule/shared/buildRuleObj.js:71
 msgid "Frequency did not match an expected value"
 msgstr "频率与预期值不匹配"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:293
+#: components/Schedule/shared/FrequencyDetailSubform.js:295
 msgid "Fri"
 msgstr "周五"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:298
-#: components/Schedule/shared/FrequencyDetailSubform.js:434
+#: components/Schedule/shared/FrequencyDetailSubform.js:300
+#: components/Schedule/shared/FrequencyDetailSubform.js:436
 msgid "Friday"
 msgstr "周五"
 
@@ -3886,7 +3897,7 @@ msgstr ""
 msgid "Hosts remaining"
 msgstr "剩余主机"
 
-#: components/Schedule/shared/ScheduleForm.js:152
+#: components/Schedule/shared/ScheduleForm.js:153
 msgid "Hour"
 msgstr "小时"
 
@@ -4353,7 +4364,7 @@ msgstr "JSON 标签页"
 msgid "JSON:"
 msgstr "JSON："
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:108
+#: components/Schedule/shared/FrequencyDetailSubform.js:110
 msgid "January"
 msgstr "1 月"
 
@@ -4502,11 +4513,11 @@ msgstr "作业"
 msgid "Jobs settings"
 msgstr "作业设置"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:138
+#: components/Schedule/shared/FrequencyDetailSubform.js:140
 msgid "July"
 msgstr "7 月"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:133
+#: components/Schedule/shared/FrequencyDetailSubform.js:135
 msgid "June"
 msgstr "6 月"
 
@@ -4595,7 +4606,7 @@ msgstr "标签名称"
 msgid "Labels"
 msgstr "标签"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:398
+#: components/Schedule/shared/FrequencyDetailSubform.js:400
 msgid "Last"
 msgstr "最后"
 
@@ -4776,7 +4787,7 @@ msgstr ""
 msgid "Local Time Zone"
 msgstr "本地时区"
 
-#: components/Schedule/shared/ScheduleForm.js:129
+#: components/Schedule/shared/ScheduleForm.js:130
 msgid "Local time zone"
 msgstr "本地时区"
 
@@ -4881,7 +4892,7 @@ msgstr "管理作业"
 msgid "Manual"
 msgstr "手动"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:118
+#: components/Schedule/shared/FrequencyDetailSubform.js:120
 msgid "March"
 msgstr "3 月"
 
@@ -4903,7 +4914,7 @@ msgstr "最大值"
 msgid "Maximum length"
 msgstr "最大长度"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:128
+#: components/Schedule/shared/FrequencyDetailSubform.js:130
 msgid "May"
 msgstr "5 月"
 
@@ -4948,7 +4959,7 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr "新实例上线时将自动分配给此组的所有实例的最小百分比。"
 
-#: components/Schedule/shared/ScheduleForm.js:151
+#: components/Schedule/shared/ScheduleForm.js:152
 msgid "Minute"
 msgstr "分钟"
 
@@ -5046,16 +5057,16 @@ msgstr ""
 msgid "Module Name"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:253
+#: components/Schedule/shared/FrequencyDetailSubform.js:255
 msgid "Mon"
 msgstr "周一"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:258
-#: components/Schedule/shared/FrequencyDetailSubform.js:414
+#: components/Schedule/shared/FrequencyDetailSubform.js:260
+#: components/Schedule/shared/FrequencyDetailSubform.js:416
 msgid "Monday"
 msgstr "周一"
 
-#: components/Schedule/shared/ScheduleForm.js:155
+#: components/Schedule/shared/ScheduleForm.js:156
 msgid "Month"
 msgstr "月"
 
@@ -5137,7 +5148,7 @@ msgstr "多项选择选项"
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
-#: components/Schedule/shared/ScheduleForm.js:104
+#: components/Schedule/shared/ScheduleForm.js:105
 #: components/TemplateList/TemplateList.js:190
 #: components/TemplateList/TemplateList.js:223
 #: components/TemplateList/TemplateListItem.js:134
@@ -5307,7 +5318,7 @@ msgstr "名称"
 msgid "Navigation"
 msgstr "导航"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:493
+#: components/Schedule/shared/FrequencyDetailSubform.js:495
 #: screens/Dashboard/shared/ChartTooltip.js:106
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:91
 msgid "Never"
@@ -5438,7 +5449,7 @@ msgstr "无"
 msgid "None (Run Once)"
 msgstr "无（运行一次）"
 
-#: components/Schedule/shared/ScheduleForm.js:150
+#: components/Schedule/shared/ScheduleForm.js:151
 msgid "None (run once)"
 msgstr "无（运行一次）"
 
@@ -5554,7 +5565,7 @@ msgstr "通知类型"
 msgid "Notifications"
 msgstr "通知"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:158
+#: components/Schedule/shared/FrequencyDetailSubform.js:160
 msgid "November"
 msgstr "11月"
 
@@ -5565,11 +5576,11 @@ msgid "OK"
 msgstr "确定"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:42
-#: components/Schedule/shared/FrequencyDetailSubform.js:527
+#: components/Schedule/shared/FrequencyDetailSubform.js:529
 msgid "Occurrences"
 msgstr "发生次数"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:153
+#: components/Schedule/shared/FrequencyDetailSubform.js:155
 msgid "October"
 msgstr "10 月"
 
@@ -5621,11 +5632,11 @@ msgstr "失败时"
 msgid "On Success"
 msgstr "成功时"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:515
+#: components/Schedule/shared/FrequencyDetailSubform.js:517
 msgid "On date"
 msgstr "于日期"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:239
+#: components/Schedule/shared/FrequencyDetailSubform.js:241
 msgid "On days"
 msgstr "于日"
 
@@ -6133,8 +6144,8 @@ msgstr "项目"
 msgid "Promote Child Groups and Hosts"
 msgstr "提升子组和主机"
 
-#: components/Schedule/shared/ScheduleForm.js:639
-#: components/Schedule/shared/ScheduleForm.js:642
+#: components/Schedule/shared/ScheduleForm.js:638
+#: components/Schedule/shared/ScheduleForm.js:641
 msgid "Prompt"
 msgstr "提示"
 
@@ -6609,15 +6620,15 @@ msgstr ""
 msgid "Run command"
 msgstr "运行命令"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:211
+#: components/Schedule/shared/FrequencyDetailSubform.js:213
 msgid "Run every"
 msgstr "运行每"
 
-#: components/Schedule/shared/ScheduleForm.js:145
+#: components/Schedule/shared/ScheduleForm.js:146
 msgid "Run frequency"
 msgstr "运行频率"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:325
+#: components/Schedule/shared/FrequencyDetailSubform.js:327
 msgid "Run on"
 msgstr "运行于"
 
@@ -6683,12 +6694,12 @@ msgstr "开始"
 msgid "STATUS:"
 msgstr "状态："
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:303
+#: components/Schedule/shared/FrequencyDetailSubform.js:305
 msgid "Sat"
 msgstr "周六"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:308
-#: components/Schedule/shared/FrequencyDetailSubform.js:439
+#: components/Schedule/shared/FrequencyDetailSubform.js:310
+#: components/Schedule/shared/FrequencyDetailSubform.js:441
 msgid "Saturday"
 msgstr "周六"
 
@@ -6697,8 +6708,8 @@ msgstr "周六"
 #: components/AssociateModal/AssociateModal.js:110
 #: components/FormActionGroup/FormActionGroup.js:13
 #: components/FormActionGroup/FormActionGroup.js:19
-#: components/Schedule/shared/ScheduleForm.js:625
-#: components/Schedule/shared/ScheduleForm.js:631
+#: components/Schedule/shared/ScheduleForm.js:624
+#: components/Schedule/shared/ScheduleForm.js:630
 #: components/Schedule/shared/useSchedulePromptSteps.js:45
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:113
 #: screens/Credential/shared/CredentialForm.js:317
@@ -6812,7 +6823,7 @@ msgstr "搜索提交按钮"
 msgid "Search text input"
 msgstr "搜索文本输入"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:389
+#: components/Schedule/shared/FrequencyDetailSubform.js:391
 msgid "Second"
 msgstr "秒"
 
@@ -6959,9 +6970,9 @@ msgstr "导入一个订阅"
 
 #: components/HostForm/HostForm.js:39
 #: components/Schedule/shared/FrequencyDetailSubform.js:56
-#: components/Schedule/shared/FrequencyDetailSubform.js:82
-#: components/Schedule/shared/FrequencyDetailSubform.js:86
-#: components/Schedule/shared/FrequencyDetailSubform.js:94
+#: components/Schedule/shared/FrequencyDetailSubform.js:84
+#: components/Schedule/shared/FrequencyDetailSubform.js:88
+#: components/Schedule/shared/FrequencyDetailSubform.js:96
 #: components/Schedule/shared/ScheduleForm.js:93
 #: components/Schedule/shared/ScheduleForm.js:97
 #: screens/Credential/shared/CredentialForm.js:44
@@ -7202,7 +7213,7 @@ msgstr "发件人电子邮件"
 msgid "Sender e-mail"
 msgstr "发件人电子邮件"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:148
+#: components/Schedule/shared/FrequencyDetailSubform.js:150
 msgid "September"
 msgstr "9 月"
 
@@ -7586,7 +7597,6 @@ msgstr "标准输出标签页"
 
 #: components/NotificationList/NotificationListItem.js:52
 #: components/NotificationList/NotificationListItem.js:53
-#: components/Schedule/shared/ScheduleForm.js:119
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:47
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:53
 msgid "Start"
@@ -7596,6 +7606,14 @@ msgstr "开始"
 #: components/JobList/JobListItem.js:92
 msgid "Start Time"
 msgstr "开始时间"
+
+#: components/Schedule/shared/DateTimePicker.js:51
+msgid "Start date"
+msgstr ""
+
+#: components/Schedule/shared/ScheduleForm.js:120
+msgid "Start date/time"
+msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:403
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7614,6 +7632,10 @@ msgstr "启动同步进程"
 #: screens/Inventory/shared/InventorySourceSyncButton.js:37
 msgid "Start sync source"
 msgstr "启动同步源"
+
+#: components/Schedule/shared/DateTimePicker.js:61
+msgid "Start time"
+msgstr ""
 
 #: screens/Job/JobDetail/JobDetail.js:139
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
@@ -7735,12 +7757,12 @@ msgstr "成功的作业"
 msgid "Successfully copied to clipboard!"
 msgstr "成功复制至剪贴板！"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:243
+#: components/Schedule/shared/FrequencyDetailSubform.js:245
 msgid "Sun"
 msgstr "周日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:248
-#: components/Schedule/shared/FrequencyDetailSubform.js:409
+#: components/Schedule/shared/FrequencyDetailSubform.js:250
+#: components/Schedule/shared/FrequencyDetailSubform.js:411
 msgid "Sunday"
 msgstr "周日"
 
@@ -8000,7 +8022,7 @@ msgstr "文本区"
 msgid "That value was not found. Please enter or select a valid value."
 msgstr "未找到该值。请输入或选择一个有效值。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:379
+#: components/Schedule/shared/FrequencyDetailSubform.js:381
 msgid "The"
 msgstr "The"
 
@@ -8177,7 +8199,7 @@ msgstr "这些参数与指定的模块一起使用。"
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
 msgstr "这些参数与指定的模块一起使用。点击可以找到有关 {0} 的信息。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:391
+#: components/Schedule/shared/FrequencyDetailSubform.js:393
 msgid "Third"
 msgstr "第三"
 
@@ -8385,12 +8407,12 @@ msgstr "此工作流没有配置任何节点。"
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "其他资源目前正在使用此工作流作业模板。确定要删除它吗？"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:283
+#: components/Schedule/shared/FrequencyDetailSubform.js:285
 msgid "Thu"
 msgstr "周四"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:288
-#: components/Schedule/shared/FrequencyDetailSubform.js:429
+#: components/Schedule/shared/FrequencyDetailSubform.js:290
+#: components/Schedule/shared/FrequencyDetailSubform.js:431
 msgid "Thursday"
 msgstr "周四"
 
@@ -8569,12 +8591,12 @@ msgstr "试用"
 msgid "True"
 msgstr "True"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:263
+#: components/Schedule/shared/FrequencyDetailSubform.js:265
 msgid "Tue"
 msgstr "周二"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:268
-#: components/Schedule/shared/FrequencyDetailSubform.js:419
+#: components/Schedule/shared/FrequencyDetailSubform.js:270
+#: components/Schedule/shared/FrequencyDetailSubform.js:421
 msgid "Tuesday"
 msgstr "周二"
 
@@ -9269,24 +9291,24 @@ msgstr "Webhook 服务可以将此用作共享机密。"
 msgid "Webhooks"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:273
+#: components/Schedule/shared/FrequencyDetailSubform.js:275
 msgid "Wed"
 msgstr "周三"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:278
-#: components/Schedule/shared/FrequencyDetailSubform.js:424
+#: components/Schedule/shared/FrequencyDetailSubform.js:280
+#: components/Schedule/shared/FrequencyDetailSubform.js:426
 msgid "Wednesday"
 msgstr "周三"
 
-#: components/Schedule/shared/ScheduleForm.js:154
+#: components/Schedule/shared/ScheduleForm.js:155
 msgid "Week"
 msgstr "周"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:445
+#: components/Schedule/shared/FrequencyDetailSubform.js:447
 msgid "Weekday"
 msgstr "工作日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:450
+#: components/Schedule/shared/FrequencyDetailSubform.js:452
 msgid "Weekend day"
 msgstr "周末"
 
@@ -9437,7 +9459,7 @@ msgstr "写入"
 msgid "YAML:"
 msgstr "YAML："
 
-#: components/Schedule/shared/ScheduleForm.js:156
+#: components/Schedule/shared/ScheduleForm.js:157
 msgid "Year"
 msgstr "年"
 
@@ -9634,7 +9656,7 @@ msgid "new choice"
 msgstr "新选择"
 
 #: components/Pagination/Pagination.js:36
-#: components/Schedule/shared/FrequencyDetailSubform.js:461
+#: components/Schedule/shared/FrequencyDetailSubform.js:463
 msgid "of"
 msgstr "的"
 
@@ -9808,37 +9830,37 @@ msgstr "{dateStr} by <0>{username}</0>"
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# fork} other {# forks}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:188
+#: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {day} other {days}}"
 msgstr "{intervalValue, plural, one {天} other {天}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:186
+#: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {hour} other {hours}}"
 msgstr "{intervalValue, plural, one {小时} other {小时}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:184
+#: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
 msgstr "{intervalValue, plural, one {分钟} other {分钟}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:192
+#: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {month} other {months}}"
 msgstr "{intervalValue, plural, one {月} other {月}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:190
+#: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {week} other {weeks}}"
 msgstr "{intervalValue, plural, one {周} other {周}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:194
+#: components/Schedule/shared/FrequencyDetailSubform.js:196
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {年} other {年}}"
 
 #: components/Schedule/shared/DateTimePicker.js:49
-msgid "{label} date"
-msgstr ""
+#~ msgid "{label} date"
+#~ msgstr ""
 
 #: components/Schedule/shared/DateTimePicker.js:57
-msgid "{label} time"
-msgstr ""
+#~ msgid "{label} time"
+#~ msgstr ""
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"

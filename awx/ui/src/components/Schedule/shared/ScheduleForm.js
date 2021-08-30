@@ -96,7 +96,8 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
     name: 'frequency',
     validate: required(t`Select a value for this field`),
   });
-
+  const [{ name: dateFieldName }] = useField('startDate');
+  const [{ name: timeFieldName }] = useField('startTime');
   return (
     <>
       <FormField
@@ -114,9 +115,9 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
         type="text"
       />
       <DateTimePicker
-        dateFieldName="startDate"
-        timeFieldName="startTime"
-        label={t`Start`}
+        dateFieldName={dateFieldName}
+        timeFieldName={timeFieldName}
+        label={t`Start date/time`}
       />
       <FormGroup
         name="timezone"
@@ -192,7 +193,6 @@ function ScheduleForm({
   launchConfig,
   surveyConfig,
   resourceDefaultCredentials,
-  ...rest
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
@@ -598,7 +598,6 @@ function ScheduleForm({
                 <ScheduleFormFields
                   hasDaysToKeepField={hasDaysToKeepField}
                   zoneOptions={zoneOptions}
-                  {...rest}
                 />
                 {isWizardOpen && (
                   <SchedulePromptableFields

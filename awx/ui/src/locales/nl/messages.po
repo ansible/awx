@@ -378,7 +378,7 @@ msgid ""
 "like the Ansible inventory .ini file format."
 msgstr "Na iedere projectupdate waarbij de SCM-revisie verandert, dient het inventaris vernieuwd te worden vanuit de geselecteerde bron voordat de opdrachten die bij de taak horen uitgevoerd worden. Dit is bedoeld voor statische content, zoals .ini, het inventarisbestandsformaat van Ansible."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:504
+#: components/Schedule/shared/FrequencyDetailSubform.js:506
 msgid "After number of occurrences"
 msgstr "Na aantal voorvallen"
 
@@ -525,7 +525,7 @@ msgstr "Goedgekeurd - {0}.  Zie het activiteitenlogboek voor meer informatie."
 msgid "Approved by {0} - {1}"
 msgstr "Goedgekeurd door {0} - {1}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:123
+#: components/Schedule/shared/FrequencyDetailSubform.js:125
 msgid "April"
 msgstr "April"
 
@@ -604,7 +604,7 @@ msgstr "Associatiemodus"
 msgid "At least one value must be selected for this field."
 msgstr "Voor dit veld moet ten minste één waarde worden geselecteerd."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:143
+#: components/Schedule/shared/FrequencyDetailSubform.js:145
 msgid "August"
 msgstr "Augustus"
 
@@ -824,8 +824,8 @@ msgstr "Cache time-out (seconden)"
 #: components/Lookup/Lookup.js:194
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:36
-#: components/Schedule/shared/ScheduleForm.js:647
-#: components/Schedule/shared/ScheduleForm.js:652
+#: components/Schedule/shared/ScheduleForm.js:646
+#: components/Schedule/shared/ScheduleForm.js:651
 #: components/Schedule/shared/SchedulePromptableFields.js:133
 #: screens/Credential/shared/CredentialForm.js:342
 #: screens/Credential/shared/CredentialForm.js:347
@@ -1646,14 +1646,14 @@ msgstr "Bewaartermijn van gegevens"
 msgid "Date"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:337
-#: components/Schedule/shared/FrequencyDetailSubform.js:441
-#: components/Schedule/shared/ScheduleForm.js:153
+#: components/Schedule/shared/FrequencyDetailSubform.js:339
+#: components/Schedule/shared/FrequencyDetailSubform.js:443
+#: components/Schedule/shared/ScheduleForm.js:154
 msgid "Day"
 msgstr "Dag"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:265
-#: components/Schedule/shared/ScheduleForm.js:164
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
+#: components/Schedule/shared/ScheduleForm.js:165
 msgid "Days of Data to Keep"
 msgstr "Dagen om gegevens te bewaren"
 
@@ -1673,7 +1673,7 @@ msgstr ""
 msgid "Debug"
 msgstr "Foutopsporing"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:163
+#: components/Schedule/shared/FrequencyDetailSubform.js:165
 msgid "December"
 msgstr "December"
 
@@ -1933,7 +1933,7 @@ msgstr "Afgeschaft"
 #: components/PromptDetail/PromptDetail.js:112
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:252
 #: components/Schedule/ScheduleList/ScheduleList.js:193
-#: components/Schedule/shared/ScheduleForm.js:112
+#: components/Schedule/shared/ScheduleForm.js:113
 #: components/TemplateList/TemplateList.js:195
 #: components/TemplateList/TemplateListItem.js:251
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:63
@@ -2620,8 +2620,7 @@ msgstr ""
 msgid "Encrypted"
 msgstr "Versleuteld"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:488
-#: components/Schedule/shared/FrequencyDetailSubform.js:540
+#: components/Schedule/shared/FrequencyDetailSubform.js:490
 msgid "End"
 msgstr "Einde"
 
@@ -2629,9 +2628,21 @@ msgstr "Einde"
 msgid "End User License Agreement"
 msgstr "Licentie-overeenkomst voor eindgebruikers"
 
+#: components/Schedule/shared/DateTimePicker.js:51
+msgid "End date"
+msgstr ""
+
+#: components/Schedule/shared/FrequencyDetailSubform.js:542
+msgid "End date/time"
+msgstr ""
+
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
 msgstr "Einde kwam niet overeen met een verwachte waarde"
+
+#: components/Schedule/shared/DateTimePicker.js:61
+msgid "End time"
+msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -3425,7 +3436,7 @@ msgstr "Mislukking"
 msgid "False"
 msgstr "False"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:113
+#: components/Schedule/shared/FrequencyDetailSubform.js:115
 msgid "February"
 msgstr "Februari"
 
@@ -3449,7 +3460,7 @@ msgstr "Het veld komt overeen met de opgegeven reguliere expressie."
 msgid "Field starts with value."
 msgstr "Veld begint met waarde."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:397
+#: components/Schedule/shared/FrequencyDetailSubform.js:399
 msgid "Fifth"
 msgstr "Vijfde"
 
@@ -3475,7 +3486,7 @@ msgstr "Voltooiingstijd"
 msgid "Finished"
 msgstr "Voltooid"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:385
+#: components/Schedule/shared/FrequencyDetailSubform.js:387
 msgid "First"
 msgstr "Eerste"
 
@@ -3542,25 +3553,25 @@ msgstr "Bekijk voor meer informatie de"
 msgid "Forks"
 msgstr "Vorken"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:395
+#: components/Schedule/shared/FrequencyDetailSubform.js:397
 msgid "Fourth"
 msgstr "Vierde"
 
-#: components/Schedule/shared/ScheduleForm.js:174
+#: components/Schedule/shared/ScheduleForm.js:175
 msgid "Frequency Details"
 msgstr "Frequentie-informatie"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:196
+#: components/Schedule/shared/FrequencyDetailSubform.js:198
 #: components/Schedule/shared/buildRuleObj.js:71
 msgid "Frequency did not match an expected value"
 msgstr "Frequentie kwam niet overeen met een verwachte waarde"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:293
+#: components/Schedule/shared/FrequencyDetailSubform.js:295
 msgid "Fri"
 msgstr "Vrij"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:298
-#: components/Schedule/shared/FrequencyDetailSubform.js:434
+#: components/Schedule/shared/FrequencyDetailSubform.js:300
+#: components/Schedule/shared/FrequencyDetailSubform.js:436
 msgid "Friday"
 msgstr "Vrijdag"
 
@@ -3886,7 +3897,7 @@ msgstr ""
 msgid "Hosts remaining"
 msgstr "Resterende hosts"
 
-#: components/Schedule/shared/ScheduleForm.js:152
+#: components/Schedule/shared/ScheduleForm.js:153
 msgid "Hour"
 msgstr "Uur"
 
@@ -4359,7 +4370,7 @@ msgstr "JSON-tabblad"
 msgid "JSON:"
 msgstr "JSON:"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:108
+#: components/Schedule/shared/FrequencyDetailSubform.js:110
 msgid "January"
 msgstr "Januari"
 
@@ -4508,11 +4519,11 @@ msgstr "Taken"
 msgid "Jobs settings"
 msgstr "Taakinstellingen"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:138
+#: components/Schedule/shared/FrequencyDetailSubform.js:140
 msgid "July"
 msgstr "Juli"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:133
+#: components/Schedule/shared/FrequencyDetailSubform.js:135
 msgid "June"
 msgstr "Juni"
 
@@ -4601,7 +4612,7 @@ msgstr "Labelnaam"
 msgid "Labels"
 msgstr "Labels"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:398
+#: components/Schedule/shared/FrequencyDetailSubform.js:400
 msgid "Last"
 msgstr "Laatste"
 
@@ -4782,7 +4793,7 @@ msgstr ""
 msgid "Local Time Zone"
 msgstr "Lokale tijdzone"
 
-#: components/Schedule/shared/ScheduleForm.js:129
+#: components/Schedule/shared/ScheduleForm.js:130
 msgid "Local time zone"
 msgstr "Lokale tijdzone"
 
@@ -4887,7 +4898,7 @@ msgstr "Beheertaken"
 msgid "Manual"
 msgstr "Handmatig"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:118
+#: components/Schedule/shared/FrequencyDetailSubform.js:120
 msgid "March"
 msgstr "Maart"
 
@@ -4909,7 +4920,7 @@ msgstr "Maximum"
 msgid "Maximum length"
 msgstr "Maximumlengte"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:128
+#: components/Schedule/shared/FrequencyDetailSubform.js:130
 msgid "May"
 msgstr "Mei"
 
@@ -4954,7 +4965,7 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr "Minimumpercentage van alle instanties die automatisch toegewezen worden aan deze groep wanneer nieuwe instanties online komen."
 
-#: components/Schedule/shared/ScheduleForm.js:151
+#: components/Schedule/shared/ScheduleForm.js:152
 msgid "Minute"
 msgstr "Minuut"
 
@@ -5052,16 +5063,16 @@ msgstr ""
 msgid "Module Name"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:253
+#: components/Schedule/shared/FrequencyDetailSubform.js:255
 msgid "Mon"
 msgstr "Ma"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:258
-#: components/Schedule/shared/FrequencyDetailSubform.js:414
+#: components/Schedule/shared/FrequencyDetailSubform.js:260
+#: components/Schedule/shared/FrequencyDetailSubform.js:416
 msgid "Monday"
 msgstr "Maandag"
 
-#: components/Schedule/shared/ScheduleForm.js:155
+#: components/Schedule/shared/ScheduleForm.js:156
 msgid "Month"
 msgstr "Maand"
 
@@ -5143,7 +5154,7 @@ msgstr "Meerkeuze-opties"
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
-#: components/Schedule/shared/ScheduleForm.js:104
+#: components/Schedule/shared/ScheduleForm.js:105
 #: components/TemplateList/TemplateList.js:190
 #: components/TemplateList/TemplateList.js:223
 #: components/TemplateList/TemplateListItem.js:134
@@ -5313,7 +5324,7 @@ msgstr "Naam"
 msgid "Navigation"
 msgstr "Navigatie"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:493
+#: components/Schedule/shared/FrequencyDetailSubform.js:495
 #: screens/Dashboard/shared/ChartTooltip.js:106
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:91
 msgid "Never"
@@ -5444,7 +5455,7 @@ msgstr "Geen"
 msgid "None (Run Once)"
 msgstr "Geen (eenmaal uitgevoerd)"
 
-#: components/Schedule/shared/ScheduleForm.js:150
+#: components/Schedule/shared/ScheduleForm.js:151
 msgid "None (run once)"
 msgstr "Geen (eenmaal uitgevoerd)"
 
@@ -5560,7 +5571,7 @@ msgstr "Berichttype"
 msgid "Notifications"
 msgstr "Berichten"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:158
+#: components/Schedule/shared/FrequencyDetailSubform.js:160
 msgid "November"
 msgstr "November"
 
@@ -5571,11 +5582,11 @@ msgid "OK"
 msgstr "OK"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:42
-#: components/Schedule/shared/FrequencyDetailSubform.js:527
+#: components/Schedule/shared/FrequencyDetailSubform.js:529
 msgid "Occurrences"
 msgstr "Voorvallen"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:153
+#: components/Schedule/shared/FrequencyDetailSubform.js:155
 msgid "October"
 msgstr "Oktober"
 
@@ -5627,11 +5638,11 @@ msgstr "Bij mislukken"
 msgid "On Success"
 msgstr "Bij slagen"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:515
+#: components/Schedule/shared/FrequencyDetailSubform.js:517
 msgid "On date"
 msgstr "Aan-datum"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:239
+#: components/Schedule/shared/FrequencyDetailSubform.js:241
 msgid "On days"
 msgstr "Aan-dagen"
 
@@ -6141,8 +6152,8 @@ msgstr "Projecten"
 msgid "Promote Child Groups and Hosts"
 msgstr "Onderliggende groepen en hosts promoveren"
 
-#: components/Schedule/shared/ScheduleForm.js:639
-#: components/Schedule/shared/ScheduleForm.js:642
+#: components/Schedule/shared/ScheduleForm.js:638
+#: components/Schedule/shared/ScheduleForm.js:641
 msgid "Prompt"
 msgstr "Melding"
 
@@ -6615,15 +6626,15 @@ msgstr ""
 msgid "Run command"
 msgstr "Opdracht uitvoeren"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:211
+#: components/Schedule/shared/FrequencyDetailSubform.js:213
 msgid "Run every"
 msgstr "Uitvoeren om de"
 
-#: components/Schedule/shared/ScheduleForm.js:145
+#: components/Schedule/shared/ScheduleForm.js:146
 msgid "Run frequency"
 msgstr "Uitvoerfrequentie"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:325
+#: components/Schedule/shared/FrequencyDetailSubform.js:327
 msgid "Run on"
 msgstr "Uitvoeren op"
 
@@ -6689,12 +6700,12 @@ msgstr "BEGINNEN"
 msgid "STATUS:"
 msgstr "STATUS:"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:303
+#: components/Schedule/shared/FrequencyDetailSubform.js:305
 msgid "Sat"
 msgstr "Zat"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:308
-#: components/Schedule/shared/FrequencyDetailSubform.js:439
+#: components/Schedule/shared/FrequencyDetailSubform.js:310
+#: components/Schedule/shared/FrequencyDetailSubform.js:441
 msgid "Saturday"
 msgstr "Zaterdag"
 
@@ -6703,8 +6714,8 @@ msgstr "Zaterdag"
 #: components/AssociateModal/AssociateModal.js:110
 #: components/FormActionGroup/FormActionGroup.js:13
 #: components/FormActionGroup/FormActionGroup.js:19
-#: components/Schedule/shared/ScheduleForm.js:625
-#: components/Schedule/shared/ScheduleForm.js:631
+#: components/Schedule/shared/ScheduleForm.js:624
+#: components/Schedule/shared/ScheduleForm.js:630
 #: components/Schedule/shared/useSchedulePromptSteps.js:45
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:113
 #: screens/Credential/shared/CredentialForm.js:317
@@ -6818,7 +6829,7 @@ msgstr "Knop Zoekopdracht verzenden"
 msgid "Search text input"
 msgstr "Input voor tekst zoeken"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:389
+#: components/Schedule/shared/FrequencyDetailSubform.js:391
 msgid "Second"
 msgstr "Seconde"
 
@@ -6965,9 +6976,9 @@ msgstr "Abonnement selecteren"
 
 #: components/HostForm/HostForm.js:39
 #: components/Schedule/shared/FrequencyDetailSubform.js:56
-#: components/Schedule/shared/FrequencyDetailSubform.js:82
-#: components/Schedule/shared/FrequencyDetailSubform.js:86
-#: components/Schedule/shared/FrequencyDetailSubform.js:94
+#: components/Schedule/shared/FrequencyDetailSubform.js:84
+#: components/Schedule/shared/FrequencyDetailSubform.js:88
+#: components/Schedule/shared/FrequencyDetailSubform.js:96
 #: components/Schedule/shared/ScheduleForm.js:93
 #: components/Schedule/shared/ScheduleForm.js:97
 #: screens/Credential/shared/CredentialForm.js:44
@@ -7206,7 +7217,7 @@ msgstr "Afzender e-mail"
 msgid "Sender e-mail"
 msgstr "Afzender e-mailbericht"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:148
+#: components/Schedule/shared/FrequencyDetailSubform.js:150
 msgid "September"
 msgstr "September"
 
@@ -7590,7 +7601,6 @@ msgstr "Tabblad Standaardoutput"
 
 #: components/NotificationList/NotificationListItem.js:52
 #: components/NotificationList/NotificationListItem.js:53
-#: components/Schedule/shared/ScheduleForm.js:119
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:47
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:53
 msgid "Start"
@@ -7600,6 +7610,14 @@ msgstr "Starten"
 #: components/JobList/JobListItem.js:92
 msgid "Start Time"
 msgstr "Starttijd"
+
+#: components/Schedule/shared/DateTimePicker.js:51
+msgid "Start date"
+msgstr ""
+
+#: components/Schedule/shared/ScheduleForm.js:120
+msgid "Start date/time"
+msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:403
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7618,6 +7636,10 @@ msgstr "Start het synchronisatieproces"
 #: screens/Inventory/shared/InventorySourceSyncButton.js:37
 msgid "Start sync source"
 msgstr "Start synchronisatie bron"
+
+#: components/Schedule/shared/DateTimePicker.js:61
+msgid "Start time"
+msgstr ""
 
 #: screens/Job/JobDetail/JobDetail.js:139
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
@@ -7743,12 +7765,12 @@ msgstr "Succesvolle taken"
 msgid "Successfully copied to clipboard!"
 msgstr "Succesvol gekopieerd naar klembord!"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:243
+#: components/Schedule/shared/FrequencyDetailSubform.js:245
 msgid "Sun"
 msgstr "Zon"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:248
-#: components/Schedule/shared/FrequencyDetailSubform.js:409
+#: components/Schedule/shared/FrequencyDetailSubform.js:250
+#: components/Schedule/shared/FrequencyDetailSubform.js:411
 msgid "Sunday"
 msgstr "Zondag"
 
@@ -8008,7 +8030,7 @@ msgstr "Tekstgebied"
 msgid "That value was not found. Please enter or select a valid value."
 msgstr "De waarde is niet gevonden. Voer een geldige waarde in of selecteer er een."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:379
+#: components/Schedule/shared/FrequencyDetailSubform.js:381
 msgid "The"
 msgstr "De"
 
@@ -8185,7 +8207,7 @@ msgstr "Deze argumenten worden gebruikt met de gespecificeerde module."
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
 msgstr "Deze argumenten worden gebruikt met de gespecificeerde module. U kunt informatie over {0} vinden door te klikken op"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:391
+#: components/Schedule/shared/FrequencyDetailSubform.js:393
 msgid "Third"
 msgstr "Derde"
 
@@ -8396,12 +8418,12 @@ msgstr "Er zijn voor deze workflow geen knooppunten geconfigureerd."
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "Deze sjabloon voor workflowtaken wordt momenteel gebruikt door andere bronnen. Weet u zeker dat u hem wilt verwijderen?"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:283
+#: components/Schedule/shared/FrequencyDetailSubform.js:285
 msgid "Thu"
 msgstr "Do"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:288
-#: components/Schedule/shared/FrequencyDetailSubform.js:429
+#: components/Schedule/shared/FrequencyDetailSubform.js:290
+#: components/Schedule/shared/FrequencyDetailSubform.js:431
 msgid "Thursday"
 msgstr "Donderdag"
 
@@ -8580,12 +8602,12 @@ msgstr "Proefperiode"
 msgid "True"
 msgstr "True"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:263
+#: components/Schedule/shared/FrequencyDetailSubform.js:265
 msgid "Tue"
 msgstr "Di"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:268
-#: components/Schedule/shared/FrequencyDetailSubform.js:419
+#: components/Schedule/shared/FrequencyDetailSubform.js:270
+#: components/Schedule/shared/FrequencyDetailSubform.js:421
 msgid "Tuesday"
 msgstr "Dinsdag"
 
@@ -9280,24 +9302,24 @@ msgstr "Webhookservices kunnen dit gebruiken als een gedeeld geheim."
 msgid "Webhooks"
 msgstr ""
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:273
+#: components/Schedule/shared/FrequencyDetailSubform.js:275
 msgid "Wed"
 msgstr "Wo"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:278
-#: components/Schedule/shared/FrequencyDetailSubform.js:424
+#: components/Schedule/shared/FrequencyDetailSubform.js:280
+#: components/Schedule/shared/FrequencyDetailSubform.js:426
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: components/Schedule/shared/ScheduleForm.js:154
+#: components/Schedule/shared/ScheduleForm.js:155
 msgid "Week"
 msgstr "Week"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:445
+#: components/Schedule/shared/FrequencyDetailSubform.js:447
 msgid "Weekday"
 msgstr "Doordeweeks"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:450
+#: components/Schedule/shared/FrequencyDetailSubform.js:452
 msgid "Weekend day"
 msgstr "Weekenddag"
 
@@ -9450,7 +9472,7 @@ msgstr "Schrijven"
 msgid "YAML:"
 msgstr "YAML:"
 
-#: components/Schedule/shared/ScheduleForm.js:156
+#: components/Schedule/shared/ScheduleForm.js:157
 msgid "Year"
 msgstr "Jaar"
 
@@ -9649,7 +9671,7 @@ msgid "new choice"
 msgstr "nieuwe keuze"
 
 #: components/Pagination/Pagination.js:36
-#: components/Schedule/shared/FrequencyDetailSubform.js:461
+#: components/Schedule/shared/FrequencyDetailSubform.js:463
 msgid "of"
 msgstr "van"
 
@@ -9823,37 +9845,37 @@ msgstr "{dateStr} door <0>{username}</0>"
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# vork} other {# vorken}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:188
+#: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {day} other {days}}"
 msgstr "{intervalValue, plural, one {dag} other {dagen}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:186
+#: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {hour} other {hours}}"
 msgstr "{intervalValue, plural, one {uur} other {uren}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:184
+#: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
 msgstr "{intervalValue, plural, one {minuut} other {minuten}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:192
+#: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {month} other {months}}"
 msgstr "{intervalValue, plural, one {maand} other {maanden}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:190
+#: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {week} other {weeks}}"
 msgstr "{intervalValue, plural, one {week} other {weken}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:194
+#: components/Schedule/shared/FrequencyDetailSubform.js:196
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {jaar} other {jaren}}"
 
 #: components/Schedule/shared/DateTimePicker.js:49
-msgid "{label} date"
-msgstr ""
+#~ msgid "{label} date"
+#~ msgstr ""
 
 #: components/Schedule/shared/DateTimePicker.js:57
-msgid "{label} time"
-msgstr ""
+#~ msgid "{label} time"
+#~ msgstr ""
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
