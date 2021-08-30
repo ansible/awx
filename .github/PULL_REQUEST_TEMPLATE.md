@@ -1,3 +1,11 @@
+<!--- changelog-entry
+# Fill in 'msg' below to have an entry automatically added to the next release changelog.
+# Leaving 'msg' blank will not generate a changelog entry for this PR.
+# Please ensure this is a simple (and readable) one-line string.
+---
+msg: ""
+-->
+
 ##### SUMMARY
 <!--- Describe the change, including rationale and design decisions -->
 

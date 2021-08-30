@@ -1,0 +1,56 @@
+name: Release AWX
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        default: ''
+      confirm:
+        description: 'Are you sure? Set this to yes.'
+        required: true
+        default: 'no'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Verify inputs"
+        run: |
+          set -e
+
+          if [[ ${{ github.event.inputs.confirm }} != "yes" ]]; then
+            >&2 echo "Confirm must be 'yes'"
+            exit 1
+          fi
+
+          if [[ ${{ github.event.inputs.version }} == "" ]]; then
+            >&2 echo "Set version to continue."
+            exit 1
+          fi
+
+          exit 0
+
+      - name: Generate changelog
+        uses: shanemcd/simple-changelog-generator@v1
+        id: changelog
+        with:
+          repo: "${{ github.repository }}"
+
+      - name: Write changelog to file
+        run: |
+          cat << 'EOF' > /tmp/changelog
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
+
+      - name: Release AWX
+        run: |
+          ansible-playbook -v tools/ansible/release.yml \
+            -e changelog_path=/tmp/changelog \
+            -e version=${{ github.event.inputs.version }} \
+            -e github_token=${{ secrets.GITHUB_TOKEN }} \
+            -e repo=${{ github.repository }}
+
+
