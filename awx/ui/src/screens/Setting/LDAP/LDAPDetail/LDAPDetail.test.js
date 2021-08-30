@@ -91,7 +91,7 @@ describe('<LDAPDetail />', () => {
       assertVariableDetail(
         wrapper,
         'LDAP Group Type Parameters',
-        '{\n  "name_attr": "cn",\n  "member_attr": "member"\n}'
+        '{\n  "member_attr": "member",\n  "name_attr": "cn"\n}'
       );
       assertVariableDetail(wrapper, 'LDAP User Flags By Group', '{}');
       assertVariableDetail(wrapper, 'LDAP Organization Map', '{}');

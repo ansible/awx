@@ -68,7 +68,7 @@ describe('<MiscAuthenticationDetail />', () => {
     assertVariableDetail(
       wrapper,
       'OAuth 2 Timeout Settings',
-      '{\n  "ACCESS_TOKEN_EXPIRE_SECONDS": 31536000000,\n  "REFRESH_TOKEN_EXPIRE_SECONDS": 2628000,\n  "AUTHORIZATION_CODE_EXPIRE_SECONDS": 600\n}'
+      '{\n  "ACCESS_TOKEN_EXPIRE_SECONDS": 31536000000,\n  "AUTHORIZATION_CODE_EXPIRE_SECONDS": 600,\n  "REFRESH_TOKEN_EXPIRE_SECONDS": 2628000\n}'
     );
     assertDetail(wrapper, 'Login redirect override URL', 'https://foohost');
     assertVariableDetail(
