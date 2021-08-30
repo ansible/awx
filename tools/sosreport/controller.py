@@ -27,6 +27,7 @@ SOSREPORT_CONTROLLER_COMMANDS = [
 
 SOSREPORT_CONTROLLER_DIRS = [
     "/etc/tower/",
+    "/etc/receptor/",
     "/etc/supervisord.d/",
     "/etc/nginx/",
     "/var/log/tower",
