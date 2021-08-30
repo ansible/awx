@@ -210,7 +210,7 @@ RUN for dir in \
       /var/log/nginx \
       /var/lib/postgresql \
       /var/run/supervisor \
-      /var/run/receptor \
+      /var/run/awx-receptor \
       /var/lib/nginx ; \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
