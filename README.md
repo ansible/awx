@@ -39,3 +39,4 @@ We welcome your feedback and ideas. Here's how to reach us with feedback and que
 
 - Join the `#ansible-awx` channel on irc.libera.chat
 - Join the [mailing list](https://groups.google.com/forum/#!forum/awx-project) 
+
