@@ -85,6 +85,11 @@ def default_instance_group(instance_factory, instance_group_factory):
 
 
 @pytest.fixture
+def controlplane_instance_group(instance_factory, instance_group_factory):
+    return create_instance_group("controlplane", instances=[create_instance("hostA")])
+
+
+@pytest.fixture
 def job_template_with_survey_passwords_factory(job_template_factory):
     def rf(persisted):
         "Returns job with linked JT survey with password survey questions"

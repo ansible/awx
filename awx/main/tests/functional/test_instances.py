@@ -314,15 +314,15 @@ class TestInstanceGroupOrdering:
         # API does not allow setting IGs on inventory source, so ignore those
         assert iu.preferred_instance_groups == [ig_inv, ig_org]
 
-    def test_project_update_instance_groups(self, instance_group_factory, project, default_instance_group):
+    def test_project_update_instance_groups(self, instance_group_factory, project, controlplane_instance_group):
         pu = ProjectUpdate.objects.create(project=project, organization=project.organization)
-        assert pu.preferred_instance_groups == [default_instance_group]
-        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
-        ig_tmp = instance_group_factory("TmpIstGrp", [default_instance_group.instances.first()])
+        assert pu.preferred_instance_groups == [controlplane_instance_group]
+        ig_org = instance_group_factory("OrgIstGrp", [controlplane_instance_group.instances.first()])
+        ig_tmp = instance_group_factory("TmpIstGrp", [controlplane_instance_group.instances.first()])
         project.organization.instance_groups.add(ig_org)
-        assert pu.preferred_instance_groups == [ig_org]
+        assert pu.preferred_instance_groups == [ig_org, controlplane_instance_group]
         project.instance_groups.add(ig_tmp)
-        assert pu.preferred_instance_groups == [ig_tmp, ig_org]
+        assert pu.preferred_instance_groups == [ig_tmp, ig_org, controlplane_instance_group]
 
     def test_job_instance_groups(self, instance_group_factory, inventory, project, default_instance_group):
         jt = JobTemplate.objects.create(inventory=inventory, project=project)
