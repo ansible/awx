@@ -82,10 +82,20 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         editable=False,
         help_text=_('Total system memory of this instance in bytes.'),
     )
+    errors = models.TextField(
+        default='',
+        blank=True,
+        help_text=_('Any error details from the last health check.'),
+    )
     last_seen = models.DateTimeField(
         null=True,
         editable=False,
         help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
+    )
+    last_health_check = models.DateTimeField(
+        null=True,
+        editable=False,
+        help_text=_('Last time a health check was ran on this instance to refresh cpu, memory, and capacity.'),
     )
     # Capacity management
     capacity = models.PositiveIntegerField(
