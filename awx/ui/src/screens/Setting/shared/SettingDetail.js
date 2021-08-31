@@ -4,6 +4,19 @@ import { t } from '@lingui/macro';
 import { Detail } from 'components/DetailList';
 import CodeDetail from 'components/DetailList/CodeDetail';
 
+function sortObj(obj) {
+  if (typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj;
+  }
+  const sorted = {};
+  Object.keys(obj)
+    .sort()
+    .forEach((key) => {
+      sorted[key] = sortObj(obj[key]);
+    });
+  return sorted;
+}
+
 export default ({ helpText, id, label, type, unit = '', value }) => {
   const dataType = value === '$encrypted$' ? 'encrypted' : type;
   let detail = null;
@@ -17,7 +30,7 @@ export default ({ helpText, id, label, type, unit = '', value }) => {
           label={label}
           mode="javascript"
           rows={4}
-          value={JSON.stringify(value || {}, undefined, 2)}
+          value={JSON.stringify(sortObj(value || {}), undefined, 2)}
         />
       );
       break;
