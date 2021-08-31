@@ -33,6 +33,9 @@ describe('<UserOrganizationlist />', () => {
         count: 1,
       },
     });
+    UsersAPI.readOrganizationOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <Route
@@ -69,5 +72,6 @@ describe('<UserOrganizationlist />', () => {
       page_size: 20,
       type: 'organization',
     });
+    expect(UsersAPI.readOrganizationOptions).toBeCalled();
   });
 });

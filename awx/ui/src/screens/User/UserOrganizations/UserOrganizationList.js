@@ -23,17 +23,29 @@ function UserOrganizationList() {
   const { id: userId } = useParams();
 
   const {
-    result: { organizations, count },
+    result: { organizations, count, searchableKeys, relatedSearchableKeys },
     error: contentError,
     isLoading,
     request: fetchOrgs,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const {
-        data: { results, count: orgCount },
-      } = await UsersAPI.readOrganizations(userId, params);
+      const [
+        {
+          data: { results, count: orgCount },
+        },
+        actions,
+      ] = await Promise.all([
+        UsersAPI.readOrganizations(userId, params),
+        UsersAPI.readOrganizationOptions(),
+      ]);
       return {
+        searchableKeys: Object.keys(actions.data.actions?.GET || {}).filter(
+          (key) => actions.data.actions?.GET[key].filterable
+        ),
+        relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
+          (val) => val.slice(0, -8)
+        ),
         organizations: results,
         count: orgCount,
       };
@@ -41,6 +53,8 @@ function UserOrganizationList() {
     {
       organizations: [],
       count: 0,
+      searchableKeys: [],
+      relatedSearchableKeys: [],
     }
   );
 
@@ -52,6 +66,8 @@ function UserOrganizationList() {
     <PaginatedTable
       items={organizations}
       contentError={contentError}
+      toolbarSearchableKeys={searchableKeys}
+      toolbarRelatedSearchableKeys={relatedSearchableKeys}
       hasContentLoading={isLoading}
       itemCount={count}
       pluralizedItemName={t`Organizations`}

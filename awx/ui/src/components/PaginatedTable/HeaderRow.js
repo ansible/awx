@@ -68,7 +68,6 @@ export function HeaderCell({
   columnIndex,
   idPrefix,
   className,
-  alignRight,
   children,
 }) {
   const sort = sortKey
@@ -83,7 +82,7 @@ export function HeaderCell({
       id={sortKey ? `${idPrefix}-${sortKey}` : null}
       className={className}
       sort={sort}
-      css={alignRight ? 'text-align: right' : null}
+      css={children === 'Actions' ? 'text-align: right' : null}
     >
       {children}
     </Th>

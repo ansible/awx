@@ -144,7 +144,7 @@ function CredentialList() {
             <HeaderRow qsConfig={QS_CONFIG}>
               <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
               <HeaderCell>{t`Type`}</HeaderCell>
-              <HeaderCell alignRight>{t`Actions`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
           renderRow={(item, index) => (

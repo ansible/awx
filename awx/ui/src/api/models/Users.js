@@ -29,6 +29,12 @@ class Users extends Base {
     });
   }
 
+  readOrganizationOptions(userId, params) {
+    return this.http.options(`${this.baseUrl}${userId}/organizations/`, {
+      params,
+    });
+  }
+
   readRoles(userId, params) {
     return this.http.get(`${this.baseUrl}${userId}/roles/`, {
       params,
