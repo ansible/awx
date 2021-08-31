@@ -148,7 +148,7 @@ function VisualizerNode({
     if (addingLink) {
       updateHelpText(
         node.isInvalidLinkTarget
-          ? t`Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported.`
+          ? t`Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported.`
           : t`Click to create a new link to this node.`
       );
       onMouseOver(node);
@@ -264,8 +264,12 @@ function VisualizerNode({
           nodePositions[node.id].y - nodePositions[1].y
         })`}
       >
-        {(node.all_parents_must_converge ||
-          node?.originalNodeObject?.all_parents_must_converge) && (
+        {(Object.prototype.hasOwnProperty.call(
+          node,
+          'all_parents_must_converge'
+        )
+          ? node.all_parents_must_converge
+          : node?.originalNodeObject?.all_parents_must_converge) && (
           <>
             <rect
               fill={
@@ -292,7 +296,7 @@ function VisualizerNode({
               x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10 + 7}
               y={-wfConstants.nodeH / 4 - 1}
             >
-              <ConvergenceLabel>{t`ALL`}</ConvergenceLabel>
+              <ConvergenceLabel data-cy="convergence-label">{t`ALL`}</ConvergenceLabel>
             </foreignObject>
           </>
         )}
