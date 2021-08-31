@@ -395,10 +395,17 @@ def on_populate_user(sender, **kwargs):
         remove = bool(team_opts.get('remove', True))
         _update_m2m_from_groups(user, ldap_user, team.member_role.members, users_opts, remove)
 
+    # Check if user.profile is available, otherwise force user.save()
+    try:
+        _ = user.profile
+    except ValueError:
+        force_user_update = True
+    finally:
+        if force_user_update:
+            user.save()
+
     # Update user profile to store LDAP DN.
-    if force_user_update:
-        user.save()
-        profile = user.profile
-        if profile.ldap_dn != ldap_user.dn:
-            profile.ldap_dn = ldap_user.dn
-            profile.save()
+    profile = user.profile
+    if profile.ldap_dn != ldap_user.dn:
+        profile.ldap_dn = ldap_user.dn
+        profile.save()
