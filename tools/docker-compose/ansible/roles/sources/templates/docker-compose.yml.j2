@@ -112,7 +112,7 @@ services:
     image: quay.io/awx/awx_devel:devel
     user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_{{ loop.index }}
-    hostname: receptor-1
+    hostname: receptor-{{ loop.index }}
     command: 'receptor --config /etc/receptor/receptor.conf'
     links:
       - receptor-hop
