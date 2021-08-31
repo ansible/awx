@@ -172,7 +172,7 @@ function Search({
                     return value.join(':');
                   })}
                   isOpen={isFilterDropdownOpen}
-                  placeholderText={`Filter By ${name}`}
+                  placeholderText={t`Filter By ${name}`}
                   ouiaId={`filter-by-${key}`}
                   isDisabled={isDisabled}
                   maxHeight={maxSelectHeight}
@@ -196,7 +196,7 @@ function Search({
                 onSelect={(event, selection) => onReplaceSearch(key, selection)}
                 selections={chipsByKey[key].chips[0]?.label}
                 isOpen={isFilterDropdownOpen}
-                placeholderText={`Filter By ${name}`}
+                placeholderText={t`Filter By ${name}`}
                 ouiaId={`filter-by-${key}`}
                 isDisabled={isDisabled}
                 maxHeight={maxSelectHeight}
