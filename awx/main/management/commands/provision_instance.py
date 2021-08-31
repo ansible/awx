@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -19,11 +18,12 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str, help='Hostname used during provisioning')
         parser.add_argument('--node_type', type=str, default="hybrid", choices=["control", "execution", "hybrid"], help='Instance Node type')
+        parser.add_argument('--uuid', type=str, help='Instance UUID')
 
-    def _register_hostname(self, hostname, node_type):
+    def _register_hostname(self, hostname, node_type, uuid):
         if not hostname:
             return
-        (changed, instance) = Instance.objects.register(uuid=self.uuid, hostname=hostname, node_type=node_type)
+        (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
         if changed:
             print('Successfully registered instance {}'.format(hostname))
         else:
@@ -34,8 +34,7 @@ class Command(BaseCommand):
     def handle(self, **options):
         if not options.get('hostname'):
             raise CommandError("Specify `--hostname` to use this command.")
-        self.uuid = settings.SYSTEM_UUID
         self.changed = False
-        self._register_hostname(options.get('hostname'), options.get('node_type'))
+        self._register_hostname(options.get('hostname'), options.get('node_type'), options.get('uuid'))
         if self.changed:
             print('(changed: True)')

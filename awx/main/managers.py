@@ -4,6 +4,7 @@
 import sys
 import logging
 import os
+from uuid import uuid4
 
 from django.db import models
 from django.conf import settings
@@ -115,7 +116,7 @@ class InstanceManager(models.Manager):
 
     def register(self, uuid=None, hostname=None, ip_address=None, node_type='hybrid', defaults=None):
         if not uuid:
-            uuid = settings.SYSTEM_UUID
+            uuid = str(uuid4())
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
         with advisory_lock('instance_registration_%s' % hostname):
