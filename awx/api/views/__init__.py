@@ -108,6 +108,7 @@ from awx.api.permissions import (
     InstanceGroupTowerPermission,
     VariableDataPermission,
     WorkflowApprovalPermission,
+    IsSuperUser,
 )
 from awx.api import renderers
 from awx.api import serializers
@@ -406,6 +407,32 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
         if parent.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {parent.hostname}.")}
         return None
+
+
+class InstanceHealthCheck(GenericAPIView):
+
+    name = _('Instance Health Check')
+    model = models.Instance
+    serializer_class = serializers.InstanceHealthCheckSerializer
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = self.get_serializer(data=request.data).to_representation(obj)
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        from awx.main.tasks import node_remote_health_check
+
+        runner_data = node_remote_health_check(obj.hostname)
+        obj.refresh_from_db()
+        data = self.get_serializer(data=request.data).to_representation(obj)
+        # Add in some extra unsaved fields
+        for extra_field in ('transmit_timing', 'run_timing'):
+            if extra_field in runner_data:
+                data[extra_field] = runner_data[extra_field]
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class InstanceGroupList(ListCreateAPIView):

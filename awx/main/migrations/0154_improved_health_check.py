@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instance',
             name='errors',
-            field=models.TextField(blank=True, default='', help_text='Any error details from the last health check.'),
+            field=models.TextField(blank=True, default='', editable=False, help_text='Any error details from the last health check.'),
         ),
         migrations.AddField(
             model_name='instance',

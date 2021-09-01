@@ -85,6 +85,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     errors = models.TextField(
         default='',
         blank=True,
+        editable=False,
         help_text=_('Any error details from the last health check.'),
     )
     last_seen = models.DateTimeField(
@@ -190,11 +191,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
-    def save_health_data(self, version, cpu, memory, uuid=None, last_seen=None, has_error=False):
-        update_fields = []
+    def save_health_data(self, version, cpu, memory, uuid=None, update_last_seen=False, errors=None):
+        self.last_health_check = now()
+        update_fields = ['last_health_check']
 
-        if last_seen is not None and self.last_seen != last_seen:
-            self.last_seen = last_seen
+        if update_last_seen:
+            self.last_seen = self.last_health_check
             update_fields.append('last_seen')
 
         if uuid is not None and self.uuid != uuid:
@@ -217,9 +219,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.memory = new_memory
             update_fields.append('memory')
 
-        if not has_error:
+        if not errors:
             self.refresh_capacity_fields()
         else:
+            self.errors = errors
+            update_fields.append('errors')
             self.mark_offline(perform_save=False)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
@@ -227,15 +231,15 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def local_health_check(self):
         """Only call this method on the instance that this record represents"""
-        has_error = False
+        errors = None
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            has_error = True
+            errors = _('Failed to connect ot Redis')
 
-        self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), last_seen=now(), has_error=has_error)
+        self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):

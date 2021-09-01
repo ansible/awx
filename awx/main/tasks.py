@@ -409,13 +409,17 @@ def cleanup_execution_environment_images():
 
 
 @task(queue=get_local_queuename)
-def execution_node_health_check(node):
+def node_remote_health_check(node):
+    if node == '':
+        logger.warn('Remote health check incorrectly called with blank string')
+        return
     try:
         instance = Instance.objects.get(hostname=node)
     except Instance.DoesNotExist:
         logger.warn(f'Instance record for {node} missing, could not check capacity.')
         return
-    data = worker_info(node)
+
+    data = worker_info(node, work_type='ansible-runner' if instance.node_type == 'execution' else 'local')
 
     prior_capacity = instance.capacity
 
@@ -423,8 +427,8 @@ def execution_node_health_check(node):
         version='ansible-runner-' + data.get('runner_version', '???'),
         cpu=data.get('cpu_count', 0),
         memory=data.get('mem_in_bytes', 0),
-        uuid=data.get('uuid'),
-        has_error=bool(data.get('errors')),
+        uuid=data.get('uuid') if instance.node_type == 'execution' else None,  # TODO, have --worker-info read from settings file
+        errors='\n'.join(data.get('errors', [])),
     )
 
     if data['errors']:
@@ -435,6 +439,8 @@ def execution_node_health_check(node):
             logger.info(f'Failed to find capacity of new or lost execution node {node}, errors:\n{formatted_error}')
     else:
         logger.info('Set capacity of execution node {} to {}, worker info data:\n{}'.format(node, instance.capacity, json.dumps(data, indent=2)))
+
+    return data
 
 
 def inspect_execution_nodes(instance_list):
@@ -480,18 +486,20 @@ def inspect_execution_nodes(instance_list):
                 except InstanceGroup.DoesNotExist:
                     logger.error(f"Unable to add execution node '{hostname}' to '{default_ig.name}' instance group; group not found.")
 
-                execution_node_health_check.apply_async([hostname])
+                node_remote_health_check.apply_async([hostname])
             elif was_lost:
                 # if the instance *was* lost, but has appeared again,
                 # attempt to re-establish the initial capacity and version
                 # check
                 logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
-                execution_node_health_check.apply_async([hostname])
+                node_remote_health_check.apply_async([hostname])
             elif instance.capacity == 0:
-                # Periodically re-run the health check of errored nodes, in case someone fixed it
-                # TODO: perhaps decrease the frequency of these checks
-                logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
-                execution_node_health_check.apply_async([hostname])
+                # nodes with proven connection but need remediation run health checks are reduced frequency
+                if not instance.last_health_check or (nowtime - instance.last_health_check).total_seconds() >= settings.EXECUTION_NODE_REMEDIATION_CHECKS:
+                    # Periodically re-run the health check of errored nodes, in case someone fixed it
+                    # TODO: perhaps decrease the frequency of these checks
+                    logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
+                    node_remote_health_check.apply_async([hostname])
 
 
 @task(queue=get_local_queuename)
@@ -3028,12 +3036,17 @@ class AWXReceptorJob:
         # We establish a connection to the Receptor socket
         receptor_ctl = get_receptor_ctl()
 
+        res = None
         try:
-            return self._run_internal(receptor_ctl)
+            res = self._run_internal(receptor_ctl)
+            return res
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
+            # If an error occured without the job itself failing, it could be a broken instance
+            if self.work_type == 'ansible-runner' and res is None or getattr(res, 'rc', None) is None:
+                node_remote_health_check(self.task.instance.execution_node)
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload

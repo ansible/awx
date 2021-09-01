@@ -28,13 +28,16 @@ def get_receptor_ctl():
     return ReceptorControl(receptor_sockfile)
 
 
-def worker_info(node_name):
+def worker_info(node_name, work_type='ansible-runner'):
     receptor_ctl = get_receptor_ctl()
     transmit_start = time.time()
     error_list = []
     data = {'errors': error_list, 'transmit_timing': 0.0}
 
-    result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": f"--worker-info"}, ttl='20s', node=node_name)
+    kwargs = {}
+    if work_type != 'local':
+        kwargs['ttl'] = '20s'
+    result = receptor_ctl.submit_work(worktype=work_type, payload='', params={"params": f"--worker-info"}, node=node_name, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -90,9 +93,11 @@ def worker_info(node_name):
             error_list.extend(remote_data.pop('errors', []))  # merge both error lists
             data.update(remote_data)
 
-    # see tasks.py usage of keys
-    missing_keys = set(('runner_version', 'mem_in_bytes', 'cpu_count')) - set(data.keys())
-    if missing_keys:
-        data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
+    # If we have a connection error, missing keys would be trivial consequence of that
+    if not data['errors']:
+        # see tasks.py usage of keys
+        missing_keys = set(('runner_version', 'mem_in_bytes', 'cpu_count')) - set(data.keys())
+        if missing_keys:
+            data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
 
     return data

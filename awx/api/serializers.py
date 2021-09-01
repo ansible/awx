@@ -4809,6 +4809,8 @@ class InstanceSerializer(BaseSerializer):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
+        if self.context['request'].user.is_superuser:
+            res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
     def get_consumed_capacity(self, obj):
@@ -4819,6 +4821,13 @@ class InstanceSerializer(BaseSerializer):
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
+
+
+class InstanceHealthCheckSerializer(BaseSerializer):
+    class Meta:
+        model = Instance
+        read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu_capacity', 'mem_capacity', 'capacity')
+        fields = read_only_fields
 
 
 class InstanceGroupSerializer(BaseSerializer):
