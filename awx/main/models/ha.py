@@ -59,7 +59,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     objects = InstanceManager()
 
     # Fields set in instance registration
-    uuid = models.CharField(max_length=40)
+    uuid = models.CharField(max_length=40, default='00000000-0000-0000-0000-000000000000')
     hostname = models.CharField(max_length=250, unique=True)
     ip_address = models.CharField(
         blank=True,
