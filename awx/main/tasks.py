@@ -424,7 +424,7 @@ def node_remote_health_check(node):
     prior_capacity = instance.capacity
 
     instance.save_health_data(
-        version='ansible-runner-' + data.get('runner_version', '???'),
+        version=('ansible-runner-' + data.get('runner_version', '???')) if instance.node_type == 'execution' else None,
         cpu=data.get('cpu_count', 0),
         memory=data.get('mem_in_bytes', 0),
         uuid=data.get('uuid') if instance.node_type == 'execution' else None,  # TODO, have --worker-info read from settings file
