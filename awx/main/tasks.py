@@ -229,8 +229,11 @@ def apply_cluster_membership_policies():
         actual_instances = [Node(obj=i, groups=[]) for i in all_instances if i.managed_by_policy]
         logger.debug("Total instances: {}, available for policy: {}".format(total_instances, len(actual_instances)))
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
+            exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
             policy_min_added = []
             for i in sorted(actual_instances, key=lambda x: len(x.groups)):
+                if i.obj.node_type == exclude_type:
+                    continue  # never place execution instances in controlplane group or control instances in other groups
                 if len(g.instances) >= g.obj.policy_instance_minimum:
                     break
                 if i.obj.id in g.instances:
@@ -245,13 +248,19 @@ def apply_cluster_membership_policies():
 
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
+            exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
+            candidate_pool_ct = len([i for i in actual_instances if i.obj.node_type != exclude_type])
+            if not candidate_pool_ct:
+                continue
             policy_per_added = []
             for i in sorted(actual_instances, key=lambda x: len(x.groups)):
+                if i.obj.node_type == exclude_type:
+                    continue
                 if i.obj.id in g.instances:
                     # If the instance is already _in_ the group, it was
                     # applied earlier via a minimum policy or policy list
                     continue
-                if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
+                if 100 * float(len(g.instances)) / candidate_pool_ct >= g.obj.policy_instance_percentage:
                     break
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)

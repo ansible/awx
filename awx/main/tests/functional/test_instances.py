@@ -244,6 +244,41 @@ def test_policy_instance_list_explicitly_pinned(instance_factory, instance_group
 
 
 @pytest.mark.django_db
+def test_control_plane_policy_exception(controlplane_instance_group):
+    controlplane_instance_group.policy_instance_percentage = 100
+    controlplane_instance_group.policy_instance_minimum = 2
+    controlplane_instance_group.save()
+    Instance.objects.create(hostname='foo-1', node_type='execution')
+    apply_cluster_membership_policies()
+    assert 'foo-1' not in [inst.hostname for inst in controlplane_instance_group.instances.all()]
+
+
+@pytest.mark.django_db
+def test_normal_instance_group_policy_exception():
+    ig = InstanceGroup.objects.create(name='bar', policy_instance_percentage=100, policy_instance_minimum=2)
+    Instance.objects.create(hostname='foo-1', node_type='control')
+    apply_cluster_membership_policies()
+    assert 'foo-1' not in [inst.hostname for inst in ig.instances.all()]
+
+
+@pytest.mark.django_db
+def test_percentage_as_fraction_of_execution_nodes():
+    """
+    If an instance requests 50 percent of instances, then those should be 50 percent
+    of available execution nodes (1 out of 2), as opposed to 50 percent
+    of all available nodes (2 out of 4) which include unusable control nodes
+    """
+    ig = InstanceGroup.objects.create(name='bar', policy_instance_percentage=50)
+    for i in range(2):
+        Instance.objects.create(hostname=f'foo-{i}', node_type='control')
+    for i in range(2):
+        Instance.objects.create(hostname=f'bar-{i}', node_type='execution')
+    apply_cluster_membership_policies()
+    assert ig.instances.count() == 1
+    assert ig.instances.first().hostname.startswith('bar-')
+
+
+@pytest.mark.django_db
 def test_basic_instance_group_membership(instance_group_factory, default_instance_group, job_factory):
     j = job_factory()
     ig = instance_group_factory("basicA", [default_instance_group.instances.first()])
