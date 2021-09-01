@@ -211,7 +211,7 @@ function InstanceList() {
         )}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
-            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
             <HeaderCell>{t`Node Type`}</HeaderCell>
             <HeaderCell>{t`Policy Type`}</HeaderCell>
             <HeaderCell>{t`Running Jobs`}</HeaderCell>
