@@ -89,9 +89,14 @@ function InstanceList() {
     useCallback(
       () =>
         Promise.all(
-          selected.map((instance) =>
-            InstanceGroupsAPI.disassociateInstance(instanceGroupId, instance.id)
-          )
+          selected
+            .filter((s) => s.node_type !== 'control')
+            .map((instance) =>
+              InstanceGroupsAPI.disassociateInstance(
+                instanceGroupId,
+                instance.id
+              )
+            )
         ),
       [instanceGroupId, selected]
     ),
@@ -106,9 +111,11 @@ function InstanceList() {
     useCallback(
       async (instancesToAssociate) => {
         await Promise.all(
-          instancesToAssociate.map((instance) =>
-            InstanceGroupsAPI.associateInstance(instanceGroupId, instance.id)
-          )
+          instancesToAssociate
+            .filter((i) => i.node_type !== 'control')
+            .map((instance) =>
+              InstanceGroupsAPI.associateInstance(instanceGroupId, instance.id)
+            )
         );
         fetchInstances();
       },
@@ -186,7 +193,9 @@ function InstanceList() {
                 verifyCannotDisassociate={false}
                 key="disassociate"
                 onDisassociate={handleDisassociate}
-                itemsToDisassociate={selected}
+                itemsToDisassociate={selected.filter(
+                  (s) => s.node_type !== 'control'
+                )}
                 modalTitle={t`Disassociate instance from instance group?`}
               />,
             ]}
