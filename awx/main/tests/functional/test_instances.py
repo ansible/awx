@@ -274,7 +274,8 @@ def test_percentage_as_fraction_of_execution_nodes():
     for i in range(2):
         Instance.objects.create(hostname=f'bar-{i}', node_type='execution')
     apply_cluster_membership_policies()
-    assert set(['bar-0']) == set([inst.hostname for inst in ig.instances.all()])
+    assert ig.instances.count() == 1
+    assert ig.instances.first().hostname.startswith('bar-')
 
 
 @pytest.mark.django_db

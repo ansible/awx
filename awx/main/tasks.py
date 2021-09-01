@@ -250,6 +250,8 @@ def apply_cluster_membership_policies():
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
             candidate_pool_ct = len([i for i in actual_instances if i.obj.node_type != exclude_type])
+            if not candidate_pool_ct:
+                continue
             policy_per_added = []
             for i in sorted(actual_instances, key=lambda x: len(x.groups)):
                 if i.obj.node_type == exclude_type:
