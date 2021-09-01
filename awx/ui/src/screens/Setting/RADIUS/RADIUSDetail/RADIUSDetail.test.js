@@ -52,6 +52,9 @@ describe('<RADIUSDetail />', () => {
   });
 
   test('should render expected details', () => {
+    expect(wrapper.find('Alert').prop('title')).toBe(
+      'This feature is deprecated and will be removed in a future release.'
+    );
     assertDetail(wrapper, 'RADIUS Server', 'example.org');
     assertDetail(wrapper, 'RADIUS Port', '1812');
     assertDetail(wrapper, 'RADIUS Secret', 'Encrypted');
