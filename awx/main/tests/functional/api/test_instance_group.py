@@ -24,6 +24,14 @@ def instance():
 
 
 @pytest.fixture
+def node_type_instance():
+    def fn(hostname, node_type):
+        return Instance.objects.create(hostname=hostname, node_type=node_type)
+
+    return fn
+
+
+@pytest.fixture
 def instance_group(job_factory):
     ig = InstanceGroup(name="east")
     ig.save()
@@ -198,3 +206,41 @@ def test_containerized_group_default_fields(instance_group, kube_credential):
     assert ig.policy_instance_list == []
     assert ig.policy_instance_minimum == 0
     assert ig.policy_instance_percentage == 0
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ['control', 'hybrid', 'execution'])
+def test_instance_attach_to_instance_group(post, instance_group, node_type_instance, admin, node_type):
+    instance = node_type_instance(hostname=node_type, node_type=node_type)
+
+    url = reverse(f'api:instance_group_instance_list', kwargs={'pk': instance_group.pk})
+    post(url, {'associate': True, 'id': instance.id}, admin, expect=204 if node_type != 'control' else 400)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ['control', 'hybrid', 'execution'])
+def test_instance_unattach_from_instance_group(post, instance_group, node_type_instance, admin, node_type):
+    instance = node_type_instance(hostname=node_type, node_type=node_type)
+    instance_group.instances.add(instance)
+
+    url = reverse(f'api:instance_group_instance_list', kwargs={'pk': instance_group.pk})
+    post(url, {'disassociate': True, 'id': instance.id}, admin, expect=204 if node_type != 'control' else 400)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ['control', 'hybrid', 'execution'])
+def test_instance_group_attach_to_instance(post, instance_group, node_type_instance, admin, node_type):
+    instance = node_type_instance(hostname=node_type, node_type=node_type)
+
+    url = reverse(f'api:instance_instance_groups_list', kwargs={'pk': instance.pk})
+    post(url, {'associate': True, 'id': instance_group.id}, admin, expect=204 if node_type != 'control' else 400)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ['control', 'hybrid', 'execution'])
+def test_instance_group_unattach_from_instance(post, instance_group, node_type_instance, admin, node_type):
+    instance = node_type_instance(hostname=node_type, node_type=node_type)
+    instance_group.instances.add(instance)
+
+    url = reverse(f'api:instance_instance_groups_list', kwargs={'pk': instance.pk})
+    post(url, {'disassociate': True, 'id': instance_group.id}, admin, expect=204 if node_type != 'control' else 400)
