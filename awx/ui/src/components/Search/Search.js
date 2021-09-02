@@ -129,6 +129,7 @@ function Search({
             isOpen={isSearchDropdownOpen}
             ouiaId="simple-key-select"
             isDisabled={isDisabled}
+            noResultsFoundText={t`No results found`}
           >
             {searchOptions}
           </Select>
@@ -176,6 +177,7 @@ function Search({
                   ouiaId={`filter-by-${key}`}
                   isDisabled={isDisabled}
                   maxHeight={maxSelectHeight}
+                  noResultsFoundText={t`No results found`}
                 >
                   {options.map(([optionKey, optionLabel]) => (
                     <SelectOption
@@ -200,6 +202,7 @@ function Search({
                 ouiaId={`filter-by-${key}`}
                 isDisabled={isDisabled}
                 maxHeight={maxSelectHeight}
+                noResultsFoundText={t`No results found`}
               >
                 <SelectOption key="true" value="true">
                   {booleanLabels.true || t`Yes`}

@@ -66,6 +66,7 @@ function PlaybookSelect({
       onBlur={onBlur}
       isDisabled={isLoading || isDisabled}
       maxHeight="1000%"
+      noResultsFoundText={t`No results found`}
     >
       {options.map((opt) => (
         <SelectOption key={opt} value={opt} />

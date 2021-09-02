@@ -57,6 +57,7 @@ function TagMultiSelect({ onChange, value }) {
       selections={selections}
       isOpen={isExpanded}
       typeAheadAriaLabel={t`Select tags`}
+      noResultsFoundText={t`No results found`}
     >
       {renderOptions(options)}
     </Select>

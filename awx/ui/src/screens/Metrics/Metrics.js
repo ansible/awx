@@ -190,7 +190,7 @@ function Metrics() {
                         setRenderedData([]);
                       }}
                       selections={instance}
-                      placeholderText={t`Select a instance`}
+                      placeholderText={t`Select an instance`}
                     >
                       {instances.map((inst) => (
                         <SelectOption value={inst} key={inst} />

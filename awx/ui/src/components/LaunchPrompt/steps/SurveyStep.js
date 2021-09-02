@@ -131,6 +131,7 @@ function MultipleChoiceField({ question }) {
           helpers.setTouched(true);
           helpers.setValue('');
         }}
+        noResultsFoundText={t`No results found`}
       >
         {options.map((opt) => (
           <SelectOption key={opt} value={opt} />
@@ -189,6 +190,7 @@ function MultiSelectField({ question }) {
           helpers.setTouched(true);
           helpers.setValue([]);
         }}
+        noResultsFoundText={t`No results found`}
       >
         {options.map((opt) => (
           <SelectOption key={opt} value={opt} />

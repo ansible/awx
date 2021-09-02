@@ -131,6 +131,7 @@ function ActivityStream() {
           selections={activityStreamType}
           isOpen={isTypeDropdownOpen}
           isGrouped
+          noResultsFoundText={t`No results found`}
         >
           <SelectGroup label={t`Views`} key="views">
             <SelectOption key="all_activity" value="all">

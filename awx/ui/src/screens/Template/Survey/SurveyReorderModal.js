@@ -151,6 +151,7 @@ function SurveyReorderModal({
             aria-label={t`Multi-Select`}
             typeAheadAriaLabel={t`Multi-Select`}
             id={`survey-preview-multiSelect-${q.variable}`}
+            noResultsFoundText={t`No results found`}
           >
             {q.choices.length > 0 &&
               q.choices
