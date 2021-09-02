@@ -22,7 +22,7 @@
 
 - control-service:
     service: control
-    filename: /var/run/receptor/receptor.sock
+    filename: {{ receptor_socket_file }}
 
 - work-command:
     worktype: local

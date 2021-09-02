@@ -18,7 +18,7 @@ services:
       SDB_PORT: {{ awx_sdb_port_start }}
       AWX_GROUP_QUEUES: tower
       MAIN_NODE_TYPE: "${MAIN_NODE_TYPE:-hybrid}"
-      RECEPTORCTL_SOCKET: /var/run/receptor/receptor.sock
+      RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
@@ -114,6 +114,8 @@ services:
     container_name: tools_receptor_{{ loop.index }}
     hostname: receptor-{{ loop.index }}
     command: 'receptor --config /etc/receptor/receptor.conf'
+    environment:
+      RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
     links:
       - receptor-hop
     volumes:
