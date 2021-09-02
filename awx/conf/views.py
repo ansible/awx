@@ -23,7 +23,7 @@ from rest_framework import status
 
 # AWX
 from awx.api.generics import APIView, GenericAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
-from awx.api.permissions import IsSuperUser
+from awx.api.permissions import IsSystemAdminOrAuditor
 from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
 from awx.main.tasks import handle_setting_changes
@@ -150,7 +150,7 @@ class SettingLoggingTest(GenericAPIView):
     name = _('Logging Connectivity Test')
     model = Setting
     serializer_class = SettingSingletonSerializer
-    permission_classes = (IsSuperUser,)
+    permission_classes = (IsSystemAdminOrAuditor,)
     filter_backends = []
 
     def post(self, request, *args, **kwargs):

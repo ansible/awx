@@ -108,7 +108,7 @@ from awx.api.permissions import (
     InstanceGroupTowerPermission,
     VariableDataPermission,
     WorkflowApprovalPermission,
-    IsSuperUser,
+    IsSystemAdminOrAuditor,
 )
 from awx.api import renderers
 from awx.api import serializers
@@ -414,7 +414,7 @@ class InstanceHealthCheck(GenericAPIView):
     name = _('Instance Health Check')
     model = models.Instance
     serializer_class = serializers.InstanceHealthCheckSerializer
-    permission_classes = (IsSuperUser,)
+    permission_classes = (IsSystemAdminOrAuditor,)
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -423,15 +423,34 @@ class InstanceHealthCheck(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        from awx.main.tasks import node_remote_health_check
 
-        runner_data = node_remote_health_check(obj.hostname)
-        obj.refresh_from_db()
-        data = self.get_serializer(data=request.data).to_representation(obj)
-        # Add in some extra unsaved fields
-        for extra_field in ('transmit_timing', 'run_timing'):
-            if extra_field in runner_data:
-                data[extra_field] = runner_data[extra_field]
+        if obj.node_type == 'execution':
+            from awx.main.tasks import node_remote_health_check
+
+            runner_data = node_remote_health_check(obj.hostname)
+            obj.refresh_from_db()
+            data = self.get_serializer(data=request.data).to_representation(obj)
+            # Add in some extra unsaved fields
+            for extra_field in ('transmit_timing', 'run_timing'):
+                if extra_field in runner_data:
+                    data[extra_field] = runner_data[extra_field]
+        else:
+            from awx.main.tasks import cluster_node_health_check
+
+            cluster_node_health_check.apply_async(
+                [obj.hostname],
+                queue=obj.hostname,
+            )
+            start_time = time.time()
+            prior_check_time = obj.last_health_check
+            while time.time() - start_time < 50.0:
+                obj.refresh_from_db(fields=['last_health_check'])
+                if obj.last_health_check != prior_check_time:
+                    break
+                time.sleep(0.5)
+            obj.refresh_from_db()
+            data = self.get_serializer(data=request.data).to_representation(obj)
+
         return Response(data, status=status.HTTP_200_OK)
 
 
