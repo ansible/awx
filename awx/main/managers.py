@@ -148,9 +148,12 @@ class InstanceManager(models.Manager):
             create_defaults = dict(capacity=0)
             if defaults is not None:
                 create_defaults.update(defaults)
+            uuid_option = {}
+            if uuid is not None:
+                uuid_option = dict(uuid=uuid)
             if node_type == 'execution' and 'version' not in create_defaults:
                 create_defaults['version'] = RECEPTOR_PENDING
-            instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults)
+            instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults, **uuid_option)
         return (True, instance)
 
     def get_or_register(self):
