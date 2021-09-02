@@ -249,7 +249,7 @@ class Host(HasCreate, HasVariables, base.Base):
         variables = kwargs.get('variables', not_provided)
 
         if variables is None:
-            variables = dict(ansible_host='127.0.0.1', ansible_connection='local')
+            variables = dict(ansible_host='localhost', ansible_connection='local')
 
         if variables != not_provided:
             if isinstance(variables, dict):
