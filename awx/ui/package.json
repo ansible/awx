@@ -72,7 +72,6 @@
     "test-watch": "TZ='UTC' react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .js --ext .jsx .",
-    "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",
     "extract-template": "lingui extract-template",
     "compile-strings": "lingui compile",
