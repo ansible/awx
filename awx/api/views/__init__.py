@@ -425,9 +425,9 @@ class InstanceHealthCheck(GenericAPIView):
         obj = self.get_object()
 
         if obj.node_type == 'execution':
-            from awx.main.tasks import node_remote_health_check
+            from awx.main.tasks import execution_node_health_check
 
-            runner_data = node_remote_health_check(obj.hostname)
+            runner_data = execution_node_health_check(obj.hostname)
             obj.refresh_from_db()
             data = self.get_serializer(data=request.data).to_representation(obj)
             # Add in some extra unsaved fields
@@ -437,17 +437,20 @@ class InstanceHealthCheck(GenericAPIView):
         else:
             from awx.main.tasks import cluster_node_health_check
 
-            cluster_node_health_check.apply_async(
-                [obj.hostname],
-                queue=obj.hostname,
-            )
-            start_time = time.time()
-            prior_check_time = obj.last_health_check
-            while time.time() - start_time < 50.0:
-                obj.refresh_from_db(fields=['last_health_check'])
-                if obj.last_health_check != prior_check_time:
-                    break
-                time.sleep(0.5)
+            if settings.CLUSTER_HOST_ID == obj.hostname:
+                cluster_node_health_check(obj.hostname)
+            else:
+                cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
+                start_time = time.time()
+                prior_check_time = obj.last_health_check
+                while time.time() - start_time < 50.0:
+                    obj.refresh_from_db(fields=['last_health_check'])
+                    if obj.last_health_check != prior_check_time:
+                        break
+                    if time.time() - start_time < 1.0:
+                        time.sleep(0.1)
+                    else:
+                        time.sleep(1.0)
             obj.refresh_from_db()
             data = self.get_serializer(data=request.data).to_representation(obj)
 

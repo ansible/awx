@@ -175,7 +175,7 @@ init:
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST) --node_type=$(MAIN_NODE_TYPE); \
 	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;\
-	$(MANAGEMENT_COMMAND) register_queue --queuename=default;
+	$(MANAGEMENT_COMMAND) register_queue --queuename=default --instance_percent=100;
 	if [ ! -f /etc/receptor/certs/awx.key ]; then \
 		rm -f /etc/receptor/certs/*; \
 		receptor --cert-init commonname="AWX Test CA" bits=2048 outcert=/etc/receptor/certs/ca.crt outkey=/etc/receptor/certs/ca.key; \
