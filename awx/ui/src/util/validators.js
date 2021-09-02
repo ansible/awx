@@ -1,4 +1,4 @@
-import { t } from '@lingui/macro';
+import { plural, t } from '@lingui/macro';
 import { isValidDate } from '@patternfly/react-core';
 
 export function required(message) {
@@ -128,6 +128,23 @@ export function number() {
   };
 }
 
+export function twilioPhoneNumber() {
+  return (value) => {
+    const phoneNumbers = Array.isArray(value) ? value : [value];
+    let error;
+    if (!error) {
+      phoneNumbers.forEach((v) => {
+        if (!/^\s*(?:\+?(\d{1,3}))?[. (]*(\d{7,12})$/.test(v)) {
+          error = plural(phoneNumbers.length, {
+            one: 'Please enter a valid phone number.',
+            other: 'Please enter valid phone numbers.',
+          });
+        }
+      });
+    }
+    return error;
+  };
+}
 export function url() {
   return (value) => {
     if (!value) {

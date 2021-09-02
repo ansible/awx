@@ -41,6 +41,10 @@ function ArrayTextField(props) {
         {...field}
         value={value.join('\n')}
         onChange={(val) => {
+          if (val.trim() === '') {
+            helpers.setValue('');
+            return;
+          }
           helpers.setValue(val.split('\n').map((v) => v.trim()));
         }}
       />
