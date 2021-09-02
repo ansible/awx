@@ -139,11 +139,13 @@ function JobDetail({ job, inventorySourceLabels }) {
           label={t`Started`}
           value={formatDateString(job.started)}
         />
-        <Detail
-          dataCy="job-finished-date"
-          label={t`Finished`}
-          value={formatDateString(job.finished)}
-        />
+        {job?.finished && (
+          <Detail
+            dataCy="job-finished-date"
+            label={t`Finished`}
+            value={formatDateString(job.finished)}
+          />
+        )}
         {jobTemplate && (
           <Detail
             dataCy="job-template"
