@@ -111,6 +111,18 @@ describe('<JobDetail />', () => {
     ).toHaveLength(1);
   });
 
+  test('should not display finished date', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          finished: null,
+        }}
+      />
+    );
+    expect(wrapper.find(`Detail[label="Finished"]`).length).toBe(0);
+  });
+
   test('should display module name and module arguments', () => {
     wrapper = mountWithContexts(
       <JobDetail
