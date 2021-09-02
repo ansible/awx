@@ -73,7 +73,7 @@ Control nodes check the receptor network (reported via `receptorctl status`) whe
 Nodes on the receptor network are compared against the `Instance` model in the database.
 
 If a node appears in the mesh network which is not in the database, then a "health check" is started.
-Fields like `cpu`, `memory`, and `version` will obtain a non-default values through this process.
+Fields like `cpu`, `memory`, and `version` will obtain a non-default value through this process.
 
 In order to run jobs on execution nodes, either the installer needs to pre-registered the node,
 or user needs to make a PATCH request to `/api/v2/instances/N/` to change the `enabled` field to true.
