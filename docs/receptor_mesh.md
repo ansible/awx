@@ -75,7 +75,7 @@ Nodes on the receptor network are compared against the `Instance` model in the d
 If a node appears in the mesh network which is not in the database, then a "health check" is started.
 Fields like `cpu`, `memory`, and `version` will obtain a non-default value through this process.
 
-In order to run jobs on execution nodes, either the installer needs to pre-registered the node,
+In order to run jobs on execution nodes, either the installer needs to pre-register the node,
 or user needs to make a PATCH request to `/api/v2/instances/N/` to change the `enabled` field to true.
 Execution nodes should automatically be placed in the default instance group.
 
