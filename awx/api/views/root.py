@@ -166,7 +166,7 @@ class ApiV2PingView(APIView):
             response['instance_groups'].append(
                 dict(name=instance_group.name, capacity=instance_group.capacity, instances=[x.hostname for x in instance_group.instances.all()])
             )
-            response['instance_groups'] = sorted(response['instance_groups'], key=operator.itemgetter('name'))
+            response['instance_groups'] = sorted(response['instance_groups'], key=lambda x: x['name'].lower())
         return Response(response)
 
 
