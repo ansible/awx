@@ -54,6 +54,9 @@ describe('<TACACSDetail />', () => {
   });
 
   test('should render expected details', () => {
+    expect(wrapper.find('Alert').prop('title')).toBe(
+      'This feature is deprecated and will be removed in a future release.'
+    );
     assertDetail(wrapper, 'TACACS+ Server', 'mockhost');
     assertDetail(wrapper, 'TACACS+ Port', '49');
     assertDetail(wrapper, 'TACACS+ Secret', 'Encrypted');
