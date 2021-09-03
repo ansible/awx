@@ -222,6 +222,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
         if not errors:
             self.refresh_capacity_fields()
+            self.errors = ''
         else:
             self.mark_offline(perform_save=False, errors=errors)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])

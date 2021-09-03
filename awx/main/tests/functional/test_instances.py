@@ -325,6 +325,23 @@ def test_instance_group_capacity(instance_factory, instance_group_factory):
 
 
 @pytest.mark.django_db
+def test_health_check_clears_errors():
+    instance = Instance.objects.create(hostname='foo-1', enabled=True, capacity=0, errors='something went wrong')
+    data = dict(version='ansible-runner-4.2', cpu=782, memory=int(39e9), uuid='asdfasdfasdfasdfasdf', errors='')
+    instance.save_health_data(**data)
+    for k, v in data.items():
+        assert getattr(instance, k) == v
+
+
+@pytest.mark.django_db
+def test_health_check_oh_no():
+    instance = Instance.objects.create(hostname='foo-2', enabled=True, capacity=52, cpu=8, memory=int(40e9))
+    instance.save_health_data('', 0, 0, errors='This it not a real instance!')
+    assert instance.capacity == instance.cpu_capacity == 0
+    assert instance.errors == 'This it not a real instance!'
+
+
+@pytest.mark.django_db
 class TestInstanceGroupOrdering:
     def test_ad_hoc_instance_groups(self, instance_group_factory, inventory, default_instance_group):
         ad_hoc = AdHocCommand.objects.create(inventory=inventory)
