@@ -7,22 +7,27 @@ import {
   TextListItem,
   TextListVariants,
   TextListItemVariants,
+  Tooltip,
 } from '@patternfly/react-core';
 import AlertModal from 'components/AlertModal';
-import { CardBody, CardActionsRow } from 'components/Card';
-import { VariablesDetail } from 'components/CodeEditor';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import CredentialChip from 'components/CredentialChip';
 import DeleteButton from 'components/DeleteButton';
-import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
-import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
+import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
+import JobCancelButton from 'components/JobCancelButton';
+import StatusLabel from 'components/StatusLabel';
+import { CardBody, CardActionsRow } from 'components/Card';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import { VariablesDetail } from 'components/CodeEditor';
 import useRequest from 'hooks/useRequest';
 import { InventorySourcesAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useIsMounted from 'hooks/useIsMounted';
+import { formatDateString } from 'util/dates';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
+import useWsInventorySourcesDetails from '../InventorySources/useWsInventorySourcesDetails';
 
 function InventorySourceDetail({ inventorySource }) {
   const {
@@ -44,17 +49,20 @@ function InventorySourceDetail({ inventorySource }) {
     enabled_var,
     enabled_value,
     host_filter,
-    summary_fields: {
-      created_by,
-      credentials,
-      inventory,
-      modified_by,
-      organization,
-      source_project,
-      user_capabilities,
-      execution_environment,
-    },
-  } = inventorySource;
+    summary_fields,
+  } = useWsInventorySourcesDetails(inventorySource);
+
+  const {
+    created_by,
+    credentials,
+    inventory,
+    modified_by,
+    organization,
+    source_project,
+    user_capabilities,
+    execution_environment,
+  } = summary_fields;
+
   const [deletionError, setDeletionError] = useState(false);
   const history = useHistory();
   const isMounted = useIsMounted();
@@ -144,10 +152,51 @@ function InventorySourceDetail({ inventorySource }) {
     return <ContentError error={error} />;
   }
 
+  const generateLastJobTooltip = (job) => (
+    <>
+      <div>{t`MOST RECENT SYNC`}</div>
+      <div>
+        {t`JOB ID:`} {job.id}
+      </div>
+      <div>
+        {t`STATUS:`} {job.status.toUpperCase()}
+      </div>
+      {job.finished && (
+        <div>
+          {t`FINISHED:`} {formatDateString(job.finished)}
+        </div>
+      )}
+    </>
+  );
+
+  let job = null;
+
+  if (summary_fields?.current_job) {
+    job = summary_fields.current_job;
+  } else if (summary_fields?.last_job) {
+    job = summary_fields.last_job;
+  }
+
   return (
     <CardBody>
-      <DetailList>
+      <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} />
+        <Detail
+          label={t`Last Job Status`}
+          value={
+            job && (
+              <Tooltip
+                position="top"
+                content={generateLastJobTooltip(job)}
+                key={job.id}
+              >
+                <Link to={`/jobs/inventory/${job.id}`}>
+                  <StatusLabel status={job.status} />
+                </Link>
+              </Tooltip>
+            )
+          }
+        />
         <Detail label={t`Description`} value={description} />
         <Detail label={t`Source`} value={sourceChoices[source]} />
         {organization && (
@@ -226,9 +275,18 @@ function InventorySourceDetail({ inventorySource }) {
             {t`Edit`}
           </Button>
         )}
-        {user_capabilities?.start && (
-          <InventorySourceSyncButton source={inventorySource} icon={false} />
-        )}
+        {user_capabilities?.start &&
+          (['new', 'running', 'pending', 'waiting'].includes(job?.status) ? (
+            <JobCancelButton
+              job={{ id: job.id, type: 'inventory_update' }}
+              errorTitle={t`Inventory Source Sync Error`}
+              title={t`Cancel Inventory Source Sync`}
+              errorMessage={t`Failed to cancel Inventory Source Sync`}
+              buttonText={t`Cancel Sync`}
+            />
+          ) : (
+            <InventorySourceSyncButton source={inventorySource} icon={false} />
+          ))}
         {user_capabilities?.delete && (
           <DeleteButton
             name={name}
@@ -236,6 +294,7 @@ function InventorySourceDetail({ inventorySource }) {
             onConfirm={handleDelete}
             deleteDetailsRequests={deleteDetailsRequests}
             deleteMessage={t`This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?`}
+            isDisabled={job?.status === 'running'}
           >
             {t`Delete`}
           </DeleteButton>
