@@ -19,8 +19,8 @@ const QS_CONFIG = (order_by = 'name') =>
 function AssociateModal({
   header = t`Items`,
   columns = [
-    { key: 'hostname', name: 'Name' },
-    { key: 'node_type', name: 'Node Type' },
+    { key: 'hostname', name: t`Name` },
+    { key: 'node_type', name: t`Node Type` },
   ],
   title = t`Select Items`,
   onClose,

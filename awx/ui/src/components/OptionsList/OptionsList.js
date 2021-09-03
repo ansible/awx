@@ -49,10 +49,9 @@ function OptionsList({
     <HeaderRow qsConfig={qsConfig}>
       {columns?.length > 0 ? (
         columns.map((col) => (
-          <HeaderCell
-            key={col.key}
-            sortKey={col.key}
-          >{t`${col.name}`}</HeaderCell>
+          <HeaderCell key={col.key} sortKey={col.key}>
+            {col.name}
+          </HeaderCell>
         ))
       ) : (
         <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
