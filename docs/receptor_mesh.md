@@ -61,10 +61,9 @@ Here is a listing of work types that you may encounter:
  - `kubernetes-runtime-auth` - user-space jobs ran in a container group
  - `kubernetes-incluster-auth` - project updates and management jobs on OpenShift Container Platform
 
-### Auto-discovery of execution nodes
+### Auto-discovery of Execution Nodes
 
-Instances in control plane must be registered by the installer via `awx-manage`
-commands like `awx-manage register_queue` or `awx-manage register_instance`.
+Instances in control plane must be registered by the installer via `awx-manage register_queue` or `awx-manage register_instance`.
 
 Execution-only nodes are automatically discovered after they have been configured and join the receptor mesh.
 Control nodes should see them as a "Known Node".
@@ -72,32 +71,38 @@ Control nodes should see them as a "Known Node".
 Control nodes check the receptor network (reported via `receptorctl status`) when their heartbeat task runs.
 Nodes on the receptor network are compared against the `Instance` model in the database.
 
-If a node appears in the mesh network which is not in the database, then a "health check" is started.
-Fields like `cpu`, `memory`, and `version` will obtain a non-default value through this process.
+If a node appears in the receptor mesh which is not in the database,
+then a database entry is created and added to the "default" instance group.
 
 In order to run jobs on execution nodes, either the installer needs to pre-register the node,
 or user needs to make a PATCH request to `/api/v2/instances/N/` to change the `enabled` field to true.
-Execution nodes should automatically be placed in the default instance group.
 
 #### Health Check Mechanics
 
-All relevant data for health checks is reported from the ansible-runner command:
+Fields like `cpu`, `memory`, and `version` will obtain a non-default value from the health check.
+If the instance has problems that would prevent jobs from running, `capacity` will be set to zero,
+and details will be shown in the instance's `errors` field.
+
+For execution nodes, relevant data for health checks is reported from the ansible-runner command:
 
 ```
 ansible-runner worker --worker-info
 ```
 
 This will output YAML data to standard out containing CPU, memory, and other metrics used to compute `capacity`.
-
 AWX invokes this command by submitting a receptor work unit (of type `ansible-runner`) to the target execution node.
-If you have the development environment running, you can run a one-off health check of a node with this command:
 
-```
-echo "from awx.main.utils.receptor import worker_info; worker_info('receptor-1')" | awx-manage shell_plus --quiet
-```
+##### Health Check Triggers
 
-This must be ran as the awx user inside one of the hybrid or control nodes.
-This will not affect actual `Instance` record, but will just run the command and report the data.
+Health checks for execution nodes have several triggers that can cause it to run.
+ - When an execution node is auto-discovered, a health check is started
+ - For execution nodes with errors, health checks are re-ran once about every 10 minutes for auto-remediation
+ - If a job had an error _not from the Ansible subprocess_ then a health check is started to check for instance errors
+ - System administrators can manually trigger a health check by making a POST request to `/api/v2/instances/N/health_check/`.
+
+Healthy execution nodes will _not_ have health checks ran on a regular basis.
+
+Control and hybrid nodes run health checks via a periodic task (bypassing ansible-runner).
 
 ### Development Environment
 
