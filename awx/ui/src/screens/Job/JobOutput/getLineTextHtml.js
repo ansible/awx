@@ -72,7 +72,7 @@ function replaceStyleAttrs(html) {
 export default function getLineTextHtml({
   created,
   event,
-  start_line,
+  start_line: startLine,
   stdout,
 }) {
   const sanitized = encode(stdout);
@@ -95,7 +95,7 @@ export default function getLineTextHtml({
     }
 
     lineTextHtml.push({
-      lineNumber: start_line + index,
+      lineNumber: startLine + index,
       html,
     });
   });
