@@ -583,7 +583,7 @@ def cluster_node_heartbeat():
             # If auto deprovisining is on, don't bother setting the capacity to 0
             # since we will delete the node anyway.
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
-                other_inst.mark_offline()
+                other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
                 logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
