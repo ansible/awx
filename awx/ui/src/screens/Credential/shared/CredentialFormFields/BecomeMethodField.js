@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useField } from 'formik';
 import { bool, shape, string } from 'prop-types';
+import { t } from '@lingui/macro';
 import {
   FormGroup,
   Select,
@@ -61,6 +62,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
         onCreateOption={(option) => {
           setOptions([...options, { value: option }]);
         }}
+        noResultsFoundText={t`No results found`}
       >
         {options.map((option) => (
           <SelectOption key={option.value} value={option.value} />

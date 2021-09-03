@@ -99,6 +99,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
       typeAheadAriaLabel={t`Select Labels`}
       placeholderText={placeholder}
       createText={createText}
+      noResultsFoundText={t`No results found`}
     >
       {renderOptions(options)}
     </Select>

@@ -248,6 +248,7 @@ function NodeTypeStep({ isIdentifierRequired }) {
                 typeAheadAriaLabel={t`Convergence select`}
                 className="convergenceSelect"
                 ouiaId="convergenceSelect"
+                noResultsFoundText={t`No results found`}
               >
                 <SelectOption key="any" value="any" id="select-option-any">
                   {t`Any`}

@@ -135,6 +135,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
             value.trim();
             setSourcePath([...sourcePath, value]);
           }}
+          noResultsFoundText={t`No results found`}
         >
           {sourcePath.map((path) => (
             <SelectOption key={path} id={path} value={path} />

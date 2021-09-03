@@ -140,6 +140,7 @@ function CredentialFormFields({ initialTypeId, credentialTypes }) {
       isCreatable={false}
       maxHeight="300px"
       width="100%"
+      noResultsFoundText={t`No results found`}
     >
       {credentialTypeOptions.map((credType) => (
         <SelectOption

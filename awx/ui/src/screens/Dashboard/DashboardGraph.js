@@ -103,6 +103,7 @@ function DashboardGraph() {
             }}
             selections={periodSelection}
             isOpen={isPeriodDropdownOpen}
+            noResultsFoundText={t`No results found`}
           >
             <SelectOption key="month" value="month">
               {t`Past month`}
