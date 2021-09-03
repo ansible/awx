@@ -726,7 +726,11 @@ describe('<ScheduleForm />', () => {
       });
 
       wrapper.update();
-      expect(wrapper.find('#schedule-End-datetime-helper').text()).toBe(
+      expect(
+        wrapper
+          .find('FormGroup[data-cy="schedule-End date/time"]')
+          .prop('helperTextInvalid')
+      ).toBe(
         'Please select an end date/time that comes after the start date/time.'
       );
     });

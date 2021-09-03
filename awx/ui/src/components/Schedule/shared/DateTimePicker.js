@@ -33,7 +33,8 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
 
   return (
     <FormGroup
-      fieldId={`schedule-${label}-datetime`}
+      fieldId={`schedule-${label}`}
+      data-cy={`schedule-${label}`}
       helperTextInvalid={dateMeta.error || timeMeta.error}
       isRequired
       validated={
@@ -42,11 +43,13 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
           ? 'default'
           : 'error'
       }
-      label={`${label} date/time`}
+      label={label}
     >
       <DateTimeGroup>
         <DatePicker
-          aria-label={t`${label} date`}
+          aria-label={
+            dateFieldName.startsWith('start') ? t`Start date` : t`End date`
+          }
           {...dateField}
           value={dateField.value.split('T')[0]}
           onChange={onDateChange}
@@ -54,7 +57,9 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
         <TimePicker
           placeholder="hh:mm AM/PM"
           stepMinutes={15}
-          aria-label={t`${label} time`}
+          aria-label={
+            timeFieldName.startsWith('start') ? t`Start time` : t`End time`
+          }
           time={timeField.value}
           {...timeField}
           onChange={(time) => timeHelpers.setValue(time)}

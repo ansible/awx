@@ -76,6 +76,8 @@ const FrequencyDetailSubform = () => {
     name: 'runOnTheMonth',
   });
   const [startDate] = useField('startDate');
+  const [{ name: dateFieldName }] = useField('endDate');
+  const [{ name: timeFieldName }] = useField('endTime');
 
   const [daysOfWeek, daysOfWeekMeta, daysOfWeekHelpers] = useField({
     name: 'daysOfWeek',
@@ -535,9 +537,9 @@ const FrequencyDetailSubform = () => {
       )}
       {end?.value === 'onDate' && (
         <DateTimePicker
-          dateFieldName="endDate"
-          timeFieldName="endTime"
-          label={t`End`}
+          dateFieldName={dateFieldName}
+          timeFieldName={timeFieldName}
+          label={t`End date/time`}
         />
       )}
     </>
