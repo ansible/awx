@@ -4826,7 +4826,7 @@ class InstanceSerializer(BaseSerializer):
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu_capacity', 'mem_capacity', 'capacity')
+        read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity')
         fields = read_only_fields
 
 
