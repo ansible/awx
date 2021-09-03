@@ -162,9 +162,9 @@ class InstanceManager(models.Manager):
 
             pod_ip = os.environ.get('MY_POD_IP')
             if settings.IS_K8S:
-                registered = self.register(ip_address=pod_ip, node_type='control')
+                registered = self.register(ip_address=pod_ip, node_type='control', uuid=settings.SYSTEM_UUID)
             else:
-                registered = self.register(ip_address=pod_ip)
+                registered = self.register(ip_address=pod_ip, uuid=settings.SYSTEM_UUID)
             RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
             RegisterQueue(settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True).register()
             return registered
