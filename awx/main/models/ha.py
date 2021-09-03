@@ -82,10 +82,21 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         editable=False,
         help_text=_('Total system memory of this instance in bytes.'),
     )
+    errors = models.TextField(
+        default='',
+        blank=True,
+        editable=False,
+        help_text=_('Any error details from the last health check.'),
+    )
     last_seen = models.DateTimeField(
         null=True,
         editable=False,
         help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
+    )
+    last_health_check = models.DateTimeField(
+        null=True,
+        editable=False,
+        help_text=_('Last time a health check was ran on this instance to refresh cpu, memory, and capacity.'),
     )
     # Capacity management
     capacity = models.PositiveIntegerField(
@@ -152,15 +163,16 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
-    def mark_offline(self, update_last_seen=False, perform_save=True):
-        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and (not update_last_seen):
+    def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
+        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and self.errors == errors and (not update_last_seen):
             return
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
+        self.errors = errors
         if update_last_seen:
             self.last_seen = now()
 
         if perform_save:
-            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity']
+            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity', 'errors']
             if update_last_seen:
                 update_fields += ['last_seen']
             self.save(update_fields=update_fields)
@@ -180,11 +192,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
-    def save_health_data(self, version, cpu, memory, uuid=None, last_seen=None, has_error=False):
-        update_fields = []
+    def save_health_data(self, version, cpu, memory, uuid=None, update_last_seen=False, errors=''):
+        self.last_health_check = now()
+        update_fields = ['last_health_check']
 
-        if last_seen is not None and self.last_seen != last_seen:
-            self.last_seen = last_seen
+        if update_last_seen:
+            self.last_seen = self.last_health_check
             update_fields.append('last_seen')
 
         if uuid is not None and self.uuid != uuid:
@@ -207,25 +220,26 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.memory = new_memory
             update_fields.append('memory')
 
-        if not has_error:
+        if not errors:
             self.refresh_capacity_fields()
+            self.errors = ''
         else:
-            self.mark_offline(perform_save=False)
-        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
+            self.mark_offline(perform_save=False, errors=errors)
+        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])
 
         self.save(update_fields=update_fields)
 
     def local_health_check(self):
         """Only call this method on the instance that this record represents"""
-        has_error = False
+        errors = None
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            has_error = True
+            errors = _('Failed to connect ot Redis')
 
-        self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), last_seen=now(), has_error=has_error)
+        self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
