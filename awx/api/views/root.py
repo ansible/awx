@@ -151,14 +151,22 @@ class ApiV2PingView(APIView):
         response['instances'] = []
         for instance in Instance.objects.all():
             response['instances'].append(
-                dict(node=instance.hostname, uuid=instance.uuid, heartbeat=instance.modified, capacity=instance.capacity, version=instance.version)
+                dict(
+                    node=instance.hostname,
+                    node_type=instance.node_type,
+                    uuid=instance.uuid,
+                    heartbeat=instance.modified,
+                    capacity=instance.capacity,
+                    version=instance.version,
+                )
             )
-            sorted(response['instances'], key=operator.itemgetter('node'))
+            response['instances'] = sorted(response['instances'], key=operator.itemgetter('node'))
         response['instance_groups'] = []
         for instance_group in InstanceGroup.objects.prefetch_related('instances'):
             response['instance_groups'].append(
                 dict(name=instance_group.name, capacity=instance_group.capacity, instances=[x.hostname for x in instance_group.instances.all()])
             )
+            response['instance_groups'] = sorted(response['instance_groups'], key=lambda x: x['name'].lower())
         return Response(response)
 
 
