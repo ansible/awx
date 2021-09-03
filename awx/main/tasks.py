@@ -177,7 +177,7 @@ def dispatch_startup():
 def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.mark_offline(update_last_seen=True)  # No thank you to new jobs while shut down
+        this_inst.mark_offline(update_last_seen=True, errors='Instance received normal shutdown signal')
         try:
             reaper.reap(this_inst)
         except Exception:

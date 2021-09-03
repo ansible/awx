@@ -163,15 +163,16 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
-    def mark_offline(self, update_last_seen=False, perform_save=True):
-        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and (not update_last_seen):
+    def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
+        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and self.errors == errors and (not update_last_seen):
             return
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
+        self.errors = errors
         if update_last_seen:
             self.last_seen = now()
 
         if perform_save:
-            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity']
+            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity', 'errors']
             if update_last_seen:
                 update_fields += ['last_seen']
             self.save(update_fields=update_fields)
@@ -191,7 +192,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
-    def save_health_data(self, version, cpu, memory, uuid=None, update_last_seen=False, errors=None):
+    def save_health_data(self, version, cpu, memory, uuid=None, update_last_seen=False, errors=''):
         self.last_health_check = now()
         update_fields = ['last_health_check']
 
@@ -222,10 +223,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not errors:
             self.refresh_capacity_fields()
         else:
-            self.errors = errors
-            update_fields.append('errors')
-            self.mark_offline(perform_save=False)
-        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
+            self.mark_offline(perform_save=False, errors=errors)
+        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])
 
         self.save(update_fields=update_fields)
 
