@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0153_instance_last_seen'),
+        ('main', '0154_set_default_uuid'),
     ]
 
     operations = [
