@@ -104,6 +104,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [results, setResults] = useState({});
+  const [uuidMap, setUuidMap] = useState({});
   const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(
     isJobRunning(job.status)
   );
@@ -237,13 +238,21 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       const { events, countOffset } = normalizeEvents(job, fetchedEvents);
 
       const newResults = {};
+      const newUuidMap = {};
       let newResultsCssMap = {};
       events.forEach((jobEvent, index) => {
+        // jobEvent.isExpanded = true;
         newResults[index] = jobEvent;
+        newUuidMap[jobEvent.uuid] = index;
+        if (jobEvent.parent_uuid && newUuidMap[jobEvent.parent_uuid]) {
+          const parent = newResults[newUuidMap[jobEvent.parent_uuid]];
+          parent.hasChildren = true;
+        }
         const { lineCssMap } = getLineTextHtml(jobEvent);
         newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
       });
       setResults(newResults);
+      setUuidMap(newUuidMap);
       setRemoteRowCount(count + countOffset);
       setCssMap(newResultsCssMap);
     } catch (err) {
@@ -281,10 +290,25 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current && isFollowModeEnabled) {
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
+    const event = results[index];
     let actualLineTextHtml = [];
-    if (results[index]) {
-      const { lineTextHtml } = getLineTextHtml(results[index]);
+    if (event) {
+      const { lineTextHtml } = getLineTextHtml(event);
       actualLineTextHtml = lineTextHtml;
+    }
+
+    let isVisible = true;
+    let parentUuid = event?.parent_uuid;
+    while (parentUuid && isVisible) {
+      const parentEvent = results[uuidMap[parentUuid]];
+      if (!parentEvent) {
+        // TODO: trigger fetch of parent data?
+        console.debug(`NO PARENT ${parentUuid} FOR`, event);
+      }
+      if (parentEvent && parentEvent.isCollapsed) {
+        isVisible = false;
+      }
+      parentUuid = parentEvent?.parent_uuid;
     }
 
     return (
@@ -295,24 +319,39 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         rowIndex={index}
         columnIndex={0}
       >
-        {results[index] ? (
-          <JobEvent
-            isClickable={isHostEvent(results[index])}
-            onJobEventClick={() => handleHostEventClick(results[index])}
-            className="row"
-            style={style}
-            lineTextHtml={actualLineTextHtml}
-            index={index}
-            {...results[index]}
-          />
-        ) : (
-          <JobEventSkeleton
-            className="row"
-            style={style}
-            counter={index}
-            contentLength={80}
-          />
-        )}
+        {({ measure }) =>
+          event ? (
+            <JobEvent
+              isClickable={isHostEvent(event)}
+              onJobEventClick={() => handleHostEventClick(event)}
+              className="row"
+              style={style}
+              lineTextHtml={actualLineTextHtml}
+              index={index}
+              event={event}
+              measure={measure}
+              isVisible={isVisible}
+              // allEvents={results}
+              // uuidMap={uuidMap}
+              onToggleExpanded={() => {
+                setResults({
+                  ...results,
+                  [index]: {
+                    ...event,
+                    isCollapsed: !event.isCollapsed,
+                  },
+                });
+              }}
+            />
+          ) : (
+            <JobEventSkeleton
+              className="row"
+              style={style}
+              counter={index}
+              contentLength={80}
+            />
+          )
+        }
       </CellMeasurer>
     );
   };
@@ -351,9 +390,21 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         }
 
         const newResults = {};
+        const newUuidMap = { ...uuidMap };
         let newResultsCssMap = {};
+        // TODO move into setResults callback?
+        // TODO merge results/uuidmap/cssmap into one state var?
         response.data.results.forEach((jobEvent, index) => {
           newResults[firstIndex + index] = jobEvent;
+          newUuidMap[jobEvent.uuid] = firstIndex + index;
+          const parentUuid = jobEvent.parent_uuid;
+          const parentIndex = newUuidMap[parentUuid];
+          if (parentUuid && parentIndex) {
+            const parent = results[parentIndex] || newResults[parentIndex];
+            if (parent) {
+              parent.hasChildren = true;
+            }
+          }
           const { lineCssMap } = getLineTextHtml(jobEvent);
           newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
         });
@@ -361,6 +412,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           ...prevResults,
           ...newResults,
         }));
+        setUuidMap(newUuidMap);
         setCssMap((prevCssMap) => ({
           ...prevCssMap,
           ...newResultsCssMap,
