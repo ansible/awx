@@ -321,7 +321,14 @@ class AutoscalePool(WorkerPool):
             if settings_absmem is not None:
                 total_memory_gb = int(settings_absmem)
             else:
-                total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
+                # Get the total virtual memory of the host
+                memory_limits = [psutil.virtual_memory().total]
+                if os.path.isfile('/sys/fs/cgroup/memory/memory.limit_in_bytes'):
+                    # Get memory limit for container
+                    with open('/sys/fs/cgroup/memory/memory.limit_in_bytes') as limit:
+                        memory_limits.append(int(limit.read()))
+                # Take the lowest of the two possible memory limits to be safe
+                total_memory_gb = (min(memory_limits) >> 30) + 1  # noqa: round up
             # 5 workers per GB of total memory
             self.max_workers = total_memory_gb * 5
 
