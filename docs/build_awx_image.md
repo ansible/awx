@@ -8,6 +8,8 @@ To build a custom awx image to use with the awx-operator, use the `build_image` 
 $ ansible-playbook tools/ansible/build.yml -v -e awx_image=registry.example.com/awx -e awx_version=test
 ```
 
+> Note: The development image (`make docker-compose-build`) will not work with the awx-operator, the UI is not built in that image, among other things (see Dockerfile.j2 for more info).
+
 This will build an AWX image and tag it.  You can then push that image to your container registry:
 
 
@@ -23,6 +25,6 @@ specify the new custom image.
 
 ```
 spec:
-  tower_image: registry.example.com/awx
-  tower_image_version: test
+  image: registry.example.com/awx
+  image_version: test
 ```
