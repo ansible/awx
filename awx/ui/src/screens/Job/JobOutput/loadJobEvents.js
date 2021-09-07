@@ -1,5 +1,7 @@
 import { getJobModel, isJobRunning } from 'util/jobs';
 
+// TODO: merge back into JobOutput
+// eslint-disable-next-line import/prefer-default-export
 export async function fetchCount(job, eventPromise) {
   if (isJobRunning(job?.status)) {
     const {
@@ -15,32 +17,4 @@ export async function fetchCount(job, eventPromise) {
     data: { count: eventCount },
   } = await eventPromise;
   return eventCount;
-}
-
-export function normalizeEvents(job, events) {
-  let countOffset = 0;
-  if (job?.result_traceback) {
-    const tracebackEvent = {
-      counter: 1,
-      created: null,
-      event: null,
-      type: null,
-      stdout: job?.result_traceback,
-      start_line: 0,
-    };
-    const firstIndex = events.findIndex((jobEvent) => jobEvent.counter === 1);
-    if (firstIndex && events[firstIndex]?.stdout) {
-      const stdoutLines = events[firstIndex].stdout.split('\r\n');
-      stdoutLines[0] = tracebackEvent.stdout;
-      events[firstIndex].stdout = stdoutLines.join('\r\n');
-    } else {
-      countOffset += 1;
-      events.unshift(tracebackEvent);
-    }
-  }
-
-  return {
-    events,
-    countOffset,
-  };
 }
