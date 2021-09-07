@@ -395,6 +395,8 @@ msgstr "Alert modal"
 
 #: components/LaunchButton/ReLaunchDropDown.js:48
 #: components/PromptDetail/PromptDetail.js:120
+#: screens/Metrics/Metrics.js:75
+#: screens/Metrics/Metrics.js:75
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:257
 msgid "All"
 msgstr "All"
@@ -4873,6 +4875,7 @@ msgid "Leave this field blank to make the execution environment globally availab
 msgstr "Leave this field blank to make the execution environment globally available."
 
 #: components/Workflow/WorkflowLegend.js:86
+#: screens/Metrics/LineChart.js:120
 msgid "Legend"
 msgstr "Legend"
 
