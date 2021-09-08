@@ -22,6 +22,8 @@ SOSREPORT_CONTROLLER_COMMANDS = [
     "ls -ll /var/lib/awx",  # check permissions
     "ls -ll /var/lib/awx/venv",  # list all venvs
     "ls -ll /etc/tower",
+    "ls -ll /var/run/awx-receptor", # list contents of dirctory where receptor socket should be
+    "ls -ll /etc/receptor",
     "umask -p",  # check current umask
 ]
 
