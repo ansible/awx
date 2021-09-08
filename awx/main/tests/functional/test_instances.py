@@ -302,6 +302,12 @@ def test_inherited_instance_group_membership(instance_group_factory, default_ins
 
 
 @pytest.mark.django_db
+def test_global_instance_groups_as_defaults(controlplane_instance_group, default_instance_group, job_factory):
+    j = job_factory()
+    assert j.preferred_instance_groups == [default_instance_group, controlplane_instance_group]
+
+
+@pytest.mark.django_db
 def test_mixed_group_membership(instance_factory, instance_group_factory):
     for i in range(5):
         instance_factory("i{}".format(i))

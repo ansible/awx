@@ -1435,9 +1435,13 @@ class UnifiedJob(
         if not settings.IS_K8S:
             default_instance_group_names.append(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
 
-        default_instance_groups = InstanceGroup.objects.filter(name__in=default_instance_group_names)
+        default_instance_groups = list(InstanceGroup.objects.filter(name__in=default_instance_group_names))
 
-        return list(default_instance_groups)
+        # assure deterministic precedence by making sure the default group is first
+        if (not settings.IS_K8S) and default_instance_groups and default_instance_groups[0].name != settings.DEFAULT_EXECUTION_QUEUE_NAME:
+            default_instance_groups.reverse()
+
+        return default_instance_groups
 
     def awx_meta_vars(self):
         """
