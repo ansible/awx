@@ -14,11 +14,12 @@ function JobEvent({
   event,
   measure,
   isVisible,
-  onToggleExpanded,
+  isCollapsed,
+  onToggleCollapsed,
 }) {
   useEffect(() => {
     measure();
-  }, [event.isCollapsed, isVisible, measure]);
+  }, [isCollapsed, isVisible, measure]);
 
   if (!isVisible) {
     return null;
@@ -36,15 +37,15 @@ function JobEvent({
             >
               <JobEventLineToggle />
               {event.hasChildren && html.length ? (
-                <button onClick={onToggleExpanded} type="button">
-                  {event.isCollapsed ? '+' : '-'}
+                <button onClick={onToggleCollapsed} type="button">
+                  {isCollapsed ? '+' : '-'}
                 </button>
               ) : (
                 ' '
               )}
               <JobEventLineNumber>
                 {lineNumber}
-                {event.isCollapsed && html.length ? (
+                {isCollapsed && html.length ? (
                   <>
                     <br />
                     ...

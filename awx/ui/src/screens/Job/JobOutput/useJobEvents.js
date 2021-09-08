@@ -39,13 +39,16 @@ export default function useJobEvents(job) {
   const [events, setEvents] = useState({});
   const [uuidMap, setUuidMap] = useState({});
   const [cssMap, setCssMap] = useState({});
+  const [nodes, setNodes] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
+  // TODO: track currentlyLoading?
 
   const addEvents = (newEvents, count) => {
     const { events: normalized, countOffset } = normalizeEvents(job, newEvents);
 
     const newResults = { ...events };
     const newUuidMap = { ...uuidMap };
+    const newNodes = { ...nodes };
     let newResultsCssMap = {};
     normalized.forEach((jobEvent) => {
       const index = jobEvent.counter - 1;
@@ -94,6 +97,7 @@ export default function useJobEvents(job) {
     return false;
   };
 
+  // TODO: set isCollapsed on the tree node rather than event itself
   const toggleEventIsCollapsed = (index) => {
     const event = events[index];
     setEvents({
@@ -105,6 +109,10 @@ export default function useJobEvents(job) {
     });
   };
 
+  const getEventForRow = (rowIndex) => {
+    //
+  };
+
   return {
     events,
     remoteRowCount, // ?
@@ -114,5 +122,6 @@ export default function useJobEvents(job) {
     setRemoteRowCount, // ? bring in any func using this?
     eventHasCollapsedParent,
     toggleEventIsCollapsed,
+    getEventForRow,
   };
 }
