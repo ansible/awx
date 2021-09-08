@@ -1438,7 +1438,7 @@ class UnifiedJob(
         default_instance_groups = list(InstanceGroup.objects.filter(name__in=default_instance_group_names))
 
         # assure deterministic precedence by making sure the default group is first
-        if default_instance_groups[0].name != settings.DEFAULT_EXECUTION_QUEUE_NAME:
+        if (not settings.IS_K8S) and default_instance_groups and default_instance_groups[0].name != settings.DEFAULT_EXECUTION_QUEUE_NAME:
             default_instance_groups.reverse()
 
         return default_instance_groups
