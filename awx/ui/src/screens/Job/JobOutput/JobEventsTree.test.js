@@ -127,7 +127,73 @@ describe('JobEventsTree', () => {
       ]);
     });
 
-    test.skip('should add event with missing parent', () => {});
+    test('should not duplicate events in events tree', () => {
+      const tree = new JobEventsTree();
+      tree.addEvents(eventsList);
+
+      tree.addEvents(eventsList);
+
+      expect(tree.getAllEvents()).toEqual({
+        1: eventsList[0],
+        2: eventsList[1],
+        3: eventsList[2],
+        4: eventsList[3],
+        5: eventsList[4],
+        6: eventsList[5],
+        7: eventsList[6],
+        8: eventsList[7],
+        9: eventsList[8],
+      });
+      expect(tree.getEventTree()).toEqual([
+        {
+          eventIndex: 1,
+          isCollapsed: false,
+          children: [
+            {
+              eventIndex: 2,
+              isCollapsed: false,
+              children: [
+                { eventIndex: 3, isCollapsed: false, children: [] },
+                { eventIndex: 4, isCollapsed: false, children: [] },
+                { eventIndex: 5, isCollapsed: false, children: [] },
+              ],
+            },
+            {
+              eventIndex: 6,
+              isCollapsed: false,
+              children: [
+                { eventIndex: 7, isCollapsed: false, children: [] },
+                { eventIndex: 8, isCollapsed: false, children: [] },
+                { eventIndex: 9, isCollapsed: false, children: [] },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    test.skip('should fetch parent for events with missing parent', () => {
+      const tree = new JobEventsTree();
+      tree.addEvents(eventsList);
+
+      const newEvents = [
+        {
+          counter: 12,
+          uuid: 'abc-012',
+          event_level: 2,
+          parent_uuid: 'abc-010',
+        },
+        {
+          counter: 13,
+          uuid: 'abc-013',
+          event_level: 2,
+          parent_uuid: 'abc-010',
+        },
+      ];
+      tree.addEvents(newEvents);
+
+      // expect nodesWithoutParents to hold them  … eventsWithoutParents?
+    });
   });
 
   describe('getNodeByUuid', () => {
@@ -159,6 +225,14 @@ describe('JobEventsTree', () => {
       expect(node.eventIndex).toEqual(8);
       expect(node.isCollapsed).toEqual(false);
       expect(node.children).toHaveLength(0);
+    });
+
+    test('should return null if node not found', () => {
+      const tree = new JobEventsTree();
+      tree.addEvents(eventsList);
+
+      const node = tree.getNodeByUuid('abc-028');
+      expect(node).toEqual(null);
     });
   });
 

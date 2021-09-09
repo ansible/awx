@@ -1,25 +1,39 @@
 class JobEventsTree {
-  constructor({ tree, events, uuidMap } = {}) {
+  constructor({ tree, events, uuidMap, nodesWithoutParents } = {}) {
     // array of root level nodes (event_level: 0)
     this.tree = tree || [];
     this.events = events || {};
     this.uuidMap = uuidMap || {};
+    this.nodesWithoutParents = nodesWithoutParents || {};
   }
 
   getAllEvents() {
     return this.events;
   }
 
+  getEvent(index) {
+    return this.events[index];
+  }
+
   getEventTree() {
     return this.tree;
+  }
+
+  getNodesWithoutParents() {
+    return this.nodesWithoutParents;
   }
 
   addEvents(newEvents) {
     newEvents.forEach((event) => {
       // todo normalize?
       const eventIndex = event.counter;
+      if (this.events[eventIndex]) {
+        this.events[eventIndex] = event;
+        return;
+      }
       this.events[eventIndex] = event;
       if (event.event_level === 0) {
+        // TODO add to array in correct position
         const length = this.tree.push({
           eventIndex,
           isCollapsed: false,
@@ -48,6 +62,17 @@ class JobEventsTree {
     // todo: clean out un-needed(?) events if too many in memory?
   }
 
+  getEventForRow(rowIndex) {
+    const node = this.getNodeForRow(rowIndex);
+    if (!node) {
+      return null;
+    }
+    return {
+      node,
+      event: this.events[node.eventIndex],
+    };
+  }
+
   getNodeForRow(rowToFind) {
     const [node] = this._getNodeForRow(rowToFind + 1, this.tree);
     return node;
@@ -56,15 +81,19 @@ class JobEventsTree {
   _getNodeForRow(rowToFind, nodes) {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
+      const nextNode = nodes[i + 1] || {};
       if (this.events[node.eventIndex].counter === rowToFind) {
         return [node, rowToFind];
       }
       if (node.isCollapsed) {
-        rowToFind += this.getTotalNumChildren(node);
+        // const numHiddenEvents = nextNode.eventIndex
+        //   ? nextNode.eventIndex - node.eventIndex - 1
+        //   : this.getTotalChildren(node);
+        rowToFind += this.getTotalNumChildren(node, nextNode);
+        // rowToFind += numHiddenEvents;
         continue;
       }
-      const { eventIndex: nextIndex } = nodes[i + 1] || {};
-      if (!nextIndex || nextIndex > rowToFind) {
+      if (!nextNode.eventIndex || nextNode.eventIndex > rowToFind) {
         const [found, newRowToFind] = this._getNodeForRow(
           rowToFind,
           node.children
@@ -78,16 +107,23 @@ class JobEventsTree {
     return [null, rowToFind];
   }
 
-  getTotalNumChildren(node) {
-    return node.children.reduce(
-      (sumChildren, currentNode) =>
-        sumChildren + this.getTotalNumChildren(currentNode),
-      node.children.length
-    );
+  getTotalNumChildren(node, siblingNode = null) {
+    // GOTCHA: requires no un-loaded siblings between node & siblingNode
+    if (siblingNode?.eventIndex) {
+      return siblingNode.eventIndex - node.eventIndex - 1;
+    }
+    let sum = node.children.length;
+    node.children.forEach((child, i) => {
+      sum += this.getTotalNumChildren(child, node.children[i + 1]);
+    });
+    return sum;
   }
 
   getNodeByUuid(uuid) {
-    const { treePath = [] } = this.uuidMap[uuid] || {};
+    if (!this.uuidMap[uuid]) {
+      return null;
+    }
+    const { treePath } = this.uuidMap[uuid];
     let arr = this.tree;
     let lastNode;
     for (let i = 0; i < treePath.length; i++) {

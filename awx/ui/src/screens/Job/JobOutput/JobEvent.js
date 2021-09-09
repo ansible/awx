@@ -13,17 +13,14 @@ function JobEvent({
   onJobEventClick,
   event,
   measure,
-  isVisible,
   isCollapsed,
   onToggleCollapsed,
+  hasChildren,
 }) {
   useEffect(() => {
     measure();
-  }, [isCollapsed, isVisible, measure]);
+  }, [event, isCollapsed, measure]);
 
-  if (!isVisible) {
-    return null;
-  }
   return !event.stdout ? null : (
     <div style={style} type={event.type}>
       {lineTextHtml.map(
@@ -36,7 +33,7 @@ function JobEvent({
               isClickable={isClickable}
             >
               <JobEventLineToggle />
-              {event.hasChildren && html.length ? (
+              {hasChildren && html.length ? (
                 <button onClick={onToggleCollapsed} type="button">
                   {isCollapsed ? '+' : '-'}
                 </button>
