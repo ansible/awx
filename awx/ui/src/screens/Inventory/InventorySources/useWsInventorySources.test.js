@@ -63,7 +63,7 @@ describe('useWsInventorySources hook', () => {
     WS.clean();
   });
 
-  test('should update last job status', async () => {
+  test('should update current job status', async () => {
     global.document.cookie = 'csrftoken=abc123';
     const mockServer = new WS('ws://localhost/websocket/');
 
@@ -72,7 +72,7 @@ describe('useWsInventorySources hook', () => {
         id: 3,
         status: 'running',
         summary_fields: {
-          last_job: {
+          current_job: {
             id: 5,
             status: 'running',
           },
@@ -112,7 +112,7 @@ describe('useWsInventorySources hook', () => {
       status: 'successful',
       last_updated: 'the_time',
       summary_fields: {
-        last_job: {
+        current_job: {
           id: 5,
           status: 'successful',
           finished: 'the_time',

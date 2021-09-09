@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 
 import { ActionsTd, ActionItem } from 'components/PaginatedTable';
-import StatusIcon from 'components/StatusIcon';
+import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import { formatDateString } from 'util/dates';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
@@ -48,6 +48,14 @@ function InventorySourceListItem({
   const missingExecutionEnvironment =
     source.custom_virtualenv && !source.execution_environment;
 
+  let job = null;
+
+  if (source.summary_fields?.current_job) {
+    job = source.summary_fields.current_job;
+  } else if (source.summary_fields?.last_job) {
+    job = source.summary_fields.last_job;
+  }
+
   return (
     <>
       <Tr id={`source-row-${source.id}`}>
@@ -76,27 +84,27 @@ function InventorySourceListItem({
           )}
         </Td>
         <Td dataLabel={t`Status`}>
-          {source.summary_fields.last_job && (
+          {job && (
             <Tooltip
               position="top"
-              content={generateLastJobTooltip(source.summary_fields.last_job)}
-              key={source.summary_fields.last_job.id}
+              content={generateLastJobTooltip(job)}
+              key={job.id}
             >
-              <Link to={`/jobs/inventory/${source.summary_fields.last_job.id}`}>
-                <StatusIcon status={source.summary_fields.last_job.status} />
+              <Link to={`/jobs/inventory/${job.id}`}>
+                <StatusLabel status={job.status} />
               </Link>
             </Tooltip>
           )}
         </Td>
         <Td dataLabel={t`Type`}>{label}</Td>
         <ActionsTd dataLabel={t`Actions`}>
-          {['running', 'pending', 'waiting'].includes(source?.status) ? (
+          {['running', 'pending', 'waiting'].includes(job?.status) ? (
             <ActionItem visible={source.summary_fields.user_capabilities.start}>
               {source.summary_fields?.current_job?.id && (
                 <JobCancelButton
                   job={{
                     type: 'inventory_update',
-                    id: source.summary_fields.current_job.id,
+                    id: source?.summary_fields?.current_job?.id,
                   }}
                   errorTitle={t`Inventory Source Sync Error`}
                   errorMessage={t`Failed to cancel Inventory Source Sync`}
