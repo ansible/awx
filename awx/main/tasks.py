@@ -939,23 +939,17 @@ class BaseTask(object):
         params = {
             "container_image": image,
             "process_isolation": True,
+            "process_isolation_executable": "podman",  # need to provide, runner enforces default via argparse
             "container_options": ['--user=root'],
         }
 
         if instance.execution_environment.credential:
             cred = instance.execution_environment.credential
             if cred.has_inputs(field_names=('host', 'username', 'password')):
-                path = os.path.split(private_data_dir)[0]
-                with open(path + '/auth.json', 'w') as authfile:
-                    os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR)
-
-                    host = cred.get_input('host')
-                    username = cred.get_input('username')
-                    password = cred.get_input('password')
-                    token = "{}:{}".format(username, password)
-                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('UTF-8')).decode('UTF-8')}}}
-                    authfile.write(json.dumps(auth_data, indent=4))
-                params["container_options"].append(f'--authfile={authfile.name}')
+                host = cred.get_input('host')
+                username = cred.get_input('username')
+                password = cred.get_input('password')
+                params['container_auth_data'] = {'host': host, 'username': username, 'password': password}
             else:
                 raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
 
@@ -3049,7 +3043,7 @@ class AWXReceptorJob:
 
         if self.task and not self.task.instance.is_container_group_task:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
-            self.runner_params['settings'].update(execution_environment_params)
+            self.runner_params.update(execution_environment_params)
 
     def run(self):
         # We establish a connection to the Receptor socket
