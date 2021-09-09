@@ -23,6 +23,7 @@ const ModalList = styled.div`
 `;
 
 function OptionsList({
+  columns,
   contentError,
   deselectItem,
   displayKey,
@@ -44,6 +45,19 @@ function OptionsList({
   sortSelectedItems,
   value,
 }) {
+  const buildHeaderRow = (
+    <HeaderRow qsConfig={qsConfig}>
+      {columns?.length > 0 ? (
+        columns.map((col) => (
+          <HeaderCell key={col.key} sortKey={col.key}>
+            {col.name}
+          </HeaderCell>
+        ))
+      ) : (
+        <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+      )}
+    </HeaderRow>
+  );
   let selectionPreview = null;
   if (value.length > 0) {
     if (isSelectedDraggable) {
@@ -82,11 +96,7 @@ function OptionsList({
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         hasContentLoading={isLoading}
-        headerRow={
-          <HeaderRow qsConfig={qsConfig}>
-            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-          </HeaderRow>
-        }
+        headerRow={buildHeaderRow}
         onRowClick={selectItem}
         renderRow={(item, index) => (
           <CheckboxListItem
@@ -95,6 +105,8 @@ function OptionsList({
             itemId={item.id}
             name={multiple ? item[displayKey] : name}
             label={item[displayKey]}
+            columns={columns}
+            item={item}
             isSelected={value.some((i) => i.id === item.id)}
             onSelect={() => selectItem(item)}
             onDeselect={() => deselectItem(item)}
