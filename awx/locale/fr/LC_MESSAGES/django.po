@@ -944,7 +944,8 @@ msgstr "Groupes d'instances de l'instance"
 msgid ""
 "Cannot change instance group membership of control-only node: {parent."
 "hostname}."
-msgstr "Impossible de changer l'appartenance à un groupe d'instance d'un nœud de contrôle uniquement : %s"
+msgstr "Impossible de changer l'appartenance à un groupe d'instance d'un nœud de contrôle uniquement : {parent."
+"hostname}."
 
 #: awx/api/views/__init__.py:413
 msgid "Instance Groups"
@@ -966,7 +967,7 @@ msgstr "Instances du groupe d'instances"
 #, python-brace-format
 msgid ""
 "Cannot change instance group membership of control-only node: {sub.hostname}."
-msgstr "Impossible de changer l'appartenance à un groupe d'instance d'un nœud de contrôle uniquement : %s"
+msgstr "Impossible de changer l'appartenance à un groupe d'instance d'un nœud de contrôle uniquement : {sub.hostname}."
 
 #: awx/api/views/__init__.py:460
 msgid "Schedules"
@@ -5157,7 +5158,7 @@ msgstr "Il n'est pas permis d'avoir plus que %(max_certs)d certificats, %(cert_c
 #: awx/main/validators.py:289
 #, python-brace-format
 msgid "The container image name {value} is not valid"
-msgstr "Le nom de l'image du conteneur %s n'est pas valide"
+msgstr "Le nom de l'image du conteneur {value} n'est pas valide"
 
 #: awx/main/views.py:30
 msgid "API Error"
@@ -6105,7 +6106,7 @@ msgstr "Les paramètres requis manquants dans {dependency}."
 msgid ""
 "Invalid group_type parameters. Expected instance of dict but got "
 "{parameters_type} instead."
-msgstr "Paramètres group_type non valides. Instance attendue de dict mais obtenue à la place."
+msgstr "Paramètres group_type non valides. Instance attendue de dict mais obtenue {parameters_type} à la place."
 
 #: awx/sso/fields.py:476
 #, python-brace-format
@@ -6264,4 +6265,3 @@ msgstr "%s est en cours de mise à niveau."
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "Cette page sera rafraîchie une fois terminée."
-
