@@ -261,7 +261,7 @@ class ControllerAPIModule(ControllerModule):
                 controller_version = response.info().getheader('X-API-Product-Version', None)
 
             parsed_collection_version = Version(self._COLLECTION_VERSION).version
-            if(not controller_version):
+            if not controller_version:
                 self.warn("You are using the {0} version of this collection but connecting to a controller that did not return a version".format(self._COLLECTION_VERSION))
             else:
                 parsed_controller_version = Version(controller_version).version
