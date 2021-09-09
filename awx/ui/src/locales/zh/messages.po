@@ -1,17 +1,11 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2021-06-08 18:28+0000\n"
+"POT-Creation-Date: 2021-09-01 18:45+0000\n"
 "Mime-Version: 1.0\n"
-"Language: zh\n"
+"Language: zh \n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -40,7 +34,7 @@ msgstr "/ (project root)"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:105
 #: screens/Template/shared/JobTemplateForm.js:210
 msgid "0 (Normal)"
-msgstr "0（正常）"
+msgstr "0（普通）"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:109
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:79
@@ -125,11 +119,11 @@ msgstr "所有"
 msgid "API Service/Integration Key"
 msgstr "API 服务/集成密钥"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:289
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:288
 msgid "API Token"
 msgstr "API 令牌"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:304
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:303
 msgid "API service/integration key"
 msgstr "API 服务/集成密钥"
 
@@ -161,11 +155,11 @@ msgid "Access Token Expiration"
 msgstr "访问令牌过期"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:299
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:419
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:418
 msgid "Account SID"
 msgstr "帐户 SID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:392
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:391
 msgid "Account token"
 msgstr "帐户令牌"
 
@@ -378,7 +372,7 @@ msgid ""
 "like the Ansible inventory .ini file format."
 msgstr "因 SCM 修订版本变更进行每次项目更新后，请在执行作业任务前从所选源刷新清单。这是面向静态内容，如 Ansible 清单 .ini 文件格式。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:506
+#: components/Schedule/shared/FrequencyDetailSubform.js:504
 msgid "After number of occurrences"
 msgstr "发生次数后"
 
@@ -407,7 +401,7 @@ msgstr "允许分支覆写"
 #: components/PromptDetail/PromptProjectDetail.js:66
 #: screens/Project/ProjectDetail/ProjectDetail.js:107
 msgid "Allow branch override"
-msgstr ""
+msgstr "允许分支覆写"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:104
 msgid ""
@@ -467,7 +461,7 @@ msgstr "应用程序"
 
 #: screens/User/UserTokenList/UserTokenList.js:183
 msgid "Application Name"
-msgstr ""
+msgstr "应用程序名"
 
 #: screens/Application/Applications.js:64
 #: screens/Application/Applications.js:67
@@ -525,7 +519,7 @@ msgstr "已批准 - {0}。详情请参阅活动流。"
 msgid "Approved by {0} - {1}"
 msgstr "于 {0} - {1} 批准"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:125
+#: components/Schedule/shared/FrequencyDetailSubform.js:123
 msgid "April"
 msgstr "4 月"
 
@@ -543,7 +537,7 @@ msgstr "您确定要禁用本地身份验证吗？这样做可能会影响用户
 
 #: screens/Setting/shared/SharedFields.js:320
 msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
-msgstr ""
+msgstr "您确定要编辑登录重定向覆盖 URL? 这样做可能会影响用户在同时禁用本地身份验证后登录系统的能力。"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.js:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
@@ -604,7 +598,7 @@ msgstr "关联模态"
 msgid "At least one value must be selected for this field."
 msgstr "此字段至少选择一个值。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:145
+#: components/Schedule/shared/FrequencyDetailSubform.js:143
 msgid "August"
 msgstr "8 月"
 
@@ -665,7 +659,7 @@ msgstr "返回到主机"
 
 #: screens/InstanceGroup/InstanceGroup.js:69
 msgid "Back to Instance Groups"
-msgstr ""
+msgstr "返回到实例组"
 
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
@@ -761,7 +755,7 @@ msgid ""
 "path used to locate playbooks."
 msgstr "用于定位 playbook 的基本路径。位于该路径中的目录将列在 playbook 目录下拉列表中。基本路径和所选 playbook 目录一起提供了用于定位 playbook 的完整路径。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:444
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:443
 msgid "Basic auth password"
 msgstr "基本验证密码"
 
@@ -784,7 +778,7 @@ msgstr "浏览"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:91
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:112
 msgid "Browse…"
-msgstr ""
+msgstr "浏览......"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
@@ -824,8 +818,8 @@ msgstr "缓存超时（秒）"
 #: components/Lookup/Lookup.js:194
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:36
-#: components/Schedule/shared/ScheduleForm.js:646
-#: components/Schedule/shared/ScheduleForm.js:651
+#: components/Schedule/shared/ScheduleForm.js:647
+#: components/Schedule/shared/ScheduleForm.js:652
 #: components/Schedule/shared/SchedulePromptableFields.js:133
 #: screens/Credential/shared/CredentialForm.js:343
 #: screens/Credential/shared/CredentialForm.js:348
@@ -945,7 +939,7 @@ msgstr "容量"
 #: screens/InstanceGroup/Instances/InstanceList.js:219
 #: screens/InstanceGroup/Instances/InstanceListItem.js:124
 msgid "Capacity Adjustment"
-msgstr ""
+msgstr "容量调整"
 
 #: components/Search/LookupTypeInput.js:59
 msgid "Case-insensitive version of contains"
@@ -982,7 +976,7 @@ msgid "Changes"
 msgstr "更改"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:209
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:264
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:263
 msgid "Channel"
 msgstr "频道"
 
@@ -1032,7 +1026,7 @@ msgstr "选择模块"
 msgid "Choose a source"
 msgstr "选择一个源"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:487
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:486
 msgid "Choose an HTTP method"
 msgstr "选择 HTTP 方法"
 
@@ -1062,7 +1056,7 @@ msgstr "清理"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:92
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:113
 msgid "Clear"
-msgstr ""
+msgstr "清除"
 
 #: components/DataListToolbar/DataListToolbar.js:84
 #: screens/Job/JobOutput/JobOutputSearch.js:142
@@ -1095,7 +1089,7 @@ msgstr "点击以创建到此节点的新链接。"
 
 #: screens/Template/Survey/SurveyToolbar.js:62
 msgid "Click to rearrange the order of the survey questions"
-msgstr ""
+msgstr "单击以重新安排调查问题的顺序"
 
 #: screens/Template/Survey/MultipleChoiceField.js:117
 msgid "Click to toggle default value"
@@ -1114,7 +1108,7 @@ msgstr "客户端 ID"
 msgid "Client Identifier"
 msgstr "客户端标识符"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:312
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:311
 msgid "Client identifier"
 msgstr "客户端标识符"
 
@@ -1611,11 +1605,11 @@ msgstr "自定义虚拟环境 {0} 必须替换为一个执行环境。"
 
 #: components/TemplateList/TemplateListItem.js:155
 msgid "Custom virtual environment {0} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "自定义虚拟环境 {0} 必须替换为执行环境。有关迁移到执行环境的更多信息，请参阅 <0> 文档</0>。"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:72
 msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "自定义虚拟环境 {virtualEnvironment} 必须替换为执行环境。有关迁移到执行环境的更多信息，请参阅 <0> 文档</0>。"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:61
 msgid "Customize messages…"
@@ -1646,22 +1640,22 @@ msgstr "数据保留的周期"
 
 #: screens/Dashboard/shared/LineChart.js:168
 msgid "Date"
-msgstr ""
+msgstr "日期"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:339
-#: components/Schedule/shared/FrequencyDetailSubform.js:443
-#: components/Schedule/shared/ScheduleForm.js:154
+#: components/Schedule/shared/FrequencyDetailSubform.js:337
+#: components/Schedule/shared/FrequencyDetailSubform.js:441
+#: components/Schedule/shared/ScheduleForm.js:153
 msgid "Day"
 msgstr "天"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
-#: components/Schedule/shared/ScheduleForm.js:165
+#: components/Schedule/shared/ScheduleForm.js:164
 msgid "Days of Data to Keep"
-msgstr "要保留数据的天数"
+msgstr "保留数据的天数"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/DaysToKeepStep.jsx:28
 msgid "Days of data to be retained"
-msgstr ""
+msgstr "数据被保留的天数"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:105
 msgid "Days remaining"
@@ -1669,13 +1663,13 @@ msgstr "剩余的天数"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useDaysToKeepStep.jsx:35
 msgid "Days to keep"
-msgstr ""
+msgstr "保存的天数"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:125
 msgid "Debug"
 msgstr "调试"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:165
+#: components/Schedule/shared/FrequencyDetailSubform.js:163
 msgid "December"
 msgstr "12 月"
 
@@ -1690,7 +1684,7 @@ msgstr "默认"
 #: screens/Template/Survey/SurveyReorderModal.js:207
 #: screens/Template/Survey/SurveyReorderModal.js:228
 msgid "Default Answer(s)"
-msgstr ""
+msgstr "默认回答"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:40
 #: components/Lookup/ExecutionEnvironmentLookup.js:209
@@ -1857,7 +1851,7 @@ msgstr "删除智能清单"
 
 #: screens/Template/Survey/SurveyToolbar.js:81
 msgid "Delete survey question"
-msgstr ""
+msgstr "删除问卷调查问题"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:76
 msgid ""
@@ -1870,7 +1864,7 @@ msgstr "在进行更新前删除整个本地存储库。根据存储库的大小
 #: components/PromptDetail/PromptProjectDetail.js:51
 #: screens/Project/ProjectDetail/ProjectDetail.js:92
 msgid "Delete the project before syncing"
-msgstr ""
+msgstr "在同步前删除项目。"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:83
 msgid "Delete this link"
@@ -1935,7 +1929,7 @@ msgstr "已弃用"
 #: components/PromptDetail/PromptDetail.js:112
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:260
 #: components/Schedule/ScheduleList/ScheduleList.js:193
-#: components/Schedule/shared/ScheduleForm.js:113
+#: components/Schedule/shared/ScheduleForm.js:112
 #: components/TemplateList/TemplateList.js:195
 #: components/TemplateList/TemplateListItem.js:251
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:63
@@ -2009,15 +2003,15 @@ msgstr "目标频道或用户"
 msgid "Destination SMS Number(s)"
 msgstr "目标 SMS 号码"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:409
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:408
 msgid "Destination SMS number(s)"
 msgstr "目标 SMS 号码"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:360
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:359
 msgid "Destination channels"
 msgstr "目标频道"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:227
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:226
 msgid "Destination channels or users"
 msgstr "目标频道或用户"
 
@@ -2115,17 +2109,17 @@ msgstr "详情标签页"
 msgid "Disable SSL Verification"
 msgstr "禁用 SSL 验证"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:185
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:238
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:277
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:348
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:457
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:184
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:237
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:276
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:347
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:456
 msgid "Disable SSL verification"
 msgstr "禁用 SSL 验证"
 
 #: components/StatusLabel/StatusLabel.js:61
 msgid "Disabled"
-msgstr ""
+msgstr "禁用"
 
 #: components/DisassociateButton/DisassociateButton.js:57
 #: components/DisassociateButton/DisassociateButton.js:84
@@ -2175,7 +2169,7 @@ msgstr "解除关联？"
 #: components/PromptDetail/PromptProjectDetail.js:46
 #: screens/Project/ProjectDetail/ProjectDetail.js:87
 msgid "Discard local changes before syncing"
-msgstr ""
+msgstr "在同步前丢弃本地更改。"
 
 #: screens/Template/shared/JobTemplateForm.js:479
 msgid ""
@@ -2203,29 +2197,29 @@ msgstr "下载输出"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:90
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:111
 msgid "Drag a file here or browse to upload"
-msgstr ""
+msgstr "把文件拖放在这里或浏览以上传"
 
 #: components/SelectedList/DraggableSelectedList.js:68
 msgid "Draggable list to reorder and remove selected items."
-msgstr ""
+msgstr "可拖动列表以重新排序和删除选定的项目。"
 
 #: components/SelectedList/DraggableSelectedList.js:43
 msgid "Dragging cancelled. List is unchanged."
-msgstr ""
+msgstr "拖放已取消。列表保持不变。"
 
 #: components/SelectedList/DraggableSelectedList.js:38
 msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
-msgstr ""
+msgstr "拖放项 {id}。带有索引 {oldIndex} 的项现在在 {newIndex} 中。"
 
 #: components/SelectedList/DraggableSelectedList.js:32
 msgid "Dragging started for item id: {newId}."
-msgstr ""
+msgstr "拖放项目 ID: {newId} 已开始。"
 
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:81
 msgid "E-mail"
 msgstr "电子邮件"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:124
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:123
 msgid "E-mail options"
 msgstr "电子邮件选项"
 
@@ -2380,7 +2374,7 @@ msgstr "编辑链接"
 
 #: screens/Setting/shared/SharedFields.js:260
 msgid "Edit Login redirect override URL"
-msgstr ""
+msgstr "编辑登录重定向覆写 URL"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeEditModal.js:64
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:230
@@ -2393,7 +2387,7 @@ msgstr "编辑通知模板"
 
 #: screens/Template/Survey/SurveyToolbar.js:71
 msgid "Edit Order"
-msgstr ""
+msgstr "编辑顺序"
 
 #: screens/Organization/OrganizationList/OrganizationListItem.js:71
 #: screens/Organization/OrganizationList/OrganizationListItem.js:75
@@ -2421,7 +2415,7 @@ msgstr "编辑源"
 
 #: screens/Template/Survey/SurveyListItem.js:87
 msgid "Edit Survey"
-msgstr ""
+msgstr "编辑问卷调查"
 
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:20
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:24
@@ -2479,7 +2473,7 @@ msgstr "编辑实例组"
 #: screens/Setting/shared/SharedFields.js:290
 #: screens/Setting/shared/SharedFields.js:292
 msgid "Edit login redirect override URL"
-msgstr ""
+msgstr "编辑登录重定向覆写 URL"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:70
 msgid "Edit this link"
@@ -2491,7 +2485,7 @@ msgstr "编辑此节点"
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:84
 msgid "Edit workflow"
-msgstr ""
+msgstr "编辑工作流"
 
 #: components/Workflow/WorkflowNodeHelp.js:170
 #: screens/Job/JobOutput/shared/OutputToolbar.js:123
@@ -2554,13 +2548,9 @@ msgstr "单独启用日志系统跟踪事实"
 msgid "Enable privilege escalation"
 msgstr "启用权限升级"
 
-#: screens/Setting/SettingList.js:52
-#~ msgid "Enable simplified login for your {0} applications"
-#~ msgstr ""
-
 #: screens/Setting/SettingList.js:53
 msgid "Enable simplified login for your {brandName} applications"
-msgstr ""
+msgstr "为您的 {brandName} 应用启用简化的登录"
 
 #: screens/Template/shared/JobTemplateForm.js:588
 msgid "Enable webhook for this template."
@@ -2581,7 +2571,7 @@ msgstr "启用"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:183
 msgid "Enabled Options"
-msgstr ""
+msgstr "启用的选项"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:239
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:254
@@ -2592,14 +2582,6 @@ msgstr "启用的值"
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:243
 msgid "Enabled Variable"
 msgstr "启用的变量"
-
-#: screens/Template/shared/JobTemplateForm.js:568
-#~ msgid ""
-#~ "Enables creation of a provisioning\n"
-#~ "callback URL. Using the URL a host can contact {0}\n"
-#~ "and request a configuration update using this job\n"
-#~ "template."
-#~ msgstr ""
 
 #: components/AdHocCommands/AdHocDetailsStep.js:224
 msgid ""
@@ -2615,14 +2597,15 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template."
-msgstr ""
+msgstr "允许创建部署回调 URL。使用此 URL，主机可访问 {brandName} 并使用此作业模板请求配置更新。"
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:148
 #: screens/Setting/shared/SettingDetail.js:87
 msgid "Encrypted"
 msgstr "已加密"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:490
+#: components/Schedule/shared/FrequencyDetailSubform.js:488
+#: components/Schedule/shared/FrequencyDetailSubform.js:540
 msgid "End"
 msgstr "结束"
 
@@ -2630,21 +2613,9 @@ msgstr "结束"
 msgid "End User License Agreement"
 msgstr "最终用户许可证协议"
 
-#: components/Schedule/shared/DateTimePicker.js:51
-msgid "End date"
-msgstr ""
-
-#: components/Schedule/shared/FrequencyDetailSubform.js:542
-msgid "End date/time"
-msgstr ""
-
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
 msgstr "结束与预期值不匹配"
-
-#: components/Schedule/shared/DateTimePicker.js:61
-msgid "End time"
-msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2673,48 +2644,36 @@ msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。示例语法请参阅 Ansible Tower 文档"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:180
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "每行输入一个注解标签，不带逗号。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:232
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:231
 msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
 msgstr "每行输入一个 IRC 频道或用户名。频道不需要输入 # 号，用户不需要输入 @ 符号。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:364
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 msgstr "每行输入一个 Slack 频道。频道不需要输入 # 号。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:89
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
 msgstr "每行输入一封电子邮件地址，为这类通知创建一个接收者列表。"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
-#~ msgid ""
-#~ "Enter one phone number per line to specify where to\n"
-#~ "route SMS messages."
-#~ msgstr "每行输入一个电话号码来指定 SMS 消息的传送目标。"
-
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:416
-#~ msgid ""
-#~ "Enter one phone number per line to specify where to\n"
-#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
-#~ msgstr ""
-
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:414
 msgid ""
 "Enter one phone number per line to specify where to\n"
-"route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-msgstr ""
+"route SMS messages."
+msgstr "每行输入一个电话号码来指定 SMS 消息的传送目标。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:404
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:403
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
@@ -2722,7 +2681,7 @@ msgstr "在 Twilio 中输入与“信息服务”关联的号码，格式为 +18
 
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
-msgstr ""
+msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述，请参阅文档中的<0>清单插件</0>部分，以及 <1>Insights</1> 插件配置指南 。"
 
 #: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
@@ -2776,7 +2735,7 @@ msgstr "错误"
 
 #: screens/Project/ProjectList/ProjectList.js:286
 msgid "Error fetching updated project"
-msgstr ""
+msgstr "获取更新的项目时出错"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:439
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:141
@@ -2906,7 +2865,7 @@ msgstr "事件"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
 msgid "Every minute for {0} times"
-msgstr ""
+msgstr "{0} 次每分钟"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -2914,7 +2873,7 @@ msgstr "完全匹配（如果没有指定，则默认查找）。"
 
 #: components/Search/RelatedLookupTypeInput.js:38
 msgid "Exact search on id field."
-msgstr ""
+msgstr "对 id 字段进行精确搜索。"
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:26
 msgid "Example URLs for GIT Source Control include:"
@@ -2963,7 +2922,7 @@ msgstr "执行环境"
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:69
 #: components/TemplateList/TemplateListItem.js:152
 msgid "Execution Environment Missing"
-msgstr ""
+msgstr "缺少执行环境"
 
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:103
 #: routeConfig.js:140
@@ -3003,7 +2962,7 @@ msgstr "展开"
 
 #: components/DataListToolbar/DataListToolbar.js:94
 msgid "Expand all rows"
-msgstr ""
+msgstr "扩展所有行"
 
 #: components/CodeEditor/VariablesDetail.js:211
 #: components/CodeEditor/VariablesField.js:247
@@ -3065,7 +3024,7 @@ msgstr "完成："
 #: components/PromptDetail/PromptJobTemplateDetail.js:80
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:142
 msgid "Fact Storage"
-msgstr ""
+msgstr "事实存储"
 
 #: screens/Host/Host.js:62
 #: screens/Host/HostFacts/HostFacts.js:45
@@ -3365,7 +3324,7 @@ msgstr "获取自定义登录配置设置失败。系统默认设置会被显示
 
 #: screens/Project/ProjectList/ProjectList.js:290
 msgid "Failed to fetch the updated project data."
-msgstr ""
+msgstr "获取更新的项目数据失败。"
 
 #: components/AdHocCommands/AdHocCommands.js:110
 #: components/LaunchButton/LaunchButton.js:164
@@ -3444,7 +3403,7 @@ msgstr "失败"
 msgid "False"
 msgstr "false"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:115
+#: components/Schedule/shared/FrequencyDetailSubform.js:113
 msgid "February"
 msgstr "2 月"
 
@@ -3468,7 +3427,7 @@ msgstr "字段与给出的正则表达式匹配。"
 msgid "Field starts with value."
 msgstr "字段以值开头。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:399
+#: components/Schedule/shared/FrequencyDetailSubform.js:397
 msgid "Fifth"
 msgstr "第五"
 
@@ -3499,7 +3458,7 @@ msgstr "完成时间"
 msgid "Finished"
 msgstr "完成"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:387
+#: components/Schedule/shared/FrequencyDetailSubform.js:385
 msgid "First"
 msgstr "第一"
 
@@ -3537,7 +3496,7 @@ msgstr "浮点值"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Follow"
-msgstr ""
+msgstr "关注"
 
 #: screens/Template/shared/JobTemplateForm.js:253
 msgid ""
@@ -3566,35 +3525,35 @@ msgstr "有关详情请参阅"
 msgid "Forks"
 msgstr "分叉"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:397
+#: components/Schedule/shared/FrequencyDetailSubform.js:395
 msgid "Fourth"
 msgstr "第六"
 
-#: components/Schedule/shared/ScheduleForm.js:175
+#: components/Schedule/shared/ScheduleForm.js:174
 msgid "Frequency Details"
 msgstr "频率详情"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:198
+#: components/Schedule/shared/FrequencyDetailSubform.js:196
 #: components/Schedule/shared/buildRuleObj.js:71
 msgid "Frequency did not match an expected value"
 msgstr "频率与预期值不匹配"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:295
+#: components/Schedule/shared/FrequencyDetailSubform.js:293
 msgid "Fri"
 msgstr "周五"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:300
-#: components/Schedule/shared/FrequencyDetailSubform.js:436
+#: components/Schedule/shared/FrequencyDetailSubform.js:298
+#: components/Schedule/shared/FrequencyDetailSubform.js:434
 msgid "Friday"
 msgstr "周五"
 
 #: components/Search/RelatedLookupTypeInput.js:45
 msgid "Fuzzy search on id, name or description fields."
-msgstr ""
+msgstr "模糊搜索 id、name 或 description 字段。"
 
 #: components/Search/RelatedLookupTypeInput.js:32
 msgid "Fuzzy search on name field."
-msgstr ""
+msgstr "模糊搜索名称字段。"
 
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:134
 #: screens/Organization/shared/OrganizationForm.js:101
@@ -3715,12 +3674,12 @@ msgstr "Google OAuth2"
 msgid "Grafana"
 msgstr "Grafana"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:158
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:157
 msgid "Grafana API key"
 msgstr "Grafana API 密钥"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:141
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:147
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:146
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -3759,12 +3718,12 @@ msgid "Groups"
 msgstr "组"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:330
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:464
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:463
 msgid "HTTP Headers"
 msgstr "HTTP 标头"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:325
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:478
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:477
 msgid "HTTP Method"
 msgstr "HTTP 方法"
 
@@ -3787,7 +3746,7 @@ msgid "Hipchat"
 msgstr "HipChat"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:76
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:75
 msgid "Host"
 msgstr "主机"
 
@@ -3895,7 +3854,7 @@ msgstr "主机"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:132
 msgid "Hosts automated"
-msgstr ""
+msgstr "自动的主机"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:114
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:121
@@ -3904,13 +3863,13 @@ msgstr "可用主机"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:127
 msgid "Hosts imported"
-msgstr ""
+msgstr "导入的主机"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:145
 msgid "Hosts remaining"
 msgstr "剩余主机"
 
-#: components/Schedule/shared/ScheduleForm.js:153
+#: components/Schedule/shared/ScheduleForm.js:152
 msgid "Hour"
 msgstr "小时"
 
@@ -3928,11 +3887,11 @@ msgstr "仪表板 ID"
 msgid "ID of the Panel"
 msgstr "面板 ID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:165
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:164
 msgid "ID of the dashboard (optional)"
 msgstr "仪表板 ID（可选）"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:171
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:170
 msgid "ID of the panel (optional)"
 msgstr "面板 ID（可选）"
 
@@ -3953,26 +3912,26 @@ msgstr "IRC 服务器地址"
 msgid "IRC Server Port"
 msgstr "IRC 服务器端口"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:219
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:218
 msgid "IRC nick"
 msgstr "IRC Nick"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:211
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:210
 msgid "IRC server address"
 msgstr "IRC 服务器地址"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:197
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:196
 msgid "IRC server password"
 msgstr "IRC 服务器密码"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:202
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:201
 msgid "IRC server port"
 msgstr "IRC 服务器端口"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:214
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:259
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:270
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:341
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:269
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:340
 msgid "Icon URL"
 msgstr "图标 URL"
 
@@ -4037,7 +3996,7 @@ msgstr "如果启用，这将存储收集的事实，以便在主机一级查看
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:266
 msgid "If specified, this field will be shown on the node instead of the resource name when viewing the workflow"
-msgstr ""
+msgstr "如果指定，则在查看工作流时此字段将显示在节点上，而不是资源名称"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:150
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
@@ -4171,7 +4130,7 @@ msgstr "没有找到实例组"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.js:146
 msgid "Instance group used capacity"
-msgstr ""
+msgstr "实例组使用的容量"
 
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:122
 msgid "Instance groups"
@@ -4199,16 +4158,12 @@ msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest.
 msgstr "无效的文件格式。请上传有效的红帽订阅清单。"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
-#~ msgid "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
-#~ msgstr "无效的链路目标。无法连接到子节点或祖先节点。不支持图形周期。"
-
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
 msgid "Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported."
-msgstr ""
+msgstr "无效的链路目标。无法连接到子节点或祖先节点。不支持图形周期。"
 
 #: util/validators.js:33
 msgid "Invalid time format"
-msgstr ""
+msgstr "无效的时间格式"
 
 #: screens/Login/Login.js:131
 msgid "Invalid username or password. Please try again."
@@ -4283,7 +4238,7 @@ msgstr "清单源"
 
 #: screens/Job/JobDetail/JobDetail.js:234
 msgid "Inventory Source Project"
-msgstr ""
+msgstr "清单源项目"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:87
 msgid "Inventory Source Sync"
@@ -4311,7 +4266,7 @@ msgstr "清单同步"
 
 #: screens/Inventory/InventoryList/InventoryList.js:168
 msgid "Inventory Type"
-msgstr ""
+msgstr "清单类型"
 
 #: components/Workflow/WorkflowNodeHelp.js:71
 msgid "Inventory Update"
@@ -4336,11 +4291,11 @@ msgstr "清单同步失败"
 
 #: components/DataListToolbar/DataListToolbar.js:99
 msgid "Is expanded"
-msgstr ""
+msgstr "已展开"
 
 #: components/DataListToolbar/DataListToolbar.js:101
 msgid "Is not expanded"
-msgstr ""
+msgstr "未扩展"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:111
 msgid "Item Failed"
@@ -4383,7 +4338,7 @@ msgstr "JSON 标签页"
 msgid "JSON:"
 msgstr "JSON："
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:110
+#: components/Schedule/shared/FrequencyDetailSubform.js:108
 msgid "January"
 msgstr "1 月"
 
@@ -4408,11 +4363,11 @@ msgstr "作业删除错误"
 
 #: screens/Job/JobDetail/JobDetail.js:123
 msgid "Job ID"
-msgstr ""
+msgstr "作业 ID"
 
 #: screens/Dashboard/shared/LineChart.js:128
 msgid "Job Runs"
-msgstr ""
+msgstr "作业运行"
 
 #: components/JobList/JobListItem.js:270
 #: screens/Job/JobDetail/JobDetail.js:307
@@ -4422,7 +4377,7 @@ msgstr "作业分片"
 #: components/JobList/JobListItem.js:275
 #: screens/Job/JobDetail/JobDetail.js:314
 msgid "Job Slice Parent"
-msgstr ""
+msgstr "任务分片父级"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:160
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:234
@@ -4532,11 +4487,11 @@ msgstr "作业"
 msgid "Jobs settings"
 msgstr "作业设置"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:140
+#: components/Schedule/shared/FrequencyDetailSubform.js:138
 msgid "July"
 msgstr "7 月"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:135
+#: components/Schedule/shared/FrequencyDetailSubform.js:133
 msgid "June"
 msgstr "6 月"
 
@@ -4625,7 +4580,7 @@ msgstr "标签名称"
 msgid "Labels"
 msgstr "标签"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:400
+#: components/Schedule/shared/FrequencyDetailSubform.js:398
 msgid "Last"
 msgstr "最后"
 
@@ -4801,13 +4756,13 @@ msgstr "正在加载"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:49
 msgid "Local"
-msgstr ""
+msgstr "本地"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:270
 msgid "Local Time Zone"
 msgstr "本地时区"
 
-#: components/Schedule/shared/ScheduleForm.js:130
+#: components/Schedule/shared/ScheduleForm.js:129
 msgid "Local time zone"
 msgstr "本地时区"
 
@@ -4862,7 +4817,7 @@ msgstr "机器凭证"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:62
 msgid "Managed"
-msgstr ""
+msgstr "管理的"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:148
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:167
@@ -4913,7 +4868,7 @@ msgstr "管理作业"
 msgid "Manual"
 msgstr "手动"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:120
+#: components/Schedule/shared/FrequencyDetailSubform.js:118
 msgid "March"
 msgstr "3 月"
 
@@ -4935,7 +4890,7 @@ msgstr "最大值"
 msgid "Maximum length"
 msgstr "最大长度"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:130
+#: components/Schedule/shared/FrequencyDetailSubform.js:128
 msgid "May"
 msgstr "5 月"
 
@@ -4980,17 +4935,17 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr "新实例上线时将自动分配给此组的所有实例的最小百分比。"
 
-#: components/Schedule/shared/ScheduleForm.js:152
+#: components/Schedule/shared/ScheduleForm.js:151
 msgid "Minute"
 msgstr "分钟"
 
 #: screens/Setting/Settings.js:96
 msgid "Miscellaneous Authentication"
-msgstr ""
+msgstr "其它身份验证"
 
 #: screens/Setting/SettingList.js:107
 msgid "Miscellaneous Authentication settings"
-msgstr ""
+msgstr "其它身份验证设置"
 
 #: screens/Setting/Settings.js:99
 msgid "Miscellaneous System"
@@ -5072,22 +5027,22 @@ msgstr "模块"
 
 #: screens/Job/JobDetail/JobDetail.js:409
 msgid "Module Arguments"
-msgstr ""
+msgstr "模块参数"
 
 #: screens/Job/JobDetail/JobDetail.js:404
 msgid "Module Name"
-msgstr ""
+msgstr "模块名称"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:255
+#: components/Schedule/shared/FrequencyDetailSubform.js:253
 msgid "Mon"
 msgstr "周一"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:260
-#: components/Schedule/shared/FrequencyDetailSubform.js:416
+#: components/Schedule/shared/FrequencyDetailSubform.js:258
+#: components/Schedule/shared/FrequencyDetailSubform.js:414
 msgid "Monday"
 msgstr "周一"
 
-#: components/Schedule/shared/ScheduleForm.js:156
+#: components/Schedule/shared/ScheduleForm.js:155
 msgid "Month"
 msgstr "月"
 
@@ -5170,7 +5125,7 @@ msgstr "多项选择选项"
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
-#: components/Schedule/shared/ScheduleForm.js:105
+#: components/Schedule/shared/ScheduleForm.js:104
 #: components/TemplateList/TemplateList.js:190
 #: components/TemplateList/TemplateList.js:223
 #: components/TemplateList/TemplateListItem.js:134
@@ -5340,7 +5295,7 @@ msgstr "名称"
 msgid "Navigation"
 msgstr "导航"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:495
+#: components/Schedule/shared/FrequencyDetailSubform.js:493
 #: screens/Dashboard/shared/ChartTooltip.js:106
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:91
 msgid "Never"
@@ -5420,7 +5375,7 @@ msgstr "没有找到项。"
 
 #: screens/Host/HostList/HostListItem.js:94
 msgid "No job data available"
-msgstr ""
+msgstr "没有可用作业数据。"
 
 #: screens/Job/JobOutput/HostEventModal.js:130
 msgid "No result found"
@@ -5466,7 +5421,7 @@ msgstr "没有找到 {pluralizedItemName}"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:264
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:265
 msgid "Node Alias"
-msgstr ""
+msgstr "节点别名"
 
 #: components/AssociateModal/AssociateModal.js:23
 #: screens/InstanceGroup/Instances/InstanceList.js:215
@@ -5487,7 +5442,7 @@ msgstr "无"
 msgid "None (Run Once)"
 msgstr "无（运行一次）"
 
-#: components/Schedule/shared/ScheduleForm.js:151
+#: components/Schedule/shared/ScheduleForm.js:150
 msgid "None (run once)"
 msgstr "无（运行一次）"
 
@@ -5528,11 +5483,11 @@ msgstr "请注意，如果主机也是组子对象的成员，在解除关联后
 
 #: components/Lookup/InstanceGroupsLookup.js:90
 msgid "Note: The order in which these are selected sets the execution precedence. Select more than one to enable drag."
-msgstr ""
+msgstr "注：选择它们的顺序设定执行优先级。选择多个来启用拖放。"
 
 #: screens/Organization/shared/OrganizationForm.js:116
 msgid "Note: The order of these credentials sets precedence for the sync and lookup of the content. Select more than one to enable drag."
-msgstr ""
+msgstr "注意：这些凭据的顺序设置内容同步和查找的优先级。选择多个来启用拖放。"
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:61
 msgid "Note: This field assumes the remote name is \"origin\"."
@@ -5570,7 +5525,7 @@ msgstr "通知模板"
 msgid "Notification Type"
 msgstr "通知类型"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:377
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:376
 msgid "Notification color"
 msgstr "通知颜色"
 
@@ -5603,7 +5558,7 @@ msgstr "通知类型"
 msgid "Notifications"
 msgstr "通知"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:160
+#: components/Schedule/shared/FrequencyDetailSubform.js:158
 msgid "November"
 msgstr "11月"
 
@@ -5614,11 +5569,11 @@ msgid "OK"
 msgstr "确定"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:42
-#: components/Schedule/shared/FrequencyDetailSubform.js:529
+#: components/Schedule/shared/FrequencyDetailSubform.js:527
 msgid "Occurrences"
 msgstr "发生次数"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:155
+#: components/Schedule/shared/FrequencyDetailSubform.js:153
 msgid "October"
 msgstr "10 月"
 
@@ -5670,11 +5625,11 @@ msgstr "失败时"
 msgid "On Success"
 msgstr "成功时"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:517
+#: components/Schedule/shared/FrequencyDetailSubform.js:515
 msgid "On date"
 msgstr "于日期"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:241
+#: components/Schedule/shared/FrequencyDetailSubform.js:239
 msgid "On days"
 msgstr "于日"
 
@@ -5716,7 +5671,7 @@ msgstr "选项"
 #: screens/Template/Survey/SurveyReorderModal.js:205
 #: screens/Template/Survey/SurveyReorderModal.js:220
 msgid "Order"
-msgstr ""
+msgstr "Order"
 
 #: components/Lookup/ApplicationLookup.js:118
 #: components/Lookup/OrganizationLookup.js:101
@@ -5808,22 +5763,22 @@ msgstr "覆盖"
 #: components/PromptDetail/PromptInventorySourceDetail.js:54
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:125
 msgid "Overwrite local groups and hosts from remote inventory source"
-msgstr ""
+msgstr "从远程清单源覆盖本地组和主机"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:59
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:130
 msgid "Overwrite local variables from remote inventory source"
-msgstr ""
+msgstr "从远程清单源覆盖本地变量"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:146
 msgid "Overwrite variables"
 msgstr "覆盖变量"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:489
 msgid "POST"
 msgstr "POST"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:491
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
 msgid "PUT"
 msgstr "PUT"
 
@@ -5836,7 +5791,7 @@ msgstr "Pagerduty"
 msgid "Pagerduty Subdomain"
 msgstr "Pagerduty 子域"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:296
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:295
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty 子域"
 
@@ -5870,8 +5825,7 @@ msgid ""
 "-e or --extra-vars command line parameter for ansible-playbook.\n"
 "Provide key/value pairs using either YAML or JSON. Refer to the\n"
 "documentation for example syntax."
-msgstr ""
-"向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML \n"
+msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML \n"
 "或 JSON 提供键/值对。示例语法请参阅相关文档。"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:215
@@ -5879,7 +5833,7 @@ msgid "Pass extra command line variables to the playbook. This is the -e or --ex
 msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML 或 JSON 提供键/值对。示例语法请参阅 Ansible Tower 文档。"
 
 #: screens/Login/Login.js:193
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:71
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:70
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:101
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:214
 #: screens/Template/Survey/SurveyQuestionForm.js:82
@@ -5924,11 +5878,11 @@ msgstr "执行搜索以定义主机过滤器"
 #: screens/User/UserTokenDetail/UserTokenDetail.js:71
 #: screens/User/UserTokenList/UserTokenList.js:105
 msgid "Personal Access Token"
-msgstr ""
+msgstr "个人访问令牌"
 
 #: screens/User/UserTokenList/UserTokenListItem.js:26
 msgid "Personal access token"
-msgstr ""
+msgstr "个人访问令牌"
 
 #: screens/Job/JobOutput/HostEventModal.js:126
 msgid "Play"
@@ -5992,11 +5946,11 @@ msgstr "Play"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:149
 msgid "Please add a Schedule to populate this list."
-msgstr ""
+msgstr "请添加一个调度来填充此列表"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:152
 msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
-msgstr ""
+msgstr "请添加一个调度来填充此列表。调度可以添加到模板、项目或清单源中。"
 
 #: screens/Template/Survey/SurveyList.js:158
 msgid "Please add survey questions."
@@ -6010,7 +5964,7 @@ msgstr "请添加 {pluralizedItemName} 来填充此列表"
 msgid "Please click the Start button to begin."
 msgstr "请点开始按钮开始。"
 
-#: util/validators.js:160
+#: util/validators.js:143
 msgid "Please enter a valid URL"
 msgstr "请输入有效的 URL。"
 
@@ -6024,7 +5978,7 @@ msgstr "请登录"
 
 #: components/JobList/JobList.js:183
 msgid "Please run a job to populate this list."
-msgstr ""
+msgstr "请运行一个作业来填充此列表"
 
 #: components/Schedule/shared/ScheduleForm.js:590
 msgid "Please select a day number between 1 and 31."
@@ -6049,7 +6003,7 @@ msgstr "Pod 规格覆写"
 #: screens/InstanceGroup/Instances/InstanceList.js:216
 #: screens/InstanceGroup/Instances/InstanceListItem.js:119
 msgid "Policy Type"
-msgstr ""
+msgstr "策略类型"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:64
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:29
@@ -6076,7 +6030,7 @@ msgid ""
 msgstr "使用搜索过滤器填充此清单的主机。例如：ansible_facts.ansible_distribution:\"RedHat\"。如需语法和实例的更多信息，请参阅相关文档。请参阅 Ansible Tower  文档来获得更多信息。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:124
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:103
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
 msgid "Port"
 msgstr "端口"
 
@@ -6088,7 +6042,7 @@ msgstr "在有多个父对象时运行此节点的先决条件。请参阅"
 msgid ""
 "Press 'Enter' to add more answer choices. One answer\n"
 "choice per line."
-msgstr ""
+msgstr "按 'Enter' 添加更多回答选择。每行一个回答选择。"
 
 #: components/CodeEditor/CodeEditor.js:184
 msgid "Press Enter to edit. Press ESC to stop editing."
@@ -6100,7 +6054,7 @@ msgid ""
 "and use the arrow keys to navigate up or down.\n"
 "Press enter to confirm the drag, or any other key to\n"
 "cancel the drag operation."
-msgstr ""
+msgstr "按空格或输入开始拖动，并使用箭头键导航或关闭。按 Enter 键确认拖动或任何其他键以取消拖动操作。"
 
 #: components/AdHocCommands/useAdHocPreviewStep.jsx:17
 #: components/LaunchPrompt/steps/usePreviewStep.js:23
@@ -6182,8 +6136,8 @@ msgstr "项目"
 msgid "Promote Child Groups and Hosts"
 msgstr "提升子组和主机"
 
-#: components/Schedule/shared/ScheduleForm.js:638
-#: components/Schedule/shared/ScheduleForm.js:641
+#: components/Schedule/shared/ScheduleForm.js:639
+#: components/Schedule/shared/ScheduleForm.js:642
 msgid "Prompt"
 msgstr "提示"
 
@@ -6231,8 +6185,7 @@ msgstr "为这个字段输入值或者选择「启动时提示」选项。"
 msgid ""
 "Provide key/value pairs using either\n"
 "YAML or JSON."
-msgstr ""
-"使用 YAML 或 JSON 提供\n"
+msgstr "使用 YAML 或 JSON 提供\n"
 "键/值对。"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:193
@@ -6310,13 +6263,13 @@ msgstr "最近模板列表标签页"
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:158
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:76
 msgid "Recent jobs"
-msgstr ""
+msgstr "最近的作业"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:114
 msgid "Recipient List"
 msgstr "接收者列表"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:84
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:83
 msgid "Recipient list"
 msgstr "接收者列表"
 
@@ -6380,11 +6333,11 @@ msgstr "刷新令牌过期"
 
 #: screens/Project/ProjectList/ProjectListItem.js:128
 msgid "Refresh for revision"
-msgstr ""
+msgstr "重新刷新修订版本"
 
 #: screens/Project/ProjectList/ProjectListItem.js:130
 msgid "Refresh project revision"
-msgstr ""
+msgstr "重新刷新项目修订版本"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:135
 msgid "Regions"
@@ -6407,11 +6360,11 @@ msgstr "相关组"
 #: components/Search/RelatedLookupTypeInput.js:16
 #: components/Search/RelatedLookupTypeInput.js:24
 msgid "Related search type"
-msgstr ""
+msgstr "相关的搜索类型"
 
 #: components/Search/RelatedLookupTypeInput.js:19
 msgid "Related search type typeahead"
-msgstr ""
+msgstr "相关的搜索类型 typeahead"
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
@@ -6489,7 +6442,7 @@ msgstr "删除此链接将会孤立分支的剩余部分，并导致它在启动
 
 #: components/SelectedList/DraggableSelectedList.js:83
 msgid "Reorder"
-msgstr ""
+msgstr "重新排序"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
 msgid "Repeat Frequency"
@@ -6652,21 +6605,21 @@ msgstr "运行命令"
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
-msgstr ""
+msgstr "运行临时命令"
 
 #: components/AdHocCommands/AdHocCommandsWizard.js:51
 msgid "Run command"
 msgstr "运行命令"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:213
+#: components/Schedule/shared/FrequencyDetailSubform.js:211
 msgid "Run every"
 msgstr "运行每"
 
-#: components/Schedule/shared/ScheduleForm.js:146
+#: components/Schedule/shared/ScheduleForm.js:145
 msgid "Run frequency"
 msgstr "运行频率"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:327
+#: components/Schedule/shared/FrequencyDetailSubform.js:325
 msgid "Run on"
 msgstr "运行于"
 
@@ -6733,12 +6686,12 @@ msgstr "开始"
 msgid "STATUS:"
 msgstr "状态："
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:305
+#: components/Schedule/shared/FrequencyDetailSubform.js:303
 msgid "Sat"
 msgstr "周六"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:310
-#: components/Schedule/shared/FrequencyDetailSubform.js:441
+#: components/Schedule/shared/FrequencyDetailSubform.js:308
+#: components/Schedule/shared/FrequencyDetailSubform.js:439
 msgid "Saturday"
 msgstr "周六"
 
@@ -6747,8 +6700,8 @@ msgstr "周六"
 #: components/AssociateModal/AssociateModal.js:114
 #: components/FormActionGroup/FormActionGroup.js:13
 #: components/FormActionGroup/FormActionGroup.js:19
-#: components/Schedule/shared/ScheduleForm.js:624
-#: components/Schedule/shared/ScheduleForm.js:630
+#: components/Schedule/shared/ScheduleForm.js:625
+#: components/Schedule/shared/ScheduleForm.js:631
 #: components/Schedule/shared/useSchedulePromptSteps.js:45
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:113
 #: screens/Credential/shared/CredentialForm.js:318
@@ -6799,7 +6752,7 @@ msgstr "调度缺少规则"
 
 #: components/Schedule/Schedule.js:82
 msgid "Schedule not found."
-msgstr ""
+msgstr "未找到调度。"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:163
 #: components/Schedule/ScheduleList/ScheduleList.js:228
@@ -6862,7 +6815,7 @@ msgstr "搜索提交按钮"
 msgid "Search text input"
 msgstr "搜索文本输入"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:391
+#: components/Schedule/shared/FrequencyDetailSubform.js:389
 msgid "Second"
 msgstr "秒"
 
@@ -6984,7 +6937,7 @@ msgstr "在编辑执行环境前选择一个项目。"
 
 #: screens/Template/Survey/SurveyToolbar.js:80
 msgid "Select a question to delete"
-msgstr ""
+msgstr "选择要删除的问题"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:18
 msgid "Select a row to approve"
@@ -7009,9 +6962,9 @@ msgstr "导入一个订阅"
 
 #: components/HostForm/HostForm.js:39
 #: components/Schedule/shared/FrequencyDetailSubform.js:56
-#: components/Schedule/shared/FrequencyDetailSubform.js:84
-#: components/Schedule/shared/FrequencyDetailSubform.js:88
-#: components/Schedule/shared/FrequencyDetailSubform.js:96
+#: components/Schedule/shared/FrequencyDetailSubform.js:82
+#: components/Schedule/shared/FrequencyDetailSubform.js:86
+#: components/Schedule/shared/FrequencyDetailSubform.js:94
 #: components/Schedule/shared/ScheduleForm.js:93
 #: components/Schedule/shared/ScheduleForm.js:97
 #: screens/Credential/shared/CredentialForm.js:44
@@ -7030,7 +6983,7 @@ msgstr "导入一个订阅"
 #: screens/Inventory/shared/SmartInventoryForm.js:67
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:24
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:432
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:431
 #: screens/Project/shared/ProjectForm.js:189
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.js:39
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:36
@@ -7064,11 +7017,11 @@ msgstr "选择一个实例和一个指标来显示图表"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
-msgstr ""
+msgstr "为工作流选择清单。此清单应用于提示清单的所有工作流节点。"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:129
 msgid "Select an option"
-msgstr ""
+msgstr "选择一个选项"
 
 #: screens/Project/shared/ProjectForm.js:200
 msgid "Select an organization before editing the default execution environment."
@@ -7101,7 +7054,7 @@ msgstr "选择作业类型"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:177
 msgid "Select option(s)"
-msgstr ""
+msgstr "选择选项"
 
 #: screens/Dashboard/DashboardGraph.js:95
 #: screens/Dashboard/DashboardGraph.js:96
@@ -7140,8 +7093,7 @@ msgstr "选择要运行此清单的实例组。"
 msgid ""
 "Select the Instance Groups for this Organization\n"
 "to run on."
-msgstr ""
-"选择要运行此机构的\n"
+msgstr "选择要运行此机构的\n"
 "实例组。"
 
 #: screens/Organization/shared/OrganizationForm.js:83
@@ -7150,11 +7102,7 @@ msgstr "选择要运行此机构的实例组。"
 
 #: screens/User/shared/UserTokenForm.js:49
 msgid "Select the application that this token will belong to, or leave this field empty to create a Personal Access Token."
-msgstr ""
-
-#: screens/User/shared/UserTokenForm.js:49
-#~ msgid "Select the application that this token will belong to."
-#~ msgstr "选择此令牌所属的应用程序。"
+msgstr "选择此令牌所属的应用，或将此字段留空以创建个人访问令牌。"
 
 #: components/AdHocCommands/AdHocCredentialStep.js:104
 msgid "Select the credential you want to use when accessing the remote hosts to run the command. Choose the credential containing the username and SSH key or password that Ansible will need to log into the remote hosts."
@@ -7246,17 +7194,17 @@ msgstr "选择的类别"
 #: components/Schedule/shared/ScheduleForm.js:573
 #: components/Schedule/shared/ScheduleForm.js:574
 msgid "Selected date range must have at least 1 schedule occurrence."
-msgstr ""
+msgstr "选定日期范围必须至少有 1 个计划发生。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:119
 msgid "Sender Email"
 msgstr "发件人电子邮件"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:95
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:94
 msgid "Sender e-mail"
 msgstr "发件人电子邮件"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:150
+#: components/Schedule/shared/FrequencyDetailSubform.js:148
 msgid "September"
 msgstr "9 月"
 
@@ -7295,7 +7243,7 @@ msgstr "设置类型"
 
 #: components/Search/AdvancedSearch.js:148
 msgid "Set type disabled for related search field fuzzy searches"
-msgstr ""
+msgstr "为相关搜索字段模糊搜索设置类型禁用"
 
 #: components/Search/AdvancedSearch.js:107
 msgid "Set type select"
@@ -7341,10 +7289,6 @@ msgstr "显示"
 #: screens/Template/shared/JobTemplateForm.js:495
 msgid "Show Changes"
 msgstr "显示更改"
-
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.js:131
-#~ msgid "Show all groups"
-#~ msgstr "显示所有组"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:193
 #: components/AdHocCommands/AdHocDetailsStep.js:194
@@ -7474,7 +7418,7 @@ msgstr "前面的一些步骤有错误"
 
 #: screens/Host/HostList/SmartInventoryButton.js:12
 msgid "Some search modifiers like not__ and __search are not supported in Smart Inventory host filters.  Remove these to create a new Smart Inventory with this filter."
-msgstr ""
+msgstr "智能清单主机过滤器中不支持 not__ 和 __search 等一些搜索修饰符。删除这些修改以使用此过滤器创建新的智能清单。"
 
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginTestAlert.js:39
 msgid "Something went wrong with the request to test this credential and metadata."
@@ -7487,11 +7431,6 @@ msgstr "出现错误..."
 #: components/Sort/Sort.js:129
 msgid "Sort"
 msgstr "排序"
-
-#: screens/Template/Survey/SurveyListItem.js:72
-#: screens/Template/Survey/SurveyListItem.js:73
-#~ msgid "Sort question order"
-#~ msgstr "排序问题顺序"
 
 #: components/JobList/JobListItem.js:159
 #: components/PromptDetail/PromptInventorySourceDetail.js:102
@@ -7538,7 +7477,7 @@ msgstr "源控制 Refspec"
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:176
 msgid "Source Control Revision"
-msgstr ""
+msgstr "源控制修订"
 
 #: components/PromptDetail/PromptProjectDetail.js:94
 #: screens/Project/ProjectDetail/ProjectDetail.js:172
@@ -7584,7 +7523,7 @@ msgstr "源控制分支"
 msgid "Source details"
 msgstr "源详情"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:399
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:398
 msgid "Source phone number"
 msgstr "源电话号码"
 
@@ -7602,13 +7541,13 @@ msgstr "来自项目的源"
 msgid "Sources"
 msgstr "源"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:466
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:465
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
 msgstr "以 JSON 格式指定 HTTP 标头。示例语法请参阅 Ansible Tower 文档。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:380
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:379
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
@@ -7640,6 +7579,7 @@ msgstr "标准输出标签页"
 
 #: components/NotificationList/NotificationListItem.js:52
 #: components/NotificationList/NotificationListItem.js:53
+#: components/Schedule/shared/ScheduleForm.js:119
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:47
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:53
 msgid "Start"
@@ -7649,14 +7589,6 @@ msgstr "开始"
 #: components/JobList/JobListItem.js:92
 msgid "Start Time"
 msgstr "开始时间"
-
-#: components/Schedule/shared/DateTimePicker.js:51
-msgid "Start date"
-msgstr ""
-
-#: components/Schedule/shared/ScheduleForm.js:120
-msgid "Start date/time"
-msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:403
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7675,10 +7607,6 @@ msgstr "启动同步进程"
 #: screens/Inventory/shared/InventorySourceSyncButton.js:37
 msgid "Start sync source"
 msgstr "启动同步源"
-
-#: components/Schedule/shared/DateTimePicker.js:61
-msgid "Start time"
-msgstr ""
 
 #: screens/Job/JobDetail/JobDetail.js:139
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
@@ -7800,12 +7728,12 @@ msgstr "成功的作业"
 msgid "Successfully copied to clipboard!"
 msgstr "成功复制至剪贴板！"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:245
+#: components/Schedule/shared/FrequencyDetailSubform.js:243
 msgid "Sun"
 msgstr "周日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:250
-#: components/Schedule/shared/FrequencyDetailSubform.js:411
+#: components/Schedule/shared/FrequencyDetailSubform.js:248
+#: components/Schedule/shared/FrequencyDetailSubform.js:409
 msgid "Sunday"
 msgstr "周日"
 
@@ -7818,23 +7746,15 @@ msgstr "问卷调查"
 
 #: screens/Template/Survey/SurveyToolbar.js:102
 msgid "Survey Disabled"
-msgstr ""
+msgstr "禁用问卷调查"
 
 #: screens/Template/Survey/SurveyToolbar.js:101
 msgid "Survey Enabled"
-msgstr ""
-
-#: screens/Template/Survey/SurveyList.js:132
-#~ msgid "Survey List"
-#~ msgstr "问卷调查列表"
-
-#: screens/Template/Survey/SurveyPreviewModal.js:31
-#~ msgid "Survey Preview"
-#~ msgstr "问卷调查预览"
+msgstr "启用问卷调查"
 
 #: screens/Template/Survey/SurveyReorderModal.js:179
 msgid "Survey Question Order"
-msgstr ""
+msgstr "问卷调查问题顺序"
 
 #: screens/Template/Survey/SurveyToolbar.js:99
 msgid "Survey Toggle"
@@ -7842,11 +7762,7 @@ msgstr "问卷调查切换"
 
 #: screens/Template/Survey/SurveyReorderModal.js:180
 msgid "Survey preview modal"
-msgstr "问卷调查预览 modal"
-
-#: screens/Template/Survey/SurveyListItem.js:66
-#~ msgid "Survey questions"
-#~ msgstr "可选的问卷调查问题"
+msgstr "问卷调查预览模态"
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:119
 #: screens/Inventory/shared/InventorySourceSyncButton.js:41
@@ -7882,7 +7798,7 @@ msgstr "修订版本同步"
 
 #: screens/Project/ProjectList/ProjectListItem.js:118
 msgid "Syncing"
-msgstr ""
+msgstr "同步"
 
 #: screens/Setting/SettingList.js:98
 #: screens/User/UserRoles/UserRolesListItem.js:18
@@ -7946,16 +7862,16 @@ msgstr "如果有一个大的 playbook，而您想要运行某个 play 或任务
 msgid "Tags for the Annotation"
 msgstr "注解的标签"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:177
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:176
 msgid "Tags for the annotation (optional)"
 msgstr "注解的标签（可选）"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:199
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:249
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:313
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:250
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:327
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:449
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:249
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:326
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:448
 msgid "Target URL"
 msgstr "目标 URL"
 
@@ -8065,7 +7981,7 @@ msgstr "文本区"
 msgid "That value was not found. Please enter or select a valid value."
 msgstr "未找到该值。请输入或选择一个有效值。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:381
+#: components/Schedule/shared/FrequencyDetailSubform.js:379
 msgid "The"
 msgstr "The"
 
@@ -8074,14 +7990,10 @@ msgid "The Execution Environment to be used when one has not been configured for
 msgstr "如果没有为作业模板配置时使用的执行环境。"
 
 #: screens/Application/shared/ApplicationForm.js:86
-#~ msgid "The Grant type the user must use for acquire tokens for this application"
-#~ msgstr "用户必须用来获取此应用令牌的授予类型"
-
-#: screens/Application/shared/ApplicationForm.js:86
 msgid "The Grant type the user must use to acquire tokens for this application"
-msgstr ""
+msgstr "用户必须用来获取此应用令牌的授予类型"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:119
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
@@ -8095,7 +8007,7 @@ msgid ""
 "timeout."
 msgstr "取消作业前运行的时间（以秒为单位）。默认为 0，即没有作业超时。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:152
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:151
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
@@ -8115,7 +8027,7 @@ msgid ""
 "The execution environment that will be used when launching\n"
 "this job template. The resolved execution environment can be overridden by\n"
 "explicitly assigning a different one to this job template."
-msgstr ""
+msgstr "启动此作业模板时要使用的执行环境。解析的执行环境可以通过为此作业模板明确分配不同的执行环境来覆盖。"
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:73
 msgid ""
@@ -8159,16 +8071,16 @@ msgstr "用于将字段保留为清单中的目标主机的模式。留空、所
 
 #: screens/Project/ProjectList/ProjectListItem.js:116
 msgid "The project is currently syncing and the revision will be available after the sync is complete."
-msgstr ""
+msgstr "该项目目前正在同步，且修订将在同步完成后可用。"
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:192
 #: screens/Project/ProjectList/ProjectListItem.js:103
 msgid "The project must be synced before a revision is available."
-msgstr ""
+msgstr "项目必须在修订可用前同步。"
 
 #: screens/Project/ProjectList/ProjectListItem.js:126
 msgid "The project revision is currently out of date.  Please refresh to fetch the most recent revision."
-msgstr ""
+msgstr "项目修订当前已过期。请刷新以获取最新的修订版本。"
 
 #: components/Workflow/WorkflowNodeHelp.js:139
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:126
@@ -8182,16 +8094,6 @@ msgid ""
 "etc.). Variable names with spaces are not allowed."
 msgstr "变量名称的建议格式为小写字母并用下划线分隔（例如：foo_bar、user_id、host_name 等等）。不允许使用带空格的变量名称。"
 
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.js:47
-#~ msgid ""
-#~ "There are no available playbook directories in {project_base_dir}.\n"
-#~ "Either that directory is empty, or all of the contents are already\n"
-#~ "assigned to other projects. Create a new directory there and make\n"
-#~ "sure the playbook files can be read by the \"awx\" system user,\n"
-#~ "or have {0} directly retrieve your playbooks from\n"
-#~ "source control using the Source Control Type option above."
-#~ msgstr ""
-
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:48
 msgid ""
 "There are no available playbook directories in {project_base_dir}.\n"
@@ -8200,7 +8102,7 @@ msgid ""
 "sure the playbook files can be read by the \"awx\" system user,\n"
 "or have {brandName} directly retrieve your playbooks from\n"
 "source control using the Source Control Type option above."
-msgstr ""
+msgstr "{project_base_dir} 中没有可用的 playbook 目录。该目录可能是空目录，或所有内容都已被分配给其他项目。创建一个新目录并确保 playbook 文件可以被 \"awx\" 系统用户读取，或者使用上述的 Source Control Type 选项从源控制控制选项直接获取 {brandName}。"
 
 #: screens/Template/Survey/MultipleChoiceField.js:34
 msgid "There must be a value in at least one input"
@@ -8223,12 +8125,8 @@ msgid "There was an error saving the workflow."
 msgstr "保存工作流时出错。"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:68
-#~ msgid "These are the modules that {0} supports running commands against."
-#~ msgstr ""
-
-#: components/AdHocCommands/AdHocDetailsStep.js:68
 msgid "These are the modules that {brandName} supports running commands against."
-msgstr ""
+msgstr "这些是 {brandName} 支持运行命令的模块。"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:138
 msgid "These are the verbosity levels for standard out of the command run that are supported."
@@ -8242,7 +8140,7 @@ msgstr "这些参数与指定的模块一起使用。"
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
 msgstr "这些参数与指定的模块一起使用。点击可以找到有关 {0} 的信息。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:393
+#: components/Schedule/shared/FrequencyDetailSubform.js:391
 msgid "Third"
 msgstr "第三"
 
@@ -8309,11 +8207,11 @@ msgstr "除非设置了启用的变量，否则此字段会被忽略。如果启
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:61
 msgid "This field is must not be blank"
-msgstr ""
+msgstr "此字段不能为空"
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:55
 msgid "This field is must not be blank."
-msgstr ""
+msgstr "此字段不能为空"
 
 #: components/LaunchPrompt/steps/useCredentialPasswordsStep.js:50
 msgid "This field may not be blank"
@@ -8333,13 +8231,13 @@ msgstr "此字段必须是一个数字，且值介于 {min} 和 {max}"
 
 #: util/validators.js:64
 msgid "This field must be a number and have a value greater than {min}"
-msgstr ""
+msgstr "此字段必须是一个数字，且值需要大于 {min}"
 
 #: util/validators.js:61
 msgid "This field must be a number and have a value less than {max}"
-msgstr ""
+msgstr "此字段必须是一个数字，且值需要小于 {max}"
 
-#: util/validators.js:184
+#: util/validators.js:167
 msgid "This field must be a regular expression"
 msgstr "此字段必须是正则表达式"
 
@@ -8391,7 +8289,7 @@ msgstr "其他资源目前正在此实例组中。确定要删除它吗？"
 
 #: components/LaunchPrompt/steps/useInventoryStep.js:59
 msgid "This inventory is applied to all workflow nodes within this workflow ({0}) that prompt for an inventory."
-msgstr ""
+msgstr "此清单会应用到在这个工作流 ({0}) 中的所有作业模板，它会提示输入一个清单。"
 
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:129
 msgid "This inventory is currently being used by other resources. Are you sure you want to delete it?"
@@ -8455,12 +8353,12 @@ msgstr "此工作流没有配置任何节点。"
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "其他资源目前正在使用此工作流作业模板。确定要删除它吗？"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:285
+#: components/Schedule/shared/FrequencyDetailSubform.js:283
 msgid "Thu"
 msgstr "周四"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:290
-#: components/Schedule/shared/FrequencyDetailSubform.js:431
+#: components/Schedule/shared/FrequencyDetailSubform.js:288
+#: components/Schedule/shared/FrequencyDetailSubform.js:429
 msgid "Thursday"
 msgstr "周四"
 
@@ -8496,7 +8394,7 @@ msgstr "超时"
 
 #: components/PromptDetail/PromptDetail.js:123
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:129
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:113
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:112
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:232
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:177
 #: screens/Template/shared/JobTemplateForm.js:488
@@ -8513,7 +8411,7 @@ msgstr "超时秒"
 
 #: screens/Template/Survey/SurveyReorderModal.js:182
 msgid "To reoder the survey questions drag and drop them in the desired location."
-msgstr ""
+msgstr "要重新调整调查问题的顺序，将问题拖放到所需的位置。"
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:93
 msgid "Toggle Legend"
@@ -8566,7 +8464,7 @@ msgstr "删除调度"
 msgid "Toggle tools"
 msgstr "切换工具"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:370
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:369
 #: screens/User/UserTokens/UserTokens.js:64
 msgid "Token"
 msgstr "令牌"
@@ -8639,12 +8537,12 @@ msgstr "试用"
 msgid "True"
 msgstr "True"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:265
+#: components/Schedule/shared/FrequencyDetailSubform.js:263
 msgid "Tue"
 msgstr "周二"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:270
-#: components/Schedule/shared/FrequencyDetailSubform.js:421
+#: components/Schedule/shared/FrequencyDetailSubform.js:268
+#: components/Schedule/shared/FrequencyDetailSubform.js:419
 msgid "Tuesday"
 msgstr "周二"
 
@@ -8704,7 +8602,7 @@ msgid "Type"
 msgstr "类型"
 
 #: screens/Credential/shared/TypeInputsSubForm.js:25
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:46
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:45
 #: screens/Project/shared/ProjectForm.js:246
 msgid "Type Details"
 msgstr "类型详情"
@@ -8713,15 +8611,15 @@ msgstr "类型详情"
 msgid ""
 "Type answer then click checkbox on right to select answer as\n"
 "default."
-msgstr ""
+msgstr "键入回答，然后点右侧选择回答作为默认选项。"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:50
 msgid "UTC"
-msgstr ""
+msgstr "UTC"
 
 #: components/HostForm/HostForm.js:62
 msgid "Unable to change inventory on a host"
-msgstr ""
+msgstr "无法更改主机上的清单。"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:84
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:46
@@ -8731,7 +8629,7 @@ msgstr "不可用"
 
 #: components/StatusLabel/StatusLabel.js:64
 msgid "Undefined"
-msgstr ""
+msgstr "未定义"
 
 #: screens/Setting/shared/RevertButton.js:53
 #: screens/Setting/shared/RevertButton.js:62
@@ -8740,7 +8638,7 @@ msgstr "撤消"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Unfollow"
-msgstr ""
+msgstr "未追随"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:122
 msgid "Unlimited"
@@ -8790,15 +8688,11 @@ msgstr "更新选项"
 #: components/PromptDetail/PromptProjectDetail.js:61
 #: screens/Project/ProjectDetail/ProjectDetail.js:102
 msgid "Update revision on job launch"
-msgstr ""
-
-#: screens/Setting/SettingList.js:87
-#~ msgid "Update settings pertaining to Jobs within {0}"
-#~ msgstr ""
+msgstr "启动作业时更新修订"
 
 #: screens/Setting/SettingList.js:88
 msgid "Update settings pertaining to Jobs within {brandName}"
-msgstr ""
+msgstr "更新 Tower 中与作业相关的设置"
 
 #: screens/Template/shared/WebhookSubForm.js:194
 msgid "Update webhook key"
@@ -8817,12 +8711,12 @@ msgid "Upload a Red Hat Subscription Manifest containing your subscription. To g
 msgstr "上传一个包含了您的订阅的 Red Hat Subscription Manifest。要生成订阅清单，请访问红帽用户门户网站中的 <0>subscription allocations</0>。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:45
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:129
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:128
 msgid "Use SSL"
 msgstr "使用 SSL"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:50
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:134
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:133
 msgid "Use TLS"
 msgstr "使用 TLS"
 
@@ -8835,7 +8729,7 @@ msgstr "当一个作业开始、成功或失败时使用的自定义消息来更
 
 #: screens/InstanceGroup/Instances/InstanceList.js:220
 msgid "Used Capacity"
-msgstr ""
+msgstr "已使用容量"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:83
@@ -8902,10 +8796,10 @@ msgstr "用户令牌"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:204
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:254
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:308
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:65
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:258
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:335
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:438
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:64
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:257
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:334
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:437
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:206
 #: screens/User/UserDetail/UserDetail.js:68
@@ -9056,7 +8950,7 @@ msgstr "查看日志记录设置"
 
 #: screens/Setting/MiscAuthentication/MiscAuthentication.js:32
 msgid "View Miscellaneous Authentication settings"
-msgstr ""
+msgstr "查看其他身份验证设置"
 
 #: screens/Setting/MiscSystem/MiscSystem.js:32
 msgid "View Miscellaneous System settings"
@@ -9337,28 +9231,28 @@ msgstr "Webhook 服务可以将此用作共享机密。"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:147
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:62
 msgid "Webhooks"
-msgstr ""
+msgstr "Webhook"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:275
+#: components/Schedule/shared/FrequencyDetailSubform.js:273
 msgid "Wed"
 msgstr "周三"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:280
-#: components/Schedule/shared/FrequencyDetailSubform.js:426
+#: components/Schedule/shared/FrequencyDetailSubform.js:278
+#: components/Schedule/shared/FrequencyDetailSubform.js:424
 msgid "Wednesday"
 msgstr "周三"
 
-#: components/Schedule/shared/ScheduleForm.js:155
+#: components/Schedule/shared/ScheduleForm.js:154
 msgid "Week"
 msgstr "周"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:447
+#: components/Schedule/shared/FrequencyDetailSubform.js:445
 msgid "Weekday"
-msgstr "工作日"
+msgstr "周中日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:452
+#: components/Schedule/shared/FrequencyDetailSubform.js:450
 msgid "Weekend day"
-msgstr "周末"
+msgstr "周末日"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:59
 msgid ""
@@ -9507,7 +9401,7 @@ msgstr "写入"
 msgid "YAML:"
 msgstr "YAML："
 
-#: components/Schedule/shared/ScheduleForm.js:157
+#: components/Schedule/shared/ScheduleForm.js:156
 msgid "Year"
 msgstr "年"
 
@@ -9571,10 +9465,6 @@ msgstr "在保存时会生成一个新的 WEBHOOK 密钥"
 msgid "a new webhook url will be generated on save."
 msgstr "在保存时会生成一个新的 WEBHOOK url"
 
-#: screens/Template/Survey/SurveyListItem.js:157
-#~ msgid "actions"
-#~ msgstr "操作"
-
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:181
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:210
 msgid "and click on Update Revision on Launch"
@@ -9595,7 +9485,7 @@ msgstr "取消删除"
 
 #: screens/Setting/shared/SharedFields.js:311
 msgid "cancel edit login redirect"
-msgstr ""
+msgstr "取消编辑登录重定向"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:232
 msgid "command"
@@ -9613,7 +9503,7 @@ msgstr "确认解除关联"
 
 #: screens/Setting/shared/SharedFields.js:300
 msgid "confirm edit login redirect"
-msgstr ""
+msgstr "确认编辑登录重定向"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:145
 msgid "deletion error"
@@ -9645,10 +9535,6 @@ msgstr "文档"
 #: screens/User/UserDetail/UserDetail.js:92
 msgid "edit"
 msgstr "编辑"
-
-#: screens/Template/Survey/SurveyListItem.js:163
-#~ msgid "edit survey"
-#~ msgstr ""
 
 #: screens/Template/Survey/SurveyListItem.js:65
 msgid "encrypted"
@@ -9691,20 +9577,12 @@ msgstr "登录类型"
 msgid "min"
 msgstr "分钟"
 
-#: screens/Template/Survey/SurveyListItem.js:91
-#~ msgid "move down"
-#~ msgstr "向下移动"
-
-#: screens/Template/Survey/SurveyListItem.js:80
-#~ msgid "move up"
-#~ msgstr "向上移动"
-
 #: screens/Template/Survey/MultipleChoiceField.js:76
 msgid "new choice"
 msgstr "新选择"
 
 #: components/Pagination/Pagination.js:36
-#: components/Schedule/shared/FrequencyDetailSubform.js:463
+#: components/Schedule/shared/FrequencyDetailSubform.js:461
 msgid "of"
 msgstr "的"
 
@@ -9747,7 +9625,7 @@ msgstr "选择详细程度"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:135
 msgid "since"
-msgstr ""
+msgstr "自"
 
 #: screens/User/UserList/UserListItem.js:49
 msgid "social login"
@@ -9790,13 +9668,9 @@ msgstr "{0, plural, one {您确定要删除以下组吗？} other {您确定要�
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr "{0, plural, one {删除组?} other {删除组?}}"
 
-#: util/validators.js:138
-msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
-msgstr ""
-
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:178
 msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
-msgstr ""
+msgstr "{0, plural, one {以下实例组不能被删除} other {以下实例组不能被删除}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:232
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
@@ -9862,10 +9736,6 @@ msgstr "{0} (删除)"
 msgid "{0} more"
 msgstr "{0} 更多"
 
-#: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:138
-#~ msgid "{0} since {1}"
-#~ msgstr ""
-
 #: screens/Inventory/InventoryList/InventoryListItem.js:61
 #~ msgid "{0} sources with sync failures."
 #~ msgstr "{0} 个同步失败的源。"
@@ -9882,37 +9752,37 @@ msgstr "{dateStr} by <0>{username}</0>"
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# fork} other {# forks}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:190
+#: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {day} other {days}}"
 msgstr "{intervalValue, plural, one {天} other {天}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:188
+#: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {hour} other {hours}}"
 msgstr "{intervalValue, plural, one {小时} other {小时}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:186
+#: components/Schedule/shared/FrequencyDetailSubform.js:184
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
 msgstr "{intervalValue, plural, one {分钟} other {分钟}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:194
+#: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {month} other {months}}"
 msgstr "{intervalValue, plural, one {月} other {月}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:192
+#: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {week} other {weeks}}"
 msgstr "{intervalValue, plural, one {周} other {周}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:196
+#: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {年} other {年}}"
 
 #: components/Schedule/shared/DateTimePicker.js:49
-#~ msgid "{label} date"
-#~ msgstr ""
+msgid "{label} date"
+msgstr "{label} 日期"
 
 #: components/Schedule/shared/DateTimePicker.js:57
-#~ msgid "{label} time"
-#~ msgstr ""
+msgid "{label} time"
+msgstr "{label} 时间"
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
@@ -9929,10 +9799,6 @@ msgstr "{numJobsToCancel, plural, one {这个操作将取消以下作业：} oth
 #: components/JobList/JobListCancelButton.js:91
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
-
-#: components/DetailList/NumberSinceDetail.js:19
-#~ msgid "{number} since {dateStr}"
-#~ msgstr ""
 
 #: components/PaginatedTable/PaginatedTable.js:79
 msgid "{pluralizedItemName} List"

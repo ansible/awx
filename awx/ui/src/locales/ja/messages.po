@@ -1,17 +1,11 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2021-06-08 18:28+0000\n"
+"POT-Creation-Date: 2021-09-01 18:45+0000\n"
 "Mime-Version: 1.0\n"
-"Language: ja\n"
+"Language: ja \n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -125,11 +119,11 @@ msgstr "すべて"
 msgid "API Service/Integration Key"
 msgstr "API サービス/統合キー"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:289
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:288
 msgid "API Token"
 msgstr "API トークン"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:304
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:303
 msgid "API service/integration key"
 msgstr "API サービス/統合キー"
 
@@ -161,11 +155,11 @@ msgid "Access Token Expiration"
 msgstr "アクセストークンの有効期限"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:299
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:419
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:418
 msgid "Account SID"
 msgstr "アカウント SID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:392
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:391
 msgid "Account token"
 msgstr "アカウントトークン"
 
@@ -378,7 +372,7 @@ msgid ""
 "like the Ansible inventory .ini file format."
 msgstr "SCM リビジョンを変更するプロジェクトの毎回の更新後に、選択されたソースのインベントリーを更新してからジョブのタスクを実行します。これは、Ansible インベントリーの .ini ファイル形式のような静的コンテンツが対象であることが意図されています。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:506
+#: components/Schedule/shared/FrequencyDetailSubform.js:504
 msgid "After number of occurrences"
 msgstr "指定した実行回数後"
 
@@ -407,7 +401,7 @@ msgstr "ブランチの上書き許可"
 #: components/PromptDetail/PromptProjectDetail.js:66
 #: screens/Project/ProjectDetail/ProjectDetail.js:107
 msgid "Allow branch override"
-msgstr ""
+msgstr "ブランチの上書き許可"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:104
 msgid ""
@@ -467,7 +461,7 @@ msgstr "アプリケーション"
 
 #: screens/User/UserTokenList/UserTokenList.js:183
 msgid "Application Name"
-msgstr ""
+msgstr "アプリケーション名"
 
 #: screens/Application/Applications.js:64
 #: screens/Application/Applications.js:67
@@ -525,7 +519,7 @@ msgstr "承認済み - {0}。詳細は、アクティビティーストリーム
 msgid "Approved by {0} - {1}"
 msgstr "{0} - {1} により承認済"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:125
+#: components/Schedule/shared/FrequencyDetailSubform.js:123
 msgid "April"
 msgstr "4 月"
 
@@ -543,7 +537,7 @@ msgstr "ローカル認証を無効にしてもよろしいですか? これを�
 
 #: screens/Setting/shared/SharedFields.js:320
 msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
-msgstr ""
+msgstr "ログインリダイレクトのオーバーライド URL を編集してもよろしいですか？これを行うと、ローカルの認証情報も無効になると、ユーザーのシステムへのログイン機能に影響があります。"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.js:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
@@ -604,7 +598,7 @@ msgstr "関連付けモーダル"
 msgid "At least one value must be selected for this field."
 msgstr "このフィールドには、少なくとも 1 つの値を選択する必要があります。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:145
+#: components/Schedule/shared/FrequencyDetailSubform.js:143
 msgid "August"
 msgstr "8 月"
 
@@ -665,7 +659,7 @@ msgstr "ホストに戻る"
 
 #: screens/InstanceGroup/InstanceGroup.js:69
 msgid "Back to Instance Groups"
-msgstr ""
+msgstr "インスタンスグループに戻る"
 
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
@@ -761,7 +755,7 @@ msgid ""
 "path used to locate playbooks."
 msgstr "Playbook を見つけるために使用されるベースパスです。このパス内にあるディレクトリーは Playbook ディレクトリーのドロップダウンに一覧表示されます。ベースパスと選択されたPlaybook ディレクトリーは、Playbook を見つけるために使用される完全なパスを提供します。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:444
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:443
 msgid "Basic auth password"
 msgstr "Basic 認証パスワード"
 
@@ -784,7 +778,7 @@ msgstr "参照"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:91
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:112
 msgid "Browse…"
-msgstr ""
+msgstr "参照…"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
@@ -824,8 +818,8 @@ msgstr "キャッシュのタイムアウト (秒)"
 #: components/Lookup/Lookup.js:194
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:36
-#: components/Schedule/shared/ScheduleForm.js:646
-#: components/Schedule/shared/ScheduleForm.js:651
+#: components/Schedule/shared/ScheduleForm.js:647
+#: components/Schedule/shared/ScheduleForm.js:652
 #: components/Schedule/shared/SchedulePromptableFields.js:133
 #: screens/Credential/shared/CredentialForm.js:343
 #: screens/Credential/shared/CredentialForm.js:348
@@ -929,7 +923,7 @@ msgstr "{0} の取り消し"
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:166
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:20
 msgid "Canceled"
-msgstr "取り消されました"
+msgstr "取り消し済み"
 
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.js:128
 msgid ""
@@ -945,7 +939,7 @@ msgstr "容量"
 #: screens/InstanceGroup/Instances/InstanceList.js:219
 #: screens/InstanceGroup/Instances/InstanceListItem.js:124
 msgid "Capacity Adjustment"
-msgstr ""
+msgstr "容量調整"
 
 #: components/Search/LookupTypeInput.js:59
 msgid "Case-insensitive version of contains"
@@ -982,7 +976,7 @@ msgid "Changes"
 msgstr "変更"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:209
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:264
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:263
 msgid "Channel"
 msgstr "チャネル"
 
@@ -1032,7 +1026,7 @@ msgstr "モジュールの選択"
 msgid "Choose a source"
 msgstr "ソースの選択"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:487
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:486
 msgid "Choose an HTTP method"
 msgstr "HTTP メソッドの選択"
 
@@ -1041,7 +1035,7 @@ msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
 "Refer to the Ansible Tower Documentation for more additional\n"
 "information about each option."
-msgstr "ユーザーのプロンプトが表示される際に、必要な回答タイプまたは形式を選択します。それぞれのオプションの詳細については、Ansible Tower ドキュメントを参照してください。"
+msgstr "ユーザーに表示されるプロンプトとして使用する回答タイプまたは形式を選択します。各オプションの詳細については、Ansible Tower のドキュメントを参照してください。"
 
 #: components/AddRole/SelectRoleStep.js:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
@@ -1062,7 +1056,7 @@ msgstr "クリーニング"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:92
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:113
 msgid "Clear"
-msgstr ""
+msgstr "消去"
 
 #: components/DataListToolbar/DataListToolbar.js:84
 #: screens/Job/JobOutput/JobOutputSearch.js:142
@@ -1095,7 +1089,7 @@ msgstr "クリックして、このノードへの新しいリンクを作成し
 
 #: screens/Template/Survey/SurveyToolbar.js:62
 msgid "Click to rearrange the order of the survey questions"
-msgstr ""
+msgstr "クリックして、 Survey の質問の順序を並べ替えます"
 
 #: screens/Template/Survey/MultipleChoiceField.js:117
 msgid "Click to toggle default value"
@@ -1114,7 +1108,7 @@ msgstr "クライアント ID"
 msgid "Client Identifier"
 msgstr "クライアント識別子"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:312
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:311
 msgid "Client identifier"
 msgstr "クライアント識別子"
 
@@ -1152,7 +1146,7 @@ msgstr "コマンド"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:49
 msgid "Compliant"
-msgstr "準拠"
+msgstr "有効"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:75
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:36
@@ -1451,7 +1445,7 @@ msgstr "ユーザートークンの作成"
 #: screens/User/UserTokenList/UserTokenList.js:146
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:150
 msgid "Created"
-msgstr "作成済み"
+msgstr "作成日時"
 
 #: components/AdHocCommands/AdHocCredentialStep.js:122
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:112
@@ -1611,11 +1605,11 @@ msgstr "カスタム仮想環境 {0} は、実行環境に置き換える必要�
 
 #: components/TemplateList/TemplateListItem.js:155
 msgid "Custom virtual environment {0} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "カスタム仮想環境 {0} は、実行環境に置き換える必要があります。実行環境への移行の詳細については、<0>ドキュメント</0> を参照してください。"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:72
 msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "カスタム仮想環境 {virtualEnvironment} は、実行環境に置き換える必要があります。実行環境への移行の詳細は、<0>ドキュメント</0> を参照してください。"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:61
 msgid "Customize messages…"
@@ -1646,22 +1640,22 @@ msgstr "データ保持期間"
 
 #: screens/Dashboard/shared/LineChart.js:168
 msgid "Date"
-msgstr ""
+msgstr "日付"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:339
-#: components/Schedule/shared/FrequencyDetailSubform.js:443
-#: components/Schedule/shared/ScheduleForm.js:154
+#: components/Schedule/shared/FrequencyDetailSubform.js:337
+#: components/Schedule/shared/FrequencyDetailSubform.js:441
+#: components/Schedule/shared/ScheduleForm.js:153
 msgid "Day"
 msgstr "日"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
-#: components/Schedule/shared/ScheduleForm.js:165
+#: components/Schedule/shared/ScheduleForm.js:164
 msgid "Days of Data to Keep"
 msgstr "データの保持日数"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/DaysToKeepStep.jsx:28
 msgid "Days of data to be retained"
-msgstr ""
+msgstr "データの保持日数"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:105
 msgid "Days remaining"
@@ -1669,13 +1663,13 @@ msgstr "残りの日数"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useDaysToKeepStep.jsx:35
 msgid "Days to keep"
-msgstr ""
+msgstr "保持する日数"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:125
 msgid "Debug"
 msgstr "デバッグ"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:165
+#: components/Schedule/shared/FrequencyDetailSubform.js:163
 msgid "December"
 msgstr "12 月"
 
@@ -1690,7 +1684,7 @@ msgstr "デフォルト"
 #: screens/Template/Survey/SurveyReorderModal.js:207
 #: screens/Template/Survey/SurveyReorderModal.js:228
 msgid "Default Answer(s)"
-msgstr ""
+msgstr "デフォルトの応答"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:40
 #: components/Lookup/ExecutionEnvironmentLookup.js:209
@@ -1857,7 +1851,7 @@ msgstr "スマートインベントリーの削除"
 
 #: screens/Template/Survey/SurveyToolbar.js:81
 msgid "Delete survey question"
-msgstr ""
+msgstr "Survey の質問の削除"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:76
 msgid ""
@@ -1870,7 +1864,7 @@ msgstr "更新の実行前にローカルリポジトリーを完全に削除し
 #: components/PromptDetail/PromptProjectDetail.js:51
 #: screens/Project/ProjectDetail/ProjectDetail.js:92
 msgid "Delete the project before syncing"
-msgstr ""
+msgstr "プロジェクトを削除してから同期する"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:83
 msgid "Delete this link"
@@ -1935,7 +1929,7 @@ msgstr "非推奨"
 #: components/PromptDetail/PromptDetail.js:112
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:260
 #: components/Schedule/ScheduleList/ScheduleList.js:193
-#: components/Schedule/shared/ScheduleForm.js:113
+#: components/Schedule/shared/ScheduleForm.js:112
 #: components/TemplateList/TemplateList.js:195
 #: components/TemplateList/TemplateListItem.js:251
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:63
@@ -2009,15 +2003,15 @@ msgstr "送信先チャネルまたはユーザー"
 msgid "Destination SMS Number(s)"
 msgstr "送信先 SMS 番号"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:409
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:408
 msgid "Destination SMS number(s)"
 msgstr "送信先 SMS 番号"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:360
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:359
 msgid "Destination channels"
 msgstr "送信先チャネル"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:227
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:226
 msgid "Destination channels or users"
 msgstr "送信先チャネルまたはユーザー"
 
@@ -2115,17 +2109,17 @@ msgstr "詳細タブ"
 msgid "Disable SSL Verification"
 msgstr "SSL 検証の無効化"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:185
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:238
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:277
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:348
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:457
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:184
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:237
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:276
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:347
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:456
 msgid "Disable SSL verification"
 msgstr "SSL 検証の無効化"
 
 #: components/StatusLabel/StatusLabel.js:61
 msgid "Disabled"
-msgstr ""
+msgstr "無効化"
 
 #: components/DisassociateButton/DisassociateButton.js:57
 #: components/DisassociateButton/DisassociateButton.js:84
@@ -2175,7 +2169,7 @@ msgstr "関連付けを解除しますか?"
 #: components/PromptDetail/PromptProjectDetail.js:46
 #: screens/Project/ProjectDetail/ProjectDetail.js:87
 msgid "Discard local changes before syncing"
-msgstr ""
+msgstr "同期する前にローカル変更を破棄する"
 
 #: screens/Template/shared/JobTemplateForm.js:479
 msgid ""
@@ -2203,29 +2197,29 @@ msgstr "出力のダウンロード"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:90
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:111
 msgid "Drag a file here or browse to upload"
-msgstr ""
+msgstr "ここにファイルをドラッグするか、参照してアップロード"
 
 #: components/SelectedList/DraggableSelectedList.js:68
 msgid "Draggable list to reorder and remove selected items."
-msgstr ""
+msgstr "選択した項目を並べ替えたり削除したりできるドラッグ可能なリスト。"
 
 #: components/SelectedList/DraggableSelectedList.js:43
 msgid "Dragging cancelled. List is unchanged."
-msgstr ""
+msgstr "ドラッグがキャンセルされました。リストは変更されていません。"
 
 #: components/SelectedList/DraggableSelectedList.js:38
 msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
-msgstr ""
+msgstr "項目 {id} のドラッグ。現在 {newIndex} にあるインデックス {oldIndex} の項目。"
 
 #: components/SelectedList/DraggableSelectedList.js:32
 msgid "Dragging started for item id: {newId}."
-msgstr ""
+msgstr "項目 ID: {newId} のドラッグが開始しました。"
 
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:81
 msgid "E-mail"
 msgstr "メール"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:124
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:123
 msgid "E-mail options"
 msgstr "メールオプション"
 
@@ -2380,7 +2374,7 @@ msgstr "リンクの編集"
 
 #: screens/Setting/shared/SharedFields.js:260
 msgid "Edit Login redirect override URL"
-msgstr ""
+msgstr "ログインリダイレクトのオーバーライド URL"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeEditModal.js:64
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:230
@@ -2393,7 +2387,7 @@ msgstr "通知テンプレートの編集"
 
 #: screens/Template/Survey/SurveyToolbar.js:71
 msgid "Edit Order"
-msgstr ""
+msgstr "順序の編集"
 
 #: screens/Organization/OrganizationList/OrganizationListItem.js:71
 #: screens/Organization/OrganizationList/OrganizationListItem.js:75
@@ -2421,7 +2415,7 @@ msgstr "ソースの編集"
 
 #: screens/Template/Survey/SurveyListItem.js:87
 msgid "Edit Survey"
-msgstr ""
+msgstr "Survey の編集"
 
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:20
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:24
@@ -2479,7 +2473,7 @@ msgstr "インスタンスグループの編集"
 #: screens/Setting/shared/SharedFields.js:290
 #: screens/Setting/shared/SharedFields.js:292
 msgid "Edit login redirect override URL"
-msgstr ""
+msgstr "ログインリダイレクトのオーバーライド URL"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:70
 msgid "Edit this link"
@@ -2491,7 +2485,7 @@ msgstr "このノードの編集"
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:84
 msgid "Edit workflow"
-msgstr ""
+msgstr "ワークフローの編集"
 
 #: components/Workflow/WorkflowNodeHelp.js:170
 #: screens/Job/JobOutput/shared/OutputToolbar.js:123
@@ -2554,13 +2548,9 @@ msgstr "システムトラッキングファクトを個別に有効化"
 msgid "Enable privilege escalation"
 msgstr "権限昇格の有効化"
 
-#: screens/Setting/SettingList.js:52
-#~ msgid "Enable simplified login for your {0} applications"
-#~ msgstr ""
-
 #: screens/Setting/SettingList.js:53
 msgid "Enable simplified login for your {brandName} applications"
-msgstr ""
+msgstr "{brandName} アプリケーションのログインの簡素化の有効化"
 
 #: screens/Template/shared/JobTemplateForm.js:588
 msgid "Enable webhook for this template."
@@ -2581,7 +2571,7 @@ msgstr "有効化"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:183
 msgid "Enabled Options"
-msgstr ""
+msgstr "有効なオプション"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:239
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:254
@@ -2592,14 +2582,6 @@ msgstr "有効な値"
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:243
 msgid "Enabled Variable"
 msgstr "有効な変数"
-
-#: screens/Template/shared/JobTemplateForm.js:568
-#~ msgid ""
-#~ "Enables creation of a provisioning\n"
-#~ "callback URL. Using the URL a host can contact {0}\n"
-#~ "and request a configuration update using this job\n"
-#~ "template."
-#~ msgstr ""
 
 #: components/AdHocCommands/AdHocDetailsStep.js:224
 msgid ""
@@ -2615,14 +2597,15 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template."
-msgstr ""
+msgstr "プロビジョニングコールバック URL の作成を有効にします。ホストは、この URL を使用して {brandName} に接続でき、このジョブテンプレートを使用して設定の更新を要求できます。"
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:148
 #: screens/Setting/shared/SettingDetail.js:87
 msgid "Encrypted"
 msgstr "暗号化"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:490
+#: components/Schedule/shared/FrequencyDetailSubform.js:488
+#: components/Schedule/shared/FrequencyDetailSubform.js:540
 msgid "End"
 msgstr "終了"
 
@@ -2630,21 +2613,9 @@ msgstr "終了"
 msgid "End User License Agreement"
 msgstr "使用許諾契約書"
 
-#: components/Schedule/shared/DateTimePicker.js:51
-msgid "End date"
-msgstr ""
-
-#: components/Schedule/shared/FrequencyDetailSubform.js:542
-msgid "End date/time"
-msgstr ""
-
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
 msgstr "終了が期待値と一致しませんでした"
-
-#: components/Schedule/shared/DateTimePicker.js:61
-msgid "End time"
-msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2673,48 +2644,36 @@ msgstr "JSON または YAML 構文のいずれかを使用してインベント�
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:180
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "各行に、コンマなしでアノテーションタグを 1 つ入力してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:232
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:231
 msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
 msgstr "各行に 1 つの IRC チャンネルまたはユーザー名を入力します。チャンネルのシャープ記号 (#) およびユーザーのアットマーク (@) 記号は不要です。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:364
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 msgstr "各行に 1 つの Slack チャンネルを入力します。チャンネルにはシャープ記号 (#) が必要です。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:89
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
 msgstr "各行に 1 つのメールアドレスを入力し、この通知タイプの受信者リストを作成します。"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
-#~ msgid ""
-#~ "Enter one phone number per line to specify where to\n"
-#~ "route SMS messages."
-#~ msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのルート先を指定します。"
-
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:416
-#~ msgid ""
-#~ "Enter one phone number per line to specify where to\n"
-#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
-#~ msgstr ""
-
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:414
 msgid ""
 "Enter one phone number per line to specify where to\n"
-"route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-msgstr ""
+"route SMS messages."
+msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのルート先を指定します。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:404
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:403
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
@@ -2722,7 +2681,7 @@ msgstr "Twilio の \"メッセージングサービス\" に関連付けられ�
 
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
-msgstr ""
+msgstr "変数を入力して、インベントリーソースを設定します。このプラグインの設定方法の詳細については、ドキュメントの <0>インベントリープラグイン</0> および <1>Insights</1> プラグイン設定ガイドを参照してください。"
 
 #: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
@@ -2776,7 +2735,7 @@ msgstr "エラー"
 
 #: screens/Project/ProjectList/ProjectList.js:286
 msgid "Error fetching updated project"
-msgstr ""
+msgstr "更新されたプロジェクトの取得エラー"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:439
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:141
@@ -2906,7 +2865,7 @@ msgstr "イベント"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
 msgid "Every minute for {0} times"
-msgstr ""
+msgstr "毎分 {0} 回"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -2914,7 +2873,7 @@ msgstr "完全一致 (指定されない場合のデフォルトのルックア�
 
 #: components/Search/RelatedLookupTypeInput.js:38
 msgid "Exact search on id field."
-msgstr ""
+msgstr "id フィールドでの正確な検索。"
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:26
 msgid "Example URLs for GIT Source Control include:"
@@ -2963,7 +2922,7 @@ msgstr "実行環境"
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:69
 #: components/TemplateList/TemplateListItem.js:152
 msgid "Execution Environment Missing"
-msgstr ""
+msgstr "実行環境がありません"
 
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:103
 #: routeConfig.js:140
@@ -3003,7 +2962,7 @@ msgstr "展開"
 
 #: components/DataListToolbar/DataListToolbar.js:94
 msgid "Expand all rows"
-msgstr ""
+msgstr "全列を展開"
 
 #: components/CodeEditor/VariablesDetail.js:211
 #: components/CodeEditor/VariablesField.js:247
@@ -3065,7 +3024,7 @@ msgstr "終了日時:"
 #: components/PromptDetail/PromptJobTemplateDetail.js:80
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:142
 msgid "Fact Storage"
-msgstr ""
+msgstr "ファクトストレージ"
 
 #: screens/Host/Host.js:62
 #: screens/Host/HostFacts/HostFacts.js:45
@@ -3365,7 +3324,7 @@ msgstr "カスタムログイン構成設定を取得できません。代わり
 
 #: screens/Project/ProjectList/ProjectList.js:290
 msgid "Failed to fetch the updated project data."
-msgstr ""
+msgstr "更新されたプロジェクトデータの取得に失敗しました。"
 
 #: components/AdHocCommands/AdHocCommands.js:110
 #: components/LaunchButton/LaunchButton.js:164
@@ -3444,7 +3403,7 @@ msgstr "失敗"
 msgid "False"
 msgstr "False"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:115
+#: components/Schedule/shared/FrequencyDetailSubform.js:113
 msgid "February"
 msgstr "2 月"
 
@@ -3468,7 +3427,7 @@ msgstr "特定の正規表現に一致するフィールド。"
 msgid "Field starts with value."
 msgstr "値で開始するフィールド。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:399
+#: components/Schedule/shared/FrequencyDetailSubform.js:397
 msgid "Fifth"
 msgstr "第 5"
 
@@ -3499,7 +3458,7 @@ msgstr "終了時間"
 msgid "Finished"
 msgstr "終了日時"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:387
+#: components/Schedule/shared/FrequencyDetailSubform.js:385
 msgid "First"
 msgstr "最初"
 
@@ -3525,7 +3484,7 @@ msgstr "名"
 
 #: components/Search/AdvancedSearch.js:203
 msgid "First, select a key"
-msgstr "最初に、キーを選択します"
+msgstr "先にキーを選択"
 
 #: components/Workflow/WorkflowTools.js:88
 msgid "Fit the graph to the available screen size"
@@ -3537,7 +3496,7 @@ msgstr "浮動"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Follow"
-msgstr ""
+msgstr "フォロー"
 
 #: screens/Template/shared/JobTemplateForm.js:253
 msgid ""
@@ -3566,35 +3525,35 @@ msgstr "詳しい情報は以下の情報を参照してください:"
 msgid "Forks"
 msgstr "フォーク"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:397
+#: components/Schedule/shared/FrequencyDetailSubform.js:395
 msgid "Fourth"
 msgstr "第 4"
 
-#: components/Schedule/shared/ScheduleForm.js:175
+#: components/Schedule/shared/ScheduleForm.js:174
 msgid "Frequency Details"
 msgstr "頻度の詳細"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:198
+#: components/Schedule/shared/FrequencyDetailSubform.js:196
 #: components/Schedule/shared/buildRuleObj.js:71
 msgid "Frequency did not match an expected value"
 msgstr "頻度が期待値と一致しませんでした"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:295
+#: components/Schedule/shared/FrequencyDetailSubform.js:293
 msgid "Fri"
 msgstr "金"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:300
-#: components/Schedule/shared/FrequencyDetailSubform.js:436
+#: components/Schedule/shared/FrequencyDetailSubform.js:298
+#: components/Schedule/shared/FrequencyDetailSubform.js:434
 msgid "Friday"
 msgstr "金曜"
 
 #: components/Search/RelatedLookupTypeInput.js:45
 msgid "Fuzzy search on id, name or description fields."
-msgstr ""
+msgstr "ID、名前、または説明フィールドのあいまい検索。"
 
 #: components/Search/RelatedLookupTypeInput.js:32
 msgid "Fuzzy search on name field."
-msgstr ""
+msgstr "名前フィールドのあいまい検索。"
 
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:134
 #: screens/Organization/shared/OrganizationForm.js:101
@@ -3676,11 +3635,11 @@ msgstr "グローバルなデフォルトの実行環境"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:76
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:71
 msgid "Globally Available"
-msgstr "世界中で利用可能"
+msgstr "システム全体で利用可能"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:147
 msgid "Globally available execution environment can not be reassigned to a specific Organization"
-msgstr "世界中で利用可能な実行環境を特定の組織に再割り当てすることはできません"
+msgstr "システム全体で利用可能な実行環境を特定の組織に再割り当てすることはできません"
 
 #: components/Pagination/Pagination.js:29
 msgid "Go to first page"
@@ -3715,12 +3674,12 @@ msgstr "Google OAuth2"
 msgid "Grafana"
 msgstr "Grafana"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:158
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:157
 msgid "Grafana API key"
 msgstr "Grafana API キー"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:141
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:147
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:146
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -3759,12 +3718,12 @@ msgid "Groups"
 msgstr "グループ"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:330
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:464
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:463
 msgid "HTTP Headers"
 msgstr "HTTP ヘッダー"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:325
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:478
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:477
 msgid "HTTP Method"
 msgstr "HTTP メソッド"
 
@@ -3787,7 +3746,7 @@ msgid "Hipchat"
 msgstr "Hipchat"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:76
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:75
 msgid "Host"
 msgstr "ホスト"
 
@@ -3819,7 +3778,7 @@ msgstr "ホストの失敗"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:103
 msgid "Host Failure"
-msgstr "ホストの失敗"
+msgstr "ホストの障害"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:237
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:264
@@ -3895,7 +3854,7 @@ msgstr "ホスト"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:132
 msgid "Hosts automated"
-msgstr ""
+msgstr "自動化されたホスト"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:114
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:121
@@ -3904,13 +3863,13 @@ msgstr "利用可能なホスト"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:127
 msgid "Hosts imported"
-msgstr ""
+msgstr "インポートされたホスト"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:145
 msgid "Hosts remaining"
 msgstr "残りのホスト"
 
-#: components/Schedule/shared/ScheduleForm.js:153
+#: components/Schedule/shared/ScheduleForm.js:152
 msgid "Hour"
 msgstr "時間"
 
@@ -3928,11 +3887,11 @@ msgstr "ダッシュボード ID"
 msgid "ID of the Panel"
 msgstr "パネル ID"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:165
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:164
 msgid "ID of the dashboard (optional)"
 msgstr "ダッシュボード ID (オプション)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:171
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:170
 msgid "ID of the panel (optional)"
 msgstr "パネル ID (オプション)"
 
@@ -3953,26 +3912,26 @@ msgstr "IRC サーバーアドレス"
 msgid "IRC Server Port"
 msgstr "IRC サーバーポート"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:219
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:218
 msgid "IRC nick"
 msgstr "IRC ニック"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:211
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:210
 msgid "IRC server address"
 msgstr "IRC サーバーアドレス"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:197
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:196
 msgid "IRC server password"
 msgstr "IRC サーバーパスワード"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:202
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:201
 msgid "IRC server port"
 msgstr "IRC サーバーポート"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:214
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:259
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:270
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:341
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:269
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:340
 msgid "Icon URL"
 msgstr "アイコン URL"
 
@@ -4037,7 +3996,7 @@ msgstr "有効にすると、収集されたファクトが保存されるため
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:266
 msgid "If specified, this field will be shown on the node instead of the resource name when viewing the workflow"
-msgstr ""
+msgstr "指定した場合に、ワークフローを表示すると、リソース名の代わりにこのフィールドがノードに表示されます"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:150
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
@@ -4171,7 +4130,7 @@ msgstr "インスタンスグループが見つかりません。"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.js:146
 msgid "Instance group used capacity"
-msgstr ""
+msgstr "インスタンスグループの使用容量"
 
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:122
 msgid "Instance groups"
@@ -4199,16 +4158,12 @@ msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest.
 msgstr "ファイル形式が無効です。有効な Red Hat サブスクリプションマニフェストをアップロードしてください。"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
-#~ msgid "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
-#~ msgstr "無効なリンクターゲットです。子ノードまたは祖先ノードにリンクできません。グラフサイクルはサポートされていません。"
-
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
 msgid "Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported."
-msgstr ""
+msgstr "無効なリンクターゲットです。子ノードまたは祖先ノードにリンクできません。グラフサイクルはサポートされていません。"
 
 #: util/validators.js:33
 msgid "Invalid time format"
-msgstr ""
+msgstr "無効な時間形式"
 
 #: screens/Login/Login.js:131
 msgid "Invalid username or password. Please try again."
@@ -4283,7 +4238,7 @@ msgstr "インベントリーソース"
 
 #: screens/Job/JobDetail/JobDetail.js:234
 msgid "Inventory Source Project"
-msgstr ""
+msgstr "インベントリーソースのプロジェクト"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:87
 msgid "Inventory Source Sync"
@@ -4311,7 +4266,7 @@ msgstr "インベントリー同期"
 
 #: screens/Inventory/InventoryList/InventoryList.js:168
 msgid "Inventory Type"
-msgstr ""
+msgstr "インベントリーのタイプ"
 
 #: components/Workflow/WorkflowNodeHelp.js:71
 msgid "Inventory Update"
@@ -4336,11 +4291,11 @@ msgstr "インベントリーの同期の失敗"
 
 #: components/DataListToolbar/DataListToolbar.js:99
 msgid "Is expanded"
-msgstr ""
+msgstr "展開"
 
 #: components/DataListToolbar/DataListToolbar.js:101
 msgid "Is not expanded"
-msgstr ""
+msgstr "展開なし"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:111
 msgid "Item Failed"
@@ -4383,14 +4338,14 @@ msgstr "JSON タブ"
 msgid "JSON:"
 msgstr "JSON:"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:110
+#: components/Schedule/shared/FrequencyDetailSubform.js:108
 msgid "January"
 msgstr "1 月"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:221
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:66
 msgid "Job"
-msgstr "ジョブ"
+msgstr "Job"
 
 #: components/JobList/JobListItem.js:105
 #: screens/Job/JobDetail/JobDetail.js:480
@@ -4408,11 +4363,11 @@ msgstr "ジョブ削除エラー"
 
 #: screens/Job/JobDetail/JobDetail.js:123
 msgid "Job ID"
-msgstr ""
+msgstr "ジョブ ID:"
 
 #: screens/Dashboard/shared/LineChart.js:128
 msgid "Job Runs"
-msgstr ""
+msgstr "ジョブの実行"
 
 #: components/JobList/JobListItem.js:270
 #: screens/Job/JobDetail/JobDetail.js:307
@@ -4422,7 +4377,7 @@ msgstr "ジョブスライス"
 #: components/JobList/JobListItem.js:275
 #: screens/Job/JobDetail/JobDetail.js:314
 msgid "Job Slice Parent"
-msgstr ""
+msgstr "ジョブスライスの親"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:160
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:234
@@ -4532,11 +4487,11 @@ msgstr "ジョブ"
 msgid "Jobs settings"
 msgstr "ジョブ設定"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:140
+#: components/Schedule/shared/FrequencyDetailSubform.js:138
 msgid "July"
 msgstr "7 月"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:135
+#: components/Schedule/shared/FrequencyDetailSubform.js:133
 msgid "June"
 msgstr "6 月"
 
@@ -4625,7 +4580,7 @@ msgstr "ラベル名"
 msgid "Labels"
 msgstr "ラベル"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:400
+#: components/Schedule/shared/FrequencyDetailSubform.js:398
 msgid "Last"
 msgstr "最終"
 
@@ -4683,7 +4638,7 @@ msgstr "最終実行日時"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:269
 msgid "Last Run"
-msgstr "最終実行"
+msgstr "最終実行日時"
 
 #: components/Lookup/HostFilterLookup.js:109
 msgid "Last job"
@@ -4761,7 +4716,7 @@ msgstr "Insights for Ansible Automation Platform の詳細"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:67
 msgid "Leave this field blank to make the execution environment globally available."
-msgstr "実行環境を世界中で利用できるようにするには、このフィールドを空白のままにします。"
+msgstr "実行環境をシステム全体で利用できるようにするには、このフィールドを空白のままにします。"
 
 #: components/Workflow/WorkflowLegend.js:86
 msgid "Legend"
@@ -4801,13 +4756,13 @@ msgstr "ロード中"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:49
 msgid "Local"
-msgstr ""
+msgstr "ローカル"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:270
 msgid "Local Time Zone"
 msgstr "ローカルタイムゾーン"
 
-#: components/Schedule/shared/ScheduleForm.js:130
+#: components/Schedule/shared/ScheduleForm.js:129
 msgid "Local time zone"
 msgstr "ローカルタイムゾーン"
 
@@ -4862,7 +4817,7 @@ msgstr "マシンの認証情報"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:62
 msgid "Managed"
-msgstr ""
+msgstr "管理"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:148
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:167
@@ -4913,7 +4868,7 @@ msgstr "管理ジョブ"
 msgid "Manual"
 msgstr "手動"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:120
+#: components/Schedule/shared/FrequencyDetailSubform.js:118
 msgid "March"
 msgstr "3 月"
 
@@ -4935,7 +4890,7 @@ msgstr "最大"
 msgid "Maximum length"
 msgstr "最大長"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:130
+#: components/Schedule/shared/FrequencyDetailSubform.js:128
 msgid "May"
 msgstr "5 月"
 
@@ -4950,11 +4905,11 @@ msgstr "メタデータ"
 
 #: screens/Metrics/Metrics.js:200
 msgid "Metric"
-msgstr "メトリック"
+msgstr "メトリクス"
 
 #: screens/Metrics/Metrics.js:172
 msgid "Metrics"
-msgstr "メトリックス"
+msgstr "メトリクス"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:100
 msgid "Microsoft Azure Resource Manager"
@@ -4980,17 +4935,17 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンスの割合"
 
-#: components/Schedule/shared/ScheduleForm.js:152
+#: components/Schedule/shared/ScheduleForm.js:151
 msgid "Minute"
 msgstr "分"
 
 #: screens/Setting/Settings.js:96
 msgid "Miscellaneous Authentication"
-msgstr ""
+msgstr "その他の認証"
 
 #: screens/Setting/SettingList.js:107
 msgid "Miscellaneous Authentication settings"
-msgstr ""
+msgstr "その他の認証設定"
 
 #: screens/Setting/Settings.js:99
 msgid "Miscellaneous System"
@@ -5072,22 +5027,22 @@ msgstr "モジュール"
 
 #: screens/Job/JobDetail/JobDetail.js:409
 msgid "Module Arguments"
-msgstr ""
+msgstr "モジュール引数"
 
 #: screens/Job/JobDetail/JobDetail.js:404
 msgid "Module Name"
-msgstr ""
+msgstr "モジュール名"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:255
+#: components/Schedule/shared/FrequencyDetailSubform.js:253
 msgid "Mon"
 msgstr "月"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:260
-#: components/Schedule/shared/FrequencyDetailSubform.js:416
+#: components/Schedule/shared/FrequencyDetailSubform.js:258
+#: components/Schedule/shared/FrequencyDetailSubform.js:414
 msgid "Monday"
 msgstr "月曜"
 
-#: components/Schedule/shared/ScheduleForm.js:156
+#: components/Schedule/shared/ScheduleForm.js:155
 msgid "Month"
 msgstr "月"
 
@@ -5111,15 +5066,15 @@ msgstr "複数選択"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:91
 msgid "Multiple Choice (multiple select)"
-msgstr "複数の選択 (複数の選択)"
+msgstr "多項選択法 (複数の選択可)"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:86
 msgid "Multiple Choice (single select)"
-msgstr "複数の選択 (単一の選択)"
+msgstr "多項選択法 (単一の選択可)"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:252
 msgid "Multiple Choice Options"
-msgstr "複数の選択オプション"
+msgstr "多項選択法オプション"
 
 #: components/AdHocCommands/AdHocCredentialStep.js:117
 #: components/AdHocCommands/AdHocCredentialStep.js:132
@@ -5170,7 +5125,7 @@ msgstr "複数の選択オプション"
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
-#: components/Schedule/shared/ScheduleForm.js:105
+#: components/Schedule/shared/ScheduleForm.js:104
 #: components/TemplateList/TemplateList.js:190
 #: components/TemplateList/TemplateList.js:223
 #: components/TemplateList/TemplateListItem.js:134
@@ -5340,7 +5295,7 @@ msgstr "名前"
 msgid "Navigation"
 msgstr "ナビゲーション"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:495
+#: components/Schedule/shared/FrequencyDetailSubform.js:493
 #: screens/Dashboard/shared/ChartTooltip.js:106
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:91
 msgid "Never"
@@ -5420,7 +5375,7 @@ msgstr "項目は見つかりません。"
 
 #: screens/Host/HostList/HostListItem.js:94
 msgid "No job data available"
-msgstr ""
+msgstr "利用可能なジョブデータがありません。"
 
 #: screens/Job/JobOutput/HostEventModal.js:130
 msgid "No result found"
@@ -5466,7 +5421,7 @@ msgstr "{pluralizedItemName} が見つかりません"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:264
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:265
 msgid "Node Alias"
-msgstr ""
+msgstr "ノードのエイリアス"
 
 #: components/AssociateModal/AssociateModal.js:23
 #: screens/InstanceGroup/Instances/InstanceList.js:215
@@ -5487,7 +5442,7 @@ msgstr "なし"
 msgid "None (Run Once)"
 msgstr "なし (1回実行)"
 
-#: components/Schedule/shared/ScheduleForm.js:151
+#: components/Schedule/shared/ScheduleForm.js:150
 msgid "None (run once)"
 msgstr "なし (1回実行)"
 
@@ -5528,11 +5483,11 @@ msgstr "ホストがそのグループの子のメンバーでもある場合は
 
 #: components/Lookup/InstanceGroupsLookup.js:90
 msgid "Note: The order in which these are selected sets the execution precedence. Select more than one to enable drag."
-msgstr ""
+msgstr "注: 選択された順序によって、実行の優先順位が設定されます。ドラッグを有効にするには、1 つ以上選択してください。"
 
 #: screens/Organization/shared/OrganizationForm.js:116
 msgid "Note: The order of these credentials sets precedence for the sync and lookup of the content. Select more than one to enable drag."
-msgstr ""
+msgstr "注: 資格情報の順序は、コンテンツの同期と検索の優先順位を設定します。ドラッグを有効にするには、1 つ以上選択してください。"
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:61
 msgid "Note: This field assumes the remote name is \"origin\"."
@@ -5570,7 +5525,7 @@ msgstr "通知テンプレート"
 msgid "Notification Type"
 msgstr "通知タイプ"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:377
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:376
 msgid "Notification color"
 msgstr "通知の色"
 
@@ -5603,7 +5558,7 @@ msgstr "通知タイプ"
 msgid "Notifications"
 msgstr "通知"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:160
+#: components/Schedule/shared/FrequencyDetailSubform.js:158
 msgid "November"
 msgstr "11 月"
 
@@ -5614,11 +5569,11 @@ msgid "OK"
 msgstr "OK"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:42
-#: components/Schedule/shared/FrequencyDetailSubform.js:529
+#: components/Schedule/shared/FrequencyDetailSubform.js:527
 msgid "Occurrences"
 msgstr "実行回数"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:155
+#: components/Schedule/shared/FrequencyDetailSubform.js:153
 msgid "October"
 msgstr "10 月"
 
@@ -5670,11 +5625,11 @@ msgstr "障害発生時"
 msgid "On Success"
 msgstr "成功時"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:517
+#: components/Schedule/shared/FrequencyDetailSubform.js:515
 msgid "On date"
 msgstr "指定日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:241
+#: components/Schedule/shared/FrequencyDetailSubform.js:239
 msgid "On days"
 msgstr "曜日"
 
@@ -5716,7 +5671,7 @@ msgstr "オプション"
 #: screens/Template/Survey/SurveyReorderModal.js:205
 #: screens/Template/Survey/SurveyReorderModal.js:220
 msgid "Order"
-msgstr ""
+msgstr "順序"
 
 #: components/Lookup/ApplicationLookup.js:118
 #: components/Lookup/OrganizationLookup.js:101
@@ -5808,22 +5763,22 @@ msgstr "上書き"
 #: components/PromptDetail/PromptInventorySourceDetail.js:54
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:125
 msgid "Overwrite local groups and hosts from remote inventory source"
-msgstr ""
+msgstr "リモートインベントリーソースからのローカルグループおよびホストを上書きする"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:59
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:130
 msgid "Overwrite local variables from remote inventory source"
-msgstr ""
+msgstr "リモートインベントリーソースのローカル変数を上書きする"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:146
 msgid "Overwrite variables"
 msgstr "変数の上書き"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:489
 msgid "POST"
 msgstr "POST"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:491
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
 msgid "PUT"
 msgstr "PUT"
 
@@ -5836,7 +5791,7 @@ msgstr "Pagerduty"
 msgid "Pagerduty Subdomain"
 msgstr "Pagerduty サブドメイン"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:296
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:295
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty サブドメイン"
 
@@ -5877,7 +5832,7 @@ msgid "Pass extra command line variables to the playbook. This is the -e or --ex
 msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
 #: screens/Login/Login.js:193
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:71
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:70
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:101
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:214
 #: screens/Template/Survey/SurveyQuestionForm.js:82
@@ -5922,11 +5877,11 @@ msgstr "検索を実行して、ホストフィルターを定義します。"
 #: screens/User/UserTokenDetail/UserTokenDetail.js:71
 #: screens/User/UserTokenList/UserTokenList.js:105
 msgid "Personal Access Token"
-msgstr ""
+msgstr "パーソナルアクセストークン"
 
 #: screens/User/UserTokenList/UserTokenListItem.js:26
 msgid "Personal access token"
-msgstr ""
+msgstr "パーソナルアクセストークン"
 
 #: screens/Job/JobOutput/HostEventModal.js:126
 msgid "Play"
@@ -5990,11 +5945,11 @@ msgstr "プレイ"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:149
 msgid "Please add a Schedule to populate this list."
-msgstr ""
+msgstr "スケジュールを追加してこのリストに入力してください。"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:152
 msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
-msgstr ""
+msgstr "このリストに入力するには、スケジュールを追加してください。スケジュールは、テンプレート、プロジェクト、またはインベントリソースに追加できます。"
 
 #: screens/Template/Survey/SurveyList.js:158
 msgid "Please add survey questions."
@@ -6002,13 +5957,13 @@ msgstr "Survey の質問を追加してください。"
 
 #: components/PaginatedTable/PaginatedTable.js:93
 msgid "Please add {pluralizedItemName} to populate this list"
-msgstr "このリストに入力するには {pluralizedItemName} を追加してください"
+msgstr "このリストを生成するには {pluralizedItemName} を追加してください"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:43
 msgid "Please click the Start button to begin."
 msgstr "開始ボタンをクリックして開始してください。"
 
-#: util/validators.js:160
+#: util/validators.js:143
 msgid "Please enter a valid URL"
 msgstr "有効な URL を入力してください。"
 
@@ -6022,7 +5977,7 @@ msgstr "ログインしてください"
 
 #: components/JobList/JobList.js:183
 msgid "Please run a job to populate this list."
-msgstr ""
+msgstr "ジョブを実行してこのリストに入力してください。"
 
 #: components/Schedule/shared/ScheduleForm.js:590
 msgid "Please select a day number between 1 and 31."
@@ -6047,7 +6002,7 @@ msgstr "Pod 仕様の上書き"
 #: screens/InstanceGroup/Instances/InstanceList.js:216
 #: screens/InstanceGroup/Instances/InstanceListItem.js:119
 msgid "Policy Type"
-msgstr ""
+msgstr "ポリシータイプ"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:64
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:29
@@ -6074,7 +6029,7 @@ msgid ""
 msgstr "検索フィルターを使用して、このインベントリーのホストにデータを入力します (例: ansible_facts.ansible_distribution:\"RedHat\")。詳細な構文と例については、ドキュメントを参照してください。構文と例の詳細については、Ansible Tower のドキュメントを参照してください。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:124
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:103
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
 msgid "Port"
 msgstr "ポート"
 
@@ -6086,7 +6041,7 @@ msgstr "複数の親がある場合にこのノードを実行するための前
 msgid ""
 "Press 'Enter' to add more answer choices. One answer\n"
 "choice per line."
-msgstr ""
+msgstr "Enter キーを押して、回答の選択肢をさらに追加します。回答の選択肢は、1 行に 1 つです。"
 
 #: components/CodeEditor/CodeEditor.js:184
 msgid "Press Enter to edit. Press ESC to stop editing."
@@ -6098,7 +6053,7 @@ msgid ""
 "and use the arrow keys to navigate up or down.\n"
 "Press enter to confirm the drag, or any other key to\n"
 "cancel the drag operation."
-msgstr ""
+msgstr "スペースまたは Enter キーを押してドラッグを開始し、矢印キーを使用して上下に移動します。Enter キーを押してドラッグを確認するか、その他のキーを押してドラッグ操作をキャンセルします。"
 
 #: components/AdHocCommands/useAdHocPreviewStep.jsx:17
 #: components/LaunchPrompt/steps/usePreviewStep.js:23
@@ -6180,8 +6135,8 @@ msgstr "プロジェクト"
 msgid "Promote Child Groups and Hosts"
 msgstr "子グループおよびホストのプロモート"
 
-#: components/Schedule/shared/ScheduleForm.js:638
-#: components/Schedule/shared/ScheduleForm.js:641
+#: components/Schedule/shared/ScheduleForm.js:639
+#: components/Schedule/shared/ScheduleForm.js:642
 msgid "Prompt"
 msgstr "プロンプト"
 
@@ -6279,7 +6234,7 @@ msgstr "RADIUS 設定"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.js:142
 msgid "RAM {0}"
-msgstr "RAM {0}"
+msgstr "メモリー {0}"
 
 #: screens/User/shared/UserTokenForm.js:79
 msgid "Read"
@@ -6306,13 +6261,13 @@ msgstr "最近のテンプレートリストタブ"
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:158
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:76
 msgid "Recent jobs"
-msgstr ""
+msgstr "最近のジョブ"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:114
 msgid "Recipient List"
 msgstr "受信者リスト"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:84
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:83
 msgid "Recipient list"
 msgstr "受信者リスト"
 
@@ -6376,11 +6331,11 @@ msgstr "トークンの有効期限の更新"
 
 #: screens/Project/ProjectList/ProjectListItem.js:128
 msgid "Refresh for revision"
-msgstr ""
+msgstr "リビジョンの更新"
 
 #: screens/Project/ProjectList/ProjectListItem.js:130
 msgid "Refresh project revision"
-msgstr ""
+msgstr "プロジェクトリビジョンの更新"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:135
 msgid "Regions"
@@ -6403,11 +6358,11 @@ msgstr "関連するグループ"
 #: components/Search/RelatedLookupTypeInput.js:16
 #: components/Search/RelatedLookupTypeInput.js:24
 msgid "Related search type"
-msgstr ""
+msgstr "関連する検索タイプ"
 
 #: components/Search/RelatedLookupTypeInput.js:19
 msgid "Related search type typeahead"
-msgstr ""
+msgstr "関連する検索タイプの先行入力"
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
@@ -6485,7 +6440,7 @@ msgstr "このリンクを削除すると、ブランチの残りの部分が孤
 
 #: components/SelectedList/DraggableSelectedList.js:83
 msgid "Reorder"
-msgstr ""
+msgstr "並べ替え"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
 msgid "Repeat Frequency"
@@ -6559,11 +6514,11 @@ msgstr "これ以外の値と他のフィルターが含まれる結果を返し
 
 #: components/Search/AdvancedSearch.js:125
 msgid "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
-msgstr "このフィルターおよび他のフィルターを満たす結果を返します。何も選択されていない場合は、これがデフォルトのセットタイプです。"
+msgstr "このフィルターおよび他のフィルターに該当する結果を返します。何も選択されていない場合は、これがデフォルトのセットタイプです。"
 
 #: components/Search/AdvancedSearch.js:131
 msgid "Returns results that satisfy this one or any other filters."
-msgstr "この 1 つまたは他のフィルターを満たす結果を返します。"
+msgstr "この 1 つまたは他のフィルターに該当する結果を返します。"
 
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:49
 #: screens/Setting/shared/RevertButton.js:53
@@ -6648,21 +6603,21 @@ msgstr "コマンドの実行"
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
-msgstr ""
+msgstr "アドホックコマンドの実行"
 
 #: components/AdHocCommands/AdHocCommandsWizard.js:51
 msgid "Run command"
 msgstr "コマンドの実行"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:213
+#: components/Schedule/shared/FrequencyDetailSubform.js:211
 msgid "Run every"
 msgstr "実行する間隔"
 
-#: components/Schedule/shared/ScheduleForm.js:146
+#: components/Schedule/shared/ScheduleForm.js:145
 msgid "Run frequency"
 msgstr "実行頻度"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:327
+#: components/Schedule/shared/FrequencyDetailSubform.js:325
 msgid "Run on"
 msgstr "実行:"
 
@@ -6729,12 +6684,12 @@ msgstr "開始"
 msgid "STATUS:"
 msgstr "ステータス:"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:305
+#: components/Schedule/shared/FrequencyDetailSubform.js:303
 msgid "Sat"
 msgstr "土"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:310
-#: components/Schedule/shared/FrequencyDetailSubform.js:441
+#: components/Schedule/shared/FrequencyDetailSubform.js:308
+#: components/Schedule/shared/FrequencyDetailSubform.js:439
 msgid "Saturday"
 msgstr "土曜"
 
@@ -6743,8 +6698,8 @@ msgstr "土曜"
 #: components/AssociateModal/AssociateModal.js:114
 #: components/FormActionGroup/FormActionGroup.js:13
 #: components/FormActionGroup/FormActionGroup.js:19
-#: components/Schedule/shared/ScheduleForm.js:624
-#: components/Schedule/shared/ScheduleForm.js:630
+#: components/Schedule/shared/ScheduleForm.js:625
+#: components/Schedule/shared/ScheduleForm.js:631
 #: components/Schedule/shared/useSchedulePromptSteps.js:45
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:113
 #: screens/Credential/shared/CredentialForm.js:318
@@ -6795,7 +6750,7 @@ msgstr "スケジュールにルールがありません"
 
 #: components/Schedule/Schedule.js:82
 msgid "Schedule not found."
-msgstr ""
+msgstr "スケジュールが見つかりません。"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:163
 #: components/Schedule/ScheduleList/ScheduleList.js:228
@@ -6858,7 +6813,7 @@ msgstr "検索送信ボタン"
 msgid "Search text input"
 msgstr "テキスト入力の検索"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:391
+#: components/Schedule/shared/FrequencyDetailSubform.js:389
 msgid "Second"
 msgstr "第 2"
 
@@ -6963,7 +6918,7 @@ msgstr "取り消すジョブの選択"
 
 #: screens/Metrics/Metrics.js:204
 msgid "Select a metric"
-msgstr "メトリックの選択"
+msgstr "メトリクスの選択"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:74
 msgid "Select a module"
@@ -6980,7 +6935,7 @@ msgstr "実行環境を編集する前にプロジェクトを選択してくだ
 
 #: screens/Template/Survey/SurveyToolbar.js:80
 msgid "Select a question to delete"
-msgstr ""
+msgstr "削除する質問を選択してください"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:18
 msgid "Select a row to approve"
@@ -7005,9 +6960,9 @@ msgstr "サブスクリプションの選択"
 
 #: components/HostForm/HostForm.js:39
 #: components/Schedule/shared/FrequencyDetailSubform.js:56
-#: components/Schedule/shared/FrequencyDetailSubform.js:84
-#: components/Schedule/shared/FrequencyDetailSubform.js:88
-#: components/Schedule/shared/FrequencyDetailSubform.js:96
+#: components/Schedule/shared/FrequencyDetailSubform.js:82
+#: components/Schedule/shared/FrequencyDetailSubform.js:86
+#: components/Schedule/shared/FrequencyDetailSubform.js:94
 #: components/Schedule/shared/ScheduleForm.js:93
 #: components/Schedule/shared/ScheduleForm.js:97
 #: screens/Credential/shared/CredentialForm.js:44
@@ -7026,7 +6981,7 @@ msgstr "サブスクリプションの選択"
 #: screens/Inventory/shared/SmartInventoryForm.js:67
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:24
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:432
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:431
 #: screens/Project/shared/ProjectForm.js:189
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.js:39
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:36
@@ -7056,15 +7011,15 @@ msgstr ""
 
 #: screens/Metrics/Metrics.js:235
 msgid "Select an instance and a metric to show chart"
-msgstr "グラフを表示するインスタンスとメトリックを選択します"
+msgstr "グラフを表示するインスタンスとメトリクスを選択します"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
-msgstr ""
+msgstr "ワークフローのインベントリーを選択してください。このインベントリーが、インベントリーをプロンプトするすべてのワークフローノードに適用されます。"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:129
 msgid "Select an option"
-msgstr ""
+msgstr "オプションを選択してください"
 
 #: screens/Project/shared/ProjectForm.js:200
 msgid "Select an organization before editing the default execution environment."
@@ -7097,7 +7052,7 @@ msgstr "ジョブタイプの選択"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:177
 msgid "Select option(s)"
-msgstr ""
+msgstr "オプションを選択してください"
 
 #: screens/Dashboard/DashboardGraph.js:95
 #: screens/Dashboard/DashboardGraph.js:96
@@ -7144,11 +7099,7 @@ msgstr "この組織を実行するインスタンスグループを選択しま
 
 #: screens/User/shared/UserTokenForm.js:49
 msgid "Select the application that this token will belong to, or leave this field empty to create a Personal Access Token."
-msgstr ""
-
-#: screens/User/shared/UserTokenForm.js:49
-#~ msgid "Select the application that this token will belong to."
-#~ msgstr "このトークンが属するアプリケーションを選択します。"
+msgstr "このトークンが属するアプリケーションを選択するか、このフィールドを空のままにしてパーソナルアクセストークンを作成します。"
 
 #: components/AdHocCommands/AdHocCredentialStep.js:104
 msgid "Select the credential you want to use when accessing the remote hosts to run the command. Choose the credential containing the username and SSH key or password that Ansible will need to log into the remote hosts."
@@ -7240,17 +7191,17 @@ msgstr "選択したカテゴリー"
 #: components/Schedule/shared/ScheduleForm.js:573
 #: components/Schedule/shared/ScheduleForm.js:574
 msgid "Selected date range must have at least 1 schedule occurrence."
-msgstr ""
+msgstr "選択した日付範囲には、少なくとも 1 つのスケジュールオカレンスが必要です。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:119
 msgid "Sender Email"
 msgstr "送信者のメール"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:95
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:94
 msgid "Sender e-mail"
 msgstr "送信者のメール"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:150
+#: components/Schedule/shared/FrequencyDetailSubform.js:148
 msgid "September"
 msgstr "9 月"
 
@@ -7289,7 +7240,7 @@ msgstr "タイプの設定"
 
 #: components/Search/AdvancedSearch.js:148
 msgid "Set type disabled for related search field fuzzy searches"
-msgstr ""
+msgstr "関連する検索フィールドのあいまい検索でタイプを無効に設定"
 
 #: components/Search/AdvancedSearch.js:107
 msgid "Set type select"
@@ -7335,10 +7286,6 @@ msgstr "表示"
 #: screens/Template/shared/JobTemplateForm.js:495
 msgid "Show Changes"
 msgstr "変更の表示"
-
-#: screens/Inventory/InventoryGroups/InventoryGroupsList.js:131
-#~ msgid "Show all groups"
-#~ msgstr "すべてのグループの表示"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:193
 #: components/AdHocCommands/AdHocDetailsStep.js:194
@@ -7468,7 +7415,7 @@ msgstr "前のステップのいくつかにエラーがあります"
 
 #: screens/Host/HostList/SmartInventoryButton.js:12
 msgid "Some search modifiers like not__ and __search are not supported in Smart Inventory host filters.  Remove these to create a new Smart Inventory with this filter."
-msgstr ""
+msgstr "not__、__search などの一部の検索修飾子は、Smart Inventory ホストフィルターではサポートされていません。これらを削除し、このフィルターを使用して新しい Smart Inventory を作成します。"
 
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginTestAlert.js:39
 msgid "Something went wrong with the request to test this credential and metadata."
@@ -7481,11 +7428,6 @@ msgstr "問題が発生しました..."
 #: components/Sort/Sort.js:129
 msgid "Sort"
 msgstr "並び替え"
-
-#: screens/Template/Survey/SurveyListItem.js:72
-#: screens/Template/Survey/SurveyListItem.js:73
-#~ msgid "Sort question order"
-#~ msgstr "質問の順序の並べ替え"
 
 #: components/JobList/JobListItem.js:159
 #: components/PromptDetail/PromptInventorySourceDetail.js:102
@@ -7532,7 +7474,7 @@ msgstr "ソースコントロールの Refspec"
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:176
 msgid "Source Control Revision"
-msgstr ""
+msgstr "ソースコントロールの改訂"
 
 #: components/PromptDetail/PromptProjectDetail.js:94
 #: screens/Project/ProjectDetail/ProjectDetail.js:172
@@ -7578,7 +7520,7 @@ msgstr "ソースコントロールのブランチ"
 msgid "Source details"
 msgstr "ソース詳細"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:399
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:398
 msgid "Source phone number"
 msgstr "発信元の電話番号"
 
@@ -7596,13 +7538,13 @@ msgstr "プロジェクトから取得"
 msgid "Sources"
 msgstr "ソース"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:466
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:465
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
 msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:380
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:379
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
@@ -7634,6 +7576,7 @@ msgstr "標準出力タブ"
 
 #: components/NotificationList/NotificationListItem.js:52
 #: components/NotificationList/NotificationListItem.js:53
+#: components/Schedule/shared/ScheduleForm.js:119
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:47
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:53
 msgid "Start"
@@ -7643,14 +7586,6 @@ msgstr "開始"
 #: components/JobList/JobListItem.js:92
 msgid "Start Time"
 msgstr "開始時間"
-
-#: components/Schedule/shared/DateTimePicker.js:51
-msgid "Start date"
-msgstr ""
-
-#: components/Schedule/shared/ScheduleForm.js:120
-msgid "Start date/time"
-msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:403
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7670,15 +7605,11 @@ msgstr "同期プロセスの開始"
 msgid "Start sync source"
 msgstr "同期ソースの開始"
 
-#: components/Schedule/shared/DateTimePicker.js:61
-msgid "Start time"
-msgstr ""
-
 #: screens/Job/JobDetail/JobDetail.js:139
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:76
 msgid "Started"
-msgstr "開始"
+msgstr "開始日時"
 
 #: components/JobList/JobList.js:217
 #: components/JobList/JobList.js:238
@@ -7697,7 +7628,7 @@ msgstr "開始"
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:223
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:79
 msgid "Status"
-msgstr "ステータス"
+msgstr "Status"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:92
 msgid "Stdout"
@@ -7794,12 +7725,12 @@ msgstr "成功ジョブ"
 msgid "Successfully copied to clipboard!"
 msgstr "クリップボードへのコピーに成功しました!"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:245
+#: components/Schedule/shared/FrequencyDetailSubform.js:243
 msgid "Sun"
 msgstr "日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:250
-#: components/Schedule/shared/FrequencyDetailSubform.js:411
+#: components/Schedule/shared/FrequencyDetailSubform.js:248
+#: components/Schedule/shared/FrequencyDetailSubform.js:409
 msgid "Sunday"
 msgstr "日曜"
 
@@ -7812,23 +7743,15 @@ msgstr "Survey"
 
 #: screens/Template/Survey/SurveyToolbar.js:102
 msgid "Survey Disabled"
-msgstr ""
+msgstr "Survey の無効化"
 
 #: screens/Template/Survey/SurveyToolbar.js:101
 msgid "Survey Enabled"
-msgstr ""
-
-#: screens/Template/Survey/SurveyList.js:132
-#~ msgid "Survey List"
-#~ msgstr "Survey 一覧"
-
-#: screens/Template/Survey/SurveyPreviewModal.js:31
-#~ msgid "Survey Preview"
-#~ msgstr "Survey プレビュー"
+msgstr "Survey の有効化"
 
 #: screens/Template/Survey/SurveyReorderModal.js:179
 msgid "Survey Question Order"
-msgstr ""
+msgstr "Survey 質問の順序"
 
 #: screens/Template/Survey/SurveyToolbar.js:99
 msgid "Survey Toggle"
@@ -7876,7 +7799,7 @@ msgstr "リビジョンの同期"
 
 #: screens/Project/ProjectList/ProjectListItem.js:118
 msgid "Syncing"
-msgstr ""
+msgstr "同期"
 
 #: screens/Setting/SettingList.js:98
 #: screens/User/UserRoles/UserRolesListItem.js:18
@@ -7940,16 +7863,16 @@ msgstr "タグは、Playbook のサイズが大きい場合にプレイまたは
 msgid "Tags for the Annotation"
 msgstr "アノテーションのタグ"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:177
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:176
 msgid "Tags for the annotation (optional)"
 msgstr "アノテーションのタグ (オプション)"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:199
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:249
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:313
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:250
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:327
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:449
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:249
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:326
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:448
 msgid "Target URL"
 msgstr "ターゲット URL"
 
@@ -8059,23 +7982,19 @@ msgstr "Textarea"
 msgid "That value was not found. Please enter or select a valid value."
 msgstr "値が見つかりませんでした。有効な値を入力または選択してください。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:381
+#: components/Schedule/shared/FrequencyDetailSubform.js:379
 msgid "The"
-msgstr " "
+msgstr "その"
 
 #: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.js:200
 msgid "The Execution Environment to be used when one has not been configured for a job template."
 msgstr "ジョブテンプレート用に構成されていない場合に使用される実行環境。"
 
 #: screens/Application/shared/ApplicationForm.js:86
-#~ msgid "The Grant type the user must use for acquire tokens for this application"
-#~ msgstr "ユーザーがこのアプリケーションのトークンを取得するために使用する必要のある付与タイプです。"
-
-#: screens/Application/shared/ApplicationForm.js:86
 msgid "The Grant type the user must use to acquire tokens for this application"
-msgstr ""
+msgstr "ユーザーがこのアプリケーションのトークンを取得するために使用する必要のある付与タイプです。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:119
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
@@ -8089,7 +8008,7 @@ msgid ""
 "timeout."
 msgstr "ジョブが取り消される前の実行時間 (秒数)。デフォルト値は 0 で、ジョブのタイムアウトがありません。"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:152
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:151
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
@@ -8109,7 +8028,8 @@ msgid ""
 "The execution environment that will be used when launching\n"
 "this job template. The resolved execution environment can be overridden by\n"
 "explicitly assigning a different one to this job template."
-msgstr ""
+msgstr "このジョブテンプレートを起動するときに使用される実行環境。\n"
+"解決された実行環境は、このジョブテンプレートに別の環境を明示的に割り当てることで上書きできます。"
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:73
 msgid ""
@@ -8153,16 +8073,16 @@ msgstr "インベントリー内のホストをターゲットにするために
 
 #: screens/Project/ProjectList/ProjectListItem.js:116
 msgid "The project is currently syncing and the revision will be available after the sync is complete."
-msgstr ""
+msgstr "プロジェクトは現在同期中であり、同期が完了するとリビジョンが利用可能になります。"
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:192
 #: screens/Project/ProjectList/ProjectListItem.js:103
 msgid "The project must be synced before a revision is available."
-msgstr ""
+msgstr "リビジョンが利用可能になる前に、プロジェクトを同期する必要があります。"
 
 #: screens/Project/ProjectList/ProjectListItem.js:126
 msgid "The project revision is currently out of date.  Please refresh to fetch the most recent revision."
-msgstr ""
+msgstr "プロジェクトのリビジョンが現在古くなっています。更新して最新のリビジョンを取得してください。"
 
 #: components/Workflow/WorkflowNodeHelp.js:139
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:126
@@ -8174,17 +8094,7 @@ msgid ""
 "The suggested format for variable names is lowercase and\n"
 "underscore-separated (for example, foo_bar, user_id, host_name,\n"
 "etc.). Variable names with spaces are not allowed."
-msgstr "推奨される変数名の形式は小文字のみを使用し、それらをアンダースコアで区切ります (foo_bar、user_id、host_name など)。スペースを含む変数名は許可されません。"
-
-#: screens/Project/shared/ProjectSubForms/ManualSubForm.js:47
-#~ msgid ""
-#~ "There are no available playbook directories in {project_base_dir}.\n"
-#~ "Either that directory is empty, or all of the contents are already\n"
-#~ "assigned to other projects. Create a new directory there and make\n"
-#~ "sure the playbook files can be read by the \"awx\" system user,\n"
-#~ "or have {0} directly retrieve your playbooks from\n"
-#~ "source control using the Source Control Type option above."
-#~ msgstr ""
+msgstr "アンダースコアで区切った小文字のみを使用する変数名が推奨の形式となっています (foo_bar、user_id、host_name など)。変数名にスペースを含めることはできません。"
 
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:48
 msgid ""
@@ -8194,7 +8104,7 @@ msgid ""
 "sure the playbook files can be read by the \"awx\" system user,\n"
 "or have {brandName} directly retrieve your playbooks from\n"
 "source control using the Source Control Type option above."
-msgstr ""
+msgstr "{project_base_dir} に利用可能な Playbook ディレクトリーはありません。そのディレクトリーが空であるか、すべてのコンテンツがすでに他のプロジェクトに割り当てられています。そこに新しいディレクトリーを作成し、「awx」システムユーザーが Playbook ファイルを読み取れるか、{brandName} が、上記のソースコントロールタイプオプションを使用して、ソースコントロールから Playbook を直接取得できるようにしてください。"
 
 #: screens/Template/Survey/MultipleChoiceField.js:34
 msgid "There must be a value in at least one input"
@@ -8217,12 +8127,8 @@ msgid "There was an error saving the workflow."
 msgstr "ワークフローの保存中にエラーが発生しました。"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:68
-#~ msgid "These are the modules that {0} supports running commands against."
-#~ msgstr ""
-
-#: components/AdHocCommands/AdHocDetailsStep.js:68
 msgid "These are the modules that {brandName} supports running commands against."
-msgstr ""
+msgstr "これらは {brandName} がコマンドの実行をサポートするモジュールです。"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:138
 msgid "These are the verbosity levels for standard out of the command run that are supported."
@@ -8236,7 +8142,7 @@ msgstr "これらの引数は、指定されたモジュールで使用されま
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
 msgstr "これらの引数は、指定されたモジュールで使用されます。クリックすると {0} の情報を表示できます。"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:393
+#: components/Schedule/shared/FrequencyDetailSubform.js:391
 msgid "Third"
 msgstr "第 3"
 
@@ -8303,15 +8209,15 @@ msgstr "有効な変数が設定されていない限り、このフィールド
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:61
 msgid "This field is must not be blank"
-msgstr ""
+msgstr "このフィールドには空白を指定できない"
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:55
 msgid "This field is must not be blank."
-msgstr ""
+msgstr "このフィールドには空白を指定できません。"
 
 #: components/LaunchPrompt/steps/useCredentialPasswordsStep.js:50
 msgid "This field may not be blank"
-msgstr "このフィールドは空白ではありません"
+msgstr "このフィールドに空白を指定できません"
 
 #: util/validators.js:127
 msgid "This field must be a number"
@@ -8327,13 +8233,13 @@ msgstr "このフィールドは、{min} から {max} の間の値である必�
 
 #: util/validators.js:64
 msgid "This field must be a number and have a value greater than {min}"
-msgstr ""
+msgstr "このフィールドは、{0} から {1} の間の値である必要があります"
 
 #: util/validators.js:61
 msgid "This field must be a number and have a value less than {max}"
-msgstr ""
+msgstr "このフィールドは、{0} から {1} の間の値である必要があります"
 
-#: util/validators.js:184
+#: util/validators.js:167
 msgid "This field must be a regular expression"
 msgstr "このフィールドは正規表現である必要があります"
 
@@ -8385,7 +8291,7 @@ msgstr "このインスタンスグループは、現在他のリソースで使
 
 #: components/LaunchPrompt/steps/useInventoryStep.js:59
 msgid "This inventory is applied to all workflow nodes within this workflow ({0}) that prompt for an inventory."
-msgstr ""
+msgstr "このインベントリーが、このワークフロー ({0}) 内の、インベントリーをプロンプトするすべてのワークフローノードに適用されます。"
 
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:129
 msgid "This inventory is currently being used by other resources. Are you sure you want to delete it?"
@@ -8449,12 +8355,12 @@ msgstr "このワークフローには、ノードが構成されていません
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "このワークフロージョブテンプレートは、現在他のリソースによって使用されています。削除してもよろしいですか?"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:285
+#: components/Schedule/shared/FrequencyDetailSubform.js:283
 msgid "Thu"
 msgstr "木"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:290
-#: components/Schedule/shared/FrequencyDetailSubform.js:431
+#: components/Schedule/shared/FrequencyDetailSubform.js:288
+#: components/Schedule/shared/FrequencyDetailSubform.js:429
 msgid "Thursday"
 msgstr "木曜"
 
@@ -8490,7 +8396,7 @@ msgstr "タイムアウト"
 
 #: components/PromptDetail/PromptDetail.js:123
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:129
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:113
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:112
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:232
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:177
 #: screens/Template/shared/JobTemplateForm.js:488
@@ -8507,7 +8413,7 @@ msgstr "タイムアウトの秒"
 
 #: screens/Template/Survey/SurveyReorderModal.js:182
 msgid "To reoder the survey questions drag and drop them in the desired location."
-msgstr ""
+msgstr "Survey の質問を再読み込みするには、目的の場所にドラッグアンドドロップします。"
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:93
 msgid "Toggle Legend"
@@ -8560,7 +8466,7 @@ msgstr "スケジュールの切り替え"
 msgid "Toggle tools"
 msgstr "ツールの切り替え"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:370
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:369
 #: screens/User/UserTokens/UserTokens.js:64
 msgid "Token"
 msgstr "トークン"
@@ -8633,12 +8539,12 @@ msgstr "トライアル"
 msgid "True"
 msgstr "True"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:265
+#: components/Schedule/shared/FrequencyDetailSubform.js:263
 msgid "Tue"
 msgstr "火"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:270
-#: components/Schedule/shared/FrequencyDetailSubform.js:421
+#: components/Schedule/shared/FrequencyDetailSubform.js:268
+#: components/Schedule/shared/FrequencyDetailSubform.js:419
 msgid "Tuesday"
 msgstr "火曜"
 
@@ -8698,7 +8604,7 @@ msgid "Type"
 msgstr "タイプ"
 
 #: screens/Credential/shared/TypeInputsSubForm.js:25
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:46
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:45
 #: screens/Project/shared/ProjectForm.js:246
 msgid "Type Details"
 msgstr "タイプの詳細"
@@ -8707,15 +8613,15 @@ msgstr "タイプの詳細"
 msgid ""
 "Type answer then click checkbox on right to select answer as\n"
 "default."
-msgstr ""
+msgstr "回答を入力し、右側のチェックボックスをクリックして、回答をデフォルトとして選択します。"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:50
 msgid "UTC"
-msgstr ""
+msgstr "UTC"
 
 #: components/HostForm/HostForm.js:62
 msgid "Unable to change inventory on a host"
-msgstr ""
+msgstr "ホストのインベントリーを変更できません。"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:84
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:46
@@ -8725,7 +8631,7 @@ msgstr "利用不可"
 
 #: components/StatusLabel/StatusLabel.js:64
 msgid "Undefined"
-msgstr ""
+msgstr "未定義"
 
 #: screens/Setting/shared/RevertButton.js:53
 #: screens/Setting/shared/RevertButton.js:62
@@ -8734,7 +8640,7 @@ msgstr "元に戻す"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Unfollow"
-msgstr ""
+msgstr "フォロー解除"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:122
 msgid "Unlimited"
@@ -8784,15 +8690,11 @@ msgstr "オプションの更新"
 #: components/PromptDetail/PromptProjectDetail.js:61
 #: screens/Project/ProjectDetail/ProjectDetail.js:102
 msgid "Update revision on job launch"
-msgstr ""
-
-#: screens/Setting/SettingList.js:87
-#~ msgid "Update settings pertaining to Jobs within {0}"
-#~ msgstr ""
+msgstr "ジョブ起動時のリビジョン更新"
 
 #: screens/Setting/SettingList.js:88
 msgid "Update settings pertaining to Jobs within {brandName}"
-msgstr ""
+msgstr "{brandName} 内のジョブを含む設定の更新"
 
 #: screens/Template/shared/WebhookSubForm.js:194
 msgid "Update webhook key"
@@ -8811,12 +8713,12 @@ msgid "Upload a Red Hat Subscription Manifest containing your subscription. To g
 msgstr "サブスクリプションを含む Red Hat Subscription Manifest をアップロードします。サブスクリプションマニフェストを生成するには、Red Hat カスタマーポータルの <0>サブスクリプション割り当て</0> にアクセスします。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:45
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:129
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:128
 msgid "Use SSL"
 msgstr "SSL の使用"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:50
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:134
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:133
 msgid "Use TLS"
 msgstr "TLS の使用"
 
@@ -8829,7 +8731,7 @@ msgstr "カスタムメッセージを使用して、ジョブの開始時、成
 
 #: screens/InstanceGroup/Instances/InstanceList.js:220
 msgid "Used Capacity"
-msgstr ""
+msgstr "使用済み容量"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:83
@@ -8896,10 +8798,10 @@ msgstr "ユーザートークン"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:204
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:254
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:308
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:65
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:258
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:335
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:438
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:64
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:257
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:334
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:437
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:206
 #: screens/User/UserDetail/UserDetail.js:68
@@ -9050,7 +8952,7 @@ msgstr "ロギング設定の表示"
 
 #: screens/Setting/MiscAuthentication/MiscAuthentication.js:32
 msgid "View Miscellaneous Authentication settings"
-msgstr ""
+msgstr "その他の認証設定の表示"
 
 #: screens/Setting/MiscSystem/MiscSystem.js:32
 msgid "View Miscellaneous System settings"
@@ -9331,26 +9233,26 @@ msgstr "Webhook サービスは、これを共有シークレットとして使�
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:147
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:62
 msgid "Webhooks"
-msgstr ""
+msgstr "Webhook"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:275
+#: components/Schedule/shared/FrequencyDetailSubform.js:273
 msgid "Wed"
 msgstr "水"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:280
-#: components/Schedule/shared/FrequencyDetailSubform.js:426
+#: components/Schedule/shared/FrequencyDetailSubform.js:278
+#: components/Schedule/shared/FrequencyDetailSubform.js:424
 msgid "Wednesday"
 msgstr "水曜"
 
-#: components/Schedule/shared/ScheduleForm.js:155
+#: components/Schedule/shared/ScheduleForm.js:154
 msgid "Week"
 msgstr "週"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:447
+#: components/Schedule/shared/FrequencyDetailSubform.js:445
 msgid "Weekday"
 msgstr "平日"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:452
+#: components/Schedule/shared/FrequencyDetailSubform.js:450
 msgid "Weekend day"
 msgstr "週末"
 
@@ -9501,7 +9403,7 @@ msgstr "書き込み"
 msgid "YAML:"
 msgstr "YAML:"
 
-#: components/Schedule/shared/ScheduleForm.js:157
+#: components/Schedule/shared/ScheduleForm.js:156
 msgid "Year"
 msgstr "年"
 
@@ -9565,10 +9467,6 @@ msgstr "新規 Webhook キーは保存時に生成されます。"
 msgid "a new webhook url will be generated on save."
 msgstr "新規 Webhook URL は保存時に生成されます。"
 
-#: screens/Template/Survey/SurveyListItem.js:157
-#~ msgid "actions"
-#~ msgstr "アクション"
-
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:181
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:210
 msgid "and click on Update Revision on Launch"
@@ -9589,11 +9487,11 @@ msgstr "削除のキャンセル"
 
 #: screens/Setting/shared/SharedFields.js:311
 msgid "cancel edit login redirect"
-msgstr ""
+msgstr "ログインリダイレクトの編集をキャンセルする"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:232
 msgid "command"
-msgstr "command"
+msgstr "コマンド"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:267
 #: screens/Template/Survey/SurveyList.js:73
@@ -9607,7 +9505,7 @@ msgstr "関連付けの解除の確認"
 
 #: screens/Setting/shared/SharedFields.js:300
 msgid "confirm edit login redirect"
-msgstr ""
+msgstr "ログインリダイレクトの編集を確認"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:145
 msgid "deletion error"
@@ -9639,10 +9537,6 @@ msgstr "ドキュメント"
 #: screens/User/UserDetail/UserDetail.js:92
 msgid "edit"
 msgstr "編集"
-
-#: screens/Template/Survey/SurveyListItem.js:163
-#~ msgid "edit survey"
-#~ msgstr ""
 
 #: screens/Template/Survey/SurveyListItem.js:65
 msgid "encrypted"
@@ -9685,20 +9579,12 @@ msgstr "ログインタイプ"
 msgid "min"
 msgstr "分"
 
-#: screens/Template/Survey/SurveyListItem.js:91
-#~ msgid "move down"
-#~ msgstr "下に移動"
-
-#: screens/Template/Survey/SurveyListItem.js:80
-#~ msgid "move up"
-#~ msgstr "上に移動"
-
 #: screens/Template/Survey/MultipleChoiceField.js:76
 msgid "new choice"
 msgstr "新しい選択"
 
 #: components/Pagination/Pagination.js:36
-#: components/Schedule/shared/FrequencyDetailSubform.js:463
+#: components/Schedule/shared/FrequencyDetailSubform.js:461
 msgid "of"
 msgstr "/"
 
@@ -9741,7 +9627,7 @@ msgstr "冗長性の選択"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:135
 msgid "since"
-msgstr ""
+msgstr "次以降"
 
 #: screens/User/UserList/UserListItem.js:49
 msgid "social login"
@@ -9784,13 +9670,9 @@ msgstr "{0, plural, one {以下のグループを削除してもよろしいで�
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr "{0, plural, one {グループを削除しますか?} other {グループを削除しますか?}}"
 
-#: util/validators.js:138
-msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
-msgstr ""
-
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:178
 msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
-msgstr ""
+msgstr "{0, plural, one {次のインスタンスグループは削除できません} other {次のインスタンスグループは削除できません}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:232
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
@@ -9822,7 +9704,7 @@ msgstr "{0, plural, one {このインスタンスグループは、現在他の�
 
 #: screens/Inventory/InventoryList/InventoryList.js:225
 msgid "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {このインベントリーは、現在いくつかのテンプレートで使用されています。削除してもよろしいですか?} other {これらのインベントリーを削除すると、そのインベントリーに依存しているいくつかのテンプレートに影響を与える可能性があります。削除してもよろしいですか?}}"
+msgstr "{0, plural, one {このインベントリーは、現在一部のテンプレートで使用されています。削除してもよろしいですか?} other {これらのインベントリーを削除すると、このインベントリーに依存しているテンプレートに影響を与える可能性があります。削除してもよろしいですか?}}"
 
 #: screens/Inventory/InventorySources/InventorySourceList.js:197
 msgid "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
@@ -9856,10 +9738,6 @@ msgstr "{0} (削除済)"
 msgid "{0} more"
 msgstr "{0} 以上"
 
-#: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:138
-#~ msgid "{0} since {1}"
-#~ msgstr ""
-
 #: screens/Inventory/InventoryList/InventoryListItem.js:61
 #~ msgid "{0} sources with sync failures."
 #~ msgstr "{0} ソースが同期に失敗しました。"
@@ -9870,47 +9748,47 @@ msgstr "{brandName} ロゴ"
 
 #: components/DetailList/UserDateDetail.js:23
 msgid "{dateStr} by <0>{username}</0>"
-msgstr "<0>{username}</0> による {dateStr}"
+msgstr "<0>{username}</0> ({dateStr})"
 
 #: screens/InstanceGroup/Instances/InstanceListItem.js:129
 msgid "{forks, plural, one {# fork} other {# forks}}"
-msgstr "{forks, plural, one {# フォーク} other {# フォーク}}"
+msgstr "{forks, plural, one {フォーク #} other {フォーク #}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:190
+#: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {day} other {days}}"
 msgstr "{intervalValue, plural, one {日} other {日}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:188
+#: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {hour} other {hours}}"
 msgstr "{intervalValue, plural, one {時間} other {時間}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:186
+#: components/Schedule/shared/FrequencyDetailSubform.js:184
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
 msgstr "{intervalValue, plural, one {分} other {分}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:194
+#: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {month} other {months}}"
 msgstr "{intervalValue, plural, one {月} other {月}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:192
+#: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {week} other {weeks}}"
 msgstr "{intervalValue, plural, one {週} other {週}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:196
+#: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {年} other {年}}"
 
 #: components/Schedule/shared/DateTimePicker.js:49
-#~ msgid "{label} date"
-#~ msgstr ""
+msgid "{label} date"
+msgstr "{ラベル} 日"
 
 #: components/Schedule/shared/DateTimePicker.js:57
-#~ msgid "{label} time"
-#~ msgstr ""
+msgid "{label} time"
+msgstr "{ラベル} 時間"
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
-msgstr "{minutes} 分 {seconds} 分"
+msgstr "{minutes} 分 {seconds} 秒"
 
 #: components/JobList/JobListCancelButton.js:106
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
@@ -9923,10 +9801,6 @@ msgstr "{numJobsToCancel, plural, one {このアクションは、次のジョ�
 #: components/JobList/JobListCancelButton.js:91
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
-
-#: components/DetailList/NumberSinceDetail.js:19
-#~ msgid "{number} since {dateStr}"
-#~ msgstr ""
 
 #: components/PaginatedTable/PaginatedTable.js:79
 msgid "{pluralizedItemName} List"
