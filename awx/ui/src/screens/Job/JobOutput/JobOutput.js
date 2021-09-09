@@ -34,7 +34,8 @@ import connectJobSocket, { closeWebSocket } from './connectJobSocket';
 import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
 import { fetchCount } from './loadJobEvents';
-import useJobEvents from './useJobEvents';
+// import useJobEvents from './useJobEvents';
+import JobEventsTree from './JobEventsTree';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'counter',
@@ -95,16 +96,23 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollTop = useRef(0);
   const scrollHeight = useRef(0);
   const history = useHistory();
-  const {
-    events,
-    remoteRowCount,
-    cssMap,
-    addEvents,
-    setRemoteRowCount,
-    eventHasCollapsedParent,
-    toggleEventIsCollapsed,
-    getEventForRow,
-  } = useJobEvents(job);
+  // const {
+  //   events,
+  //   remoteRowCount,
+  //   cssMap,
+  //   addEvents,
+  //   setRemoteRowCount,
+  //   eventHasCollapsedParent,
+  //   toggleEventIsCollapsed,
+  //   getEventForRow,
+  // } = useJobEvents(job);
+  // TODO: merge into one state var?
+  const [tree, setTree] = useState([]);
+  const [events, setEvents] = useState({});
+  const [uuidMap, setUuidMap] = useState({});
+  const [cssMap, setCssMap] = useState({});
+  const [remoteRowCount, setRemoteRowCount] = useState(0);
+
   const [contentError, setContentError] = useState(null);
   const [currentlyLoading, setCurrentlyLoading] = useState([]);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -116,6 +124,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     isJobRunning(job.status)
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
+
+  const eventsTree = new JobEventsTree({
+    tree,
+    events,
+    uuidMap,
+    // cssMap,
+    // nodesWithoutParents,
+  });
 
   useInterval(
     () => {
@@ -242,7 +258,12 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       if (!isMounted.current) {
         return;
       }
-      addEvents(fetchedEvents, count);
+      eventsTree.addEvents(fetchedEvents);
+      // TODO
+      // eventsTree.setTotalRowCount(count);
+      setRemoteRowCount(count);
+      setTree(eventsTree.getEventTree());
+      setEvents(eventsTree.getAllEvents());
     } catch (err) {
       setContentError(err);
     } finally {
@@ -259,10 +280,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const isRowLoaded = ({ index }) => {
-    if (events[index]) {
-      return true;
-    }
-    return currentlyLoading.includes(index);
+    return eventsTree.getEventForRow(index) !== null;
+    // if (events[index]) {
+    //   return true;
+    // }
+    // return currentlyLoading.includes(index);
   };
 
   const handleHostEventClick = (hostEventToOpen) => {
@@ -278,8 +300,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current && isFollowModeEnabled) {
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
-    // const event = events[index];
-    const { event, isCollapsed } = getEventForRow(index);
+    const { event, node } = eventsTree.getEventForRow(index) || {};
     let actualLineTextHtml = [];
     if (event) {
       const { lineTextHtml } = getLineTextHtml(event);
@@ -305,10 +326,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               index={index}
               event={event}
               measure={measure}
-              isVisible={!eventHasCollapsedParent(event)}
-              isCollapsed={isCollapsed}
+              isCollapsed={node.isCollapsed}
+              hasChildren={node.children.length}
               onToggleCollapsed={() => {
-                toggleEventIsCollapsed(index);
+                eventsTree.toggleNodeIsCollapsed(event.uuid);
+                setTree([...eventsTree.getEventTree()]);
               }}
             />
           ) : (
@@ -358,7 +380,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           return;
         }
 
-        addEvents(response.data.results);
+        eventsTree.addEvents(response.data.results);
 
         setCurrentlyLoading((prevCurrentlyLoading) =>
           prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
