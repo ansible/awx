@@ -1342,7 +1342,13 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     model = ExecutionEnvironment
     select_related = ('organization',)
-    prefetch_related = ('organization__admin_role', 'organization__execution_environment_admin_role')
+    prefetch_related = (
+        'organization__admin_role',
+        'organization__execution_environment_admin_role',
+        'created_by',
+        'modified_by',
+        'credential__credential_type',
+    )
 
     def filtered_queryset(self):
         return ExecutionEnvironment.objects.filter(

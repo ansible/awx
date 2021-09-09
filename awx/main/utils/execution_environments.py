@@ -10,19 +10,8 @@ def get_control_plane_execution_environment():
     return ExecutionEnvironment.objects.filter(organization=None, managed=True).first()
 
 
-def get_default_execution_environment():
-    if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-        return settings.DEFAULT_EXECUTION_ENVIRONMENT
-    installed_default = ExecutionEnvironment.objects.filter(
-        image__in=[ee['image'] for ee in settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS], organization=None, managed=False
-    ).first()
-    if installed_default:
-        return installed_default
-    return ExecutionEnvironment.objects.filter(organization=None, managed=False).first()
-
-
 def get_default_pod_spec():
-    ee = get_default_execution_environment()
+    ee = ExecutionEnvironment.objects.get_default_execution_environment()
     if ee is None:
         raise RuntimeError("Unable to find an execution environment.")
 

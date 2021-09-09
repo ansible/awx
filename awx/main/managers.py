@@ -4,15 +4,17 @@
 import sys
 import logging
 import os
+
 from django.db import models
 from django.conf import settings
+from django.utils.functional import cached_property
 
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.common import get_capacity_type
 from awx.main.constants import RECEPTOR_PENDING
 
-___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager']
+___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager', 'ExecutionEnvironmentManager']
 
 logger = logging.getLogger('awx.main.managers')
 
@@ -271,3 +273,19 @@ class InstanceGroupManager(models.Manager):
             else:
                 logger.error('Programming error, %s not in ["running", "waiting"]', t.log_format)
         return graph
+
+
+class ExecutionEnvironmentManager(models.Manager):
+    '''Allows caching for some global functions'''
+
+    def get_default_execution_environment(self):
+        if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
+            return settings.DEFAULT_EXECUTION_ENVIRONMENT
+        installed_default = self.model.objects.filter(
+            image__in=[ee['image'] for ee in settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS], organization=None, managed=False
+        ).first()
+        if installed_default:
+            return installed_default
+        return self.model.objects.filter(organization=None, managed=False).first()
+
+    default_execution_environment = cached_property(get_default_execution_environment, name='default_execution_environment')

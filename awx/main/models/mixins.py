@@ -21,7 +21,6 @@ from django.utils.translation import ugettext_lazy as _
 from awx.main.models.base import prevent_search
 from awx.main.models.rbac import Role, RoleAncestorEntry, get_roles_on_resource
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
-from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
@@ -479,7 +478,7 @@ class ExecutionEnvironmentMixin(models.Model):
             if self.inventory.organization.default_environment is not None:
                 return self.inventory.organization.default_environment
 
-        return get_default_execution_environment()
+        return self._meta.get_field('execution_environment').related_model.get_default_execution_environment()
 
 
 class CustomVirtualEnvMixin(models.Model):

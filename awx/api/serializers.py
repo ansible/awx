@@ -1408,11 +1408,14 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 class ExecutionEnvironmentSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
-    managed = serializers.ReadOnlyField()
+    managed = serializers.ReadOnlyField(help_text=_('This execution environment is managed by the server.'))
+    is_global_default = serializers.ReadOnlyField(
+        help_text=_('If a template, project, or organization does not specify any execution environment, this one will be used.')
+    )
 
     class Meta:
         model = ExecutionEnvironment
-        fields = ('*', 'organization', 'image', 'managed', 'credential', 'pull')
+        fields = ('*', 'organization', 'image', 'managed', 'is_global_default', 'credential', 'pull')
 
     def get_related(self, obj):
         res = super(ExecutionEnvironmentSerializer, self).get_related(obj)

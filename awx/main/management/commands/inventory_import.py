@@ -22,13 +22,13 @@ from rest_framework.exceptions import PermissionDenied
 
 # AWX inventory imports
 from awx.main.models.inventory import Inventory, InventorySource, InventoryUpdate, Host
+from awx.main.models.ha import ExecutionEnvironment
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
-from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.utils.pglock import advisory_lock
@@ -75,7 +75,7 @@ class AnsibleInventoryLoader(object):
         bargs.extend(['-v', '{0}:{0}:Z'.format(self.source)])
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
-        bargs.extend([get_default_execution_environment().image])
+        bargs.extend([ExecutionEnvironment.objects.get_default_execution_environment().image])
         bargs.extend(['ansible-inventory', '-i', self.source])
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])
         if self.verbosity:

@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from awx.api.versioning import reverse
 from awx.main.models.base import CommonModel
 from awx.main.validators import validate_container_image_name
+from awx.main.managers import ExecutionEnvironmentManager
 
 
 __all__ = ['ExecutionEnvironment']
@@ -18,6 +19,8 @@ class ExecutionEnvironment(CommonModel):
         ('missing', _("Only pull the image if not present before running.")),
         ('never', _("Never pull container before running.")),
     ]
+
+    objects = ExecutionEnvironmentManager()
 
     organization = models.ForeignKey(
         'Organization',
@@ -53,3 +56,6 @@ class ExecutionEnvironment(CommonModel):
 
     def get_absolute_url(self, request=None):
         return reverse('api:execution_environment_detail', kwargs={'pk': self.pk}, request=request)
+
+    def is_global_default(self):
+        return bool(self.pk == ExecutionEnvironment.objects.default_execution_environment.pk)  # NOTE: using cached prop for perf
