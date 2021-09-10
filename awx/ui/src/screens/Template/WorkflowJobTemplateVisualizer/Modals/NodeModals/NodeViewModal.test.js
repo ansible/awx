@@ -300,4 +300,35 @@ describe('NodeViewModal', () => {
       jest.clearAllMocks();
     });
   });
+
+  describe('Convergence label', () => {
+    const workflowContext = {
+      nodeToView: {
+        fullUnifiedJobTemplate: {
+          id: 1,
+          name: 'Mock Node',
+          description: '',
+          type: 'workflow_approval_template',
+          timeout: 0,
+          all_parents_must_converge: false,
+        },
+      },
+    };
+
+    test('should display "Any" Convergence label', async () => {
+      let wrapper;
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <WorkflowDispatchContext.Provider value={dispatch}>
+            <WorkflowStateContext.Provider value={workflowContext}>
+              <NodeViewModal />
+            </WorkflowStateContext.Provider>
+          </WorkflowDispatchContext.Provider>
+        );
+      });
+      waitForLoaded(wrapper);
+      expect(wrapper.find('Detail[label="Convergence"] dd').text()).toBe('Any');
+      jest.clearAllMocks();
+    });
+  });
 });

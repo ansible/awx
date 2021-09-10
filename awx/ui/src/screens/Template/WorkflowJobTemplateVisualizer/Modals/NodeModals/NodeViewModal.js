@@ -190,16 +190,19 @@ function NodeViewModal({ readOnly }) {
     let nodeUpdatedConvergence = {};
 
     if (
-      nodeToView.all_parents_must_converge !== undefined &&
-      nodeToView.all_parents_must_converge !==
-        nodeToView.originalNodeObject.all_parents_must_converge
+      nodeToView?.all_parents_must_converge !== undefined &&
+      nodeToView?.all_parents_must_converge !==
+        nodeToView?.originalNodeObject?.all_parents_must_converge
     ) {
       nodeUpdatedConvergence = {
         ...nodeToView.originalNodeObject,
         all_parents_must_converge: nodeToView.all_parents_must_converge,
       };
     } else {
-      nodeUpdatedConvergence = nodeToView.originalNodeObject;
+      nodeUpdatedConvergence = {
+        ...nodeToView.originalNodeObject,
+        all_parents_must_converge: nodeToView?.all_parents_must_converge,
+      };
     }
 
     Content = (
