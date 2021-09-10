@@ -38,7 +38,7 @@ function InstanceGroups() {
     '/instance_groups/container_group/add': t`Create new container group`,
   });
 
-  const buildBreadcrumbConfig = useCallback((instanceGroups) => {
+  const buildBreadcrumbConfig = useCallback((instanceGroups, instance) => {
     if (!instanceGroups) {
       return;
     }
@@ -49,6 +49,8 @@ function InstanceGroups() {
 
       [`/instance_groups/${instanceGroups.id}/details`]: t`Details`,
       [`/instance_groups/${instanceGroups.id}/instances`]: t`Instances`,
+      [`/instance_groups/${instanceGroups.id}/instances/${instance?.id}`]: `${instance?.hostname}`,
+      [`/instance_groups/${instanceGroups.id}/instances/${instance?.id}/details`]: t`Instance details`,
       [`/instance_groups/${instanceGroups.id}/jobs`]: t`Jobs`,
       [`/instance_groups/${instanceGroups.id}/edit`]: t`Edit details`,
       [`/instance_groups/${instanceGroups.id}`]: `${instanceGroups.name}`,

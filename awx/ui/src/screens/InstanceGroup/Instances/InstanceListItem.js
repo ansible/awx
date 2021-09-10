@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { bool, func } from 'prop-types';
 import { t, Plural } from '@lingui/macro';
 import styled from 'styled-components';
@@ -62,6 +63,8 @@ function InstanceListItem({
       instance.capacity_adjustment
     )
   );
+  const { id } = useParams();
+
   const labelId = `check-action-${instance.id}`;
 
   function usedCapacity(item) {
@@ -113,7 +116,9 @@ function InstanceListItem({
           dataLabel={t`Selected`}
         />
         <Td id={labelId} dataLabel={t`Name`}>
-          {instance.hostname}
+          <Link to={`/instance_groups/${id}/instances/${instance.id}/details`}>
+            {instance.hostname}
+          </Link>
         </Td>
         <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
         <Td dataLabel={t`Policy Type`}>
