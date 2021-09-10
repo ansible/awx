@@ -351,6 +351,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       return Promise.resolve(null);
     }
 
+    // TODO convert to tree indexes
+
     if (stopIndex > startIndex + 50) {
       stopIndex = startIndex + 50;
     }
