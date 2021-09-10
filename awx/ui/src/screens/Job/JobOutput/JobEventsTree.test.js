@@ -172,8 +172,27 @@ describe('JobEventsTree', () => {
       ]);
     });
 
-    test.skip('should fetch parent for events with missing parent', () => {
-      const tree = new JobEventsTree();
+    test('should fetch parent for events with missing parent', () => {
+      const fetchParent = jest.fn();
+      const tree = new JobEventsTree({}, fetchParent);
+      tree.addEvents(eventsList);
+
+      const newEvents = [
+        {
+          counter: 12,
+          uuid: 'abc-012',
+          event_level: 2,
+          parent_uuid: 'abc-010',
+        },
+      ];
+      tree.addEvents(newEvents);
+
+      expect(fetchParent).toHaveBeenCalledWith('abc-010');
+    });
+
+    test('should batch parent fetches by uuid', () => {
+      const fetchParent = jest.fn();
+      const tree = new JobEventsTree({}, fetchParent);
       tree.addEvents(eventsList);
 
       const newEvents = [
@@ -192,8 +211,227 @@ describe('JobEventsTree', () => {
       ];
       tree.addEvents(newEvents);
 
-      // expect nodesWithoutParents to hold them  … eventsWithoutParents?
+      expect(fetchParent).toHaveBeenCalledTimes(1);
+      expect(fetchParent).toHaveBeenCalledWith('abc-010');
     });
+
+    test('should fetch multiple parent fetches by uuid', () => {
+      const fetchParent = jest.fn();
+      const tree = new JobEventsTree({}, fetchParent);
+      tree.addEvents(eventsList);
+
+      const newEvents = [
+        {
+          counter: 14,
+          uuid: 'abc-014',
+          event_level: 2,
+          parent_uuid: 'abc-012',
+        },
+        {
+          counter: 15,
+          uuid: 'abc-015',
+          event_level: 1,
+          parent_uuid: 'abc-011',
+        },
+      ];
+      tree.addEvents(newEvents);
+
+      expect(fetchParent).toHaveBeenCalledTimes(2);
+      expect(fetchParent).toHaveBeenCalledWith('abc-012');
+      expect(fetchParent).toHaveBeenCalledWith('abc-011');
+    });
+
+    test('should set eventsWithoutParents while fetching parent events', () => {
+      const tree = new JobEventsTree({}, jest.fn());
+      tree.addEvents(eventsList);
+
+      const newEvents = [
+        {
+          counter: 12,
+          uuid: 'abc-012',
+          event_level: 2,
+          parent_uuid: 'abc-010',
+        },
+      ];
+      tree.addEvents(newEvents);
+
+      expect(tree.getEventsWithoutParents()).toEqual({
+        'abc-010': [newEvents[0]],
+      });
+      expect(tree.getNodeByUuid('abc-010')).toEqual(null);
+    });
+
+    test('should check for eventsWithoutParents belonging to new nodes', () => {
+      const tree = new JobEventsTree(
+        {
+          eventsWithoutParents: {
+            'abc-010': [
+              {
+                counter: 12,
+                uuid: 'abc-012',
+                event_level: 1,
+                parent_uuid: 'abc-010',
+              },
+            ],
+          },
+        },
+        jest.fn()
+      );
+
+      const parentEvent = {
+        counter: 10,
+        uuid: 'abc-010',
+        event_level: 0,
+        parent_uuid: '',
+      };
+      tree.addEvents([parentEvent]);
+
+      expect(tree.getEventTree()).toEqual([
+        {
+          eventIndex: 10,
+          isCollapsed: false,
+          children: [
+            {
+              eventIndex: 12,
+              isCollapsed: false,
+              children: [],
+            },
+          ],
+        },
+      ]);
+      expect(tree.getEventsWithoutParents()).toEqual({});
+    });
+
+    test('should fetch parent of parent and compile them together', () => {
+      const fetchParent = jest.fn();
+      const tree = new JobEventsTree({}, fetchParent);
+
+      const event3 = {
+        counter: 3,
+        uuid: 'abc-003',
+        event_level: 2,
+        parent_uuid: 'abc-002',
+      };
+      tree.addEvents([event3]);
+      expect(fetchParent).toHaveBeenCalledWith('abc-002');
+
+      const event2 = {
+        counter: 2,
+        uuid: 'abc-002',
+        event_level: 1,
+        parent_uuid: 'abc-001',
+      };
+      tree.addEvents([event2]);
+      expect(fetchParent).toHaveBeenCalledWith('abc-001');
+      expect(tree.getAllEvents()).toEqual({});
+      expect(tree.getEventTree()).toEqual([]);
+      expect(tree.getEventsWithoutParents()).toEqual({
+        'abc-001': [event2],
+        'abc-002': [event3],
+      });
+
+      const event1 = {
+        counter: 1,
+        uuid: 'abc-001',
+        event_level: 0,
+        parent_uuid: '',
+      };
+      tree.addEvents([event1]);
+      expect(tree.getAllEvents()).toEqual({
+        1: event1,
+        2: event2,
+        3: event3,
+      });
+      expect(tree.getEventTree()).toEqual([
+        {
+          eventIndex: 1,
+          isCollapsed: false,
+          children: [
+            {
+              eventIndex: 2,
+              isCollapsed: false,
+              children: [
+                {
+                  eventIndex: 3,
+                  isCollapsed: false,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+      expect(tree.getEventsWithoutParents()).toEqual({});
+    });
+
+    test('should add root level node in middle of array', () => {
+      const tree = new JobEventsTree();
+
+      const events = [
+        {
+          counter: 1,
+          uuid: 'abc-001',
+          event_level: 0,
+          parent_uuid: '',
+        },
+        {
+          counter: 2,
+          uuid: 'abc-002',
+          event_level: 0,
+          parent_uuid: '',
+        },
+        {
+          counter: 3,
+          uuid: 'abc-003',
+          event_level: 0,
+          parent_uuid: '',
+        },
+      ];
+      tree.addEvents([events[0]]);
+      tree.addEvents([events[2]]);
+      tree.addEvents([events[1]]);
+
+      const eventsTree = tree.getEventTree();
+      expect(eventsTree[0].eventIndex).toEqual(1);
+      expect(eventsTree[1].eventIndex).toEqual(2);
+      expect(eventsTree[2].eventIndex).toEqual(3);
+    });
+
+    test('should add child nodes in middle of array', () => {
+      const tree = new JobEventsTree();
+      tree.addEvents([...eventsList.slice(0, 3), ...eventsList.slice(4)]);
+
+      tree.addEvents([eventsList[3]]);
+
+      expect(tree.getEventTree()).toEqual([
+        {
+          eventIndex: 1,
+          isCollapsed: false,
+          children: [
+            {
+              eventIndex: 2,
+              isCollapsed: false,
+              children: [
+                { eventIndex: 3, isCollapsed: false, children: [] },
+                { eventIndex: 4, isCollapsed: false, children: [] },
+                { eventIndex: 5, isCollapsed: false, children: [] },
+              ],
+            },
+            {
+              eventIndex: 6,
+              isCollapsed: false,
+              children: [
+                { eventIndex: 7, isCollapsed: false, children: [] },
+                { eventIndex: 8, isCollapsed: false, children: [] },
+                { eventIndex: 9, isCollapsed: false, children: [] },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    // TODO: how/when are child counts wrong
   });
 
   describe('getNodeByUuid', () => {
@@ -257,6 +495,8 @@ describe('JobEventsTree', () => {
       const node = tree.getNodeForRow(1);
       expect(node.isCollapsed).toBe(false);
     });
+
+    test.skip('should update total row count', () => {});
   });
 
   describe('getNodeForRow', () => {
