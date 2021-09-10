@@ -22,7 +22,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # AWX inventory imports
 from awx.main.models.inventory import Inventory, InventorySource, InventoryUpdate, Host
-from awx.main.models.ha import ExecutionEnvironment
+from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.utils.safe_yaml import sanitize_jinja
 
