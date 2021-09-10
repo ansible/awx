@@ -6,12 +6,12 @@
 "compileNamespace": "cjs",
 "extractBabelOptions": {},
 "compilerBabelOptions": {},
-"fallbackLocales": { default: "en"},
+"fallbackLocales": { "default": "en"},
 "format": "po",
 "locales": ["en","es","fr","nl","zh","ja","zu"],
 "orderBy": "messageId",
 "pseudoLocale": "zu",
 "rootDir": "./src",
 "runtimeConfigModule": ["@lingui/core", "i18n"],
-"sourceLocale": "en",
+"sourceLocale": "en"
 }
