@@ -382,6 +382,8 @@ msgstr "警报模式"
 
 #: components/LaunchButton/ReLaunchDropDown.js:48
 #: components/PromptDetail/PromptDetail.js:120
+#: screens/Metrics/Metrics.js:75
+#: screens/Metrics/Metrics.js:75
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:257
 msgid "All"
 msgstr "所有"
@@ -4719,6 +4721,7 @@ msgid "Leave this field blank to make the execution environment globally availab
 msgstr "将此字段留空以使执行环境全局可用。"
 
 #: components/Workflow/WorkflowLegend.js:86
+#: screens/Metrics/LineChart.js:120
 msgid "Legend"
 msgstr "图例"
 

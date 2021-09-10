@@ -382,6 +382,8 @@ msgstr "アラートモーダル"
 
 #: components/LaunchButton/ReLaunchDropDown.js:48
 #: components/PromptDetail/PromptDetail.js:120
+#: screens/Metrics/Metrics.js:75
+#: screens/Metrics/Metrics.js:75
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:257
 msgid "All"
 msgstr "すべて"
@@ -4719,6 +4721,7 @@ msgid "Leave this field blank to make the execution environment globally availab
 msgstr "実行環境をシステム全体で利用できるようにするには、このフィールドを空白のままにします。"
 
 #: components/Workflow/WorkflowLegend.js:86
+#: screens/Metrics/LineChart.js:120
 msgid "Legend"
 msgstr "凡例"
 

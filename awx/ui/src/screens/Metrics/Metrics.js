@@ -72,7 +72,7 @@ function Metrics() {
       const metricOptions = Object.keys(mets);
 
       return {
-        instances: [...results.map((result) => result.hostname), 'All'],
+        instances: [...results.map((result) => result.hostname), t`All`],
         metrics: metricOptions,
       };
     }, []),
