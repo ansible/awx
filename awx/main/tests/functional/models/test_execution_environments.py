@@ -48,7 +48,7 @@ def test_user_default(set_up_defaults):
 
 
 @pytest.mark.django_db
-def test_useage_of_cache(set_up_defaults):
+def test_usage_of_cache(set_up_defaults):
     ee = ExecutionEnvironment.objects.default_execution_environment
     ee.name = 'foobar'
     ee.save(update_fields=['name'])
