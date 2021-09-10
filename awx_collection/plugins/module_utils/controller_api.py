@@ -261,22 +261,29 @@ class ControllerAPIModule(ControllerModule):
                 controller_version = response.info().getheader('X-API-Product-Version', None)
 
             parsed_collection_version = Version(self._COLLECTION_VERSION).version
-            parsed_controller_version = Version(controller_version).version
-            if controller_type == 'AWX':
-                collection_compare_ver = parsed_collection_version[0]
-                controller_compare_ver = parsed_controller_version[0]
-            else:
-                collection_compare_ver = "{0}.{1}".format(parsed_collection_version[0], parsed_collection_version[1])
-                controller_compare_ver = '{0}.{1}'.format(parsed_controller_version[0], parsed_controller_version[1])
-
-            if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != controller_type:
-                self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, controller_type))
-            elif collection_compare_ver != controller_compare_ver:
+            if not controller_version:
                 self.warn(
-                    "You are running collection version {0} but connecting to {2} version {1}".format(
-                        self._COLLECTION_VERSION, controller_version, controller_type
+                    "You are using the {0} version of this collection but connecting to a controller that did not return a version".format(
+                        self._COLLECTION_VERSION
                     )
                 )
+            else:
+                parsed_controller_version = Version(controller_version).version
+                if controller_type == 'AWX':
+                    collection_compare_ver = parsed_collection_version[0]
+                    controller_compare_ver = parsed_controller_version[0]
+                else:
+                    collection_compare_ver = "{0}.{1}".format(parsed_collection_version[0], parsed_collection_version[1])
+                    controller_compare_ver = '{0}.{1}'.format(parsed_controller_version[0], parsed_controller_version[1])
+
+                if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != controller_type:
+                    self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, controller_type))
+                elif collection_compare_ver != controller_compare_ver:
+                    self.warn(
+                        "You are running collection version {0} but connecting to {2} version {1}".format(
+                            self._COLLECTION_VERSION, controller_version, controller_type
+                        )
+                    )
 
             self.version_checked = True
 
