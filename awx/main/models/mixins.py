@@ -478,7 +478,7 @@ class ExecutionEnvironmentMixin(models.Model):
             if self.inventory.organization.default_environment is not None:
                 return self.inventory.organization.default_environment
 
-        return self._meta.get_field('execution_environment').related_model.get_default_execution_environment()
+        return self._meta.get_field('execution_environment').related_model.objects.get_default_execution_environment()
 
 
 class CustomVirtualEnvMixin(models.Model):
