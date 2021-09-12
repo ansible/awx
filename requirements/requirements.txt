@@ -37,6 +37,12 @@ azure-keyvault==1.1.0
     # via -r /awx_devel/requirements/requirements.in
 azure-nspkg==3.0.2
     # via azure-keyvault
+boto3==1.18.40
+    # via -r /awx_devel/requirements/requirements.in
+botocore==1.21.40
+    # via
+    #   boto3
+    #   s3transfer
 cachetools==4.0.0
     # via google-auth
     # via
@@ -184,6 +190,10 @@ jinja2==2.11.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   openshift
+jmespath==0.10.0
+    # via
+    #   boto3
+    #   botocore
 json-log-formatter==0.3.0
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==3.2.0
@@ -273,6 +283,7 @@ python-daemon==2.2.4
 python-dateutil==2.8.1
     # via
     #   adal
+    #   botocore
     #   kubernetes
     #   receptorctl
 python-dsv-sdk==0.0.1
@@ -332,6 +343,8 @@ ruamel.yaml==0.16.10
     # via openshift
 ruamel.yaml.clib==0.2.0
     # via ruamel.yaml
+s3transfer==0.5.0
+    # via boto3
 schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
 service-identity==18.1.0
@@ -390,6 +403,7 @@ txaio==20.12.1
     # via autobahn
 urllib3==1.25.8
     # via
+    #   botocore
     #   kubernetes
     #   requests
 uwsgi==2.0.18

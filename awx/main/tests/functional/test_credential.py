@@ -77,6 +77,7 @@ def test_default_cred_types():
     assert sorted(CredentialType.defaults.keys()) == [
         'aim',
         'aws',
+        'aws_sm',
         'azure_kv',
         'azure_rm',
         'centrify_vault_kv',
