@@ -5,6 +5,22 @@ from distutils.util import strtobool
 import yaml
 
 from awxkit.cli.utils import colored
+from awxkit import config
+
+
+def get_config_credentials():
+    """Load username and password from config.credentials.default.
+
+    In order to respect configurations from AWXKIT_CREDENTIAL_FILE.
+    """
+    default_username = 'admin'
+    default_password = 'password'
+
+    if not hasattr(config, 'credentials'):
+        return default_username, default_password
+
+    default = config.credentials.get('default', {})
+    return (default.get('username', default_username), default.get('password', default_password))
 
 
 def add_authentication_arguments(parser, env):
@@ -20,16 +36,20 @@ def add_authentication_arguments(parser, env):
         help='an OAuth2.0 token (get one by using `awx login`)',
         metavar='TEXT',
     )
+
+    config_username, config_password = get_config_credentials()
+    # options configured via cli args take higher precedence than those from the config
     auth.add_argument(
         '--conf.username',
-        default=env.get('CONTROLLER_USERNAME', env.get('TOWER_USERNAME', 'admin')),
+        default=env.get('CONTROLLER_USERNAME', env.get('TOWER_USERNAME', config_username)),
         metavar='TEXT',
     )
     auth.add_argument(
         '--conf.password',
-        default=env.get('CONTROLLER_PASSWORD', env.get('TOWER_PASSWORD', 'password')),
+        default=env.get('CONTROLLER_PASSWORD', env.get('TOWER_PASSWORD', config_password)),
         metavar='TEXT',
     )
+
     auth.add_argument(
         '-k',
         '--conf.insecure',
