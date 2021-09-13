@@ -277,42 +277,46 @@ options:
                 - Nodes that will run after this node completes.
                 - List of node identifiers.
               type: list
+              elements: dict
               suboptions:
                 identifier:
                   description:
                     - Identifier of Node that will run after this node completes given this option.
-                  elements: str
+                  type: str
             success_nodes:
               description:
                 - Nodes that will run after this node on success.
                 - List of node identifiers.
               type: list
+              elements: dict
               suboptions:
                 identifier:
                   description:
                     - Identifier of Node that will run after this node completes given this option.
-                  elements: str
+                  type: str
             failure_nodes:
               description:
                 - Nodes that will run after this node on failure.
                 - List of node identifiers.
               type: list
+              elements: dict
               suboptions:
                 identifier:
                   description:
                     - Identifier of Node that will run after this node completes given this option.
-                  elements: str
+                  type: str
             credentials:
               description:
                 - Credentials to be applied to job as launch-time prompts.
                 - List of credential names.
                 - Uniqueness is not handled rigorously.
               type: list
+              elements: dict
               suboptions:
                 name:
                   description:
                     - Name Credentials to be applied to job as launch-time prompts.
-                  elements: str
+                  type: str
     destroy_current_schema:
       description:
         - Set in order to destroy current schema on the workflow.
