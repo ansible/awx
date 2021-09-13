@@ -18,7 +18,7 @@ from solo.models import SingletonModel
 
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
-from awx.main.managers import InstanceManager, InstanceGroupManager
+from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
 from awx.main.fields import JSONField
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
@@ -59,7 +59,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     objects = InstanceManager()
 
     # Fields set in instance registration
-    uuid = models.CharField(max_length=40, default='00000000-0000-0000-0000-000000000000')
+    uuid = models.CharField(max_length=40, default=UUID_DEFAULT)
     hostname = models.CharField(max_length=250, unique=True)
     ip_address = models.CharField(
         blank=True,
