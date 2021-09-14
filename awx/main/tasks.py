@@ -3178,7 +3178,13 @@ class AWXReceptorJob:
                 receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
-            receptor_params = {"params": f"--private-data-dir={private_data_dir}"}
+            if self.work_type == 'ansible-runner':
+                # on execution nodes, we rely on the private data dir being deleted
+                cli_params = f"--private-data-dir={private_data_dir} --delete"
+            else:
+                # on hybrid nodes, we rely on the private data dir NOT being deleted
+                cli_params = f"--private-data-dir={private_data_dir}"
+            receptor_params = {"params": cli_params}
 
         return receptor_params
 
