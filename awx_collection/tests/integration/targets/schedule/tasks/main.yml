@@ -3,86 +3,182 @@
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
-- name: generate random string for project
+- name: generate random string for schedule
   set_fact:
     sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
+    cred1: "AWX-Collection-tests-schedule-cred1-{{ test_id }}"
+    proj1: "AWX-Collection-tests-schedule-proj-{{ test_id }}"
+    jt1: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
 
-- name: Try to create without an rrule
-  schedule:
-    name: "{{ sched1 }}"
-    state: present
-    unified_job_template: "Demo Job Template"
-    enabled: true
-  register: result
-  ignore_errors: true
+- block:
+    - name: Try to create without an rrule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        enabled: true
+      register: result
+      ignore_errors: true
 
-- assert:
-    that:
-      - result is failed
-      - "'Unable to create schedule {{ sched1 }}' in result.msg"
+    - assert:
+        that:
+          - result is failed
+          - "'Unable to create schedule {{ sched1 }}' in result.msg"
 
-- name: Create with options that the JT does not support
-  schedule:
-    name: "{{ sched1 }}"
-    state: present
-    unified_job_template: "Demo Job Template"
-    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
-    description: "This hopefully will not work"
-    extra_data:
-      some: var
-    inventory: Demo Inventory
-    scm_branch: asdf1234
-    job_type: run
-    job_tags: other_tags
-    skip_tags: some_tags
-    limit: node1
-    diff_mode: true
-    verbosity: 4
-    enabled: true
-  register: result
-  ignore_errors: true
+    - name: Create with options that the JT does not support
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+        description: "This hopefully will not work"
+        extra_data:
+          some: var
+        inventory: Demo Inventory
+        scm_branch: asdf1234
+        job_type: run
+        job_tags: other_tags
+        skip_tags: some_tags
+        limit: node1
+        diff_mode: true
+        verbosity: 4
+        enabled: true
+      register: result
+      ignore_errors: true
 
-- assert:
-    that:
-      - result is failed
-      - "'Unable to create schedule {{ sched1 }}' in result.msg"
+    - assert:
+        that:
+          - result is failed
+          - "'Unable to create schedule {{ sched1 }}' in result.msg"
 
-- name: Build a real schedule
-  schedule:
-    name: "{{ sched1 }}"
-    state: present
-    unified_job_template: "Demo Job Template"
-    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
-  register: result
+    - name: Build a real schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
 
-- assert:
-    that:
-      - result is changed
+    - assert:
+        that:
+          - result is changed
 
-- name: Rebuild the same schedule
-  schedule:
-    name: "{{ sched1 }}"
-    state: present
-    unified_job_template: "Demo Job Template"
-    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
-  register: result
+    - name: Rebuild the same schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
 
-- assert:
-    that:
-      - result is not changed
+    - assert:
+        that:
+          - result is not changed
 
-- name: Disable a schedule
-  schedule:
-    name: "{{ sched1 }}"
-    state: present
-    enabled: "false"
-  register: result
+    - name: Create a Demo Project
+      project:
+        name: "{{ proj1 }}"
+        organization: Default
+        allow_override: true
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
 
-- assert:
-    that:
-      - result is changed
+    - name: Create Credential1
+      credential:
+        name: "{{ cred1 }}"
+        organization: Default
+        credential_type: Red Hat Ansible Automation Platform
+      register: cred1_result
 
-- name: Delete the schedule
-  schedule:
-    name: "{{ sched1 }}"
-    state: absent
+    - name: Create Job Template with all prompts
+      job_template:
+        name: "{{ jt1 }}"
+        organization: Default
+        project: "{{ proj1 }}"
+        inventory: Demo Inventory
+        playbook: hello_world.yml
+        ask_variables_on_launch: true
+        ask_inventory_on_launch: true
+        ask_scm_branch_on_launch: true
+        ask_credential_on_launch: true
+        ask_job_type_on_launch: true
+        ask_tags_on_launch: true
+        ask_skip_tags_on_launch: true
+        ask_limit_on_launch: true
+        ask_diff_mode_on_launch: true
+        ask_verbosity_on_launch: true
+        job_type: run
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+
+    - name: Create with options that the JT does support
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "{{ jt1 }}"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+        description: "This hopefully will not work"
+        extra_data:
+          some: var
+        inventory: Demo Inventory
+        scm_branch: asdf1234
+        credentials:
+          - "{{ cred1 }}"
+        job_type: run
+        job_tags: other_tags
+        skip_tags: some_tags
+        limit: node1
+        diff_mode: true
+        verbosity: 4
+        enabled: true
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Disable a schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        enabled: "false"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+  always:
+    - name: Delete the schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: absent
+
+    - name: Delete the jt
+      job_template:
+        name: "{{ jt1 }}"
+        project: "{{ proj1 }}"
+        playbook: hello_world.yml
+        state: absent
+
+    - name: Delete the Project
+      project:
+        name: "{{ proj1 }}"
+        organization: Default
+        state: absent
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+      register: result
+
+    - name: Delete Credential1
+      credential:
+        name: "{{ cred1 }}"
+        organization: Default
+        credential_type: Red Hat Ansible Automation Platform
+        state: absent

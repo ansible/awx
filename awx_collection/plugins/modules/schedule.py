@@ -53,6 +53,11 @@ options:
         - Inventory applied as a prompt, assuming job template prompts for inventory
       required: False
       type: str
+    credentials:
+      description:
+        - List of credentials applied as a prompt, assuming job template prompts for credentials
+      type: list
+      elements: str
     scm_branch:
       description:
         - Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
@@ -147,6 +152,7 @@ def main():
         description=dict(),
         extra_data=dict(type='dict'),
         inventory=dict(),
+        credentials=dict(type='list', elements='str'),
         scm_branch=dict(),
         job_type=dict(choices=['run', 'check']),
         job_tags=dict(),
@@ -169,6 +175,7 @@ def main():
     description = module.params.get('description')
     extra_data = module.params.get('extra_data')
     inventory = module.params.get('inventory')
+    credentials = module.params.get('credentials')
     scm_branch = module.params.get('scm_branch')
     job_type = module.params.get('job_type')
     job_tags = module.params.get('job_tags')
@@ -190,6 +197,13 @@ def main():
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('schedules', name_or_id=name)
+
+    association_fields = {}
+
+    if credentials is not None:
+        association_fields['credentials'] = []
+        for item in credentials:
+            association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
 
     # Create the data that gets sent for create and update
     new_fields = {}
@@ -226,7 +240,12 @@ def main():
         module.delete_if_needed(existing_item)
     elif state == 'present':
         # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(existing_item, new_fields, endpoint='schedules', item_type='schedule', associations={})
+        module.create_or_update_if_needed(
+            existing_item,
+            new_fields,
+            endpoint='schedules',
+            item_type='schedule',
+            associations=association_fields,)
 
 
 if __name__ == '__main__':
