@@ -452,7 +452,8 @@ class InstanceHealthCheck(GenericAPIView):
                     else:
                         time.sleep(1.0)
                 else:
-                    obj.mark_offline(errors=_('Health check initiated by user determined this instance to be unresponsive'))
+                    if obj.capacity > 0:
+                        obj.mark_offline(errors=_('Health check initiated by user determined this instance to be unresponsive'))
             obj.refresh_from_db()
             data = self.get_serializer(data=request.data).to_representation(obj)
 

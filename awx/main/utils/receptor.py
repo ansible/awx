@@ -4,6 +4,8 @@ import time
 
 from receptorctl.socket_interface import ReceptorControl
 
+from django.utils.translation import ugettext_lazy as _
+
 
 logger = logging.getLogger('awx.main.utils.receptor')
 
@@ -58,7 +60,7 @@ def worker_info(node_name, work_type='ansible-runner'):
             data['run_timing'] = time.time() - run_start
             time.sleep(0.5)
         else:
-            error_list.append(f'Timeout getting worker info on {node_name}, state remains in {state_name}')
+            error_list.append(_('Timeout getting worker info on {node_name}, state remains in {state_name}').format(node_name=node_name, state_name=state_name))
 
         stdout = resultfile.read()
         stdout = str(stdout, encoding='utf-8')
@@ -74,21 +76,27 @@ def worker_info(node_name, work_type='ansible-runner'):
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')
         if not work_detail.startswith('exit status'):
-            error_list.append(f'Receptor error getting worker info from {node_name}, detail:\n{work_detail}')
+            error_list.append(
+                _('Receptor error getting worker info from {node_name}, detail:\n{work_detail}').format(node_name=node_name, work_detail=work_detail)
+            )
         elif 'unrecognized arguments: --worker-info' in stdout:
-            error_list.append(f'Old version (2.0.1 or earlier) of ansible-runner on node {node_name} without --worker-info')
+            error_list.append(_('Old version (2.0.1 or earlier) of ansible-runner on node {node_name} without --worker-info').format(node_name=node_name))
         else:
-            error_list.append(f'Unknown ansible-runner error on node {node_name}, stdout:\n{stdout}')
+            error_list.append(_('Unknown ansible-runner error on node {node_name}, stdout:\n{stdout}').format(node_name=node_name, stdout=stdout))
     else:
         yaml_stdout = stdout.strip()
         remote_data = {}
         try:
             remote_data = yaml.safe_load(yaml_stdout)
         except Exception as json_e:
-            error_list.append(f'Failed to parse node {node_name} --worker-info output as YAML, error: {json_e}, data:\n{yaml_stdout}')
+            error_list.append(
+                _('Failed to parse node {node_name} --worker-info output as YAML, error: {json_e}, data:\n{yaml_stdout}').format(
+                    node_name=node_name, json_e=json_e, yaml_stdout=yaml_stdout
+                )
+            )
 
         if not isinstance(remote_data, dict):
-            error_list.append(f'Remote node {node_name} --worker-info output is not a YAML dict, output:{stdout}')
+            error_list.append(_('Remote node {node_name} --worker-info output is not a YAML dict, output:{stdout}').format(node_name=node_name, stdout=stdout))
         else:
             error_list.extend(remote_data.pop('errors', []))  # merge both error lists
             data.update(remote_data)
@@ -98,6 +106,6 @@ def worker_info(node_name, work_type='ansible-runner'):
         # see tasks.py usage of keys
         missing_keys = set(('runner_version', 'mem_in_bytes', 'cpu_count')) - set(data.keys())
         if missing_keys:
-            data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
+            data['errors'].append(_('Worker failed to return keys {}').format(' '.join(missing_keys)))
 
     return data
