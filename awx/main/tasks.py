@@ -106,7 +106,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.receptor import get_receptor_ctl, worker_info
+from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -3049,6 +3049,9 @@ class AWXReceptorJob:
         _kw = {}
         if self.work_type == 'ansible-runner':
             _kw['node'] = self.task.instance.execution_node
+            use_stream_tls = True if get_conn_type(_kw['node'], receptor_ctl) == 2 else False
+            _kw['tlsclient'] = get_tls_client(use_stream_tls)
+
         result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, **_kw)
         self.unit_id = result['unitid']
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
