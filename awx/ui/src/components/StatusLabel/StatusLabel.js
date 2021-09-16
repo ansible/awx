@@ -29,6 +29,7 @@ const RunningIcon = styled(SyncAltIcon)`
 const colors = {
   success: 'green',
   successful: 'green',
+  healthy: 'green',
   failed: 'red',
   error: 'red',
   running: 'blue',
@@ -39,6 +40,7 @@ const colors = {
 };
 const icons = {
   success: CheckCircleIcon,
+  healthy: CheckCircleIcon,
   successful: CheckCircleIcon,
   failed: ExclamationCircleIcon,
   error: ExclamationCircleIcon,
@@ -52,6 +54,7 @@ const icons = {
 export default function StatusLabel({ status, tooltipContent = '' }) {
   const upperCaseStatus = {
     success: t`Success`,
+    healthy: t`Healthy`,
     successful: t`Successful`,
     failed: t`Failed`,
     error: t`Error`,
@@ -88,6 +91,7 @@ StatusLabel.propTypes = {
   status: oneOf([
     'success',
     'successful',
+    'healthy',
     'failed',
     'error',
     'running',

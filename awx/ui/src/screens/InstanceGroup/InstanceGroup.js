@@ -21,7 +21,7 @@ import JobList from 'components/JobList';
 
 import InstanceGroupDetails from './InstanceGroupDetails';
 import InstanceGroupEdit from './InstanceGroupEdit';
-import InstanceList from './Instances/InstanceList';
+import Instances from './Instances/Instances';
 
 function InstanceGroup({ setBreadcrumb }) {
   const { id } = useParams();
@@ -108,7 +108,8 @@ function InstanceGroup({ setBreadcrumb }) {
   }
 
   let cardHeader = <RoutedTabs tabsArray={tabsArray} />;
-  if (pathname.endsWith('edit')) {
+
+  if (['edit', 'instances/'].some((name) => pathname.includes(name))) {
     cardHeader = null;
   }
 
@@ -139,7 +140,10 @@ function InstanceGroup({ setBreadcrumb }) {
                   />
                 </Route>
                 <Route path="/instance_groups/:id/instances">
-                  <InstanceList />
+                  <Instances
+                    instanceGroup={instanceGroup}
+                    setBreadcrumb={setBreadcrumb}
+                  />
                 </Route>
                 <Route path="/instance_groups/:id/jobs">
                   <JobList

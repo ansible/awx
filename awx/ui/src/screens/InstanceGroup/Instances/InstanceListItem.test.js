@@ -10,6 +10,12 @@ import InstanceListItem from './InstanceListItem';
 jest.mock('../../../api');
 jest.mock('../../../hooks/useDebounce');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({
+    id: 1,
+  }),
+}));
 const instance = [
   {
     id: 1,
@@ -153,6 +159,9 @@ describe('<InstanceListItem/>', () => {
         </table>
       );
     });
+    expect(wrapper.find('Td[dataLabel="Name"]').find('Link').prop('to')).toBe(
+      '/instance_groups/1/instances/1/details'
+    );
     expect(wrapper.find('Td').at(1).text()).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
     expect(wrapper.find('Td').at(2).text()).toBe('hybrid');
