@@ -118,7 +118,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
 
   const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
-      const { data } = await InstancesAPI.createHealthCheck(instanceId);
+      const { data } = await InstancesAPI.healthCheck(instanceId);
       setHealthCheck(data);
     }, [instanceId])
   );

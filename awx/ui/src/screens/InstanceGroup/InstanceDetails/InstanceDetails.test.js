@@ -298,7 +298,7 @@ describe('<InstanceDetails/>', () => {
   });
 
   test('Should make request for Health Check', async () => {
-    InstancesAPI.createHealthCheck.mockResolvedValue({
+    InstancesAPI.healthCheck.mockResolvedValue({
       data: {
         uuid: '00000000-0000-0000-0000-000000000000',
         hostname: 'awx_1',
@@ -342,7 +342,7 @@ describe('<InstanceDetails/>', () => {
     await act(async () => {
       wrapper.find("Button[ouiaId='health-check-button']").prop('onClick')();
     });
-    expect(InstancesAPI.createHealthCheck).toBeCalledWith(1);
+    expect(InstancesAPI.healthCheck).toBeCalledWith(1);
     wrapper.update();
     expect(
       wrapper.find("Detail[label='Last Health Check']").prop('value')
@@ -350,7 +350,7 @@ describe('<InstanceDetails/>', () => {
   });
 
   test('Should handle api error for health check', async () => {
-    InstancesAPI.createHealthCheck.mockRejectedValue(
+    InstancesAPI.healthCheck.mockRejectedValue(
       new Error({
         response: {
           config: {
@@ -392,7 +392,7 @@ describe('<InstanceDetails/>', () => {
     await act(async () => {
       wrapper.find("Button[ouiaId='health-check-button']").prop('onClick')();
     });
-    expect(InstancesAPI.createHealthCheck).toBeCalledWith(1);
+    expect(InstancesAPI.healthCheck).toBeCalledWith(1);
     wrapper.update();
     expect(wrapper.find('AlertModal')).toHaveLength(1);
     expect(wrapper.find('ErrorDetail')).toHaveLength(1);

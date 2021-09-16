@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { t } from '@lingui/macro';
+import { Plural, t } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
+import useExpanded from 'hooks/useExpanded';
 import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
@@ -24,6 +25,7 @@ import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 
+import { Button, Tooltip } from '@patternfly/react-core';
 import InstanceListItem from './InstanceListItem';
 
 const QS_CONFIG = getQSConfig('instance', {
@@ -81,6 +83,13 @@ function InstanceList() {
     fetchInstances();
   }, [fetchInstances]);
 
+  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
+    useCallback(async () => {
+      await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
+      fetchInstances();
+    }, [selected, fetchInstances])
+  );
+
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateInstances,
@@ -129,7 +138,7 @@ function InstanceList() {
   };
 
   const { error, dismissError } = useDismissableError(
-    associateError || disassociateError
+    associateError || disassociateError || healthCheckError
   );
 
   const canAdd =
@@ -147,6 +156,9 @@ function InstanceList() {
     () => InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
     [instanceGroupId]
   );
+
+  const { expanded, isAllExpanded, handleExpand, expandAll } =
+    useExpanded(instances);
 
   return (
     <>
@@ -178,6 +190,8 @@ function InstanceList() {
             {...props}
             isAllSelected={isAllSelected}
             onSelectAll={selectAll}
+            isAllExpanded={isAllExpanded}
+            onExpandAll={expandAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -198,6 +212,28 @@ function InstanceList() {
                 )}
                 modalTitle={t`Disassociate instance from instance group?`}
               />,
+              <Tooltip
+                content={
+                  selected.length ? (
+                    <Plural
+                      value={selected.length}
+                      one="Click to run a health check on the selected instance."
+                      other="Click to run a health check on the selected instances."
+                    />
+                  ) : (
+                    t`Select an instance to run a health check.`
+                  )
+                }
+              >
+                <div>
+                  <Button
+                    isDisabled={!canAdd || !selected.length}
+                    variant="secondary"
+                    ouiaId="health-check"
+                    onClick={fetchHealthCheck}
+                  >{t`Health Check`}</Button>
+                </div>
+              </Tooltip>,
             ]}
             emptyStateControls={
               canAdd ? (
@@ -210,10 +246,9 @@ function InstanceList() {
           />
         )}
         headerRow={
-          <HeaderRow qsConfig={QS_CONFIG}>
+          <HeaderRow qsConfig={QS_CONFIG} isExpandable>
             <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
-            <HeaderCell>{t`Node Type`}</HeaderCell>
-            <HeaderCell>{t`Policy Type`}</HeaderCell>
+            <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
             <HeaderCell>{t`Running Jobs`}</HeaderCell>
             <HeaderCell>{t`Total Jobs`}</HeaderCell>
             <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
@@ -223,6 +258,8 @@ function InstanceList() {
         }
         renderRow={(instance, index) => (
           <InstanceListItem
+            isExpanded={expanded.some((row) => row.id === instance.id)}
+            onExpand={() => handleExpand(instance)}
             key={instance.id}
             value={instance.hostname}
             instance={instance}
@@ -252,9 +289,11 @@ function InstanceList() {
           title={t`Error!`}
           variant="error"
         >
-          {associateError
-            ? t`Failed to associate.`
-            : t`Failed to disassociate one or more instances.`}
+          {associateError && t`Failed to associate.`}
+          {disassociateError &&
+            t`Failed to disassociate one or more instances.`}
+          {healthCheckError &&
+            t`Failed to run a health check on one or more instances.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
