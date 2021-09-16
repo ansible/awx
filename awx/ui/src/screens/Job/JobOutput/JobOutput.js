@@ -35,7 +35,7 @@ import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
 import { fetchCount } from './loadJobEvents';
 // import useJobEvents from './useJobEvents';
-import JobEventsTree from './JobEventsTree';
+import useJobEventsTree from './JobEventsTree';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'counter',
@@ -107,9 +107,16 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   //   getEventForRow,
   // } = useJobEvents(job);
   // TODO: merge into one state var?
-  const [tree, setTree] = useState([]);
-  const [events, setEvents] = useState({});
-  const [uuidMap, setUuidMap] = useState({});
+  // const [tree, setTree] = useState([]);
+  // const [events, setEvents] = useState({});
+  // const [uuidMap, setUuidMap] = useState({});
+
+  const fetchEventByUuid = (uuid) => {
+    console.log('Oh Boy');
+  };
+
+  const { addEvents, toggleNodeIsCollapsed, getEventForRow } =
+    useJobEventsTree(fetchEventByUuid);
   const [cssMap, setCssMap] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
 
@@ -125,13 +132,13 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
 
-  const eventsTree = new JobEventsTree({
-    tree,
-    events,
-    uuidMap,
-    // cssMap,
-    // nodesWithoutParents,
-  });
+  // const eventsTree = new JobEventsTree({
+  //   tree,
+  //   events,
+  //   uuidMap,
+  //   // cssMap,
+  //   // nodesWithoutParents,
+  // });
 
   useInterval(
     () => {
@@ -258,12 +265,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       if (!isMounted.current) {
         return;
       }
-      eventsTree.addEvents(fetchedEvents);
-      // TODO
+      addEvents(fetchedEvents);
       // eventsTree.setTotalRowCount(count);
       setRemoteRowCount(count);
-      setTree(eventsTree.getEventTree());
-      setEvents(eventsTree.getAllEvents());
+      // setTree(eventsTree.getEventTree());
+      // setEvents(eventsTree.getAllEvents());
     } catch (err) {
       setContentError(err);
     } finally {
@@ -280,7 +286,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const isRowLoaded = ({ index }) => {
-    return eventsTree.getEventForRow(index) !== null;
+    return getEventForRow(index) !== null;
     // if (events[index]) {
     //   return true;
     // }
@@ -300,7 +306,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current && isFollowModeEnabled) {
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
-    const { event, node } = eventsTree.getEventForRow(index) || {};
+    const { event, node } = getEventForRow(index) || {};
     let actualLineTextHtml = [];
     if (event) {
       const { lineTextHtml } = getLineTextHtml(event);
@@ -329,8 +335,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               isCollapsed={node.isCollapsed}
               hasChildren={node.children.length}
               onToggleCollapsed={() => {
-                eventsTree.toggleNodeIsCollapsed(event.uuid);
-                setTree([...eventsTree.getEventTree()]);
+                toggleNodeIsCollapsed(event.uuid);
               }}
             />
           ) : (
@@ -382,8 +387,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           return;
         }
 
-        eventsTree.addEvents(response.data.results);
-
+        addEvents(response.data.results);
+        // TODO track currentlyLoading
         setCurrentlyLoading((prevCurrentlyLoading) =>
           prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
         );

@@ -24,6 +24,7 @@ export default function useJobEventsTree(fetchEventByUuid) {
     getNodeByUuid: (uuid) => getNodeByUuid(state, uuid),
     toggleNodeIsCollapsed: (uuid) =>
       dispatch({ type: TOGGLE_NODE_COLLAPSED, uuid }),
+    getEventForRow: (rowIndex) => getEventForRow(state, rowIndex),
     getNodeForRow: (rowIndex) => getNodeForRow(state, rowIndex),
     getTotalNumChildren: (uuid) => {
       const node = getNodeByUuid(state, uuid);
@@ -180,7 +181,7 @@ export function jobEventsReducer(callbacks) {
 }
 
 function getEventForRow(state, rowIndex) {
-  const node = getNodeForRow(rowIndex);
+  const node = getNodeForRow(state, rowIndex);
   if (!node) {
     return null;
   }
