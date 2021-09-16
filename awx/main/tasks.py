@@ -949,7 +949,8 @@ class BaseTask(object):
                 host = cred.get_input('host')
                 username = cred.get_input('username')
                 password = cred.get_input('password')
-                params['container_auth_data'] = {'host': host, 'username': username, 'password': password}
+                verify_ssl = cred.get_input('verify_ssl')
+                params['container_auth_data'] = {'host': host, 'username': username, 'password': password, 'verify_ssl': verify_ssl}
             else:
                 raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
 
