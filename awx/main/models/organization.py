@@ -118,7 +118,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         from awx.main.models import Credential
 
         public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
-        if public_galaxy_credential not in self.galaxy_credentials.all():
+        if public_galaxy_credential is not None and public_galaxy_credential not in self.galaxy_credentials.all():
             self.galaxy_credentials.add(public_galaxy_credential)
 
 
