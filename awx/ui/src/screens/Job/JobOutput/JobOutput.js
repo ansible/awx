@@ -35,7 +35,7 @@ import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
 import { fetchCount } from './loadJobEvents';
 // import useJobEvents from './useJobEvents';
-import useJobEventsTree from './JobEventsTree';
+import useJobEvents from './useJobEvents';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'counter',
@@ -112,11 +112,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   // const [uuidMap, setUuidMap] = useState({});
 
   const fetchEventByUuid = (uuid) => {
-    console.log('Oh Boy');
+    console.log('Oh Boy', uuid);
   };
 
   const { addEvents, toggleNodeIsCollapsed, getEventForRow } =
-    useJobEventsTree(fetchEventByUuid);
+    useJobEvents(fetchEventByUuid);
   const [cssMap, setCssMap] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
 
