@@ -976,13 +976,10 @@ class BaseTask(object):
         """
         Create a temporary directory for job-related files.
         """
-        pdd_wrapper_path = tempfile.mkdtemp(prefix=f'pdd_wrapper_{instance.pk}_', dir=settings.AWX_ISOLATION_BASE_PATH)
-        os.chmod(pdd_wrapper_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-        if settings.AWX_CLEANUP_PATHS:
-            self.cleanup_paths.append(pdd_wrapper_path)
-
-        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=pdd_wrapper_path)
+        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+        if settings.AWX_CLEANUP_PATHS:
+            self.cleanup_paths.append(path)
         # Ansible runner requires that project exists,
         # and we will write files in the other folders without pre-creating the folder
         for subfolder in ('project', 'inventory', 'env'):
@@ -1107,30 +1104,6 @@ class BaseTask(object):
 
         if self.instance.execution_environment is None:
             raise RuntimeError('The project could not sync because there is no Execution Environment.')
-
-        ee_cred = self.instance.execution_environment.credential
-        if ee_cred:
-            verify_ssl = ee_cred.get_input('verify_ssl')
-            if not verify_ssl:
-                pdd_wrapper_path = os.path.split(private_data_dir)[0]
-                registries_conf_path = os.path.join(pdd_wrapper_path, 'registries.conf')
-                host = ee_cred.get_input('host')
-
-                with open(registries_conf_path, 'w') as registries_conf:
-                    os.chmod(registries_conf.name, stat.S_IRUSR | stat.S_IWUSR)
-
-                    lines = [
-                        '[[registry]]',
-                        'location = "{}"'.format(host),
-                        'insecure = true',
-                    ]
-
-                    registries_conf.write('\n'.join(lines))
-
-                # Podman >= 3.1.0
-                env['CONTAINERS_REGISTRIES_CONF'] = registries_conf_path
-                # Podman < 3.1.0
-                env['REGISTRIES_CONFIG_PATH'] = registries_conf_path
 
         return env
 
@@ -3173,7 +3146,13 @@ class AWXReceptorJob:
                 receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
-            receptor_params = {"params": f"--private-data-dir={private_data_dir}"}
+            if self.work_type == 'ansible-runner':
+                # on execution nodes, we rely on the private data dir being deleted
+                cli_params = f"--private-data-dir={private_data_dir} --delete"
+            else:
+                # on hybrid nodes, we rely on the private data dir NOT being deleted
+                cli_params = f"--private-data-dir={private_data_dir}"
+            receptor_params = {"params": cli_params}
 
         return receptor_params
 
