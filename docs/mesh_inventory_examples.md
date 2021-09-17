@@ -1,14 +1,14 @@
 # Automation Platform Mesh Inventory Examples
-<b><i>Note</b> - we use the term `mesh` in this document to describe a graph network comprising of verticies or `nodes`. Communication intra-node is defined by the term `edges`, or in computer terms, a connectivity mechanism on the transport layer such as `TCP`, `UDP` or `unix sockets`.</i>
+<b><i>Note</b> - we use the term `mesh` in this document to describe a network comprising of vertices or `nodes`. Communication between nodes is defined by the term `edges`, or in computer terms, a connection on the transport layer such as `TCP`, `UDP` or `unix sockets`.</i>
 
-Please refer to [this](./receptor_mesh.md) document a more in-depth explanation of the objects in the `mesh` network. 
+Please refer to [this](./receptor_mesh.md) document for a more in-depth explanation of the objects in the `mesh` network. 
 
 The examples below are an attempt to deliver `ansible` inventory files that reflect typical user environments. While we cannot encapsulate every single customer scenario, if you need a starting point to start building out your inventory file, please refer to the examples [below](##Example-Inventory-Files).
 
 | Node Type | Description |
 | --------- | ----------- |
 | Control | Nodes that run persistent AWX services, and delegate jobs to hybrid and execution nodes|
-| Hybrid | Nodes that run persisten AWX services and execute jobs issues from user-space|
+| Hybrid | Nodes that run persistent AWX services and execute jobs from user-space|
 | Hop | Actionless nodes in a given network. They will have [receptor](./receptor_mesh.md) but remain actionless |
 | Execution | Nodes that run jobs delivered from Control-Nodes (jobs submitted from the user-space) |
 
