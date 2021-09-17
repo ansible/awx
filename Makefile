@@ -499,11 +499,11 @@ docker-compose-sources: .git/hooks/pre-commit
 
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS)
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx_1
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx_1 --remove-orphans
 
 docker-compose-test: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /bin/bash
@@ -536,8 +536,10 @@ docker-compose-build:
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
 docker-clean:
-	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	docker images | grep "awx_devel" | awk '{print $$3}' | xargs docker rmi
+	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
+	if [ $(shell docker images | grep "awx_devel") ]; then \
+	  docker images | grep "awx_devel" | awk '{print $$3}' | xargs docker rmi --force; \
+	fi
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 	docker volume rm tools_awx_db
