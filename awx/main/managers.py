@@ -129,24 +129,25 @@ class InstanceManager(models.Manager):
                         other_inst.save(update_fields=['ip_address'])
                         logger.warning("IP address {0} conflict detected, ip address unset for host {1}.".format(ip_address, other_hostname))
 
-            # get the instance based on the hostname
-            instance = self.filter(hostname=hostname)
-
-            # Check or update the existing uuid
-            if uuid is not None and uuid != UUID_DEFAULT:
-                if self.filter(uuid=uuid).exists():
-                    instance = self.filter(uuid=uuid)
+            # Return existing instance that matches hostname or UUID (default to UUID)
+            if uuid is not None and uuid != UUID_DEFAULT and self.filter(uuid=uuid).exists():
+                instance = self.filter(uuid=uuid)
+            else:
+                # if instance was not retrieved by uuid and hostname was, use the hostname
+                instance = self.filter(hostname=hostname)
 
             # Return existing instance
             if instance.exists():
-                instance = instance.get()
+                instance = instance.first()  # in the unusual occasion that there is more than one, only get one
                 update_fields = []
+                # if instance was retrieved by uuid and hostname has changed, update hostname
                 if instance.hostname != hostname:
+                    logger.warning("passed in hostname {0} is different from the original hostname {1}, updating to {0}".format(hostname, instance.hostname))
                     instance.hostname = hostname
                     update_fields.append('hostname')
+                # if any other fields are to be updated
                 if instance.ip_address != ip_address:
                     instance.ip_address = ip_address
-                    update_fields.append('ip_address')
                 if instance.node_type != node_type:
                     instance.node_type = node_type
                     update_fields.append('node_type')
