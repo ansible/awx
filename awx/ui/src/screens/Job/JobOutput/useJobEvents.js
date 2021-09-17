@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 
 const initialState = {
   // array of root level nodes (event_level: 0)
@@ -13,10 +13,21 @@ const initialState = {
 };
 export const ADD_EVENTS = 'ADD_EVENTS';
 export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
+export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
 
-export default function useJobEvents(fetchEventByUuid) {
-  const reducer = jobEventsReducer({ fetchEventByUuid });
+export default function useJobEvents(callbacks) {
+  const [actionQueue, setActionQueue] = useState([]);
+  const enqueueAction = (action) => setActionQueue(actionQueue.concat(action));
+  const reducer = jobEventsReducer(callbacks, enqueueAction);
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const action = actionQueue[0];
+    if (action) {
+      dispatch(action);
+      setActionQueue(actionQueue.slice(1));
+    }
+  }, [actionQueue]);
 
   // todo useCallback() these?
   return {
@@ -33,13 +44,15 @@ export default function useJobEvents(fetchEventByUuid) {
   };
 }
 
-export function jobEventsReducer(callbacks) {
+export function jobEventsReducer(callbacks, enqueueAction) {
   return (state, action) => {
     switch (action.type) {
       case ADD_EVENTS:
         return addEvents(state, action.events);
       case TOGGLE_NODE_COLLAPSED:
         return toggleNodeIsCollapsed(state, action.uuid);
+      case SET_EVENT_NUM_CHILDREN:
+        return setEventNumChildren(state, action.uuid, action.numChildren);
       default:
         throw new Error(`Unrecognized action: ${action.type}`);
     }
@@ -58,15 +71,12 @@ export function jobEventsReducer(callbacks) {
       }
       if (event.event_level === 0) {
         state = _addRootLevelEvent(state, event);
-        state.events[eventIndex] = event;
         return;
       }
 
       let isParentFound;
       [state, isParentFound] = _addNestedLevelEvent(state, event);
-      if (isParentFound) {
-        state.events[eventIndex] = event;
-      } else {
+      if (!isParentFound) {
         parentsToFetch.add(event.parent_uuid);
         state = _addEventWithoutParent(state, event);
       }
@@ -97,6 +107,10 @@ export function jobEventsReducer(callbacks) {
     return _gatherEventsForNewParent(
       {
         ...state,
+        events: {
+          ...state.events,
+          [eventIndex]: event,
+        },
         tree: updatedTree,
         uuidMap: {
           ...state.uuidMap,
@@ -133,14 +147,24 @@ export function jobEventsReducer(callbacks) {
       length = parent.children.length;
     }
     const { treePath: parentTreePath } = state.uuidMap[event.parent_uuid];
-    state.uuidMap = {
-      ...state.uuidMap,
-      [event.uuid]: {
-        index: eventIndex,
-        treePath: [...parentTreePath, length - 1],
+    state = _gatherEventsForNewParent(
+      {
+        ...state,
+        events: {
+          ...state.events,
+          [eventIndex]: event,
+        },
+        uuidMap: {
+          ...state.uuidMap,
+          [event.uuid]: {
+            index: eventIndex,
+            treePath: [...parentTreePath, length - 1],
+          },
+        },
       },
-    };
-    state = _gatherEventsForNewParent(state, event.uuid);
+      event.uuid
+    );
+    _fetchNumChildren(state, event);
 
     return [state, true];
   }
@@ -161,6 +185,16 @@ export function jobEventsReducer(callbacks) {
         [parentUuid]: eventsList,
       },
     };
+  }
+
+  async function _fetchNumChildren(state, event) {
+    const parentNode = getNodeByUuid(state, event.parent_uuid);
+    const parentEvent = state.events[parentNode.eventIndex];
+    if (!parentEvent) {
+      throw new Error(`Cannot fetch numChildren; parent event not found`);
+    }
+    const sibling = await callbacks.fetchNextSibling(parentEvent.id);
+    // while (!sibling && parentEvent) {}
   }
 
   function _gatherEventsForNewParent(state, parentUuid) {
@@ -223,7 +257,7 @@ function _getNodeForRow(state, rowToFind, nodes) {
   return [null, rowToFind];
 }
 
-// TODO: move; this will need access to dispatch :(
+// TODO: move
 function getTotalNumChildren(node, siblingNode = null) {
   // GOTCHA: requires no un-loaded siblings between node & siblingNode
   if (siblingNode?.eventIndex) {
@@ -283,4 +317,11 @@ function getNodeByUuid(state, uuid) {
     arr = arr[index].children;
   }
   return lastNode;
+}
+
+function setEventNumChildren(state, uuid, numChildren) {
+  return updateNodeByUuid(state, uuid, (node) => ({
+    ...node,
+    numChildren,
+  }));
 }

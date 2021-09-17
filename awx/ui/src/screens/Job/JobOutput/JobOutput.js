@@ -112,11 +112,21 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   // const [uuidMap, setUuidMap] = useState({});
 
   const fetchEventByUuid = (uuid) => {
+    // TODO (not getting called yet?)
     console.log('Oh Boy', uuid);
   };
+  const fetchNextSibling = async (counter) => {
+    // TODO
+  };
+  const fetchNumEvents = async (startCounter, endCounter) => {
+    // TODO
+  };
 
-  const { addEvents, toggleNodeIsCollapsed, getEventForRow } =
-    useJobEvents(fetchEventByUuid);
+  const { addEvents, toggleNodeIsCollapsed, getEventForRow } = useJobEvents({
+    fetchEventByUuid,
+    fetchNextSibling,
+    fetchNumEvents,
+  });
   const [cssMap, setCssMap] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
 
