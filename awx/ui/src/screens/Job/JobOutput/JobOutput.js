@@ -115,11 +115,17 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     // TODO (not getting called yet?)
     console.log('Oh Boy', uuid);
   };
-  const fetchNextSibling = async (counter) => {
-    // TODO
+  const fetchNextSibling = async (parentEventId, counter) => {
+    // TODO  job_events/{parentEventId}/children/?page_size=1&order_by=counter&counter__gt=counter
+    // return data.results[0]
+  };
+  const fetchNextRootNode = async (counter) => {
+    // TODO job_events/?order_by=counter&counter__gt=counter&parent_uuid=
+    // return data.results[0]
   };
   const fetchNumEvents = async (startCounter, endCounter) => {
-    // TODO
+    // TODO  job_events/?counter__gt={startCounter}&counter__lt={endCounter}&page_size=1
+    // return data.count
   };
 
   const { addEvents, toggleNodeIsCollapsed, getEventForRow } = useJobEvents({

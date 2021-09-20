@@ -6,17 +6,25 @@ import useJobEvents, {
   TOGGLE_NODE_COLLAPSED,
   SET_EVENT_NUM_CHILDREN,
 } from './useJobEvents';
+import { sleep } from '../../../../testUtils/testUtils';
 
 function HookTest({
   fetchEventByUuid = () => {},
   fetchNextSibling = () => {},
+  fetchNextRootNode = () => {},
+  fetchNumEvents = () => {},
 }) {
-  const hookFuncs = useJobEvents({ fetchEventByUuid, fetchNextSibling });
+  const hookFuncs = useJobEvents({
+    fetchEventByUuid,
+    fetchNextSibling,
+    fetchNextRootNode,
+    fetchNumEvents,
+  });
   return <div id="test" {...hookFuncs} />;
 }
 
 const eventsList = [
-  { id: 101, counter: 1, uuid: 'abc-001', event_level: 0 },
+  { id: 101, counter: 1, uuid: 'abc-001', event_level: 0, parent_uuid: '' },
   {
     id: 102,
     counter: 2,
@@ -116,14 +124,19 @@ describe('useJobEvents', () => {
   let callbacks;
   let reducer;
   let emptyState;
+  let enqueueAction;
 
   beforeEach(() => {
     callbacks = {
       fetchEventByUuid: jest.fn(),
       fetchNextSibling: jest.fn(),
+      fetchNextRootNode: jest.fn(),
       fetchNumEvents: jest.fn(),
     };
-    reducer = jobEventsReducer(callbacks);
+    enqueueAction = jest.fn();
+    callbacks.fetchNextSibling.mockResolvedValue(eventsList[9]);
+    callbacks.fetchNextRootNode.mockResolvedValue(eventsList[9]);
+    reducer = jobEventsReducer(callbacks, enqueueAction);
     emptyState = {
       tree: [],
       events: {},
@@ -586,29 +599,149 @@ describe('useJobEvents', () => {
       ]);
     });
 
-    test("should fetch next sibling's counter", () => {
-      reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: [eventsList[0], eventsList[1]],
+    describe('fetchNumChildren', () => {
+      test('should find child count for root node', async () => {
+        callbacks.fetchNextRootNode.mockResolvedValue({
+          id: 121,
+          counter: 21,
+          uuid: 'abc-021',
+          event_level: 0,
+          parent_uuid: '',
+        });
+        callbacks.fetchNumEvents.mockResolvedValue(19);
+        reducer(emptyState, {
+          type: ADD_EVENTS,
+          events: [eventsList[0], eventsList[1]],
+        });
+
+        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(0);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledWith(1);
+        await sleep(0);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(1, 21);
+        expect(enqueueAction).toHaveBeenCalledWith({
+          type: SET_EVENT_NUM_CHILDREN,
+          uuid: 'abc-001',
+          numChildren: 19,
+        });
       });
 
-      expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(1);
-      expect(callbacks.fetchNextSibling).toHaveBeenCalledWith(101);
-    });
+      test('should find child count for last root node', async () => {
+        callbacks.fetchNextRootNode.mockResolvedValue(null);
+        callbacks.fetchNumEvents.mockResolvedValue(19);
+        reducer(emptyState, {
+          type: ADD_EVENTS,
+          events: [eventsList[0], eventsList[1]],
+        });
 
-    test("should fetch parent's next sibling counter", () => {
-      reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: [eventsList[0], eventsList[1]],
+        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(0);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledWith(1);
+        await sleep(0);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(1, undefined);
+        expect(enqueueAction).toHaveBeenCalledWith({
+          type: SET_EVENT_NUM_CHILDREN,
+          uuid: 'abc-001',
+          numChildren: 19,
+        });
       });
-      callbacks.fetchNextSibling.mockClear();
 
-      reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: [eventsList[2]],
+      test('should find child count for nested node', async () => {
+        const state = {
+          events: {
+            1: eventsList[0],
+            2: eventsList[1],
+          },
+          tree: [
+            {
+              children: [{ children: [], eventIndex: 2, isCollapsed: false }],
+              eventIndex: 1,
+              isCollapsed: false,
+            },
+          ],
+          uuidMap: {
+            'abc-001': { index: 1, treePath: [0] },
+            'abc-002': { index: 2, treePath: [0, 0] },
+          },
+          eventsWithoutParents: {},
+        };
+
+        callbacks.fetchNextSibling.mockResolvedValue({
+          id: 20,
+          counter: 20,
+          uuid: 'abc-020',
+          event_level: 1,
+          parent_uuid: 'abc-001',
+        });
+        callbacks.fetchNumEvents.mockResolvedValue(18);
+        reducer(state, {
+          type: ADD_EVENTS,
+          events: [eventsList[2]],
+        });
+
+        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNextSibling).toHaveBeenCalledWith(101, 2);
+        await sleep(0);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(0);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(2, 20);
+        expect(enqueueAction).toHaveBeenCalledWith({
+          type: SET_EVENT_NUM_CHILDREN,
+          uuid: 'abc-002',
+          numChildren: 18,
+        });
       });
 
-      expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(2);
+      test('should find child count for nested node, last sibling', async () => {
+        const state = {
+          events: {
+            1: eventsList[0],
+            2: eventsList[1],
+          },
+          tree: [
+            {
+              children: [{ children: [], eventIndex: 2, isCollapsed: false }],
+              eventIndex: 1,
+              isCollapsed: false,
+            },
+          ],
+          uuidMap: {
+            'abc-001': { index: 1, treePath: [0] },
+            'abc-002': { index: 2, treePath: [0, 0] },
+          },
+          eventsWithoutParents: {},
+        };
+
+        callbacks.fetchNextSibling.mockResolvedValue(null);
+        callbacks.fetchNextRootNode.mockResolvedValue({
+          id: 121,
+          counter: 21,
+          uuid: 'abc-021',
+          event_level: 0,
+          parent_uuid: '',
+        });
+        callbacks.fetchNumEvents.mockResolvedValue(19);
+        reducer(state, {
+          type: ADD_EVENTS,
+          events: [eventsList[2]],
+        });
+
+        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNextSibling).toHaveBeenCalledWith(101, 2);
+        await sleep(0);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNextRootNode).toHaveBeenCalledWith(1);
+        await sleep(0);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
+        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(2, 21);
+        expect(enqueueAction).toHaveBeenCalledWith({
+          type: SET_EVENT_NUM_CHILDREN,
+          uuid: 'abc-002',
+          numChildren: 19,
+        });
+      });
     });
   });
 
