@@ -1,0 +1,135 @@
+# Automation Controller Nodes
+# There are two valid node_types that can be assigned for this group.
+# A node_type=control implies that the node will only be able to run
+# project and inventory updates, but not regular jobs.
+# A node_type=hybrid will have the ability to run everything.
+# If you do not define the node_type, it defaults to hybrid.
+#
+# control.example node_type=control
+# hybrid.example  node_type=hybrid
+# hybrid2.example <- this will default to hybrid
+
+[automationcontroller]
+srv-41.miller-harris.com node_type=control ansible_connection=local
+web-57.howell-patel.com node_type=control
+laptop-17.elliot.org node_type=control
+
+[automationcontroller:vars]
+peers=execution_nodes
+
+
+# Execution Nodes
+# There are two valid node_types that can be assigned for this group.
+# A node_type=hop implies that the node will forward jobs to an execution node.
+# A node_type=execution implies that the node will be able to run jobs.
+# If you do not define the node_type, it defaults to execution.
+#
+# hop.example        node_type=hop
+# execution.example  node_type=execution
+# execution2.example <- this will default to execution
+[execution_nodes]
+
+[automationhub]
+
+[database]
+
+[servicescatalog_workers]
+
+[sso]
+
+[all:vars]
+admin_password=''
+
+pg_host=''
+pg_port=''
+
+pg_database='awx'
+pg_username='awx'
+pg_password=''
+pg_sslmode='prefer'  # set to 'verify-full' for client-side enforced SSL
+
+# Execution Environment Configuration
+# Credentials for container registry to pull execution environment images from,
+# comment out registry_username if authentication is not required
+registry_url='registry.redhat.io'
+registry_username=''
+registry_password=''
+
+# Receptor Configuration
+#
+receptor_listener_port=27199
+
+# Automation Hub Configuration
+#
+
+automationhub_admin_password=''
+
+automationhub_pg_host=''
+automationhub_pg_port=''
+
+automationhub_pg_database='automationhub'
+automationhub_pg_username='automationhub'
+automationhub_pg_password=''
+automationhub_pg_sslmode='prefer'
+
+# By default if the automation hub package and its dependencies
+# are installed they won't get upgraded when running the installer
+# even if newer packages are available. One needs to run the ./setup.sh
+# script with the following set to True.
+#
+# automationhub_upgrade = False
+
+# By default when one uploads collections to Automation Hub
+# an admin needs to approve it before it is made available
+# to the users. If one wants to disble the content approval
+# flow, the following setting should be set to False.
+#
+# automationhub_require_content_approval = True
+
+# At import time collections can go through a series of checks.
+# Behaviour is driven by galaxy-importer.cfg configuration.
+# Example are ansible-doc, ansible-lint, flake8, ...
+#
+# The following parameter allow one to drive this configuration.
+# This variable is expected to be a dictionnary.
+#
+# automationhub_importer_settings = None
+
+# The default install will deploy a TLS enabled Automation Hub.
+# If for some reason this is not the behavior wanted one can
+# disable TLS enabled deployment.
+#
+# automationhub_disable_https = False
+
+# The default install will deploy a TLS enabled Automation Hub.
+# Unless specified otherwise the HSTS web-security policy mechanism
+# will be enabled. This setting allows one to disable it if need be.
+#
+# automationhub_disable_hsts = False
+
+# The default install will generate self-signed certificates for the Automation
+# Hub service. If you are providing valid certificate via automationhub_ssl_cert
+# and automationhub_ssl_key, one should toggle that value to True.
+#
+# automationhub_ssl_validate_certs = False
+
+# SSL-related variables
+
+# If set, this will install a custom CA certificate to the system trust store.
+# custom_ca_cert=/path/to/ca.crt
+
+# Certificate and key to install in nginx for the web UI and API
+# web_server_ssl_cert=/path/to/tower.cert
+# web_server_ssl_key=/path/to/tower.key
+
+# Certificate and key to install in Automation Hub node
+# automationhub_ssl_cert=/path/to/automationhub.cert
+# automationhub_ssl_key=/path/to/automationhub.key
+
+# Server-side SSL settings for PostgreSQL (when we are installing it).
+# postgres_use_ssl=False
+# postgres_ssl_cert=/path/to/pgsql.crt
+# postgres_ssl_key=/path/to/pgsql.key
+
+# Single-Sign-On configuration
+sso_console_admin_password=''
