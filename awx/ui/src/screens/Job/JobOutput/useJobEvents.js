@@ -164,7 +164,7 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       },
       event.uuid
     );
-    _fetchNumChildren(state, event);
+    _fetchNumChildren(state, parent);
 
     return [state, true];
   }
@@ -187,14 +187,36 @@ export function jobEventsReducer(callbacks, enqueueAction) {
     };
   }
 
-  async function _fetchNumChildren(state, event) {
-    const parentNode = getNodeByUuid(state, event.parent_uuid);
-    const parentEvent = state.events[parentNode.eventIndex];
-    if (!parentEvent) {
-      throw new Error(`Cannot fetch numChildren; parent event not found`);
+  async function _fetchNumChildren(state, node) {
+    const event = state.events[node.eventIndex];
+    if (!event) {
+      throw new Error(
+        `Cannot fetch numChildren; event ${node.eventIndex} not found`
+      );
     }
-    const sibling = await callbacks.fetchNextSibling(parentEvent.id);
-    // while (!sibling && parentEvent) {}
+    const sibling = await _getNextSibling(state, event);
+    const numChildren = await callbacks.fetchNumEvents(
+      event.counter,
+      sibling?.counter
+    );
+    enqueueAction({
+      type: SET_EVENT_NUM_CHILDREN,
+      uuid: event.uuid,
+      numChildren,
+    });
+  }
+
+  async function _getNextSibling(state, event) {
+    if (!event.parent_uuid) {
+      return callbacks.fetchNextRootNode(event.counter);
+    }
+    const parentNode = getNodeByUuid(state, event.parent_uuid);
+    const parent = state.events[parentNode.eventIndex];
+    const sibling = await callbacks.fetchNextSibling(parent.id, event.counter);
+    if (!sibling) {
+      return _getNextSibling(state, parent);
+    }
+    return sibling;
   }
 
   function _gatherEventsForNewParent(state, parentUuid) {
