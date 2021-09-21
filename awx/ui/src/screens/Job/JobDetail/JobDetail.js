@@ -17,7 +17,7 @@ import {
 import { CardBody, CardActionsRow } from 'components/Card';
 import ChipGroup from 'components/ChipGroup';
 import CredentialChip from 'components/CredentialChip';
-import { VariablesInput as _VariablesInput } from 'components/CodeEditor';
+import { VariablesDetail } from 'components/CodeEditor';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
 import { LaunchButton, ReLaunchDropDown } from 'components/LaunchButton';
@@ -28,12 +28,6 @@ import { getJobModel, isJobRunning } from 'util/jobs';
 import { toTitleCase } from 'util/strings';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
-
-const VariablesInput = styled(_VariablesInput)`
-  .pf-c-form__label {
-    --pf-c-form__label--FontWeight: var(--pf-global--FontWeight--bold);
-  }
-`;
 
 const StatusDetailValue = styled.div`
   align-items: center;
@@ -420,29 +414,29 @@ function JobDetail({ job, inventorySourceLabels }) {
           label={t`Last Modified`}
           date={job.modified}
         />
+        {job.extra_vars && (
+          <VariablesDetail
+            css="margin: 20px 0"
+            id="job-variables"
+            readOnly
+            value={job.extra_vars}
+            rows={4}
+            label={t`Variables`}
+            name="extra_vars"
+          />
+        )}
+        {job.artifacts && (
+          <VariablesDetail
+            css="margin: 20px 0"
+            id="job-artifacts"
+            readOnly
+            value={JSON.stringify(job.artifacts)}
+            rows={4}
+            label={t`Artifacts`}
+            name="artifacts"
+          />
+        )}
       </DetailList>
-      {job.extra_vars && (
-        <VariablesInput
-          css="margin: 20px 0"
-          id="job-variables"
-          readOnly
-          value={job.extra_vars}
-          rows={4}
-          label={t`Variables`}
-          name="extra_vars"
-        />
-      )}
-      {job.artifacts && (
-        <VariablesInput
-          css="margin: 20px 0"
-          id="job-artifacts"
-          readOnly
-          value={JSON.stringify(job.artifacts)}
-          rows={4}
-          label={t`Artifacts`}
-          name="artifacts"
-        />
-      )}
       <CardActionsRow>
         {job.type !== 'system_job' &&
           job.summary_fields.user_capabilities.start &&

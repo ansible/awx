@@ -251,7 +251,7 @@ describe('<JobDetail />', () => {
     wrapper.find('button[aria-label="Delete"]').simulate('click');
     await sleep(1);
     wrapper.update();
-    const modal = wrapper.find('Modal');
+    const modal = wrapper.find('Modal[aria-label="Alert modal"]');
     expect(modal.length).toBe(1);
     modal.find('button[aria-label="Confirm Delete"]').simulate('click');
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
@@ -272,7 +272,7 @@ describe('<JobDetail />', () => {
     );
     wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');
-    const modal = wrapper.find('Modal');
+    const modal = wrapper.find('Modal[aria-label="Alert modal"]');
     expect(modal.length).toBe(1);
     await act(async () => {
       modal.find('button[aria-label="Confirm Delete"]').simulate('click');
