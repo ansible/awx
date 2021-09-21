@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
-import { InstanceGroupsAPI } from 'api';
+import { InstancesAPI, InstanceGroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -151,5 +151,50 @@ describe('<InstanceList/>', () => {
     expect(wrapper.find('AssociateModal').length).toBe(1);
     wrapper.find('ModalBoxCloseButton').simulate('click');
     expect(wrapper.find('AssociateModal').length).toBe(0);
+  });
+  test('should run health check', async () => {
+    expect(
+      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
+    ).toBe(true);
+    await act(async () =>
+      wrapper.find('DataListToolbar').prop('onSelectAll')(instances)
+    );
+    wrapper.update();
+    expect(
+      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
+    ).toBe(false);
+    await act(async () =>
+      wrapper.find('Button[ouiaId="health-check"]').prop('onClick')()
+    );
+    expect(InstancesAPI.healthCheck).toBeCalledTimes(3);
+  });
+  test('should render health check error', async () => {
+    InstancesAPI.healthCheck.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'create',
+            url: '/api/v2/instances',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+    expect(
+      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
+    ).toBe(true);
+    await act(async () =>
+      wrapper.find('DataListToolbar').prop('onSelectAll')(instances)
+    );
+    wrapper.update();
+    expect(
+      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
+    ).toBe(false);
+    await act(async () =>
+      wrapper.find('Button[ouiaId="health-check"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('AlertModal')).toHaveLength(1);
   });
 });

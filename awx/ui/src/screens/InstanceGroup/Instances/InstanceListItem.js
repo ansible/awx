@@ -9,11 +9,13 @@ import {
   ProgressMeasureLocation,
   ProgressSize,
   Slider,
+  Tooltip,
 } from '@patternfly/react-core';
-import { Tr, Td } from '@patternfly/react-table';
-
+import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
+import { formatDateString } from 'util/dates';
 import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 import InstanceToggle from 'components/InstanceToggle';
+import StatusLabel from 'components/StatusLabel';
 import { Instance } from 'types';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useDebounce from 'hooks/useDebounce';
@@ -21,6 +23,7 @@ import { InstancesAPI } from 'api';
 import { useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
+import { Detail, DetailList } from 'components/DetailList';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
@@ -50,6 +53,8 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
 
 function InstanceListItem({
   instance,
+  isExpanded,
+  onExpand,
   isSelected,
   onSelect,
   fetchInstances,
@@ -107,6 +112,13 @@ function InstanceListItem({
     <>
       <Tr id={`instance-row-${instance.id}`}>
         <Td
+          expand={{
+            rowIndex,
+            isExpanded,
+            onToggle: onExpand,
+          }}
+        />
+        <Td
           select={{
             rowIndex,
             isSelected: isSelected && instance.node_type !== 'control',
@@ -117,12 +129,17 @@ function InstanceListItem({
         />
         <Td id={labelId} dataLabel={t`Name`}>
           <Link to={`/instance_groups/${id}/instances/${instance.id}/details`}>
-            {instance.hostname}
+            <b>{instance.hostname}</b>
           </Link>
         </Td>
-        <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
-        <Td dataLabel={t`Policy Type`}>
-          {instance.managed_by_policy ? t`Auto` : t`Manual`}
+        <Td dataLabel={t`Status`}>
+          <Tooltip
+            content={t`Last Health Check ${formatDateString(
+              instance.last_health_check
+            )}`}
+          >
+            <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
+          </Tooltip>
         </Td>
         <Td dataLabel={t`Running Jobs`}>{instance.jobs_running}</Td>
         <Td dataLabel={t`Total Jobs`}>{instance.jobs_total}</Td>
@@ -165,6 +182,24 @@ function InstanceListItem({
             />
           </ActionItem>
         </ActionsTd>
+      </Tr>
+      <Tr isExpanded={isExpanded}>
+        <Td colSpan={2} />
+        <Td colSpan={7}>
+          <ExpandableRowContent>
+            <DetailList>
+              <Detail label={t`Node Type`} value={instance.node_type} />
+              <Detail
+                label={t`Policy Type`}
+                value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+              />
+              <Detail
+                label={t`Last Health Check`}
+                value={formatDateString(instance.last_health_check)}
+              />
+            </DetailList>
+          </ExpandableRowContent>
+        </Td>
       </Tr>
       {updateError && (
         <AlertModal

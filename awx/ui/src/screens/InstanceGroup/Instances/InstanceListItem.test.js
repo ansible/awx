@@ -36,6 +36,7 @@ const instance = [
     percent_capacity_remaining: 60.0,
     jobs_running: 0,
     jobs_total: 68,
+    last_health_check: '2021-09-15T18:02:07.270664Z',
     cpu: 6,
     memory: 2087469056,
     cpu_capacity: 24,
@@ -58,6 +59,7 @@ const instance = [
     modified: '2020-08-12T20:08:02.836748Z',
     capacity_adjustment: '0.40',
     version: '13.0.0',
+    last_health_check: '2021-09-15T18:02:07.270664Z',
     capacity: 10,
     consumed_capacity: 0,
     percent_capacity_remaining: 60.0,
@@ -162,10 +164,8 @@ describe('<InstanceListItem/>', () => {
     expect(wrapper.find('Td[dataLabel="Name"]').find('Link').prop('to')).toBe(
       '/instance_groups/1/instances/1/details'
     );
-    expect(wrapper.find('Td').at(1).text()).toBe('awx');
+    expect(wrapper.find('Td').at(2).text()).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
-    expect(wrapper.find('Td').at(2).text()).toBe('hybrid');
-    expect(wrapper.find('Td').at(3).text()).toBe('Auto');
     expect(
       wrapper
         .find('Td')
@@ -198,9 +198,7 @@ describe('<InstanceListItem/>', () => {
         </table>
       );
     });
-    expect(wrapper.find('Td').first().prop('select').onSelect).toEqual(
-      onSelect
-    );
+    expect(wrapper.find('Td').at(1).prop('select').onSelect).toEqual(onSelect);
   });
 
   test('should disable checkbox', async () => {
@@ -218,7 +216,7 @@ describe('<InstanceListItem/>', () => {
         </table>
       );
     });
-    expect(wrapper.find('Td').first().prop('select').disable).toEqual(true);
+    expect(wrapper.find('Td').at(1).prop('select').disable).toEqual(true);
   });
 
   test('should display instance toggle', () => {
@@ -275,5 +273,33 @@ describe('<InstanceListItem/>', () => {
       wrapper.update();
     });
     expect(wrapper.find('ErrorDetail').length).toBe(1);
+  });
+
+  test('Should render expanded row with the correct data points', async () => {
+    const onSelect = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[0]}
+              onSelect={onSelect}
+              fetchInstances={() => {}}
+              isExpanded
+            />
+          </tbody>
+        </table>
+      );
+    });
+    expect(wrapper.find('InstanceListItem').prop('isExpanded')).toBe(true);
+    expect(wrapper.find('Detail[label="Node Type"]').prop('value')).toBe(
+      'hybrid'
+    );
+    expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
+      'Auto'
+    );
+    expect(
+      wrapper.find('Detail[label="Last Health Check"]').prop('value')
+    ).toBe('9/15/2021, 6:02:07 PM');
   });
 });
