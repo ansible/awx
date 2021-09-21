@@ -54,14 +54,21 @@ const getNodeToEditDefaultValues = (
     identifier = nodeToEdit?.originalNodeObject?.identifier;
   }
 
+  const getConvergence = () => {
+    // There is a case where the nodeToEdit convergence value will not align with the
+    // original node object value.  This allows the nodeToEdit value to take precedence over the
+    // original node object.
+    if (nodeToEdit) {
+      return nodeToEdit.all_parents_must_converge ? 'all' : 'any';
+    }
+    return nodeToEdit?.originalNodeObject?.all_parents_must_converge
+      ? 'all'
+      : 'any';
+  };
   const initialValues = {
     nodeResource: nodeToEdit?.fullUnifiedJobTemplate || null,
     nodeType: nodeToEdit?.fullUnifiedJobTemplate?.type || 'job_template',
-    convergence:
-      nodeToEdit?.all_parents_must_converge ||
-      nodeToEdit?.originalNodeObject?.all_parents_must_converge
-        ? 'all'
-        : 'any',
+    convergence: getConvergence(),
     identifier,
   };
 
@@ -322,7 +329,6 @@ export default function useWorkflowNodeSteps(
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [launchConfig, surveyConfig, isReady]);
-
   const stepWithError = steps.find((s) => s.contentError);
   const contentError = stepWithError ? stepWithError.contentError : null;
 
