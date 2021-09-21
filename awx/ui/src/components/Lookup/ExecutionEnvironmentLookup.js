@@ -37,6 +37,7 @@ function ExecutionEnvironmentLookup({
   validate,
   value,
   fieldName,
+  overrideLabel,
 }) {
   const location = useLocation();
 
@@ -202,6 +203,9 @@ function ExecutionEnvironmentLookup({
     globalDefaultEnvironment,
     defaultExecutionEnvironment
   ) => {
+    if (overrideLabel) {
+      return null;
+    }
     if (globalDefaultEnvironment) {
       return t`Global Default Execution Environment`;
     }
@@ -241,6 +245,7 @@ ExecutionEnvironmentLookup.propTypes = {
   organizationId: oneOfType([number, string]),
   validate: func,
   fieldName: string,
+  overrideLabel: bool,
 };
 
 ExecutionEnvironmentLookup.defaultProps = {
@@ -253,6 +258,7 @@ ExecutionEnvironmentLookup.defaultProps = {
   organizationId: null,
   validate: () => undefined,
   fieldName: 'execution_environment',
+  overrideLabel: false,
 };
 
 export default ExecutionEnvironmentLookup;

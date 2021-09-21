@@ -17,6 +17,7 @@ import FileUploadIcon from '@patternfly/react-icons/dist/js/icons/file-upload-ic
 import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import AnsibleSelect from 'components/AnsibleSelect';
+import { ExecutionEnvironmentLookup } from 'components/Lookup';
 import CodeEditor from 'components/CodeEditor';
 import { PasswordInput } from 'components/FormField';
 import { FormFullWidthLayout } from 'components/FormLayout';
@@ -229,6 +230,39 @@ EncryptedField.propTypes = {
   config: shape({}).isRequired,
 };
 
+const ExecutionEnvField = ({ name, config, isRequired = false }) => {
+  const validate = isRequired ? required(null) : null;
+  const [field, meta, helpers] = useField({ name, validate });
+  const isValid = !meta.error || !meta.touched;
+  return config ? (
+    <SettingGroup
+      defaultValue={config.default ?? ''}
+      fieldId={name}
+      helperTextInvalid={meta.error}
+      isRequired={isRequired}
+      label={config.label}
+      popoverContent={config.help_text}
+      validated={isValid ? 'default' : 'error'}
+      isDisabled={field.value === null}
+    >
+      <ExecutionEnvironmentLookup
+        onBlur={() => helpers.setTouched(true)}
+        value={field.value}
+        onChange={(value) => {
+          helpers.setValue(value);
+          helpers.setTouched(true);
+        }}
+        overrideLabel
+        fieldName={name}
+      />
+    </SettingGroup>
+  ) : null;
+};
+ExecutionEnvField.propTypes = {
+  name: string.isRequired,
+  config: shape({}).isRequired,
+};
+
 const InputAlertField = ({ name, config }) => {
   const [field, meta] = useField({ name });
   const isValid = !(meta.touched && meta.error);
@@ -341,7 +375,6 @@ const InputField = ({ name, config, type = 'text', isRequired = false }) => {
   ];
   const [field, meta] = useField({ name, validate: combine(validators) });
   const isValid = !(meta.touched && meta.error);
-
   return config ? (
     <SettingGroup
       defaultValue={config.default ?? ''}
@@ -517,6 +550,7 @@ export {
   BooleanField,
   ChoiceField,
   EncryptedField,
+  ExecutionEnvField,
   FileUploadField,
   InputField,
   ObjectField,
