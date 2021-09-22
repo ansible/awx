@@ -37,6 +37,10 @@ describe('PromptJobTemplateDetail', () => {
   test('should render expected details', () => {
     assertDetail(wrapper, 'Job Type', 'Run');
     assertDetail(wrapper, 'Inventory', 'Demo Inventory');
+    const link = wrapper.find('Detail[label="Inventory"]');
+    expect(link.find('Link').prop('to')).toBe(
+      '/inventories/inventory/1/details'
+    );
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Source Control Branch', 'Foo branch');
     assertDetail(wrapper, 'Playbook', 'ping.yml');
