@@ -285,22 +285,19 @@ class TaskManager:
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
             elif rampart_group.is_container_group:
-                # find one real, non-containerized instance with capacity to
-                # act as the controller for k8s API interaction
-                match = None
-                for group in InstanceGroup.objects.filter(is_container_group=False):
-                    match = group.fit_task_to_most_remaining_capacity_instance(task, group.instances.all())
-                    if match:
-                        break
                 task.instance_group = rampart_group
-                if match is None:
-                    logger.warn('No available capacity to run containerized <{}>.'.format(task.log_format))
-                elif task.capacity_type == 'execution' and any(ig.is_container_group for ig in task.preferred_instance_groups):
-                    task.controller_node = match.hostname
+                if task.capacity_type == 'execution':
+                    # find one real, non-containerized instance with capacity to
+                    # act as the controller for k8s API interaction
+                    try:
+                        task.controller_node = Instance.choose_online_control_plane_node()
+                    except IndexError:
+                        logger.warning("No control plane nodes available to run containerized job {}".format(task.log_format))
+                        return
                 else:
-                    # project updates and inventory updates don't *actually* run in pods, so
+                    # project updates and system jobs don't *actually* run in pods, so
                     # just pick *any* non-containerized host and use it as the execution node
-                    task.execution_node = match.hostname
+                    task.execution_node = Instance.choose_online_control_plane_node()
                     logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
