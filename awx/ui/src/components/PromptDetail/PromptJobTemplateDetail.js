@@ -124,7 +124,7 @@ function PromptJobTemplateDetail({ resource }) {
           label={t`Inventory`}
           value={
             <Link
-              to={`/${inventoryKind}/${summary_fields.inventory?.id}/details`}
+              to={`/inventories/${inventoryKind}/${summary_fields.inventory?.id}/details`}
             >
               {summary_fields.inventory?.name}
             </Link>
