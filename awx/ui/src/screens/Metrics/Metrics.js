@@ -70,9 +70,16 @@ function Metrics() {
       ]);
 
       const metricOptions = Object.keys(mets);
+      const instanceNames = [];
+      results.forEach((result) => {
+        if (result.node_type !== 'execution') {
+          instanceNames.push(result.hostname);
+        }
+      });
 
       return {
-        instances: [...results.map((result) => result.hostname), t`All`],
+        instances:
+          instanceNames.length > 1 ? [...instanceNames, t`All`] : instanceNames,
         metrics: metricOptions,
       };
     }, []),
