@@ -23,6 +23,7 @@ const FormActionGroup = ({ onCancel, onSubmit, submitDisabled }) => (
         aria-label={t`Cancel`}
         variant="link"
         type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={onCancel}
       >
         {t`Cancel`}
