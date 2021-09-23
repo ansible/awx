@@ -1,12 +1,11 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { formatDateString } from 'util/dates';
 import { Application } from 'types';
 
@@ -28,18 +27,18 @@ function ApplicationListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{application.name}</b>
         </Link>
-      </Td>
-      <Td dataLabel={t`Organization`}>
+      </TdBreakWord>
+      <TdBreakWord dataLabel={t`Organization`}>
         <Link
           to={`/organizations/${application.summary_fields.organization.id}`}
         >
           <b>{application.summary_fields.organization.name}</b>
         </Link>
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Last Modified`}>
         {formatDateString(application.modified)}
       </Td>

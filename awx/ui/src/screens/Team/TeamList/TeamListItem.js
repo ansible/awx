@@ -1,5 +1,5 @@
-import 'styled-components/macro';
 import React from 'react';
+import 'styled-components/macro';
 import { string, bool, func } from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -7,7 +7,7 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { Team } from 'types';
 
 function TeamListItem({ team, isSelected, onSelect, detailUrl, rowIndex }) {
@@ -30,12 +30,12 @@ function TeamListItem({ team, isSelected, onSelect, detailUrl, rowIndex }) {
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{team.name}</b>
         </Link>
-      </Td>
-      <Td dataLabel={t`Organization`}>
+      </TdBreakWord>
+      <TdBreakWord dataLabel={t`Organization`}>
         {team.summary_fields.organization && (
           <Link
             to={`/organizations/${team.summary_fields.organization.id}/details`}
@@ -43,7 +43,7 @@ function TeamListItem({ team, isSelected, onSelect, detailUrl, rowIndex }) {
             <b>{team.summary_fields.organization.name}</b>
           </Link>
         )}
-      </Td>
+      </TdBreakWord>
       <ActionsTd dataLabel={t`Actions`}>
         <ActionItem
           visible={team.summary_fields.user_capabilities.edit}

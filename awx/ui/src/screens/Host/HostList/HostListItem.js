@@ -7,7 +7,7 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { Host } from 'types';
 import HostToggle from 'components/HostToggle';
 import { DetailList, Detail } from 'components/DetailList';
@@ -47,12 +47,12 @@ function HostListItem({
           }}
           dataLabel={t`Selected`}
         />
-        <Td id={labelId} dataLabel={t`Name`}>
+        <TdBreakWord id={labelId} dataLabel={t`Name`}>
           <Link to={`${detailUrl}`}>
             <b>{host.name}</b>
           </Link>
-        </Td>
-        <Td dataLabel={t`Inventory`}>
+        </TdBreakWord>
+        <TdBreakWord dataLabel={t`Inventory`}>
           {host.summary_fields.inventory && (
             <Link
               to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
@@ -60,7 +60,7 @@ function HostListItem({
               {host.summary_fields.inventory.name}
             </Link>
           )}
-        </Td>
+        </TdBreakWord>
         <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
           <HostToggle host={host} />
           <ActionItem

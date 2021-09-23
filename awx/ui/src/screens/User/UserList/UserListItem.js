@@ -1,5 +1,5 @@
+import React from 'react';
 import 'styled-components/macro';
-import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -7,7 +7,7 @@ import { Button, Label } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 
 import { User } from 'types';
 
@@ -35,7 +35,7 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, rowIndex }) {
           onSelect,
         }}
       />
-      <Td id={labelId} dataLabel={t`Username`}>
+      <TdBreakWord id={labelId} dataLabel={t`Username`}>
         <Link to={`${detailUrl}`}>
           <b>{user.username}</b>
         </Link>
@@ -49,7 +49,7 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, rowIndex }) {
             <Label aria-label={t`social login`}>{t`SOCIAL`}</Label>
           </span>
         )}
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`First Name`}>
         {user.first_name && <>{user.first_name}</>}
       </Td>

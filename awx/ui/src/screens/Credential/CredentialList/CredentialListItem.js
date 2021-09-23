@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { timeOfDay } from 'util/dates';
 
 import { Credential } from 'types';
@@ -52,11 +52,11 @@ function CredentialListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{credential.name}</b>
         </Link>
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Type`}>
         {credential.summary_fields.credential_type.name}
       </Td>

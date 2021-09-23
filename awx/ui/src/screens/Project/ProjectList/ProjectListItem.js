@@ -11,7 +11,7 @@ import {
   UndoIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { formatDateString, timeOfDay } from 'util/dates';
 import { ProjectsAPI } from 'api';
 import { DetailList, Detail, DeletedDetail } from 'components/DetailList';
@@ -171,7 +171,7 @@ function ProjectListItem({
           }}
           dataLabel={t`Selected`}
         />
-        <Td id={labelId} dataLabel={t`Name`}>
+        <TdBreakWord id={labelId} dataLabel={t`Name`}>
           <span>
             <Link to={`${detailUrl}`}>
               <b>{project.name}</b>
@@ -188,7 +188,7 @@ function ProjectListItem({
               </Tooltip>
             </span>
           )}
-        </Td>
+        </TdBreakWord>
         <Td dataLabel={t`Status`}>
           {job && (
             <Tooltip

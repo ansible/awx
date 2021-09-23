@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { timeOfDay } from 'util/dates';
 import { InventoriesAPI } from 'api';
 import { Inventory } from 'types';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import CopyButton from 'components/CopyButton';
 import StatusLabel from 'components/StatusLabel';
 
@@ -19,7 +19,6 @@ function InventoryListItem({
   isSelected,
   onSelect,
   detailUrl,
-
   fetchInventories,
 }) {
   InventoryListItem.propTypes = {
@@ -82,7 +81,7 @@ function InventoryListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         {inventory.pending_deletion ? (
           <b>{inventory.name}</b>
         ) : (
@@ -90,7 +89,7 @@ function InventoryListItem({
             <b>{inventory.name}</b>
           </Link>
         )}
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Status`}>
         {inventory.kind !== 'smart' && (
           <StatusLabel status={syncStatus} tooltipContent={tooltipContent} />
@@ -99,13 +98,13 @@ function InventoryListItem({
       <Td dataLabel={t`Type`}>
         {inventory.kind === 'smart' ? t`Smart Inventory` : t`Inventory`}
       </Td>
-      <Td key="organization" dataLabel={t`Organization`}>
+      <TdBreakWord key="organization" dataLabel={t`Organization`}>
         <Link
           to={`/organizations/${inventory?.summary_fields?.organization?.id}/details`}
         >
           {inventory?.summary_fields?.organization?.name}
         </Link>
-      </Td>
+      </TdBreakWord>
       {inventory.pending_deletion ? (
         <Td dataLabel={t`Groups`}>
           <Label color="red">{t`Pending delete`}</Label>

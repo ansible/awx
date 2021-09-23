@@ -8,7 +8,7 @@ import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { formatDateString } from 'util/dates';
 import { isJobRunning } from 'util/jobs';
-import { ActionsTd, ActionItem } from '../PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from '../PaginatedTable';
 import { LaunchButton, ReLaunchDropDown } from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
 import { DetailList, Detail, LaunchedByDetail } from '../DetailList';
@@ -76,7 +76,7 @@ function JobListItem({
           }}
           dataLabel={t`Select`}
         />
-        <Td id={labelId} dataLabel={t`Name`}>
+        <TdBreakWord id={labelId} dataLabel={t`Name`}>
           <span>
             <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
               <b>
@@ -84,7 +84,7 @@ function JobListItem({
               </b>
             </Link>
           </span>
-        </Td>
+        </TdBreakWord>
         <Td dataLabel={t`Status`}>
           {job.status && <StatusLabel status={job.status} />}
         </Td>
