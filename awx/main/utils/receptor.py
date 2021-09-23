@@ -4,10 +4,18 @@ import time
 
 from receptorctl.socket_interface import ReceptorControl
 
+from enum import Enum, unique
 
 logger = logging.getLogger('awx.main.utils.receptor')
 
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
+
+
+@unique
+class ReceptorConnectionType(Enum):
+    DATAGRAM = 0
+    STREAM = 1
+    STREAMTLS = 2
 
 
 def get_receptor_sockfile():
@@ -47,20 +55,15 @@ def get_receptor_ctl():
 
 
 def get_conn_type(node_name, receptor_ctl):
-    """
-    ConnType 0: Datagram
-    ConnType 1: Stream
-    ConnType 2: StreamTLS
-    """
     all_nodes = receptor_ctl.simple_command("status").get('Advertisements', None)
     for node in all_nodes:
         if node.get('NodeID') == node_name:
-            return node.get('ConnType')
+            return ReceptorConnectionType(node.get('ConnType'))
 
 
 def worker_info(node_name, work_type='ansible-runner'):
     receptor_ctl = get_receptor_ctl()
-    use_stream_tls = True if get_conn_type(node_name, receptor_ctl) == 2 else False
+    use_stream_tls = get_conn_type(node_name, receptor_ctl).name == "STREAMTLS"
     transmit_start = time.time()
     error_list = []
     data = {'errors': error_list, 'transmit_timing': 0.0}

@@ -3049,7 +3049,7 @@ class AWXReceptorJob:
         _kw = {}
         if self.work_type == 'ansible-runner':
             _kw['node'] = self.task.instance.execution_node
-            use_stream_tls = True if get_conn_type(_kw['node'], receptor_ctl) == 2 else False
+            use_stream_tls = get_conn_type(_kw['node'], receptor_ctl).name == "STREAMTLS"
             _kw['tlsclient'] = get_tls_client(use_stream_tls)
 
         result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, **_kw)
