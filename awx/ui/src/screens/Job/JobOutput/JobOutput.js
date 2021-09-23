@@ -139,7 +139,12 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     return data.count || 0;
   };
 
-  const { addEvents, toggleNodeIsCollapsed, getEventForRow } = useJobEvents({
+  const {
+    addEvents,
+    toggleNodeIsCollapsed,
+    getEventForRow,
+    getNumCollapsedEvents,
+  } = useJobEvents({
     fetchEventByUuid,
     fetchNextSibling,
     fetchNextRootNode,
@@ -147,7 +152,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   });
   const [cssMap, setCssMap] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
-
   const [contentError, setContentError] = useState(null);
   const [currentlyLoading, setCurrentlyLoading] = useState([]);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -159,6 +163,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     isJobRunning(job.status)
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
+
+  const totalNonCollapsedRows = Math.max(
+    remoteRowCount - getNumCollapsedEvents(),
+    0
+  );
 
   useInterval(
     () => {
@@ -378,15 +387,22 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     // TODO convert to tree indexes
 
+    const diff = Math.max(stopIndex - startIndex, 50);
     if (stopIndex > startIndex + 50) {
       stopIndex = startIndex + 50;
     }
     console.debug('LOAD MORE', { startIndex, stopIndex });
+    // debugger;
+    // const event = getEventForRow(startIndex);
+    const event = getEventForRow(startIndex - 1);
+    // console.log(event, event2);
 
+    // TODO: forget pagination stuff. use counter__gt=event.counter or similar
     const [requestParams, loadRange] = getEventRequestParams(
       job,
       remoteRowCount,
       [startIndex, stopIndex]
+      // event ? [event.counter, event.counter + diff] : [startIndex, stopIndex]
     );
 
     if (isMounted.current) {
@@ -534,7 +550,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                         deferredMeasurementCache={cache}
                         height={height || 1}
                         onRowsRendered={onRowsRendered}
-                        rowCount={remoteRowCount}
+                        rowCount={totalNonCollapsedRows}
                         rowHeight={cache.rowHeight}
                         rowRenderer={rowRenderer}
                         scrollToAlignment="start"
