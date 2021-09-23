@@ -59,7 +59,11 @@ export function jobEventsReducer(callbacks, enqueueAction) {
   };
 
   function addEvents(origState, newEvents) {
-    let state = { ...origState, events: { ...origState.events } };
+    let state = {
+      ...origState,
+      events: { ...origState.events },
+      tree: [...origState.tree],
+    };
     const parentsToFetch = new Set();
     newEvents.forEach((event) => {
       // todo normalize?
@@ -69,7 +73,7 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         state = _gatherEventsForNewParent(state, event.uuid);
         return;
       }
-      if (event.event_level === 0) {
+      if (event.event_level === 0 || !event.parent_uuid) {
         state = _addRootLevelEvent(state, event);
         return;
       }
@@ -135,16 +139,21 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       isCollapsed: false,
       children: [],
     };
+    // TODO: don't duplicate event if already in children
     const index = parent.children.findIndex(
-      (node) => node.eventIndex > eventIndex
+      (node) => node.eventIndex >= eventIndex
     );
-    let length;
-    // TODO update Parent correctly in tree/setTree ***
+    const length = parent.children.length + 1;
     if (index === -1) {
-      length = parent.children.push(newNode);
+      state = updateNodeByUuid(state, event.parent_uuid, (node) => {
+        node.children.push(newNode);
+        return node;
+      });
     } else {
-      parent.children.splice(index, 0, newNode);
-      length = parent.children.length;
+      state = updateNodeByUuid(state, event.parent_uuid, (node) => {
+        node.children.splice(index, 0, newNode);
+        return node;
+      });
     }
     const { treePath: parentTreePath } = state.uuidMap[event.parent_uuid];
     state = _gatherEventsForNewParent(
@@ -164,7 +173,9 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       },
       event.uuid
     );
-    _fetchNumChildren(state, parent);
+    if (length === 1) {
+      _fetchNumChildren(state, parent);
+    }
 
     return [state, true];
   }
@@ -248,46 +259,52 @@ function getEventForRow(state, rowIndex) {
 }
 
 function getNodeForRow(state, rowToFind) {
-  const [node] = _getNodeForRow(state, rowToFind + 1, state.tree);
+  const node = _getNodeForRow(state, rowToFind + 1, state.tree);
   return node;
 }
 
-// TODO don't depend on eventIndex
 function _getNodeForRow(state, rowToFind, nodes) {
+  let remainingCount = rowToFind;
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    const nextNode = nodes[i + 1] || {};
-    if (state.events[node.eventIndex].counter === rowToFind) {
-      return [node, rowToFind];
+    if (remainingCount === 1) {
+      return node;
     }
-    if (node.isCollapsed) {
-      rowToFind += getTotalNumChildren(node, nextNode);
-      continue;
+    remainingCount--;
+    if (remainingCount < 1) {
+      // looking for a node that hasn't been loaded yet
+      return null;
     }
-    if (!nextNode.eventIndex || nextNode.eventIndex > rowToFind) {
-      const [found, newRowToFind] = _getNodeForRow(
-        state,
-        rowToFind,
-        node.children
-      );
-      if (found) {
-        return [found, newRowToFind];
-      }
-      rowToFind = newRowToFind;
+    const nodeChildren =
+      getTotalNumChildren(node) - getNumCollapsedChildren(node);
+    if (nodeChildren >= remainingCount) {
+      return _getNodeForRow(state, remainingCount, node.children);
     }
+    remainingCount -= nodeChildren;
   }
-  return [null, rowToFind];
+  return null;
 }
 
-// TODO: move
-function getTotalNumChildren(node, siblingNode = null) {
-  // GOTCHA: requires no un-loaded siblings between node & siblingNode
-  if (siblingNode?.eventIndex) {
-    return siblingNode.eventIndex - node.eventIndex - 1;
+function getTotalNumChildren(node) {
+  if (typeof node.numChildren !== 'undefined') {
+    return node.numChildren;
   }
-  let sum = node.children.length;
-  node.children.forEach((child, i) => {
-    sum += getTotalNumChildren(child, node.children[i + 1]);
+
+  let estimatedNumChildren = node.children.length;
+  node.children.forEach((child) => {
+    estimatedNumChildren += getTotalNumChildren(child);
+  });
+  return estimatedNumChildren;
+}
+
+function getNumCollapsedChildren(node) {
+  if (node.isCollapsed) {
+    return getTotalNumChildren(node);
+  }
+
+  let sum = 0;
+  node.children.forEach((child) => {
+    sum += getNumCollapsedChildren(child);
   });
   return sum;
 }
@@ -303,27 +320,31 @@ function updateNodeByUuid(state, uuid, update) {
   if (!state.uuidMap[uuid]) {
     throw new Error(`Cannot update node; Event UUID not found ${uuid}`);
   }
-  const tree = [...state.tree];
-  let arr = tree;
   const { treePath } = state.uuidMap[uuid];
-  for (let i = 0; i < treePath.length; i++) {
-    const index = treePath[i];
-    const children = [...arr[index].children];
-    let node = arr[index];
-    if (i === treePath.length - 1) {
-      node = update(node);
-    }
-    arr[index] = {
-      ...node,
-      children,
-    };
-    arr = children;
-  }
-
   return {
     ...state,
-    tree,
+    tree: _updateNodeByPath(treePath, state.tree, update),
   };
+}
+
+function _updateNodeByPath(treePath, nodeArray, update) {
+  const index = treePath[0];
+  const node = nodeArray[index];
+  if (treePath.length === 1) {
+    return [
+      ...nodeArray.slice(0, index),
+      update({ ...node, children: [...nodeArray[index].children] }),
+      ...nodeArray.slice(index + 1),
+    ];
+  }
+  return [
+    ...nodeArray.slice(0, index),
+    {
+      ...node,
+      children: _updateNodeByPath(treePath.slice(1), node.children, update),
+    },
+    ...nodeArray.slice(index + 1),
+  ];
 }
 
 function getNodeByUuid(state, uuid) {
