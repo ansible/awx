@@ -41,6 +41,8 @@ export default function useJobEvents(callbacks) {
       const node = getNodeByUuid(state, uuid);
       return getTotalNumChildren(node);
     },
+    getNumCollapsedEvents: () =>
+      state.tree.reduce((sum, node) => sum + getNumCollapsedChildren(node), 0),
   };
 }
 
@@ -215,6 +217,12 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       uuid: event.uuid,
       numChildren,
     });
+    if (sibling) {
+      enqueueAction({
+        type: ADD_EVENTS,
+        events: [sibling],
+      });
+    }
   }
 
   async function _getNextSibling(state, event) {
