@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { Form } from '@patternfly/react-core';
 import { CardBody } from 'components/Card';
@@ -8,7 +7,6 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { FormSubmitError } from 'components/FormField';
 import { FormColumnLayout } from 'components/FormLayout';
-import { ExecutionEnvironmentLookup } from 'components/Lookup';
 import { useSettings } from 'contexts/Settings';
 import useModal from 'hooks/useModal';
 import useRequest from 'hooks/useRequest';
@@ -16,6 +14,7 @@ import { SettingsAPI, ExecutionEnvironmentsAPI } from 'api';
 import {
   BooleanField,
   EncryptedField,
+  ExecutionEnvField,
   InputField,
   ObjectField,
   RevertAllAlert,
@@ -174,32 +173,9 @@ function MiscSystemEdit() {
                   name="ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC"
                   config={system.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC}
                 />
-                <ExecutionEnvironmentLookup
-                  helperTextInvalid={
-                    formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
-                  }
-                  isValid={
-                    !formik.touched.DEFAULT_EXECUTION_ENVIRONMENT ||
-                    !formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
-                  }
-                  onBlur={() =>
-                    formik.setFieldTouched('DEFAULT_EXECUTION_ENVIRONMENT')
-                  }
-                  value={formik.values.DEFAULT_EXECUTION_ENVIRONMENT}
-                  onChange={(value) => {
-                    formik.setFieldValue(
-                      'DEFAULT_EXECUTION_ENVIRONMENT',
-                      value
-                    );
-                    formik.setFieldTouched(
-                      'DEFAULT_EXECUTION_ENVIRONMENT',
-                      true,
-                      false
-                    );
-                  }}
-                  popoverContent={t`The Execution Environment to be used when one has not been configured for a job template.`}
-                  isGlobalDefaultEnvironment
-                  fieldName="DEFAULT_EXECUTION_ENVIRONMENT"
+                <ExecutionEnvField
+                  name="DEFAULT_EXECUTION_ENVIRONMENT"
+                  config={system.DEFAULT_EXECUTION_ENVIRONMENT}
                 />
                 <InputField
                   name="TOWER_URL_BASE"

@@ -24,9 +24,7 @@ function ExecutionEnvironmentLookup({
   id,
   globallyAvailable,
   helperTextInvalid,
-  isDefaultEnvironment,
   isDisabled,
-  isGlobalDefaultEnvironment,
   isValid,
   onBlur,
   onChange,
@@ -37,9 +35,9 @@ function ExecutionEnvironmentLookup({
   validate,
   value,
   fieldName,
+  overrideLabel,
 }) {
   const location = useLocation();
-
   const {
     request: fetchProject,
     error: fetchProjectError,
@@ -198,15 +196,9 @@ function ExecutionEnvironmentLookup({
     </>
   );
 
-  const renderLabel = (
-    globalDefaultEnvironment,
-    defaultExecutionEnvironment
-  ) => {
-    if (globalDefaultEnvironment) {
-      return t`Global Default Execution Environment`;
-    }
-    if (defaultExecutionEnvironment) {
-      return t`Default Execution Environment`;
+  const renderLabel = () => {
+    if (overrideLabel) {
+      return null;
     }
     return t`Execution Environment`;
   };
@@ -214,7 +206,7 @@ function ExecutionEnvironmentLookup({
   return (
     <FormGroup
       fieldId={id}
-      label={renderLabel(isGlobalDefaultEnvironment, isDefaultEnvironment)}
+      label={renderLabel()}
       labelIcon={popoverContent && <Popover content={popoverContent} />}
       helperTextInvalid={helperTextInvalid}
       validated={isValid ? 'default' : 'error'}
@@ -235,24 +227,22 @@ ExecutionEnvironmentLookup.propTypes = {
   value: ExecutionEnvironment,
   popoverContent: string,
   onChange: func.isRequired,
-  isDefaultEnvironment: bool,
-  isGlobalDefaultEnvironment: bool,
   projectId: oneOfType([number, string]),
   organizationId: oneOfType([number, string]),
   validate: func,
   fieldName: string,
+  overrideLabel: bool,
 };
 
 ExecutionEnvironmentLookup.defaultProps = {
   id: 'execution-environments',
   popoverContent: '',
-  isDefaultEnvironment: false,
-  isGlobalDefaultEnvironment: false,
   value: null,
   projectId: null,
   organizationId: null,
   validate: () => undefined,
   fieldName: 'execution_environment',
+  overrideLabel: false,
 };
 
 export default ExecutionEnvironmentLookup;

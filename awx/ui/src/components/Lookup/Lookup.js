@@ -54,7 +54,6 @@ function Lookup(props) {
   } = props;
   const [typedText, setTypedText] = useState('');
   const debounceRequest = useDebounce(onDebounce, 1000);
-
   useField({
     name: fieldName,
     validate: (val) => {
@@ -79,6 +78,8 @@ function Lookup(props) {
     dispatch({ type: 'SET_VALUE', value });
     if (value?.name) {
       setTypedText(value.name);
+    } else {
+      setTypedText('');
     }
   }, [value, multiple]);
 
