@@ -13,7 +13,11 @@ describe('<Metrics/>', () => {
   beforeEach(async () => {
     InstancesAPI.read.mockResolvedValue({
       data: {
-        results: [{ hostname: 'instance 1' }, { hostname: 'instance 2' }],
+        results: [
+          { hostname: 'instance 1', node_type: 'control' },
+          { hostname: 'instance 2', node_type: 'hybrid' },
+          { hostname: 'receptor', node_type: 'execution' },
+        ],
       },
     });
     MetricsAPI.read.mockResolvedValue({
@@ -69,5 +73,16 @@ describe('<Metrics/>', () => {
       metric: 'metric1',
       node: 'instance 1',
     });
+  });
+
+  test('should not include receptor instances', async () => {
+    await act(async () => {
+      wrapper.find('Select[ouiaId="Instance-select"]').prop('onToggle')(true);
+    });
+    wrapper.update();
+    expect(wrapper.find('SelectOption[value="receptor"]')).toHaveLength(0);
+    expect(
+      wrapper.find('Select[ouiaId="Instance-select"]').find('SelectOption')
+    ).toHaveLength(3);
   });
 });
