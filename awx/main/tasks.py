@@ -1865,7 +1865,7 @@ class RunJob(BaseTask):
 
         if sync_needs:
             pu_ig = job.instance_group
-            pu_en = job.execution_node
+            pu_en = Instance.objects.me().hostname
 
             sync_metafields = dict(
                 launch_type="sync",
