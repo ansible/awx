@@ -249,14 +249,55 @@ describe('useJobEvents', () => {
       ]);
     });
 
+    test('should not mutate original state', () => {
+      const state = reducer(emptyState, {
+        type: ADD_EVENTS,
+        events: [eventsList[0], eventsList[1]],
+      });
+      reducer(state, {
+        type: ADD_EVENTS,
+        events: [eventsList[2], eventsList[5]],
+      });
+
+      expect(state.events).toEqual({ 1: eventsList[0], 2: eventsList[1] });
+      expect(state.tree).toEqual([
+        {
+          eventIndex: 1,
+          isCollapsed: false,
+          children: [
+            {
+              eventIndex: 2,
+              isCollapsed: false,
+              children: [],
+            },
+          ],
+        },
+      ]);
+      expect(state.uuidMap).toEqual({
+        'abc-001': { index: 1, treePath: [0] },
+        'abc-002': { index: 2, treePath: [0, 0] },
+      });
+    });
+
     test('should not duplicate events in events tree', () => {
       const state = reducer(emptyState, {
         type: ADD_EVENTS,
         events: eventsList,
       });
+      const newNode = {
+        id: 110,
+        counter: 10,
+        uuid: 'abc-010',
+        event_level: 2,
+        parent_uuid: 'abc-006',
+      };
+      reducer(state, {
+        type: ADD_EVENTS,
+        events: [newNode],
+      });
       const { events, tree } = reducer(state, {
         type: ADD_EVENTS,
-        events: eventsList,
+        events: [newNode],
       });
 
       expect(events).toEqual({
@@ -269,6 +310,7 @@ describe('useJobEvents', () => {
         7: eventsList[6],
         8: eventsList[7],
         9: eventsList[8],
+        10: newNode,
       });
       expect(tree).toEqual([
         {
@@ -291,6 +333,7 @@ describe('useJobEvents', () => {
                 { eventIndex: 7, isCollapsed: false, children: [] },
                 { eventIndex: 8, isCollapsed: false, children: [] },
                 { eventIndex: 9, isCollapsed: false, children: [] },
+                { eventIndex: 10, isCollapsed: false, children: [] },
               ],
             },
           ],
@@ -894,6 +937,7 @@ describe('useJobEvents', () => {
         counter: 10,
         uuid: 'abc-010',
         event_level: 0,
+        parent_uuid: '',
       };
       wrapper.find('#test').prop('addEvents')([lastNode]);
 
@@ -901,6 +945,54 @@ describe('useJobEvents', () => {
 
       expect(node).toEqual({
         eventIndex: 10,
+        isCollapsed: false,
+        children: [],
+      });
+    });
+
+    test('should get correct node if events have gap in counter', () => {
+      wrapper.find('#test').prop('addEvents')([
+        {
+          id: 111,
+          counter: 11,
+          uuid: 'abc-011',
+          event_level: 0,
+          parent_uuid: '',
+        },
+        {
+          id: 113,
+          counter: 13,
+          uuid: 'abc-013',
+          event_level: 1,
+          parent_uuid: 'abc-011',
+        },
+        {
+          id: 114,
+          counter: 15,
+          uuid: 'abc-015',
+          event_level: 1,
+          parent_uuid: 'abc-011',
+        },
+      ]);
+
+      const node1 = wrapper.find('#test').prop('getNodeForRow')(9);
+      expect(node1).toEqual({
+        eventIndex: 11,
+        isCollapsed: false,
+        children: [
+          { eventIndex: 13, isCollapsed: false, children: [] },
+          { eventIndex: 15, isCollapsed: false, children: [] },
+        ],
+      });
+      const node2 = wrapper.find('#test').prop('getNodeForRow')(10);
+      expect(node2).toEqual({
+        eventIndex: 13,
+        isCollapsed: false,
+        children: [],
+      });
+      const node3 = wrapper.find('#test').prop('getNodeForRow')(11);
+      expect(node3).toEqual({
+        eventIndex: 15,
         isCollapsed: false,
         children: [],
       });

@@ -17,6 +17,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ErrorDetail from 'components/ErrorDetail';
 import StatusIcon from 'components/StatusIcon';
+import { JobEventsAPI } from 'api';
 
 import { getJobModel, isJobRunning } from 'util/jobs';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
@@ -34,7 +35,6 @@ import connectJobSocket, { closeWebSocket } from './connectJobSocket';
 import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
 import { fetchCount } from './loadJobEvents';
-// import useJobEvents from './useJobEvents';
 import useJobEvents from './useJobEvents';
 
 const QS_CONFIG = getQSConfig('job_output', {
@@ -96,41 +96,53 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollTop = useRef(0);
   const scrollHeight = useRef(0);
   const history = useHistory();
-  // const {
-  //   events,
-  //   remoteRowCount,
-  //   cssMap,
-  //   addEvents,
-  //   setRemoteRowCount,
-  //   eventHasCollapsedParent,
-  //   toggleEventIsCollapsed,
-  //   getEventForRow,
-  // } = useJobEvents(job);
-  // TODO: merge into one state var?
-  // const [tree, setTree] = useState([]);
-  // const [events, setEvents] = useState({});
-  // const [uuidMap, setUuidMap] = useState({});
 
   const fetchEventByUuid = (uuid) => {
     // TODO (not getting called yet?)
     console.log('Oh Boy', uuid);
   };
   const fetchNextSibling = async (parentEventId, counter) => {
-    // TODO  job_events/{parentEventId}/children/?page_size=1&order_by=counter&counter__gt=counter
-    // return data.results[0]
+    const { data } = await JobEventsAPI.readChildren(parentEventId, {
+      page_size: 1,
+      order_by: 'counter',
+      counter__gt: counter,
+    });
+    return data.results[0] || null;
   };
   const fetchNextRootNode = async (counter) => {
-    // TODO job_events/?order_by=counter&counter__gt=counter&parent_uuid=
-    // return data.results[0]
+    const { data } = await getJobModel(job.type).readEvents(job.id, {
+      page_size: 1,
+      order_by: 'counter',
+      counter__gt: counter,
+      parent_uuid: '',
+    });
+    return data.results[0] || null;
   };
   const fetchNumEvents = async (startCounter, endCounter) => {
+    if (endCounter === startCounter + 1) {
+      return 0;
+    }
     // TODO  job_events/?counter__gt={startCounter}&counter__lt={endCounter}&page_size=1
     // return data.count
+    const params = {
+      page_size: 1,
+      order_by: 'counter',
+      counter__gt: startCounter,
+    };
+    if (endCounter) {
+      params.counter__lt = endCounter;
+    }
+    const { data } = await getJobModel(job.type).readEvents(job.id, params);
+    // console.log(
+    //   `fetchNumEvents(${startCounter}, ${endCounter}) -> ${data.count}`
+    // );
+    return data.count || 0;
   };
 
   const { addEvents, toggleNodeIsCollapsed, getEventForRow } = useJobEvents({
     fetchEventByUuid,
     fetchNextSibling,
+    fetchNextRootNode,
     fetchNumEvents,
   });
   const [cssMap, setCssMap] = useState({});
@@ -147,14 +159,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     isJobRunning(job.status)
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
-
-  // const eventsTree = new JobEventsTree({
-  //   tree,
-  //   events,
-  //   uuidMap,
-  //   // cssMap,
-  //   // nodesWithoutParents,
-  // });
 
   useInterval(
     () => {
