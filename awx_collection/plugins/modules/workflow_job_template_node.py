@@ -93,6 +93,11 @@ options:
         - Omit if creating an approval node.
         - This parameter is mutually exclusive with C(approval_node).
       type: str
+    lookup_organization:
+      description:
+        - Organization the inventories, job template, project, inventory source the unified_job_template exists in.
+        - If not provided, will lookup by name only, which does not work with duplicates.
+      type: str
     approval_node:
       description:
         - A dictionary of Name, description, and timeout values for the approval node.
@@ -243,6 +248,7 @@ def main():
         diff_mode=dict(type='bool'),
         verbosity=dict(choices=['0', '1', '2', '3', '4', '5']),
         unified_job_template=dict(),
+        lookup_organization=dict(),
         approval_node=dict(type='dict'),
         all_parents_must_converge=dict(type='bool'),
         success_nodes=dict(type='list', elements='str'),
@@ -270,6 +276,7 @@ def main():
     state = module.params.get('state')
     approval_node = module.params.get('approval_node')
     new_fields = {}
+    lookup_organization = module.params.get('lookup_organization')
     search_fields = {'identifier': identifier}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -296,9 +303,15 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
+    # Set lookup data to use
+    search_fields = {}
+    if lookup_organization:
+        search_fields['organization'] = module.resolve_name_to_id('organizations', lookup_organization)
+
     unified_job_template = module.params.get('unified_job_template')
     if unified_job_template:
-        new_fields['unified_job_template'] = module.resolve_name_to_id('unified_job_templates', unified_job_template)
+        search_fields['name'] = unified_job_template
+        new_fields['unified_job_template'] = module.get_one('unified_job_templates', **{'data': search_fields})['id']
 
     inventory = module.params.get('inventory')
     if inventory:

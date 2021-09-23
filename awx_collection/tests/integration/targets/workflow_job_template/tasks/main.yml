@@ -8,6 +8,7 @@
     org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
     scm_cred_name: "AWX-Collection-tests-workflow_job_template-scm-cred-{{ test_id }}"
     demo_project_name: "AWX-Collection-tests-workflow_job_template-proj-{{ test_id }}"
+    demo_project_name_2: "AWX-Collection-tests-workflow_job_template-proj-{{ test_id }}_2"
     jt1_name: "AWX-Collection-tests-workflow_job_template-jt1-{{ test_id }}"
     jt2_name: "AWX-Collection-tests-workflow_job_template-jt2-{{ test_id }}"
     approval_node_name: "AWX-Collection-tests-workflow_approval_node-{{ test_id }}"
@@ -87,6 +88,20 @@
     that:
       - "result is changed"
 
+- name: Create a 2nd Demo Project in another org
+  project:
+    name: "{{ demo_project_name_2 }}"
+    organization: "{{ org_name }}"
+    state: present
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+    scm_credential: "{{ scm_cred_name }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Add an inventory
   inventory:
     description: Test inventory
@@ -126,6 +141,20 @@
   job_template:
     name: "{{ jt2_name }}"
     project: "{{ demo_project_name }}"
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    job_type: run
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a second Job Template in new org
+  job_template:
+    name: "{{ jt2_name }}"
+    project: "{{ demo_project_name_2 }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
     job_type: run
@@ -191,6 +220,7 @@
   workflow_job_template_node:
     identifier: leaf
     unified_job_template: "{{ jt2_name }}"
+    lookup_organization: "{{ org_name }}"
     workflow: "{{ wfjt_name }}"
 
 - name: Create root node
@@ -616,6 +646,22 @@
   job_template:
     name: "{{ jt2_name }}"
     project: "{{ demo_project_name }}"
+    organization: Default
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    job_type: run
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the second Job Template
+  job_template:
+    name: "{{ jt2_name }}"
+    project: "{{ demo_project_name_2 }}"
+    organization: "{{ org_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
     job_type: run
@@ -652,6 +698,16 @@
   project:
     name: "{{ demo_project_name }}"
     organization: Default
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+    scm_credential: "{{ scm_cred_name }}"
+    state: absent
+  register: result
+
+- name: Delete the 2nd Demo Project
+  project:
+    name: "{{ demo_project_name_2 }}"
+    organization: "{{ org_name }}"
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
     scm_credential: "{{ scm_cred_name }}"
