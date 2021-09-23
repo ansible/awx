@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
 
 import { t } from '@lingui/macro';
-import { useRouteMatch } from 'react-router-dom';
-import {
-  Button,
-  Title,
-  EmptyState,
-  EmptyStateIcon,
-  EmptyStateBody,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import { TableComposable, Thead, Tr, Th, Tbody } from '@patternfly/react-table';
-import { CubesIcon } from '@patternfly/react-icons';
-import ContentLoading from 'components/ContentLoading';
 import AlertModal from 'components/AlertModal';
-import { ToolbarAddButton } from 'components/PaginatedTable';
+import ContentEmpty from 'components/ContentEmpty';
+import ContentLoading from 'components/ContentLoading';
 
 import useSelected from 'hooks/useSelected';
 import SurveyListItem from './SurveyListItem';
@@ -29,8 +21,6 @@ function SurveyList({
   deleteSurvey,
   canEdit,
 }) {
-  const match = useRouteMatch();
-
   const questions = survey?.spec || [];
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -109,10 +99,10 @@ function SurveyList({
           <Thead>
             <Tr>
               <Th />
-              <Th datalabel={t`Name`}>{t`Name`}</Th>
-              <Th datalabel={t`Type`}>{t`Type`}</Th>
-              <Th datalabel={t`Default`}>{t`Default`}</Th>
-              <Th datalabel={t`Actions`}>{t`Actions`}</Th>
+              <Th dataLabel={t`Name`}>{t`Name`}</Th>
+              <Th dataLabel={t`Type`}>{t`Type`}</Th>
+              <Th dataLabel={t`Default`}>{t`Default`}</Th>
+              <Th dataLabel={t`Actions`}>{t`Actions`}</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -148,16 +138,14 @@ function SurveyList({
     );
   }
 
-  if ((!questions || questions?.length <= 0) && !isLoading) {
-    return (
-      <EmptyState variant="full">
-        <EmptyStateIcon icon={CubesIcon} />
-        <Title size="lg" headingLevel="h3">
-          {t`No survey questions found.`}
-        </Title>
-        <EmptyStateBody>{t`Please add survey questions.`}</EmptyStateBody>
-        <ToolbarAddButton isDisabled={!canEdit} linkTo={`${match.url}/add`} />
-      </EmptyState>
+  const emptyList = !questions || questions?.length <= 0;
+
+  if (emptyList && !isLoading) {
+    content = (
+      <ContentEmpty
+        message={t`Please add survey questions.`}
+        title={t`No survey questions found.`}
+      />
     );
   }
   return (
@@ -175,6 +163,7 @@ function SurveyList({
         onToggleSurvey={toggleSurvey}
         isDeleteDisabled={selected?.length === 0}
         canEdit={canEdit}
+        emptyList={emptyList}
         onToggleDeleteModal={() => setIsDeleteModalOpen(true)}
       />
       {content}
