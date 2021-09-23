@@ -231,9 +231,7 @@ EncryptedField.propTypes = {
 };
 
 const ExecutionEnvField = ({ name, config, isRequired = false }) => {
-  const validate = isRequired ? required(null) : null;
-  const [field, meta, helpers] = useField({ name, validate });
-  const isValid = !meta.error || !meta.touched;
+  const [field, meta, helpers] = useField({ name });
   return config ? (
     <SettingGroup
       defaultValue={config.default ?? ''}
@@ -242,15 +240,13 @@ const ExecutionEnvField = ({ name, config, isRequired = false }) => {
       isRequired={isRequired}
       label={config.label}
       popoverContent={config.help_text}
-      validated={isValid ? 'default' : 'error'}
       isDisabled={field.value === null}
+      onRevertCallback={() => helpers.setValue(config.default)}
     >
       <ExecutionEnvironmentLookup
-        onBlur={() => helpers.setTouched(true)}
         value={field.value}
         onChange={(value) => {
-          helpers.setValue(value);
-          helpers.setTouched(true);
+          helpers.setValue(value, false);
         }}
         overrideLabel
         fieldName={name}

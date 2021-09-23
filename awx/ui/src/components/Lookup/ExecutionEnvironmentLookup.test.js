@@ -54,7 +54,6 @@ describe('ExecutionEnvironmentLookup', () => {
       wrapper = mountWithContexts(
         <Formik>
           <ExecutionEnvironmentLookup
-            isDefaultEnvironment
             value={executionEnvironment}
             onChange={() => {}}
           />
@@ -65,11 +64,8 @@ describe('ExecutionEnvironmentLookup', () => {
     expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledTimes(1);
     expect(wrapper.find('ExecutionEnvironmentLookup')).toHaveLength(1);
     expect(
-      wrapper.find('FormGroup[label="Default Execution Environment"]').length
-    ).toBe(1);
-    expect(
       wrapper.find('FormGroup[label="Execution Environment"]').length
-    ).toBe(0);
+    ).toBe(1);
   });
 
   test('should fetch execution environments', async () => {

@@ -57,12 +57,10 @@ function Lookup(props) {
   useField({
     name: fieldName,
     validate: (val) => {
-      setTimeout(() => {
-        if (!multiple && !val && typedText && typedText !== '') {
-          return t`That value was not found. Please enter or select a valid value.`;
-        }
-        return validate(val);
-      });
+      if (!multiple && !val && typedText && typedText !== '') {
+        return t`That value was not found. Please enter or select a valid value.`;
+      }
+      return validate(val);
     },
   });
 
