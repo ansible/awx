@@ -32,6 +32,7 @@ function SurveyToolbar({
   isDeleteDisabled,
   onToggleDeleteModal,
   onOpenOrderModal,
+  emptyList,
 }) {
   isDeleteDisabled = !canEdit || isDeleteDisabled;
   const match = useRouteMatch();
@@ -94,17 +95,19 @@ function SurveyToolbar({
             </Tooltip>
           </ToolbarItem>
         </ToolbarGroup>
-        <SwitchWrapper>
-          <Switch
-            aria-label={t`Survey Toggle`}
-            id="survey-toggle"
-            label={t`Survey Enabled`}
-            labelOff={t`Survey Disabled`}
-            isChecked={surveyEnabled}
-            isDisabled={!canEdit}
-            onChange={() => onToggleSurvey(!surveyEnabled)}
-          />
-        </SwitchWrapper>
+        {!emptyList && (
+          <SwitchWrapper>
+            <Switch
+              aria-label={t`Survey Toggle`}
+              id="survey-toggle"
+              label={t`Survey Enabled`}
+              labelOff={t`Survey Disabled`}
+              isChecked={surveyEnabled}
+              isDisabled={!canEdit}
+              onChange={() => onToggleSurvey(!surveyEnabled)}
+            />
+          </SwitchWrapper>
+        )}
       </ToolbarContent>
     </Toolbar>
   );
