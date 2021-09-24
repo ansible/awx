@@ -630,6 +630,17 @@ def remove_default_ee(sender, instance, **kwargs):
         settings.DEFAULT_EXECUTION_ENVIRONMENT = None
 
 
+@receiver(post_save, sender=ExecutionEnvironment)
+def remove_stale_image(sender, instance, created, **kwargs):
+    if created:
+        return
+    removed_image = instance._prior_values_store.get('image')
+    if removed_image and removed_image != instance.organization_id:
+        if instance._meta.model.objects.filter(image=removed_image).exclude(pk=instance.pk).exists():
+            return  # if other EE objects reference the tag, then do not purge it
+        # TODO: send off tasks to delete images
+
+
 @receiver(post_save, sender=Session)
 def save_user_session_membership(sender, **kwargs):
     session = kwargs.get('instance', None)
