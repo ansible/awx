@@ -27,7 +27,6 @@ import socket
 import threading
 import concurrent.futures
 from base64 import b64encode
-import subprocess
 import sys
 
 # Django
@@ -51,13 +50,14 @@ from gitdb.exc import BadName as BadGitName
 
 # Runner
 import ansible_runner
+import ansible_runner.cleanup
 
 # dateutil
 from dateutil.parser import parse as parse_date
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS, JOB_FOLDER_PREFIX
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
@@ -106,7 +106,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client
+from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client, worker_cleanup
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -391,21 +391,31 @@ def purge_old_stdout_files():
 
 
 @task(queue=get_local_queuename)
-def cleanup_execution_environment_images():
+def cleanup_images_and_files(remove_images=None):
     if settings.IS_K8S:
         return
-    process = subprocess.run('podman images --filter="dangling=true" --format json'.split(" "), capture_output=True)
-    if process.returncode != 0:
-        logger.debug("Cleanup execution environment images: could not get list of images")
-        return
-    if len(process.stdout) > 0:
-        images_system = json.loads(process.stdout)
-        for e in images_system:
-            image_name = e["Id"]
-            logger.debug(f"Cleanup execution environment images: deleting {image_name}")
-            process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
-            if process.returncode != 0:
-                logger.debug(f"Failed to delete image {image_name}")
+    this_inst = Instance.objects.me()
+    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs()
+    runner_cleanup_kwargs['remove_images'] = remove_images
+    ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+
+
+@task(queue='tower_broadcast_all')
+def handle_removed_image(remove_images=None):
+    """Special broadcast invocation of this method to handle case of deleted EE"""
+    cleanup_images_and_files(remove_images=remove_images)
+
+
+@task(queue=get_local_queuename)
+def cleanup_images_and_files_execution_nodes(remove_images=None):
+    with advisory_lock('clean_execution_nodes_lock', wait=False):
+        for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
+            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs()
+            runner_cleanup_kwargs['remove_images'] = remove_images
+            try:
+                worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+            except RuntimeError:
+                logger.exception(f'Error running cleanup on execution node {inst.hostname}')
 
 
 @task(queue=get_local_queuename)
@@ -980,7 +990,7 @@ class BaseTask(object):
         """
         Create a temporary directory for job-related files.
         """
-        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
+        path = tempfile.mkdtemp(prefix=JOB_FOLDER_PREFIX % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(path)

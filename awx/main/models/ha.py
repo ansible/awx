@@ -20,6 +20,7 @@ from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
 from awx.main.fields import JSONField
+from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
@@ -154,6 +155,13 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return random.choice(
             Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
         )
+
+    def get_cleanup_task_kwargs(self):
+        ret = dict(process_isolation_executable='podman', file_pattern='/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*'), exclude_strings=None)
+        active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status_in=('running', 'waiting')).values_list('pk', flat=True))
+        if active_pks:
+            ret['exclude_strings'] = ','.join(JOB_FOLDER_PREFIX % job_id for job_id in active_pks)
+        return ret
 
     def is_lost(self, ref_time=None):
         if self.last_seen is None:

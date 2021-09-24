@@ -73,7 +73,7 @@ def worker_info(node_name, work_type='ansible-runner'):
     kwargs['signwork'] = True
     if work_type != 'local':
         kwargs['ttl'] = '20s'
-    result = receptor_ctl.submit_work(worktype=work_type, payload='', params={"params": f"--worker-info"}, node=node_name, **kwargs)
+    result = receptor_ctl.submit_work(worktype=work_type, payload='', params={"params": "--worker-info"}, node=node_name, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -137,3 +137,52 @@ def worker_info(node_name, work_type='ansible-runner'):
             data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
 
     return data
+
+
+def worker_cleanup(node_name, vargs, timeout=300.0):
+    receptor_ctl = get_receptor_ctl()
+
+    # convert python args into CLI args
+    args = ['cleanup']
+    for option in ('file_pattern', 'exclude_strings', 'remove_images', 'image_prune', 'process_isolation_executable'):
+        if vargs.get(option) is True:
+            args.append('--{}'.format(option.replace('_', '-')))
+        if vargs.get(option):
+            args.append('--{}={}'.format(option.replace('_', '-'), vargs.get(option)))
+
+    result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": ' '.join(args)}, node=node_name, ttl='20s')
+
+    unit_id = result['unitid']
+    run_start = time.time()
+
+    try:
+
+        resultfile = receptor_ctl.get_work_results(unit_id)
+
+        stdout = ''
+
+        while time.time() - run_start < timeout:
+            status = receptor_ctl.simple_command(f'work status {unit_id}')
+            state_name = status.get('StateName')
+            if state_name not in ('Pending', 'Running'):
+                break
+            time.sleep(0.5)
+        else:
+            raise RuntimeError(f'Timeout running worker cleanup, state in {state_name}')
+
+        stdout = resultfile.read()
+        stdout = str(stdout, encoding='utf-8')
+
+    finally:
+
+        res = receptor_ctl.simple_command(f"work release {unit_id}")
+        if res != {'released': unit_id}:
+            logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node_name}, data: {res}')
+
+        receptor_ctl.close()
+
+    if state_name.lower() == 'failed':
+        work_detail = status.get('Detail', '')
+        raise RuntimeError(f'Worker cleanup receptor failure, stdout:\n{stdout}\nwork detail:{work_detail}')
+
+    return stdout

@@ -58,7 +58,7 @@ from awx.main.models import (
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
-from awx.main.tasks import update_inventory_computed_fields
+from awx.main.tasks import update_inventory_computed_fields, handle_removed_image, cleanup_images_and_files_execution_nodes
 from awx.main.fields import (
     is_implicit_parent,
     update_role_parentage_for_instance,
@@ -635,10 +635,14 @@ def remove_stale_image(sender, instance, created, **kwargs):
     if created:
         return
     removed_image = instance._prior_values_store.get('image')
-    if removed_image and removed_image != instance.organization_id:
+    if removed_image and removed_image != instance.image:
         if instance._meta.model.objects.filter(image=removed_image).exclude(pk=instance.pk).exists():
             return  # if other EE objects reference the tag, then do not purge it
-        # TODO: send off tasks to delete images
+        # raise Exception((handle_removed_image.delay, removed_image))
+        # handle_removed_image()  # .delay()
+        handle_removed_image.delay(remove_images=removed_image)
+        # handle_removed_image.delay.assert_called_once_with(remove_images='quay.io/foo/bar')
+        cleanup_images_and_files_execution_nodes.delay(remove_images=removed_image)
 
 
 @receiver(post_save, sender=Session)
