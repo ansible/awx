@@ -36,7 +36,7 @@ Ansible Tower 3.3 adds support for container-based clusters using Openshift or K
 ### Installation and the Inventory File
 The current standalone instance configuration doesn't change for a 3.1+ deployment. The inventory file does change in some important ways:
 
-* Since there is no primary/secondary configuration, those inventory groups go away and are replaced with a single inventory group `tower`. The customer may *optionally* define other groups and group instances in those groups. These groups should be prefixed with `instance_group_`. Instances are not required to be in the `tower` group alongside other `instance_group_` groups, but one instance *must* be present in the `tower` group. Technically `tower` is a group like any other `instance_group_` group, but it must always be present and if a specific group is not associated with a specific resource, then job execution will always fall back to the `tower` group:
+* Since there is no primary/secondary configuration, those inventory groups go away and are replaced with a single inventory group `tower`. The customer may *optionally* define other groups and group instances in those groups. These groups should be prefixed with `instance_group_`. One instance *must* be present in the `tower` group. Technically `tower` is a group like any other `instance_group_` group, but it must always be present and if a specific group is not associated with a specific resource, then job execution will always fall back to the `tower` group:
 
 ```
 [tower]
