@@ -24,6 +24,7 @@ const mockJob = {
   status: 'successful',
   job_slice_number: 1,
   job_slice_count: 3,
+  execution_environment: 1,
 };
 
 describe('<JobListItem />', () => {
@@ -61,7 +62,7 @@ describe('<JobListItem />', () => {
     expect(wrapper.find('LaunchButton').length).toBe(1);
   });
 
-  test('should render souce data in expanded view', () => {
+  test('should render source data in expanded view', () => {
     wrapper = mountWithContexts(
       <table>
         <tbody>
@@ -126,6 +127,49 @@ describe('<JobListItem />', () => {
       </table>
     );
     expect(wrapper.find('Td[dataLabel="Type"]').length).toBe(1);
+  });
+
+  test('should not display EE for canceled jobs', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            job={{
+              ...mockJob,
+              status: 'canceled',
+              execution_environment: null,
+            }}
+            showTypeColumn
+            isSelected
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('Detail[label="Execution Environment"]').length).toBe(
+      0
+    );
+  });
+
+  test('should display missing resource for completed jobs and missing EE', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            job={mockJob}
+            showTypeColumn
+            isSelected
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('Detail[label="Execution Environment"]').length).toBe(
+      1
+    );
+    expect(
+      wrapper.find('Detail[label="Execution Environment"] dd').text()
+    ).toBe('Missing resource');
   });
 });
 
