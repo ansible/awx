@@ -478,7 +478,10 @@ def inspect_execution_nodes(instance_list):
         for ad in connections:
             hostname = ad['NodeID']
             commands = ad.get('WorkCommands') or []
-            if 'ansible-runner' not in commands:
+            worktypes = []
+            for c in commands:
+                worktypes.append(c["WorkType"])
+            if 'ansible-runner' not in worktypes:
                 continue
             changed = False
             if hostname in node_lookup:
@@ -3053,7 +3056,7 @@ class AWXReceptorJob:
             use_stream_tls = get_conn_type(_kw['node'], receptor_ctl).name == "STREAMTLS"
             _kw['tlsclient'] = get_tls_client(use_stream_tls)
 
-        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, **_kw)
+        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=True, **_kw)
         self.unit_id = result['unitid']
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
 

@@ -70,6 +70,7 @@ def worker_info(node_name, work_type='ansible-runner'):
 
     kwargs = {}
     kwargs['tlsclient'] = get_tls_client(use_stream_tls)
+    kwargs['signwork'] = True
     if work_type != 'local':
         kwargs['ttl'] = '20s'
     result = receptor_ctl.submit_work(worktype=work_type, payload='', params={"params": f"--worker-info"}, node=node_name, **kwargs)
