@@ -57,7 +57,10 @@ def test_python_and_js_licenses():
                 if version.startswith('=='):
                     version = version[2:]
                 if reqt.link:
-                    (name, version) = reqt.link.filename.split('@', 1)
+                    if str(reqt.link).startswith(('http://', 'https://')):
+                        (name, version) = str(reqt.req).split('==', 1)
+                    else:
+                        (name, version) = reqt.link.filename.split('@', 1)
                     if name.endswith('.git'):
                         name = name[:-4]
                     if name == 'receptor':
