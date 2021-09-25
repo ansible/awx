@@ -624,10 +624,18 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
         approval.deny()
 
 
+def _handle_image_cleanup(removed_image, pk):
+    if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
+        return  # if other EE objects reference the tag, then do not purge it
+    handle_removed_image.delay(remove_images=removed_image)
+    cleanup_images_and_files_execution_nodes.delay(remove_images=removed_image)
+
+
 @receiver(pre_delete, sender=ExecutionEnvironment)
 def remove_default_ee(sender, instance, **kwargs):
     if instance.id == getattr(settings.DEFAULT_EXECUTION_ENVIRONMENT, 'id', None):
         settings.DEFAULT_EXECUTION_ENVIRONMENT = None
+    _handle_image_cleanup(instance.image, instance.pk)
 
 
 @receiver(post_save, sender=ExecutionEnvironment)
@@ -636,13 +644,7 @@ def remove_stale_image(sender, instance, created, **kwargs):
         return
     removed_image = instance._prior_values_store.get('image')
     if removed_image and removed_image != instance.image:
-        if instance._meta.model.objects.filter(image=removed_image).exclude(pk=instance.pk).exists():
-            return  # if other EE objects reference the tag, then do not purge it
-        # raise Exception((handle_removed_image.delay, removed_image))
-        # handle_removed_image()  # .delay()
-        handle_removed_image.delay(remove_images=removed_image)
-        # handle_removed_image.delay.assert_called_once_with(remove_images='quay.io/foo/bar')
-        cleanup_images_and_files_execution_nodes.delay(remove_images=removed_image)
+        _handle_image_cleanup(removed_image, instance.pk)
 
 
 @receiver(post_save, sender=Session)
