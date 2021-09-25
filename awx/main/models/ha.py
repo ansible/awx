@@ -151,7 +151,9 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @staticmethod
     def choose_online_control_plane_node():
-        return random.choice(Instance.objects.filter(enabled=True).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True))
+        return random.choice(
+            Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
+        )
 
     def is_lost(self, ref_time=None):
         if self.last_seen is None:
