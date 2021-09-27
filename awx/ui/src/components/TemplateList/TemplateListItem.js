@@ -16,7 +16,7 @@ import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { toTitleCase } from 'util/strings';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig } from 'contexts/Config';
-import { ActionsTd, ActionItem } from '../PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from '../PaginatedTable';
 import { DetailList, Detail, DeletedDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
@@ -131,7 +131,7 @@ function TemplateListItem({
           }}
           dataLabel={t`Selected`}
         />
-        <Td id={labelId} dataLabel={t`Name`}>
+        <TdBreakWord id={labelId} dataLabel={t`Name`}>
           <Link to={`${detailUrl}`}>
             <b>{template.name}</b>
           </Link>
@@ -172,7 +172,7 @@ function TemplateListItem({
               </Popover>
             </span>
           )}
-        </Td>
+        </TdBreakWord>
         <Td dataLabel={t`Type`}>{toTitleCase(template.type)}</Td>
         <Td dataLabel={t`Last Ran`}>{lastRun}</Td>
         <ActionsTd dataLabel={t`Actions`}>

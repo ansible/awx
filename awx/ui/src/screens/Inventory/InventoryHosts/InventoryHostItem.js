@@ -5,7 +5,7 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 
 import HostToggle from 'components/HostToggle';
 import { Host } from 'types';
@@ -30,11 +30,11 @@ function InventoryHostItem({
           onSelect,
         }}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{host.name}</b>
         </Link>
-      </Td>
+      </TdBreakWord>
       <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
         <HostToggle host={host} />
         <ActionItem

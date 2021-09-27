@@ -1,12 +1,11 @@
 import 'styled-components/macro';
 import React, { useState, useEffect, useCallback } from 'react';
-
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { timeOfDay } from 'util/dates';
 import { NotificationTemplatesAPI, NotificationsAPI } from 'api';
 import StatusLabel from 'components/StatusLabel';
@@ -107,11 +106,11 @@ function NotificationTemplateListItem({
           }}
           dataLabel={t`Selected`}
         />
-        <Td id={labelId} dataLabel={t`Name`}>
+        <TdBreakWord id={labelId} dataLabel={t`Name`}>
           <Link to={`${detailUrl}`}>
             <b>{template.name}</b>
           </Link>
-        </Td>
+        </TdBreakWord>
         <Td dataLabel={t`Status`}>
           {status && <StatusLabel status={status} />}
         </Td>

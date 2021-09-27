@@ -13,7 +13,7 @@ import {
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { InstanceGroup } from 'types';
 
 const Unavailable = styled.span`
@@ -58,11 +58,11 @@ function InstanceGroupListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{instanceGroup.name}</b>
         </Link>
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Type`}>
         {isContainerGroup(instanceGroup)
           ? t`Container group`

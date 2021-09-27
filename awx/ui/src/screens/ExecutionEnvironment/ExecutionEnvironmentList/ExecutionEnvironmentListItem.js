@@ -7,7 +7,7 @@ import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import CopyButton from 'components/CopyButton';
 import { ExecutionEnvironment } from 'types';
 import { ExecutionEnvironmentsAPI } from 'api';
@@ -18,7 +18,6 @@ function ExecutionEnvironmentListItem({
   detailUrl,
   isSelected,
   onSelect,
-
   rowIndex,
   fetchExecutionEnvironments,
 }) {
@@ -54,11 +53,14 @@ function ExecutionEnvironmentListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={`ee-name-${executionEnvironment.id}`} dataLabel={t`Name`}>
+      <TdBreakWord
+        id={`ee-name-${executionEnvironment.id}`}
+        dataLabel={t`Name`}
+      >
         <Link to={`${detailUrl}`}>
           <b>{executionEnvironment.name}</b>
         </Link>
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Image`}>{executionEnvironment.image}</Td>
       <Td dataLabel={t`Organization`}>
         {executionEnvironment.organization ? (

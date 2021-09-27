@@ -1,12 +1,11 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { CredentialType } from 'types';
 
 function CredentialTypeListItem({
@@ -28,11 +27,11 @@ function CredentialTypeListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{credentialType.name}</b>
         </Link>
-      </Td>
+      </TdBreakWord>
       <ActionsTd dataLabel={t`Actions`}>
         <ActionItem
           visible={credentialType.summary_fields.user_capabilities.edit}

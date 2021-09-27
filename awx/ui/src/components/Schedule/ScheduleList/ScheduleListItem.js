@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { Schedule } from 'types';
 import { formatDateString } from 'util/dates';
 import { DetailList, Detail } from '../../DetailList';
-import { ActionsTd, ActionItem } from '../../PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from '../../PaginatedTable';
 import { ScheduleToggle } from '..';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
@@ -74,7 +74,7 @@ function ScheduleListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <Link to={`${scheduleBaseUrl}/details`}>
           <b>{schedule.name}</b>
         </Link>
@@ -90,7 +90,7 @@ function ScheduleListItem({
             </Tooltip>
           </span>
         )}
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Type`}>
         {
           jobTypeLabels[

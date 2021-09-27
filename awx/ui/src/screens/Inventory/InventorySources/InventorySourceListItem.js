@@ -9,7 +9,7 @@ import {
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import { formatDateString } from 'util/dates';
@@ -67,7 +67,7 @@ function InventorySourceListItem({
             onSelect,
           }}
         />
-        <Td dataLabel={t`Name`}>
+        <TdBreakWord dataLabel={t`Name`}>
           <Link to={`${detailUrl}/details`}>
             <b>{source.name}</b>
           </Link>
@@ -82,7 +82,7 @@ function InventorySourceListItem({
               </Tooltip>
             </span>
           )}
-        </Td>
+        </TdBreakWord>
         <Td dataLabel={t`Status`}>
           {job && (
             <Tooltip

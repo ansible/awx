@@ -10,7 +10,7 @@ import {
   ExclamationTriangleIcon as PFExclamationTriangleIcon,
   PencilAltIcon,
 } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from 'components/PaginatedTable';
+import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 
 import { Organization } from 'types';
 
@@ -18,6 +18,7 @@ const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
   color: var(--pf-global--warning-color--100);
   margin-left: 18px;
 `;
+
 function OrganizationListItem({
   organization,
   isSelected,
@@ -41,7 +42,7 @@ function OrganizationListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={t`Name`}>
+      <TdBreakWord id={labelId} dataLabel={t`Name`}>
         <span>
           <Link to={`${detailUrl}`}>
             <b>{organization.name}</b>
@@ -58,7 +59,7 @@ function OrganizationListItem({
             </Tooltip>
           </span>
         )}
-      </Td>
+      </TdBreakWord>
       <Td dataLabel={t`Members`}>
         {organization.summary_fields.related_field_counts.users}
       </Td>
