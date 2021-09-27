@@ -627,7 +627,7 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
 def _handle_image_cleanup(removed_image, pk):
     if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
         return  # if other EE objects reference the tag, then do not purge it
-    handle_removed_image.delay(remove_images=removed_image)
+    handle_removed_image.delay(remove_images=[removed_image])
 
 
 @receiver(pre_delete, sender=ExecutionEnvironment)

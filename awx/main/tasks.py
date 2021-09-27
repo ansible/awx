@@ -390,20 +390,18 @@ def purge_old_stdout_files():
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
 
 
-def _cleanup_images_and_files(remove_images=None):
+def _cleanup_images_and_files(**kwargs):
     if settings.IS_K8S:
         return
     this_inst = Instance.objects.me()
-    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs()
-    runner_cleanup_kwargs['remove_images'] = remove_images
+    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
     ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
     checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
     if checker_instance and this_inst.hostname == checker_instance.hostname:
         for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
-            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs()
-            runner_cleanup_kwargs['remove_images'] = remove_images
+            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
             try:
                 worker_cleanup(inst.hostname, runner_cleanup_kwargs)
             except RuntimeError:
@@ -413,7 +411,7 @@ def _cleanup_images_and_files(remove_images=None):
 @task(queue='tower_broadcast_all')
 def handle_removed_image(remove_images=None):
     """Special broadcast invocation of this method to handle case of deleted EE"""
-    _cleanup_images_and_files(remove_images=remove_images)
+    _cleanup_images_and_files(remove_images=remove_images, file_pattern='', exclude_strings='')
 
 
 @task(queue=get_local_queuename)
