@@ -63,7 +63,7 @@ def get_conn_type(node_name, receptor_ctl):
 
 def worker_info(node_name, work_type='ansible-runner'):
     receptor_ctl = get_receptor_ctl()
-    use_stream_tls = get_conn_type(node_name, receptor_ctl).name == "STREAMTLS"
+    use_stream_tls = getattr(get_conn_type(node_name, receptor_ctl), 'name', None) == "STREAMTLS"
     transmit_start = time.time()
     error_list = []
     data = {'errors': error_list, 'transmit_timing': 0.0}
