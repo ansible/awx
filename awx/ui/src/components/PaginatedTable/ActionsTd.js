@@ -7,13 +7,14 @@ const ActionsGrid = styled.div`
   display: grid;
   grid-gap: 16px;
   align-items: center;
-
-  ${(props) => {
-    const columns = props.gridColumns || '40px '.repeat(props.numActions || 1);
-    return css`
-      grid-template-columns: ${columns};
-    `;
-  }}
+  padding-right: 20px
+    ${(props) => {
+      const columns =
+        props.gridColumns || '40px '.repeat(props.numActions || 1);
+      return css`
+        grid-template-columns: ${columns};
+      `;
+    }};
 `;
 ActionsGrid.displayName = 'ActionsGrid';
 

@@ -52,8 +52,8 @@ function InstanceToggle({ className, fetchInstances, instance, onToggle }) {
           className={className}
           css="display: inline-flex;"
           id={`host-${instance.id}-toggle`}
-          label={t`On`}
-          labelOff={t`Off`}
+          label={t`Enabled`}
+          labelOff={t`Disabled`}
           isChecked={isEnabled}
           isDisabled={isLoading || !me?.is_superuser}
           onChange={toggleInstance}

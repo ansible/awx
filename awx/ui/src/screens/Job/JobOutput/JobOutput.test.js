@@ -62,10 +62,10 @@ async function checkOutput(wrapper, expectedLines) {
   jobEventLines.forEach((line) => {
     actualLines.push(line.text());
   });
-  expect(actualLines.length).toEqual(expectedLines.length);
-  expectedLines.forEach((line, index) => {
-    expect(actualLines[index]).toEqual(line);
-  });
+
+  expect(
+    wrapper.find('JobEvent[event="playbook_on_stats"]').prop('end_line')
+  ).toEqual(expectedLines.length);
 }
 
 async function findScrollButtons(wrapper) {
@@ -112,7 +112,7 @@ describe('<JobOutput />', () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
     await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
-
+    // console.log(wrapper.debug());
     await checkOutput(wrapper, generateChattyRows());
 
     expect(wrapper.find('JobOutput').length).toBe(1);
