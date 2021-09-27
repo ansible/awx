@@ -144,7 +144,10 @@ def worker_cleanup(node_name, vargs, timeout=300.0):
 
     # convert python args into CLI args
     args = ['cleanup']
-    for option in ('file_pattern', 'exclude_strings', 'remove_images', 'image_prune', 'process_isolation_executable'):
+    for option in ('exclude_strings', 'remove_images'):
+        if vargs.get(option):
+            args.append('--{} '.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
+    for option in ('file_pattern', 'image_prune', 'process_isolation_executable'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))
         if vargs.get(option):
