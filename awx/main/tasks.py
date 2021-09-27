@@ -480,10 +480,12 @@ def inspect_execution_nodes(instance_list):
             changed = False
             if hostname in node_lookup:
                 instance = node_lookup[hostname]
-            else:
+            elif settings.MESH_AUTODISCOVERY_ENABLED:
                 defaults = dict(enabled=False)
                 (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution', defaults=defaults)
                 logger.warn(f"Registered execution node '{hostname}' (marked disabled by default)")
+            else:
+                logger.warn(f"Unrecognized node on mesh advertising ansible-runner work type: {hostname}")
 
             was_lost = instance.is_lost(ref_time=nowtime)
             last_seen = parse_date(ad['Time'])
@@ -494,17 +496,6 @@ def inspect_execution_nodes(instance_list):
             instance.save(update_fields=['last_seen'])
 
             if changed:
-                try:
-                    default_ig = InstanceGroup.objects.get(name=settings.DEFAULT_EXECUTION_QUEUE_NAME)
-                    if instance.hostname not in default_ig.policy_instance_list:
-                        default_ig.policy_instance_list += [instance.hostname]
-                        default_ig.save(update_fields=['policy_instance_list'])
-                        logger.warn(f"Updated '{default_ig.name}' instance group's policy_instance_list to include execution node '{hostname}'")
-                    else:
-                        logger.warn(f"'{default_ig.name}' instance group's policy_instance_list already listed execution node '{hostname}'")
-                except InstanceGroup.DoesNotExist:
-                    logger.error(f"Unable to add execution node '{hostname}' to '{default_ig.name}' instance group; group not found.")
-
                 execution_node_health_check.apply_async([hostname])
             elif was_lost:
                 # if the instance *was* lost, but has appeared again,
