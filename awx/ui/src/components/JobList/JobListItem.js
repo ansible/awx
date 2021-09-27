@@ -222,13 +222,15 @@ function JobListItem({
                   dataCy={`job-${job.id}-project`}
                 />
               )}
-              {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
-                <ExecutionEnvironmentDetail
-                  executionEnvironment={execution_environment}
-                  verifyMissingVirtualEnv={false}
-                  dataCy={`execution-environment-detail-${job.id}`}
-                />
-              )}
+              {job.type !== 'workflow_job' &&
+                !isJobRunning(job.status) &&
+                job.status !== 'canceled' && (
+                  <ExecutionEnvironmentDetail
+                    executionEnvironment={execution_environment}
+                    verifyMissingVirtualEnv={false}
+                    dataCy={`execution-environment-detail-${job.id}`}
+                  />
+                )}
               {credentials && credentials.length > 0 && (
                 <Detail
                   fullWidth
