@@ -58,7 +58,7 @@ from awx.main.models import (
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
-from awx.main.tasks import update_inventory_computed_fields, handle_removed_image, cleanup_images_and_files_execution_nodes
+from awx.main.tasks import update_inventory_computed_fields, handle_removed_image
 from awx.main.fields import (
     is_implicit_parent,
     update_role_parentage_for_instance,
@@ -628,7 +628,6 @@ def _handle_image_cleanup(removed_image, pk):
     if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
         return  # if other EE objects reference the tag, then do not purge it
     handle_removed_image.delay(remove_images=removed_image)
-    cleanup_images_and_files_execution_nodes.delay(remove_images=removed_image)
 
 
 @receiver(pre_delete, sender=ExecutionEnvironment)
