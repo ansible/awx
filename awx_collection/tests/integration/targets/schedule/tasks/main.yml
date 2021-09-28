@@ -5,10 +5,13 @@
 
 - name: generate random string for schedule
   set_fact:
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
     sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
     cred1: "AWX-Collection-tests-schedule-cred1-{{ test_id }}"
-    proj1: "AWX-Collection-tests-schedule-proj-{{ test_id }}"
+    proj1: "AWX-Collection-tests-schedule-proj1-{{ test_id }}"
+    proj2: "AWX-Collection-tests-schedule-proj2-{{ test_id }}"
     jt1: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
+    jt2: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
 
 - block:
     - name: Try to create without an rrule
@@ -84,6 +87,19 @@
         scm_type: git
         scm_url: https://github.com/ansible/ansible-tower-samples.git
 
+    - name: "Create a new organization"
+      organization:
+        name: "{{ org_name }}"
+
+    - name: Create a Demo Project in another org
+      project:
+        name: "{{ proj2 }}"
+        organization: "{{ org_name }}"
+        allow_override: true
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+
     - name: Create Credential1
       credential:
         name: "{{ cred1 }}"
@@ -154,6 +170,24 @@
     - assert:
         that:
           - result is changed
+
+    - name: Create a second Job Template in new org
+      job_template:
+        name: "{{ jt2 }}"
+        project: "{{ proj2 }}"
+        inventory: Demo Inventory
+        playbook: hello_world.yml
+        job_type: run
+        state: present
+
+    - name: Build a schedule with a job template's name in two orgs
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "{{ jt2 }}"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
   always:
     - name: Delete the schedule
       schedule:
@@ -166,6 +200,22 @@
         project: "{{ proj1 }}"
         playbook: hello_world.yml
         state: absent
+
+    - name: Delete the jt
+      job_template:
+        name: "{{ jt2 }}"
+        project: "{{ proj2 }}"
+        playbook: hello_world.yml
+        state: absent
+
+    - name: Delete the Project
+      project:
+        name: "{{ proj2 }}"
+        organization: "{{ org_name }}"
+        state: absent
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+      register: result
 
     - name: Delete the Project
       project:
@@ -182,3 +232,9 @@
         organization: Default
         credential_type: Red Hat Ansible Automation Platform
         state: absent
+
+    - name: "Remove the organization"
+      organization:
+        name: "{{ org_name }}"
+        state: absent
+      register: result

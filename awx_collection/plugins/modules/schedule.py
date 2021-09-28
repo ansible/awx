@@ -108,6 +108,11 @@ options:
         - Name of unified job template to schedule.
       required: False
       type: str
+    organization:
+      description:
+        - The organization the unified job template exists in.
+        - Used for looking up the unified job template, not a direct model field.
+      type: str
     enabled:
       description:
         - Enables processing of this schedule.
@@ -161,6 +166,7 @@ def main():
         diff_mode=dict(type='bool'),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         unified_job_template=dict(),
+        organization=dict(),
         enabled=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
@@ -184,6 +190,7 @@ def main():
     diff_mode = module.params.get('diff_mode')
     verbosity = module.params.get('verbosity')
     unified_job_template = module.params.get('unified_job_template')
+    organization = module.params.get('organization')
     enabled = module.params.get('enabled')
     state = module.params.get('state')
 
@@ -191,10 +198,13 @@ def main():
     inventory_id = None
     if inventory:
         inventory_id = module.resolve_name_to_id('inventories', inventory)
+    search_fields = {}
+    if organization:
+        search_fields['organization'] = module.resolve_name_to_id('organizations', organization)
     unified_job_template_id = None
     if unified_job_template:
-        unified_job_template_id = module.resolve_name_to_id('unified_job_templates', unified_job_template)
-
+        search_fields['name'] = unified_job_template
+        unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('schedules', name_or_id=name)
 
