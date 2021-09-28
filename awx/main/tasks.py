@@ -422,7 +422,7 @@ def _cleanup_images_and_files(**kwargs):
 @task(queue='tower_broadcast_all')
 def handle_removed_image(remove_images=None):
     """Special broadcast invocation of this method to handle case of deleted EE"""
-    _cleanup_images_and_files(remove_images=remove_images, file_pattern='', exclude_strings='')
+    _cleanup_images_and_files(remove_images=remove_images, file_pattern='')
 
 
 @task(queue=get_local_queuename)

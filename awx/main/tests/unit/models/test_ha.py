@@ -89,3 +89,19 @@ class TestInstanceGroup(object):
             assert ig.find_largest_idle_instance(instances_online_only) is None, reason
         else:
             assert ig.find_largest_idle_instance(instances_online_only) == instances[instance_fit_index], reason
+
+
+def test_cleanup_params_defaults():
+    inst = Instance(hostname='foobar')
+    assert inst.get_cleanup_task_kwargs(exclude_strings=['awx_423_']) == {'exclude_strings': ['awx_423_'], 'file_pattern': '/tmp/awx_*_*'}
+
+
+def test_cleanup_params_for_image_cleanup():
+    inst = Instance(hostname='foobar')
+    # see CLI conversion in awx.main.tests.unit.utils.test_receptor
+    assert inst.get_cleanup_task_kwargs(file_pattern='', remove_images=['quay.invalid/foo/bar'], image_prune=True) == {
+        'file_pattern': '',
+        'process_isolation_executable': 'podman',
+        'remove_images': ['quay.invalid/foo/bar'],
+        'image_prune': True,
+    }

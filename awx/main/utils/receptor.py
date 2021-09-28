@@ -162,17 +162,26 @@ def worker_info(node_name, work_type='ansible-runner'):
     return data
 
 
-def worker_cleanup(node_name, vargs, timeout=300.0):
-    # convert python args into CLI args
+def _convert_args_to_cli(vargs):
+    """
+    For the ansible-runner worker cleanup command
+    converts the dictionary (parsed argparse variables) used for python interface
+    into a string of CLI options, which has to be used on execution nodes.
+    """
     args = ['cleanup']
     for option in ('exclude_strings', 'remove_images'):
         if vargs.get(option):
-            args.append('--{} '.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
+            args.append('--{}={}'.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
     for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))
-        if vargs.get(option) is not None:
+        if vargs.get(option) not in (None, ''):
             args.append('--{}={}'.format(option.replace('_', '-'), vargs.get(option)))
+    return args
+
+
+def worker_cleanup(node_name, vargs, timeout=300.0):
+    args = _convert_args_to_cli(vargs)
 
     remote_command = ' '.join(args)
     logger.debug(f'Running command over receptor mesh on {node_name}: ansible-runner worker {remote_command}')
