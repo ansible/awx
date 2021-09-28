@@ -1,3 +1,4 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
+# Remove pbr from requirements.in when moving ansible-runner to requirements.in
 git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
-https://receptor-nightlies.s3.amazonaws.com/receptorctl/receptorctl-latest-py3-none-any.whl
+https://receptor-nightlies.s3.amazonaws.com/receptorctl/receptorctl-0.0.0-py3-none-any.whl
