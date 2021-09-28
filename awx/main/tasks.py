@@ -11,6 +11,8 @@ import importlib
 import json
 import logging
 import os
+from io import StringIO
+from contextlib import redirect_stdout
 import shutil
 import stat
 import tempfile
@@ -395,15 +397,24 @@ def _cleanup_images_and_files(**kwargs):
         return
     this_inst = Instance.objects.me()
     runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+    stdout = ''
+    with StringIO() as buffer:
+        with redirect_stdout(buffer):
+            ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+            stdout = buffer.getvalue()
+    if '(changed: True)' in stdout:
+        logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
     checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
     if checker_instance and this_inst.hostname == checker_instance.hostname:
+        logger.info(f'Running execution node cleanup with kwargs {kwargs}')
         for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
             runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
             try:
-                worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+                stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+                if '(changed: True)' in stdout:
+                    logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
             except RuntimeError:
                 logger.exception(f'Error running cleanup on execution node {inst.hostname}')
 
@@ -452,7 +463,7 @@ def execution_node_health_check(node):
     if instance.node_type != 'execution':
         raise RuntimeError(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
 
-    data = worker_info(node, work_type='ansible-runner' if instance.node_type == 'execution' else 'local')
+    data = worker_info(node)
 
     prior_capacity = instance.capacity
 
