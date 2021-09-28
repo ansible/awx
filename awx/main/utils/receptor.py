@@ -175,7 +175,7 @@ def _convert_args_to_cli(vargs):
     for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))
-        if vargs.get(option) not in (None, ''):
+        elif vargs.get(option) not in (None, ''):
             args.append('--{}={}'.format(option.replace('_', '-'), vargs.get(option)))
     return args
 

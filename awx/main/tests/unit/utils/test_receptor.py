@@ -17,6 +17,5 @@ def test_image_cleanup_scenario():
         }
     )
     assert (
-        ' '.join(args)
-        == 'cleanup --remove-images=quay.invalid/foo/bar:latest quay.invalid/foo/bar:devel --image-prune --image-prune=True --process-isolation-executable=podman'
+        ' '.join(args) == 'cleanup --remove-images=quay.invalid/foo/bar:latest quay.invalid/foo/bar:devel --image-prune --process-isolation-executable=podman'
     )
