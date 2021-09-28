@@ -28,6 +28,7 @@ export const JOB_URL_SEGMENT_MAP = {
   playbook: 'job',
   project: 'project_update',
   management: 'system_job',
+  system: 'system_job',
   inventory: 'inventory_update',
   command: 'ad_hoc_command',
   workflow: 'workflow_job',
@@ -148,6 +149,7 @@ function Job({ setBreadcrumb }) {
       <Card>
         <RoutedTabs tabsArray={tabsArray} />
         <Switch>
+          <Redirect from="/jobs/system/:id" to="/jobs/management/:id" exact />
           <Redirect
             from="/jobs/:typeSegment/:id"
             to="/jobs/:typeSegment/:id/output"
