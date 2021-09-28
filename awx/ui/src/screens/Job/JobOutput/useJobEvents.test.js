@@ -1,5 +1,6 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
 import useJobEvents, {
   jobEventsReducer,
   ADD_EVENTS,
@@ -8,6 +9,9 @@ import useJobEvents, {
 } from './useJobEvents';
 import { sleep } from '../../../../testUtils/testUtils';
 
+function Child() {
+  return <div />;
+}
 function HookTest({
   fetchEventByUuid = () => {},
   fetchNextSibling = () => {},
@@ -20,7 +24,7 @@ function HookTest({
     fetchNextRootNode,
     fetchNumEvents,
   });
-  return <div id="test" {...hookFuncs} />;
+  return <Child id="test" {...hookFuncs} />;
 }
 
 const eventsList = [
@@ -1198,6 +1202,55 @@ describe('useJobEvents', () => {
       expect(
         wrapper.find('#test').prop('getTotalNumChildren')('abc-001')
       ).toEqual(8);
+    });
+  });
+
+  describe('getCounterForRow', () => {
+    let wrapper;
+    let getCounterForRow;
+    beforeEach(() => {
+      wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+      getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+    });
+
+    test('should return exact counter when no nodes are collapsed', () => {
+      expect(getCounterForRow(8)).toEqual(9);
+    });
+
+    test('should return estimated counter when node not loaded', () => {
+      expect(getCounterForRow(12)).toEqual(13);
+    });
+
+    test('should return estimated counter when node is non-loaded child', async () => {
+      callbacks.fetchNumEvents.mockImplementation((counter) => {
+        const children = {
+          1: 28,
+          2: 3,
+          6: 23,
+        };
+        return children[counter];
+      });
+      wrapper = mount(<HookTest {...callbacks} />);
+      wrapper.update();
+      await sleep(0);
+      await act(async () => {
+        wrapper.find('#test').prop('addEvents')(eventsList);
+        wrapper.find('#test').prop('addEvents')([
+          {
+            id: 130,
+            counter: 30,
+            uuid: 'abc-030',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+        ]);
+      });
+      wrapper.update();
+
+      getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+
+      expect(getCounterForRow(15)).toEqual(16);
     });
   });
 });
