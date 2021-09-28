@@ -144,6 +144,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     toggleNodeIsCollapsed,
     getEventForRow,
     getNumCollapsedEvents,
+    getCounterForRow,
   } = useJobEvents({
     fetchEventByUuid,
     fetchNextSibling,
@@ -315,6 +316,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const isRowLoaded = ({ index }) => {
+    // TODO: update currentlyLoading in loadJobEvents & loadMoreRows
     return getEventForRow(index) !== null;
     // if (events[index]) {
     //   return true;
@@ -381,28 +383,30 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const loadMoreRows = ({ startIndex, stopIndex }) => {
+    if (!isMounted.current) {
+      return Promise.resolve(null);
+    }
     if (startIndex === 0 && stopIndex === 0) {
+      console.log('WHAT');
       return Promise.resolve(null);
     }
 
-    // TODO convert to tree indexes
-
     const diff = Math.max(stopIndex - startIndex, 50);
-    if (stopIndex > startIndex + 50) {
-      stopIndex = startIndex + 50;
-    }
-    console.debug('LOAD MORE', { startIndex, stopIndex });
-    // debugger;
-    // const event = getEventForRow(startIndex);
-    const event = getEventForRow(startIndex - 1);
-    // console.log(event, event2);
 
-    // TODO: forget pagination stuff. use counter__gt=event.counter or similar
+    const startCounter = getCounterForRow(startIndex);
+    console.debug(
+      'LOAD MORE',
+      { startIndex, stopIndex },
+      { startCounter, stopCounter: startCounter + diff }
+    );
+
+    // TODO: forget pagination stuff. use counter__gt=event.counter or similar?
     const [requestParams, loadRange] = getEventRequestParams(
       job,
-      remoteRowCount,
-      [startIndex, stopIndex]
-      // event ? [event.counter, event.counter + diff] : [startIndex, stopIndex]
+      // remoteRowCount,
+      totalNonCollapsedRows,
+      // [startIndex, stopIndex]
+      [startCounter, startCounter + diff]
     );
 
     if (isMounted.current) {
@@ -416,6 +420,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
+    // TODO handle 404?
+    // TODO update remoteRowCount if job running?
     return getJobModel(job.type)
       .readEvents(job.id, params)
       .then((response) => {
@@ -457,7 +463,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleScrollLast = () => {
-    scrollToRow(remoteRowCount - 1);
+    scrollToRow(totalNonCollapsedRows - 1);
   };
 
   const handleResize = ({ width }) => {
@@ -530,7 +536,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
-            rowCount={remoteRowCount}
+            rowCount={totalNonCollapsedRows}
             minimumBatchSize={50}
           >
             {({ onRowsRendered, registerChild }) => (

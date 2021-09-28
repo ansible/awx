@@ -43,6 +43,7 @@ export default function useJobEvents(callbacks) {
     },
     getNumCollapsedEvents: () =>
       state.tree.reduce((sum, node) => sum + getNumCollapsedChildren(node), 0),
+    getCounterForRow: (rowIndex) => getCounterForRow(state, rowIndex),
   };
 }
 
@@ -267,7 +268,7 @@ function getEventForRow(state, rowIndex) {
 }
 
 function getNodeForRow(state, rowToFind) {
-  const node = _getNodeForRow(state, rowToFind + 1, state.tree);
+  const { node } = _getNodeForRow(state, rowToFind + 1, state.tree);
   return node;
 }
 
@@ -276,21 +277,52 @@ function _getNodeForRow(state, rowToFind, nodes) {
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (remainingCount === 1) {
-      return node;
+      return { node };
     }
     remainingCount--;
     if (remainingCount < 1) {
       // looking for a node that hasn't been loaded yet
-      return null;
+      return { node: null };
     }
     const nodeChildren =
       getTotalNumChildren(node) - getNumCollapsedChildren(node);
     if (nodeChildren >= remainingCount) {
-      return _getNodeForRow(state, remainingCount, node.children);
+      const result = _getNodeForRow(state, remainingCount, node.children);
+      if (result.parentNode) {
+        return result;
+      }
+      return {
+        ...result,
+        parentNode: node,
+        parentOffset: remainingCount,
+      };
     }
     remainingCount -= nodeChildren;
   }
-  return null;
+  return { node: null, remainingCount };
+}
+
+function getCounterForRow(state, rowToFind) {
+  const { node, remainingCount, parentNode, parentOffset } = _getNodeForRow(
+    state,
+    rowToFind + 1,
+    state.tree
+  );
+
+  if (node) {
+    const event = state.events[node.eventIndex];
+    return event.counter;
+  }
+  if (parentNode) {
+    const parentEvent = state.events[parentNode.eventIndex];
+    return parentEvent.counter + parentOffset;
+  }
+  // rowToFind is not a child of any loaded event; look past end of loaded events
+  const lastIndex = Math.max(
+    ...Object.keys(state.events).map((i) => parseInt(i, 10))
+  );
+  const lastEvent = state.events[String(lastIndex)];
+  return lastEvent.counter + remainingCount;
 }
 
 function getTotalNumChildren(node) {
