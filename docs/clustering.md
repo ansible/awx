@@ -74,20 +74,11 @@ Recommendations and constraints:
 
 * **Provisioning** - Provisioning instances after installation is supported by updating the `inventory` file and re-running the setup playbook. It's important that this file contains all passwords and related information used when installing the cluster; if this is not the case, other instances may be reconfigured (this can be done intentionally).
 
-* **Deprovisioning** - Prior to version version 19.3.0, AWX did not automatically deprovision instances since it could not distinguish between an instance that was taken offline intentionally or due to failure. Instead, the procedure for deprovisioning an instance was to shut it down (or stop the `automation-controller-service`) and run the AWX deprovision command:
+* **Deprovisioning** - AWX does not automatically deprovision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure.
 
-```
-$ awx-manage deprovision_instance --hostname=<hostname>
-```
+  Starting with AWX version 19.3.0, deprovisioning a node results in one or more Receptor configurations needing to be updated across one or more nodes, which therefore cannot be done via a manual process; the Automation Mesh Installer needs to deprovision the nodes.
 
-Starting with AWX version 19.3.0, deprovisioning a node results in one or more Receptor configurations needing to be updated across one or more nodes, which therefore cannot be done via a manual process; the Automation Mesh Installer needs to deprovision the nodes.
-
-Adding to and removing from the mesh does not require that every node is listed in the inventory file; in other words, the absence of a node from the inventory file _does not_ indicate that a node should be removed. Instead, a `hostvar` of `node_state: deprovision` conveys to the mesh installer that the node should be deprovisioned.
-
-Once a node is identified as a candidate for deprovisioning, the following happens "behind the scenes":
-
-- Receptor is disabled via `ssh`
-- The instance is deleted directly from database
+  Adding to and removing from the mesh does not require that every node is listed in the inventory file; in other words, the absence of a node from the inventory file _does not_ indicate that a node should be removed. Instead, a `hostvar` of `node_state: deprovision` conveys to the mesh installer that the node should be deprovisioned.
 
 * **Removing/Deprovisioning Instance Groups** - AWX does not automatically de-provision or remove instance groups, even though re-provisioning will often cause these to be unused. They may still show up in API endpoints and stats monitoring. These groups can be removed with the following command:
 
