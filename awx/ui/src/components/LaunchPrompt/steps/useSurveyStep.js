@@ -72,7 +72,7 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
           ? question.default.split('\n')
           : [];
       } else {
-        values[`survey_${question.variable}`] = question.default || '';
+        values[`survey_${question.variable}`] = question.default ?? '';
       }
       if (resource?.extra_data) {
         Object.entries(resource.extra_data).forEach(([key, value]) => {
@@ -129,11 +129,14 @@ function checkForError(launchConfig, surveyConfig, values) {
         }
       }
       if (isNumeric && (value || value === 0)) {
-        if (value < question.min || value > question.max) {
+        if (
+          (value < question.min || value > question.max) &&
+          question.required
+        ) {
           hasError = true;
         }
       }
-      if (question.required && (!value || value.length === 0)) {
+      if (question.required && (!value || value.length === 0) && !isNumeric) {
         hasError = true;
       }
     });
