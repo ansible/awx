@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "POT-Creation-Date: 2021-06-08 18:28+0000\n"
 "Mime-Version: 1.0\n"
-"Language: nl \n"
+"Language: nl\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
@@ -182,22 +182,22 @@ msgstr "Actie"
 #: components/TemplateList/TemplateListItem.js:178
 #: screens/ActivityStream/ActivityStream.js:253
 #: screens/ActivityStream/ActivityStreamListItem.js:49
-#: screens/Application/ApplicationsList/ApplicationListItem.js:46
+#: screens/Application/ApplicationsList/ApplicationListItem.js:45
 #: screens/Application/ApplicationsList/ApplicationsList.js:160
 #: screens/Credential/CredentialList/CredentialList.js:147
 #: screens/Credential/CredentialList/CredentialListItem.js:63
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:177
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:36
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:35
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:154
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:74
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:76
 #: screens/Host/HostGroups/HostGroupItem.js:34
 #: screens/Host/HostGroups/HostGroupsList.js:177
 #: screens/Host/HostList/HostList.js:163
 #: screens/Host/HostList/HostListItem.js:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:286
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:75
-#: screens/InstanceGroup/Instances/InstanceList.js:221
-#: screens/InstanceGroup/Instances/InstanceListItem.js:152
+#: screens/InstanceGroup/Instances/InstanceList.js:256
+#: screens/InstanceGroup/Instances/InstanceListItem.js:178
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:215
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:48
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.js:39
@@ -207,7 +207,7 @@ msgstr "Actie"
 #: screens/Inventory/InventoryHosts/InventoryHostItem.js:38
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:139
 #: screens/Inventory/InventoryList/InventoryList.js:207
-#: screens/Inventory/InventoryList/InventoryListItem.js:114
+#: screens/Inventory/InventoryList/InventoryListItem.js:113
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:232
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.js:40
 #: screens/Inventory/InventorySources/InventorySourceList.js:215
@@ -215,9 +215,9 @@ msgstr "Actie"
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:102
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.js:72
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:196
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:122
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:121
 #: screens/Organization/OrganizationList/OrganizationList.js:146
-#: screens/Organization/OrganizationList/OrganizationListItem.js:68
+#: screens/Organization/OrganizationList/OrganizationListItem.js:69
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:86
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:17
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:159
@@ -226,8 +226,8 @@ msgstr "Actie"
 #: screens/Project/ProjectList/ProjectListItem.js:209
 #: screens/Team/TeamList/TeamList.js:144
 #: screens/Team/TeamList/TeamListItem.js:47
-#: screens/Template/Survey/SurveyList.js:115
-#: screens/Template/Survey/SurveyList.js:115
+#: screens/Template/Survey/SurveyList.js:105
+#: screens/Template/Survey/SurveyList.js:105
 #: screens/Template/Survey/SurveyListItem.js:85
 #: screens/User/UserList/UserList.js:160
 #: screens/User/UserList/UserListItem.js:60
@@ -388,8 +388,8 @@ msgstr "Waarschuwingsmodus"
 
 #: components/LaunchButton/ReLaunchDropDown.js:48
 #: components/PromptDetail/PromptDetail.js:120
-#: screens/Metrics/Metrics.js:75
-#: screens/Metrics/Metrics.js:75
+#: screens/Metrics/Metrics.js:82
+#: screens/Metrics/Metrics.js:82
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:257
 msgid "All"
 msgstr "Alle"
@@ -539,11 +539,11 @@ msgstr "Weet u zeker dat u deze taak wilt annuleren?"
 msgid "Are you sure you want to delete:"
 msgstr "Weet u zeker dat u dit wilt verwijderen:"
 
-#: screens/Setting/shared/SharedFields.js:141
+#: screens/Setting/shared/SharedFields.js:142
 msgid "Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
 msgstr "Weet u zeker dat u lokale authenticatie wilt uitschakelen? Als u dat doet, kan dat gevolgen hebben voor de mogelijkheid van gebruikers om in te loggen en voor de mogelijkheid van de systeembeheerder om deze wijziging terug te draaien."
 
-#: screens/Setting/shared/SharedFields.js:320
+#: screens/Setting/shared/SharedFields.js:350
 msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
 msgstr ""
 
@@ -584,11 +584,11 @@ msgstr "Weet u zeker dat u het verzoek om deze taak te annuleren in wilt dienen?
 msgid "Arguments"
 msgstr "Argumenten"
 
-#: screens/Job/JobDetail/JobDetail.js:442
+#: screens/Job/JobDetail/JobDetail.js:435
 msgid "Artifacts"
 msgstr "Artefacten"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:188
+#: screens/InstanceGroup/Instances/InstanceList.js:202
 #: screens/User/UserTeams/UserTeamList.js:208
 msgid "Associate"
 msgstr "Associate"
@@ -623,7 +623,8 @@ msgstr "Machtigingscode vervallen"
 msgid "Authorization grant type"
 msgstr "Type authenticatieverlening"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:120
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:204
+#: screens/InstanceGroup/Instances/InstanceListItem.js:198
 msgid "Auto"
 msgstr "Auto"
 
@@ -669,12 +670,16 @@ msgstr "Terug naar hosts"
 msgid "Back to Instance Groups"
 msgstr ""
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:167
+msgid "Back to Instances"
+msgstr ""
+
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
 msgid "Back to Inventories"
 msgstr "Terug naar inventarissen"
 
-#: screens/Job/Job.js:109
+#: screens/Job/Job.js:110
 msgid "Back to Jobs"
 msgstr "Terug naar taken"
 
@@ -792,7 +797,8 @@ msgstr ""
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
 msgstr "Standaard verzamelen wij analytische gegevens over het gebruik van de service en sturen deze door naar Red Hat. Er zijn twee categorieën gegevens die door de service worden verzameld. Zie voor meer informatie <0>deze Tower-documentatiepagina</0>. Schakel de volgende vakjes uit om deze functie uit te schakelen."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:126
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:217
+#: screens/InstanceGroup/Instances/InstanceListItem.js:152
 msgid "CPU {0}"
 msgstr "CPU {0}"
 
@@ -820,10 +826,10 @@ msgstr "Cache time-out (seconden)"
 #: components/DisassociateButton/DisassociateButton.js:122
 #: components/DisassociateButton/DisassociateButton.js:125
 #: components/FormActionGroup/FormActionGroup.js:23
-#: components/FormActionGroup/FormActionGroup.js:28
+#: components/FormActionGroup/FormActionGroup.js:29
 #: components/LaunchPrompt/LaunchPrompt.js:129
 #: components/Lookup/HostFilterLookup.js:359
-#: components/Lookup/Lookup.js:194
+#: components/Lookup/Lookup.js:195
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:36
 #: components/Schedule/shared/ScheduleForm.js:646
@@ -842,12 +848,12 @@ msgstr "Cache time-out (seconden)"
 #: screens/Setting/shared/RevertAllAlert.js:32
 #: screens/Setting/shared/RevertFormActionGroup.js:31
 #: screens/Setting/shared/RevertFormActionGroup.js:37
-#: screens/Setting/shared/SharedFields.js:132
-#: screens/Setting/shared/SharedFields.js:138
-#: screens/Setting/shared/SharedFields.js:316
+#: screens/Setting/shared/SharedFields.js:133
+#: screens/Setting/shared/SharedFields.js:139
+#: screens/Setting/shared/SharedFields.js:346
 #: screens/Team/TeamRoles/TeamRolesList.js:228
 #: screens/Team/TeamRoles/TeamRolesList.js:231
-#: screens/Template/Survey/SurveyList.js:88
+#: screens/Template/Survey/SurveyList.js:78
 #: screens/Template/Survey/SurveyReorderModal.js:199
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/DeleteAllNodesModal.js:31
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:39
@@ -894,7 +900,7 @@ msgstr "Linkwijzigingen annuleren"
 msgid "Cancel link removal"
 msgstr "Verwijdering van link annuleren"
 
-#: components/Lookup/Lookup.js:192
+#: components/Lookup/Lookup.js:193
 msgid "Cancel lookup"
 msgstr "Opzoeken annuleren"
 
@@ -920,13 +926,13 @@ msgid "Cancel subscription edit"
 msgstr "Abonnement bewerken annuleren"
 
 #: components/JobList/JobListItem.js:106
-#: screens/Job/JobDetail/JobDetail.js:481
+#: screens/Job/JobDetail/JobDetail.js:475
 #: screens/Job/JobOutput/shared/OutputToolbar.js:135
 msgid "Cancel {0}"
 msgstr "{0} annuleren"
 
 #: components/JobList/JobList.js:227
-#: components/StatusLabel/StatusLabel.js:62
+#: components/StatusLabel/StatusLabel.js:65
 #: components/Workflow/WorkflowNodeHelp.js:111
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:166
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:20
@@ -944,8 +950,9 @@ msgstr "Kan aggregator logboekregistraties niet inschakelen zonder de host en he
 msgid "Capacity"
 msgstr "Capaciteit"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:219
-#: screens/InstanceGroup/Instances/InstanceListItem.js:124
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:214
+#: screens/InstanceGroup/Instances/InstanceList.js:254
+#: screens/InstanceGroup/Instances/InstanceListItem.js:150
 msgid "Capacity Adjustment"
 msgstr ""
 
@@ -1095,7 +1102,7 @@ msgstr "Klik op deze knop om de verbinding met het geheimbeheersysteem te verifi
 msgid "Click to create a new link to this node."
 msgstr "Klik om een nieuwe link naar dit knooppunt te maken."
 
-#: screens/Template/Survey/SurveyToolbar.js:62
+#: screens/Template/Survey/SurveyToolbar.js:63
 msgid "Click to rearrange the order of the survey questions"
 msgstr ""
 
@@ -1164,9 +1171,9 @@ msgstr "Compliant"
 msgid "Concurrent Jobs"
 msgstr "Gelijktijdige taken"
 
-#: screens/Setting/shared/SharedFields.js:120
-#: screens/Setting/shared/SharedFields.js:126
-#: screens/Setting/shared/SharedFields.js:306
+#: screens/Setting/shared/SharedFields.js:121
+#: screens/Setting/shared/SharedFields.js:127
+#: screens/Setting/shared/SharedFields.js:336
 msgid "Confirm"
 msgstr "Bevestigen"
 
@@ -1219,7 +1226,7 @@ msgstr "Alles terugzetten bevestigen"
 msgid "Confirm selection"
 msgstr "Selectie bevestigen"
 
-#: screens/Job/JobDetail/JobDetail.js:299
+#: screens/Job/JobDetail/JobDetail.js:293
 msgid "Container Group"
 msgstr "Containergroep"
 
@@ -1282,15 +1289,15 @@ msgstr "Toegangsgegevens kopiëren"
 msgid "Copy Error"
 msgstr "Kopieerfout"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:91
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:93
 msgid "Copy Execution Environment"
 msgstr "Uitvoeringsomgeving kopiëren"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:137
+#: screens/Inventory/InventoryList/InventoryListItem.js:136
 msgid "Copy Inventory"
 msgstr "Inventaris kopiëren"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:150
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:149
 msgid "Copy Notification Template"
 msgstr "Berichtsjabloon kopiëren"
 
@@ -1441,7 +1448,7 @@ msgstr "Gebruikerstoken maken"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:260
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:140
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:47
-#: screens/Job/JobDetail/JobDetail.js:414
+#: screens/Job/JobDetail/JobDetail.js:408
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:339
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:105
 #: screens/Project/ProjectDetail/ProjectDetail.js:231
@@ -1570,7 +1577,7 @@ msgstr "Toegangsgegevens voor authenticatie met een beschermd containerregister.
 msgid "Credential type not found."
 msgstr "Type toegangsgegevens niet gevonden."
 
-#: components/JobList/JobListItem.js:235
+#: components/JobList/JobListItem.js:237
 #: components/LaunchPrompt/steps/CredentialsStep.js:189
 #: components/LaunchPrompt/steps/useCredentialsStep.js:62
 #: components/Lookup/MultiCredentialsLookup.js:138
@@ -1585,7 +1592,7 @@ msgstr "Type toegangsgegevens niet gevonden."
 #: screens/Credential/CredentialList/CredentialList.js:175
 #: screens/Credential/Credentials.js:13
 #: screens/Credential/Credentials.js:23
-#: screens/Job/JobDetail/JobDetail.js:338
+#: screens/Job/JobDetail/JobDetail.js:332
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:285
 #: screens/Template/shared/JobTemplateForm.js:373
 #: util/getRelatedResourceDeleteDetails.js:90
@@ -1605,7 +1612,7 @@ msgid "Custom pod spec"
 msgstr "Aangepaste podspecificatie"
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:78
-#: screens/Organization/OrganizationList/OrganizationListItem.js:54
+#: screens/Organization/OrganizationList/OrganizationListItem.js:55
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:66
 #: screens/Project/ProjectList/ProjectListItem.js:183
 msgid "Custom virtual environment {0} must be replaced by an execution environment."
@@ -1682,8 +1689,8 @@ msgid "December"
 msgstr "December"
 
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.js:102
-#: screens/Template/Survey/SurveyList.js:114
-#: screens/Template/Survey/SurveyList.js:114
+#: screens/Template/Survey/SurveyList.js:104
+#: screens/Template/Survey/SurveyList.js:104
 #: screens/Template/Survey/SurveyListItem.js:63
 msgid "Default"
 msgstr "Standaard"
@@ -1695,7 +1702,6 @@ msgid "Default Answer(s)"
 msgstr ""
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:40
-#: components/Lookup/ExecutionEnvironmentLookup.js:209
 msgid "Default Execution Environment"
 msgstr "Standaarduitvoeringsomgeving"
 
@@ -1736,15 +1742,15 @@ msgstr "Kenmerken en functies op systeemniveau definiëren"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:72
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:76
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:99
-#: screens/Job/JobDetail/JobDetail.js:493
+#: screens/Job/JobDetail/JobDetail.js:487
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:376
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:175
 #: screens/Project/ProjectDetail/ProjectDetail.js:279
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:75
 #: screens/Team/TeamDetail/TeamDetail.js:70
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:409
-#: screens/Template/Survey/SurveyList.js:76
-#: screens/Template/Survey/SurveyToolbar.js:91
+#: screens/Template/Survey/SurveyList.js:66
+#: screens/Template/Survey/SurveyToolbar.js:92
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:247
 #: screens/User/UserDetail/UserDetail.js:107
 #: screens/User/UserTokenDetail/UserTokenDetail.js:76
@@ -1773,7 +1779,7 @@ msgstr "Host verwijderen"
 msgid "Delete Inventory"
 msgstr "Inventaris verwijderen"
 
-#: screens/Job/JobDetail/JobDetail.js:489
+#: screens/Job/JobDetail/JobDetail.js:483
 #: screens/Job/JobOutput/shared/OutputToolbar.js:193
 #: screens/Job/JobOutput/shared/OutputToolbar.js:197
 msgid "Delete Job"
@@ -1795,7 +1801,7 @@ msgstr "Organisatie verwijderen"
 msgid "Delete Project"
 msgstr "Project verwijderen"
 
-#: screens/Template/Survey/SurveyList.js:62
+#: screens/Template/Survey/SurveyList.js:52
 msgid "Delete Questions"
 msgstr "Vragen verwijderen"
 
@@ -1803,7 +1809,7 @@ msgstr "Vragen verwijderen"
 msgid "Delete Schedule"
 msgstr "Schema verwijderen"
 
-#: screens/Template/Survey/SurveyList.js:62
+#: screens/Template/Survey/SurveyList.js:52
 msgid "Delete Survey"
 msgstr "Vragenlijst verwijderen"
 
@@ -1857,7 +1863,7 @@ msgstr "Inventarisbron maken"
 msgid "Delete smart inventory"
 msgstr "Smart-inventaris maken"
 
-#: screens/Template/Survey/SurveyToolbar.js:81
+#: screens/Template/Survey/SurveyToolbar.js:82
 msgid "Delete survey question"
 msgstr ""
 
@@ -2037,9 +2043,10 @@ msgstr "Bestemmingskanalen of -gebruikers"
 #: screens/Host/Host.js:57
 #: screens/Host/Hosts.js:28
 #: screens/InstanceGroup/ContainerGroup.js:75
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:174
 #: screens/InstanceGroup/InstanceGroup.js:76
 #: screens/InstanceGroup/InstanceGroups.js:50
-#: screens/InstanceGroup/InstanceGroups.js:56
+#: screens/InstanceGroup/InstanceGroups.js:58
 #: screens/Inventory/Inventories.js:60
 #: screens/Inventory/Inventories.js:85
 #: screens/Inventory/Inventory.js:62
@@ -2048,7 +2055,7 @@ msgstr "Bestemmingskanalen of -gebruikers"
 #: screens/Inventory/InventorySource/InventorySource.js:83
 #: screens/Inventory/SmartInventory.js:65
 #: screens/Inventory/SmartInventoryHost/SmartInventoryHost.js:60
-#: screens/Job/Job.js:115
+#: screens/Job/Job.js:116
 #: screens/Job/JobOutput/HostEventModal.js:111
 #: screens/Job/Jobs.js:28
 #: screens/ManagementJob/ManagementJobs.js:27
@@ -2125,7 +2132,7 @@ msgstr "SSL-verificatie uitschakelen"
 msgid "Disable SSL verification"
 msgstr "SSL-verificatie uitschakelen"
 
-#: components/StatusLabel/StatusLabel.js:61
+#: components/StatusLabel/StatusLabel.js:64
 msgid "Disabled"
 msgstr ""
 
@@ -2148,7 +2155,8 @@ msgstr "Groep van host loskoppelen?"
 msgid "Disassociate host from group?"
 msgstr "Host van groep loskoppelen?"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:199
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:281
+#: screens/InstanceGroup/Instances/InstanceList.js:213
 msgid "Disassociate instance from instance group?"
 msgstr "Instantie van instantiegroep loskoppelen?"
 
@@ -2263,7 +2271,7 @@ msgstr "Voer iedere keer dat een taak uitgevoerd wordt met dit project een updat
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:155
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:363
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:365
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:136
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:135
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:158
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:162
 #: screens/Project/ProjectDetail/ProjectDetail.js:252
@@ -2298,7 +2306,7 @@ msgstr "Voer iedere keer dat een taak uitgevoerd wordt met dit project een updat
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:380
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:217
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:219
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:233
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:236
 #: screens/User/UserDetail/UserDetail.js:96
 msgid "Edit"
 msgstr "Bewerken"
@@ -2351,8 +2359,8 @@ msgstr "Toegangsgegevens plug-inconfiguratie bewerken"
 msgid "Edit Details"
 msgstr "Details bewerken"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:77
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:81
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:79
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:83
 msgid "Edit Execution Environment"
 msgstr "Uitvoeringsomgeving bewerken"
 
@@ -2371,8 +2379,8 @@ msgstr "Groep bewerken"
 msgid "Edit Host"
 msgstr "Host bewerken"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:117
-#: screens/Inventory/InventoryList/InventoryListItem.js:122
+#: screens/Inventory/InventoryList/InventoryListItem.js:116
+#: screens/Inventory/InventoryList/InventoryListItem.js:121
 msgid "Edit Inventory"
 msgstr "Inventaris bewerken"
 
@@ -2380,25 +2388,25 @@ msgstr "Inventaris bewerken"
 msgid "Edit Link"
 msgstr "Link bewerken"
 
-#: screens/Setting/shared/SharedFields.js:260
+#: screens/Setting/shared/SharedFields.js:290
 msgid "Edit Login redirect override URL"
 msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeEditModal.js:64
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:230
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:233
 msgid "Edit Node"
 msgstr "Knooppunt bewerken"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:140
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:139
 msgid "Edit Notification Template"
 msgstr "Berichtsjabloon bewerken"
 
-#: screens/Template/Survey/SurveyToolbar.js:71
+#: screens/Template/Survey/SurveyToolbar.js:72
 msgid "Edit Order"
 msgstr ""
 
-#: screens/Organization/OrganizationList/OrganizationListItem.js:71
-#: screens/Organization/OrganizationList/OrganizationListItem.js:75
+#: screens/Organization/OrganizationList/OrganizationListItem.js:72
+#: screens/Organization/OrganizationList/OrganizationListItem.js:76
 msgid "Edit Organization"
 msgstr "Organisatie bewerken"
 
@@ -2443,20 +2451,20 @@ msgstr "Sjabloon bewerken"
 msgid "Edit User"
 msgstr "Gebruiker bewerken"
 
-#: screens/Application/ApplicationsList/ApplicationListItem.js:49
-#: screens/Application/ApplicationsList/ApplicationListItem.js:53
+#: screens/Application/ApplicationsList/ApplicationListItem.js:48
+#: screens/Application/ApplicationsList/ApplicationListItem.js:52
 msgid "Edit application"
 msgstr "Toepassing bewerken"
 
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:39
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:43
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:38
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:42
 msgid "Edit credential type"
 msgstr "Type toegangsgegevens bewerken"
 
 #: screens/CredentialType/CredentialTypes.js:25
 #: screens/ExecutionEnvironment/ExecutionEnvironments.js:25
-#: screens/InstanceGroup/InstanceGroups.js:53
-#: screens/InstanceGroup/InstanceGroups.js:58
+#: screens/InstanceGroup/InstanceGroups.js:55
+#: screens/InstanceGroup/InstanceGroups.js:60
 #: screens/Inventory/Inventories.js:61
 #: screens/Inventory/Inventories.js:66
 #: screens/Inventory/Inventories.js:75
@@ -2478,8 +2486,8 @@ msgstr "Host bewerken"
 msgid "Edit instance group"
 msgstr "Instantiegroep bewerken"
 
-#: screens/Setting/shared/SharedFields.js:290
-#: screens/Setting/shared/SharedFields.js:292
+#: screens/Setting/shared/SharedFields.js:320
+#: screens/Setting/shared/SharedFields.js:322
 msgid "Edit login redirect override URL"
 msgstr ""
 
@@ -2763,7 +2771,7 @@ msgid "Enter variables using either JSON or YAML syntax. Use the radio button to
 msgstr "Voer variabelen in met JSON- of YAML-syntaxis. Gebruik de radioknop om tussen de twee te wisselen."
 
 #: components/JobList/JobList.js:226
-#: components/StatusLabel/StatusLabel.js:57
+#: components/StatusLabel/StatusLabel.js:60
 #: components/Workflow/WorkflowNodeHelp.js:108
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:129
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:205
@@ -2823,8 +2831,9 @@ msgstr "Fout bij het opslaan van de workflow!"
 #: screens/Host/HostDetail/HostDetail.js:125
 #: screens/Host/HostGroups/HostGroupsList.js:244
 #: screens/Host/HostList/HostList.js:222
-#: screens/InstanceGroup/Instances/InstanceList.js:252
-#: screens/InstanceGroup/Instances/InstanceListItem.js:167
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:294
+#: screens/InstanceGroup/Instances/InstanceList.js:289
+#: screens/InstanceGroup/Instances/InstanceListItem.js:211
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:140
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:77
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:282
@@ -2845,7 +2854,7 @@ msgstr "Fout bij het opslaan van de workflow!"
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:125
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:384
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:220
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:167
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:166
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:184
 #: screens/Organization/OrganizationList/OrganizationList.js:195
 #: screens/Project/ProjectDetail/ProjectDetail.js:287
@@ -2883,6 +2892,10 @@ msgstr "Fout!"
 #: components/CodeEditor/VariablesDetail.js:105
 msgid "Error:"
 msgstr "Fout:"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:256
+msgid "Errors"
+msgstr ""
 
 #: screens/ActivityStream/ActivityStream.js:252
 #: screens/ActivityStream/ActivityStreamListItem.js:46
@@ -2956,9 +2969,9 @@ msgstr "Uitvoeren wanneer het bovenliggende knooppunt in een succesvolle status 
 #: components/AdHocCommands/useAdHocExecutionEnvironmentStep.jsx:15
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:41
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:104
-#: components/Lookup/ExecutionEnvironmentLookup.js:158
-#: components/Lookup/ExecutionEnvironmentLookup.js:189
-#: components/Lookup/ExecutionEnvironmentLookup.js:211
+#: components/Lookup/ExecutionEnvironmentLookup.js:156
+#: components/Lookup/ExecutionEnvironmentLookup.js:187
+#: components/Lookup/ExecutionEnvironmentLookup.js:203
 msgid "Execution Environment"
 msgstr "Uitvoeringsomgeving"
 
@@ -2982,7 +2995,7 @@ msgstr ""
 msgid "Execution Environments"
 msgstr "Uitvoeringsomgevingen"
 
-#: screens/Job/JobDetail/JobDetail.js:286
+#: screens/Job/JobDetail/JobDetail.js:280
 msgid "Execution Node"
 msgstr "Uitvoeringsknooppunt"
 
@@ -3042,7 +3055,7 @@ msgstr "Verloopt op UTC"
 msgid "Expires on {0}"
 msgstr "Verloopt op {0}"
 
-#: components/JobList/JobListItem.js:263
+#: components/JobList/JobListItem.js:265
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:119
 msgid "Explanation"
 msgstr "Uitleg"
@@ -3079,7 +3092,7 @@ msgid "Facts"
 msgstr "Feiten"
 
 #: components/JobList/JobList.js:225
-#: components/StatusLabel/StatusLabel.js:56
+#: components/StatusLabel/StatusLabel.js:59
 #: components/Workflow/WorkflowNodeHelp.js:105
 #: screens/Dashboard/shared/ChartTooltip.js:66
 #: screens/Job/JobOutput/shared/HostStatusBar.js:47
@@ -3122,7 +3135,7 @@ msgid "Failed to associate role"
 msgstr "Kan rol niet koppelen"
 
 #: screens/Host/HostGroups/HostGroupsList.js:248
-#: screens/InstanceGroup/Instances/InstanceList.js:256
+#: screens/InstanceGroup/Instances/InstanceList.js:292
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:285
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:265
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:267
@@ -3145,7 +3158,7 @@ msgid "Failed to cancel one or more jobs."
 msgstr "Kan een of meer taken niet annuleren."
 
 #: components/JobList/JobListItem.js:107
-#: screens/Job/JobDetail/JobDetail.js:482
+#: screens/Job/JobDetail/JobDetail.js:476
 #: screens/Job/JobOutput/shared/OutputToolbar.js:136
 msgid "Failed to cancel {0}"
 msgstr "Kan {0} niet annuleren"
@@ -3154,11 +3167,11 @@ msgstr "Kan {0} niet annuleren"
 msgid "Failed to copy credential."
 msgstr "Kan toegangsgegevens niet kopiëren"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:99
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:101
 msgid "Failed to copy execution environment"
 msgstr "Kan uitvoeringsomgeving niet kopiëren"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:145
+#: screens/Inventory/InventoryList/InventoryListItem.js:144
 msgid "Failed to copy inventory."
 msgstr "Kan inventaris niet kopiëren."
 
@@ -3167,7 +3180,7 @@ msgid "Failed to copy project."
 msgstr "Kan project niet kopiëren."
 
 #: components/TemplateList/TemplateListItem.js:236
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:158
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:157
 msgid "Failed to copy template."
 msgstr "Kan sjabloon niet kopiëren."
 
@@ -3353,7 +3366,8 @@ msgstr "Een of meer groepen kunnen niet worden losgekoppeld."
 msgid "Failed to disassociate one or more hosts."
 msgstr "Een of meer hosts kunnen niet worden losgekoppeld."
 
-#: screens/InstanceGroup/Instances/InstanceList.js:257
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:299
+#: screens/InstanceGroup/Instances/InstanceList.js:294
 msgid "Failed to disassociate one or more instances."
 msgstr "Een of meer instanties kunnen niet worden losgekoppeld."
 
@@ -3387,7 +3401,11 @@ msgstr "Kan geen volledig bronobject van knooppunt ophalen."
 msgid "Failed to retrieve node credentials."
 msgstr "Kan geen knooppuntgegevens ophalen."
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:170
+#: screens/InstanceGroup/Instances/InstanceList.js:296
+msgid "Failed to run a health check on one or more instances."
+msgstr ""
+
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:169
 msgid "Failed to send test notification."
 msgstr "Kan testbericht niet verzenden."
 
@@ -3419,7 +3437,8 @@ msgstr "Kan niet van bericht wisselen."
 msgid "Failed to toggle schedule."
 msgstr "Kan niet van schema wisselen."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:171
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:298
+#: screens/InstanceGroup/Instances/InstanceListItem.js:215
 msgid "Failed to update capacity adjustment."
 msgstr "Kan de capaciteitsaanpassing niet bijwerken."
 
@@ -3496,7 +3515,7 @@ msgstr ""
 msgid "Finish Time"
 msgstr "Voltooiingstijd"
 
-#: screens/Job/JobDetail/JobDetail.js:145
+#: screens/Job/JobDetail/JobDetail.js:139
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:161
 msgid "Finished"
 msgstr "Voltooid"
@@ -3672,11 +3691,11 @@ msgid "GitLab"
 msgstr "GitLab"
 
 #: components/Lookup/ExecutionEnvironmentLookup.js:206
-msgid "Global Default Execution Environment"
-msgstr "Wereldwijde standaarduitvoeringsomgeving"
+#~ msgid "Global Default Execution Environment"
+#~ msgstr "Wereldwijde standaarduitvoeringsomgeving"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:76
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:71
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:73
 msgid "Globally Available"
 msgstr "Wereldwijd beschikbaar"
 
@@ -3754,7 +3773,7 @@ msgstr "Type groep"
 #: screens/Inventory/Inventory.js:64
 #: screens/Inventory/InventoryHost/InventoryHost.js:83
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:248
-#: screens/Inventory/InventoryList/InventoryListItem.js:110
+#: screens/Inventory/InventoryList/InventoryListItem.js:109
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:250
 #: util/getRelatedResourceDeleteDetails.js:118
 msgid "Groups"
@@ -3769,6 +3788,15 @@ msgstr "HTTP-koppen"
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:478
 msgid "HTTP Method"
 msgstr "HTTP-methode"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:273
+#: screens/InstanceGroup/Instances/InstanceList.js:234
+msgid "Health Check"
+msgstr ""
+
+#: components/StatusLabel/StatusLabel.js:57
+msgid "Healthy"
+msgstr ""
 
 #: components/AppContainer/PageHeaderToolbar.js:115
 msgid "Help"
@@ -3828,6 +3856,7 @@ msgstr "Hostmislukking"
 msgid "Host Filter"
 msgstr "Hostfilter"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:192
 #: screens/Job/JobOutput/HostEventModal.js:118
 msgid "Host Name"
 msgstr "Hostnaam"
@@ -4070,7 +4099,7 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:127
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:133
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:152
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:62
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:64
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:96
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:90
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:109
@@ -4136,7 +4165,7 @@ msgstr "Dashboard Insights for Ansible Automation Platform"
 msgid "Insights system ID"
 msgstr "Systeem-ID Insights"
 
-#: screens/Metrics/Metrics.js:180
+#: screens/Metrics/Metrics.js:187
 msgid "Instance"
 msgstr "Instantie"
 
@@ -4144,7 +4173,7 @@ msgstr "Instantie"
 msgid "Instance Filters"
 msgstr "Instantiefilters"
 
-#: screens/Job/JobDetail/JobDetail.js:292
+#: screens/Job/JobDetail/JobDetail.js:286
 msgid "Instance Group"
 msgstr "Instantiegroep"
 
@@ -4168,6 +4197,10 @@ msgstr "Instantiegroepen"
 msgid "Instance ID"
 msgstr "Instantie-id"
 
+#: screens/InstanceGroup/InstanceGroups.js:53
+msgid "Instance details"
+msgstr ""
+
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:59
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:69
 msgid "Instance group"
@@ -4177,7 +4210,7 @@ msgstr "Instantiegroep"
 msgid "Instance group not found."
 msgstr "Kan instantiegroep niet vinden."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:146
+#: screens/InstanceGroup/Instances/InstanceListItem.js:172
 msgid "Instance group used capacity"
 msgstr ""
 
@@ -4189,8 +4222,8 @@ msgstr "Instantiegroepen"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:284
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:73
 #: screens/InstanceGroup/InstanceGroups.js:51
-#: screens/InstanceGroup/Instances/InstanceList.js:158
-#: screens/InstanceGroup/Instances/InstanceList.js:238
+#: screens/InstanceGroup/Instances/InstanceList.js:170
+#: screens/InstanceGroup/Instances/InstanceList.js:275
 msgid "Instances"
 msgstr "Instanties"
 
@@ -4234,7 +4267,7 @@ msgstr "Ongeldige gebruikersnaam of wachtwoord. Probeer het opnieuw."
 msgid "Inventories"
 msgstr "Inventarissen"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:136
+#: screens/Inventory/InventoryList/InventoryListItem.js:135
 msgid "Inventories with sources cannot be copied"
 msgstr "Inventarissen met bronnen kunnen niet gekopieerd worden"
 
@@ -4262,11 +4295,11 @@ msgstr "Inventarissen met bronnen kunnen niet gekopieerd worden"
 #: screens/Host/HostList/HostListItem.js:55
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:72
 #: screens/Inventory/InventoryList/InventoryList.js:171
-#: screens/Inventory/InventoryList/InventoryListItem.js:100
+#: screens/Inventory/InventoryList/InventoryListItem.js:99
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:39
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.js:105
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:39
-#: screens/Job/JobDetail/JobDetail.js:193
+#: screens/Job/JobDetail/JobDetail.js:187
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:199
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:206
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:140
@@ -4285,11 +4318,11 @@ msgstr "Inventarisbestand"
 msgid "Inventory ID"
 msgstr "Inventaris-id"
 
-#: screens/Job/JobDetail/JobDetail.js:211
+#: screens/Job/JobDetail/JobDetail.js:205
 msgid "Inventory Source"
 msgstr "Inventarisbron"
 
-#: screens/Job/JobDetail/JobDetail.js:234
+#: screens/Job/JobDetail/JobDetail.js:228
 msgid "Inventory Source Project"
 msgstr ""
 
@@ -4313,7 +4346,7 @@ msgstr "Inventarisbronnen"
 #: components/JobList/JobListItem.js:37
 #: components/Schedule/ScheduleList/ScheduleListItem.js:36
 #: components/Workflow/WorkflowLegend.js:100
-#: screens/Job/JobDetail/JobDetail.js:77
+#: screens/Job/JobDetail/JobDetail.js:71
 msgid "Inventory Sync"
 msgstr "Inventarissynchronisatie"
 
@@ -4401,20 +4434,20 @@ msgid "Job"
 msgstr "Taak"
 
 #: components/JobList/JobListItem.js:105
-#: screens/Job/JobDetail/JobDetail.js:480
+#: screens/Job/JobDetail/JobDetail.js:474
 #: screens/Job/JobOutput/JobOutput.js:557
 #: screens/Job/JobOutput/JobOutput.js:558
 #: screens/Job/JobOutput/shared/OutputToolbar.js:134
 msgid "Job Cancel Error"
 msgstr "Fout bij annuleren taak"
 
-#: screens/Job/JobDetail/JobDetail.js:502
+#: screens/Job/JobDetail/JobDetail.js:496
 #: screens/Job/JobOutput/JobOutput.js:546
 #: screens/Job/JobOutput/JobOutput.js:547
 msgid "Job Delete Error"
 msgstr "Fout bij verwijderen taak"
 
-#: screens/Job/JobDetail/JobDetail.js:123
+#: screens/Job/JobDetail/JobDetail.js:117
 msgid "Job ID"
 msgstr ""
 
@@ -4422,13 +4455,13 @@ msgstr ""
 msgid "Job Runs"
 msgstr ""
 
-#: components/JobList/JobListItem.js:270
-#: screens/Job/JobDetail/JobDetail.js:307
+#: components/JobList/JobListItem.js:272
+#: screens/Job/JobDetail/JobDetail.js:301
 msgid "Job Slice"
 msgstr "Taken verdelen"
 
-#: components/JobList/JobListItem.js:275
-#: screens/Job/JobDetail/JobDetail.js:314
+#: components/JobList/JobListItem.js:277
+#: screens/Job/JobDetail/JobDetail.js:308
 msgid "Job Slice Parent"
 msgstr ""
 
@@ -4447,7 +4480,7 @@ msgstr "Taakstatus"
 #: components/PromptDetail/PromptDetail.js:219
 #: components/PromptDetail/PromptJobTemplateDetail.js:242
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:344
-#: screens/Job/JobDetail/JobDetail.js:368
+#: screens/Job/JobDetail/JobDetail.js:362
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:336
 #: screens/Template/shared/JobTemplateForm.js:519
 msgid "Job Tags"
@@ -4459,7 +4492,7 @@ msgstr "Taaktags"
 #: components/Workflow/WorkflowNodeHelp.js:59
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:98
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:14
-#: screens/Job/JobDetail/JobDetail.js:152
+#: screens/Job/JobDetail/JobDetail.js:146
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:93
 msgid "Job Template"
 msgstr "Taaksjabloon"
@@ -4480,7 +4513,7 @@ msgstr "Taaksjablonen"
 msgid "Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed."
 msgstr "Taaksjablonen met een ontbrekende inventaris of een ontbrekend project kunnen niet worden geselecteerd tijdens het maken of bewerken van knooppunten. Selecteer een andere sjabloon of herstel de ontbrekende velden om verder te gaan."
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useWorkflowNodeSteps.js:309
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useWorkflowNodeSteps.js:316
 msgid "Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes"
 msgstr "Taaksjablonen met toegangsgegevens die om een wachtwoord vragen, kunnen niet worden geselecteerd tijdens het maken of bewerken van knooppunten"
 
@@ -4489,7 +4522,7 @@ msgstr "Taaksjablonen met toegangsgegevens die om een wachtwoord vragen, kunnen 
 #: components/PromptDetail/PromptDetail.js:169
 #: components/PromptDetail/PromptJobTemplateDetail.js:107
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:293
-#: screens/Job/JobDetail/JobDetail.js:186
+#: screens/Job/JobDetail/JobDetail.js:180
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:182
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:137
 #: screens/Template/shared/JobTemplateForm.js:250
@@ -4519,8 +4552,8 @@ msgstr "Taaksjablonen"
 #: screens/Host/Hosts.js:31
 #: screens/InstanceGroup/ContainerGroup.js:80
 #: screens/InstanceGroup/InstanceGroup.js:86
-#: screens/InstanceGroup/InstanceGroups.js:52
-#: screens/InstanceGroup/InstanceGroups.js:57
+#: screens/InstanceGroup/InstanceGroups.js:54
+#: screens/InstanceGroup/InstanceGroups.js:59
 #: screens/Inventory/Inventories.js:59
 #: screens/Inventory/Inventories.js:68
 #: screens/Inventory/Inventory.js:68
@@ -4621,11 +4654,11 @@ msgstr "LDAP5"
 msgid "Label Name"
 msgstr "Labelnaam"
 
-#: components/JobList/JobListItem.js:248
+#: components/JobList/JobListItem.js:250
 #: components/PromptDetail/PromptJobTemplateDetail.js:209
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:114
 #: components/TemplateList/TemplateListItem.js:332
-#: screens/Job/JobDetail/JobDetail.js:352
+#: screens/Job/JobDetail/JobDetail.js:346
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:303
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:188
 #: screens/Template/shared/JobTemplateForm.js:391
@@ -4636,6 +4669,12 @@ msgstr "Labels"
 #: components/Schedule/shared/FrequencyDetailSubform.js:400
 msgid "Last"
 msgstr "Laatste"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:209
+#: screens/InstanceGroup/Instances/InstanceListItem.js:139
+#: screens/InstanceGroup/Instances/InstanceListItem.js:201
+msgid "Last Health Check"
+msgstr ""
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:185
 #: screens/Project/ProjectDetail/ProjectDetail.js:142
@@ -4650,7 +4689,7 @@ msgstr "Laatste login"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:282
 #: components/TemplateList/TemplateListItem.js:308
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:101
-#: screens/Application/ApplicationsList/ApplicationListItem.js:43
+#: screens/Application/ApplicationsList/ApplicationListItem.js:42
 #: screens/Application/ApplicationsList/ApplicationsList.js:159
 #: screens/Credential/CredentialDetail/CredentialDetail.js:250
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:91
@@ -4661,7 +4700,7 @@ msgstr "Laatste login"
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:108
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:44
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:85
-#: screens/Job/JobDetail/JobDetail.js:420
+#: screens/Job/JobDetail/JobDetail.js:414
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:344
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:110
 #: screens/Project/ProjectDetail/ProjectDetail.js:236
@@ -4792,7 +4831,7 @@ msgstr "Minder dan of gelijk aan vergelijking."
 #: components/PromptDetail/PromptJobTemplateDetail.js:155
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:88
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:321
-#: screens/Job/JobDetail/JobDetail.js:271
+#: screens/Job/JobDetail/JobDetail.js:265
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:230
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:147
 #: screens/Template/shared/JobTemplateForm.js:440
@@ -4839,7 +4878,7 @@ msgid "Logout"
 msgstr "Afmelden"
 
 #: components/Lookup/HostFilterLookup.js:338
-#: components/Lookup/Lookup.js:173
+#: components/Lookup/Lookup.js:174
 msgid "Lookup modal"
 msgstr "Opzoekmodus"
 
@@ -4865,7 +4904,7 @@ msgstr "MEEST RECENTE SYNCHRONISATIE"
 #: components/AdHocCommands/AdHocCredentialStep.js:97
 #: components/AdHocCommands/AdHocCredentialStep.js:98
 #: components/AdHocCommands/AdHocCredentialStep.js:112
-#: screens/Job/JobDetail/JobDetail.js:322
+#: screens/Job/JobDetail/JobDetail.js:316
 msgid "Machine Credential"
 msgstr "Toegangsgegevens machine"
 
@@ -4883,7 +4922,7 @@ msgstr "Beheerde knooppunten"
 #: components/Schedule/ScheduleList/ScheduleListItem.js:39
 #: components/Workflow/WorkflowLegend.js:108
 #: components/Workflow/WorkflowNodeHelp.js:79
-#: screens/Job/JobDetail/JobDetail.js:80
+#: screens/Job/JobDetail/JobDetail.js:74
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:105
 msgid "Management Job"
 msgstr "Beheertaak"
@@ -4914,7 +4953,8 @@ msgstr "Beheertaken"
 #: components/PromptDetail/PromptProjectDetail.js:95
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:88
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:157
-#: screens/InstanceGroup/Instances/InstanceListItem.js:120
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:204
+#: screens/InstanceGroup/Instances/InstanceListItem.js:198
 #: screens/Project/ProjectDetail/ProjectDetail.js:173
 #: screens/Project/ProjectList/ProjectList.js:183
 #: screens/Project/ProjectList/ProjectListItem.js:206
@@ -4949,7 +4989,7 @@ msgid "May"
 msgstr "Mei"
 
 #: screens/Organization/OrganizationList/OrganizationList.js:144
-#: screens/Organization/OrganizationList/OrganizationListItem.js:62
+#: screens/Organization/OrganizationList/OrganizationListItem.js:63
 msgid "Members"
 msgstr "Leden"
 
@@ -4957,11 +4997,11 @@ msgstr "Leden"
 msgid "Metadata"
 msgstr "Metadata"
 
-#: screens/Metrics/Metrics.js:200
+#: screens/Metrics/Metrics.js:207
 msgid "Metric"
 msgstr "Metrisch"
 
-#: screens/Metrics/Metrics.js:172
+#: screens/Metrics/Metrics.js:179
 msgid "Metrics"
 msgstr "Meetwaarden"
 
@@ -5079,11 +5119,11 @@ msgstr "Gewijzigd door (gebruikersnaam)"
 msgid "Module"
 msgstr "Module"
 
-#: screens/Job/JobDetail/JobDetail.js:409
+#: screens/Job/JobDetail/JobDetail.js:403
 msgid "Module Arguments"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.js:404
+#: screens/Job/JobDetail/JobDetail.js:398
 msgid "Module Name"
 msgstr ""
 
@@ -5104,7 +5144,7 @@ msgstr "Maand"
 msgid "More information"
 msgstr "Meer informatie"
 
-#: screens/Setting/shared/SharedFields.js:72
+#: screens/Setting/shared/SharedFields.js:73
 msgid "More information for"
 msgstr "Meer informatie voor"
 
@@ -5151,8 +5191,8 @@ msgstr "Meerkeuze-opties"
 #: components/Lookup/ApplicationLookup.js:110
 #: components/Lookup/CredentialLookup.js:188
 #: components/Lookup/CredentialLookup.js:203
-#: components/Lookup/ExecutionEnvironmentLookup.js:175
-#: components/Lookup/ExecutionEnvironmentLookup.js:182
+#: components/Lookup/ExecutionEnvironmentLookup.js:173
+#: components/Lookup/ExecutionEnvironmentLookup.js:180
 #: components/Lookup/HostFilterLookup.js:83
 #: components/Lookup/HostFilterLookup.js:373
 #: components/Lookup/HostListItem.js:8
@@ -5200,7 +5240,7 @@ msgstr "Meerkeuze-opties"
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:135
 #: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:28
 #: screens/Application/Applications.js:78
-#: screens/Application/ApplicationsList/ApplicationListItem.js:31
+#: screens/Application/ApplicationsList/ApplicationListItem.js:30
 #: screens/Application/ApplicationsList/ApplicationsList.js:118
 #: screens/Application/ApplicationsList/ApplicationsList.js:155
 #: screens/Application/shared/ApplicationForm.js:52
@@ -5214,12 +5254,12 @@ msgstr "Meerkeuze-opties"
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:68
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:123
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:176
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:31
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:30
 #: screens/CredentialType/shared/CredentialTypeForm.js:21
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:47
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:122
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:151
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:57
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:58
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:90
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:116
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:9
@@ -5235,10 +5275,10 @@ msgstr "Meerkeuze-opties"
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:50
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:280
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:61
-#: screens/InstanceGroup/Instances/InstanceList.js:165
-#: screens/InstanceGroup/Instances/InstanceList.js:172
-#: screens/InstanceGroup/Instances/InstanceList.js:214
-#: screens/InstanceGroup/Instances/InstanceListItem.js:115
+#: screens/InstanceGroup/Instances/InstanceList.js:177
+#: screens/InstanceGroup/Instances/InstanceList.js:184
+#: screens/InstanceGroup/Instances/InstanceList.js:250
+#: screens/InstanceGroup/Instances/InstanceListItem.js:130
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:46
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:21
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:67
@@ -5259,7 +5299,7 @@ msgstr "Meerkeuze-opties"
 #: screens/Inventory/InventoryList/InventoryList.js:163
 #: screens/Inventory/InventoryList/InventoryList.js:194
 #: screens/Inventory/InventoryList/InventoryList.js:203
-#: screens/Inventory/InventoryList/InventoryListItem.js:85
+#: screens/Inventory/InventoryList/InventoryListItem.js:84
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:179
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:194
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:231
@@ -5281,7 +5321,7 @@ msgstr "Meerkeuze-opties"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:73
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:137
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:193
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:110
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:109
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:41
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:91
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:85
@@ -5289,7 +5329,7 @@ msgstr "Meerkeuze-opties"
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.js:13
 #: screens/Organization/OrganizationList/OrganizationList.js:122
 #: screens/Organization/OrganizationList/OrganizationList.js:143
-#: screens/Organization/OrganizationList/OrganizationListItem.js:44
+#: screens/Organization/OrganizationList/OrganizationListItem.js:45
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:68
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:85
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:14
@@ -5309,8 +5349,8 @@ msgstr "Meerkeuze-opties"
 #: screens/Team/TeamList/TeamListItem.js:33
 #: screens/Team/shared/TeamForm.js:29
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:180
-#: screens/Template/Survey/SurveyList.js:112
-#: screens/Template/Survey/SurveyList.js:112
+#: screens/Template/Survey/SurveyList.js:102
+#: screens/Template/Survey/SurveyList.js:102
 #: screens/Template/Survey/SurveyListItem.js:39
 #: screens/Template/Survey/SurveyReorderModal.js:206
 #: screens/Template/Survey/SurveyReorderModal.js:206
@@ -5419,7 +5459,7 @@ msgstr "Geen standaardfout beschikbaar"
 msgid "No Standard Out Available"
 msgstr "Geen standaardoutput beschikbaar"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:69
+#: screens/Inventory/InventoryList/InventoryListItem.js:68
 msgid "No inventory sync failures."
 msgstr "Geen fouten bij inventarissynchronisatie."
 
@@ -5462,7 +5502,7 @@ msgstr "Geen resultaten gevonden"
 msgid "No subscriptions found"
 msgstr "Geen abonnementen gevonden"
 
-#: screens/Template/Survey/SurveyList.js:156
+#: screens/Template/Survey/SurveyList.js:147
 msgid "No survey questions found."
 msgstr "Geen vragenlijstvragen gevonden."
 
@@ -5478,8 +5518,8 @@ msgid "Node Alias"
 msgstr ""
 
 #: components/AssociateModal/AssociateModal.js:23
-#: screens/InstanceGroup/Instances/InstanceList.js:215
-#: screens/InstanceGroup/Instances/InstanceListItem.js:118
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:212
+#: screens/InstanceGroup/Instances/InstanceListItem.js:195
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:72
 msgid "Node Type"
 msgstr "Type knooppunt"
@@ -5515,7 +5555,7 @@ msgstr "Niet gevonden"
 msgid "Not configured"
 msgstr "Niet geconfigureerd"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:72
+#: screens/Inventory/InventoryList/InventoryListItem.js:71
 msgid "Not configured for inventory sync."
 msgstr "Niet geconfigureerd voor inventarissynchronisatie."
 
@@ -5642,7 +5682,7 @@ msgstr "Oktober"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:58
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:98
-#: screens/Setting/shared/SharedFields.js:149
+#: screens/Setting/shared/SharedFields.js:150
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "Off"
@@ -5659,7 +5699,7 @@ msgstr "Uit"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:57
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:98
-#: screens/Setting/shared/SharedFields.js:148
+#: screens/Setting/shared/SharedFields.js:149
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "On"
@@ -5740,17 +5780,17 @@ msgstr ""
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:65
 #: components/TemplateList/TemplateListItem.js:264
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:68
-#: screens/Application/ApplicationsList/ApplicationListItem.js:36
+#: screens/Application/ApplicationsList/ApplicationListItem.js:35
 #: screens/Application/ApplicationsList/ApplicationsList.js:157
 #: screens/Credential/CredentialDetail/CredentialDetail.js:215
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:67
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:141
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:153
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:63
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:65
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:74
 #: screens/Inventory/InventoryList/InventoryList.js:176
 #: screens/Inventory/InventoryList/InventoryList.js:206
-#: screens/Inventory/InventoryList/InventoryListItem.js:102
+#: screens/Inventory/InventoryList/InventoryListItem.js:101
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:204
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:107
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:81
@@ -5805,7 +5845,7 @@ msgstr "Overige meldingen"
 msgid "Out of compliance"
 msgstr "Niet compliant"
 
-#: screens/Job/Job.js:116
+#: screens/Job/Job.js:117
 #: screens/Job/Jobs.js:27
 msgid "Output"
 msgstr "Output"
@@ -5911,7 +5951,7 @@ msgid "Past week"
 msgstr "Afgelopen week"
 
 #: components/JobList/JobList.js:221
-#: components/StatusLabel/StatusLabel.js:59
+#: components/StatusLabel/StatusLabel.js:62
 #: components/Workflow/WorkflowNodeHelp.js:93
 msgid "Pending"
 msgstr "In afwachting"
@@ -5920,7 +5960,7 @@ msgstr "In afwachting"
 msgid "Pending Workflow Approvals"
 msgstr "In afwachting van workflowgoedkeuringen"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:111
+#: screens/Inventory/InventoryList/InventoryListItem.js:110
 msgid "Pending delete"
 msgstr "In afwachting om verwijderd te worden"
 
@@ -5950,14 +5990,14 @@ msgid "Play Started"
 msgstr "Afspelen gestart"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:153
-#: screens/Job/JobDetail/JobDetail.js:268
+#: screens/Job/JobDetail/JobDetail.js:262
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:228
 #: screens/Template/shared/JobTemplateForm.js:354
 msgid "Playbook"
 msgstr "Draaiboek"
 
 #: components/JobList/JobListItem.js:38
-#: screens/Job/JobDetail/JobDetail.js:78
+#: screens/Job/JobDetail/JobDetail.js:72
 msgid "Playbook Check"
 msgstr "Draaiboek controleren"
 
@@ -5974,7 +6014,7 @@ msgstr "Draaiboekmap"
 #: components/JobList/JobList.js:206
 #: components/JobList/JobListItem.js:38
 #: components/Schedule/ScheduleList/ScheduleListItem.js:37
-#: screens/Job/JobDetail/JobDetail.js:78
+#: screens/Job/JobDetail/JobDetail.js:72
 msgid "Playbook Run"
 msgstr "Draaiboek uitvoering"
 
@@ -6005,7 +6045,7 @@ msgstr ""
 msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
 msgstr ""
 
-#: screens/Template/Survey/SurveyList.js:158
+#: screens/Template/Survey/SurveyList.js:146
 msgid "Please add survey questions."
 msgstr "Voeg vragenlijstvragen toe."
 
@@ -6053,8 +6093,8 @@ msgstr "Selecteer een organisatie voordat u het hostfilter bewerkt."
 msgid "Pod spec override"
 msgstr "Overschrijven Podspec"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:216
-#: screens/InstanceGroup/Instances/InstanceListItem.js:119
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:203
+#: screens/InstanceGroup/Instances/InstanceListItem.js:197
 msgid "Policy Type"
 msgstr ""
 
@@ -6141,7 +6181,7 @@ msgstr "Wachtwoord verhoging van rechten"
 #: components/PromptDetail/PromptJobTemplateDetail.js:146
 #: components/TemplateList/TemplateListItem.js:292
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:218
-#: screens/Job/JobDetail/JobDetail.js:250
+#: screens/Job/JobDetail/JobDetail.js:244
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:210
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:218
 msgid "Project"
@@ -6290,7 +6330,8 @@ msgstr "RADIUS"
 msgid "RADIUS settings"
 msgstr "RADIUS-instellingen"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:142
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:233
+#: screens/InstanceGroup/Instances/InstanceListItem.js:168
 msgid "RAM {0}"
 msgstr "RAM {0}"
 
@@ -6424,8 +6465,8 @@ msgstr ""
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
-#: screens/Job/JobDetail/JobDetail.js:461
-#: screens/Job/JobDetail/JobDetail.js:469
+#: screens/Job/JobDetail/JobDetail.js:455
+#: screens/Job/JobDetail/JobDetail.js:463
 #: screens/Job/JobOutput/shared/OutputToolbar.js:165
 msgid "Relaunch"
 msgstr "Opnieuw starten"
@@ -6529,7 +6570,7 @@ msgstr "Vereist"
 msgid "Resource Name"
 msgstr "Bronnaam"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:219
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:222
 msgid "Resource deleted"
 msgstr "Bron verwijderd"
 
@@ -6605,7 +6646,7 @@ msgstr "Instellingen terugzetten"
 msgid "Revert to factory default."
 msgstr "Terugzetten op fabrieksinstellingen."
 
-#: screens/Job/JobDetail/JobDetail.js:263
+#: screens/Job/JobDetail/JobDetail.js:257
 #: screens/Project/ProjectList/ProjectList.js:210
 #: screens/Project/ProjectList/ProjectListItem.js:208
 msgid "Revision"
@@ -6655,9 +6696,13 @@ msgstr "Uitvoeren"
 #: components/AdHocCommands/AdHocCommands.js:132
 #: components/AdHocCommands/AdHocCommands.js:138
 #: components/AdHocCommands/AdHocCommands.js:142
-#: screens/Job/JobDetail/JobDetail.js:79
+#: screens/Job/JobDetail/JobDetail.js:73
 msgid "Run Command"
 msgstr "Opdracht uitvoeren"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:266
+msgid "Run a health check on the instance"
+msgstr ""
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
@@ -6684,7 +6729,7 @@ msgid "Run type"
 msgstr "Uitvoertype"
 
 #: components/JobList/JobList.js:223
-#: components/StatusLabel/StatusLabel.js:58
+#: components/StatusLabel/StatusLabel.js:61
 #: components/TemplateList/TemplateListItem.js:113
 #: components/Workflow/WorkflowNodeHelp.js:99
 msgid "Running"
@@ -6694,9 +6739,10 @@ msgstr "In uitvoering"
 msgid "Running Handlers"
 msgstr "Handlers die worden uitgevoerd"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:206
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:282
-#: screens/InstanceGroup/Instances/InstanceList.js:217
-#: screens/InstanceGroup/Instances/InstanceListItem.js:122
+#: screens/InstanceGroup/Instances/InstanceList.js:252
+#: screens/InstanceGroup/Instances/InstanceListItem.js:148
 msgid "Running Jobs"
 msgstr "Taken in uitvoering"
 
@@ -6854,7 +6900,7 @@ msgid "Scroll previous"
 msgstr "Vorige scrollen"
 
 #: components/Lookup/HostFilterLookup.js:263
-#: components/Lookup/Lookup.js:135
+#: components/Lookup/Lookup.js:136
 msgid "Search"
 msgstr "Zoeken"
 
@@ -6888,7 +6934,7 @@ msgstr "Zie fouten links"
 
 #: components/JobList/JobListItem.js:77
 #: components/Lookup/HostFilterLookup.js:351
-#: components/Lookup/Lookup.js:185
+#: components/Lookup/Lookup.js:186
 #: components/Pagination/Pagination.js:33
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:97
 msgid "Select"
@@ -6912,7 +6958,7 @@ msgstr "Hosts selecteren"
 msgid "Select Input"
 msgstr "Input selecteren"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:243
+#: screens/InstanceGroup/Instances/InstanceList.js:280
 msgid "Select Instances"
 msgstr "Instanties selecteren"
 
@@ -6974,7 +7020,7 @@ msgstr "Type toegangsgegevens selecteren"
 msgid "Select a job to cancel"
 msgstr "Taak selecteren om deze te annuleren"
 
-#: screens/Metrics/Metrics.js:204
+#: screens/Metrics/Metrics.js:211
 msgid "Select a metric"
 msgstr "Metriek selecteren"
 
@@ -6991,7 +7037,7 @@ msgstr "Draaiboek selecteren"
 msgid "Select a project before editing the execution environment."
 msgstr "Selecteer een project voordat u de uitvoeringsomgeving bewerkt."
 
-#: screens/Template/Survey/SurveyToolbar.js:80
+#: screens/Template/Survey/SurveyToolbar.js:81
 msgid "Select a question to delete"
 msgstr ""
 
@@ -7055,7 +7101,7 @@ msgid "Select a webhook service."
 msgstr "Selecteer een webhookservice."
 
 #: components/DataListToolbar/DataListToolbar.js:113
-#: screens/Template/Survey/SurveyToolbar.js:48
+#: screens/Template/Survey/SurveyToolbar.js:49
 msgid "Select all"
 msgstr "Alles selecteren"
 
@@ -7063,13 +7109,17 @@ msgstr "Alles selecteren"
 msgid "Select an activity type"
 msgstr "Type activiteit selecteren"
 
-#: screens/Metrics/Metrics.js:193
+#: screens/Metrics/Metrics.js:200
 msgid "Select an instance"
 msgstr ""
 
-#: screens/Metrics/Metrics.js:235
+#: screens/Metrics/Metrics.js:242
 msgid "Select an instance and a metric to show chart"
 msgstr "Instantie en metriek selecteren om grafiek te tonen"
+
+#: screens/InstanceGroup/Instances/InstanceList.js:224
+msgid "Select an instance to run a health check."
+msgstr ""
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
@@ -7204,7 +7254,7 @@ msgstr "Selecteer het project dat het draaiboek bevat waarvan u wilt dat deze ta
 msgid "Select your Ansible Automation Platform subscription to use."
 msgstr "Selecteer het Ansible Automation Platform-abonnement dat u wilt gebruiken"
 
-#: components/Lookup/Lookup.js:172
+#: components/Lookup/Lookup.js:173
 msgid "Select {0}"
 msgstr "Selecteer {0}"
 
@@ -7220,19 +7270,19 @@ msgstr "Selecteer {0}"
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:90
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:108
 #: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:26
-#: screens/Application/ApplicationsList/ApplicationListItem.js:29
+#: screens/Application/ApplicationsList/ApplicationListItem.js:28
 #: screens/Credential/CredentialList/CredentialListItem.js:53
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:29
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:55
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:28
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:54
 #: screens/Host/HostGroups/HostGroupItem.js:26
 #: screens/Host/HostList/HostListItem.js:48
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:59
-#: screens/InstanceGroup/Instances/InstanceListItem.js:113
+#: screens/InstanceGroup/Instances/InstanceListItem.js:128
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:38
-#: screens/Inventory/InventoryList/InventoryListItem.js:83
+#: screens/Inventory/InventoryList/InventoryListItem.js:82
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.js:33
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:108
-#: screens/Organization/OrganizationList/OrganizationListItem.js:42
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:107
+#: screens/Organization/OrganizationList/OrganizationListItem.js:43
 #: screens/Organization/shared/OrganizationForm.js:113
 #: screens/Project/ProjectList/ProjectListItem.js:172
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:244
@@ -7289,8 +7339,12 @@ msgid "Set source path to"
 msgstr "Stel bronpad in op"
 
 #: components/InstanceToggle/InstanceToggle.js:48
-msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
-msgstr "Zet de instantie online of offline. Indien offline, zullen er geen taken aan deze instantie worden toegewezen."
+msgid "Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance."
+msgstr ""
+
+#: components/InstanceToggle/InstanceToggle.js:48
+#~ msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
+#~ msgstr "Zet de instantie online of offline. Indien offline, zullen er geen taken aan deze instantie worden toegewezen."
 
 #: screens/Application/shared/ApplicationForm.js:128
 msgid "Set to Public or Confidential depending on how secure the client device is."
@@ -7421,7 +7475,7 @@ msgstr "Eenvoudige sleutel selecteren"
 #: components/PromptDetail/PromptDetail.js:242
 #: components/PromptDetail/PromptJobTemplateDetail.js:257
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:362
-#: screens/Job/JobDetail/JobDetail.js:387
+#: screens/Job/JobDetail/JobDetail.js:381
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:351
 #: screens/Template/shared/JobTemplateForm.js:535
 msgid "Skip Tags"
@@ -7457,7 +7511,7 @@ msgstr "Slack"
 #: screens/Host/HostList/SmartInventoryButton.js:39
 #: screens/Host/HostList/SmartInventoryButton.js:43
 #: screens/Inventory/InventoryList/InventoryList.js:172
-#: screens/Inventory/InventoryList/InventoryListItem.js:100
+#: screens/Inventory/InventoryList/InventoryListItem.js:99
 msgid "Smart Inventory"
 msgstr "Smart-inventaris"
 
@@ -7504,7 +7558,7 @@ msgstr "Sorteren"
 #: components/PromptDetail/PromptInventorySourceDetail.js:102
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:201
 #: screens/Inventory/shared/InventorySourceForm.js:131
-#: screens/Job/JobDetail/JobDetail.js:223
+#: screens/Job/JobDetail/JobDetail.js:217
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:93
 msgid "Source"
 msgstr "Bron"
@@ -7515,7 +7569,7 @@ msgstr "Bron"
 #: components/PromptDetail/PromptProjectDetail.js:98
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:87
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:319
-#: screens/Job/JobDetail/JobDetail.js:257
+#: screens/Job/JobDetail/JobDetail.js:251
 #: screens/Project/ProjectDetail/ProjectDetail.js:201
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:227
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:133
@@ -7566,7 +7620,7 @@ msgstr "URL broncontrole"
 #: components/JobList/JobList.js:204
 #: components/JobList/JobListItem.js:36
 #: components/Schedule/ScheduleList/ScheduleListItem.js:38
-#: screens/Job/JobDetail/JobDetail.js:76
+#: screens/Job/JobDetail/JobDetail.js:70
 msgid "Source Control Update"
 msgstr "Update broncontrole"
 
@@ -7579,7 +7633,7 @@ msgid "Source Variables"
 msgstr "Bronvariabelen"
 
 #: components/JobList/JobListItem.js:190
-#: screens/Job/JobDetail/JobDetail.js:176
+#: screens/Job/JobDetail/JobDetail.js:170
 msgid "Source Workflow Job"
 msgstr "Taak bronworkflow"
 
@@ -7687,7 +7741,7 @@ msgstr "Start synchronisatie bron"
 msgid "Start time"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.js:139
+#: screens/Job/JobDetail/JobDetail.js:133
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:76
 msgid "Started"
@@ -7696,13 +7750,16 @@ msgstr "Gestart"
 #: components/JobList/JobList.js:217
 #: components/JobList/JobList.js:238
 #: components/JobList/JobListItem.js:88
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:197
+#: screens/InstanceGroup/Instances/InstanceList.js:251
+#: screens/InstanceGroup/Instances/InstanceListItem.js:135
 #: screens/Inventory/InventoryList/InventoryList.js:204
-#: screens/Inventory/InventoryList/InventoryListItem.js:94
+#: screens/Inventory/InventoryList/InventoryListItem.js:93
 #: screens/Inventory/InventorySources/InventorySourceList.js:213
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:86
-#: screens/Job/JobDetail/JobDetail.js:127
+#: screens/Job/JobDetail/JobDetail.js:121
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:194
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:115
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:114
 #: screens/Project/ProjectList/ProjectList.js:208
 #: screens/Project/ProjectList/ProjectListItem.js:192
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:45
@@ -7781,7 +7838,7 @@ msgstr "Subversie"
 
 #: components/NotificationList/NotificationListItem.js:65
 #: components/NotificationList/NotificationListItem.js:66
-#: components/StatusLabel/StatusLabel.js:54
+#: components/StatusLabel/StatusLabel.js:56
 msgid "Success"
 msgstr "Geslaagd"
 
@@ -7796,7 +7853,7 @@ msgid "Success message body"
 msgstr "Body succesbericht"
 
 #: components/JobList/JobList.js:224
-#: components/StatusLabel/StatusLabel.js:55
+#: components/StatusLabel/StatusLabel.js:58
 #: components/Workflow/WorkflowNodeHelp.js:102
 #: screens/Dashboard/shared/ChartTooltip.js:59
 msgid "Successful"
@@ -7827,11 +7884,11 @@ msgstr "Zondag"
 msgid "Survey"
 msgstr "Vragenlijst"
 
-#: screens/Template/Survey/SurveyToolbar.js:102
+#: screens/Template/Survey/SurveyToolbar.js:104
 msgid "Survey Disabled"
 msgstr ""
 
-#: screens/Template/Survey/SurveyToolbar.js:101
+#: screens/Template/Survey/SurveyToolbar.js:103
 msgid "Survey Enabled"
 msgstr ""
 
@@ -7847,7 +7904,7 @@ msgstr ""
 msgid "Survey Question Order"
 msgstr ""
 
-#: screens/Template/Survey/SurveyToolbar.js:99
+#: screens/Template/Survey/SurveyToolbar.js:101
 msgid "Survey Toggle"
 msgstr "Vragenlijst schakelen"
 
@@ -8005,7 +8062,7 @@ msgstr "Taak niet gevonden."
 #: screens/ActivityStream/ActivityStream.js:178
 #: screens/Organization/Organization.js:124
 #: screens/Organization/OrganizationList/OrganizationList.js:145
-#: screens/Organization/OrganizationList/OrganizationListItem.js:65
+#: screens/Organization/OrganizationList/OrganizationListItem.js:66
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:64
 #: screens/Organization/Organizations.js:32
 #: screens/Team/TeamList/TeamList.js:112
@@ -8047,11 +8104,11 @@ msgstr "Test"
 msgid "Test External Credential"
 msgstr "Test externe inloggegevens"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:126
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:125
 msgid "Test Notification"
 msgstr "Testbericht"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:123
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:122
 msgid "Test notification"
 msgstr "Testbericht"
 
@@ -8072,7 +8129,7 @@ msgstr "Tekstgebied"
 msgid "Textarea"
 msgstr "Tekstgebied"
 
-#: components/Lookup/Lookup.js:62
+#: components/Lookup/Lookup.js:61
 msgid "That value was not found. Please enter or select a valid value."
 msgstr "De waarde is niet gevonden. Voer een geldige waarde in of selecteer er een."
 
@@ -8081,8 +8138,8 @@ msgid "The"
 msgstr "De"
 
 #: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.js:200
-msgid "The Execution Environment to be used when one has not been configured for a job template."
-msgstr "De uitvoeringsomgeving die moet worden gebruikt wanneer er geen is geconfigureerd voor een taaksjabloon."
+#~ msgid "The Execution Environment to be used when one has not been configured for a job template."
+#~ msgstr "De uitvoeringsomgeving die moet worden gebruikt wanneer er geen is geconfigureerd voor een taaksjabloon."
 
 #: screens/Application/shared/ApplicationForm.js:86
 #~ msgid "The Grant type the user must use for acquire tokens for this application"
@@ -8160,7 +8217,7 @@ msgid "The number of parallel or simultaneous processes to use while executing t
 msgstr "Het aantal parallelle of gelijktijdige processen dat gebruikt wordt bij het uitvoeren van het draaiboek. Als u geen waarde invoert, wordt de standaardwaarde van het Ansible-configuratiebestand gebruikt. U vindt meer informatie"
 
 #: components/ContentError/ContentError.js:40
-#: screens/Job/Job.js:136
+#: screens/Job/Job.js:137
 msgid "The page you requested could not be found."
 msgstr "De door u opgevraagde pagina kan niet worden gevonden."
 
@@ -8262,7 +8319,7 @@ msgid "This Project needs to be updated"
 msgstr "Dit project moet worden bijgewerkt"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:286
-#: screens/Template/Survey/SurveyList.js:92
+#: screens/Template/Survey/SurveyList.js:82
 msgid "This action will delete the following:"
 msgstr "Met deze actie wordt het volgende verwijderd:"
 
@@ -8612,9 +8669,10 @@ msgstr "Gereedschap"
 msgid "Top Pagination"
 msgstr "Bovenkant paginering"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:207
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:283
-#: screens/InstanceGroup/Instances/InstanceList.js:218
-#: screens/InstanceGroup/Instances/InstanceListItem.js:123
+#: screens/InstanceGroup/Instances/InstanceList.js:253
+#: screens/InstanceGroup/Instances/InstanceListItem.js:149
 msgid "Total Jobs"
 msgstr "Totale taken"
 
@@ -8641,9 +8699,9 @@ msgstr "Submodules laatste binding op vertakking tracken"
 msgid "Trial"
 msgstr "Proefperiode"
 
-#: components/JobList/JobListItem.js:275
+#: components/JobList/JobListItem.js:277
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:63
-#: screens/Job/JobDetail/JobDetail.js:315
+#: screens/Job/JobDetail/JobDetail.js:309
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:162
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:191
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:221
@@ -8693,12 +8751,12 @@ msgstr "Twilio"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:66
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:72
 #: screens/Inventory/InventoryList/InventoryList.js:205
-#: screens/Inventory/InventoryList/InventoryListItem.js:99
+#: screens/Inventory/InventoryList/InventoryListItem.js:98
 #: screens/Inventory/InventorySources/InventorySourceList.js:214
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:99
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:105
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:195
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:118
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:117
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:68
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:157
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:75
@@ -8707,8 +8765,8 @@ msgstr "Twilio"
 #: screens/Project/ProjectList/ProjectListItem.js:205
 #: screens/Team/TeamRoles/TeamRoleListItem.js:17
 #: screens/Team/TeamRoles/TeamRolesList.js:181
-#: screens/Template/Survey/SurveyList.js:113
-#: screens/Template/Survey/SurveyList.js:113
+#: screens/Template/Survey/SurveyList.js:103
+#: screens/Template/Survey/SurveyList.js:103
 #: screens/Template/Survey/SurveyListItem.js:60
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.js:93
 #: screens/User/UserDetail/UserDetail.js:75
@@ -8737,13 +8795,14 @@ msgstr ""
 msgid "Unable to change inventory on a host"
 msgstr ""
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:249
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:84
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:46
-#: screens/InstanceGroup/Instances/InstanceListItem.js:78
+#: screens/InstanceGroup/Instances/InstanceListItem.js:86
 msgid "Unavailable"
 msgstr "Niet beschikbaar"
 
-#: components/StatusLabel/StatusLabel.js:64
+#: components/StatusLabel/StatusLabel.js:67
 msgid "Undefined"
 msgstr ""
 
@@ -8847,14 +8906,17 @@ msgid ""
 "curly braces to access information about the job:"
 msgstr "Gebruik aangepaste berichten om de inhoud te wijzigen van berichten die worden verzonden wanneer een taak start, slaagt of mislukt. Gebruik accolades om informatie over de taak te openen:"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:220
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:238
+#: screens/InstanceGroup/Instances/InstanceList.js:255
 msgid "Used Capacity"
 msgstr ""
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:242
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:246
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:83
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:42
-#: screens/InstanceGroup/Instances/InstanceListItem.js:74
+#: screens/InstanceGroup/Instances/InstanceListItem.js:82
 msgid "Used capacity"
 msgstr "Gebruikte capaciteit"
 
@@ -8967,7 +9029,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/InventoryForm.js:68
 #: screens/Inventory/shared/InventoryGroupForm.js:46
 #: screens/Inventory/shared/SmartInventoryForm.js:93
-#: screens/Job/JobDetail/JobDetail.js:431
+#: screens/Job/JobDetail/JobDetail.js:424
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:366
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:204
 #: screens/Template/shared/JobTemplateForm.js:411
@@ -8999,7 +9061,7 @@ msgstr "Uitgebreid"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:232
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:87
-#: screens/Job/JobDetail/JobDetail.js:274
+#: screens/Job/JobDetail/JobDetail.js:268
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:231
 #: screens/Template/shared/JobTemplateForm.js:461
 msgid "Verbosity"
@@ -9052,7 +9114,7 @@ msgstr "Hostdetails van inventaris weergeven"
 msgid "View JSON examples at <0>www.json.org</0>"
 msgstr "JSON-voorbeelden op <0>www.json.org</0> weergeven"
 
-#: screens/Job/Job.js:180
+#: screens/Job/Job.js:182
 msgid "View Job Details"
 msgstr "Taakdetails weergeven"
 
@@ -9165,7 +9227,7 @@ msgstr "Geef alle inventarishosts weer."
 msgid "View all Jobs"
 msgstr "Alle taken weergeven"
 
-#: screens/Job/Job.js:137
+#: screens/Job/Job.js:138
 msgid "View all Jobs."
 msgstr "Geef alle taken weer."
 
@@ -9269,7 +9331,7 @@ msgid "WARNING:"
 msgstr "WAARSCHUWING:"
 
 #: components/JobList/JobList.js:222
-#: components/StatusLabel/StatusLabel.js:60
+#: components/StatusLabel/StatusLabel.js:63
 #: components/Workflow/WorkflowNodeHelp.js:96
 msgid "Waiting"
 msgstr "Wachten"
@@ -9424,7 +9486,7 @@ msgstr "Workflowgoedkeuringen"
 #: components/JobList/JobList.js:209
 #: components/JobList/JobListItem.js:41
 #: components/Schedule/ScheduleList/ScheduleListItem.js:40
-#: screens/Job/JobDetail/JobDetail.js:81
+#: screens/Job/JobDetail/JobDetail.js:75
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:124
 msgid "Workflow Job"
 msgstr "Workflowtaak"
@@ -9432,7 +9494,7 @@ msgstr "Workflowtaak"
 #: components/JobList/JobListItem.js:178
 #: components/Workflow/WorkflowNodeHelp.js:63
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:15
-#: screens/Job/JobDetail/JobDetail.js:163
+#: screens/Job/JobDetail/JobDetail.js:157
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:111
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:137
 #: util/getRelatedResourceDeleteDetails.js:104
@@ -9491,7 +9553,7 @@ msgstr "Workflowtaaksjablonen"
 msgid "Workflow link modal"
 msgstr "Modus Workflowlink"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:220
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:223
 msgid "Workflow node view modal"
 msgstr "Modis Weergave workflowknooppunt"
 
@@ -9607,11 +9669,11 @@ msgid "brand logo"
 msgstr "merklogo"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:279
-#: screens/Template/Survey/SurveyList.js:82
+#: screens/Template/Survey/SurveyList.js:72
 msgid "cancel delete"
 msgstr "verwijderen annuleren"
 
-#: screens/Setting/shared/SharedFields.js:311
+#: screens/Setting/shared/SharedFields.js:341
 msgid "cancel edit login redirect"
 msgstr ""
 
@@ -9620,7 +9682,7 @@ msgid "command"
 msgstr "opdracht"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:267
-#: screens/Template/Survey/SurveyList.js:73
+#: screens/Template/Survey/SurveyList.js:63
 msgid "confirm delete"
 msgstr "verwijderen bevestigen"
 
@@ -9629,7 +9691,7 @@ msgstr "verwijderen bevestigen"
 msgid "confirm disassociate"
 msgstr "loskoppelen bevestigen"
 
-#: screens/Setting/shared/SharedFields.js:300
+#: screens/Setting/shared/SharedFields.js:330
 msgid "confirm edit login redirect"
 msgstr ""
 
@@ -9796,13 +9858,17 @@ msgstr "bijgewerkt"
 msgid "workflow job template webhook key"
 msgstr "webhooksleutel taaksjabloon voor workflows"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:62
+#: screens/Inventory/InventoryList/InventoryListItem.js:61
 msgid "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
 msgstr ""
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:111
 msgid "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
 msgstr "{0, plural, one {Weet u zeker dat u de groep hieronder wilt verwijderen?} other {Weet u zeker dat u de groepen hieronder wilt verwijderen?}}"
+
+#: screens/InstanceGroup/Instances/InstanceList.js:218
+msgid "{0, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
+msgstr ""
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:84
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
@@ -9896,7 +9962,8 @@ msgstr "{brandName} logo"
 msgid "{dateStr} by <0>{username}</0>"
 msgstr "{dateStr} door <0>{username}</0>"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:129
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:220
+#: screens/InstanceGroup/Instances/InstanceListItem.js:155
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# vork} other {# vorken}}"
 
