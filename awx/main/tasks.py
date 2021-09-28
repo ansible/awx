@@ -438,6 +438,9 @@ def execution_node_health_check(node):
         logger.warn(f'Instance record for {node} missing, could not check capacity.')
         return
 
+    if instance.node_type != 'execution':
+        raise RuntimeError(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
+
     data = worker_info(node, work_type='ansible-runner' if instance.node_type == 'execution' else 'local')
 
     prior_capacity = instance.capacity
