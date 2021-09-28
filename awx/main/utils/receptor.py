@@ -147,13 +147,16 @@ def worker_cleanup(node_name, vargs, timeout=300.0):
     for option in ('exclude_strings', 'remove_images'):
         if vargs.get(option):
             args.append('--{} '.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
-    for option in ('file_pattern', 'image_prune', 'process_isolation_executable'):
+    for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))
-        if vargs.get(option):
+        if vargs.get(option) is not None:
             args.append('--{}={}'.format(option.replace('_', '-'), vargs.get(option)))
 
-    result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": ' '.join(args)}, node=node_name, ttl='20s')
+    remote_command = ' '.join(args)
+    logger.debug(f'Running command over receptor mesh on {node_name}: ansible-runner worker {remote_command}')
+
+    result = receptor_ctl.submit_work(worktype='ansible-runner', payload='', params={"params": remote_command}, node=node_name, ttl='20s')
 
     unit_id = result['unitid']
     run_start = time.time()
