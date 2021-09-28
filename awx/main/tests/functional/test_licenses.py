@@ -48,6 +48,7 @@ def test_python_and_js_licenses():
 
     def read_api_requirements(path):
         ret = {}
+        skip_pbr_license_check = False
         for req_file in ['requirements.txt', 'requirements_git.txt']:
             fname = '%s/%s' % (path, req_file)
 
@@ -65,7 +66,11 @@ def test_python_and_js_licenses():
                         name = name[:-4]
                     if name == 'receptor':
                         name = 'receptorctl'
+                    if name == 'ansible-runner':
+                        skip_pbr_license_check = True
                 ret[name] = {'name': name, 'version': version}
+        if 'pbr' in ret and skip_pbr_license_check:
+            del ret['pbr']
         return ret
 
     def read_ui_requirements(path):
