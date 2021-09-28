@@ -27,6 +27,7 @@ try:
 except ImportError:
     HAS_YAML = False
 
+
 class ConfigFileException(Exception):
     pass
 
@@ -283,6 +284,7 @@ class ControllerModule(AnsibleModule):
             self.warn_callback(warning)
         else:
             super().warn(warning)
+
 
 class ControllerAPIModule(ControllerModule):
     # TODO: Move the collection version check into controller_module.py
