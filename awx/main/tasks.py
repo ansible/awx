@@ -3023,7 +3023,7 @@ class AWXReceptorJob:
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
             # If an error occured without the job itself failing, it could be a broken instance
-            if self.work_type == 'ansible-runner' and res is None or getattr(res, 'rc', None) is None:
+            if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
                 execution_node_health_check(self.task.instance.execution_node)
 
     def _run_internal(self, receptor_ctl):
