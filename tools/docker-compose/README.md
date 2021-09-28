@@ -20,7 +20,7 @@ Once you have a local copy, run the commands in the following sections from the 
 
 ## Overview
 
-Here are the main make targets:
+Here are the main `make` targets:
 
 - `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target
 - `docker-compose` - make target for development, passes awx_devel image and tag
@@ -59,7 +59,7 @@ AWX requires access to a PostgreSQL database, and by default, one will be create
 
 ## Starting the Development Environment
 
-### Build the image
+### Build the Image
 
 The AWX base container image (defined in the Dockerfile templated from [Dockerfile.j2](./../ansible/roles/dockerfile/templates/Dockerfile.j2)) contains basic OS dependencies and symbolic links into the development environment that make running the services easy.
 
@@ -96,6 +96,56 @@ $ make docker-compose
 
 > For running docker-compose detached mode, start the containers using the following command: `$ make docker-compose COMPOSE_UP_OPTS=-d`
 
+
+##### _(alternative method)_ Spin up a development environment with customized mesh node cluster
+
+With the introduction of Receptor, a cluster (of containers) with execution nodes and a hop node can be created by the docker-compose Makefile target.
+By default, it will create 1 hybrid node, 1 hop node, and 2 execution nodes.
+You can switch the type of AWX nodes between hybrid and control with this syntax.
+
+```
+MAIN_NODE_TYPE=control COMPOSE_TAG=devel make docker-compose
+```
+
+Running the above command will create a cluster of 1 control node, 1 hop node, and 2 execution nodes.
+
+The number of nodes can be changed:
+
+```
+CONTROL_PLANE_NODE_COUNT=2 EXECUTION_NODE_COUNT=3 COMPOSE_TAG=devel make docker-compose
+```
+
+This will spin up a topology represented below.
+(names are the receptor node names, which differ from the AWX Instance names and network address in some cases)
+
+```
+                                            ┌──────────────┐
+                                            │              │
+┌──────────────┐                 ┌──────────┤  receptor-1  │
+│              │                 │          │              │
+│    awx_1     │◄──────────┐     │          └──────────────┘
+│              │           │     ▼
+└──────┬───────┘    ┌──────┴───────┐        ┌──────────────┐
+       │            │              │        │              │
+       │            │ receptor-hop │◄───────┤  receptor-2  │
+       ▼            │              │        │              │
+┌──────────────┐    └──────────────┘        └──────────────┘
+│              │                 ▲
+│    awx_2     │                 │          ┌──────────────┐
+│              │                 │          │              │
+└──────────────┘                 └──────────┤  receptor-3  │
+                                            │              │
+                                            └──────────────┘
+```
+
+All execution (`receptor-*`) nodes connect to the hop node.
+Only the `awx_1` node connects to the hop node out of the AWX cluster.
+`awx_1` connects to `awx_2`, fulfilling the requirement that the AWX cluster is fully connected.
+
+For example, if a job is launched with `awx_2` as the `controller_node` and `receptor-3` as the `execution_node`,
+then `awx_2` communicates to `receptor-3` via `awx_1` and then `receptor-hop`.
+
+
 ##### Wait for migrations to complete
 
 The first time you start the environment, database migrations need to run in order to build the PostgreSQL database. It will take few moments, but eventually you will see output in your terminal session that looks like the following:
@@ -116,7 +166,7 @@ awx_1        |   Applying auth.0001_initial... OK
 ...
 ```
 
-##### Clean and Build UI
+##### Clean and build the UI
 
 ```bash
 $ docker exec tools_awx_1 make clean-ui ui-devel
@@ -136,7 +186,7 @@ $ docker exec -ti tools_awx_1 awx-manage createsuperuser
 
 > Remember the username and password, as you will use them to log into the web interface for the first time.
 
-##### Load Demo Data
+##### Load demo data
 
 Optionally, you may also want to load some demo data. This will create a demo project, inventory, and job template.
 
@@ -206,7 +256,7 @@ In order to launch all developer services:
 `launch_awx.sh` also calls `bootstrap_development.sh` so if all you are doing is launching the supervisor to start all services, you don't
 need to call `bootstrap_development.sh` first.
 
-### Start a cluster
+### Start a Cluster
 
 Certain features or bugs are only applicable when running a cluster of AWX nodes. To bring up a 3 node cluster development environment simply run the below command.
 
