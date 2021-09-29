@@ -86,6 +86,8 @@ describe('<ExecutionEnvironmentAdd/>', () => {
         context: { router: { history } },
       });
     });
+
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -108,8 +110,6 @@ describe('<ExecutionEnvironmentAdd/>', () => {
   });
 
   test('handleCancel should return the user back to the execution environments list', async () => {
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-
     wrapper.find('Button[aria-label="Cancel"]').simulate('click');
     expect(history.location.pathname).toEqual('/execution_environments');
   });
@@ -130,5 +130,24 @@ describe('<ExecutionEnvironmentAdd/>', () => {
     });
     wrapper.update();
     expect(wrapper.find('FormSubmitError').length).toBe(1);
+  });
+
+  test('should parse and prefill select form fields from query params', async () => {
+    history = createMemoryHistory({
+      initialEntries: [
+        '/execution_environments/add?image=https://myhub.io/repo:2.0',
+      ],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<ExecutionEnvironmentAdd me={mockMe} />, {
+        context: { router: { history } },
+      });
+    });
+
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+
+    expect(
+      wrapper.find('input#execution-environment-image').prop('value')
+    ).toEqual('https://myhub.io/repo:2.0');
   });
 });
