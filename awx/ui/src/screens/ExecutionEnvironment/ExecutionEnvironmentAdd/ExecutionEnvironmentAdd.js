@@ -30,9 +30,10 @@ function ExecutionEnvironmentAdd() {
 
   const hubParams = {
     image: '',
-    credential: null // reverse lookup?
   };
-  history.location.search.replace(/^\?/, '')
+
+  history.location.search
+    .replace(/^\?/, '')
     .split('&')
     .map((s) => s.split('='))
     .forEach(([key, val]) => {
