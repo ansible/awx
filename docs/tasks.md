@@ -157,10 +157,14 @@ One of the most important tasks in a clustered AWX installation is the periodic 
 If a node in an AWX cluster discovers that one of its peers has not updated its heartbeat within a certain grace period, it is assumed to be offline, and its capacity is set to zero to avoid scheduling new tasks on that node. Additionally, jobs allegedly running or scheduled to run on that node are assumed to be lost, and "reaped", or marked as failed.
 
 ## Reaping Receptor Work Units
-When an AWX job is launched via receptor, files such as status, stdin, and stdout are created in a specific receptor directory. This directory on disk is a random 8 character string, e.g. qLL2JFNT
-This is also called the work Unit ID in receptor, and is used in various receptor commands, e.g. "work results qLL2JFNT"
-After an AWX job executes, the receptor work unit directory is cleaned up by issuing the work release command. In some cases the release process might fail, or if AWX crashes during a job's execution, the work release command is never issued to begin with.
-As such, there is a periodic task that will obtain a list of all receptor work units, and find which ones belong to AWX jobs that are in a completed state (status is canceled, error, or succeeded). This task will call "work release" on each of these work units to clean up the files on disk.
+
+Each AWX job launch will start a "Receptor work unit". This work unit handles all of the `stdin`, `stdout`, and `status` of the job running on the mesh and will also write data to the disk.
+
+Files such as `status`, `stdin`, and `stdout` are created in a specific Receptor directory which is named via a randomly-generated 8-character string (_e.g._ `qLL2JFNT`). This string is also the work unit ID in Receptor, and is utilized in various Receptor commands (_e.g._ `work results qLL2JFNT`).
+
+The files that get written to disk via the work unit will get cleaned up after the AWX job finishes; the way that this is done is by issuing the `work release` command. In some cases, the release process might fail, or if AWX crashes during a job's execution, the `work release` command is never issued to begin with.
+
+Because of this, there is a periodic task that will obtain a list of all Receptor work units and find which ones belong to AWX jobs that are in a completed state (where the status is either `canceled`, `error`, or `succeeded`). This task will call `work release` on each of these work units and clean up the files on disk.
 
 ## AWX Jobs
 
