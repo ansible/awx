@@ -99,7 +99,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const fetchEventByUuid = (uuid) => {
     // TODO (not getting called yet?)
-    console.log('Oh Boy', uuid);
+    console.log('TODO fetchEventByUuid', uuid);
   };
   const fetchNextSibling = async (parentEventId, counter) => {
     const { data } = await JobEventsAPI.readChildren(parentEventId, {
@@ -122,8 +122,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (endCounter === startCounter + 1) {
       return 0;
     }
-    // TODO  job_events/?counter__gt={startCounter}&counter__lt={endCounter}&page_size=1
-    // return data.count
     const params = {
       page_size: 1,
       order_by: 'counter',
@@ -133,9 +131,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       params.counter__lt = endCounter;
     }
     const { data } = await getJobModel(job.type).readEvents(job.id, params);
-    // console.log(
-    //   `fetchNumEvents(${startCounter}, ${endCounter}) -> ${data.count}`
-    // );
     return data.count || 0;
   };
 
@@ -145,6 +140,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     getEventForRow,
     getNumCollapsedEvents,
     getCounterForRow,
+    getEvent,
   } = useJobEvents({
     fetchEventByUuid,
     fetchNextSibling,
@@ -296,10 +292,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         return;
       }
       addEvents(fetchedEvents);
-      // eventsTree.setTotalRowCount(count);
       setRemoteRowCount(count);
-      // setTree(eventsTree.getEventTree());
-      // setEvents(eventsTree.getAllEvents());
     } catch (err) {
       setContentError(err);
     } finally {
@@ -316,12 +309,17 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const isRowLoaded = ({ index }) => {
-    // TODO: update currentlyLoading in loadJobEvents & loadMoreRows
-    return getEventForRow(index) !== null;
-    // if (events[index]) {
-    //   return true;
-    // }
-    // return currentlyLoading.includes(index);
+    // return getEventForRow(index) !== null;
+    const counter = getCounterForRow(index);
+    if (getEvent(counter)) {
+      // const event = getEventForRow(index);
+      // console.log(`${index} loaded; counter ${counter}`, event);
+      return true;
+    }
+    // console.log(
+    //   `${index} currentlyLoading: ${currentlyLoading.includes(counter)}`
+    // );
+    return currentlyLoading.includes(counter);
   };
 
   const handleHostEventClick = (hostEventToOpen) => {
@@ -387,7 +385,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       return Promise.resolve(null);
     }
     if (startIndex === 0 && stopIndex === 0) {
-      console.log('WHAT');
       return Promise.resolve(null);
     }
 
@@ -403,9 +400,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     // TODO: forget pagination stuff. use counter__gt=event.counter or similar?
     const [requestParams, loadRange] = getEventRequestParams(
       job,
-      // remoteRowCount,
       totalNonCollapsedRows,
-      // [startIndex, stopIndex]
       [startCounter, startCounter + diff]
     );
 
@@ -420,8 +415,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
-    // TODO handle 404?
     // TODO update remoteRowCount if job running?
+    // TODO handle request aborted error if navigating away?
     return getJobModel(job.type)
       .readEvents(job.id, params)
       .then((response) => {

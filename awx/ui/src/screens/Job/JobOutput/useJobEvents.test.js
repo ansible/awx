@@ -954,54 +954,6 @@ describe('useJobEvents', () => {
       });
     });
 
-    test('should get correct node if events have gap in counter', () => {
-      wrapper.find('#test').prop('addEvents')([
-        {
-          id: 111,
-          counter: 11,
-          uuid: 'abc-011',
-          event_level: 0,
-          parent_uuid: '',
-        },
-        {
-          id: 113,
-          counter: 13,
-          uuid: 'abc-013',
-          event_level: 1,
-          parent_uuid: 'abc-011',
-        },
-        {
-          id: 114,
-          counter: 15,
-          uuid: 'abc-015',
-          event_level: 1,
-          parent_uuid: 'abc-011',
-        },
-      ]);
-
-      const node1 = wrapper.find('#test').prop('getNodeForRow')(9);
-      expect(node1).toEqual({
-        eventIndex: 11,
-        isCollapsed: false,
-        children: [
-          { eventIndex: 13, isCollapsed: false, children: [] },
-          { eventIndex: 15, isCollapsed: false, children: [] },
-        ],
-      });
-      const node2 = wrapper.find('#test').prop('getNodeForRow')(10);
-      expect(node2).toEqual({
-        eventIndex: 13,
-        isCollapsed: false,
-        children: [],
-      });
-      const node3 = wrapper.find('#test').prop('getNodeForRow')(11);
-      expect(node3).toEqual({
-        eventIndex: 15,
-        isCollapsed: false,
-        children: [],
-      });
-    });
-
     test('should return null if no node matches index', () => {
       const node = wrapper.find('#test').prop('getNodeForRow')(10);
 
@@ -1181,8 +1133,54 @@ describe('useJobEvents', () => {
       expect(node.isCollapsed).toBe(false);
     });
 
-    // missing node
-    // loading node?
+    test('should get node after gap in loaded children', async () => {
+      const fetchNumEvents = jest.fn();
+      fetchNumEvents.mockImplementation((index) => {
+        const counts = {
+          1: 52,
+          2: 3,
+          6: 47,
+        };
+        return Promise.resolve(counts[index]);
+      });
+      wrapper = mount(<HookTest fetchNumEvents={fetchNumEvents} />);
+      const laterEvents = [
+        {
+          id: 151,
+          counter: 51,
+          uuid: 'abc-051',
+          event_level: 2,
+          parent_uuid: 'abc-006',
+        },
+        {
+          id: 152,
+          counter: 52,
+          uuid: 'abc-052',
+          event_level: 2,
+          parent_uuid: 'abc-006',
+        },
+        {
+          id: 153,
+          counter: 53,
+          uuid: 'abc-052',
+          event_level: 2,
+          parent_uuid: 'abc-006',
+        },
+      ];
+      await act(async () => {
+        wrapper.find('#test').prop('addEvents')(eventsList);
+        wrapper.find('#test').prop('addEvents')(laterEvents);
+      });
+      wrapper.update();
+      wrapper.update();
+
+      const node = wrapper.find('#test').prop('getNodeForRow')(51);
+      expect(node).toEqual({
+        eventIndex: 52,
+        isCollapsed: false,
+        children: [],
+      });
+    });
   });
 
   describe('getTotalNumChildren', () => {
@@ -1206,19 +1204,17 @@ describe('useJobEvents', () => {
   });
 
   describe('getCounterForRow', () => {
-    let wrapper;
-    let getCounterForRow;
-    beforeEach(() => {
-      wrapper = shallow(<HookTest />);
-      wrapper.find('#test').prop('addEvents')(eventsList);
-      getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
-    });
-
     test('should return exact counter when no nodes are collapsed', () => {
+      const wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
       expect(getCounterForRow(8)).toEqual(9);
     });
 
     test('should return estimated counter when node not loaded', () => {
+      const wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
       expect(getCounterForRow(12)).toEqual(13);
     });
 
@@ -1231,9 +1227,8 @@ describe('useJobEvents', () => {
         };
         return children[counter];
       });
-      wrapper = mount(<HookTest {...callbacks} />);
+      const wrapper = mount(<HookTest {...callbacks} />);
       wrapper.update();
-      await sleep(0);
       await act(async () => {
         wrapper.find('#test').prop('addEvents')(eventsList);
         wrapper.find('#test').prop('addEvents')([
@@ -1248,9 +1243,184 @@ describe('useJobEvents', () => {
       });
       wrapper.update();
 
-      getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
 
       expect(getCounterForRow(15)).toEqual(16);
+    });
+
+    test('should skip over collapsed subtree', () => {
+      const wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+      wrapper.find('#test').prop('toggleNodeIsCollapsed')('abc-002');
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+      expect(getCounterForRow(4)).toEqual(8);
+    });
+
+    test('should estimate counter after skipping collapsed subtree', async () => {
+      callbacks.fetchNumEvents.mockImplementation((counter) => {
+        const children = {
+          1: 85,
+          2: 66,
+          69: 17,
+        };
+        return children[counter];
+      });
+      const wrapper = mount(<HookTest {...callbacks} />);
+      await act(async () => {
+        wrapper.find('#test').prop('addEvents')([
+          eventsList[0],
+          eventsList[1],
+          eventsList[2],
+          eventsList[3],
+          eventsList[4],
+          {
+            id: 169,
+            counter: 69,
+            event_level: 2,
+            uuid: 'abc-069',
+            parent_uuid: 'abc-001',
+          },
+        ]);
+        wrapper.find('#test').prop('toggleNodeIsCollapsed')('abc-002');
+      });
+      wrapper.update();
+
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+      expect(getCounterForRow(3)).toEqual(70);
+    });
+
+    test('should estimate counter in gap between loaded events', async () => {
+      callbacks.fetchNumEvents.mockImplementation(
+        (counter) =>
+          ({
+            1: 30,
+          }[counter])
+      );
+      const wrapper = mount(<HookTest {...callbacks} />);
+      await act(async () => {
+        wrapper.find('#test').prop('addEvents')([
+          eventsList[0],
+          {
+            id: 102,
+            counter: 2,
+            uuid: 'abc-002',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 103,
+            counter: 3,
+            uuid: 'abc-003',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 120,
+            counter: 20,
+            uuid: 'abc-020',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 121,
+            counter: 21,
+            uuid: 'abc-021',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 122,
+            counter: 22,
+            uuid: 'abc-022',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+        ]);
+      });
+      wrapper.update();
+
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+      expect(getCounterForRow(10)).toEqual(11);
+    });
+
+    test('should estimate counter in gap before loaded sibling events', async () => {
+      callbacks.fetchNumEvents.mockImplementation(
+        (counter) =>
+          ({
+            1: 30,
+          }[counter])
+      );
+      const wrapper = mount(<HookTest {...callbacks} />);
+      await act(async () => {
+        wrapper.find('#test').prop('addEvents')([
+          eventsList[0],
+          {
+            id: 120,
+            counter: 20,
+            uuid: 'abc-020',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 121,
+            counter: 21,
+            uuid: 'abc-021',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 122,
+            counter: 22,
+            uuid: 'abc-022',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+        ]);
+      });
+      wrapper.update();
+
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+      expect(getCounterForRow(10)).toEqual(11);
+    });
+
+    test('should get counter for node between unloaded siblings', async () => {
+      callbacks.fetchNumEvents.mockImplementation(
+        (counter) =>
+          ({
+            1: 30,
+          }[counter])
+      );
+      const wrapper = mount(<HookTest {...callbacks} />);
+      await act(async () => {
+        wrapper.find('#test').prop('addEvents')([
+          eventsList[0],
+          {
+            id: 109,
+            counter: 9,
+            uuid: 'abc-009',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 110,
+            counter: 10,
+            uuid: 'abc-010',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+          {
+            id: 111,
+            counter: 11,
+            uuid: 'abc-011',
+            event_level: 1,
+            parent_uuid: 'abc-001',
+          },
+        ]);
+      });
+      wrapper.update();
+
+      const getCounterForRow = wrapper.find('#test').prop('getCounterForRow');
+      expect(getCounterForRow(10)).toEqual(11);
     });
   });
 });

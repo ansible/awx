@@ -23,6 +23,7 @@ export default function getEventRequestParams(
     Math.min(firstIndex + pageSize, remoteRowCount)
   );
 
+  console.log({ page, firstIndex, startIndex, stopIndex });
   return [{ page, page_size: pageSize }, loadRange];
 }
 
