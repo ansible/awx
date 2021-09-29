@@ -76,7 +76,7 @@ Recommendations and constraints:
 
 * **Deprovisioning** - AWX does not automatically deprovision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure.
 
-  Starting with AWX version 19.3.0, deprovisioning a node results in one or more Receptor configurations needing to be updated across one or more nodes, which therefore cannot be done via a manual process; the Automation Mesh Installer needs to deprovision the nodes.
+  Starting with AWX version 19.3.0, deprovisioning an instance results in one or more Receptor configurations needing to be updated across one or more nodes, which therefore cannot be done via a manual process; the Automation Mesh Installer needs to deprovision the nodes.
 
   Adding to and removing from the mesh does not require that every node is listed in the inventory file; in other words, the absence of a node from the inventory file _does not_ indicate that a node should be removed. Instead, a `hostvar` of `node_state: deprovision` conveys to the mesh installer that the node should be deprovisioned.
 
