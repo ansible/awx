@@ -2,8 +2,8 @@ import pytest
 from unittest import mock
 import os
 
-from awx.main.tasks import RunProjectUpdate, RunInventoryUpdate
-from awx.main.models import ProjectUpdate, InventoryUpdate, InventorySource
+from awx.main.tasks import RunProjectUpdate, RunInventoryUpdate, execution_node_health_check
+from awx.main.models import ProjectUpdate, InventoryUpdate, InventorySource, Instance
 
 
 @pytest.fixture
@@ -13,6 +13,15 @@ def scm_revision_file(tmpdir_factory):
     with open(str(revision_file), 'w') as f:
         f.write('1234567890123456789012345678901234567890')
     return os.path.join(revision_file.dirname, 'revision.txt')
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ('control', 'hybrid'))
+def test_no_worker_info_on_AWX_nodes(node_type):
+    hostname = 'us-south-3-compute.invalid'
+    Instance.objects.create(hostname=hostname, node_type=node_type)
+    with pytest.raises(RuntimeError):
+        execution_node_health_check(hostname)
 
 
 @pytest.mark.django_db

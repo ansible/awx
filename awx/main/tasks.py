@@ -438,6 +438,9 @@ def execution_node_health_check(node):
         logger.warn(f'Instance record for {node} missing, could not check capacity.')
         return
 
+    if instance.node_type != 'execution':
+        raise RuntimeError(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
+
     data = worker_info(node, work_type='ansible-runner' if instance.node_type == 'execution' else 'local')
 
     prior_capacity = instance.capacity
@@ -3023,7 +3026,7 @@ class AWXReceptorJob:
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
             # If an error occured without the job itself failing, it could be a broken instance
-            if self.work_type == 'ansible-runner' and res is None or getattr(res, 'rc', None) is None:
+            if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
                 execution_node_health_check(self.task.instance.execution_node)
 
     def _run_internal(self, receptor_ctl):
