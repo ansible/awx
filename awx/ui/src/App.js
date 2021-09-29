@@ -103,7 +103,11 @@ const ProtectedRoute = ({ children, ...rest }) => {
   const location = useLocation();
 
   useEffect(() => {
-    setAuthRedirectTo(authRedirectTo === '/logout' ? '/' : pathname);
+    setAuthRedirectTo(
+      authRedirectTo === '/logout'
+        ? '/'
+        : `${location.pathname}${location.search}`
+    );
   });
 
   if (isAuthenticated(document.cookie)) {
@@ -115,12 +119,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
       </Route>
     );
   }
-
-  setAuthRedirectTo(
-    authRedirectTo === '/logout'
-      ? '/'
-      : `${location.pathname}${location.search}`
-  );
 
   return <Redirect to="/login" />;
 };
