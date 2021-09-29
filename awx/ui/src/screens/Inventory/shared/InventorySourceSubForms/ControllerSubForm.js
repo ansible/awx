@@ -15,7 +15,7 @@ import {
   SourceVarsField,
 } from './SharedFields';
 
-const TowerSubForm = ({ autoPopulateCredential }) => {
+const ControllerSubForm = ({ autoPopulateCredential }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
@@ -78,4 +78,4 @@ const TowerSubForm = ({ autoPopulateCredential }) => {
   );
 };
 
-export default TowerSubForm;
+export default ControllerSubForm;

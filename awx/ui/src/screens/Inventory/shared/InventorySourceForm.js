@@ -22,7 +22,7 @@ import {
   OpenStackSubForm,
   SCMSubForm,
   SatelliteSubForm,
-  TowerSubForm,
+  ControllerSubForm,
   VMwareSubForm,
   VirtualizationSubForm,
 } from './InventorySourceSubForms';
@@ -207,8 +207,8 @@ const InventorySourceFormFields = ({
                     }
                   />
                 ),
-                tower: (
-                  <TowerSubForm
+                controller: (
+                  <ControllerSubForm
                     autoPopulateCredential={
                       !source?.id || source?.source !== 'controller'
                     }
