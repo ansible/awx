@@ -29,7 +29,9 @@ function ExecutionEnvironmentAdd() {
   };
 
   const hubParams = {
+    description: '',
     image: '',
+    name: '',
   };
 
   history.location.search
