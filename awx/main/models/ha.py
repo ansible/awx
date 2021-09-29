@@ -165,7 +165,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         vargs = dict(file_pattern='/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*'))
         vargs.update(kwargs)
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
-            active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status_in=('running', 'waiting')).values_list('pk', flat=True))
+            active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')).values_list('pk', flat=True))
             if active_pks:
                 vargs['exclude_strings'] = [JOB_FOLDER_PREFIX % job_id for job_id in active_pks]
         if 'remove_images' in vargs or 'image_prune' in vargs:
