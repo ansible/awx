@@ -134,9 +134,13 @@ function InstanceListItem({
         </Td>
         <Td dataLabel={t`Status`}>
           <Tooltip
-            content={t`Last Health Check ${formatDateString(
-              instance.last_health_check
-            )}`}
+            content={
+              <div>
+                {t`Last Health Check`}
+                &nbsp;
+                {formatDateString(instance.last_health_check)}
+              </div>
+            }
           >
             <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
           </Tooltip>

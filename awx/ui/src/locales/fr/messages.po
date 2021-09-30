@@ -2,10 +2,16 @@ msgid ""
 msgstr ""
 "POT-Creation-Date: 2021-09-01 18:45+0000\n"
 "Mime-Version: 1.0\n"
-"Language: fr \n"
+"Language: fr\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -119,11 +125,11 @@ msgstr "TOUS"
 msgid "API Service/Integration Key"
 msgstr "Service API/Clé d’intégration"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:288
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:289
 msgid "API Token"
 msgstr "Token API"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:303
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:304
 msgid "API service/integration key"
 msgstr "Service API/Clé d’intégration"
 
@@ -155,11 +161,11 @@ msgid "Access Token Expiration"
 msgstr "Expiration du jeton d'accès"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:299
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:418
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:419
 msgid "Account SID"
 msgstr "SID de compte"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:391
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:392
 msgid "Account token"
 msgstr "Token de compte"
 
@@ -176,22 +182,22 @@ msgstr "Action"
 #: components/TemplateList/TemplateListItem.js:178
 #: screens/ActivityStream/ActivityStream.js:253
 #: screens/ActivityStream/ActivityStreamListItem.js:49
-#: screens/Application/ApplicationsList/ApplicationListItem.js:46
+#: screens/Application/ApplicationsList/ApplicationListItem.js:45
 #: screens/Application/ApplicationsList/ApplicationsList.js:160
 #: screens/Credential/CredentialList/CredentialList.js:147
 #: screens/Credential/CredentialList/CredentialListItem.js:63
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:177
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:36
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:35
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:154
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:74
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:76
 #: screens/Host/HostGroups/HostGroupItem.js:34
 #: screens/Host/HostGroups/HostGroupsList.js:177
 #: screens/Host/HostList/HostList.js:163
 #: screens/Host/HostList/HostListItem.js:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:286
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:75
-#: screens/InstanceGroup/Instances/InstanceList.js:221
-#: screens/InstanceGroup/Instances/InstanceListItem.js:152
+#: screens/InstanceGroup/Instances/InstanceList.js:256
+#: screens/InstanceGroup/Instances/InstanceListItem.js:178
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:215
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:48
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.js:39
@@ -201,7 +207,7 @@ msgstr "Action"
 #: screens/Inventory/InventoryHosts/InventoryHostItem.js:38
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:139
 #: screens/Inventory/InventoryList/InventoryList.js:207
-#: screens/Inventory/InventoryList/InventoryListItem.js:114
+#: screens/Inventory/InventoryList/InventoryListItem.js:113
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:232
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.js:40
 #: screens/Inventory/InventorySources/InventorySourceList.js:215
@@ -209,9 +215,9 @@ msgstr "Action"
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:102
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.js:72
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:196
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:122
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:121
 #: screens/Organization/OrganizationList/OrganizationList.js:146
-#: screens/Organization/OrganizationList/OrganizationListItem.js:68
+#: screens/Organization/OrganizationList/OrganizationListItem.js:69
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:86
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:17
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:159
@@ -220,8 +226,8 @@ msgstr "Action"
 #: screens/Project/ProjectList/ProjectListItem.js:209
 #: screens/Team/TeamList/TeamList.js:144
 #: screens/Team/TeamList/TeamListItem.js:47
-#: screens/Template/Survey/SurveyList.js:115
-#: screens/Template/Survey/SurveyList.js:115
+#: screens/Template/Survey/SurveyList.js:105
+#: screens/Template/Survey/SurveyList.js:105
 #: screens/Template/Survey/SurveyListItem.js:85
 #: screens/User/UserList/UserList.js:160
 #: screens/User/UserList/UserListItem.js:60
@@ -372,7 +378,7 @@ msgid ""
 "like the Ansible inventory .ini file format."
 msgstr "Chaque fois qu’un projet est mis à jour et que la révision SCM est modifiée, réalisez une mise à jour de la source sélectionnée avant de lancer les tâches liées un à job. Le but est le contenu statique, comme le format .ini de fichier d'inventaire Ansible."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:504
+#: components/Schedule/shared/FrequencyDetailSubform.js:506
 msgid "After number of occurrences"
 msgstr "Après le nombre d'occurrences"
 
@@ -382,8 +388,8 @@ msgstr "Modal d'alerte"
 
 #: components/LaunchButton/ReLaunchDropDown.js:48
 #: components/PromptDetail/PromptDetail.js:120
-#: screens/Metrics/Metrics.js:75
-#: screens/Metrics/Metrics.js:75
+#: screens/Metrics/Metrics.js:82
+#: screens/Metrics/Metrics.js:82
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:257
 msgid "All"
 msgstr "Tous"
@@ -521,7 +527,7 @@ msgstr "Approuvé - {0}.  Voir le flux d'activité pour plus d'informations."
 msgid "Approved by {0} - {1}"
 msgstr "Approuvé par {0} - {1}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:123
+#: components/Schedule/shared/FrequencyDetailSubform.js:125
 msgid "April"
 msgstr "Avril"
 
@@ -533,11 +539,11 @@ msgstr "Êtes-vous certain de vouloir annuler ce job ?"
 msgid "Are you sure you want to delete:"
 msgstr "Êtes-vous sûr de vouloir supprimer :"
 
-#: screens/Setting/shared/SharedFields.js:141
+#: screens/Setting/shared/SharedFields.js:142
 msgid "Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
 msgstr "Êtes-vous sûr de vouloir désactiver l'authentification locale ?  Cela pourrait avoir un impact sur la capacité des utilisateurs à se connecter et sur la capacité de l'administrateur système à annuler ce changement."
 
-#: screens/Setting/shared/SharedFields.js:320
+#: screens/Setting/shared/SharedFields.js:350
 msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
 msgstr "Êtes-vous sûr de vouloir modifier l'URL de substitution de la redirection de la connexion ?  Cela pourrait avoir un impact sur la capacité des utilisateurs à se connecter au système une fois que l'authentification locale est également désactivée."
 
@@ -578,11 +584,11 @@ msgstr "Voulez-vous vraiment demander l'annulation de ce job ?"
 msgid "Arguments"
 msgstr "Arguments"
 
-#: screens/Job/JobDetail/JobDetail.js:442
+#: screens/Job/JobDetail/JobDetail.js:435
 msgid "Artifacts"
 msgstr "Artefacts"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:188
+#: screens/InstanceGroup/Instances/InstanceList.js:202
 #: screens/User/UserTeams/UserTeamList.js:208
 msgid "Associate"
 msgstr "Associé"
@@ -600,7 +606,7 @@ msgstr "Association modale"
 msgid "At least one value must be selected for this field."
 msgstr "Au moins une valeur doit être sélectionnée pour ce champ."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:143
+#: components/Schedule/shared/FrequencyDetailSubform.js:145
 msgid "August"
 msgstr "Août"
 
@@ -617,7 +623,8 @@ msgstr "Expiration du code d'autorisation"
 msgid "Authorization grant type"
 msgstr "Type d'autorisation"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:120
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:204
+#: screens/InstanceGroup/Instances/InstanceListItem.js:198
 msgid "Auto"
 msgstr "Auto"
 
@@ -663,12 +670,16 @@ msgstr "Retour aux hôtes"
 msgid "Back to Instance Groups"
 msgstr "Retour aux groupes d'instances"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:167
+msgid "Back to Instances"
+msgstr ""
+
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
 msgid "Back to Inventories"
 msgstr "Retour aux inventaires"
 
-#: screens/Job/Job.js:109
+#: screens/Job/Job.js:110
 msgid "Back to Jobs"
 msgstr "Retour Jobs"
 
@@ -757,7 +768,7 @@ msgid ""
 "path used to locate playbooks."
 msgstr "Chemin de base utilisé pour localiser les playbooks. Les répertoires localisés dans ce chemin sont répertoriés dans la liste déroulante des répertoires de playbooks. Le chemin de base et le répertoire de playbook sélectionnés fournissent ensemble le chemin complet servant à localiser les playbooks."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:443
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:444
 msgid "Basic auth password"
 msgstr "Mot de passe d'auth de base"
 
@@ -786,7 +797,8 @@ msgstr "Navigation...."
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
 msgstr "Par défaut, nous collectons et transmettons à Red Hat des données analytiques sur l'utilisation du service. Il existe deux catégories de données collectées par le service. Pour plus d'informations, consultez <0>cette page de documentation Tower</0>. Décochez les cases suivantes pour désactiver cette fonctionnalité."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:126
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:217
+#: screens/InstanceGroup/Instances/InstanceListItem.js:152
 msgid "CPU {0}"
 msgstr "CPU {0}"
 
@@ -814,14 +826,14 @@ msgstr "Expiration du délai d’attente du cache (secondes)"
 #: components/DisassociateButton/DisassociateButton.js:122
 #: components/DisassociateButton/DisassociateButton.js:125
 #: components/FormActionGroup/FormActionGroup.js:23
-#: components/FormActionGroup/FormActionGroup.js:28
+#: components/FormActionGroup/FormActionGroup.js:29
 #: components/LaunchPrompt/LaunchPrompt.js:129
 #: components/Lookup/HostFilterLookup.js:359
-#: components/Lookup/Lookup.js:194
+#: components/Lookup/Lookup.js:195
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:36
-#: components/Schedule/shared/ScheduleForm.js:647
-#: components/Schedule/shared/ScheduleForm.js:652
+#: components/Schedule/shared/ScheduleForm.js:646
+#: components/Schedule/shared/ScheduleForm.js:651
 #: components/Schedule/shared/SchedulePromptableFields.js:133
 #: screens/Credential/shared/CredentialForm.js:343
 #: screens/Credential/shared/CredentialForm.js:348
@@ -836,12 +848,12 @@ msgstr "Expiration du délai d’attente du cache (secondes)"
 #: screens/Setting/shared/RevertAllAlert.js:32
 #: screens/Setting/shared/RevertFormActionGroup.js:31
 #: screens/Setting/shared/RevertFormActionGroup.js:37
-#: screens/Setting/shared/SharedFields.js:132
-#: screens/Setting/shared/SharedFields.js:138
-#: screens/Setting/shared/SharedFields.js:316
+#: screens/Setting/shared/SharedFields.js:133
+#: screens/Setting/shared/SharedFields.js:139
+#: screens/Setting/shared/SharedFields.js:346
 #: screens/Team/TeamRoles/TeamRolesList.js:228
 #: screens/Team/TeamRoles/TeamRolesList.js:231
-#: screens/Template/Survey/SurveyList.js:88
+#: screens/Template/Survey/SurveyList.js:78
 #: screens/Template/Survey/SurveyReorderModal.js:199
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/DeleteAllNodesModal.js:31
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:39
@@ -888,7 +900,7 @@ msgstr "Annuler les changements de liens"
 msgid "Cancel link removal"
 msgstr "Annuler la suppression d'un lien"
 
-#: components/Lookup/Lookup.js:192
+#: components/Lookup/Lookup.js:193
 msgid "Cancel lookup"
 msgstr "Annuler la recherche"
 
@@ -914,13 +926,13 @@ msgid "Cancel subscription edit"
 msgstr "Annuler l'édition de l'abonnement"
 
 #: components/JobList/JobListItem.js:106
-#: screens/Job/JobDetail/JobDetail.js:481
+#: screens/Job/JobDetail/JobDetail.js:475
 #: screens/Job/JobOutput/shared/OutputToolbar.js:135
 msgid "Cancel {0}"
 msgstr "Annuler {0}"
 
 #: components/JobList/JobList.js:227
-#: components/StatusLabel/StatusLabel.js:62
+#: components/StatusLabel/StatusLabel.js:65
 #: components/Workflow/WorkflowNodeHelp.js:111
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:166
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:20
@@ -938,8 +950,9 @@ msgstr "Impossible d'activer l'agrégateur de logs sans fournir l'hôte de l'agr
 msgid "Capacity"
 msgstr "Capacité"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:219
-#: screens/InstanceGroup/Instances/InstanceListItem.js:124
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:214
+#: screens/InstanceGroup/Instances/InstanceList.js:254
+#: screens/InstanceGroup/Instances/InstanceListItem.js:150
 msgid "Capacity Adjustment"
 msgstr "Ajustement des capacités"
 
@@ -967,7 +980,8 @@ msgstr "Version non sensible à la casse de startswith."
 msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
-msgstr "Changez PROJECTS_ROOT lors du déploiement de\n"
+msgstr ""
+"Changez PROJECTS_ROOT lors du déploiement de\n"
 "{brandName} pour modifier cet emplacement."
 
 #: screens/Job/JobOutput/shared/HostStatusBar.js:43
@@ -979,7 +993,7 @@ msgid "Changes"
 msgstr "Modifications"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:209
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:263
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:264
 msgid "Channel"
 msgstr "Canal"
 
@@ -1029,7 +1043,7 @@ msgstr "Choisissez un module"
 msgid "Choose a source"
 msgstr "Choisissez une source"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:486
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:487
 msgid "Choose an HTTP method"
 msgstr "Choisissez une méthode HTTP"
 
@@ -1090,7 +1104,7 @@ msgstr "Cliquez sur ce bouton pour vérifier la connexion au système de gestion
 msgid "Click to create a new link to this node."
 msgstr "Cliquez pour créer un nouveau lien vers ce nœud."
 
-#: screens/Template/Survey/SurveyToolbar.js:62
+#: screens/Template/Survey/SurveyToolbar.js:63
 msgid "Click to rearrange the order of the survey questions"
 msgstr "Cliquez pour réorganiser l'ordre des questions de l'enquête"
 
@@ -1111,7 +1125,7 @@ msgstr "ID du client"
 msgid "Client Identifier"
 msgstr "Identifiant client"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:311
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:312
 msgid "Client identifier"
 msgstr "Identifiant client"
 
@@ -1159,9 +1173,9 @@ msgstr "Conforme"
 msgid "Concurrent Jobs"
 msgstr "Jobs parallèles"
 
-#: screens/Setting/shared/SharedFields.js:120
-#: screens/Setting/shared/SharedFields.js:126
-#: screens/Setting/shared/SharedFields.js:306
+#: screens/Setting/shared/SharedFields.js:121
+#: screens/Setting/shared/SharedFields.js:127
+#: screens/Setting/shared/SharedFields.js:336
 msgid "Confirm"
 msgstr "Confirmer"
 
@@ -1214,7 +1228,7 @@ msgstr "Confirmer annuler tout"
 msgid "Confirm selection"
 msgstr "Confirmer la sélection"
 
-#: screens/Job/JobDetail/JobDetail.js:299
+#: screens/Job/JobDetail/JobDetail.js:293
 msgid "Container Group"
 msgstr "Groupe de conteneurs"
 
@@ -1277,15 +1291,15 @@ msgstr "Copier les identifiants"
 msgid "Copy Error"
 msgstr "Erreur de copie"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:91
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:93
 msgid "Copy Execution Environment"
 msgstr "Copier Environnement d'exécution"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:137
+#: screens/Inventory/InventoryList/InventoryListItem.js:136
 msgid "Copy Inventory"
 msgstr "Copier l'inventaire"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:150
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:149
 msgid "Copy Notification Template"
 msgstr "Copie du modèle de notification"
 
@@ -1436,7 +1450,7 @@ msgstr "Créer un jeton d'utilisateur"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:260
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:140
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:47
-#: screens/Job/JobDetail/JobDetail.js:414
+#: screens/Job/JobDetail/JobDetail.js:408
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:339
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:105
 #: screens/Project/ProjectDetail/ProjectDetail.js:231
@@ -1565,7 +1579,7 @@ msgstr "Identifiant pour s'authentifier auprès d'un registre de conteneur prot�
 msgid "Credential type not found."
 msgstr "Type d'informations d’identification non trouvé."
 
-#: components/JobList/JobListItem.js:235
+#: components/JobList/JobListItem.js:237
 #: components/LaunchPrompt/steps/CredentialsStep.js:189
 #: components/LaunchPrompt/steps/useCredentialsStep.js:62
 #: components/Lookup/MultiCredentialsLookup.js:138
@@ -1580,7 +1594,7 @@ msgstr "Type d'informations d’identification non trouvé."
 #: screens/Credential/CredentialList/CredentialList.js:175
 #: screens/Credential/Credentials.js:13
 #: screens/Credential/Credentials.js:23
-#: screens/Job/JobDetail/JobDetail.js:338
+#: screens/Job/JobDetail/JobDetail.js:332
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:285
 #: screens/Template/shared/JobTemplateForm.js:373
 #: util/getRelatedResourceDeleteDetails.js:90
@@ -1600,7 +1614,7 @@ msgid "Custom pod spec"
 msgstr "Spécifications des pods personnalisés"
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:78
-#: screens/Organization/OrganizationList/OrganizationListItem.js:54
+#: screens/Organization/OrganizationList/OrganizationListItem.js:55
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:66
 #: screens/Project/ProjectList/ProjectListItem.js:183
 msgid "Custom virtual environment {0} must be replaced by an execution environment."
@@ -1645,14 +1659,14 @@ msgstr "Durée de conservation des données"
 msgid "Date"
 msgstr "Date"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:337
-#: components/Schedule/shared/FrequencyDetailSubform.js:441
-#: components/Schedule/shared/ScheduleForm.js:153
+#: components/Schedule/shared/FrequencyDetailSubform.js:339
+#: components/Schedule/shared/FrequencyDetailSubform.js:443
+#: components/Schedule/shared/ScheduleForm.js:154
 msgid "Day"
 msgstr "Jour"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
-#: components/Schedule/shared/ScheduleForm.js:164
+#: components/Schedule/shared/ScheduleForm.js:165
 msgid "Days of Data to Keep"
 msgstr "Nombre de jours pendant lesquels on peut conserver les données"
 
@@ -1672,13 +1686,13 @@ msgstr "Jours conservation"
 msgid "Debug"
 msgstr "Déboguer"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:163
+#: components/Schedule/shared/FrequencyDetailSubform.js:165
 msgid "December"
 msgstr "Décembre"
 
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.js:102
-#: screens/Template/Survey/SurveyList.js:114
-#: screens/Template/Survey/SurveyList.js:114
+#: screens/Template/Survey/SurveyList.js:104
+#: screens/Template/Survey/SurveyList.js:104
 #: screens/Template/Survey/SurveyListItem.js:63
 msgid "Default"
 msgstr "Par défaut"
@@ -1690,7 +1704,6 @@ msgid "Default Answer(s)"
 msgstr "Réponse(s) par défaut"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:40
-#: components/Lookup/ExecutionEnvironmentLookup.js:209
 msgid "Default Execution Environment"
 msgstr "Environnement d'exécution par défaut"
 
@@ -1731,15 +1744,15 @@ msgstr "Définir les fonctions et fonctionnalités niveau système"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:72
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:76
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:99
-#: screens/Job/JobDetail/JobDetail.js:493
+#: screens/Job/JobDetail/JobDetail.js:487
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:376
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:175
 #: screens/Project/ProjectDetail/ProjectDetail.js:279
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:75
 #: screens/Team/TeamDetail/TeamDetail.js:70
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:409
-#: screens/Template/Survey/SurveyList.js:76
-#: screens/Template/Survey/SurveyToolbar.js:91
+#: screens/Template/Survey/SurveyList.js:66
+#: screens/Template/Survey/SurveyToolbar.js:92
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:247
 #: screens/User/UserDetail/UserDetail.js:107
 #: screens/User/UserTokenDetail/UserTokenDetail.js:76
@@ -1768,7 +1781,7 @@ msgstr "Supprimer l'hôte"
 msgid "Delete Inventory"
 msgstr "Supprimer l’inventaire"
 
-#: screens/Job/JobDetail/JobDetail.js:489
+#: screens/Job/JobDetail/JobDetail.js:483
 #: screens/Job/JobOutput/shared/OutputToolbar.js:193
 #: screens/Job/JobOutput/shared/OutputToolbar.js:197
 msgid "Delete Job"
@@ -1790,7 +1803,7 @@ msgstr "Supprimer l'organisation"
 msgid "Delete Project"
 msgstr "Suppression du projet"
 
-#: screens/Template/Survey/SurveyList.js:62
+#: screens/Template/Survey/SurveyList.js:52
 msgid "Delete Questions"
 msgstr "Supprimer les questions"
 
@@ -1798,7 +1811,7 @@ msgstr "Supprimer les questions"
 msgid "Delete Schedule"
 msgstr "Supprimer la programmation"
 
-#: screens/Template/Survey/SurveyList.js:62
+#: screens/Template/Survey/SurveyList.js:52
 msgid "Delete Survey"
 msgstr "Supprimer le questionnaire"
 
@@ -1852,7 +1865,7 @@ msgstr "Supprimer la source de l'inventaire"
 msgid "Delete smart inventory"
 msgstr "Supprimer l'inventaire smart"
 
-#: screens/Template/Survey/SurveyToolbar.js:81
+#: screens/Template/Survey/SurveyToolbar.js:82
 msgid "Delete survey question"
 msgstr "Supprimer question de l'enquête"
 
@@ -1932,7 +1945,7 @@ msgstr "Obsolète"
 #: components/PromptDetail/PromptDetail.js:112
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:260
 #: components/Schedule/ScheduleList/ScheduleList.js:193
-#: components/Schedule/shared/ScheduleForm.js:112
+#: components/Schedule/shared/ScheduleForm.js:113
 #: components/TemplateList/TemplateList.js:195
 #: components/TemplateList/TemplateListItem.js:251
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:63
@@ -2006,15 +2019,15 @@ msgstr "Canaux ou utilisateurs de destination"
 msgid "Destination SMS Number(s)"
 msgstr "Numéro(s) de SMS de destination"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:408
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:409
 msgid "Destination SMS number(s)"
 msgstr "Numéro(s) de SMS de destination"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:359
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:360
 msgid "Destination channels"
 msgstr "Canaux de destination"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:226
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:227
 msgid "Destination channels or users"
 msgstr "Canaux ou utilisateurs de destination"
 
@@ -2032,9 +2045,10 @@ msgstr "Canaux ou utilisateurs de destination"
 #: screens/Host/Host.js:57
 #: screens/Host/Hosts.js:28
 #: screens/InstanceGroup/ContainerGroup.js:75
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:174
 #: screens/InstanceGroup/InstanceGroup.js:76
 #: screens/InstanceGroup/InstanceGroups.js:50
-#: screens/InstanceGroup/InstanceGroups.js:56
+#: screens/InstanceGroup/InstanceGroups.js:58
 #: screens/Inventory/Inventories.js:60
 #: screens/Inventory/Inventories.js:85
 #: screens/Inventory/Inventory.js:62
@@ -2043,7 +2057,7 @@ msgstr "Canaux ou utilisateurs de destination"
 #: screens/Inventory/InventorySource/InventorySource.js:83
 #: screens/Inventory/SmartInventory.js:65
 #: screens/Inventory/SmartInventoryHost/SmartInventoryHost.js:60
-#: screens/Job/Job.js:115
+#: screens/Job/Job.js:116
 #: screens/Job/JobOutput/HostEventModal.js:111
 #: screens/Job/Jobs.js:28
 #: screens/ManagementJob/ManagementJobs.js:27
@@ -2112,15 +2126,15 @@ msgstr "Onglet Détails"
 msgid "Disable SSL Verification"
 msgstr "Désactiver la vérification SSL"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:184
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:237
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:276
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:347
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:456
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:185
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:238
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:277
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:348
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:457
 msgid "Disable SSL verification"
 msgstr "Désactiver la vérification SSL"
 
-#: components/StatusLabel/StatusLabel.js:61
+#: components/StatusLabel/StatusLabel.js:64
 msgid "Disabled"
 msgstr "Désactivés"
 
@@ -2143,7 +2157,8 @@ msgstr "Dissocier le groupe de l'hôte ?"
 msgid "Disassociate host from group?"
 msgstr "Dissocier Hôte du Groupe"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:199
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:281
+#: screens/InstanceGroup/Instances/InstanceList.js:213
 msgid "Disassociate instance from instance group?"
 msgstr "Dissocier l'instance du groupe d'instances ?"
 
@@ -2222,7 +2237,7 @@ msgstr "Le déplacement a commencé pour l'élément id : {newId}."
 msgid "E-mail"
 msgstr "E-mail"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:123
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:124
 msgid "E-mail options"
 msgstr "Options d'email"
 
@@ -2258,7 +2273,7 @@ msgstr "Chaque fois qu’un job s’exécute avec ce projet, réalisez une mise 
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:155
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:363
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:365
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:136
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:135
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:158
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:162
 #: screens/Project/ProjectDetail/ProjectDetail.js:252
@@ -2293,7 +2308,7 @@ msgstr "Chaque fois qu’un job s’exécute avec ce projet, réalisez une mise 
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:380
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:217
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:219
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:233
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:236
 #: screens/User/UserDetail/UserDetail.js:96
 msgid "Edit"
 msgstr "Modifier"
@@ -2346,8 +2361,8 @@ msgstr "Modifier la configuration du plug-in Configuration"
 msgid "Edit Details"
 msgstr "Modifier les détails"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:77
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:81
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:79
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:83
 msgid "Edit Execution Environment"
 msgstr "Modifier l'environnement d'exécution"
 
@@ -2366,8 +2381,8 @@ msgstr "Modifier le groupe"
 msgid "Edit Host"
 msgstr "Modifier l’hôte"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:117
-#: screens/Inventory/InventoryList/InventoryListItem.js:122
+#: screens/Inventory/InventoryList/InventoryListItem.js:116
+#: screens/Inventory/InventoryList/InventoryListItem.js:121
 msgid "Edit Inventory"
 msgstr "Modifier l'inventaire"
 
@@ -2375,25 +2390,25 @@ msgstr "Modifier l'inventaire"
 msgid "Edit Link"
 msgstr "Modifier le lien"
 
-#: screens/Setting/shared/SharedFields.js:260
+#: screens/Setting/shared/SharedFields.js:290
 msgid "Edit Login redirect override URL"
 msgstr "URL de remplacement pour la redirection de connexion"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeEditModal.js:64
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:230
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:233
 msgid "Edit Node"
 msgstr "Modifier le nœud"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:140
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:139
 msgid "Edit Notification Template"
 msgstr "Modèle de notification de modification"
 
-#: screens/Template/Survey/SurveyToolbar.js:71
+#: screens/Template/Survey/SurveyToolbar.js:72
 msgid "Edit Order"
 msgstr "Ordre d'édition"
 
-#: screens/Organization/OrganizationList/OrganizationListItem.js:71
-#: screens/Organization/OrganizationList/OrganizationListItem.js:75
+#: screens/Organization/OrganizationList/OrganizationListItem.js:72
+#: screens/Organization/OrganizationList/OrganizationListItem.js:76
 msgid "Edit Organization"
 msgstr "Modifier l'organisation"
 
@@ -2438,20 +2453,20 @@ msgstr "Modifier le modèle"
 msgid "Edit User"
 msgstr "Modifier l’utilisateur"
 
-#: screens/Application/ApplicationsList/ApplicationListItem.js:49
-#: screens/Application/ApplicationsList/ApplicationListItem.js:53
+#: screens/Application/ApplicationsList/ApplicationListItem.js:48
+#: screens/Application/ApplicationsList/ApplicationListItem.js:52
 msgid "Edit application"
 msgstr "Modifier l’application"
 
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:39
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:43
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:38
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:42
 msgid "Edit credential type"
 msgstr "Modifier le type d’identification"
 
 #: screens/CredentialType/CredentialTypes.js:25
 #: screens/ExecutionEnvironment/ExecutionEnvironments.js:25
-#: screens/InstanceGroup/InstanceGroups.js:53
-#: screens/InstanceGroup/InstanceGroups.js:58
+#: screens/InstanceGroup/InstanceGroups.js:55
+#: screens/InstanceGroup/InstanceGroups.js:60
 #: screens/Inventory/Inventories.js:61
 #: screens/Inventory/Inventories.js:66
 #: screens/Inventory/Inventories.js:75
@@ -2473,8 +2488,8 @@ msgstr "Modifier l’hôte"
 msgid "Edit instance group"
 msgstr "Modifier le groupe d'instances"
 
-#: screens/Setting/shared/SharedFields.js:290
-#: screens/Setting/shared/SharedFields.js:292
+#: screens/Setting/shared/SharedFields.js:320
+#: screens/Setting/shared/SharedFields.js:322
 msgid "Edit login redirect override URL"
 msgstr "URL de remplacement pour la redirection de connexion"
 
@@ -2592,7 +2607,8 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template"
-msgstr "Permet la création d'une URL de rappel\n"
+msgstr ""
+"Permet la création d'une URL de rappel\n"
 "de rappel. En utilisant cette URL, un hôte peut contacter {nomdelabrand}\n"
 "et demander une mise à jour de la configuration en utilisant ce\n"
 "modèle de job."
@@ -2603,7 +2619,8 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template."
-msgstr "Permet la création d'une URL de rappel\n"
+msgstr ""
+"Permet la création d'une URL de rappel\n"
 "de provisoinning. En utilisant cette URL, un hôte peut contacter {brandName}\n"
 "et demander une mise à jour de la configuration en utilisant ce\n"
 "modèle de job."
@@ -2613,8 +2630,7 @@ msgstr "Permet la création d'une URL de rappel\n"
 msgid "Encrypted"
 msgstr "Crypté"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:488
-#: components/Schedule/shared/FrequencyDetailSubform.js:540
+#: components/Schedule/shared/FrequencyDetailSubform.js:490
 msgid "End"
 msgstr "Fin"
 
@@ -2622,9 +2638,21 @@ msgstr "Fin"
 msgid "End User License Agreement"
 msgstr "Contrat de licence utilisateur"
 
+#: components/Schedule/shared/DateTimePicker.js:51
+msgid "End date"
+msgstr ""
+
+#: components/Schedule/shared/FrequencyDetailSubform.js:542
+msgid "End date/time"
+msgstr ""
+
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
 msgstr "La fin ne correspondait pas à une valeur attendue"
+
+#: components/Schedule/shared/DateTimePicker.js:61
+msgid "End time"
+msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2653,36 +2681,42 @@ msgstr "Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilis
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr "Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:180
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "Entrez une balise d'annotation par ligne, sans virgule."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:231
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:232
 msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
 msgstr "Saisir un canal IRC ou un nom d'utilisateur par ligne. Le symbole dièse (#) pour les canaux et (@) pour le utilisateurs, ne sont pas nécessaires."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:364
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 msgstr "Saisir un canal Slack par ligne. Le symbole dièse (#) est exigé pour les canaux."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:89
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
 msgstr "Saisir une adresse email par ligne pour créer une liste des destinataires pour ce type de notification."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages."
+#~ msgstr "Saisir un numéro de téléphone par ligne pour spécifier où envoyer les messages SMS."
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:414
 msgid ""
 "Enter one phone number per line to specify where to\n"
-"route SMS messages."
-msgstr "Saisir un numéro de téléphone par ligne pour spécifier où envoyer les messages SMS."
+"route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
+msgstr ""
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:403
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:404
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
@@ -2729,7 +2763,7 @@ msgid "Enter variables using either JSON or YAML syntax. Use the radio button to
 msgstr "Entrez les variables avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux."
 
 #: components/JobList/JobList.js:226
-#: components/StatusLabel/StatusLabel.js:57
+#: components/StatusLabel/StatusLabel.js:60
 #: components/Workflow/WorkflowNodeHelp.js:108
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:129
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:205
@@ -2789,8 +2823,9 @@ msgstr "Erreur lors de la sauvegarde du flux de travail !"
 #: screens/Host/HostDetail/HostDetail.js:125
 #: screens/Host/HostGroups/HostGroupsList.js:244
 #: screens/Host/HostList/HostList.js:222
-#: screens/InstanceGroup/Instances/InstanceList.js:252
-#: screens/InstanceGroup/Instances/InstanceListItem.js:167
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:294
+#: screens/InstanceGroup/Instances/InstanceList.js:289
+#: screens/InstanceGroup/Instances/InstanceListItem.js:211
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:140
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:77
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:282
@@ -2811,7 +2846,7 @@ msgstr "Erreur lors de la sauvegarde du flux de travail !"
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:125
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:384
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:220
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:167
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:166
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:184
 #: screens/Organization/OrganizationList/OrganizationList.js:195
 #: screens/Project/ProjectDetail/ProjectDetail.js:287
@@ -2849,6 +2884,10 @@ msgstr "Erreur !"
 #: components/CodeEditor/VariablesDetail.js:105
 msgid "Error:"
 msgstr "Erreur :"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:256
+msgid "Errors"
+msgstr ""
 
 #: screens/ActivityStream/ActivityStream.js:252
 #: screens/ActivityStream/ActivityStreamListItem.js:46
@@ -2922,9 +2961,9 @@ msgstr "Exécuter lorsque le nœud parent se trouve dans un état de réussite."
 #: components/AdHocCommands/useAdHocExecutionEnvironmentStep.jsx:15
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:41
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:104
-#: components/Lookup/ExecutionEnvironmentLookup.js:158
-#: components/Lookup/ExecutionEnvironmentLookup.js:189
-#: components/Lookup/ExecutionEnvironmentLookup.js:211
+#: components/Lookup/ExecutionEnvironmentLookup.js:156
+#: components/Lookup/ExecutionEnvironmentLookup.js:187
+#: components/Lookup/ExecutionEnvironmentLookup.js:203
 msgid "Execution Environment"
 msgstr "Environnement d'exécution"
 
@@ -2948,7 +2987,7 @@ msgstr "Environnement d'exécution manquant"
 msgid "Execution Environments"
 msgstr "Environnements d'exécution"
 
-#: screens/Job/JobDetail/JobDetail.js:286
+#: screens/Job/JobDetail/JobDetail.js:280
 msgid "Execution Node"
 msgstr "Nœud d'exécution"
 
@@ -3008,7 +3047,7 @@ msgstr "Expire UTC"
 msgid "Expires on {0}"
 msgstr "Expire le {0}"
 
-#: components/JobList/JobListItem.js:263
+#: components/JobList/JobListItem.js:265
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:119
 msgid "Explanation"
 msgstr "Explication"
@@ -3045,7 +3084,7 @@ msgid "Facts"
 msgstr "Facts"
 
 #: components/JobList/JobList.js:225
-#: components/StatusLabel/StatusLabel.js:56
+#: components/StatusLabel/StatusLabel.js:59
 #: components/Workflow/WorkflowNodeHelp.js:105
 #: screens/Dashboard/shared/ChartTooltip.js:66
 #: screens/Job/JobOutput/shared/HostStatusBar.js:47
@@ -3088,7 +3127,7 @@ msgid "Failed to associate role"
 msgstr "N'a pas réussi à associer le rôle"
 
 #: screens/Host/HostGroups/HostGroupsList.js:248
-#: screens/InstanceGroup/Instances/InstanceList.js:256
+#: screens/InstanceGroup/Instances/InstanceList.js:292
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:285
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:265
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:267
@@ -3111,7 +3150,7 @@ msgid "Failed to cancel one or more jobs."
 msgstr "N'a pas réussi à supprimer un ou plusieurs Jobs"
 
 #: components/JobList/JobListItem.js:107
-#: screens/Job/JobDetail/JobDetail.js:482
+#: screens/Job/JobDetail/JobDetail.js:476
 #: screens/Job/JobOutput/shared/OutputToolbar.js:136
 msgid "Failed to cancel {0}"
 msgstr "Échec de l'annulation {0}"
@@ -3120,11 +3159,11 @@ msgstr "Échec de l'annulation {0}"
 msgid "Failed to copy credential."
 msgstr "N'a pas réussi à copier les identifiants"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:99
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:101
 msgid "Failed to copy execution environment"
 msgstr "Échec de la copie de l'environnement d'exécution"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:145
+#: screens/Inventory/InventoryList/InventoryListItem.js:144
 msgid "Failed to copy inventory."
 msgstr "N'a pas réussi à copier l'inventaire."
 
@@ -3133,7 +3172,7 @@ msgid "Failed to copy project."
 msgstr "Le projet n'a pas été copié."
 
 #: components/TemplateList/TemplateListItem.js:236
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:158
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:157
 msgid "Failed to copy template."
 msgstr "Impossible de copier le modèle."
 
@@ -3319,7 +3358,8 @@ msgstr "N'a pas réussi à dissocier un ou plusieurs groupes."
 msgid "Failed to disassociate one or more hosts."
 msgstr "N'a pas réussi à dissocier un ou plusieurs hôtes."
 
-#: screens/InstanceGroup/Instances/InstanceList.js:257
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:299
+#: screens/InstanceGroup/Instances/InstanceList.js:294
 msgid "Failed to disassociate one or more instances."
 msgstr "N'a pas réussi à dissocier une ou plusieurs instances."
 
@@ -3353,7 +3393,11 @@ msgstr "Echec de la récupération de l'objet ressource de noeud complet."
 msgid "Failed to retrieve node credentials."
 msgstr "Impossible de récupérer les informations d'identification des nœuds."
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:170
+#: screens/InstanceGroup/Instances/InstanceList.js:296
+msgid "Failed to run a health check on one or more instances."
+msgstr ""
+
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:169
 msgid "Failed to send test notification."
 msgstr "Échec de l'envoi de la notification de test."
 
@@ -3385,7 +3429,8 @@ msgstr "N'a pas réussi à basculer la notification."
 msgid "Failed to toggle schedule."
 msgstr "Impossible de basculer le calendrier."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:171
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:298
+#: screens/InstanceGroup/Instances/InstanceListItem.js:215
 msgid "Failed to update capacity adjustment."
 msgstr "Échec de la mise à jour de l'ajustement des capacités."
 
@@ -3412,7 +3457,7 @@ msgstr "Échec"
 msgid "False"
 msgstr "Faux"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:113
+#: components/Schedule/shared/FrequencyDetailSubform.js:115
 msgid "February"
 msgstr "Février"
 
@@ -3436,7 +3481,7 @@ msgstr "Le champ correspond à l'expression régulière donnée."
 msgid "Field starts with value."
 msgstr "Le champ commence par la valeur."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:397
+#: components/Schedule/shared/FrequencyDetailSubform.js:399
 msgid "Fifth"
 msgstr "Cinquième"
 
@@ -3462,12 +3507,12 @@ msgstr ""
 msgid "Finish Time"
 msgstr "Heure de Fin"
 
-#: screens/Job/JobDetail/JobDetail.js:145
+#: screens/Job/JobDetail/JobDetail.js:139
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:161
 msgid "Finished"
 msgstr "Terminé"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:385
+#: components/Schedule/shared/FrequencyDetailSubform.js:387
 msgid "First"
 msgstr "Première"
 
@@ -3534,25 +3579,25 @@ msgstr "Pour plus d'informations, reportez-vous à"
 msgid "Forks"
 msgstr "Forks"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:395
+#: components/Schedule/shared/FrequencyDetailSubform.js:397
 msgid "Fourth"
 msgstr "Quatrième"
 
-#: components/Schedule/shared/ScheduleForm.js:174
+#: components/Schedule/shared/ScheduleForm.js:175
 msgid "Frequency Details"
 msgstr "Informations sur la fréquence"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:196
+#: components/Schedule/shared/FrequencyDetailSubform.js:198
 #: components/Schedule/shared/buildRuleObj.js:71
 msgid "Frequency did not match an expected value"
 msgstr "La fréquence ne correspondait pas à une valeur attendue"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:293
+#: components/Schedule/shared/FrequencyDetailSubform.js:295
 msgid "Fri"
 msgstr "Ven."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:298
-#: components/Schedule/shared/FrequencyDetailSubform.js:434
+#: components/Schedule/shared/FrequencyDetailSubform.js:300
+#: components/Schedule/shared/FrequencyDetailSubform.js:436
 msgid "Friday"
 msgstr "Vendredi"
 
@@ -3638,11 +3683,11 @@ msgid "GitLab"
 msgstr "GitLab"
 
 #: components/Lookup/ExecutionEnvironmentLookup.js:206
-msgid "Global Default Execution Environment"
-msgstr "Environnement d'exécution global par défaut"
+#~ msgid "Global Default Execution Environment"
+#~ msgstr "Environnement d'exécution global par défaut"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:76
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:71
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:73
 msgid "Globally Available"
 msgstr "Disponible dans le monde entier"
 
@@ -3683,12 +3728,12 @@ msgstr "Google OAuth2"
 msgid "Grafana"
 msgstr "Grafana"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:157
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:158
 msgid "Grafana API key"
 msgstr "Clé API Grafana"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:141
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:146
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:147
 msgid "Grafana URL"
 msgstr "URL Grafana"
 
@@ -3720,21 +3765,30 @@ msgstr "Type de groupe"
 #: screens/Inventory/Inventory.js:64
 #: screens/Inventory/InventoryHost/InventoryHost.js:83
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:248
-#: screens/Inventory/InventoryList/InventoryListItem.js:110
+#: screens/Inventory/InventoryList/InventoryListItem.js:109
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:250
 #: util/getRelatedResourceDeleteDetails.js:118
 msgid "Groups"
 msgstr "Groupes"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:330
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:463
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:464
 msgid "HTTP Headers"
 msgstr "En-têtes HTTP"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:325
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:477
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:478
 msgid "HTTP Method"
 msgstr "Méthode HTTP"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:273
+#: screens/InstanceGroup/Instances/InstanceList.js:234
+msgid "Health Check"
+msgstr ""
+
+#: components/StatusLabel/StatusLabel.js:57
+msgid "Healthy"
+msgstr ""
 
 #: components/AppContainer/PageHeaderToolbar.js:115
 msgid "Help"
@@ -3755,7 +3809,7 @@ msgid "Hipchat"
 msgstr "HipChat"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:109
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:75
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:76
 msgid "Host"
 msgstr "Hôte"
 
@@ -3794,6 +3848,7 @@ msgstr "Échec de l'hôte"
 msgid "Host Filter"
 msgstr "Filtre d'hôte"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:192
 #: screens/Job/JobOutput/HostEventModal.js:118
 msgid "Host Name"
 msgstr "Nom d'hôte"
@@ -3878,7 +3933,7 @@ msgstr "Hôtes importés"
 msgid "Hosts remaining"
 msgstr "Hôtes restants"
 
-#: components/Schedule/shared/ScheduleForm.js:152
+#: components/Schedule/shared/ScheduleForm.js:153
 msgid "Hour"
 msgstr "Heure"
 
@@ -3896,11 +3951,11 @@ msgstr "ID du tableau de bord (facultatif)"
 msgid "ID of the Panel"
 msgstr "ID du panneau (facultatif)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:164
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:165
 msgid "ID of the dashboard (optional)"
 msgstr "ID du tableau de bord (facultatif)"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:170
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:171
 msgid "ID of the panel (optional)"
 msgstr "ID du panneau (facultatif)"
 
@@ -3921,26 +3976,26 @@ msgstr "Adresse du serveur IRC"
 msgid "IRC Server Port"
 msgstr "Port du serveur IRC"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:218
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:219
 msgid "IRC nick"
 msgstr "IRC nick"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:210
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:211
 msgid "IRC server address"
 msgstr "Adresse du serveur IRC"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:196
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:197
 msgid "IRC server password"
 msgstr "Mot de passe du serveur IRC"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:201
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:202
 msgid "IRC server port"
 msgstr "Port du serveur IRC"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:214
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:259
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:269
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:340
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:270
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:341
 msgid "Icon URL"
 msgstr "Icône URL"
 
@@ -4032,7 +4087,7 @@ msgstr "Si vous voulez que la source de l'inventaire soit mise à jour au lancem
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:127
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:133
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:152
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:62
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:64
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:96
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:90
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:109
@@ -4096,7 +4151,7 @@ msgstr "Insights - Tableau de bord de la plate-forme d'automatisation Ansible"
 msgid "Insights system ID"
 msgstr "ID du système Insights"
 
-#: screens/Metrics/Metrics.js:180
+#: screens/Metrics/Metrics.js:187
 msgid "Instance"
 msgstr "Instance"
 
@@ -4104,7 +4159,7 @@ msgstr "Instance"
 msgid "Instance Filters"
 msgstr "Filtres de l'instance"
 
-#: screens/Job/JobDetail/JobDetail.js:292
+#: screens/Job/JobDetail/JobDetail.js:286
 msgid "Instance Group"
 msgstr "Groupe d'instance"
 
@@ -4128,6 +4183,10 @@ msgstr "Groupes d'instances"
 msgid "Instance ID"
 msgstr "ID d'instance"
 
+#: screens/InstanceGroup/InstanceGroups.js:53
+msgid "Instance details"
+msgstr ""
+
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:59
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:69
 msgid "Instance group"
@@ -4137,7 +4196,7 @@ msgstr "Groupe d'instance"
 msgid "Instance group not found."
 msgstr "Groupe d'instance non trouvé."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:146
+#: screens/InstanceGroup/Instances/InstanceListItem.js:172
 msgid "Instance group used capacity"
 msgstr "La capacité utilisée par le groupe d'instances"
 
@@ -4149,8 +4208,8 @@ msgstr "Groupes d'instances"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:284
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:73
 #: screens/InstanceGroup/InstanceGroups.js:51
-#: screens/InstanceGroup/Instances/InstanceList.js:158
-#: screens/InstanceGroup/Instances/InstanceList.js:238
+#: screens/InstanceGroup/Instances/InstanceList.js:170
+#: screens/InstanceGroup/Instances/InstanceList.js:275
 msgid "Instances"
 msgstr "Instances"
 
@@ -4190,7 +4249,7 @@ msgstr "Nom d’utilisateur et/ou mot de passe non valide. Veuillez réessayer."
 msgid "Inventories"
 msgstr "Inventaires"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:136
+#: screens/Inventory/InventoryList/InventoryListItem.js:135
 msgid "Inventories with sources cannot be copied"
 msgstr "Les inventaires et les sources ne peuvent pas être copiés"
 
@@ -4218,11 +4277,11 @@ msgstr "Les inventaires et les sources ne peuvent pas être copiés"
 #: screens/Host/HostList/HostListItem.js:55
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:72
 #: screens/Inventory/InventoryList/InventoryList.js:171
-#: screens/Inventory/InventoryList/InventoryListItem.js:100
+#: screens/Inventory/InventoryList/InventoryListItem.js:99
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:39
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.js:105
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:39
-#: screens/Job/JobDetail/JobDetail.js:193
+#: screens/Job/JobDetail/JobDetail.js:187
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:199
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:206
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:140
@@ -4241,11 +4300,11 @@ msgstr "Fichier d'inventaire"
 msgid "Inventory ID"
 msgstr "ID Inventaire"
 
-#: screens/Job/JobDetail/JobDetail.js:211
+#: screens/Job/JobDetail/JobDetail.js:205
 msgid "Inventory Source"
 msgstr "Sources d'inventaire"
 
-#: screens/Job/JobDetail/JobDetail.js:234
+#: screens/Job/JobDetail/JobDetail.js:228
 msgid "Inventory Source Project"
 msgstr "Projet Source d’inventaire"
 
@@ -4269,7 +4328,7 @@ msgstr "Sources d'inventaire"
 #: components/JobList/JobListItem.js:37
 #: components/Schedule/ScheduleList/ScheduleListItem.js:36
 #: components/Workflow/WorkflowLegend.js:100
-#: screens/Job/JobDetail/JobDetail.js:77
+#: screens/Job/JobDetail/JobDetail.js:71
 msgid "Inventory Sync"
 msgstr "Sync Inventaires"
 
@@ -4347,7 +4406,7 @@ msgstr "Onglet JSON"
 msgid "JSON:"
 msgstr "JSON :"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:108
+#: components/Schedule/shared/FrequencyDetailSubform.js:110
 msgid "January"
 msgstr "Janvier"
 
@@ -4357,20 +4416,20 @@ msgid "Job"
 msgstr "Job"
 
 #: components/JobList/JobListItem.js:105
-#: screens/Job/JobDetail/JobDetail.js:480
+#: screens/Job/JobDetail/JobDetail.js:474
 #: screens/Job/JobOutput/JobOutput.js:557
 #: screens/Job/JobOutput/JobOutput.js:558
 #: screens/Job/JobOutput/shared/OutputToolbar.js:134
 msgid "Job Cancel Error"
 msgstr "Erreur d'annulation d'un Job"
 
-#: screens/Job/JobDetail/JobDetail.js:502
+#: screens/Job/JobDetail/JobDetail.js:496
 #: screens/Job/JobOutput/JobOutput.js:546
 #: screens/Job/JobOutput/JobOutput.js:547
 msgid "Job Delete Error"
 msgstr "Erreur de suppression d’un Job"
 
-#: screens/Job/JobDetail/JobDetail.js:123
+#: screens/Job/JobDetail/JobDetail.js:117
 msgid "Job ID"
 msgstr "ID Job"
 
@@ -4378,13 +4437,13 @@ msgstr "ID Job"
 msgid "Job Runs"
 msgstr "Exécutions Job"
 
-#: components/JobList/JobListItem.js:270
-#: screens/Job/JobDetail/JobDetail.js:307
+#: components/JobList/JobListItem.js:272
+#: screens/Job/JobDetail/JobDetail.js:301
 msgid "Job Slice"
 msgstr "Tranche de job"
 
-#: components/JobList/JobListItem.js:275
-#: screens/Job/JobDetail/JobDetail.js:314
+#: components/JobList/JobListItem.js:277
+#: screens/Job/JobDetail/JobDetail.js:308
 msgid "Job Slice Parent"
 msgstr "Parent de tranche de job"
 
@@ -4403,7 +4462,7 @@ msgstr "Statut Job"
 #: components/PromptDetail/PromptDetail.js:219
 #: components/PromptDetail/PromptJobTemplateDetail.js:242
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:344
-#: screens/Job/JobDetail/JobDetail.js:368
+#: screens/Job/JobDetail/JobDetail.js:362
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:336
 #: screens/Template/shared/JobTemplateForm.js:519
 msgid "Job Tags"
@@ -4415,7 +4474,7 @@ msgstr "Balises Job"
 #: components/Workflow/WorkflowNodeHelp.js:59
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:98
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:14
-#: screens/Job/JobDetail/JobDetail.js:152
+#: screens/Job/JobDetail/JobDetail.js:146
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:93
 msgid "Job Template"
 msgstr "Modèle de Job"
@@ -4436,7 +4495,7 @@ msgstr "Modèles de Jobs"
 msgid "Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed."
 msgstr "Les modèles de Job dont l'inventaire ou le projet est manquant ne peuvent pas être sélectionnés lors de la création ou de la modification de nœuds.  Sélectionnez un autre modèle ou corrigez les champs manquants pour continuer."
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useWorkflowNodeSteps.js:309
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useWorkflowNodeSteps.js:316
 msgid "Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes"
 msgstr "Les modèles de Job dont les informations d'identification demandent un mot de passe ne peuvent pas être sélectionnés lors de la création ou de la modification de nœuds"
 
@@ -4445,7 +4504,7 @@ msgstr "Les modèles de Job dont les informations d'identification demandent un 
 #: components/PromptDetail/PromptDetail.js:169
 #: components/PromptDetail/PromptJobTemplateDetail.js:107
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:293
-#: screens/Job/JobDetail/JobDetail.js:186
+#: screens/Job/JobDetail/JobDetail.js:180
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:182
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:137
 #: screens/Template/shared/JobTemplateForm.js:250
@@ -4475,8 +4534,8 @@ msgstr "Modèles de Jobs"
 #: screens/Host/Hosts.js:31
 #: screens/InstanceGroup/ContainerGroup.js:80
 #: screens/InstanceGroup/InstanceGroup.js:86
-#: screens/InstanceGroup/InstanceGroups.js:52
-#: screens/InstanceGroup/InstanceGroups.js:57
+#: screens/InstanceGroup/InstanceGroups.js:54
+#: screens/InstanceGroup/InstanceGroups.js:59
 #: screens/Inventory/Inventories.js:59
 #: screens/Inventory/Inventories.js:68
 #: screens/Inventory/Inventory.js:68
@@ -4496,11 +4555,11 @@ msgstr "Jobs"
 msgid "Jobs settings"
 msgstr "Paramètres Job"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:138
+#: components/Schedule/shared/FrequencyDetailSubform.js:140
 msgid "July"
 msgstr "Juillet"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:133
+#: components/Schedule/shared/FrequencyDetailSubform.js:135
 msgid "June"
 msgstr "Juin"
 
@@ -4577,11 +4636,11 @@ msgstr "LDAP5"
 msgid "Label Name"
 msgstr "Nom du label"
 
-#: components/JobList/JobListItem.js:248
+#: components/JobList/JobListItem.js:250
 #: components/PromptDetail/PromptJobTemplateDetail.js:209
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:114
 #: components/TemplateList/TemplateListItem.js:332
-#: screens/Job/JobDetail/JobDetail.js:352
+#: screens/Job/JobDetail/JobDetail.js:346
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:303
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:188
 #: screens/Template/shared/JobTemplateForm.js:391
@@ -4589,9 +4648,15 @@ msgstr "Nom du label"
 msgid "Labels"
 msgstr "Libellés"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:398
+#: components/Schedule/shared/FrequencyDetailSubform.js:400
 msgid "Last"
 msgstr "Dernier"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:209
+#: screens/InstanceGroup/Instances/InstanceListItem.js:139
+#: screens/InstanceGroup/Instances/InstanceListItem.js:201
+msgid "Last Health Check"
+msgstr ""
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:185
 #: screens/Project/ProjectDetail/ProjectDetail.js:142
@@ -4606,7 +4671,7 @@ msgstr "Dernière connexion"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:282
 #: components/TemplateList/TemplateListItem.js:308
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:101
-#: screens/Application/ApplicationsList/ApplicationListItem.js:43
+#: screens/Application/ApplicationsList/ApplicationListItem.js:42
 #: screens/Application/ApplicationsList/ApplicationsList.js:159
 #: screens/Credential/CredentialDetail/CredentialDetail.js:250
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:91
@@ -4617,7 +4682,7 @@ msgstr "Dernière connexion"
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:108
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:44
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:85
-#: screens/Job/JobDetail/JobDetail.js:420
+#: screens/Job/JobDetail/JobDetail.js:414
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:344
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:110
 #: screens/Project/ProjectDetail/ProjectDetail.js:236
@@ -4748,7 +4813,7 @@ msgstr "Moins ou égal à la comparaison."
 #: components/PromptDetail/PromptJobTemplateDetail.js:155
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:88
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:321
-#: screens/Job/JobDetail/JobDetail.js:271
+#: screens/Job/JobDetail/JobDetail.js:265
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:230
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:147
 #: screens/Template/shared/JobTemplateForm.js:440
@@ -4772,7 +4837,7 @@ msgstr "Local"
 msgid "Local Time Zone"
 msgstr "Fuseau horaire local"
 
-#: components/Schedule/shared/ScheduleForm.js:129
+#: components/Schedule/shared/ScheduleForm.js:130
 msgid "Local time zone"
 msgstr "Fuseau horaire local"
 
@@ -4795,7 +4860,7 @@ msgid "Logout"
 msgstr "Déconnexion"
 
 #: components/Lookup/HostFilterLookup.js:338
-#: components/Lookup/Lookup.js:173
+#: components/Lookup/Lookup.js:174
 msgid "Lookup modal"
 msgstr "Recherche modale"
 
@@ -4821,7 +4886,7 @@ msgstr "DERNIÈRE SYNCHRONISATION"
 #: components/AdHocCommands/AdHocCredentialStep.js:97
 #: components/AdHocCommands/AdHocCredentialStep.js:98
 #: components/AdHocCommands/AdHocCredentialStep.js:112
-#: screens/Job/JobDetail/JobDetail.js:322
+#: screens/Job/JobDetail/JobDetail.js:316
 msgid "Machine Credential"
 msgstr "Informations d’identification de la machine"
 
@@ -4839,7 +4904,7 @@ msgstr "Nœuds gérés"
 #: components/Schedule/ScheduleList/ScheduleListItem.js:39
 #: components/Workflow/WorkflowLegend.js:108
 #: components/Workflow/WorkflowNodeHelp.js:79
-#: screens/Job/JobDetail/JobDetail.js:80
+#: screens/Job/JobDetail/JobDetail.js:74
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:105
 msgid "Management Job"
 msgstr "Job de gestion"
@@ -4870,7 +4935,8 @@ msgstr "Jobs de gestion"
 #: components/PromptDetail/PromptProjectDetail.js:95
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:88
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:157
-#: screens/InstanceGroup/Instances/InstanceListItem.js:120
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:204
+#: screens/InstanceGroup/Instances/InstanceListItem.js:198
 #: screens/Project/ProjectDetail/ProjectDetail.js:173
 #: screens/Project/ProjectList/ProjectList.js:183
 #: screens/Project/ProjectList/ProjectListItem.js:206
@@ -4878,7 +4944,7 @@ msgstr "Jobs de gestion"
 msgid "Manual"
 msgstr "Manuel"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:118
+#: components/Schedule/shared/FrequencyDetailSubform.js:120
 msgid "March"
 msgstr "Mars"
 
@@ -4900,12 +4966,12 @@ msgstr "Maximum"
 msgid "Maximum length"
 msgstr "Longueur maximale"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:128
+#: components/Schedule/shared/FrequencyDetailSubform.js:130
 msgid "May"
 msgstr "Mai"
 
 #: screens/Organization/OrganizationList/OrganizationList.js:144
-#: screens/Organization/OrganizationList/OrganizationListItem.js:62
+#: screens/Organization/OrganizationList/OrganizationListItem.js:63
 msgid "Members"
 msgstr "Membres"
 
@@ -4913,11 +4979,11 @@ msgstr "Membres"
 msgid "Metadata"
 msgstr "Métadonnées"
 
-#: screens/Metrics/Metrics.js:200
+#: screens/Metrics/Metrics.js:207
 msgid "Metric"
 msgstr "Métrique"
 
-#: screens/Metrics/Metrics.js:172
+#: screens/Metrics/Metrics.js:179
 msgid "Metrics"
 msgstr "Métriques"
 
@@ -4945,7 +5011,7 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr "Le pourcentage minimum de toutes les instances qui seront automatiquement assignées à ce groupe lorsque de nouvelles instances seront mises en ligne."
 
-#: components/Schedule/shared/ScheduleForm.js:151
+#: components/Schedule/shared/ScheduleForm.js:152
 msgid "Minute"
 msgstr "Minute"
 
@@ -5035,24 +5101,24 @@ msgstr "Modifié par (username)"
 msgid "Module"
 msgstr "Module"
 
-#: screens/Job/JobDetail/JobDetail.js:409
+#: screens/Job/JobDetail/JobDetail.js:403
 msgid "Module Arguments"
 msgstr "Arguments du module"
 
-#: screens/Job/JobDetail/JobDetail.js:404
+#: screens/Job/JobDetail/JobDetail.js:398
 msgid "Module Name"
 msgstr "Nom du module"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:253
+#: components/Schedule/shared/FrequencyDetailSubform.js:255
 msgid "Mon"
 msgstr "Lun."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:258
-#: components/Schedule/shared/FrequencyDetailSubform.js:414
+#: components/Schedule/shared/FrequencyDetailSubform.js:260
+#: components/Schedule/shared/FrequencyDetailSubform.js:416
 msgid "Monday"
 msgstr "Lundi"
 
-#: components/Schedule/shared/ScheduleForm.js:155
+#: components/Schedule/shared/ScheduleForm.js:156
 msgid "Month"
 msgstr "Mois"
 
@@ -5060,7 +5126,7 @@ msgstr "Mois"
 msgid "More information"
 msgstr "Plus d'informations"
 
-#: screens/Setting/shared/SharedFields.js:72
+#: screens/Setting/shared/SharedFields.js:73
 msgid "More information for"
 msgstr "Plus d'informations pour"
 
@@ -5107,8 +5173,8 @@ msgstr "Options à choix multiples."
 #: components/Lookup/ApplicationLookup.js:110
 #: components/Lookup/CredentialLookup.js:188
 #: components/Lookup/CredentialLookup.js:203
-#: components/Lookup/ExecutionEnvironmentLookup.js:175
-#: components/Lookup/ExecutionEnvironmentLookup.js:182
+#: components/Lookup/ExecutionEnvironmentLookup.js:173
+#: components/Lookup/ExecutionEnvironmentLookup.js:180
 #: components/Lookup/HostFilterLookup.js:83
 #: components/Lookup/HostFilterLookup.js:373
 #: components/Lookup/HostListItem.js:8
@@ -5135,7 +5201,7 @@ msgstr "Options à choix multiples."
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:188
 #: components/Schedule/ScheduleList/ScheduleListItem.js:77
-#: components/Schedule/shared/ScheduleForm.js:104
+#: components/Schedule/shared/ScheduleForm.js:105
 #: components/TemplateList/TemplateList.js:190
 #: components/TemplateList/TemplateList.js:223
 #: components/TemplateList/TemplateListItem.js:134
@@ -5156,7 +5222,7 @@ msgstr "Options à choix multiples."
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:135
 #: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:28
 #: screens/Application/Applications.js:78
-#: screens/Application/ApplicationsList/ApplicationListItem.js:31
+#: screens/Application/ApplicationsList/ApplicationListItem.js:30
 #: screens/Application/ApplicationsList/ApplicationsList.js:118
 #: screens/Application/ApplicationsList/ApplicationsList.js:155
 #: screens/Application/shared/ApplicationForm.js:52
@@ -5170,12 +5236,12 @@ msgstr "Options à choix multiples."
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:68
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:123
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:176
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:31
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:30
 #: screens/CredentialType/shared/CredentialTypeForm.js:21
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:47
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:122
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:151
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:57
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:58
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:90
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:116
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:9
@@ -5191,10 +5257,10 @@ msgstr "Options à choix multiples."
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:50
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:280
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:61
-#: screens/InstanceGroup/Instances/InstanceList.js:165
-#: screens/InstanceGroup/Instances/InstanceList.js:172
-#: screens/InstanceGroup/Instances/InstanceList.js:214
-#: screens/InstanceGroup/Instances/InstanceListItem.js:115
+#: screens/InstanceGroup/Instances/InstanceList.js:177
+#: screens/InstanceGroup/Instances/InstanceList.js:184
+#: screens/InstanceGroup/Instances/InstanceList.js:250
+#: screens/InstanceGroup/Instances/InstanceListItem.js:130
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:46
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:21
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:67
@@ -5215,7 +5281,7 @@ msgstr "Options à choix multiples."
 #: screens/Inventory/InventoryList/InventoryList.js:163
 #: screens/Inventory/InventoryList/InventoryList.js:194
 #: screens/Inventory/InventoryList/InventoryList.js:203
-#: screens/Inventory/InventoryList/InventoryListItem.js:85
+#: screens/Inventory/InventoryList/InventoryListItem.js:84
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:179
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:194
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:231
@@ -5237,7 +5303,7 @@ msgstr "Options à choix multiples."
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:73
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:137
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:193
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:110
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:109
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:41
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:91
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:85
@@ -5245,7 +5311,7 @@ msgstr "Options à choix multiples."
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.js:13
 #: screens/Organization/OrganizationList/OrganizationList.js:122
 #: screens/Organization/OrganizationList/OrganizationList.js:143
-#: screens/Organization/OrganizationList/OrganizationListItem.js:44
+#: screens/Organization/OrganizationList/OrganizationListItem.js:45
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:68
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:85
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:14
@@ -5265,8 +5331,8 @@ msgstr "Options à choix multiples."
 #: screens/Team/TeamList/TeamListItem.js:33
 #: screens/Team/shared/TeamForm.js:29
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:180
-#: screens/Template/Survey/SurveyList.js:112
-#: screens/Template/Survey/SurveyList.js:112
+#: screens/Template/Survey/SurveyList.js:102
+#: screens/Template/Survey/SurveyList.js:102
 #: screens/Template/Survey/SurveyListItem.js:39
 #: screens/Template/Survey/SurveyReorderModal.js:206
 #: screens/Template/Survey/SurveyReorderModal.js:206
@@ -5305,7 +5371,7 @@ msgstr "Nom"
 msgid "Navigation"
 msgstr "Navigation"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:493
+#: components/Schedule/shared/FrequencyDetailSubform.js:495
 #: screens/Dashboard/shared/ChartTooltip.js:106
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:91
 msgid "Never"
@@ -5375,7 +5441,7 @@ msgstr "Aucune erreur standard disponible"
 msgid "No Standard Out Available"
 msgstr "Aucune sortie standard disponible"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:69
+#: screens/Inventory/InventoryList/InventoryListItem.js:68
 msgid "No inventory sync failures."
 msgstr "Aucune erreurs de synchronisation des inventaires"
 
@@ -5418,7 +5484,7 @@ msgstr "Aucun résultat trouvé"
 msgid "No subscriptions found"
 msgstr "Aucun abonnement trouvé"
 
-#: screens/Template/Survey/SurveyList.js:156
+#: screens/Template/Survey/SurveyList.js:147
 msgid "No survey questions found."
 msgstr "Aucune question d'enquête trouvée."
 
@@ -5434,8 +5500,8 @@ msgid "Node Alias"
 msgstr "Alias de nœud"
 
 #: components/AssociateModal/AssociateModal.js:23
-#: screens/InstanceGroup/Instances/InstanceList.js:215
-#: screens/InstanceGroup/Instances/InstanceListItem.js:118
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:212
+#: screens/InstanceGroup/Instances/InstanceListItem.js:195
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:72
 msgid "Node Type"
 msgstr "Type de nœud"
@@ -5452,7 +5518,7 @@ msgstr "Aucun"
 msgid "None (Run Once)"
 msgstr "Aucun (exécution unique)"
 
-#: components/Schedule/shared/ScheduleForm.js:150
+#: components/Schedule/shared/ScheduleForm.js:151
 msgid "None (run once)"
 msgstr "Aucune (exécution unique)"
 
@@ -5471,7 +5537,7 @@ msgstr "Introuvable"
 msgid "Not configured"
 msgstr "Non configuré"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:72
+#: screens/Inventory/InventoryList/InventoryListItem.js:71
 msgid "Not configured for inventory sync."
 msgstr "Non configuré pour la synchronisation de l'inventaire."
 
@@ -5535,7 +5601,7 @@ msgstr "Modèles de notification"
 msgid "Notification Type"
 msgstr "Type de notification"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:376
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:377
 msgid "Notification color"
 msgstr "Couleur de la notification"
 
@@ -5568,7 +5634,7 @@ msgstr "Type de notification"
 msgid "Notifications"
 msgstr "Notifications"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:158
+#: components/Schedule/shared/FrequencyDetailSubform.js:160
 msgid "November"
 msgstr "Novembre"
 
@@ -5579,11 +5645,11 @@ msgid "OK"
 msgstr "OK"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:42
-#: components/Schedule/shared/FrequencyDetailSubform.js:527
+#: components/Schedule/shared/FrequencyDetailSubform.js:529
 msgid "Occurrences"
 msgstr "Occurrences"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:153
+#: components/Schedule/shared/FrequencyDetailSubform.js:155
 msgid "October"
 msgstr "Octobre"
 
@@ -5598,7 +5664,7 @@ msgstr "Octobre"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:58
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:98
-#: screens/Setting/shared/SharedFields.js:149
+#: screens/Setting/shared/SharedFields.js:150
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "Off"
@@ -5615,7 +5681,7 @@ msgstr "Désactivé"
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:57
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Setting/shared/SettingDetail.js:98
-#: screens/Setting/shared/SharedFields.js:148
+#: screens/Setting/shared/SharedFields.js:149
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "On"
@@ -5635,11 +5701,11 @@ msgstr "En cas d'échec"
 msgid "On Success"
 msgstr "En cas de succès"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:515
+#: components/Schedule/shared/FrequencyDetailSubform.js:517
 msgid "On date"
 msgstr "À la date du"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:239
+#: components/Schedule/shared/FrequencyDetailSubform.js:241
 msgid "On days"
 msgstr "Tels jours"
 
@@ -5696,17 +5762,17 @@ msgstr "Commande"
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:65
 #: components/TemplateList/TemplateListItem.js:264
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:68
-#: screens/Application/ApplicationsList/ApplicationListItem.js:36
+#: screens/Application/ApplicationsList/ApplicationListItem.js:35
 #: screens/Application/ApplicationsList/ApplicationsList.js:157
 #: screens/Credential/CredentialDetail/CredentialDetail.js:215
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:67
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:141
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:153
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:63
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:65
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:74
 #: screens/Inventory/InventoryList/InventoryList.js:176
 #: screens/Inventory/InventoryList/InventoryList.js:206
-#: screens/Inventory/InventoryList/InventoryListItem.js:102
+#: screens/Inventory/InventoryList/InventoryListItem.js:101
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:204
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:107
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:81
@@ -5761,7 +5827,7 @@ msgstr "Autres invites"
 msgid "Out of compliance"
 msgstr "Non-conformité"
 
-#: screens/Job/Job.js:116
+#: screens/Job/Job.js:117
 #: screens/Job/Jobs.js:27
 msgid "Output"
 msgstr "Sortie"
@@ -5784,11 +5850,11 @@ msgstr "Remplacer les variables locales de la source d'inventaire distante."
 msgid "Overwrite variables"
 msgstr "Remplacer les variables"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:489
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
 msgid "POST"
 msgstr "PUBLICATION"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:490
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:491
 msgid "PUT"
 msgstr "PLACER"
 
@@ -5801,7 +5867,7 @@ msgstr "Pagerduty"
 msgid "Pagerduty Subdomain"
 msgstr "Sous-domaine Pagerduty"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:295
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:296
 msgid "Pagerduty subdomain"
 msgstr "Sous-domaine Pagerduty"
 
@@ -5842,7 +5908,7 @@ msgid "Pass extra command line variables to the playbook. This is the -e or --ex
 msgstr "Transmettez des variables de ligne de commandes supplémentaires au playbook. Voici le paramètre de ligne de commande -e or --extra-vars pour ansible-playbook. Fournir la paire clé/valeur en utilisant YAML ou JSON. Consulter la documentation Ansible Tower pour obtenir des exemples de syntaxe."
 
 #: screens/Login/Login.js:193
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:70
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:71
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:101
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:214
 #: screens/Template/Survey/SurveyQuestionForm.js:82
@@ -5867,7 +5933,7 @@ msgid "Past week"
 msgstr "La semaine dernière"
 
 #: components/JobList/JobList.js:221
-#: components/StatusLabel/StatusLabel.js:59
+#: components/StatusLabel/StatusLabel.js:62
 #: components/Workflow/WorkflowNodeHelp.js:93
 msgid "Pending"
 msgstr "En attente"
@@ -5876,7 +5942,7 @@ msgstr "En attente"
 msgid "Pending Workflow Approvals"
 msgstr "En attente d'approbation des flux de travail"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:111
+#: screens/Inventory/InventoryList/InventoryListItem.js:110
 msgid "Pending delete"
 msgstr "En attente de suppression"
 
@@ -5906,14 +5972,14 @@ msgid "Play Started"
 msgstr "Play - Démarrage"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:153
-#: screens/Job/JobDetail/JobDetail.js:268
+#: screens/Job/JobDetail/JobDetail.js:262
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:228
 #: screens/Template/shared/JobTemplateForm.js:354
 msgid "Playbook"
 msgstr "Playbook"
 
 #: components/JobList/JobListItem.js:38
-#: screens/Job/JobDetail/JobDetail.js:78
+#: screens/Job/JobDetail/JobDetail.js:72
 msgid "Playbook Check"
 msgstr "Vérification du Playbook"
 
@@ -5930,7 +5996,7 @@ msgstr "Répertoire Playbook"
 #: components/JobList/JobList.js:206
 #: components/JobList/JobListItem.js:38
 #: components/Schedule/ScheduleList/ScheduleListItem.js:37
-#: screens/Job/JobDetail/JobDetail.js:78
+#: screens/Job/JobDetail/JobDetail.js:72
 msgid "Playbook Run"
 msgstr "Exécution Playbook"
 
@@ -5961,7 +6027,7 @@ msgstr "Veuillez ajouter une programmation pour remplir cette liste"
 msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
 msgstr "Veuillez ajouter une programmation pour remplir cette liste.  Les programmations peuvent être ajoutées à un modèle, un projet ou une source d'inventaire."
 
-#: screens/Template/Survey/SurveyList.js:158
+#: screens/Template/Survey/SurveyList.js:146
 msgid "Please add survey questions."
 msgstr "Veuillez ajouter des questions d'enquête."
 
@@ -5973,7 +6039,7 @@ msgstr "Veuillez ajouter {pluralizedItemName} pour remplir cette liste"
 msgid "Please click the Start button to begin."
 msgstr "Veuillez cliquer sur le bouton de démarrage pour commencer."
 
-#: util/validators.js:143
+#: util/validators.js:160
 msgid "Please enter a valid URL"
 msgstr "Veuillez entrer une URL valide"
 
@@ -6009,8 +6075,8 @@ msgstr "Veuillez sélectionner une organisation avant d'éditer le filtre de l'h
 msgid "Pod spec override"
 msgstr "Remplacement des spécifications du pod"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:216
-#: screens/InstanceGroup/Instances/InstanceListItem.js:119
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:203
+#: screens/InstanceGroup/Instances/InstanceListItem.js:197
 msgid "Policy Type"
 msgstr "Type de politique"
 
@@ -6039,7 +6105,7 @@ msgid ""
 msgstr "Remplissez les hôtes pour cet inventaire en utilisant un filtre de recherche. Exemple : ansible_facts.ansible_distribution : \"RedHat\". Reportez-vous à la documentation pour plus de syntaxe et d'exemples."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:124
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:103
 msgid "Port"
 msgstr "Port"
 
@@ -6063,7 +6129,8 @@ msgid ""
 "and use the arrow keys to navigate up or down.\n"
 "Press enter to confirm the drag, or any other key to\n"
 "cancel the drag operation."
-msgstr "Appuyez sur la touche Espace ou Entrée pour commencer à faire glisser,\n"
+msgstr ""
+"Appuyez sur la touche Espace ou Entrée pour commencer à faire glisser,\n"
 "et utilisez les touches fléchées pour vous déplacer vers le haut ou le bas.\n"
 "Appuyez sur la touche Entrée pour confirmer le déplacement, ou sur une autre touche pour annuler l'opération de déplacement\n"
 "pour annuler l'opération."
@@ -6096,7 +6163,7 @@ msgstr "Mot de passe pour l’élévation des privilèges"
 #: components/PromptDetail/PromptJobTemplateDetail.js:146
 #: components/TemplateList/TemplateListItem.js:292
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:218
-#: screens/Job/JobDetail/JobDetail.js:250
+#: screens/Job/JobDetail/JobDetail.js:244
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:210
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:218
 msgid "Project"
@@ -6148,8 +6215,8 @@ msgstr "Projets"
 msgid "Promote Child Groups and Hosts"
 msgstr "Promouvoir les groupes de dépendants et les hôtes"
 
-#: components/Schedule/shared/ScheduleForm.js:639
-#: components/Schedule/shared/ScheduleForm.js:642
+#: components/Schedule/shared/ScheduleForm.js:638
+#: components/Schedule/shared/ScheduleForm.js:641
 msgid "Prompt"
 msgstr "Invite"
 
@@ -6245,7 +6312,8 @@ msgstr "RADIUS"
 msgid "RADIUS settings"
 msgstr "Paramètres RADIUS"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:142
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:233
+#: screens/InstanceGroup/Instances/InstanceListItem.js:168
 msgid "RAM {0}"
 msgstr "RAM {0}"
 
@@ -6280,7 +6348,7 @@ msgstr "Jobs récents"
 msgid "Recipient List"
 msgstr "Liste de destinataires"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:83
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:84
 msgid "Recipient list"
 msgstr "Liste de destinataires"
 
@@ -6379,8 +6447,8 @@ msgstr "Recherche connexe : type typeahead"
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
-#: screens/Job/JobDetail/JobDetail.js:461
-#: screens/Job/JobDetail/JobDetail.js:469
+#: screens/Job/JobDetail/JobDetail.js:455
+#: screens/Job/JobDetail/JobDetail.js:463
 #: screens/Job/JobOutput/shared/OutputToolbar.js:165
 msgid "Relaunch"
 msgstr "Relancer"
@@ -6484,7 +6552,7 @@ msgstr "Obligatoire"
 msgid "Resource Name"
 msgstr "Nom de la ressource"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:219
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:222
 msgid "Resource deleted"
 msgstr "Ressource supprimée"
 
@@ -6560,7 +6628,7 @@ msgstr "Inverser les paramètres"
 msgid "Revert to factory default."
 msgstr "Revenir à la valeur usine par défaut."
 
-#: screens/Job/JobDetail/JobDetail.js:263
+#: screens/Job/JobDetail/JobDetail.js:257
 #: screens/Project/ProjectList/ProjectList.js:210
 #: screens/Project/ProjectList/ProjectListItem.js:208
 msgid "Revision"
@@ -6610,9 +6678,13 @@ msgstr "Exécuter"
 #: components/AdHocCommands/AdHocCommands.js:132
 #: components/AdHocCommands/AdHocCommands.js:138
 #: components/AdHocCommands/AdHocCommands.js:142
-#: screens/Job/JobDetail/JobDetail.js:79
+#: screens/Job/JobDetail/JobDetail.js:73
 msgid "Run Command"
 msgstr "Exécuter Commande"
+
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:266
+msgid "Run a health check on the instance"
+msgstr ""
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
@@ -6622,15 +6694,15 @@ msgstr "Exécuter une commande ad hoc"
 msgid "Run command"
 msgstr "Exécuter Commande"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:211
+#: components/Schedule/shared/FrequencyDetailSubform.js:213
 msgid "Run every"
 msgstr "Exécutez tous les"
 
-#: components/Schedule/shared/ScheduleForm.js:145
+#: components/Schedule/shared/ScheduleForm.js:146
 msgid "Run frequency"
 msgstr "Fréquence d'exécution"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:325
+#: components/Schedule/shared/FrequencyDetailSubform.js:327
 msgid "Run on"
 msgstr "Continuer"
 
@@ -6639,7 +6711,7 @@ msgid "Run type"
 msgstr "Type d’exécution"
 
 #: components/JobList/JobList.js:223
-#: components/StatusLabel/StatusLabel.js:58
+#: components/StatusLabel/StatusLabel.js:61
 #: components/TemplateList/TemplateListItem.js:113
 #: components/Workflow/WorkflowNodeHelp.js:99
 msgid "Running"
@@ -6649,9 +6721,10 @@ msgstr "En cours d'exécution"
 msgid "Running Handlers"
 msgstr "Descripteurs d'exécution"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:206
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:282
-#: screens/InstanceGroup/Instances/InstanceList.js:217
-#: screens/InstanceGroup/Instances/InstanceListItem.js:122
+#: screens/InstanceGroup/Instances/InstanceList.js:252
+#: screens/InstanceGroup/Instances/InstanceListItem.js:148
 msgid "Running Jobs"
 msgstr "Jobs en cours d'exécution"
 
@@ -6697,12 +6770,12 @@ msgstr "DÉMARRER"
 msgid "STATUS:"
 msgstr "ÉTAT :"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:303
+#: components/Schedule/shared/FrequencyDetailSubform.js:305
 msgid "Sat"
 msgstr "Sam."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:308
-#: components/Schedule/shared/FrequencyDetailSubform.js:439
+#: components/Schedule/shared/FrequencyDetailSubform.js:310
+#: components/Schedule/shared/FrequencyDetailSubform.js:441
 msgid "Saturday"
 msgstr "Samedi"
 
@@ -6711,8 +6784,8 @@ msgstr "Samedi"
 #: components/AssociateModal/AssociateModal.js:114
 #: components/FormActionGroup/FormActionGroup.js:13
 #: components/FormActionGroup/FormActionGroup.js:19
-#: components/Schedule/shared/ScheduleForm.js:625
-#: components/Schedule/shared/ScheduleForm.js:631
+#: components/Schedule/shared/ScheduleForm.js:624
+#: components/Schedule/shared/ScheduleForm.js:630
 #: components/Schedule/shared/useSchedulePromptSteps.js:45
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:113
 #: screens/Credential/shared/CredentialForm.js:318
@@ -6809,7 +6882,7 @@ msgid "Scroll previous"
 msgstr "Faire défiler la page précédente"
 
 #: components/Lookup/HostFilterLookup.js:263
-#: components/Lookup/Lookup.js:135
+#: components/Lookup/Lookup.js:136
 msgid "Search"
 msgstr "Rechercher"
 
@@ -6826,7 +6899,7 @@ msgstr "Bouton de soumission de recherche"
 msgid "Search text input"
 msgstr "Saisie de texte de recherche"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:389
+#: components/Schedule/shared/FrequencyDetailSubform.js:391
 msgid "Second"
 msgstr "Deuxième"
 
@@ -6843,7 +6916,7 @@ msgstr "Voir les erreurs sur la gauche"
 
 #: components/JobList/JobListItem.js:77
 #: components/Lookup/HostFilterLookup.js:351
-#: components/Lookup/Lookup.js:185
+#: components/Lookup/Lookup.js:186
 #: components/Pagination/Pagination.js:33
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:97
 msgid "Select"
@@ -6867,7 +6940,7 @@ msgstr "Sélectionner les hôtes"
 msgid "Select Input"
 msgstr "Sélectionnez une entrée"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:243
+#: screens/InstanceGroup/Instances/InstanceList.js:280
 msgid "Select Instances"
 msgstr "Sélectionner les instances"
 
@@ -6929,7 +7002,7 @@ msgstr "Sélectionnez un type d’identifiant"
 msgid "Select a job to cancel"
 msgstr "Sélectionnez un Job à annuler"
 
-#: screens/Metrics/Metrics.js:204
+#: screens/Metrics/Metrics.js:211
 msgid "Select a metric"
 msgstr "Sélectionnez une métrique"
 
@@ -6946,7 +7019,7 @@ msgstr "Choisir un playbook"
 msgid "Select a project before editing the execution environment."
 msgstr "Sélectionnez un projet avant de modifier l'environnement d'exécution."
 
-#: screens/Template/Survey/SurveyToolbar.js:80
+#: screens/Template/Survey/SurveyToolbar.js:81
 msgid "Select a question to delete"
 msgstr "Sélectionnez une question à supprimer"
 
@@ -6973,9 +7046,9 @@ msgstr "Sélectionnez un abonnement"
 
 #: components/HostForm/HostForm.js:39
 #: components/Schedule/shared/FrequencyDetailSubform.js:56
-#: components/Schedule/shared/FrequencyDetailSubform.js:82
-#: components/Schedule/shared/FrequencyDetailSubform.js:86
-#: components/Schedule/shared/FrequencyDetailSubform.js:94
+#: components/Schedule/shared/FrequencyDetailSubform.js:84
+#: components/Schedule/shared/FrequencyDetailSubform.js:88
+#: components/Schedule/shared/FrequencyDetailSubform.js:96
 #: components/Schedule/shared/ScheduleForm.js:93
 #: components/Schedule/shared/ScheduleForm.js:97
 #: screens/Credential/shared/CredentialForm.js:44
@@ -6994,7 +7067,7 @@ msgstr "Sélectionnez un abonnement"
 #: screens/Inventory/shared/SmartInventoryForm.js:67
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:24
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:61
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:431
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:432
 #: screens/Project/shared/ProjectForm.js:189
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.js:39
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:36
@@ -7010,7 +7083,7 @@ msgid "Select a webhook service."
 msgstr "Sélectionnez un service webhook."
 
 #: components/DataListToolbar/DataListToolbar.js:113
-#: screens/Template/Survey/SurveyToolbar.js:48
+#: screens/Template/Survey/SurveyToolbar.js:49
 msgid "Select all"
 msgstr "Tout sélectionner"
 
@@ -7018,13 +7091,17 @@ msgstr "Tout sélectionner"
 msgid "Select an activity type"
 msgstr "Sélectionnez un type d'activité"
 
-#: screens/Metrics/Metrics.js:193
+#: screens/Metrics/Metrics.js:200
 msgid "Select an instance"
 msgstr ""
 
-#: screens/Metrics/Metrics.js:235
+#: screens/Metrics/Metrics.js:242
 msgid "Select an instance and a metric to show chart"
 msgstr "Sélectionnez une instance et une métrique pour afficher le graphique"
+
+#: screens/InstanceGroup/Instances/InstanceList.js:224
+msgid "Select an instance to run a health check."
+msgstr ""
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
@@ -7127,7 +7204,8 @@ msgstr "Sélectionnez l'environnement d'exécution pour ce modèle de Job."
 msgid ""
 "Select the inventory containing the hosts\n"
 "you want this job to manage."
-msgstr "Sélectionnez l'inventaire contenant les hôtes\n"
+msgstr ""
+"Sélectionnez l'inventaire contenant les hôtes\n"
 "que vous voulez que ce Job gère."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:107
@@ -7156,7 +7234,7 @@ msgstr "Sélectionnez le projet contenant le playbook que ce job devra exécuter
 msgid "Select your Ansible Automation Platform subscription to use."
 msgstr "Sélectionnez votre abonnement à la Plateforme d'Automatisation Ansible à utiliser."
 
-#: components/Lookup/Lookup.js:172
+#: components/Lookup/Lookup.js:173
 msgid "Select {0}"
 msgstr "Sélectionnez {0}"
 
@@ -7172,19 +7250,19 @@ msgstr "Sélectionnez {0}"
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:90
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:108
 #: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:26
-#: screens/Application/ApplicationsList/ApplicationListItem.js:29
+#: screens/Application/ApplicationsList/ApplicationListItem.js:28
 #: screens/Credential/CredentialList/CredentialListItem.js:53
-#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:29
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:55
+#: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:28
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:54
 #: screens/Host/HostGroups/HostGroupItem.js:26
 #: screens/Host/HostList/HostListItem.js:48
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:59
-#: screens/InstanceGroup/Instances/InstanceListItem.js:113
+#: screens/InstanceGroup/Instances/InstanceListItem.js:128
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:38
-#: screens/Inventory/InventoryList/InventoryListItem.js:83
+#: screens/Inventory/InventoryList/InventoryListItem.js:82
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.js:33
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:108
-#: screens/Organization/OrganizationList/OrganizationListItem.js:42
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:107
+#: screens/Organization/OrganizationList/OrganizationListItem.js:43
 #: screens/Organization/shared/OrganizationForm.js:113
 #: screens/Project/ProjectList/ProjectListItem.js:172
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:244
@@ -7211,11 +7289,11 @@ msgstr "La plage de dates sélectionnée doit avoir au moins une occurrence de c
 msgid "Sender Email"
 msgstr "E-mail de l’expéditeur"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:94
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:95
 msgid "Sender e-mail"
 msgstr "E-mail de l'expéditeur"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:148
+#: components/Schedule/shared/FrequencyDetailSubform.js:150
 msgid "September"
 msgstr "Septembre"
 
@@ -7241,8 +7319,12 @@ msgid "Set source path to"
 msgstr "Définir le chemin source à"
 
 #: components/InstanceToggle/InstanceToggle.js:48
-msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
-msgstr "Mettez l'instance en ligne ou hors ligne. Si elle est hors ligne, les Jobs ne seront pas attribués à cette instance."
+msgid "Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance."
+msgstr ""
+
+#: components/InstanceToggle/InstanceToggle.js:48
+#~ msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
+#~ msgstr "Mettez l'instance en ligne ou hors ligne. Si elle est hors ligne, les Jobs ne seront pas attribués à cette instance."
 
 #: screens/Application/shared/ApplicationForm.js:128
 msgid "Set to Public or Confidential depending on how secure the client device is."
@@ -7369,7 +7451,7 @@ msgstr "Sélection par simple pression d'une touche"
 #: components/PromptDetail/PromptDetail.js:242
 #: components/PromptDetail/PromptJobTemplateDetail.js:257
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:362
-#: screens/Job/JobDetail/JobDetail.js:387
+#: screens/Job/JobDetail/JobDetail.js:381
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:351
 #: screens/Template/shared/JobTemplateForm.js:535
 msgid "Skip Tags"
@@ -7405,7 +7487,7 @@ msgstr "Slack"
 #: screens/Host/HostList/SmartInventoryButton.js:39
 #: screens/Host/HostList/SmartInventoryButton.js:43
 #: screens/Inventory/InventoryList/InventoryList.js:172
-#: screens/Inventory/InventoryList/InventoryListItem.js:100
+#: screens/Inventory/InventoryList/InventoryListItem.js:99
 msgid "Smart Inventory"
 msgstr "Inventaire smart"
 
@@ -7447,7 +7529,7 @@ msgstr "Trier"
 #: components/PromptDetail/PromptInventorySourceDetail.js:102
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:201
 #: screens/Inventory/shared/InventorySourceForm.js:131
-#: screens/Job/JobDetail/JobDetail.js:223
+#: screens/Job/JobDetail/JobDetail.js:217
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:93
 msgid "Source"
 msgstr "Source"
@@ -7458,7 +7540,7 @@ msgstr "Source"
 #: components/PromptDetail/PromptProjectDetail.js:98
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:87
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:319
-#: screens/Job/JobDetail/JobDetail.js:257
+#: screens/Job/JobDetail/JobDetail.js:251
 #: screens/Project/ProjectDetail/ProjectDetail.js:201
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:227
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:133
@@ -7509,7 +7591,7 @@ msgstr "URL Contrôle de la source"
 #: components/JobList/JobList.js:204
 #: components/JobList/JobListItem.js:36
 #: components/Schedule/ScheduleList/ScheduleListItem.js:38
-#: screens/Job/JobDetail/JobDetail.js:76
+#: screens/Job/JobDetail/JobDetail.js:70
 msgid "Source Control Update"
 msgstr "Mise à jour du Contrôle de la source"
 
@@ -7522,7 +7604,7 @@ msgid "Source Variables"
 msgstr "Variables Source"
 
 #: components/JobList/JobListItem.js:190
-#: screens/Job/JobDetail/JobDetail.js:176
+#: screens/Job/JobDetail/JobDetail.js:170
 msgid "Source Workflow Job"
 msgstr "Flux de travail Source"
 
@@ -7534,7 +7616,7 @@ msgstr "Branche Contrôle de la source"
 msgid "Source details"
 msgstr "Détails de la source"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:398
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:399
 msgid "Source phone number"
 msgstr "Numéro de téléphone de la source"
 
@@ -7552,13 +7634,13 @@ msgstr "Provenance d'un projet"
 msgid "Sources"
 msgstr "Sources"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:465
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:466
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
 msgstr "Spécifier les En-têtes HTTP en format JSON. Voir la documentation Ansible Tower pour obtenir des exemples de syntaxe."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:379
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:380
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
@@ -7590,7 +7672,6 @@ msgstr "Onglet Standard Out"
 
 #: components/NotificationList/NotificationListItem.js:52
 #: components/NotificationList/NotificationListItem.js:53
-#: components/Schedule/shared/ScheduleForm.js:119
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:47
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:53
 msgid "Start"
@@ -7600,6 +7681,14 @@ msgstr "Démarrer"
 #: components/JobList/JobListItem.js:92
 msgid "Start Time"
 msgstr "Heure Début"
+
+#: components/Schedule/shared/DateTimePicker.js:51
+msgid "Start date"
+msgstr ""
+
+#: components/Schedule/shared/ScheduleForm.js:120
+msgid "Start date/time"
+msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:403
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7619,7 +7708,11 @@ msgstr "Démarrer le processus de synchronisation"
 msgid "Start sync source"
 msgstr "Démarrer la source de synchronisation"
 
-#: screens/Job/JobDetail/JobDetail.js:139
+#: components/Schedule/shared/DateTimePicker.js:61
+msgid "Start time"
+msgstr ""
+
+#: screens/Job/JobDetail/JobDetail.js:133
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:76
 msgid "Started"
@@ -7628,13 +7721,16 @@ msgstr "Démarré"
 #: components/JobList/JobList.js:217
 #: components/JobList/JobList.js:238
 #: components/JobList/JobListItem.js:88
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:197
+#: screens/InstanceGroup/Instances/InstanceList.js:251
+#: screens/InstanceGroup/Instances/InstanceListItem.js:135
 #: screens/Inventory/InventoryList/InventoryList.js:204
-#: screens/Inventory/InventoryList/InventoryListItem.js:94
+#: screens/Inventory/InventoryList/InventoryListItem.js:93
 #: screens/Inventory/InventorySources/InventorySourceList.js:213
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:86
-#: screens/Job/JobDetail/JobDetail.js:127
+#: screens/Job/JobDetail/JobDetail.js:121
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:194
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:115
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:114
 #: screens/Project/ProjectList/ProjectList.js:208
 #: screens/Project/ProjectList/ProjectListItem.js:192
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:45
@@ -7662,7 +7758,8 @@ msgid ""
 "the revision specified by the main project.\n"
 "This is equivalent to specifying the --remote\n"
 "flag to git submodule update."
-msgstr "Les sous-modules suivront le dernier commit sur\n"
+msgstr ""
+"Les sous-modules suivront le dernier commit sur\n"
 "leur branche principale (ou toute autre branche spécifiée dans\n"
 ".gitmodules). Si non, les sous-modules seront maintenus à\n"
 "la révision spécifiée par le projet principal.\n"
@@ -7714,7 +7811,7 @@ msgstr "Subversion"
 
 #: components/NotificationList/NotificationListItem.js:65
 #: components/NotificationList/NotificationListItem.js:66
-#: components/StatusLabel/StatusLabel.js:54
+#: components/StatusLabel/StatusLabel.js:56
 msgid "Success"
 msgstr "Réussite"
 
@@ -7729,7 +7826,7 @@ msgid "Success message body"
 msgstr "Corps du message de réussite"
 
 #: components/JobList/JobList.js:224
-#: components/StatusLabel/StatusLabel.js:55
+#: components/StatusLabel/StatusLabel.js:58
 #: components/Workflow/WorkflowNodeHelp.js:102
 #: screens/Dashboard/shared/ChartTooltip.js:59
 msgid "Successful"
@@ -7744,12 +7841,12 @@ msgstr "Tâches ayant réussi"
 msgid "Successfully copied to clipboard!"
 msgstr "Copie réussie dans le presse-papiers !"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:243
+#: components/Schedule/shared/FrequencyDetailSubform.js:245
 msgid "Sun"
 msgstr "Dim."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:248
-#: components/Schedule/shared/FrequencyDetailSubform.js:409
+#: components/Schedule/shared/FrequencyDetailSubform.js:250
+#: components/Schedule/shared/FrequencyDetailSubform.js:411
 msgid "Sunday"
 msgstr "Dimanche"
 
@@ -7760,11 +7857,11 @@ msgstr "Dimanche"
 msgid "Survey"
 msgstr "Questionnaire"
 
-#: screens/Template/Survey/SurveyToolbar.js:102
+#: screens/Template/Survey/SurveyToolbar.js:104
 msgid "Survey Disabled"
 msgstr "Questionnaire désactivé"
 
-#: screens/Template/Survey/SurveyToolbar.js:101
+#: screens/Template/Survey/SurveyToolbar.js:103
 msgid "Survey Enabled"
 msgstr "Questionnaire activé"
 
@@ -7772,7 +7869,7 @@ msgstr "Questionnaire activé"
 msgid "Survey Question Order"
 msgstr "Ordre des questions de l’enquête"
 
-#: screens/Template/Survey/SurveyToolbar.js:99
+#: screens/Template/Survey/SurveyToolbar.js:101
 msgid "Survey Toggle"
 msgstr "Basculement Questionnaire"
 
@@ -7878,16 +7975,16 @@ msgstr "Les balises sont utiles si votre playbook est important et que vous souh
 msgid "Tags for the Annotation"
 msgstr "Balises pour l'annotation"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:176
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:177
 msgid "Tags for the annotation (optional)"
 msgstr "Balises pour l'annotation (facultatif)"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:199
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:249
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:313
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:249
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:326
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:448
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:250
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:327
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:449
 msgid "Target URL"
 msgstr "URL cible"
 
@@ -7926,7 +8023,7 @@ msgstr "Équipe non trouvée."
 #: screens/ActivityStream/ActivityStream.js:178
 #: screens/Organization/Organization.js:124
 #: screens/Organization/OrganizationList/OrganizationList.js:145
-#: screens/Organization/OrganizationList/OrganizationListItem.js:65
+#: screens/Organization/OrganizationList/OrganizationListItem.js:66
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:64
 #: screens/Organization/Organizations.js:32
 #: screens/Team/TeamList/TeamList.js:112
@@ -7968,11 +8065,11 @@ msgstr "Test"
 msgid "Test External Credential"
 msgstr "Test des informations d'identification externes"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:126
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:125
 msgid "Test Notification"
 msgstr "Notification test"
 
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:123
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:122
 msgid "Test notification"
 msgstr "Notification test"
 
@@ -7993,23 +8090,23 @@ msgstr "Zone de texte"
 msgid "Textarea"
 msgstr "Zone de texte"
 
-#: components/Lookup/Lookup.js:62
+#: components/Lookup/Lookup.js:61
 msgid "That value was not found. Please enter or select a valid value."
 msgstr "Cette valeur n’a pas été trouvée. Veuillez entrer ou sélectionner une valeur valide."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:379
+#: components/Schedule/shared/FrequencyDetailSubform.js:381
 msgid "The"
 msgstr "Le"
 
 #: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.js:200
-msgid "The Execution Environment to be used when one has not been configured for a job template."
-msgstr "L'environnement d'exécution à utiliser lorsqu'il n'a pas été configuré pour un modèle de travail."
+#~ msgid "The Execution Environment to be used when one has not been configured for a job template."
+#~ msgstr "L'environnement d'exécution à utiliser lorsqu'il n'a pas été configuré pour un modèle de travail."
 
 #: screens/Application/shared/ApplicationForm.js:86
 msgid "The Grant type the user must use to acquire tokens for this application"
 msgstr "Le type d’autorisation que l'utilisateur doit utiliser pour acquérir des jetons pour cette application"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:119
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
@@ -8023,7 +8120,7 @@ msgid ""
 "timeout."
 msgstr "Délai (en secondes) avant l'annulation de la tâche. La valeur par défaut est 0 pour aucun délai d'expiration du job."
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:151
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:152
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
@@ -8043,7 +8140,8 @@ msgid ""
 "The execution environment that will be used when launching\n"
 "this job template. The resolved execution environment can be overridden by\n"
 "explicitly assigning a different one to this job template."
-msgstr "L'environnement d'exécution qui sera utilisé lors du lancement\n"
+msgstr ""
+"L'environnement d'exécution qui sera utilisé lors du lancement\n"
 "ce modèle de tâche. L'environnement d'exécution résolu peut être remplacé en\n"
 "en affectant explicitement un environnement différent à ce modèle de tâche."
 
@@ -8079,7 +8177,7 @@ msgid "The number of parallel or simultaneous processes to use while executing t
 msgstr "Nombre de processus parallèles ou simultanés à utiliser lors de l'exécution du playbook. La saisie d'aucune valeur entraînera l'utilisation de la valeur par défaut du fichier de configuration ansible. Vous pourrez trouver plus d’informations."
 
 #: components/ContentError/ContentError.js:40
-#: screens/Job/Job.js:136
+#: screens/Job/Job.js:137
 msgid "The page you requested could not be found."
 msgstr "La page que vous avez demandée n'a pas été trouvée."
 
@@ -8158,7 +8256,7 @@ msgstr "Ces arguments sont utilisés avec le module spécifié."
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
 msgstr "Ces arguments sont utilisés avec le module spécifié. Vous pouvez trouver des informations sur {0} en cliquant sur"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:391
+#: components/Schedule/shared/FrequencyDetailSubform.js:393
 msgid "Third"
 msgstr "Troisième"
 
@@ -8167,7 +8265,7 @@ msgid "This Project needs to be updated"
 msgstr "Ce projet doit être mis à jour"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:286
-#: screens/Template/Survey/SurveyList.js:92
+#: screens/Template/Survey/SurveyList.js:82
 msgid "This action will delete the following:"
 msgstr "Cette action supprimera les éléments suivants :"
 
@@ -8201,7 +8299,8 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
 "Insights for Ansible Automation Platform."
-msgstr "Ces données sont utilisées pour améliorer\n"
+msgstr ""
+"Ces données sont utilisées pour améliorer\n"
 "les futures versions du logiciel et pour fournir\n"
 "des informations sur la plate-forme d'automatisation Ansible."
 
@@ -8210,7 +8309,8 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Tower Software and help\n"
 "streamline customer experience and success."
-msgstr "Ces données sont utilisées pour améliorer\n"
+msgstr ""
+"Ces données sont utilisées pour améliorer\n"
 "les futures versions du logiciel Tower et contribuer à\n"
 "à rationaliser l'expérience des clients."
 
@@ -8259,7 +8359,7 @@ msgstr "Ce champ doit être un nombre et avoir une valeur supérieure à {min}"
 msgid "This field must be a number and have a value less than {max}"
 msgstr "Ce champ doit être un nombre et avoir une valeur inférieure à {max}"
 
-#: util/validators.js:167
+#: util/validators.js:184
 msgid "This field must be a regular expression"
 msgstr "Ce champ doit être une expression régulière"
 
@@ -8365,7 +8465,8 @@ msgstr "Cette valeur ne correspond pas au mot de passe que vous avez entré pré
 msgid ""
 "This will revert all configuration values on this page to\n"
 "their factory defaults. Are you sure you want to proceed?"
-msgstr "Ceci rétablira toutes les valeurs de configuration sur cette page à\n"
+msgstr ""
+"Ceci rétablira toutes les valeurs de configuration sur cette page à\n"
 "à leurs valeurs par défaut. Êtes-vous sûr de vouloir continuer ?"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:40
@@ -8376,12 +8477,12 @@ msgstr "Ce flux de travail ne comporte aucun nœud configuré."
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "Ce modèle de tâche de flux de travail est actuellement utilisé par d'autres ressources. Êtes-vous sûr de vouloir le supprimer ?"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:283
+#: components/Schedule/shared/FrequencyDetailSubform.js:285
 msgid "Thu"
 msgstr "Jeu."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:288
-#: components/Schedule/shared/FrequencyDetailSubform.js:429
+#: components/Schedule/shared/FrequencyDetailSubform.js:290
+#: components/Schedule/shared/FrequencyDetailSubform.js:431
 msgid "Thursday"
 msgstr "Jeudi"
 
@@ -8417,7 +8518,7 @@ msgstr "Expiré"
 
 #: components/PromptDetail/PromptDetail.js:123
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:129
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:112
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:113
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:232
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:177
 #: screens/Template/shared/JobTemplateForm.js:488
@@ -8487,7 +8588,7 @@ msgstr "Supprimer la programmation"
 msgid "Toggle tools"
 msgstr "Basculer les outils"
 
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:369
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:370
 #: screens/User/UserTokens/UserTokens.js:64
 msgid "Token"
 msgstr "Jeton"
@@ -8519,9 +8620,10 @@ msgstr "Outils"
 msgid "Top Pagination"
 msgstr "Top Pagination"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:207
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:283
-#: screens/InstanceGroup/Instances/InstanceList.js:218
-#: screens/InstanceGroup/Instances/InstanceListItem.js:123
+#: screens/InstanceGroup/Instances/InstanceList.js:253
+#: screens/InstanceGroup/Instances/InstanceListItem.js:149
 msgid "Total Jobs"
 msgstr "Total Jobs"
 
@@ -8548,9 +8650,9 @@ msgstr "Suivre le dernier commit des sous-modules sur la branche"
 msgid "Trial"
 msgstr "Essai"
 
-#: components/JobList/JobListItem.js:275
+#: components/JobList/JobListItem.js:277
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:63
-#: screens/Job/JobDetail/JobDetail.js:315
+#: screens/Job/JobDetail/JobDetail.js:309
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:162
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:191
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:221
@@ -8560,12 +8662,12 @@ msgstr "Essai"
 msgid "True"
 msgstr "Vrai"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:263
+#: components/Schedule/shared/FrequencyDetailSubform.js:265
 msgid "Tue"
 msgstr "Mar."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:268
-#: components/Schedule/shared/FrequencyDetailSubform.js:419
+#: components/Schedule/shared/FrequencyDetailSubform.js:270
+#: components/Schedule/shared/FrequencyDetailSubform.js:421
 msgid "Tuesday"
 msgstr "Mardi"
 
@@ -8600,12 +8702,12 @@ msgstr "Twilio"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:66
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:72
 #: screens/Inventory/InventoryList/InventoryList.js:205
-#: screens/Inventory/InventoryList/InventoryListItem.js:99
+#: screens/Inventory/InventoryList/InventoryListItem.js:98
 #: screens/Inventory/InventorySources/InventorySourceList.js:214
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:99
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:105
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:195
-#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:118
+#: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:117
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:68
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:157
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:75
@@ -8614,8 +8716,8 @@ msgstr "Twilio"
 #: screens/Project/ProjectList/ProjectListItem.js:205
 #: screens/Team/TeamRoles/TeamRoleListItem.js:17
 #: screens/Team/TeamRoles/TeamRolesList.js:181
-#: screens/Template/Survey/SurveyList.js:113
-#: screens/Template/Survey/SurveyList.js:113
+#: screens/Template/Survey/SurveyList.js:103
+#: screens/Template/Survey/SurveyList.js:103
 #: screens/Template/Survey/SurveyListItem.js:60
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.js:93
 #: screens/User/UserDetail/UserDetail.js:75
@@ -8625,7 +8727,7 @@ msgid "Type"
 msgstr "Type"
 
 #: screens/Credential/shared/TypeInputsSubForm.js:25
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:45
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:46
 #: screens/Project/shared/ProjectForm.js:246
 msgid "Type Details"
 msgstr "Détails sur le type"
@@ -8644,13 +8746,14 @@ msgstr "UTC"
 msgid "Unable to change inventory on a host"
 msgstr "Impossible de modifier l'inventaire sur un hôte."
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:249
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:84
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:46
-#: screens/InstanceGroup/Instances/InstanceListItem.js:78
+#: screens/InstanceGroup/Instances/InstanceListItem.js:86
 msgid "Unavailable"
 msgstr "Non disponible"
 
-#: components/StatusLabel/StatusLabel.js:64
+#: components/StatusLabel/StatusLabel.js:67
 msgid "Undefined"
 msgstr "Indéfini"
 
@@ -8734,12 +8837,12 @@ msgid "Upload a Red Hat Subscription Manifest containing your subscription. To g
 msgstr "Téléchargez un manifeste d'abonnement Red Hat contenant votre abonnement. Pour générer votre manifeste d'abonnement, accédez à <0>allocations d'abonnements</0> sur le portail client de Red Hat."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:45
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:128
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:129
 msgid "Use SSL"
 msgstr "Utiliser SSL"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:50
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:133
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:134
 msgid "Use TLS"
 msgstr "Utiliser TLS"
 
@@ -8750,14 +8853,17 @@ msgid ""
 "curly braces to access information about the job:"
 msgstr "Utilisez des messages personnalisés pour modifier le contenu des notifications envoyées lorsqu'un job démarre, réussit ou échoue. Utilisez des parenthèses en accolade pour accéder aux informations sur le job :"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:220
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:238
+#: screens/InstanceGroup/Instances/InstanceList.js:255
 msgid "Used Capacity"
 msgstr "Capacité utilisée"
 
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:242
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:246
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:83
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:42
-#: screens/InstanceGroup/Instances/InstanceListItem.js:74
+#: screens/InstanceGroup/Instances/InstanceListItem.js:82
 msgid "Used capacity"
 msgstr "Capacité utilisée"
 
@@ -8819,10 +8925,10 @@ msgstr "Jetons d'utilisateur"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:204
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:254
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:308
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:64
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:257
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:334
-#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:437
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:65
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:258
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:335
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:438
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:92
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:206
 #: screens/User/UserDetail/UserDetail.js:68
@@ -8870,7 +8976,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/InventoryForm.js:68
 #: screens/Inventory/shared/InventoryGroupForm.js:46
 #: screens/Inventory/shared/SmartInventoryForm.js:93
-#: screens/Job/JobDetail/JobDetail.js:431
+#: screens/Job/JobDetail/JobDetail.js:424
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:366
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:204
 #: screens/Template/shared/JobTemplateForm.js:411
@@ -8902,7 +9008,7 @@ msgstr "Verbeux"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:232
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:87
-#: screens/Job/JobDetail/JobDetail.js:274
+#: screens/Job/JobDetail/JobDetail.js:268
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:231
 #: screens/Template/shared/JobTemplateForm.js:461
 msgid "Verbosity"
@@ -8955,7 +9061,7 @@ msgstr "Voir les détails de l'hôte de l'inventaire"
 msgid "View JSON examples at <0>www.json.org</0>"
 msgstr "Voir des exemples JSON dans <0>www.json.org</0>"
 
-#: screens/Job/Job.js:180
+#: screens/Job/Job.js:182
 msgid "View Job Details"
 msgstr "Voir les détails de Job"
 
@@ -9068,7 +9174,7 @@ msgstr "Voir tous les hôtes de l'inventaire."
 msgid "View all Jobs"
 msgstr "Voir tous les Jobs"
 
-#: screens/Job/Job.js:137
+#: screens/Job/Job.js:138
 msgid "View all Jobs."
 msgstr "Voir tous les Jobs."
 
@@ -9172,7 +9278,7 @@ msgid "WARNING:"
 msgstr "AVERTISSEMENT :"
 
 #: components/JobList/JobList.js:222
-#: components/StatusLabel/StatusLabel.js:60
+#: components/StatusLabel/StatusLabel.js:63
 #: components/Workflow/WorkflowNodeHelp.js:96
 msgid "Waiting"
 msgstr "En attente"
@@ -9256,24 +9362,24 @@ msgstr "Les services webhook peuvent l'utiliser en tant que secret partagé."
 msgid "Webhooks"
 msgstr "Webhooks"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:273
+#: components/Schedule/shared/FrequencyDetailSubform.js:275
 msgid "Wed"
 msgstr "Mer."
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:278
-#: components/Schedule/shared/FrequencyDetailSubform.js:424
+#: components/Schedule/shared/FrequencyDetailSubform.js:280
+#: components/Schedule/shared/FrequencyDetailSubform.js:426
 msgid "Wednesday"
 msgstr "Mercredi"
 
-#: components/Schedule/shared/ScheduleForm.js:154
+#: components/Schedule/shared/ScheduleForm.js:155
 msgid "Week"
 msgstr "Semaine"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:445
+#: components/Schedule/shared/FrequencyDetailSubform.js:447
 msgid "Weekday"
 msgstr "Jour de la semaine"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:450
+#: components/Schedule/shared/FrequencyDetailSubform.js:452
 msgid "Weekend day"
 msgstr "Jour du week-end"
 
@@ -9325,7 +9431,7 @@ msgstr "Approbations des flux de travail"
 #: components/JobList/JobList.js:209
 #: components/JobList/JobListItem.js:41
 #: components/Schedule/ScheduleList/ScheduleListItem.js:40
-#: screens/Job/JobDetail/JobDetail.js:81
+#: screens/Job/JobDetail/JobDetail.js:75
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:124
 msgid "Workflow Job"
 msgstr "Job de flux de travail"
@@ -9333,7 +9439,7 @@ msgstr "Job de flux de travail"
 #: components/JobList/JobListItem.js:178
 #: components/Workflow/WorkflowNodeHelp.js:63
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:15
-#: screens/Job/JobDetail/JobDetail.js:163
+#: screens/Job/JobDetail/JobDetail.js:157
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:111
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:137
 #: util/getRelatedResourceDeleteDetails.js:104
@@ -9392,7 +9498,7 @@ msgstr "Modèles de Jobs de flux de travail"
 msgid "Workflow link modal"
 msgstr "Modal de liaison de flux de travail"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:220
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:223
 msgid "Workflow node view modal"
 msgstr "Vue modale du nœud de flux de travail"
 
@@ -9424,7 +9530,7 @@ msgstr "Écriture"
 msgid "YAML:"
 msgstr "YAML :"
 
-#: components/Schedule/shared/ScheduleForm.js:156
+#: components/Schedule/shared/ScheduleForm.js:157
 msgid "Year"
 msgstr "Année"
 
@@ -9502,11 +9608,11 @@ msgid "brand logo"
 msgstr "logo de la marque"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:279
-#: screens/Template/Survey/SurveyList.js:82
+#: screens/Template/Survey/SurveyList.js:72
 msgid "cancel delete"
 msgstr "annuler supprimer"
 
-#: screens/Setting/shared/SharedFields.js:311
+#: screens/Setting/shared/SharedFields.js:341
 msgid "cancel edit login redirect"
 msgstr "annuler modifier connecter rediriger"
 
@@ -9515,7 +9621,7 @@ msgid "command"
 msgstr "commande"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:267
-#: screens/Template/Survey/SurveyList.js:73
+#: screens/Template/Survey/SurveyList.js:63
 msgid "confirm delete"
 msgstr "confirmer supprimer"
 
@@ -9524,7 +9630,7 @@ msgstr "confirmer supprimer"
 msgid "confirm disassociate"
 msgstr "confirmer dissocier"
 
-#: screens/Setting/shared/SharedFields.js:300
+#: screens/Setting/shared/SharedFields.js:330
 msgid "confirm edit login redirect"
 msgstr "confirmer modifier connecter rediriger"
 
@@ -9605,7 +9711,7 @@ msgid "new choice"
 msgstr "nouveau choix"
 
 #: components/Pagination/Pagination.js:36
-#: components/Schedule/shared/FrequencyDetailSubform.js:461
+#: components/Schedule/shared/FrequencyDetailSubform.js:463
 msgid "of"
 msgstr "de"
 
@@ -9679,7 +9785,7 @@ msgstr "actualisé"
 msgid "workflow job template webhook key"
 msgstr "clé webhook de modèles de tâche flux de travail"
 
-#: screens/Inventory/InventoryList/InventoryListItem.js:62
+#: screens/Inventory/InventoryList/InventoryListItem.js:61
 msgid "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
 msgstr ""
 
@@ -9687,9 +9793,17 @@ msgstr ""
 msgid "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
 msgstr "{0, plural, one {Est-ce que vous êtes sûr de vouloir supprimer le groupe ci-dessous?} other {Est-ce que vous êtes sûr de vouloir supprimer les groupes ci-dessous?}}"
 
+#: screens/InstanceGroup/Instances/InstanceList.js:218
+msgid "{0, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
+msgstr ""
+
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:84
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr "{0, plural, one {Suppression de groupe?} other {Suppression de groupe?}}"
+
+#: util/validators.js:138
+msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
+msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:178
 msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
@@ -9771,41 +9885,42 @@ msgstr "{brandName} logo"
 msgid "{dateStr} by <0>{username}</0>"
 msgstr "{dateStr} par <0>{username}</0>"
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:129
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:220
+#: screens/InstanceGroup/Instances/InstanceListItem.js:155
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# fourche} other {# forks}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:188
+#: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {day} other {days}}"
 msgstr "{intervalValue, plural, one {jour} other {jours}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:186
+#: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {hour} other {hours}}"
 msgstr "{intervalValue, plural, one {heure} other {heures}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:184
+#: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
 msgstr "{intervalValue, plural, one {minute} other {minutes}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:192
+#: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {month} other {months}}"
 msgstr "{intervalValue, plural, one {mois} other {mois}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:190
+#: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {week} other {weeks}}"
 msgstr "{intervalValue, plural, one {semaine} other {semaine}}"
 
-#: components/Schedule/shared/FrequencyDetailSubform.js:194
+#: components/Schedule/shared/FrequencyDetailSubform.js:196
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {année} other {années}}"
 
 #: components/Schedule/shared/DateTimePicker.js:49
-msgid "{label} date"
-msgstr "{label} date"
+#~ msgid "{label} date"
+#~ msgstr "{label} date"
 
 #: components/Schedule/shared/DateTimePicker.js:57
-msgid "{label} time"
-msgstr "{label} heure"
+#~ msgid "{label} time"
+#~ msgstr "{label} heure"
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
