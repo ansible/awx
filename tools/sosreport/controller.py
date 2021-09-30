@@ -52,6 +52,8 @@ SOSREPORT_FORBIDDEN_PATHS = [
     "/etc/tower/tower.cert",
     "/etc/tower/awx.cert",
     "/var/log/tower/profile",
+    "/etc/receptor/tls/ca/*.key",
+    "/etc/receptor/tls/*.key"
 ]
 
 
