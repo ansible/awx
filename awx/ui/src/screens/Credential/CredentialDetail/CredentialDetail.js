@@ -238,14 +238,12 @@ function CredentialDetail({ credential }) {
         {fields.map((field) => renderDetail(field))}
 
         <UserDateDetail
-          dataCy="credential-created-detail"
           id="credential-created-detail"
           label={t`Created`}
           date={created}
           user={created_by}
         />
         <UserDateDetail
-          dataCy="credential-last_modified-detail"
           id="credential-last_modified-detail"
           label={t`Last Modified`}
           date={modified}

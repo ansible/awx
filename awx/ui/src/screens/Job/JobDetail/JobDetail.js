@@ -404,13 +404,11 @@ function JobDetail({ job, inventorySourceLabels }) {
           value={job.module_args}
         />
         <UserDateDetail
-          dataCy="job-created"
           label={t`Created`}
           date={job.created}
           user={created_by}
         />
         <UserDateDetail
-          dataCy="job-last-modified"
           label={t`Last Modified`}
           date={job.modified}
         />
