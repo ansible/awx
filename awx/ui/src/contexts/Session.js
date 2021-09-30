@@ -5,10 +5,11 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Redirect } from 'react-router-dom';
 import { DateTime } from 'luxon';
 import { RootAPI, MeAPI } from 'api';
 import { isAuthenticated } from 'util/auth';
+import useRequest from 'hooks/useRequest';
 import { SESSION_TIMEOUT_KEY } from '../constants';
 
 // The maximum supported timeout for setTimeout(), in milliseconds,
@@ -72,8 +73,31 @@ function SessionProvider({ children }) {
   const [sessionTimeout, setSessionTimeout] = useStorage(SESSION_TIMEOUT_KEY);
   const [sessionCountdown, setSessionCountdown] = useState(0);
   const [authRedirectTo, setAuthRedirectTo] = useState('/');
+  const [isUserBeingLoggedOut, setIsUserBeingLoggedOut] = useState(false);
+
+  const {
+    request: fetchLoginRedirectOverride,
+    result: { loginRedirectOverride },
+    isLoading,
+  } = useRequest(
+    useCallback(async () => {
+      const { data } = await RootAPI.read();
+      return {
+        loginRedirectOverride: data?.login_redirect_override,
+      };
+    }, []),
+    {
+      loginRedirectOverride: null,
+      isLoading: true,
+    }
+  );
+
+  useEffect(() => {
+    fetchLoginRedirectOverride();
+  }, [fetchLoginRedirectOverride]);
 
   const logout = useCallback(async () => {
+    setIsUserBeingLoggedOut(true);
     if (!isSessionExpired.current) {
       setAuthRedirectTo('/logout');
     }
@@ -82,14 +106,13 @@ function SessionProvider({ children }) {
     setSessionCountdown(0);
     clearTimeout(sessionTimeoutId.current);
     clearInterval(sessionIntervalId.current);
+    return <Redirect to="/login" />;
   }, [setSessionTimeout, setSessionCountdown]);
 
   useEffect(() => {
     if (!isAuthenticated(document.cookie)) {
-      history.replace('/login');
       return () => {};
     }
-
     const calcRemaining = () => {
       if (sessionTimeout) {
         return Math.max(
@@ -140,9 +163,15 @@ function SessionProvider({ children }) {
     clearInterval(sessionIntervalId.current);
   }, []);
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <SessionContext.Provider
       value={{
+        isUserBeingLoggedOut,
+        loginRedirectOverride,
         authRedirectTo,
         handleSessionContinue,
         isSessionExpired,
