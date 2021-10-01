@@ -960,6 +960,13 @@ describe('useJobEvents', () => {
       expect(node).toEqual(null);
     });
 
+    test('should return null if no nodes loaded', () => {
+      wrapper = shallow(<HookTest />);
+      const node = wrapper.find('#test').prop('getNodeForRow')(5);
+
+      expect(node).toEqual(null);
+    });
+
     test('should return collapsed node', () => {
       wrapper.find('#test').prop('toggleNodeIsCollapsed')('abc-002');
 
