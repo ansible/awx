@@ -114,7 +114,7 @@ function SurveyQuestionForm({
     variable: question?.variable || '',
     min: question?.min || 0,
     max: question?.max || 1024,
-    default: question?.default || '',
+    default: question?.default ?? '',
     choices: question?.choices || '',
     formattedChoices: [{ choice: '', isDefault: false, id: 0 }],
     new_question: !question,
