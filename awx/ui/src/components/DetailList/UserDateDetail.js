@@ -11,13 +11,13 @@ const Detail = styled(_Detail)`
   word-break: break-word;
 `;
 
-function UserDateDetail({ label, date, user, dataCy = null }) {
+function UserDateDetail({ label, date, user }) {
   const dateStr = formatDateString(date);
   const username = user ? user.username : '';
   return (
     <Detail
       label={label}
-      dataCy={dataCy}
+      dataCy="user-date-detail"
       value={
         user ? (
           <Trans>

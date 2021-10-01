@@ -57,13 +57,11 @@ function UserTokenDetail({ token }) {
           label={t`Created`}
           date={created}
           user={summary_fields.user}
-          dataCy="application-token-detail-created"
         />
         <UserDateDetail
           label={t`Last Modified`}
           date={modified}
           user={summary_fields.user}
-          dataCy="application-token-detail-last-modified"
         />
       </DetailList>
       <CardActionsRow>

@@ -150,27 +150,22 @@ function WorkflowApprovalDetail({ workflowApproval }) {
           label={t`Created`}
           date={workflowApproval.created}
           user={workflowApproval.summary_fields.created_by}
-          dataCy="wa-detail-created-by"
         />
         <Detail
           label={t`Last Modified`}
           value={formatDateString(workflowApproval.modified)}
-          dataCy="wa-detail-last-modified"
         />
         <Detail
           label={t`Finished`}
           value={formatDateString(workflowApproval.finished)}
-          dataCy="wa-detail-finished"
         />
         <Detail
           label={t`Canceled`}
           value={formatDateString(workflowApproval.canceled_on)}
-          dataCy="wa-detail-canceled"
         />
         <Detail
           label={t`Elapsed`}
           value={secondsToHHMMSS(workflowApproval.elapsed)}
-          dataCy="wa-detail-elapsed"
         />
       </DetailList>
       <CardActionsRow>

@@ -99,13 +99,11 @@ function ExecutionEnvironmentDetails({ executionEnvironment }) {
           label={t`Created`}
           date={executionEnvironment.created}
           user={executionEnvironment.summary_fields.created_by}
-          dataCy="execution-environment-created"
         />
         <UserDateDetail
           label={t`Last Modified`}
           date={executionEnvironment.modified}
           user={executionEnvironment.summary_fields.modified_by}
-          dataCy="execution-environment-modified"
         />
       </DetailList>
       <CardActionsRow>
