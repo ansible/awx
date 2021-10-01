@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
 import { CredentialsAPI } from 'api';
 import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
-import TowerSubForm from './TowerSubForm';
+import ControllerSubForm from './ControllerSubForm';
 
 jest.mock('../../../../api');
 
@@ -21,7 +21,7 @@ const initialValues = {
   verbosity: 1,
 };
 
-describe('<TowerSubForm />', () => {
+describe('<ControllerSubForm />', () => {
   let wrapper;
 
   beforeEach(async () => {
@@ -31,7 +31,7 @@ describe('<TowerSubForm />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik initialValues={initialValues}>
-          <TowerSubForm />
+          <ControllerSubForm />
         </Formik>
       );
     });
