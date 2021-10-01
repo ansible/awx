@@ -118,17 +118,11 @@ export function jobEventsReducer(callbacks, enqueueAction) {
     return _gatherEventsForNewParent(
       {
         ...state,
-        events: {
-          ...state.events,
-          [eventIndex]: event,
-        },
+        events: { ...state.events, [eventIndex]: event },
         tree: updatedTree,
         uuidMap: {
           ...state.uuidMap,
-          [event.uuid]: {
-            index: eventIndex,
-            treePath: [length - 1],
-          },
+          [event.uuid]: { index: eventIndex, treePath: [length - 1] },
         },
       },
       event.uuid
@@ -275,56 +269,41 @@ function getNodeForRow(state, rowToFind) {
   return node;
 }
 
+function getCounterForRow(state, rowToFind) {
+  const { node, expectedCounter } = _getNodeForRow(
+    state,
+    rowToFind + 1,
+    state.tree
+  );
+
+  if (node) {
+    const event = state.events[node.eventIndex];
+    return event.counter;
+  }
+  return expectedCounter;
+}
+
 function _getNodeForRow(state, rowToFind, nodes) {
   let remainingCount = rowToFind;
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    if (window.debugMode) console.log('Visiting', { node, remainingCount });
     if (remainingCount === 1) {
-      if (window.debugMode) console.log('a', node);
       return { node };
     }
     remainingCount--;
     if (remainingCount < 1) {
-      // looking for a node that hasn't been loaded yet
-      if (window.debugMode) console.log('b', node);
       return { node: null };
     }
     const totalNodeDescendants = getTotalNumChildren(node);
     const nodeChildren = totalNodeDescendants - getNumCollapsedChildren(node);
-    if (window.debugMode) console.log({ nodeChildren, remainingCount });
     if (nodeChildren >= remainingCount) {
-      if (node.children[0].eventIndex > node.eventIndex + remainingCount) {
-        return {
-          node: null,
-          expectedCounter: node.eventIndex + remainingCount,
-        };
-      }
-      const counterGap = node.children[0].eventIndex - (node.eventIndex + 1);
-      if (remainingCount > counterGap) {
-        remainingCount -= counterGap;
-      }
-      return _getNodeForRow(state, remainingCount, node.children);
-      // const result = _getNodeForRow(state, remainingCount, node.children);
-      // if (result.parentNode) {
-      //   if (window.debugMode) console.log('c', node);
-      //   return result;
-      // }
-      // if (node.isCollapsed) {
-      //   if (window.debugMode) console.log('d', node);
-      //   return result;
-      // }
-      // if (window.debugMode) console.log('e', result, node, remainingCount);
-      // return {
-      //   ...result,
-      //   parentNode: node,
-      //   parentOffset: remainingCount,
-      // };
+      return _getNodeInChildren(state, node, remainingCount);
     }
     remainingCount -= nodeChildren;
 
     const nextNode = nodes[i + 1];
     if (nextNode) {
+      // check for a gap between this node and the next one
       const lastChildCounter = node.eventIndex + totalNodeDescendants;
       const counterGap = nextNode.eventIndex - (lastChildCounter + 1);
       if (remainingCount - counterGap < 1) {
@@ -336,61 +315,39 @@ function _getNodeForRow(state, rowToFind, nodes) {
       remainingCount -= counterGap;
     }
   }
+
+  const lastDescendant = _getLastDescendantNode(nodes);
+  if (!lastDescendant) {
+    return { node: null, remainingCount, expectedCounter: rowToFind };
+  }
+
+  return {
+    node: null,
+    remainingCount,
+    expectedCounter: lastDescendant.eventIndex + remainingCount,
+  };
+}
+
+function _getNodeInChildren(state, node, remainingCount) {
+  const counterGap = node.children[0].eventIndex - (node.eventIndex + 1);
+  if (remainingCount - counterGap <= 0) {
+    return {
+      node: null,
+      expectedCounter: node.eventIndex + remainingCount,
+    };
+  }
+  remainingCount -= counterGap;
+  return _getNodeForRow(state, remainingCount, node.children);
+}
+
+function _getLastDescendantNode(nodes) {
   let lastDescendant = nodes[nodes.length - 1];
   let children = lastDescendant?.children || [];
   while (children.length) {
     lastDescendant = children[children.length - 1];
     children = lastDescendant.children;
   }
-  if (!lastDescendant) {
-    console.log('NO LAST NODE FOUND');
-    return { node: null, remainingCount };
-  }
-
-  const lastEvent = state.events[lastDescendant.eventIndex];
-  if (window.debugMode) {
-    console.log({ last: lastEvent.counter, remainingCount });
-    console.log('f', nodes, {
-      node: null,
-      remainingCount,
-      expectedCounter: lastEvent.counter + remainingCount,
-    });
-  }
-  return {
-    node: null,
-    remainingCount,
-    expectedCounter: lastEvent.counter + remainingCount,
-  };
-}
-
-function getCounterForRow(state, rowToFind) {
-  const { node, remainingCount, parentNode, parentOffset, expectedCounter } =
-    _getNodeForRow(state, rowToFind + 1, state.tree);
-
-  if (node) {
-    const event = state.events[node.eventIndex];
-    return event.counter;
-  }
-  if (expectedCounter) {
-    return expectedCounter;
-  }
-  // TODO: unclear if any of this is needed. tests pass without but UI seems
-  // to get here anyway in some circumstances. If not needed, parentNode and
-  // parentOffset might be free to delete above; else add tests!
-
-  debugger;
-  // if (parentNode) {
-  //   console.log({ parentOffset, remainingCount });
-  //   // const parentEvent = state.events[parentNode.eventIndex];
-  //   return parentNode.eventIndex + parentOffset;
-  // }
-  // console.log('OH SHIT');
-  // // rowToFind is not a child of any loaded event; look past end of loaded events
-  // const lastIndex = Math.max(
-  //   ...Object.keys(state.events).map((i) => parseInt(i, 10))
-  // );
-  // const lastEvent = state.events[String(lastIndex)];
-  // return lastEvent.counter + remainingCount;
+  return lastDescendant;
 }
 
 function getTotalNumChildren(node) {
