@@ -603,6 +603,12 @@ def awx_receptor_workunit_reaper():
     As such, this periodic task will obtain a list of all receptor work units, and find which ones
     belong to AWX jobs that are in a completed state (status is canceled, error, or succeeded).
     This task will call "work release" on each of these work units to clean up the files on disk.
+
+    Note that when we call "work release" on a work unit that actually represents remote work
+    both the local and remote work units are cleaned up.
+
+    Since we are cleaning up jobs that controller considers to be inactive, we take the added
+    precaution of calling "work cancel" in case the work unit is still active.
     """
     if not settings.RECEPTOR_RELEASE_WORK:
         return
@@ -614,6 +620,7 @@ def awx_receptor_workunit_reaper():
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
+        receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
         receptor_ctl.simple_command(f"work release {job.work_unit_id}")
 
 
