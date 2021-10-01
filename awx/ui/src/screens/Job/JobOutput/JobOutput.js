@@ -32,7 +32,7 @@ import JobOutputSearch from './JobOutputSearch';
 import { HostStatusBar, OutputToolbar } from './shared';
 import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
-import getEventRequestParams from './getEventRequestParams';
+import getEventRequestParams, { range } from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
 import { fetchCount } from './loadJobEvents';
 import useJobEvents from './useJobEvents';
@@ -96,19 +96,32 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollTop = useRef(0);
   const scrollHeight = useRef(0);
   const history = useHistory();
+  // TODO move this ref into useJobEvents?
+  const siblingRequests = useRef([]);
 
   const fetchEventByUuid = (uuid) => {
     // TODO (not getting called yet?)
     console.log('TODO fetchEventByUuid', uuid);
+    debugger;
   };
+
   const fetchNextSibling = async (parentEventId, counter) => {
-    const { data } = await JobEventsAPI.readChildren(parentEventId, {
-      page_size: 1,
-      order_by: 'counter',
-      counter__gt: counter,
-    });
+    const key = `${parentEventId}-${counter}`;
+    let promise = siblingRequests.current[key];
+    if (!promise) {
+      promise = JobEventsAPI.readChildren(parentEventId, {
+        page_size: 1,
+        order_by: 'counter',
+        counter__gt: counter,
+      });
+      siblingRequests.current[key] = promise;
+    }
+
+    const { data } = await promise;
+    siblingRequests.current[key] = null;
     return data.results[0] || null;
   };
+
   const fetchNextRootNode = async (counter) => {
     const { data } = await getJobModel(job.type).readEvents(job.id, {
       page_size: 1,
@@ -118,6 +131,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     });
     return data.results[0] || null;
   };
+
   const fetchNumEvents = async (startCounter, endCounter) => {
     if (endCounter === startCounter + 1) {
       return 0;
@@ -309,16 +323,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const isRowLoaded = ({ index }) => {
-    // return getEventForRow(index) !== null;
     const counter = getCounterForRow(index);
     if (getEvent(counter)) {
-      // const event = getEventForRow(index);
-      // console.log(`${index} loaded; counter ${counter}`, event);
       return true;
     }
-    // console.log(
-    //   `${index} currentlyLoading: ${currentlyLoading.includes(counter)}`
-    // );
     return currentlyLoading.includes(counter);
   };
 
@@ -388,21 +396,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       return Promise.resolve(null);
     }
 
-    const diff = Math.max(stopIndex - startIndex, 50);
+    const diff = stopIndex - startIndex;
 
     const startCounter = getCounterForRow(startIndex);
-    console.debug(
-      'LOAD MORE',
-      { startIndex, stopIndex },
-      { startCounter, stopCounter: startCounter + diff }
-    );
-
-    // TODO: forget pagination stuff. use counter__gt=event.counter or similar?
-    const [requestParams, loadRange] = getEventRequestParams(
-      job,
-      totalNonCollapsedRows,
-      [startCounter, startCounter + diff]
-    );
+    const loadRange = range(startCounter, startCounter + diff);
 
     if (isMounted.current) {
       setCurrentlyLoading((prevCurrentlyLoading) =>
@@ -411,7 +408,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
 
     const params = {
-      ...requestParams,
+      counter__gte: startCounter,
+      counter__lte: startCounter + diff,
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
