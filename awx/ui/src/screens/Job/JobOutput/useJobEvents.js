@@ -34,12 +34,6 @@ export default function useJobEvents(callbacks) {
     });
   }, [actionQueue]);
 
-  window.getEventForRow = (index) => {
-    const counter = getCounterForRow(state, index);
-    return [getEventForRow(state, index), counter, state.events[counter]];
-  };
-
-  // todo useCallback() these?
   return {
     addEvents: (events) => dispatch({ type: ADD_EVENTS, events }),
     getNodeByUuid: (uuid) => getNodeByUuid(state, uuid),
@@ -100,7 +94,6 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       }
     });
 
-    // TODO: update callback to accept array of uuids/do it in 1 request
     parentsToFetch.forEach((uuid) => callbacks.fetchEventByUuid(uuid));
 
     return state;
@@ -153,7 +146,6 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       isCollapsed: false,
       children: [],
     };
-    // TODO: don't duplicate event if already in children
     const index = parent.children.findIndex(
       (node) => node.eventIndex >= eventIndex
     );

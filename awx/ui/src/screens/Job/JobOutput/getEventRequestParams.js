@@ -23,11 +23,10 @@ export default function getEventRequestParams(
     Math.min(firstIndex + pageSize, remoteRowCount)
   );
 
-  console.log({ page, firstIndex, startIndex, stopIndex });
   return [{ page, page_size: pageSize }, loadRange];
 }
 
-function range(low, high) {
+export function range(low, high) {
   const numbers = [];
   for (let n = low; n <= high; n++) {
     numbers.push(n);
