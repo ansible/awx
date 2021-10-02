@@ -1,6 +1,6 @@
 # Channels Overview
 
-Our channels/websocket implementation handles the communication between AWX API and updates in AWX UI.
+Our channels/websocket implementation handles the communication between AWX API and updates in AWX UI. Note that the websockets are not meant for external use and 3rd party clients.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ Upon receiving the payload, AWX decrypts the `secret` header using the known sha
 
 ## Protocol
 
-You can connect to the AWX channels implementation using any standard websocket library by pointing it to `/websocket`. You must
+You can connect to the AWX channels implementation using any standard websocket library by pointing it to `/websocket/`. You must
 provide a valid Auth Token in the request URL.
 
 Once you've connected, you are not subscribed to any event groups. You subscribe by sending a `json` request that looks like the following:
