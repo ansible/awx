@@ -1,17 +1,11 @@
 PYTHON ?= python3.8
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
-SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
-PACKER ?= packer
-PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 NODE ?= node
 NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
-DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-IMAGE_REPOSITORY_AUTH ?=
-IMAGE_REPOSITORY_BASE ?= https://gcr.io
 VERSION := $(shell cat VERSION)
 
 # NOTE: This defaults the container image version to the branch that's active
@@ -19,9 +13,7 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 MAIN_NODE_TYPE ?= hybrid
 
-VENV_BASE ?= /var/lib/awx/venv/
-SCL_PREFIX ?=
-CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
+VENV_BASE ?= /var/lib/awx/venv
 
 DEV_DOCKER_TAG_BASE ?= quay.io/awx
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
@@ -33,30 +25,13 @@ SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 # to install the actual requirements
 VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0 wheel==0.36.2
 
-# Determine appropriate shasum command
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-    SHASUM_BIN ?= sha256sum
-endif
-ifeq ($(UNAME_S),Darwin)
-    SHASUM_BIN ?= shasum -a 256
-endif
-
-# Get the branch information from git
-GIT_DATE := $(shell git log -n 1 --format="%ai")
-DATE := $(shell date -u +%Y%m%d%H%M)
-
 NAME ?= awx
-GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 
 # TAR build parameters
 SDIST_TAR_NAME=$(NAME)-$(VERSION)
-WHEEL_NAME=$(NAME)-$(VERSION)
 
 SDIST_COMMAND ?= sdist
-WHEEL_COMMAND ?= bdist_wheel
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
-WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 
 I18N_FLAG_FILE = .i18n_built
 
@@ -449,29 +424,11 @@ release_build:
 dist/$(SDIST_TAR_FILE): ui-release VERSION
 	$(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/$(WHEEL_FILE): ui-release
-	$(PYTHON) setup.py $(WHEEL_COMMAND)
-
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
 	@echo "Artifacts:"
 	@echo dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
-
-wheel: dist/$(WHEEL_FILE)
-	@echo "#############################################"
-	@echo "Artifacts:"
-	@echo dist/$(WHEEL_FILE)
-	@echo "#############################################"
-
-# Build setup bundle tarball
-setup-bundle-build:
-	mkdir -p $@
-
-docker-auth:
-	@if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
-		echo "$(IMAGE_REPOSITORY_AUTH)" | docker login -u oauth2accesstoken --password-stdin $(IMAGE_REPOSITORY_BASE); \
-	fi;
 
 # This directory is bind-mounted inside of the development container and
 # needs to be pre-created for permissions to be set correctly. Otherwise,
