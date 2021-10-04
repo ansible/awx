@@ -9,6 +9,8 @@ try:
 except ImportError:
     from pip.req import parse_requirements
 
+from pip._internal.req.constructors import parse_req_from_line
+
 
 def test_python_and_js_licenses():
     def index_licenses(path):
@@ -53,15 +55,16 @@ def test_python_and_js_licenses():
             fname = '%s/%s' % (path, req_file)
 
             for reqt in parse_requirements(fname, session=''):
-                name = reqt.name
-                version = str(reqt.specifier)
+                parsed_requirement = parse_req_from_line(reqt.requirement, None)
+                name = parsed_requirement.requirement.name
+                version = str(parsed_requirement.requirement.specifier)
                 if version.startswith('=='):
                     version = version[2:]
-                if reqt.link:
-                    if str(reqt.link).startswith(('http://', 'https://')):
-                        (name, version) = str(reqt.req).split('==', 1)
+                if parsed_requirement.link:
+                    if str(parsed_requirement.link).startswith(('http://', 'https://')):
+                        (name, version) = str(parsed_requirement.requirement).split('==', 1)
                     else:
-                        (name, version) = reqt.link.filename.split('@', 1)
+                        (name, version) = parsed_requirement.link.filename.split('@', 1)
                     if name.endswith('.git'):
                         name = name[:-4]
                     if name == 'receptor':
