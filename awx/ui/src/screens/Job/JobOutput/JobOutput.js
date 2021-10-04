@@ -305,6 +305,18 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       if (!isMounted.current) {
         return;
       }
+      let newCssMap;
+      fetchedEvents.forEach((event) => {
+        const { lineCssMap } = getLineTextHtml(event);
+        newCssMap = {
+          ...newCssMap,
+          ...lineCssMap,
+        };
+      });
+      setCssMap((prevCssMap) => ({
+        ...prevCssMap,
+        ...newCssMap,
+      }));
       addEvents(fetchedEvents);
       setRemoteRowCount(count);
     } catch (err) {
@@ -421,8 +433,22 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         if (!isMounted.current) {
           return;
         }
+        const fetchedEvents = response.data.results;
 
-        addEvents(response.data.results);
+        let newCssMap;
+        fetchedEvents.forEach((event) => {
+          const { lineCssMap } = getLineTextHtml(event);
+          newCssMap = {
+            ...newCssMap,
+            ...lineCssMap,
+          };
+        });
+        setCssMap((prevCssMap) => ({
+          ...prevCssMap,
+          ...newCssMap,
+        }));
+
+        addEvents(fetchedEvents);
         // TODO track currentlyLoading
         setCurrentlyLoading((prevCurrentlyLoading) =>
           prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
