@@ -4,6 +4,7 @@ import {
   JobEventLineToggle,
   JobEventLineNumber,
   JobEventLineText,
+  JobEventEllipsis,
 } from './shared';
 
 function JobEvent({
@@ -32,22 +33,14 @@ function JobEvent({
               isFirst={lineNumber === 0}
               isClickable={isClickable}
             >
-              <JobEventLineToggle />
-              {hasChildren && html.length ? (
-                <button onClick={onToggleCollapsed} type="button">
-                  {isCollapsed ? '+' : '-'}
-                </button>
-              ) : (
-                ' '
-              )}
+              <JobEventLineToggle
+                canToggle={hasChildren && html.length}
+                isCollapsed={isCollapsed}
+                onToggle={onToggleCollapsed}
+              />
               <JobEventLineNumber>
                 {lineNumber}
-                {isCollapsed && html.length ? (
-                  <>
-                    <br />
-                    ...
-                  </>
-                ) : null}
+                <JobEventEllipsis isCollapsed={isCollapsed && html.length} />
               </JobEventLineNumber>
               <JobEventLineText
                 type="job_event_line_text"
