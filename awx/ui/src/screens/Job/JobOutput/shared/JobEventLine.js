@@ -8,10 +8,6 @@ export default styled.div`
     cursor: ${(props) => (props.isClickable ? 'pointer' : 'default')};
   }
 
-  &:hover div {
-    background-color: white;
-  }
-
   &--hidden {
     display: none;
   }
