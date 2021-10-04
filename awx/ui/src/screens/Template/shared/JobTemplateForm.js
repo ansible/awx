@@ -510,7 +510,7 @@ function JobTemplateForm({
               <InstanceGroupsLookup
                 value={instanceGroupsField.value}
                 onChange={(value) => instanceGroupsHelpers.setValue(value)}
-                tooltip={t`Select the Instance Groups for this Organization
+                tooltip={t`Select the Instance Groups for this Job Template
                         to run on.`}
                 fieldName="instanceGroups"
               />
