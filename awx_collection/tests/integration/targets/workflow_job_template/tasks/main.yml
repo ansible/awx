@@ -117,11 +117,11 @@
     source_path: "/inventories/inventory.ini"
     overwrite: true
     source: scm
-  register: result
+  register: project_inv_source_result
 
 - assert:
     that:
-      - "result is changed"
+      - "project_inv_source_result is changed"
 
 - name: Create a Job Template
   job_template:
@@ -159,11 +159,11 @@
     playbook: hello_world.yml
     job_type: run
     state: present
-  register: result
+  register: jt2_name_result
 
 - assert:
     that:
-      - "result is changed"
+      - "jt2_name_result is changed"
 
 - name: Add a Survey to second Job Template
   job_template:
@@ -536,7 +536,7 @@
     schema:
       - identifier: node101
         unified_job_template:
-          name: "{{ project_inv_source }}"
+          name: "{{ project_inv_source_result.id }}"
           inventory:
             organization:
               name: Default
