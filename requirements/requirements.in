@@ -57,8 +57,8 @@ twisted[tls]>=20.3.0  # CVE-2020-10108, CVE-2020-10109
 uWSGI
 uwsgitop
 wheel
-pip==19.3.1  # see UPGRADE BLOCKERs
-setuptools==41.6.0  # see UPGRADE BLOCKERs
+pip==21.2.4  # see UPGRADE BLOCKERs
+setuptools==58.2.0  # see UPGRADE BLOCKERs
 
 # Temporarily added to use ansible-runner from git branch, to be removed
 # when ansible-runner moves from requirements_git.txt to here
