@@ -165,7 +165,7 @@ function OrganizationsList() {
                     deleteMessage={
                       <Plural
                         value={selected.length}
-                        one="This organization is currently being by other resources. Are you sure you want to delete it?"
+                        one="This organization is currently being used by other resources. Are you sure you want to delete it?"
                         other="Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?"
                       />
                     }

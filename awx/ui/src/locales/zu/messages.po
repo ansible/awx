@@ -23,7 +23,7 @@ msgstr ""
 msgid "(Prompt on launch)"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:271
+#: screens/Credential/CredentialDetail/CredentialDetail.js:269
 msgid "* This field will be retrieved from an external secret management system using the specified credential."
 msgstr ""
 
@@ -441,8 +441,8 @@ msgid "An inventory must be selected"
 msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
-msgid "Ansible Tower"
-msgstr ""
+#~ msgid "Ansible Tower"
+#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
 msgid "Ansible Tower Documentation."
@@ -506,8 +506,8 @@ msgstr ""
 msgid "Approval"
 msgstr ""
 
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:176
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:181
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:186
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:30
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:45
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:53
@@ -584,7 +584,7 @@ msgstr ""
 msgid "Arguments"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.js:435
+#: screens/Job/JobDetail/JobDetail.js:430
 msgid "Artifacts"
 msgstr ""
 
@@ -926,7 +926,7 @@ msgid "Cancel subscription edit"
 msgstr ""
 
 #: components/JobList/JobListItem.js:106
-#: screens/Job/JobDetail/JobDetail.js:475
+#: screens/Job/JobDetail/JobDetail.js:470
 #: screens/Job/JobOutput/shared/OutputToolbar.js:135
 msgid "Cancel {0}"
 msgstr ""
@@ -934,7 +934,7 @@ msgstr ""
 #: components/JobList/JobList.js:227
 #: components/StatusLabel/StatusLabel.js:65
 #: components/Workflow/WorkflowNodeHelp.js:111
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:166
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:163
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:20
 msgid "Canceled"
 msgstr ""
@@ -1435,11 +1435,11 @@ msgstr ""
 #: components/PromptDetail/PromptDetail.js:138
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:277
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:100
-#: screens/Credential/CredentialDetail/CredentialDetail.js:243
+#: screens/Credential/CredentialDetail/CredentialDetail.js:242
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:86
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:99
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:137
-#: screens/Host/HostDetail/HostDetail.js:85
+#: screens/Host/HostDetail/HostDetail.js:83
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:66
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:90
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:103
@@ -1448,7 +1448,7 @@ msgstr ""
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:260
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:140
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:47
-#: screens/Job/JobDetail/JobDetail.js:408
+#: screens/Job/JobDetail/JobDetail.js:407
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:339
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:105
 #: screens/Project/ProjectDetail/ProjectDetail.js:231
@@ -1521,13 +1521,13 @@ msgstr ""
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:53
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:243
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:41
+#: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:42
 #: screens/Inventory/shared/InventorySourceSubForms/EC2SubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:42
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:79
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:41
-#: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:42
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:41
 #: util/getRelatedResourceDeleteDetails.js:166
@@ -1728,9 +1728,9 @@ msgstr ""
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:28
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:123
-#: screens/Credential/CredentialDetail/CredentialDetail.js:294
+#: screens/Credential/CredentialDetail/CredentialDetail.js:292
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:120
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:132
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:130
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:113
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:125
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:131
@@ -1742,7 +1742,7 @@ msgstr ""
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:72
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:76
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:99
-#: screens/Job/JobDetail/JobDetail.js:487
+#: screens/Job/JobDetail/JobDetail.js:482
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:376
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:175
 #: screens/Project/ProjectDetail/ProjectDetail.js:279
@@ -1753,8 +1753,8 @@ msgstr ""
 #: screens/Template/Survey/SurveyToolbar.js:92
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:247
 #: screens/User/UserDetail/UserDetail.js:107
-#: screens/User/UserTokenDetail/UserTokenDetail.js:76
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:208
+#: screens/User/UserTokenDetail/UserTokenDetail.js:74
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:203
 msgid "Delete"
 msgstr ""
 
@@ -1762,15 +1762,15 @@ msgstr ""
 msgid "Delete All Groups and Hosts"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:288
+#: screens/Credential/CredentialDetail/CredentialDetail.js:286
 msgid "Delete Credential"
 msgstr ""
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:125
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:123
 msgid "Delete Execution Environment"
 msgstr ""
 
-#: screens/Host/HostDetail/HostDetail.js:116
+#: screens/Host/HostDetail/HostDetail.js:110
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:109
 msgid "Delete Host"
 msgstr ""
@@ -1779,7 +1779,7 @@ msgstr ""
 msgid "Delete Inventory"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.js:483
+#: screens/Job/JobDetail/JobDetail.js:478
 #: screens/Job/JobOutput/shared/OutputToolbar.js:193
 #: screens/Job/JobOutput/shared/OutputToolbar.js:197
 msgid "Delete Job"
@@ -1821,11 +1821,11 @@ msgstr ""
 msgid "Delete User"
 msgstr ""
 
-#: screens/User/UserTokenDetail/UserTokenDetail.js:72
+#: screens/User/UserTokenDetail/UserTokenDetail.js:70
 msgid "Delete User Token"
 msgstr ""
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:204
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:199
 msgid "Delete Workflow Approval"
 msgstr ""
 
@@ -1923,8 +1923,8 @@ msgstr ""
 msgid "Denied by {0} - {1}"
 msgstr ""
 
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:185
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:190
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:195
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:30
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:45
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:53
@@ -2256,10 +2256,10 @@ msgstr ""
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:396
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:110
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:112
-#: screens/Credential/CredentialDetail/CredentialDetail.js:281
+#: screens/Credential/CredentialDetail/CredentialDetail.js:279
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:105
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:119
-#: screens/Host/HostDetail/HostDetail.js:110
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:117
+#: screens/Host/HostDetail/HostDetail.js:104
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:98
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:110
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:120
@@ -2505,7 +2505,7 @@ msgstr ""
 
 #: components/Workflow/WorkflowNodeHelp.js:170
 #: screens/Job/JobOutput/shared/OutputToolbar.js:123
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:171
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:167
 msgid "Elapsed"
 msgstr ""
 
@@ -2585,7 +2585,7 @@ msgstr ""
 #: components/PromptDetail/PromptJobTemplateDetail.js:189
 #: components/PromptDetail/PromptProjectDetail.js:112
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:97
-#: screens/Credential/CredentialDetail/CredentialDetail.js:256
+#: screens/Credential/CredentialDetail/CredentialDetail.js:254
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:250
 #: screens/Project/ProjectDetail/ProjectDetail.js:241
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
@@ -2734,7 +2734,7 @@ msgstr ""
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
 msgstr ""
 
-#: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:60
+#: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
 msgstr ""
 
@@ -2775,7 +2775,7 @@ msgstr ""
 #: components/Workflow/WorkflowNodeHelp.js:108
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:129
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:205
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:141
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:139
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:215
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:121
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:133
@@ -2825,10 +2825,10 @@ msgstr ""
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:131
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:155
 #: screens/Application/ApplicationsList/ApplicationsList.js:185
-#: screens/Credential/CredentialDetail/CredentialDetail.js:302
+#: screens/Credential/CredentialDetail/CredentialDetail.js:300
 #: screens/Credential/CredentialList/CredentialList.js:194
 #: screens/Host/HostDetail/HostDetail.js:56
-#: screens/Host/HostDetail/HostDetail.js:125
+#: screens/Host/HostDetail/HostDetail.js:119
 #: screens/Host/HostGroups/HostGroupsList.js:244
 #: screens/Host/HostList/HostList.js:222
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:294
@@ -2879,11 +2879,11 @@ msgstr ""
 #: screens/User/UserRoles/UserRolesList.js:243
 #: screens/User/UserRoles/UserRolesList.js:254
 #: screens/User/UserTeams/UserTeamList.js:259
-#: screens/User/UserTokenDetail/UserTokenDetail.js:83
+#: screens/User/UserTokenDetail/UserTokenDetail.js:81
 #: screens/User/UserTokenList/UserTokenList.js:209
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:216
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:227
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:238
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:211
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:222
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:233
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:246
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:257
 msgid "Error!"
@@ -3121,7 +3121,7 @@ msgstr ""
 msgid "Failed to approve one or more workflow approval."
 msgstr ""
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:230
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:225
 msgid "Failed to approve workflow approval."
 msgstr ""
 
@@ -3158,7 +3158,7 @@ msgid "Failed to cancel one or more jobs."
 msgstr ""
 
 #: components/JobList/JobListItem.js:107
-#: screens/Job/JobDetail/JobDetail.js:476
+#: screens/Job/JobDetail/JobDetail.js:471
 #: screens/Job/JobOutput/shared/OutputToolbar.js:136
 msgid "Failed to cancel {0}"
 msgstr ""
@@ -3188,7 +3188,7 @@ msgstr ""
 msgid "Failed to delete application."
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:305
+#: screens/Credential/CredentialDetail/CredentialDetail.js:303
 msgid "Failed to delete credential."
 msgstr ""
 
@@ -3196,7 +3196,7 @@ msgstr ""
 msgid "Failed to delete group {0}."
 msgstr ""
 
-#: screens/Host/HostDetail/HostDetail.js:128
+#: screens/Host/HostDetail/HostDetail.js:122
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:121
 msgid "Failed to delete host."
 msgstr ""
@@ -3335,7 +3335,7 @@ msgstr ""
 msgid "Failed to delete user."
 msgstr ""
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:219
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:214
 msgid "Failed to delete workflow approval."
 msgstr ""
 
@@ -3352,7 +3352,7 @@ msgstr ""
 msgid "Failed to deny one or more workflow approval."
 msgstr ""
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:241
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:236
 msgid "Failed to deny workflow approval."
 msgstr ""
 
@@ -3446,7 +3446,7 @@ msgstr ""
 msgid "Failed to update survey."
 msgstr ""
 
-#: screens/User/UserTokenDetail/UserTokenDetail.js:86
+#: screens/User/UserTokenDetail/UserTokenDetail.js:84
 msgid "Failed to user token."
 msgstr ""
 
@@ -3516,7 +3516,7 @@ msgid "Finish Time"
 msgstr ""
 
 #: screens/Job/JobDetail/JobDetail.js:139
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:161
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:159
 msgid "Finished"
 msgstr ""
 
@@ -4428,14 +4428,14 @@ msgid "Job"
 msgstr ""
 
 #: components/JobList/JobListItem.js:105
-#: screens/Job/JobDetail/JobDetail.js:474
+#: screens/Job/JobDetail/JobDetail.js:469
 #: screens/Job/JobOutput/JobOutput.js:557
 #: screens/Job/JobOutput/JobOutput.js:558
 #: screens/Job/JobOutput/shared/OutputToolbar.js:134
 msgid "Job Cancel Error"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.js:496
+#: screens/Job/JobDetail/JobDetail.js:491
 #: screens/Job/JobOutput/JobOutput.js:546
 #: screens/Job/JobOutput/JobOutput.js:547
 msgid "Job Delete Error"
@@ -4685,24 +4685,24 @@ msgstr ""
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:101
 #: screens/Application/ApplicationsList/ApplicationListItem.js:42
 #: screens/Application/ApplicationsList/ApplicationsList.js:159
-#: screens/Credential/CredentialDetail/CredentialDetail.js:250
+#: screens/Credential/CredentialDetail/CredentialDetail.js:248
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:91
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:105
-#: screens/Host/HostDetail/HostDetail.js:91
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:104
+#: screens/Host/HostDetail/HostDetail.js:86
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:71
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:95
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:108
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:44
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:85
-#: screens/Job/JobDetail/JobDetail.js:414
+#: screens/Job/JobDetail/JobDetail.js:411
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:344
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:110
 #: screens/Project/ProjectDetail/ProjectDetail.js:236
 #: screens/Team/TeamDetail/TeamDetail.js:48
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:275
 #: screens/User/UserDetail/UserDetail.js:84
-#: screens/User/UserTokenDetail/UserTokenDetail.js:63
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:156
+#: screens/User/UserTokenDetail/UserTokenDetail.js:62
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:155
 msgid "Last Modified"
 msgstr ""
 
@@ -5962,7 +5962,7 @@ msgstr ""
 msgid "Perform a search to define a host filter"
 msgstr ""
 
-#: screens/User/UserTokenDetail/UserTokenDetail.js:71
+#: screens/User/UserTokenDetail/UserTokenDetail.js:69
 #: screens/User/UserTokenList/UserTokenList.js:105
 msgid "Personal Access Token"
 msgstr ""
@@ -6360,6 +6360,10 @@ msgstr ""
 msgid "Recipient list"
 msgstr ""
 
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
+msgid "Red Hat Ansible Automation Platform"
+msgstr ""
+
 #: components/Lookup/ProjectLookup.js:138
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:161
@@ -6455,8 +6459,8 @@ msgstr ""
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
-#: screens/Job/JobDetail/JobDetail.js:455
-#: screens/Job/JobDetail/JobDetail.js:463
+#: screens/Job/JobDetail/JobDetail.js:450
+#: screens/Job/JobDetail/JobDetail.js:458
 #: screens/Job/JobOutput/shared/OutputToolbar.js:165
 msgid "Relaunch"
 msgstr ""
@@ -7063,13 +7067,13 @@ msgstr ""
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:77
 #: screens/Inventory/shared/InventoryForm.js:54
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:49
+#: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:50
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:49
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:50
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:49
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:34
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:92
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:49
-#: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:50
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:49
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:49
 #: screens/Inventory/shared/SmartInventoryForm.js:67
@@ -8326,7 +8330,7 @@ msgstr ""
 msgid "This container group is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:292
+#: screens/Credential/CredentialDetail/CredentialDetail.js:290
 msgid "This credential is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -8348,7 +8352,7 @@ msgid ""
 "streamline customer experience and success."
 msgstr ""
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:130
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:128
 msgid "This execution environment is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -9003,7 +9007,7 @@ msgstr ""
 #: components/PromptDetail/PromptJobTemplateDetail.js:271
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:131
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:381
-#: screens/Host/HostDetail/HostDetail.js:96
+#: screens/Host/HostDetail/HostDetail.js:90
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:97
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:37
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:89
@@ -9012,7 +9016,7 @@ msgstr ""
 #: screens/Inventory/shared/InventoryForm.js:68
 #: screens/Inventory/shared/InventoryGroupForm.js:46
 #: screens/Inventory/shared/SmartInventoryForm.js:93
-#: screens/Job/JobDetail/JobDetail.js:424
+#: screens/Job/JobDetail/JobDetail.js:419
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:366
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:204
 #: screens/Template/shared/JobTemplateForm.js:411
@@ -9692,8 +9696,8 @@ msgid "documentation"
 msgstr ""
 
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:101
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:115
-#: screens/Host/HostDetail/HostDetail.js:106
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:113
+#: screens/Host/HostDetail/HostDetail.js:100
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:94
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:106
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:99
@@ -9898,7 +9902,11 @@ msgid "{0, plural, one {This inventory source is currently being used by other r
 msgstr ""
 
 #: screens/Organization/OrganizationList/OrganizationList.js:166
-msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+#~ msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+#~ msgstr ""
+
+#: screens/Organization/OrganizationList/OrganizationList.js:166
+msgid "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr ""
 
 #: screens/Project/ProjectList/ProjectList.js:238

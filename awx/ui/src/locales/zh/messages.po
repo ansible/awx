@@ -23,7 +23,7 @@ msgstr "（限制为前 10）"
 msgid "(Prompt on launch)"
 msgstr "（启动时提示）"
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:271
+#: screens/Credential/CredentialDetail/CredentialDetail.js:269
 msgid "* This field will be retrieved from an external secret management system using the specified credential."
 msgstr "* 此字段将使用指定的凭证从外部 secret 管理系统检索。"
 
@@ -441,8 +441,8 @@ msgid "An inventory must be selected"
 msgstr "必须选择一个清单"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
-msgid "Ansible Tower"
-msgstr "Ansible Tower"
+#~ msgid "Ansible Tower"
+#~ msgstr "Ansible Tower"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
 msgid "Ansible Tower Documentation."
@@ -506,8 +506,8 @@ msgstr "应用程序和令牌"
 msgid "Approval"
 msgstr "批准"
 
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:176
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:181
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:186
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:30
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:45
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:53
@@ -584,7 +584,7 @@ msgstr "您确定要提交取消此作业的请求吗？"
 msgid "Arguments"
 msgstr "参数"
 
-#: screens/Job/JobDetail/JobDetail.js:435
+#: screens/Job/JobDetail/JobDetail.js:430
 msgid "Artifacts"
 msgstr "工件"
 
@@ -926,7 +926,7 @@ msgid "Cancel subscription edit"
 msgstr "取消订阅编辑"
 
 #: components/JobList/JobListItem.js:106
-#: screens/Job/JobDetail/JobDetail.js:475
+#: screens/Job/JobDetail/JobDetail.js:470
 #: screens/Job/JobOutput/shared/OutputToolbar.js:135
 msgid "Cancel {0}"
 msgstr "取消 {0}"
@@ -934,7 +934,7 @@ msgstr "取消 {0}"
 #: components/JobList/JobList.js:227
 #: components/StatusLabel/StatusLabel.js:65
 #: components/Workflow/WorkflowNodeHelp.js:111
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:166
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:163
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:20
 msgid "Canceled"
 msgstr "已取消"
@@ -1435,11 +1435,11 @@ msgstr "创建用户令牌"
 #: components/PromptDetail/PromptDetail.js:138
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:277
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:100
-#: screens/Credential/CredentialDetail/CredentialDetail.js:243
+#: screens/Credential/CredentialDetail/CredentialDetail.js:242
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:86
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:99
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:137
-#: screens/Host/HostDetail/HostDetail.js:85
+#: screens/Host/HostDetail/HostDetail.js:83
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:66
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:90
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:103
@@ -1448,7 +1448,7 @@ msgstr "创建用户令牌"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:260
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:140
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:47
-#: screens/Job/JobDetail/JobDetail.js:408
+#: screens/Job/JobDetail/JobDetail.js:407
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:339
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:105
 #: screens/Project/ProjectDetail/ProjectDetail.js:231
@@ -1521,13 +1521,13 @@ msgstr "创建者（用户名）"
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:53
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:243
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:41
+#: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:42
 #: screens/Inventory/shared/InventorySourceSubForms/EC2SubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:42
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:79
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:41
-#: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:42
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:41
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:41
 #: util/getRelatedResourceDeleteDetails.js:166
@@ -1728,9 +1728,9 @@ msgstr "定义系统级的特性和功能"
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:28
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:123
-#: screens/Credential/CredentialDetail/CredentialDetail.js:294
+#: screens/Credential/CredentialDetail/CredentialDetail.js:292
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:120
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:132
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:130
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:113
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:125
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:131
@@ -1742,7 +1742,7 @@ msgstr "定义系统级的特性和功能"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:72
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:76
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:99
-#: screens/Job/JobDetail/JobDetail.js:487
+#: screens/Job/JobDetail/JobDetail.js:482
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:376
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:175
 #: screens/Project/ProjectDetail/ProjectDetail.js:279
@@ -1753,8 +1753,8 @@ msgstr "定义系统级的特性和功能"
 #: screens/Template/Survey/SurveyToolbar.js:92
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:247
 #: screens/User/UserDetail/UserDetail.js:107
-#: screens/User/UserTokenDetail/UserTokenDetail.js:76
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:208
+#: screens/User/UserTokenDetail/UserTokenDetail.js:74
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:203
 msgid "Delete"
 msgstr "删除"
 
@@ -1762,15 +1762,15 @@ msgstr "删除"
 msgid "Delete All Groups and Hosts"
 msgstr "删除所有组和主机"
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:288
+#: screens/Credential/CredentialDetail/CredentialDetail.js:286
 msgid "Delete Credential"
 msgstr "删除凭证"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:125
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:123
 msgid "Delete Execution Environment"
 msgstr "删除执行环境"
 
-#: screens/Host/HostDetail/HostDetail.js:116
+#: screens/Host/HostDetail/HostDetail.js:110
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:109
 msgid "Delete Host"
 msgstr "删除主机"
@@ -1779,7 +1779,7 @@ msgstr "删除主机"
 msgid "Delete Inventory"
 msgstr "删除清单"
 
-#: screens/Job/JobDetail/JobDetail.js:483
+#: screens/Job/JobDetail/JobDetail.js:478
 #: screens/Job/JobOutput/shared/OutputToolbar.js:193
 #: screens/Job/JobOutput/shared/OutputToolbar.js:197
 msgid "Delete Job"
@@ -1821,11 +1821,11 @@ msgstr "删除团队"
 msgid "Delete User"
 msgstr "删除用户"
 
-#: screens/User/UserTokenDetail/UserTokenDetail.js:72
+#: screens/User/UserTokenDetail/UserTokenDetail.js:70
 msgid "Delete User Token"
 msgstr "删除用户令牌"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:204
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:199
 msgid "Delete Workflow Approval"
 msgstr "删除工作流批准"
 
@@ -1923,8 +1923,8 @@ msgstr "拒绝 - {0}。详情请查看活动流。"
 msgid "Denied by {0} - {1}"
 msgstr "拒绝于 {0} - {1}"
 
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:185
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:190
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:195
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:30
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:45
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:53
@@ -2256,10 +2256,10 @@ msgstr "每次使用此项目运行作业时，请在启动该作业前更新项
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:396
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:110
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:112
-#: screens/Credential/CredentialDetail/CredentialDetail.js:281
+#: screens/Credential/CredentialDetail/CredentialDetail.js:279
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:105
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:119
-#: screens/Host/HostDetail/HostDetail.js:110
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:117
+#: screens/Host/HostDetail/HostDetail.js:104
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:98
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:110
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:120
@@ -2505,7 +2505,7 @@ msgstr "编辑工作流"
 
 #: components/Workflow/WorkflowNodeHelp.js:170
 #: screens/Job/JobOutput/shared/OutputToolbar.js:123
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:171
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:167
 msgid "Elapsed"
 msgstr "已经过"
 
@@ -2581,7 +2581,7 @@ msgstr "启用"
 #: components/PromptDetail/PromptJobTemplateDetail.js:189
 #: components/PromptDetail/PromptProjectDetail.js:112
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:97
-#: screens/Credential/CredentialDetail/CredentialDetail.js:256
+#: screens/Credential/CredentialDetail/CredentialDetail.js:254
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:250
 #: screens/Project/ProjectDetail/ProjectDetail.js:241
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
@@ -2716,7 +2716,7 @@ msgstr "在 Twilio 中输入与“信息服务”关联的号码，格式为 +18
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
 msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述，请参阅文档中的<0>清单插件</0>部分，以及 <1>Insights</1> 插件配置指南 。"
 
-#: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:60
+#: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
 msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述，请参阅文档中的<0>清单插件</0>部分，以及 <1>Tower</1> 插件配置指南 。"
 
@@ -2757,7 +2757,7 @@ msgstr "使用 JSON 或 YAML 语法输入变量。使用单选按钮在两者之
 #: components/Workflow/WorkflowNodeHelp.js:108
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:129
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:205
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:141
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:139
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:215
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:121
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:133
@@ -2807,10 +2807,10 @@ msgstr "保存工作流时出错！"
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:131
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:155
 #: screens/Application/ApplicationsList/ApplicationsList.js:185
-#: screens/Credential/CredentialDetail/CredentialDetail.js:302
+#: screens/Credential/CredentialDetail/CredentialDetail.js:300
 #: screens/Credential/CredentialList/CredentialList.js:194
 #: screens/Host/HostDetail/HostDetail.js:56
-#: screens/Host/HostDetail/HostDetail.js:125
+#: screens/Host/HostDetail/HostDetail.js:119
 #: screens/Host/HostGroups/HostGroupsList.js:244
 #: screens/Host/HostList/HostList.js:222
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:294
@@ -2861,11 +2861,11 @@ msgstr "保存工作流时出错！"
 #: screens/User/UserRoles/UserRolesList.js:243
 #: screens/User/UserRoles/UserRolesList.js:254
 #: screens/User/UserTeams/UserTeamList.js:259
-#: screens/User/UserTokenDetail/UserTokenDetail.js:83
+#: screens/User/UserTokenDetail/UserTokenDetail.js:81
 #: screens/User/UserTokenList/UserTokenList.js:209
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:216
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:227
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:238
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:211
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:222
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:233
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:246
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:257
 msgid "Error!"
@@ -3103,7 +3103,7 @@ msgstr "失败的作业"
 msgid "Failed to approve one or more workflow approval."
 msgstr "批准一个或多个工作流批准失败。"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:230
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:225
 msgid "Failed to approve workflow approval."
 msgstr "批准工作流批准失败。"
 
@@ -3140,7 +3140,7 @@ msgid "Failed to cancel one or more jobs."
 msgstr "取消一个或多个作业失败。"
 
 #: components/JobList/JobListItem.js:107
-#: screens/Job/JobDetail/JobDetail.js:476
+#: screens/Job/JobDetail/JobDetail.js:471
 #: screens/Job/JobOutput/shared/OutputToolbar.js:136
 msgid "Failed to cancel {0}"
 msgstr "取消 {0} 失败"
@@ -3170,7 +3170,7 @@ msgstr "复制模板失败。"
 msgid "Failed to delete application."
 msgstr "删除应用程序失败。"
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:305
+#: screens/Credential/CredentialDetail/CredentialDetail.js:303
 msgid "Failed to delete credential."
 msgstr "删除凭证失败。"
 
@@ -3178,7 +3178,7 @@ msgstr "删除凭证失败。"
 msgid "Failed to delete group {0}."
 msgstr "删除组 {0} 失败。"
 
-#: screens/Host/HostDetail/HostDetail.js:128
+#: screens/Host/HostDetail/HostDetail.js:122
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:121
 msgid "Failed to delete host."
 msgstr "删除主机失败。"
@@ -3317,7 +3317,7 @@ msgstr "删除团队失败。"
 msgid "Failed to delete user."
 msgstr "删除用户失败。"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:219
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:214
 msgid "Failed to delete workflow approval."
 msgstr "删除工作流批准失败。"
 
@@ -3334,7 +3334,7 @@ msgstr "删除 {name} 失败。"
 msgid "Failed to deny one or more workflow approval."
 msgstr "拒绝一个或多个工作流批准失败。"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:241
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:236
 msgid "Failed to deny workflow approval."
 msgstr "拒绝工作流批准失败。"
 
@@ -3428,7 +3428,7 @@ msgstr "更新容量调整失败。"
 msgid "Failed to update survey."
 msgstr "更新问卷调查失败。"
 
-#: screens/User/UserTokenDetail/UserTokenDetail.js:86
+#: screens/User/UserTokenDetail/UserTokenDetail.js:84
 msgid "Failed to user token."
 msgstr "用户令牌失败。"
 
@@ -3498,7 +3498,7 @@ msgid "Finish Time"
 msgstr "完成时间"
 
 #: screens/Job/JobDetail/JobDetail.js:139
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:161
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:159
 msgid "Finished"
 msgstr "完成"
 
@@ -4406,14 +4406,14 @@ msgid "Job"
 msgstr "作业"
 
 #: components/JobList/JobListItem.js:105
-#: screens/Job/JobDetail/JobDetail.js:474
+#: screens/Job/JobDetail/JobDetail.js:469
 #: screens/Job/JobOutput/JobOutput.js:557
 #: screens/Job/JobOutput/JobOutput.js:558
 #: screens/Job/JobOutput/shared/OutputToolbar.js:134
 msgid "Job Cancel Error"
 msgstr "作业取消错误"
 
-#: screens/Job/JobDetail/JobDetail.js:496
+#: screens/Job/JobDetail/JobDetail.js:491
 #: screens/Job/JobOutput/JobOutput.js:546
 #: screens/Job/JobOutput/JobOutput.js:547
 msgid "Job Delete Error"
@@ -4663,24 +4663,24 @@ msgstr "最近登陆"
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:101
 #: screens/Application/ApplicationsList/ApplicationListItem.js:42
 #: screens/Application/ApplicationsList/ApplicationsList.js:159
-#: screens/Credential/CredentialDetail/CredentialDetail.js:250
+#: screens/Credential/CredentialDetail/CredentialDetail.js:248
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:91
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:105
-#: screens/Host/HostDetail/HostDetail.js:91
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:104
+#: screens/Host/HostDetail/HostDetail.js:86
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:71
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:95
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:108
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:44
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:85
-#: screens/Job/JobDetail/JobDetail.js:414
+#: screens/Job/JobDetail/JobDetail.js:411
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:344
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:110
 #: screens/Project/ProjectDetail/ProjectDetail.js:236
 #: screens/Team/TeamDetail/TeamDetail.js:48
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:275
 #: screens/User/UserDetail/UserDetail.js:84
-#: screens/User/UserTokenDetail/UserTokenDetail.js:63
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:156
+#: screens/User/UserTokenDetail/UserTokenDetail.js:62
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:155
 msgid "Last Modified"
 msgstr "最后修改"
 
@@ -5942,7 +5942,7 @@ msgstr "等待删除"
 msgid "Perform a search to define a host filter"
 msgstr "执行搜索以定义主机过滤器"
 
-#: screens/User/UserTokenDetail/UserTokenDetail.js:71
+#: screens/User/UserTokenDetail/UserTokenDetail.js:69
 #: screens/User/UserTokenList/UserTokenList.js:105
 msgid "Personal Access Token"
 msgstr "个人访问令牌"
@@ -6342,6 +6342,10 @@ msgstr "接收者列表"
 msgid "Recipient list"
 msgstr "接收者列表"
 
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
+msgid "Red Hat Ansible Automation Platform"
+msgstr ""
+
 #: components/Lookup/ProjectLookup.js:138
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:161
@@ -6437,8 +6441,8 @@ msgstr "相关的搜索类型 typeahead"
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
-#: screens/Job/JobDetail/JobDetail.js:455
-#: screens/Job/JobDetail/JobDetail.js:463
+#: screens/Job/JobDetail/JobDetail.js:450
+#: screens/Job/JobDetail/JobDetail.js:458
 #: screens/Job/JobOutput/shared/OutputToolbar.js:165
 msgid "Relaunch"
 msgstr "重新启动"
@@ -7045,13 +7049,13 @@ msgstr "导入一个订阅"
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:77
 #: screens/Inventory/shared/InventoryForm.js:54
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:49
+#: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:50
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:49
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:50
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:49
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:34
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:92
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:49
-#: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.js:50
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:49
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:49
 #: screens/Inventory/shared/SmartInventoryForm.js:67
@@ -8267,7 +8271,7 @@ msgstr "此操作将解除以下关联："
 msgid "This container group is currently being by other resources. Are you sure you want to delete it?"
 msgstr "其他资源目前正在此容器组中。确定要删除它吗？"
 
-#: screens/Credential/CredentialDetail/CredentialDetail.js:292
+#: screens/Credential/CredentialDetail/CredentialDetail.js:290
 msgid "This credential is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "其他资源目前正在使用此凭证。确定要删除它吗？"
 
@@ -8289,7 +8293,7 @@ msgid ""
 "streamline customer experience and success."
 msgstr "这些数据用于增强未来的 Tower 软件发行版本，并帮助简化客户体验和成功。"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:130
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:128
 msgid "This execution environment is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "其他资源目前正在使用此执行环境。确定要删除它吗？"
 
@@ -8940,7 +8944,7 @@ msgstr "VMware vCenter"
 #: components/PromptDetail/PromptJobTemplateDetail.js:271
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:131
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:381
-#: screens/Host/HostDetail/HostDetail.js:96
+#: screens/Host/HostDetail/HostDetail.js:90
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:97
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:37
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:89
@@ -8949,7 +8953,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/InventoryForm.js:68
 #: screens/Inventory/shared/InventoryGroupForm.js:46
 #: screens/Inventory/shared/SmartInventoryForm.js:93
-#: screens/Job/JobDetail/JobDetail.js:424
+#: screens/Job/JobDetail/JobDetail.js:419
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:366
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:204
 #: screens/Template/shared/JobTemplateForm.js:411
@@ -9625,8 +9629,8 @@ msgid "documentation"
 msgstr "文档"
 
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:101
-#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:115
-#: screens/Host/HostDetail/HostDetail.js:106
+#: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:113
+#: screens/Host/HostDetail/HostDetail.js:100
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:94
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:106
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:99
@@ -9819,8 +9823,12 @@ msgid "{0, plural, one {This inventory source is currently being used by other r
 msgstr "{0, plural, one {这个清单源正被依赖它的其他资源使用。您确定要删除它吗？} other {删除这些清单源可能会影响到其他依赖它的资源。您确定要删除吗？}}"
 
 #: screens/Organization/OrganizationList/OrganizationList.js:166
-msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {这个机构正被其他资源使用。您确定要删除它吗？} other {删除这些机构可能会影响到其他依赖它的资源。您确定要删除吗？}}"
+#~ msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+#~ msgstr "{0, plural, one {这个机构正被其他资源使用。您确定要删除它吗？} other {删除这些机构可能会影响到其他依赖它的资源。您确定要删除吗？}}"
+
+#: screens/Organization/OrganizationList/OrganizationList.js:166
+msgid "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr ""
 
 #: screens/Project/ProjectList/ProjectList.js:238
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
