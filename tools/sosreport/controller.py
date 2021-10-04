@@ -24,7 +24,7 @@ SOSREPORT_CONTROLLER_COMMANDS = [
     "ls -ll /etc/tower",
     "ls -ll /var/run/awx-receptor", # list contents of dirctory where receptor socket should be
     "ls -ll /etc/receptor",
-    "receptorctl --socket /var/run/awx-receptor/receptor.sock status", # Get invormation about the status of the mesh
+    "receptorctl --socket /var/run/awx-receptor/receptor.sock status", # Get information about the status of the mesh
     "umask -p",  # check current umask
 ]
 
