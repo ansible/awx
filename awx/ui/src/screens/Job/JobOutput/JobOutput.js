@@ -99,10 +99,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   // TODO move this ref into useJobEvents?
   const siblingRequests = useRef([]);
 
-  const fetchEventByUuid = (uuid) => {
-    // TODO (not getting called yet?)
-    console.log('TODO fetchEventByUuid', uuid);
-    debugger;
+  const fetchEventByUuid = async (uuid) => {
+    const { data } = await getJobModel(job.type).readEvents(job.id, { uuid });
+    return data.results[0] || null;
   };
 
   const fetchNextSibling = async (parentEventId, counter) => {
