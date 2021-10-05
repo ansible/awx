@@ -4,11 +4,34 @@ import shutil
 from setuptools import setup, find_packages, Command
 
 
-def get_version():
+def use_scm_version():
+    return False if version_file() else True
+
+
+def get_version_from_file():
+    if vf := version_file():
+        with open(vf, 'r') as file:
+            return file.read().strip()
+
+
+def version_file():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     version_file = os.path.join(current_dir, 'VERSION')
-    with open(version_file, 'r') as file:
-        return file.read().strip()
+
+    if os.path.exists(version_file):
+        return version_file
+
+
+def setup_requires():
+    if version_file():
+        return []
+    else:
+        return ['setuptools_scm']
+
+
+extra_setup_args = {}
+if not version_file():
+    extra_setup_args.update(dict(use_scm_version=dict(root="..", relative_to=__file__), setup_requires=setup_requires()))
 
 
 class CleanCommand(Command):
@@ -53,7 +76,7 @@ class CleanCommand(Command):
 
 setup(
     name='awxkit',
-    version=get_version(),
+    version=get_version_from_file(),
     description='The official command line interface for Ansible AWX',
     author='Red Hat, Inc.',
     author_email='info@ansible.com',
@@ -84,4 +107,5 @@ setup(
         'Topic :: System :: Systems Administration',
     ],
     entry_points={'console_scripts': ['akit=awxkit.scripts.basic_session:load_interactive', 'awx=awxkit.cli:run']},
+    **extra_setup_args,
 )

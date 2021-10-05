@@ -18,12 +18,34 @@ sharedir = "/usr/share/awx"
 docdir = "/usr/share/doc/awx"
 
 
-def get_version():
+def use_scm_version():
+    return False if version_file() else True
+
+
+def get_version_from_file():
+    if vf := version_file():
+        with open(vf, 'r') as file:
+            return file.read().strip()
+
+
+def version_file():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     version_file = os.path.join(current_dir, 'VERSION')
-    with open(version_file, 'r') as file:
-        return file.read().strip()
 
+    if os.path.exists(version_file):
+        return version_file
+
+
+def setup_requires():
+    if version_file():
+        return []
+    else:
+        return ['setuptools_scm']
+
+
+extra_setup_args = {}
+if not version_file():
+    extra_setup_args.update(dict(use_scm_version=use_scm_version(), setup_requires=setup_requires()))
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
@@ -93,7 +115,7 @@ class egg_info_dev(_egg_info):
 
 setup(
     name=os.getenv('NAME', 'awx'),
-    version=get_version(),
+    version=get_version_from_file(),
     author='Ansible, Inc.',
     author_email='info@ansible.com',
     description='awx: API, UI and Task Engine for Ansible',
@@ -104,7 +126,6 @@ setup(
     packages=['awx'],
     include_package_data=True,
     zip_safe=False,
-    setup_requires=[],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -165,4 +186,5 @@ setup(
         },
     },
     cmdclass={'egg_info_dev': egg_info_dev},
+    **extra_setup_args,
 )

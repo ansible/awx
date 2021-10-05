@@ -6,7 +6,7 @@ NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION := $(shell cat VERSION)
+VERSION := $(shell $(PYTHON) setup.py --version)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)

@@ -58,6 +58,7 @@ __pycache__
 /dist
 /*.egg-info
 *.py[c,o]
+/.eggs
 
 # JavaScript
 /Gruntfile.js
