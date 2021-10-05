@@ -2625,7 +2625,7 @@ class RunInventoryUpdate(BaseTask):
                     job_type='run',
                     job_tags=','.join(sync_needs),
                     status='running',
-                    execution_node=inventory_update.execution_node,
+                    execution_node=Instance.objects.me().hostname,
                     instance_group=inventory_update.instance_group,
                     celery_task_id=inventory_update.celery_task_id,
                 )
