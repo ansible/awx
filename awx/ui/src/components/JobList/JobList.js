@@ -100,8 +100,8 @@ function JobList({ defaultParams, showTypeColumn = false }) {
 
   // TODO: update QS_CONFIG to be safe for deps array
   const fetchJobsById = useCallback(
-    async (ids) => {
-      const params = parseQueryString(qsConfig, location.search);
+    async (ids, qs = {}) => {
+      const params = parseQueryString(qs, location.search);
       params.id__in = ids.join(',');
       const { data } = await UnifiedJobsAPI.read(params);
       return data.results;
