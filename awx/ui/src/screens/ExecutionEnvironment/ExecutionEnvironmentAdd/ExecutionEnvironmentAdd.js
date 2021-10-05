@@ -27,6 +27,24 @@ function ExecutionEnvironmentAdd() {
   const handleCancel = () => {
     history.push(`/execution_environments`);
   };
+
+  const hubParams = {
+    description: '',
+    image: '',
+    name: '',
+  };
+
+  history.location.search
+    .replace(/^\?/, '')
+    .split('&')
+    .map((s) => s.split('='))
+    .forEach(([key, val]) => {
+      if (!(key in hubParams)) {
+        return;
+      }
+      hubParams[key] = decodeURIComponent(val);
+    });
+
   return (
     <PageSection>
       <Card>
@@ -38,6 +56,7 @@ function ExecutionEnvironmentAdd() {
                 submitError={submitError}
                 onCancel={handleCancel}
                 me={me || {}}
+                executionEnvironment={hubParams}
               />
             )}
           </Config>

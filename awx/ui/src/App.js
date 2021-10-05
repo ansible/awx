@@ -100,10 +100,14 @@ const AuthorizedRoutes = ({ routeConfig }) => {
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const { authRedirectTo, setAuthRedirectTo } = useSession();
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
-    setAuthRedirectTo(authRedirectTo === '/logout' ? '/' : pathname);
+    setAuthRedirectTo(
+      authRedirectTo === '/logout'
+        ? '/'
+        : `${location.pathname}${location.search}`
+    );
   });
 
   if (isAuthenticated(document.cookie)) {
