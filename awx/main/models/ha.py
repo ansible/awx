@@ -20,6 +20,7 @@ from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
 from awx.main.fields import JSONField
+from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
@@ -154,6 +155,22 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return random.choice(
             Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
         )
+
+    def get_cleanup_task_kwargs(self, **kwargs):
+        """
+        Produce options to use for the command: ansible-runner worker cleanup
+        returns a dict that is passed to the python interface for the runner method corresponding to that command
+        any kwargs will override that key=value combination in the returned dict
+        """
+        vargs = dict(file_pattern='/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*'))
+        vargs.update(kwargs)
+        if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
+            active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')).values_list('pk', flat=True))
+            if active_pks:
+                vargs['exclude_strings'] = [JOB_FOLDER_PREFIX % job_id for job_id in active_pks]
+        if 'remove_images' in vargs or 'image_prune' in vargs:
+            vargs.setdefault('process_isolation_executable', 'podman')
+        return vargs
 
     def is_lost(self, ref_time=None):
         if self.last_seen is None:

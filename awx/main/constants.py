@@ -81,3 +81,6 @@ LOGGER_BLOCKLIST = (
 # Reported version for node seen in receptor mesh but for which capacity check
 # failed or is in progress
 RECEPTOR_PENDING = 'ansible-runner-???'
+
+# Naming pattern for AWX jobs in /tmp folder, like /tmp/awx_42_xiwm
+JOB_FOLDER_PREFIX = 'awx_%s_'

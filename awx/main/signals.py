@@ -58,7 +58,7 @@ from awx.main.models import (
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
-from awx.main.tasks import update_inventory_computed_fields
+from awx.main.tasks import update_inventory_computed_fields, handle_removed_image
 from awx.main.fields import (
     is_implicit_parent,
     update_role_parentage_for_instance,
@@ -624,10 +624,26 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
         approval.deny()
 
 
+def _handle_image_cleanup(removed_image, pk):
+    if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
+        return  # if other EE objects reference the tag, then do not purge it
+    handle_removed_image.delay(remove_images=[removed_image])
+
+
 @receiver(pre_delete, sender=ExecutionEnvironment)
 def remove_default_ee(sender, instance, **kwargs):
     if instance.id == getattr(settings.DEFAULT_EXECUTION_ENVIRONMENT, 'id', None):
         settings.DEFAULT_EXECUTION_ENVIRONMENT = None
+    _handle_image_cleanup(instance.image, instance.pk)
+
+
+@receiver(post_save, sender=ExecutionEnvironment)
+def remove_stale_image(sender, instance, created, **kwargs):
+    if created:
+        return
+    removed_image = instance._prior_values_store.get('image')
+    if removed_image and removed_image != instance.image:
+        _handle_image_cleanup(removed_image, instance.pk)
 
 
 @receiver(post_save, sender=Session)

@@ -11,6 +11,8 @@ import importlib
 import json
 import logging
 import os
+from io import StringIO
+from contextlib import redirect_stdout
 import shutil
 import stat
 import tempfile
@@ -27,7 +29,6 @@ import socket
 import threading
 import concurrent.futures
 from base64 import b64encode
-import subprocess
 import sys
 
 # Django
@@ -51,13 +52,14 @@ from gitdb.exc import BadName as BadGitName
 
 # Runner
 import ansible_runner
+import ansible_runner.cleanup
 
 # dateutil
 from dateutil.parser import parse as parse_date
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS, JOB_FOLDER_PREFIX
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
@@ -106,7 +108,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client
+from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client, worker_cleanup
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -390,22 +392,42 @@ def purge_old_stdout_files():
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
 
 
-@task(queue=get_local_queuename)
-def cleanup_execution_environment_images():
+def _cleanup_images_and_files(**kwargs):
     if settings.IS_K8S:
         return
-    process = subprocess.run('podman images --filter="dangling=true" --format json'.split(" "), capture_output=True)
-    if process.returncode != 0:
-        logger.debug("Cleanup execution environment images: could not get list of images")
-        return
-    if len(process.stdout) > 0:
-        images_system = json.loads(process.stdout)
-        for e in images_system:
-            image_name = e["Id"]
-            logger.debug(f"Cleanup execution environment images: deleting {image_name}")
-            process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
-            if process.returncode != 0:
-                logger.debug(f"Failed to delete image {image_name}")
+    this_inst = Instance.objects.me()
+    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
+    stdout = ''
+    with StringIO() as buffer:
+        with redirect_stdout(buffer):
+            ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+            stdout = buffer.getvalue()
+    if '(changed: True)' in stdout:
+        logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+
+    # if we are the first instance alphabetically, then run cleanup on execution nodes
+    checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
+    if checker_instance and this_inst.hostname == checker_instance.hostname:
+        logger.info(f'Running execution node cleanup with kwargs {kwargs}')
+        for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
+            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+            try:
+                stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+                if '(changed: True)' in stdout:
+                    logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
+            except RuntimeError:
+                logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+
+
+@task(queue='tower_broadcast_all')
+def handle_removed_image(remove_images=None):
+    """Special broadcast invocation of this method to handle case of deleted EE"""
+    _cleanup_images_and_files(remove_images=remove_images, file_pattern='')
+
+
+@task(queue=get_local_queuename)
+def cleanup_images_and_files():
+    _cleanup_images_and_files()
 
 
 @task(queue=get_local_queuename)
@@ -441,7 +463,7 @@ def execution_node_health_check(node):
     if instance.node_type != 'execution':
         raise RuntimeError(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
 
-    data = worker_info(node, work_type='ansible-runner' if instance.node_type == 'execution' else 'local')
+    data = worker_info(node)
 
     prior_capacity = instance.capacity
 
@@ -980,7 +1002,7 @@ class BaseTask(object):
         """
         Create a temporary directory for job-related files.
         """
-        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
+        path = tempfile.mkdtemp(prefix=JOB_FOLDER_PREFIX % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(path)

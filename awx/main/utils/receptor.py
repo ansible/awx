@@ -61,40 +61,48 @@ def get_conn_type(node_name, receptor_ctl):
             return ReceptorConnectionType(node.get('ConnType'))
 
 
-def worker_info(node_name, work_type='ansible-runner'):
-    receptor_ctl = get_receptor_ctl()
-    use_stream_tls = getattr(get_conn_type(node_name, receptor_ctl), 'name', None) == "STREAMTLS"
-    transmit_start = time.time()
-    error_list = []
-    data = {'errors': error_list, 'transmit_timing': 0.0}
+class RemoteJobError(RuntimeError):
+    pass
 
-    kwargs = {}
-    kwargs['tlsclient'] = get_tls_client(use_stream_tls)
-    kwargs['signwork'] = True
-    if work_type != 'local':
-        kwargs['ttl'] = '20s'
-    result = receptor_ctl.submit_work(worktype=work_type, payload='', params={"params": f"--worker-info"}, node=node_name, **kwargs)
+
+def run_until_complete(node, timing_data=None, **kwargs):
+    """
+    Runs an ansible-runner work_type on remote node, waits until it completes, then returns stdout.
+    """
+    receptor_ctl = get_receptor_ctl()
+
+    use_stream_tls = getattr(get_conn_type(node, receptor_ctl), 'name', None) == "STREAMTLS"
+    kwargs.setdefault('tlsclient', get_tls_client(use_stream_tls))
+    kwargs.setdefault('signwork', True)
+    kwargs.setdefault('ttl', '20s')
+    kwargs.setdefault('payload', '')
+
+    transmit_start = time.time()
+    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
-    data['transmit_timing'] = run_start - transmit_start
-    data['run_timing'] = 0.0
+    if timing_data:
+        timing_data['transmit_timing'] = run_start - transmit_start
+    run_timing = 0.0
+    stdout = ''
 
     try:
 
         resultfile = receptor_ctl.get_work_results(unit_id)
 
-        stdout = ''
-
-        while data['run_timing'] < 20.0:
+        while run_timing < 20.0:
             status = receptor_ctl.simple_command(f'work status {unit_id}')
             state_name = status.get('StateName')
             if state_name not in ('Pending', 'Running'):
                 break
-            data['run_timing'] = time.time() - run_start
+            run_timing = time.time() - run_start
             time.sleep(0.5)
         else:
-            error_list.append(f'Timeout getting worker info on {node_name}, state remains in {state_name}')
+            raise RemoteJobError(f'Receptor job timeout on {node} after {run_timing} seconds, state remains in {state_name}')
+
+        if timing_data:
+            timing_data['run_timing'] = run_timing
 
         stdout = resultfile.read()
         stdout = str(stdout, encoding='utf-8')
@@ -103,19 +111,27 @@ def worker_info(node_name, work_type='ansible-runner'):
 
         res = receptor_ctl.simple_command(f"work release {unit_id}")
         if res != {'released': unit_id}:
-            logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node_name}, data: {res}')
+            logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
 
         receptor_ctl.close()
 
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')
-        if not work_detail.startswith('exit status'):
-            error_list.append(f'Receptor error getting worker info from {node_name}, detail:\n{work_detail}')
-        elif 'unrecognized arguments: --worker-info' in stdout:
-            error_list.append(f'Old version (2.0.1 or earlier) of ansible-runner on node {node_name} without --worker-info')
+        if work_detail:
+            raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}')
         else:
-            error_list.append(f'Unknown ansible-runner error on node {node_name}, stdout:\n{stdout}')
-    else:
+            raise RemoteJobError(f'Unknown ansible-runner error on node {node}, stdout:\n{stdout}')
+
+    return stdout
+
+
+def worker_info(node_name, work_type='ansible-runner'):
+    error_list = []
+    data = {'errors': error_list, 'transmit_timing': 0.0}
+
+    try:
+        stdout = run_until_complete(node=node_name, timing_data=data, params={"params": "--worker-info"})
+
         yaml_stdout = stdout.strip()
         remote_data = {}
         try:
@@ -129,6 +145,13 @@ def worker_info(node_name, work_type='ansible-runner'):
             error_list.extend(remote_data.pop('errors', []))  # merge both error lists
             data.update(remote_data)
 
+    except RemoteJobError as exc:
+        details = exc.args[0]
+        if 'unrecognized arguments: --worker-info' in details:
+            error_list.append(f'Old version (2.0.1 or earlier) of ansible-runner on node {node_name} without --worker-info')
+        else:
+            error_list.append(details)
+
     # If we have a connection error, missing keys would be trivial consequence of that
     if not data['errors']:
         # see tasks.py usage of keys
@@ -137,3 +160,32 @@ def worker_info(node_name, work_type='ansible-runner'):
             data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
 
     return data
+
+
+def _convert_args_to_cli(vargs):
+    """
+    For the ansible-runner worker cleanup command
+    converts the dictionary (parsed argparse variables) used for python interface
+    into a string of CLI options, which has to be used on execution nodes.
+    """
+    args = ['cleanup']
+    for option in ('exclude_strings', 'remove_images'):
+        if vargs.get(option):
+            args.append('--{}={}'.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
+    for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
+        if vargs.get(option) is True:
+            args.append('--{}'.format(option.replace('_', '-')))
+        elif vargs.get(option) not in (None, ''):
+            args.append('--{}={}'.format(option.replace('_', '-'), vargs.get(option)))
+    return args
+
+
+def worker_cleanup(node_name, vargs, timeout=300.0):
+    args = _convert_args_to_cli(vargs)
+
+    remote_command = ' '.join(args)
+    logger.debug(f'Running command over receptor mesh on {node_name}: ansible-runner worker {remote_command}')
+
+    stdout = run_until_complete(node=node_name, params={"params": remote_command})
+
+    return stdout
