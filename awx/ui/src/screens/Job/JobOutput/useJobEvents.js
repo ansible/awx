@@ -94,7 +94,13 @@ export function jobEventsReducer(callbacks, enqueueAction) {
       }
     });
 
-    parentsToFetch.forEach((uuid) => callbacks.fetchEventByUuid(uuid));
+    parentsToFetch.forEach(async (uuid) => {
+      const event = await callbacks.fetchEventByUuid(uuid);
+      enqueueAction({
+        type: ADD_EVENTS,
+        events: [event],
+      });
+    });
 
     return state;
   }
