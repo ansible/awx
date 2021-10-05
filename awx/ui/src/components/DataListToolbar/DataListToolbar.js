@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-
+import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -56,6 +56,7 @@ function DataListToolbar({
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
 }) {
+  const { search } = useLocation();
   const showExpandCollapse = onCompact && onExpand;
   const [isKebabOpen, setIsKebabOpen] = useState(false);
   const [isKebabModalOpen, setIsKebabModalOpen] = useState(false);
@@ -81,7 +82,7 @@ function DataListToolbar({
       id={`${qsConfig.namespace}-list-toolbar`}
       clearAllFilters={clearAllFilters}
       collapseListedFiltersBreakpoint="lg"
-      clearFiltersButtonText={t`Clear all filters`}
+      clearFiltersButtonText={Boolean(search) && t`Clear all filters`}
     >
       <ToolbarContent>
         {onExpandAll && (

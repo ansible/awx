@@ -5,8 +5,10 @@ import { t } from '@lingui/macro';
 import {
   Button,
   ButtonVariant,
+  Divider,
   InputGroup,
   Select,
+  SelectGroup,
   SelectOption,
   SelectVariant,
   TextInput,
@@ -41,15 +43,9 @@ function AdvancedSearch({
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
 }) {
-  // TODO: blocked by pf bug, eventually separate these into two groups in the select
-  // for now, I'm spreading set to get rid of duplicate keys...when they are grouped
-  // we might want to revisit that.
-  const allKeys = [
-    ...new Set([
-      ...(searchableKeys.map((k) => k.key) || []),
-      ...(relatedSearchableKeys || []),
-    ]),
-  ];
+  const relatedKeys = relatedSearchableKeys.filter(
+    (sKey) => !searchableKeys.map(({ key }) => key).includes(sKey)
+  );
 
   const [isPrefixDropdownOpen, setIsPrefixDropdownOpen] = useState(false);
   const [isKeyDropdownOpen, setIsKeyDropdownOpen] = useState(false);
@@ -165,19 +161,44 @@ function AdvancedSearch({
         isOpen={isKeyDropdownOpen}
         placeholderText={t`Key`}
         isCreatable
+        isGrouped
         onCreateOption={setKeySelection}
         maxHeight={maxSelectHeight}
         noResultsFoundText={t`No results found`}
       >
-        {allKeys.map((optionKey) => (
-          <SelectOption
-            key={optionKey}
-            value={optionKey}
-            id={`select-option-${optionKey}`}
-          >
-            {optionKey}
-          </SelectOption>
-        ))}
+        {[
+          ...(searchableKeys.length
+            ? [
+                <SelectGroup key="direct keys" label={t`Direct Keys`}>
+                  {searchableKeys.map((k) => (
+                    <SelectOption
+                      value={k.key}
+                      key={k.key}
+                      id={`select-option-${k.key}`}
+                    >
+                      {k.key}
+                    </SelectOption>
+                  ))}
+                </SelectGroup>,
+                <Divider key="divider" />,
+              ]
+            : []),
+          ...(relatedKeys.length
+            ? [
+                <SelectGroup key="related keys" label={t`Related Keys`}>
+                  {relatedKeys.map((rKey) => (
+                    <SelectOption
+                      value={rKey}
+                      key={rKey}
+                      id={`select-option-${rKey}`}
+                    >
+                      {rKey}
+                    </SelectOption>
+                  ))}
+                </SelectGroup>,
+              ]
+            : []),
+        ]}
       </Select>
       {relatedSearchKeySelected ? (
         <RelatedLookupTypeInput
