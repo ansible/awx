@@ -212,6 +212,7 @@ function ExecutionEnvironmentForm({
   };
   return (
     <Formik
+      enableReinitialize
       initialValues={initialValues}
       onSubmit={(values) => onSubmit(values)}
     >
