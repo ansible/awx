@@ -69,7 +69,7 @@ describe('<NotificationTemplateListItem />', () => {
   });
 
   test('should call api to copy inventory', async () => {
-    NotificationTemplatesAPI.copy.mockResolvedValue();
+    NotificationTemplatesAPI.copy.mockResolvedValue({ name: 'Foo' });
 
     const wrapper = mountWithContexts(
       <table>
@@ -91,7 +91,18 @@ describe('<NotificationTemplateListItem />', () => {
   });
 
   test('should render proper alert modal on copy error', async () => {
-    NotificationTemplatesAPI.copy.mockRejectedValue(new Error());
+    NotificationTemplatesAPI.copy.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'post',
+            url: '/api/v2/notification_templates/3/copy',
+          },
+          data: 'An error ocurred',
+          status: 403,
+        },
+      })
+    );
 
     const wrapper = mountWithContexts(
       <table>
@@ -104,10 +115,12 @@ describe('<NotificationTemplateListItem />', () => {
         </tbody>
       </table>
     );
+    expect(wrapper.find('Modal').length).toBe(0);
     await act(async () =>
       wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
     );
     wrapper.update();
+    expect(wrapper.find('Modal').length).toBe(1);
     expect(wrapper.find('Modal').prop('isOpen')).toBe(true);
     jest.clearAllMocks();
   });
