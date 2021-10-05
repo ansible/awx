@@ -9,7 +9,8 @@ def use_scm_version():
 
 
 def get_version_from_file():
-    if vf := version_file():
+    vf = version_file()
+    if vf:
         with open(vf, 'r') as file:
             return file.read().strip()
 
