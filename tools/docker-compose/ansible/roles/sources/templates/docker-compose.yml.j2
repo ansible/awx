@@ -37,6 +37,8 @@ services:
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
+      - "../../docker-compose/_sources/receptor/work_private_key.pem:/etc/receptor/work_private_key.pem"
       # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "~/.kube/config:/var/lib/awx/.kube/config"
@@ -96,7 +98,7 @@ services:
       - "awx_db:/var/lib/postgresql/data"
 {% if execution_node_count|int > 0 %}
   receptor-hop:
-    image: quay.io/project-receptor/receptor:latest
+    image: quay.io/ansible/receptor:devel
     user: root
     container_name: tools_receptor_hop
     hostname: receptor-hop
@@ -121,6 +123,7 @@ services:
     volumes:
       - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
+      - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
     privileged: true
   {% endfor %}
 {% endif %}

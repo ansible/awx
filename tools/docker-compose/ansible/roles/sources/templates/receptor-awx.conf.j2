@@ -1,11 +1,22 @@
 ---
 - node:
     id: awx_{{ item }}
+    firewallrules:
+      - action: "reject"
+        tonode: awx_{{ item }}
+        toservice: "control"
 
 - log-level: info
 
 - tcp-listener:
     port: 2222
+
+- work-signing:
+    privatekey: /etc/receptor/work_private_key.pem
+    tokenexpiration: 1m
+
+- work-verification:
+    publickey: /etc/receptor/work_public_key.pem
 
 {% for i in range(item | int + 1, control_plane_node_count | int + 1) %}
 - tcp-peer:
@@ -29,6 +40,7 @@
     command: ansible-runner
     params: worker
     allowruntimeparams: true
+    verifysignature: true
 
 - work-kubernetes:
     worktype: kubernetes-runtime-auth
@@ -36,6 +48,7 @@
     allowruntimeauth: true
     allowruntimepod: true
     allowruntimeparams: true
+    verifysignature: true
 
 - work-kubernetes:
     worktype: kubernetes-incluster-auth
@@ -43,3 +56,4 @@
     allowruntimeauth: true
     allowruntimepod: true
     allowruntimeparams: true
+    verifysignature: true

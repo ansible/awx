@@ -79,6 +79,16 @@
     awx_image_tag: "{{ lookup('file', playbook_dir + '/../../../VERSION') }}"
   when: awx_image_tag is not defined
 
+- name: Generate Private RSA key for signing work
+  command: openssl genrsa -out {{ work_sign_private_keyfile }} {{ receptor_rsa_bits }}
+  args:
+    creates: "{{ work_sign_private_keyfile }}"
+
+- name: Generate public RSA key for signing work
+  command: openssl rsa -in {{ work_sign_private_keyfile }} -out {{ work_sign_public_keyfile }} -outform PEM -pubout
+  args:
+    creates: "{{ work_sign_public_keyfile }}"
+
 - name: Render Docker-Compose
   template:
     src: docker-compose.yml.j2
