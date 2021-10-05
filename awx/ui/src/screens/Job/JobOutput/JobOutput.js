@@ -448,7 +448,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         }));
 
         addEvents(fetchedEvents);
-        // TODO track currentlyLoading
         setCurrentlyLoading((prevCurrentlyLoading) =>
           prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
         );

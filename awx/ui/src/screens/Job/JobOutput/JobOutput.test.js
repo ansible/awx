@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { JobsAPI } from 'api';
+import { JobsAPI, JobEventsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -27,6 +27,10 @@ const applyJobEventMock = (mockJobEvents) => {
     };
   };
   JobsAPI.readEvents = jest.fn().mockImplementation(mockReadEvents);
+  JobEventsAPI.readChildren = jest.fn().mockResolvedValue({
+    counter: 20,
+    uuid: 'abc-020',
+  });
 };
 
 const generateChattyRows = () => {
