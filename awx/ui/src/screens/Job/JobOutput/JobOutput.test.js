@@ -112,7 +112,6 @@ describe('<JobOutput />', () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
     await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
-    // console.log(wrapper.debug());
     await checkOutput(wrapper, generateChattyRows());
 
     expect(wrapper.find('JobOutput').length).toBe(1);
