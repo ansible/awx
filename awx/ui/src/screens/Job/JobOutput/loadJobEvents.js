@@ -1,7 +1,5 @@
 import { getJobModel, isJobRunning } from 'util/jobs';
 
-// TODO: merge back into JobOutput
-// eslint-disable-next-line import/prefer-default-export
 export async function fetchCount(job, eventPromise) {
   if (isJobRunning(job?.status)) {
     const {
@@ -19,8 +17,7 @@ export async function fetchCount(job, eventPromise) {
   return eventCount;
 }
 
-// TODO merge into useJobEventsTree?
-function normalizeEvents(job, events) {
+export function prependTraceback(job, events) {
   let countOffset = 0;
   if (!job?.result_traceback) {
     return {
@@ -37,7 +34,6 @@ function normalizeEvents(job, events) {
     stdout: job?.result_traceback,
     start_line: 0,
   };
-  // TODO: set as event at index 0 and use exact counter as index in addEvents?
   const firstIndex = events.findIndex((jobEvent) => jobEvent.counter === 1);
   if (firstIndex && events[firstIndex]?.stdout) {
     const stdoutLines = events[firstIndex].stdout.split('\r\n');

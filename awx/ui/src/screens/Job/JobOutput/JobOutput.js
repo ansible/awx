@@ -34,7 +34,7 @@ import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
 import getEventRequestParams, { range } from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
-import { fetchCount } from './loadJobEvents';
+import { fetchCount, prependTraceback } from './loadJobEvents';
 import useJobEvents from './useJobEvents';
 
 const QS_CONFIG = getQSConfig('job_output', {
@@ -324,8 +324,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         ...prevCssMap,
         ...newCssMap,
       }));
-      addEvents(fetchedEvents);
-      setRemoteRowCount(count);
+      const { events, countOffset } = prependTraceback(job, fetchedEvents);
+      addEvents(events);
+      setRemoteRowCount(count + countOffset);
     } catch (err) {
       setContentError(err);
     } finally {
