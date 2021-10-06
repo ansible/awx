@@ -9,7 +9,6 @@ import {
 import JobOutput from './JobOutput';
 import mockJobData from '../shared/data.job.json';
 import mockJobEventsData from './data.job_events.json';
-import mockFilteredJobEventsData from './data.filtered_job_events.json';
 
 jest.mock('../../../api');
 
