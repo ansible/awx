@@ -1,7 +1,7 @@
 import { useState, useEffect, useReducer } from 'react';
 
 const initialState = {
-  // array of root level nodes (event_level: 0)
+  // array of root level nodes (no parent_uuid)
   tree: [],
   // all events indexed by counter value
   events: {},
@@ -81,7 +81,7 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         state = _gatherEventsForNewParent(state, event.uuid);
         return;
       }
-      if (event.event_level === 0 || !event.parent_uuid) {
+      if (!event.parent_uuid) {
         state = _addRootLevelEvent(state, event);
         return;
       }
