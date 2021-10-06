@@ -10,6 +10,6 @@ def is_ha_environment():
     otherwise.
     """
     # If there are two or more instances, then we are in an HA environment.
-    if Instance.objects.count() > 1:
+    if Instance.objects.filter(node_type__in=('control', 'hybrid')).count() > 1:
         return True
     return False
