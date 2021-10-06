@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { t } from '@lingui/macro';
 import { useHistory } from 'react-router-dom';
 import { Formik } from 'formik';
 import { Form } from '@patternfly/react-core';
@@ -18,6 +19,7 @@ import {
   ObjectField,
   RevertAllAlert,
   RevertFormActionGroup,
+  ChoiceField,
 } from '../../shared';
 
 function JobsEdit() {
@@ -34,7 +36,6 @@ function JobsEdit() {
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('jobs');
       const {
-        ALLOW_JINJA_IN_EXTRA_VARS,
         EVENT_STDOUT_MAX_BYTES_DISPLAY,
         STDOUT_MAX_BYTES_DISPLAY,
         ...jobsData
@@ -112,6 +113,23 @@ function JobsEdit() {
       return acc;
     }, {});
 
+  // We have to rebuild the ALLOW_JINJA_IN_EXTRA_VARS object because the default value
+  // is 'template' but its label that comes from the api is 'Only On Job Template
+  // Definitions'.  The problem is that this label does not match whats in the help
+  // text, or what is rendered on the screen in the details, 'template' is what is
+  // rendered in those locations. For consistency sake I have changed that label
+  // value below.
+
+  const jinja = {
+    default: 'template',
+    help_text: jobs?.ALLOW_JINJA_IN_EXTRA_VARS?.help_text,
+    label: jobs?.ALLOW_JINJA_IN_EXTRA_VARS?.label,
+  };
+  jinja.choices = jobs?.ALLOW_JINJA_IN_EXTRA_VARS?.choices.map(
+    ([value, label]) =>
+      value === 'template' ? [value, t`Template`] : [value, label]
+  );
+
   return (
     <CardBody>
       {isLoading && <ContentLoading />}
@@ -157,6 +175,7 @@ function JobsEdit() {
                   config={jobs.MAX_FORKS}
                   type="number"
                 />
+                <ChoiceField name="ALLOW_JINJA_IN_EXTRA_VARS" config={jinja} />
                 <BooleanField
                   name="PROJECT_UPDATE_VVV"
                   config={jobs.PROJECT_UPDATE_VVV}
