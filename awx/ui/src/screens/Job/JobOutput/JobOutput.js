@@ -96,8 +96,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollTop = useRef(0);
   const scrollHeight = useRef(0);
   const history = useHistory();
-  // TODO move this ref into useJobEvents?
   const siblingRequests = useRef([]);
+  const numEventsRequests = useRef([]);
 
   const fetchEventByUuid = async (uuid) => {
     const { data } = await getJobModel(job.type).readEvents(job.id, { uuid });
@@ -135,15 +135,23 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (endCounter === startCounter + 1) {
       return 0;
     }
-    const params = {
-      page_size: 1,
-      order_by: 'counter',
-      counter__gt: startCounter,
-    };
-    if (endCounter) {
-      params.counter__lt = endCounter;
+    const key = `${startCounter}-${endCounter}`;
+    let promise = numEventsRequests.current[key];
+    if (!promise) {
+      const params = {
+        page_size: 1,
+        order_by: 'counter',
+        counter__gt: startCounter,
+      };
+      if (endCounter) {
+        params.counter__lt = endCounter;
+      }
+      promise = getJobModel(job.type).readEvents(job.id, params);
+      numEventsRequests.current[key] = promise;
     }
-    const { data } = await getJobModel(job.type).readEvents(job.id, params);
+
+    const { data } = await promise;
+    numEventsRequests.current[key] = null;
     return data.count || 0;
   };
 
@@ -480,7 +488,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleScrollLast = () => {
-    scrollToRow(totalNonCollapsedRows - 1);
+    scrollToRow(totalNonCollapsedRows);
   };
 
   const handleResize = ({ width }) => {
