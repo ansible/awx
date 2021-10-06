@@ -423,6 +423,10 @@ DEVSERVER_DEFAULT_PORT = '8013'
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
+# Fail health checks if remote nodes do not have at least this version ansible-runner
+# of if they do not match both the x and y of x.y.z type versions
+MINIMUM_ALLOWED_ANSIBLE_RUNNER_VERSION = '2.0.0'
+
 # heartbeat period can factor into some forms of logic, so it is maintained as a setting here
 CLUSTER_NODE_HEARTBEAT_PERIOD = 60
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34

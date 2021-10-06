@@ -1,8 +1,13 @@
 import logging
 import yaml
 import time
+from distutils.version import LooseVersion as Version
 
 from receptorctl.socket_interface import ReceptorControl
+
+from ansible_runner.__main__ import VERSION as local_runner_version
+
+from django.conf import settings
 
 from enum import Enum, unique
 
@@ -152,12 +157,24 @@ def worker_info(node_name, work_type='ansible-runner'):
         else:
             error_list.append(details)
 
-    # If we have a connection error, missing keys would be trivial consequence of that
-    if not data['errors']:
-        # see tasks.py usage of keys
-        missing_keys = set(('runner_version', 'mem_in_bytes', 'cpu_count')) - set(data.keys())
-        if missing_keys:
-            data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
+    # If we have errors, we should not go on to do further stricter validation
+    if data['errors']:
+        return data
+
+    # see tasks.py usage of keys
+    missing_keys = set(('runner_version', 'mem_in_bytes', 'cpu_count')) - set(data.keys())
+    if missing_keys:
+        data['errors'].append('Worker failed to return keys {}'.format(' '.join(missing_keys)))
+        return data
+
+    if Version(local_runner_version) != Version(data['runner_version']):
+        logger.warn(f'Execution node {node_name} runner version {data["runner_version"]} differs from local version {local_runner_version}')
+        remote_numbers = Version(data['runner_version']).version
+        required_numbers = Version(settings.MINIMUM_ALLOWED_ANSIBLE_RUNNER_VERSION).version
+        if required_numbers[:2] != remote_numbers[:2]:
+            data['errors'].append(f'ansible-runner version does not match major and minor numbers of {settings.MINIMUM_ALLOWED_ANSIBLE_RUNNER_VERSION}')
+        elif remote_numbers[2] < required_numbers[2]:
+            data['errors'].append(f'ansible-runner version does not match minimum enforced minimum of {settings.MINIMUM_ALLOWED_ANSIBLE_RUNNER_VERSION}')
 
     return data
 
