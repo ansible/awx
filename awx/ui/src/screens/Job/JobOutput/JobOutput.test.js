@@ -28,49 +28,16 @@ const applyJobEventMock = (mockJobEvents) => {
   };
   JobsAPI.readEvents = jest.fn().mockImplementation(mockReadEvents);
   JobEventsAPI.readChildren = jest.fn().mockResolvedValue({
-    counter: 20,
-    uuid: 'abc-020',
+    data: {
+      results: [
+        {
+          counter: 20,
+          uuid: 'abc-020',
+        },
+      ],
+    },
   });
 };
-
-const generateChattyRows = () => {
-  const rows = [
-    '',
-    'PLAY [all] *********************************************************************16:17:13',
-    '',
-    'TASK [debug] *******************************************************************16:17:13',
-  ];
-
-  for (let i = 1; i < 95; i++) {
-    rows.push(
-      `ok: [localhost] => (item=${i}) => {`,
-      `    "msg": "This is a debug message: ${i}"`,
-      '}'
-    );
-  }
-
-  rows.push(
-    '',
-    'PLAY RECAP *********************************************************************16:17:15',
-    'localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   ',
-    ''
-  );
-
-  return rows;
-};
-
-async function checkOutput(wrapper, expectedLines) {
-  await waitForElement(wrapper, 'div[type="job_event"]', (el) => el.length > 1);
-  const jobEventLines = wrapper.find('JobEventLineText div');
-  const actualLines = [];
-  jobEventLines.forEach((line) => {
-    actualLines.push(line.text());
-  });
-
-  expect(
-    wrapper.find('JobEvent[event="playbook_on_stats"]').prop('end_line')
-  ).toEqual(expectedLines.length);
-}
 
 async function findScrollButtons(wrapper) {
   const pageControls = await waitForElement(wrapper, 'PageControls');
@@ -105,31 +72,21 @@ describe('<JobOutput />', () => {
 
   beforeEach(() => {
     applyJobEventMock(mockJobEventsData);
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 200,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 100,
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    });
-    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
-    await checkOutput(wrapper, generateChattyRows());
-
-    expect(wrapper.find('JobOutput').length).toBe(1);
-  });
-
   test('navigation buttons should display output properly', async () => {
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-      configurable: true,
-      value: 10,
-    });
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-      configurable: true,
-      value: 100,
-    });
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
@@ -137,8 +94,8 @@ describe('<JobOutput />', () => {
     const { scrollFirstButton, scrollLastButton, scrollPreviousButton } =
       await findScrollButtons(wrapper);
     let jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(0).prop('stdout')).toBe('');
-    expect(jobEvents.at(1).prop('stdout')).toBe(
+    expect(jobEvents.at(0).prop('event').stdout).toBe('');
+    expect(jobEvents.at(1).prop('event').stdout).toBe(
       '\r\nPLAY [all] *********************************************************************'
     );
     await act(async () => {
@@ -146,36 +103,30 @@ describe('<JobOutput />', () => {
     });
     wrapper.update();
     jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(jobEvents.length - 2).prop('stdout')).toBe(
-      '\r\nPLAY RECAP *********************************************************************\r\n\u001b[0;32mlocalhost\u001b[0m                  : \u001b[0;32mok=1   \u001b[0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   \r\n'
+
+    expect(jobEvents.at(jobEvents.length - 2).prop('event').stdout).toBe(
+      '\u001b[0;32mok: [localhost] => (item=94) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 94"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
     await act(async () => {
       scrollPreviousButton.simulate('click');
     });
     wrapper.update();
     jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(0).prop('stdout')).toBe(
-      '\u001b[0;32mok: [localhost] => (item=76) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 76"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
+    expect(jobEvents.at(20).prop('event').stdout).toBe(
+      '\u001b[0;32mok: [localhost] => (item=26) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 26"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
-    expect(jobEvents.at(1).prop('stdout')).toBe(
-      '\u001b[0;32mok: [localhost] => (item=77) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 77"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
+    expect(jobEvents.at(21).prop('event').stdout).toBe(
+      '\u001b[0;32mok: [localhost] => (item=27) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 27"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
     await act(async () => {
       scrollFirstButton.simulate('click');
     });
     wrapper.update();
     jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(0).prop('stdout')).toBe('');
-    expect(jobEvents.at(1).prop('stdout')).toBe(
+
+    expect(jobEvents.at(0).prop('event').stdout).toBe('');
+    expect(jobEvents.at(1).prop('event').stdout).toBe(
       '\r\nPLAY [all] *********************************************************************'
-    );
-    await act(async () => {
-      scrollLastButton.simulate('click');
-    });
-    wrapper.update();
-    jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(jobEvents.length - 2).prop('stdout')).toBe(
-      '\r\nPLAY RECAP *********************************************************************\r\n\u001b[0;32mlocalhost\u001b[0m                  : \u001b[0;32mok=1   \u001b[0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   \r\n'
     );
     Object.defineProperty(
       HTMLElement.prototype,
@@ -262,33 +213,6 @@ describe('<JobOutput />', () => {
     });
     await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
     expect(wrapper.find('Search').props().isDisabled).toBe(true);
-  });
-
-  test('filter should trigger api call and display correct rows', async () => {
-    const searchBtn = 'button[aria-label="Search submit button"]';
-    const searchTextInput = 'input[aria-label="Search text input"]';
-    await act(async () => {
-      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    });
-    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
-    applyJobEventMock(mockFilteredJobEventsData);
-    await act(async () => {
-      wrapper.find(searchTextInput).instance().value = '99';
-      wrapper.find(searchTextInput).simulate('change');
-    });
-    wrapper.update();
-    await act(async () => {
-      wrapper.find(searchBtn).simulate('click');
-    });
-    wrapper.update();
-    expect(JobsAPI.readEvents).toHaveBeenCalled();
-    const jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(0).prop('stdout')).toBe(
-      '\u001b[0;32mok: [localhost] => (item=99) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 99"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    );
-    expect(jobEvents.at(1).prop('stdout')).toBe(
-      '\u001b[0;32mok: [localhost] => (item=199) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 199"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    );
   });
 
   test('should throw error', async () => {
