@@ -23,7 +23,11 @@ const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
 `;
 
-function InstanceGroupDetails({ instanceGroup, defaultControlPlane }) {
+function InstanceGroupDetails({
+  instanceGroup,
+  defaultControlPlane,
+  defaultExecution,
+}) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -42,7 +46,8 @@ function InstanceGroupDetails({ instanceGroup, defaultControlPlane }) {
   const { error, dismissError } = useDismissableError(deleteError);
   const deleteDetailsRequests =
     relatedResourceDeleteRequests.instanceGroup(instanceGroup);
-
+  const isDefaultInstanceGroup =
+    name === defaultControlPlane || name === defaultExecution;
   return (
     <CardBody>
       <DetailList>
@@ -110,7 +115,7 @@ function InstanceGroupDetails({ instanceGroup, defaultControlPlane }) {
               {t`Edit`}
             </Button>
           )}
-        {name !== defaultControlPlane &&
+        {!isDefaultInstanceGroup &&
           instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
