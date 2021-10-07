@@ -6,7 +6,7 @@ NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION := $(shell cat VERSION)
+VERSION := $(shell $(PYTHON) setup.py --version)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -290,7 +290,6 @@ test:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
-	cmp VERSION awxkit/VERSION || "VERSION and awxkit/VERSION *must* match"
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
