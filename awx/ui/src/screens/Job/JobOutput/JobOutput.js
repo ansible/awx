@@ -429,12 +429,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     const params = {
       counter__gte: startCounter,
-      counter__lte: startCounter + diff,
+      limit: diff,
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
     // TODO update remoteRowCount if job running?
-    // TODO handle request aborted error if navigating away?
     return getJobModel(job.type)
       .readEvents(job.id, params)
       .then((response) => {
