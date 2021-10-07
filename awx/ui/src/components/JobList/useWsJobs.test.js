@@ -123,7 +123,7 @@ describe('useWsJobs hook', () => {
       );
     });
 
-    expect(fetch).toHaveBeenCalledWith([2], {});
+    expect(fetch).toHaveBeenCalledWith([2]);
     WS.clean();
   });
 });

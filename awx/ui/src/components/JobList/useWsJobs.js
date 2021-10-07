@@ -31,7 +31,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
         return;
       }
       setJobsToFetch([]);
-      const newJobs = await fetchJobsById(throttledJobsToFetch, {});
+      const newJobs = await fetchJobsById(throttledJobsToFetch);
       const deduplicated = newJobs.filter(
         (job) => !jobs.find((j) => j.id === job.id)
       );
