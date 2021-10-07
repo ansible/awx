@@ -159,15 +159,15 @@ describe('useJobEvents', () => {
       expect(state.events).toEqual(basicEvents);
       expect(state.tree).toEqual(basicTree);
       expect(state.uuidMap).toEqual({
-        'abc-001': { index: 1, treePath: [0] },
-        'abc-002': { index: 2, treePath: [0, 0] },
-        'abc-003': { index: 3, treePath: [0, 0, 0] },
-        'abc-004': { index: 4, treePath: [0, 0, 1] },
-        'abc-005': { index: 5, treePath: [0, 0, 2] },
-        'abc-006': { index: 6, treePath: [0, 1] },
-        'abc-007': { index: 7, treePath: [0, 1, 0] },
-        'abc-008': { index: 8, treePath: [0, 1, 1] },
-        'abc-009': { index: 9, treePath: [0, 1, 2] },
+        'abc-001': 1,
+        'abc-002': 2,
+        'abc-003': 3,
+        'abc-004': 4,
+        'abc-005': 5,
+        'abc-006': 6,
+        'abc-007': 7,
+        'abc-008': 8,
+        'abc-009': 9,
       });
     });
 
@@ -258,6 +258,7 @@ describe('useJobEvents', () => {
         type: ADD_EVENTS,
         events: [eventsList[0], eventsList[1]],
       });
+      window.debug = true;
       reducer(state, {
         type: ADD_EVENTS,
         events: [eventsList[2], eventsList[5]],
@@ -278,8 +279,8 @@ describe('useJobEvents', () => {
         },
       ]);
       expect(state.uuidMap).toEqual({
-        'abc-001': { index: 1, treePath: [0] },
-        'abc-002': { index: 2, treePath: [0, 0] },
+        'abc-001': 1,
+        'abc-002': 2,
       });
     });
 
@@ -709,8 +710,8 @@ describe('useJobEvents', () => {
             },
           ],
           uuidMap: {
-            'abc-001': { index: 1, treePath: [0] },
-            'abc-002': { index: 2, treePath: [0, 0] },
+            'abc-001': 1,
+            'abc-002': 2,
           },
           eventsWithoutParents: {},
         };
@@ -755,8 +756,8 @@ describe('useJobEvents', () => {
             },
           ],
           uuidMap: {
-            'abc-001': { index: 1, treePath: [0] },
-            'abc-002': { index: 2, treePath: [0, 0] },
+            'abc-001': 1,
+            'abc-002': 2,
           },
           eventsWithoutParents: {},
         };

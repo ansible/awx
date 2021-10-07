@@ -5,7 +5,7 @@ const initialState = {
   tree: [],
   // all events indexed by counter value
   events: {},
-  // lookup info (counter value & location in tree) indexed by uuid
+  // counter value indexed by uuid
   uuidMap: {},
   // events with parent events that aren't yet loaded.
   // arrays indexed by parent uuid
@@ -74,7 +74,6 @@ export function jobEventsReducer(callbacks, enqueueAction) {
     };
     const parentsToFetch = new Set();
     newEvents.forEach((event) => {
-      // todo normalize?
       const eventIndex = event.counter;
       if (state.events[eventIndex]) {
         state.events[eventIndex] = event;
@@ -114,12 +113,10 @@ export function jobEventsReducer(callbacks, enqueueAction) {
     };
     const index = state.tree.findIndex((node) => node.eventIndex > eventIndex);
     const updatedTree = [...state.tree];
-    let length;
     if (index === -1) {
-      length = updatedTree.push(newNode);
+      updatedTree.push(newNode);
     } else {
       updatedTree.splice(index, 0, newNode);
-      length = updatedTree.length;
     }
     return _gatherEventsForNewParent(
       {
@@ -128,7 +125,7 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         tree: updatedTree,
         uuidMap: {
           ...state.uuidMap,
-          [event.uuid]: { index: eventIndex, treePath: [length - 1] },
+          [event.uuid]: eventIndex,
         },
       },
       event.uuid
@@ -161,7 +158,6 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         return node;
       });
     }
-    const { treePath: parentTreePath } = state.uuidMap[event.parent_uuid];
     state = _gatherEventsForNewParent(
       {
         ...state,
@@ -171,10 +167,7 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         },
         uuidMap: {
           ...state.uuidMap,
-          [event.uuid]: {
-            index: eventIndex,
-            treePath: [...parentTreePath, length - 1],
-          },
+          [event.uuid]: eventIndex,
         },
       },
       event.uuid
@@ -391,46 +384,97 @@ function updateNodeByUuid(state, uuid, update) {
   if (!state.uuidMap[uuid]) {
     throw new Error(`Cannot update node; Event UUID not found ${uuid}`);
   }
-  const { treePath } = state.uuidMap[uuid];
+  const index = state.uuidMap[uuid];
   return {
     ...state,
-    tree: _updateNodeByPath(treePath, state.tree, update),
+    tree: _updateNodeByIndex(index, state.tree, update),
   };
 }
 
-function _updateNodeByPath(treePath, nodeArray, update) {
-  const index = treePath[0];
-  const node = nodeArray[index];
-  if (treePath.length === 1) {
-    return [
-      ...nodeArray.slice(0, index),
-      update({ ...node, children: [...nodeArray[index].children] }),
-      ...nodeArray.slice(index + 1),
-    ];
+function _updateNodeByIndex(target, nodeArray, update) {
+  const nextIndex = nodeArray.findIndex((node) => node.eventIndex > target);
+  const targetIndex = nextIndex === -1 ? nodeArray.length - 1 : nextIndex - 1;
+  let updatedNode;
+  if (nodeArray[targetIndex].eventIndex === target) {
+    updatedNode = update({
+      ...nodeArray[targetIndex],
+      children: [...nodeArray[targetIndex].children],
+    });
+  } else {
+    updatedNode = {
+      ...nodeArray[targetIndex],
+      children: _updateNodeByIndex(
+        target,
+        nodeArray[targetIndex].children,
+        update
+      ),
+    };
   }
   return [
-    ...nodeArray.slice(0, index),
-    {
-      ...node,
-      children: _updateNodeByPath(treePath.slice(1), node.children, update),
-    },
-    ...nodeArray.slice(index + 1),
+    ...nodeArray.slice(0, targetIndex),
+    updatedNode,
+    ...nodeArray.slice(targetIndex + 1),
   ];
 }
+
+// function _updateNodeByPath(treePath, nodeArray, update) {
+//   const index = treePath[0];
+//   const node = nodeArray[index];
+//   if (treePath.length === 1) {
+//     return [
+//       ...nodeArray.slice(0, index),
+//       update({ ...node, children: [...nodeArray[index].children] }),
+//       ...nodeArray.slice(index + 1),
+//     ];
+//   }
+//   return [
+//     ...nodeArray.slice(0, index),
+//     {
+//       ...node,
+//       children: _updateNodeByPath(treePath.slice(1), node.children, update),
+//     },
+//     ...nodeArray.slice(index + 1),
+//   ];
+// }
 
 function getNodeByUuid(state, uuid) {
   if (!state.uuidMap[uuid]) {
     return null;
   }
-  const { treePath } = state.uuidMap[uuid];
-  let arr = state.tree;
-  let lastNode;
-  for (let i = 0; i < treePath.length; i++) {
-    const index = treePath[i];
-    lastNode = arr[index];
-    arr = arr[index].children;
+
+  const index = state.uuidMap[uuid];
+  // let arr = state.tree;
+  // let lastNode;
+
+  return _getNodeByIndex(state.tree, index);
+  // for (let i = 0; i < treePath.length; i++) {
+  //   const index = treePath[i];
+  //   lastNode = arr[index];
+  //   arr = arr[index].children;
+  // }
+  // return lastNode;
+}
+
+function _getNodeByIndex(arr, index) {
+  if (!arr.length) {
+    return null;
   }
-  return lastNode;
+  const i = arr.findIndex((node) => node.eventIndex >= index);
+  if (i === -1) {
+    return _getNodeByIndex(arr[arr.length - 1].children, index);
+  }
+  // const matched = arr[i - 1];
+  // if (matched.eventIndex === index) {
+  //   return matched;
+  // }
+  // return _getNodeByIndex(matched.children, index);
+  if (arr[i].eventIndex === index) {
+    return arr[i];
+  }
+  if (!arr[i - 1]) {
+    return null;
+  }
+  return _getNodeByIndex(arr[i - 1].children, index);
 }
 
 function setEventNumChildren(state, uuid, numChildren) {
