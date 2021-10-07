@@ -83,4 +83,5 @@ LOGGER_BLOCKLIST = (
 RECEPTOR_PENDING = 'ansible-runner-???'
 
 # Naming pattern for AWX jobs in /tmp folder, like /tmp/awx_42_xiwm
+# also update awxkit.api.pages.unified_jobs if changed
 JOB_FOLDER_PREFIX = 'awx_%s_'
