@@ -3061,6 +3061,10 @@ class AWXReceptorJob:
             if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
                 execution_node_health_check(self.task.instance.execution_node)
 
+    @property
+    def sign_work(self):
+        return False if settings.IS_K8S else True
+
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
@@ -3077,8 +3081,7 @@ class AWXReceptorJob:
             _kw['node'] = self.task.instance.execution_node
             use_stream_tls = get_conn_type(_kw['node'], receptor_ctl).name == "STREAMTLS"
             _kw['tlsclient'] = get_tls_client(use_stream_tls)
-
-        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=True, **_kw)
+        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=self.sign_work, **_kw)
         self.unit_id = result['unitid']
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
 
