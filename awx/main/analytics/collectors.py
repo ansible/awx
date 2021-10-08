@@ -337,7 +337,11 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           {tbl}.parent_uuid,
                           {tbl}.event,
                           task_action,
-                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
+                          -- '-' operator listed here:
+                          -- https://www.postgresql.org/docs/12/functions-json.html
+                          -- note that operator is only supported by jsonb objects
+                          -- https://www.postgresql.org/docs/current/datatype-json.html
+                          (CASE WHEN event = 'playbook_on_stats' THEN {event_data} - 'artifact_data' END) as playbook_on_stats,
                           {tbl}.failed,
                           {tbl}.changed,
                           {tbl}.playbook,
@@ -357,9 +361,9 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
         return query
 
     try:
-        return _copy_table(table='events', query=query(f"{tbl}.event_data::json"), path=full_path)
+        return _copy_table(table='events', query=query(f"{tbl}.event_data::jsonb"), path=full_path)
     except UntranslatableCharacter:
-        return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::json"), path=full_path)
+        return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::jsonb"), path=full_path)
 
 
 @register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
