@@ -98,15 +98,14 @@ function JobList({ defaultParams, showTypeColumn = false }) {
     fetchJobs();
   }, [fetchJobs]);
 
-  // TODO: update QS_CONFIG to be safe for deps array
   const fetchJobsById = useCallback(
-    async (ids) => {
-      const params = parseQueryString(qsConfig, location.search);
+    async (ids, qs = {}) => {
+      const params = parseQueryString(qs, location.search);
       params.id__in = ids.join(',');
       const { data } = await UnifiedJobsAPI.read(params);
       return data.results;
     },
-    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
+    [location.search]
   );
 
   const jobs = useWsJobs(results, fetchJobsById, qsConfig);

@@ -265,6 +265,61 @@ describe('<JobList />', () => {
     jest.restoreAllMocks();
   });
 
+  test('should query jobs list after delete API requests', async () => {
+    UnifiedJobsAPI.read.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [
+          {
+            id: 1,
+            url: '/api/v2/project_updates/1',
+            name: 'job 1',
+            type: 'project_update',
+            status: 'running',
+            related: {
+              cancel: '/api/v2/project_updates/1/cancel',
+            },
+            summary_fields: {
+              user_capabilities: {
+                delete: true,
+                start: true,
+              },
+            },
+          },
+        ],
+      },
+    });
+    const jobListParams = {
+      order_by: '-finished',
+      not__launch_type: 'sync',
+      page: 1,
+      page_size: 20,
+    };
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      expect(UnifiedJobsAPI.read).toHaveBeenCalledTimes(1);
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+    wrapper.find('JobListItem');
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(1);
+
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+      expect(UnifiedJobsAPI.read).toHaveBeenCalledTimes(1);
+      expect(UnifiedJobsAPI.read).toHaveBeenCalledWith(jobListParams);
+    });
+
+    jest.restoreAllMocks();
+  });
+
   test('should display message about job running status', async () => {
     UnifiedJobsAPI.read.mockResolvedValue({
       data: {
