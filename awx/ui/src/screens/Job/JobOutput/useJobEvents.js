@@ -16,12 +16,12 @@ export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
 export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
 export const CLEAR_EVENTS = 'CLEAR_EVENTS';
 
-export default function useJobEvents(callbacks) {
+export default function useJobEvents(callbacks, isFlatMode) {
   const [actionQueue, setActionQueue] = useState([]);
   const enqueueAction = (action) => {
     setActionQueue((queue) => queue.concat(action));
   };
-  const reducer = jobEventsReducer(callbacks, enqueueAction);
+  const reducer = jobEventsReducer(callbacks, isFlatMode, enqueueAction);
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function useJobEvents(callbacks) {
   };
 }
 
-export function jobEventsReducer(callbacks, enqueueAction) {
+export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
   return (state, action) => {
     switch (action.type) {
       case ADD_EVENTS:
@@ -84,7 +84,7 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         state = _gatherEventsForNewParent(state, event.uuid);
         return;
       }
-      if (!event.parent_uuid) {
+      if (!event.parent_uuid || isFlatMode) {
         state = _addRootLevelEvent(state, event);
         return;
       }

@@ -34,7 +34,11 @@ import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
 import getEventRequestParams, { range } from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
-import { fetchCount, prependTraceback } from './loadJobEvents';
+import {
+  fetchCount,
+  prependTraceback,
+  mockMissingEvents,
+} from './loadJobEvents';
 import useJobEvents from './useJobEvents';
 
 const QS_CONFIG = getQSConfig('job_output', {
@@ -155,6 +159,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     return data.count || 0;
   };
 
+  const isFlatMode = isJobRunning(job.status) || location.search.length > 1;
+
   const {
     addEvents,
     toggleNodeIsCollapsed,
@@ -163,12 +169,15 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     getCounterForRow,
     getEvent,
     clearLoadedEvents,
-  } = useJobEvents({
-    fetchEventByUuid,
-    fetchNextSibling,
-    fetchNextRootNode,
-    fetchNumEvents,
-  });
+  } = useJobEvents(
+    {
+      fetchEventByUuid,
+      fetchNextSibling,
+      fetchNextRootNode,
+      fetchNumEvents,
+    },
+    isFlatMode
+  );
   const [cssMap, setCssMap] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [contentError, setContentError] = useState(null);
@@ -223,7 +232,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       setIsMonitoringWebsocket(false);
       isMounted.current = false;
     };
-  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.search, isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (listRef.current?.recomputeRowHeights) {
@@ -298,9 +307,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       );
     }
 
+    const qsParams = parseQueryString(QS_CONFIG, location.search);
     const eventPromise = getJobModel(job.type).readEvents(job.id, {
       ...params,
-      ...parseQueryString(QS_CONFIG, location.search),
+      ...qsParams,
     });
 
     try {
@@ -309,7 +319,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           data: { results: fetchedEvents = [] },
         },
         count,
-      ] = await Promise.all([eventPromise, fetchCount(job, eventPromise)]);
+      ] = await Promise.all([eventPromise, fetchCount(job, qsParams)]);
 
       if (!isMounted.current) {
         return;
@@ -327,7 +337,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         ...newCssMap,
       }));
       const { events, countOffset } = prependTraceback(job, fetchedEvents);
-      addEvents(events);
+      const lastCounter = events[events.length - 1]?.counter || 50;
+      addEvents(mockMissingEvents(events, 0, lastCounter));
       setRemoteRowCount(count + countOffset);
     } catch (err) {
       setContentError(err);
@@ -431,7 +442,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     const params = {
       counter__gte: startCounter,
-      limit: diff,
+      limit: diff + 1,
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
@@ -452,12 +463,17 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             ...lineCssMap,
           };
         });
+        const events = mockMissingEvents(
+          fetchedEvents,
+          startCounter,
+          startCounter + diff
+        );
         setCssMap((prevCssMap) => ({
           ...prevCssMap,
           ...newCssMap,
         }));
 
-        addEvents(fetchedEvents);
+        addEvents(events);
         setCurrentlyLoading((prevCurrentlyLoading) =>
           prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
         );
