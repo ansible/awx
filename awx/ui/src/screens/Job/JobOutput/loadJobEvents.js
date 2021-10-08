@@ -1,20 +1,14 @@
-import { getJobModel, isJobRunning } from 'util/jobs';
+import { getJobModel } from 'util/jobs';
 
-export async function fetchCount(job, eventPromise) {
-  if (isJobRunning(job?.status)) {
-    const {
-      data: { results: lastEvents = [] },
-    } = await getJobModel(job.type).readEvents(job.id, {
-      order_by: '-counter',
-      limit: 1,
-    });
-    return lastEvents.length >= 1 ? lastEvents[0].counter : 0;
-  }
-
+export async function fetchCount(job, params) {
   const {
-    data: { count: eventCount },
-  } = await eventPromise;
-  return eventCount;
+    data: { results: lastEvents = [] },
+  } = await getJobModel(job.type).readEvents(job.id, {
+    ...params,
+    order_by: '-counter',
+    limit: 1,
+  });
+  return lastEvents.length >= 1 ? lastEvents[0].counter : 0;
 }
 
 export function prependTraceback(job, events) {
@@ -48,4 +42,20 @@ export function prependTraceback(job, events) {
     events,
     countOffset,
   };
+}
+
+export function mockMissingEvents(fetchedEvents, startCounter, endCounter) {
+  const events = fetchedEvents.filter((e) => e.counter < startCounter);
+  for (let i = startCounter; i <= endCounter; i++) {
+    const event = fetchedEvents.find((e) => e.counter === i);
+    if (event) {
+      events.push(event);
+    } else {
+      events.push({
+        counter: i,
+        stdout: '',
+      });
+    }
+  }
+  return events.concat(fetchedEvents.filter((e) => e.counter > endCounter));
 }
