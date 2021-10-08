@@ -162,6 +162,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     getNumCollapsedEvents,
     getCounterForRow,
     getEvent,
+    clearLoadedEvents,
   } = useJobEvents({
     fetchEventByUuid,
     fetchNextSibling,
@@ -195,6 +196,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
 
   useEffect(() => {
+    clearLoadedEvents();
     loadJobEvents();
 
     if (isJobRunning(job.status)) {

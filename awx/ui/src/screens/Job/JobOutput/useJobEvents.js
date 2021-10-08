@@ -14,6 +14,7 @@ const initialState = {
 export const ADD_EVENTS = 'ADD_EVENTS';
 export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
 export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
+export const CLEAR_EVENTS = 'CLEAR_EVENTS';
 
 export default function useJobEvents(callbacks) {
   const [actionQueue, setActionQueue] = useState([]);
@@ -49,6 +50,7 @@ export default function useJobEvents(callbacks) {
       state.tree.reduce((sum, node) => sum + getNumCollapsedChildren(node), 0),
     getCounterForRow: (rowIndex) => getCounterForRow(state, rowIndex),
     getEvent: (rowIndex) => state.events[rowIndex] || null,
+    clearLoadedEvents: () => dispatch({ type: CLEAR_EVENTS }),
   };
 }
 
@@ -61,6 +63,8 @@ export function jobEventsReducer(callbacks, enqueueAction) {
         return toggleNodeIsCollapsed(state, action.uuid);
       case SET_EVENT_NUM_CHILDREN:
         return setEventNumChildren(state, action.uuid, action.numChildren);
+      case CLEAR_EVENTS:
+        return initialState;
       default:
         throw new Error(`Unrecognized action: ${action.type}`);
     }
