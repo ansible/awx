@@ -158,7 +158,7 @@ EXAMPLES = '''
     controller_password: ansible
     controller_host: https://localhost
 
-- name: Create a Vaiult credential (example for notes)
+- name: Create a Vault credential (example for notes)
   credential:
     name: Example password
     credential_type: Vault
