@@ -909,7 +909,7 @@ class ControllerAPIModule(ControllerModule):
                 if response['status_code'] == 200:
                     # compare apples-to-apples, old API data to new API data
                     # but do so considering the fields given in parameters
-                    self.json_output['changed'] = self.objects_could_be_different(existing_item, response['json'], field_set=new_item.keys(), warning=True)
+                    self.json_output['changed'] |= self.objects_could_be_different(existing_item, response['json'], field_set=new_item.keys(), warning=True)
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
