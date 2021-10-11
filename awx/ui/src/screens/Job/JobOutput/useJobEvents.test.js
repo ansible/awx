@@ -140,7 +140,7 @@ describe('useJobEvents', () => {
     enqueueAction = jest.fn();
     callbacks.fetchNextSibling.mockResolvedValue(eventsList[9]);
     callbacks.fetchNextRootNode.mockResolvedValue(eventsList[9]);
-    reducer = jobEventsReducer(callbacks, enqueueAction);
+    reducer = jobEventsReducer(callbacks, false, enqueueAction);
     emptyState = {
       tree: [],
       events: {},
