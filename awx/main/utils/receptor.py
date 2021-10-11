@@ -3,6 +3,7 @@ import yaml
 import time
 
 from receptorctl.socket_interface import ReceptorControl
+from django.conf import settings
 
 from enum import Enum, unique
 
@@ -73,12 +74,12 @@ def run_until_complete(node, timing_data=None, **kwargs):
 
     use_stream_tls = getattr(get_conn_type(node, receptor_ctl), 'name', None) == "STREAMTLS"
     kwargs.setdefault('tlsclient', get_tls_client(use_stream_tls))
-    kwargs.setdefault('signwork', True)
     kwargs.setdefault('ttl', '20s')
     kwargs.setdefault('payload', '')
 
     transmit_start = time.time()
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, **kwargs)
+    sign_work = False if settings.IS_K8S else True
+    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=sign_work, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
