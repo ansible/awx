@@ -2655,6 +2655,7 @@ class RunInventoryUpdate(BaseTask):
                     celery_task_id=inventory_update.celery_task_id,
                 )
             )
+            create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # associate the inventory update before calling run() so that a
             # cancel() call on the inventory update can cancel the project update
             local_project_sync.scm_inventory_updates.add(inventory_update)
