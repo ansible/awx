@@ -20,7 +20,7 @@ function JobEvent({
 }) {
   useEffect(() => {
     measure();
-  }, [event, isCollapsed, measure]);
+  }, [lineTextHtml.length, isCollapsed, measure]);
 
   let toggleLineIndex = -1;
   if (hasChildren) {

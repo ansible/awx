@@ -54,7 +54,7 @@ export default function useJobEvents(callbacks, isFlatMode) {
     getNumCollapsedEvents: () =>
       state.tree.reduce((sum, node) => sum + getNumCollapsedChildren(node), 0),
     getCounterForRow: (rowIndex) => getCounterForRow(state, rowIndex),
-    getEvent: (rowIndex) => state.events[rowIndex] || null,
+    getEvent: (eventIndex) => getEvent(state, eventIndex),
     clearLoadedEvents: () => dispatch({ type: CLEAR_EVENTS }),
   };
 }
@@ -460,42 +460,13 @@ function _updateNodeByIndex(target, nodeArray, update) {
   ];
 }
 
-// function _updateNodeByPath(treePath, nodeArray, update) {
-//   const index = treePath[0];
-//   const node = nodeArray[index];
-//   if (treePath.length === 1) {
-//     return [
-//       ...nodeArray.slice(0, index),
-//       update({ ...node, children: [...nodeArray[index].children] }),
-//       ...nodeArray.slice(index + 1),
-//     ];
-//   }
-//   return [
-//     ...nodeArray.slice(0, index),
-//     {
-//       ...node,
-//       children: _updateNodeByPath(treePath.slice(1), node.children, update),
-//     },
-//     ...nodeArray.slice(index + 1),
-//   ];
-// }
-
 function getNodeByUuid(state, uuid) {
   if (!state.uuidMap[uuid]) {
     return null;
   }
 
   const index = state.uuidMap[uuid];
-  // let arr = state.tree;
-  // let lastNode;
-
   return _getNodeByIndex(state.tree, index);
-  // for (let i = 0; i < treePath.length; i++) {
-  //   const index = treePath[i];
-  //   lastNode = arr[index];
-  //   arr = arr[index].children;
-  // }
-  // return lastNode;
 }
 
 function _getNodeByIndex(arr, index) {
@@ -506,11 +477,6 @@ function _getNodeByIndex(arr, index) {
   if (i === -1) {
     return _getNodeByIndex(arr[arr.length - 1].children, index);
   }
-  // const matched = arr[i - 1];
-  // if (matched.eventIndex === index) {
-  //   return matched;
-  // }
-  // return _getNodeByIndex(matched.children, index);
   if (arr[i].eventIndex === index) {
     return arr[i];
   }
@@ -525,4 +491,20 @@ function setEventNumChildren(state, uuid, numChildren) {
     ...node,
     numChildren,
   }));
+}
+
+function getEvent(state, eventIndex) {
+  const event = state.events[eventIndex];
+  if (event) {
+    return event;
+  }
+  if (state.eventGaps.includes(eventIndex)) {
+    return {
+      counter: eventIndex,
+      stdout: '',
+      isMockEvent: true,
+    };
+  }
+
+  return null;
 }

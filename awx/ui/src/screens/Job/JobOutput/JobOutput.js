@@ -37,7 +37,7 @@ import isHostEvent from './isHostEvent';
 import {
   fetchCount,
   prependTraceback,
-  mockMissingEvents,
+  listMissingEvents,
 } from './loadJobEvents';
 import useJobEvents from './useJobEvents';
 
@@ -100,11 +100,18 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollTop = useRef(0);
   const scrollHeight = useRef(0);
   const history = useHistory();
+  const eventByUuidRequests = useRef([]);
   const siblingRequests = useRef([]);
   const numEventsRequests = useRef([]);
 
   const fetchEventByUuid = async (uuid) => {
-    const { data } = await getJobModel(job.type).readEvents(job.id, { uuid });
+    let promise = eventByUuidRequests.current[uuid];
+    if (!promise) {
+      promise = getJobModel(job.type).readEvents(job.id, { uuid });
+      eventByUuidRequests.current[uuid] = promise;
+    }
+    const { data } = await promise;
+    eventByUuidRequests.current[uuid] = null;
     return data.results[0] || null;
   };
 
@@ -163,6 +170,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const {
     addEvents,
+    addEventGaps,
     toggleNodeIsCollapsed,
     getEventForRow,
     getNumCollapsedEvents,
@@ -187,6 +195,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [isHostModalOpen, setIsHostModalOpen] = useState(false);
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [highestLoadedCounter, setHighestLoadedCounter] = useState(0);
   const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(
     isJobRunning(job.status)
   );
@@ -207,32 +216,73 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   useEffect(() => {
     clearLoadedEvents();
     loadJobEvents();
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    if (isJobRunning(job.status)) {
-      connectJobSocket(job, (data) => {
-        if (data.group_name === 'job_events') {
-          if (data.counter && data.counter > jobSocketCounter.current) {
-            jobSocketCounter.current = data.counter;
-          }
-        }
-        if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
-          if (data.final_counter) {
-            jobSocketCounter.current = data.final_counter;
-          }
-          if (data.status) {
-            setJobStatus(data.status);
-          }
-        }
-      });
-      setIsMonitoringWebsocket(true);
+  // useEffect(() => {
+  //   rebuildEventsTree();
+  // }, [isFlatMode])
+
+  useEffect(() => {
+    if (!isJobRunning(jobStatus)) {
+      return;
     }
+    let batchTimeout;
+    let batchedEvents = [];
+    connectJobSocket(job, (data) => {
+      const addBatchedEvents = () => {
+        let min;
+        let max;
+        batchedEvents.forEach((event) => {
+          if (!min || event.counter < min) {
+            min = event.counter;
+          }
+          if (!max || event.counter > max) {
+            max = event.counter;
+          }
+        });
+        addEvents(batchedEvents);
+        addEventGaps(listMissingEvents(batchedEvents, min, max));
+        if (max > jobSocketCounter.current) {
+          jobSocketCounter.current = max;
+        }
+        batchedEvents = [];
+      };
 
+      if (data.group_name === 'job_events') {
+        batchedEvents.push(data);
+        clearTimeout(batchTimeout);
+        if (batchedEvents.length >= 25) {
+          addBatchedEvents();
+        } else {
+          batchTimeout = setTimeout(addBatchedEvents, 500);
+        }
+        // if (data.counter && data.counter > jobSocketCounter.current) {
+        //   jobSocketCounter.current = data.counter;
+        // }
+      }
+      if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
+        if (data.final_counter) {
+          jobSocketCounter.current = data.final_counter;
+        }
+        if (data.status) {
+          setJobStatus(data.status);
+        }
+      }
+    });
+    setIsMonitoringWebsocket(true);
+
+    // eslint-disable-next-line consistent-return
     return function cleanup() {
+      clearTimeout(batchTimeout);
       closeWebSocket();
       setIsMonitoringWebsocket(false);
       isMounted.current = false;
     };
-  }, [location.search, isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isJobRunning(jobStatus)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // useEffect(() => {
+  //   rebuildEventsTree();
+  // }, [isFlatMode])
 
   useEffect(() => {
     if (listRef.current?.recomputeRowHeights) {
@@ -241,18 +291,19 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   }, [currentlyLoading, cssMap, remoteRowCount]);
 
   useEffect(() => {
-    if (jobStatus && !isJobRunning(jobStatus)) {
-      if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-        setRemoteRowCount(jobSocketCounter.current);
-      }
+    if (!jobStatus || isJobRunning(jobStatus)) {
+      return;
+    }
+    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+      setRemoteRowCount(jobSocketCounter.current);
+    }
 
-      if (isMonitoringWebsocket) {
-        setIsMonitoringWebsocket(false);
-      }
+    if (isMonitoringWebsocket) {
+      setIsMonitoringWebsocket(false);
+    }
 
-      if (isFollowModeEnabled) {
-        setTimeout(() => setIsFollowModeEnabled(false), 1000);
-      }
+    if (isFollowModeEnabled) {
+      setTimeout(() => setIsFollowModeEnabled(false), 1000);
     }
   }, [jobStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -338,7 +389,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       }));
       const { events, countOffset } = prependTraceback(job, fetchedEvents);
       const lastCounter = events[events.length - 1]?.counter || 50;
-      addEvents(mockMissingEvents(events, 0, lastCounter));
+      addEvents(events);
+      addEventGaps(listMissingEvents(events, 0, lastCounter));
+      setHighestLoadedCounter(lastCounter);
       setRemoteRowCount(count + countOffset);
     } catch (err) {
       setContentError(err);
@@ -414,6 +467,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               style={style}
               counter={index}
               contentLength={80}
+              measure={measure}
             />
           )
         }
@@ -453,27 +507,29 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         if (!isMounted.current) {
           return;
         }
-        const fetchedEvents = response.data.results;
+        const events = response.data.results;
 
         let newCssMap;
-        fetchedEvents.forEach((event) => {
+        events.forEach((event) => {
           const { lineCssMap } = getLineTextHtml(event);
           newCssMap = {
             ...newCssMap,
             ...lineCssMap,
           };
         });
-        const events = mockMissingEvents(
-          fetchedEvents,
-          startCounter,
-          startCounter + diff
-        );
         setCssMap((prevCssMap) => ({
           ...prevCssMap,
           ...newCssMap,
         }));
 
+        const lastCounter = events[events.length - 1]?.counter || 50;
         addEvents(events);
+        addEventGaps(
+          listMissingEvents(events, startCounter, startCounter + diff)
+        );
+        if (lastCounter > highestLoadedCounter) {
+          setHighestLoadedCounter(lastCounter);
+        }
         setCurrentlyLoading((prevCurrentlyLoading) =>
           prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
         );
