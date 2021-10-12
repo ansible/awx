@@ -1,2 +1,4 @@
 ---
 awx_image: quay.io/ansible/awx
+
+build_tool: docker
