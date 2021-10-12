@@ -175,3 +175,41 @@ jobs:
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
             --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} make ui-test
+  awx-operator:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout awx
+        uses: actions/checkout@v2
+        with:
+          path: awx
+
+      - name: Checkout awx-operator
+        uses: actions/checkout@v2
+        with:
+          repository: ansible/awx-operator
+          path: awx-operator
+
+      - name: Install playbook dependencies
+        run: |
+          python3 -m pip install docker
+
+      - name: Build AWX image
+        working-directory: awx
+        run: |
+          ansible-playbook -v tools/ansible/build.yml \
+            -e headless=yes \
+            -e awx_image=awx \
+            -e awx_image_tag=ci \
+            -e ansible_python_interpreter=$(which python3)
+
+      - name: Run test deployment with awx-operator
+        working-directory: awx-operator
+        run: |
+          python3 -m pip install -r molecule/requirements.txt
+          ansible-galaxy collection install -r molecule/requirements.yml
+          sudo rm -f $(which kustomize)
+          make kustomize
+          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule test -s kind
+        env:
+          AWX_TEST_IMAGE: awx
+          AWX_TEST_VERSION: ci
