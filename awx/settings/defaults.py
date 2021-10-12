@@ -68,7 +68,6 @@ DATABASES = {
 # the K8S cluster where awx itself is running)
 IS_K8S = False
 
-RECEPTOR_RELEASE_WORK = True
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
 # Timeout when waiting for pod to enter running state. If the pod is still in pending state , it will be terminated. Valid time units are "s", "m", "h". Example : "5m" , "10s".
@@ -930,6 +929,9 @@ AWX_CALLBACK_PROFILE = False
 
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
+
+# Delete completed work units in receptor
+RECEPTOR_RELEASE_WORK = True
 
 MIDDLEWARE = [
     'django_guid.middleware.GuidMiddleware',
