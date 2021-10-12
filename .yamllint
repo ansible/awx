@@ -6,6 +6,8 @@ ignore: |
   # vault files
   awx/main/tests/data/ansible_utils/playbooks/valid/vault.yml
   awx/ui/test/e2e/tests/smoke-vars.yml
+  awx/ui/node_modules
+  tools/docker-compose/_sources
 
 extends: default
 
