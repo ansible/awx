@@ -177,6 +177,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     getCounterForRow,
     getEvent,
     clearLoadedEvents,
+    rebuildEventsTree,
   } = useJobEvents(
     {
       fetchEventByUuid,
@@ -218,9 +219,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     loadJobEvents();
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // useEffect(() => {
-  //   rebuildEventsTree();
-  // }, [isFlatMode])
+  useEffect(() => {
+    rebuildEventsTree();
+  }, [isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isJobRunning(jobStatus)) {
