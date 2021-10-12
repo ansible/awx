@@ -44,18 +44,13 @@ export function prependTraceback(job, events) {
   };
 }
 
-export function mockMissingEvents(fetchedEvents, startCounter, endCounter) {
-  const events = fetchedEvents.filter((e) => e.counter < startCounter);
+export function listMissingEvents(eventsList, startCounter, endCounter) {
+  const missing = [];
   for (let i = startCounter; i <= endCounter; i++) {
-    const event = fetchedEvents.find((e) => e.counter === i);
-    if (event) {
-      events.push(event);
-    } else {
-      events.push({
-        counter: i,
-        stdout: '',
-      });
+    const event = eventsList.find((e) => e.counter === i);
+    if (!event) {
+      missing.push(i);
     }
   }
-  return events.concat(fetchedEvents.filter((e) => e.counter > endCounter));
+  return missing;
 }

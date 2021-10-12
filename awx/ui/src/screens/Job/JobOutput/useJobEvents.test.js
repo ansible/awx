@@ -1308,6 +1308,31 @@ describe('useJobEvents', () => {
     });
   });
 
+  describe('getEvent', () => {
+    let wrapper;
+    beforeEach(() => {
+      wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+    });
+
+    test('should get event object', () => {
+      const event = wrapper.find('#test').prop('getEvent')(7);
+      expect(event).toEqual(eventsList[6]);
+    });
+
+    test('should get stubbed event', () => {
+      wrapper.find('#test').prop('addEventGaps')([10]);
+      wrapper.update();
+
+      const event = wrapper.find('#test').prop('getEvent')(10);
+      expect(event).toEqual({
+        counter: 10,
+        stdout: '',
+        isMockEvent: true,
+      });
+    });
+  });
+
   describe('getTotalNumChildren', () => {
     let wrapper;
     beforeEach(() => {
