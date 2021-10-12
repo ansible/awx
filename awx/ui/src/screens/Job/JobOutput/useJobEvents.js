@@ -10,8 +10,11 @@ const initialState = {
   // events with parent events that aren't yet loaded.
   // arrays indexed by parent uuid
   eventsWithoutParents: {},
+  // counter where gaps occur in counter series or events with no stdout appear
+  eventGaps: [],
 };
 export const ADD_EVENTS = 'ADD_EVENTS';
+export const ADD_EVENT_GAPS = 'ADD_EVENT_GAPS';
 export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
 export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
 export const CLEAR_EVENTS = 'CLEAR_EVENTS';
@@ -37,6 +40,8 @@ export default function useJobEvents(callbacks, isFlatMode) {
 
   return {
     addEvents: (events) => dispatch({ type: ADD_EVENTS, events }),
+    addEventGaps: (counterIds) =>
+      dispatch({ type: ADD_EVENT_GAPS, counterIds }),
     getNodeByUuid: (uuid) => getNodeByUuid(state, uuid),
     toggleNodeIsCollapsed: (uuid) =>
       dispatch({ type: TOGGLE_NODE_COLLAPSED, uuid }),
@@ -59,6 +64,8 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
     switch (action.type) {
       case ADD_EVENTS:
         return addEvents(state, action.events);
+      case ADD_EVENT_GAPS:
+        return addEventGaps(state, action.counterIds);
       case TOGGLE_NODE_COLLAPSED:
         return toggleNodeIsCollapsed(state, action.uuid);
       case SET_EVENT_NUM_CHILDREN:
@@ -76,9 +83,11 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       events: { ...origState.events },
       tree: [...origState.tree],
     };
+    const gaps = new Set(state.eventGaps);
     const parentsToFetch = new Set();
     newEvents.forEach((event) => {
       const eventIndex = event.counter;
+      gaps.delete(eventIndex);
       if (state.events[eventIndex]) {
         state.events[eventIndex] = event;
         state = _gatherEventsForNewParent(state, event.uuid);
@@ -105,7 +114,10 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       });
     });
 
-    return state;
+    return {
+      ...state,
+      eventGaps: [...gaps],
+    };
   }
 
   function _addRootLevelEvent(state, event) {
@@ -256,15 +268,42 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
   }
 }
 
-function getEventForRow(state, rowIndex) {
-  const node = getNodeForRow(state, rowIndex);
-  if (!node) {
-    return null;
-  }
+function addEventGaps(state, counterIds) {
+  const gaps = new Set(state.eventGaps);
+  counterIds.forEach((id) => gaps.add(id));
   return {
-    node,
-    event: state.events[node.eventIndex],
+    ...state,
+    eventGaps: [...gaps],
   };
+}
+
+function getEventForRow(state, rowIndex) {
+  const { node, expectedCounter } = _getNodeForRow(
+    state,
+    rowIndex + 1,
+    state.tree
+  );
+  if (node) {
+    return {
+      node,
+      event: state.events[node.eventIndex],
+    };
+  }
+  if (state.eventGaps.includes(expectedCounter)) {
+    return {
+      event: {
+        counter: expectedCounter,
+        stdout: '',
+        isMockEvent: true,
+      },
+      node: {
+        eventIndex: expectedCounter,
+        isCollapsed: false,
+        children: [],
+      },
+    };
+  }
+  return null;
 }
 
 function getNodeForRow(state, rowToFind) {

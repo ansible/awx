@@ -4,6 +4,7 @@ import { shallow, mount } from 'enzyme';
 import useJobEvents, {
   jobEventsReducer,
   ADD_EVENTS,
+  ADD_EVENT_GAPS,
   TOGGLE_NODE_COLLAPSED,
   SET_EVENT_NUM_CHILDREN,
 } from './useJobEvents';
@@ -146,6 +147,7 @@ describe('useJobEvents', () => {
       events: {},
       uuidMap: {},
       eventsWithoutParents: {},
+      eventGaps: [],
     };
   });
 
@@ -647,6 +649,58 @@ describe('useJobEvents', () => {
       ]);
     });
 
+    test('should build in flat mode', () => {
+      const flatReducer = jobEventsReducer(callbacks, true, enqueueAction);
+      const state = flatReducer(emptyState, {
+        type: ADD_EVENTS,
+        events: eventsList,
+      });
+
+      expect(state.events).toEqual(basicEvents);
+      expect(state.tree).toEqual([
+        { eventIndex: 1, isCollapsed: false, children: [] },
+        { eventIndex: 2, isCollapsed: false, children: [] },
+        { eventIndex: 3, isCollapsed: false, children: [] },
+        { eventIndex: 4, isCollapsed: false, children: [] },
+        { eventIndex: 5, isCollapsed: false, children: [] },
+        { eventIndex: 6, isCollapsed: false, children: [] },
+        { eventIndex: 7, isCollapsed: false, children: [] },
+        { eventIndex: 8, isCollapsed: false, children: [] },
+        { eventIndex: 9, isCollapsed: false, children: [] },
+      ]);
+      expect(state.uuidMap).toEqual({
+        'abc-001': 1,
+        'abc-002': 2,
+        'abc-003': 3,
+        'abc-004': 4,
+        'abc-005': 5,
+        'abc-006': 6,
+        'abc-007': 7,
+        'abc-008': 8,
+        'abc-009': 9,
+      });
+    });
+
+    test('should replace eventGap', () => {
+      const state = reducer(emptyState, {
+        type: ADD_EVENTS,
+        events: eventsList.slice(0, 8),
+      });
+      const state2 = reducer(state, {
+        type: ADD_EVENT_GAPS,
+        counterIds: [9],
+      });
+      expect(state2.eventGaps).toEqual([9]);
+
+      const state3 = reducer(state2, {
+        type: ADD_EVENTS,
+        events: [eventsList[8]],
+      });
+
+      expect(state3.events).toEqual(basicEvents);
+      expect(state3.eventGaps).toEqual([]);
+    });
+
     describe('fetchNumChildren', () => {
       test('should find child count for root node', async () => {
         callbacks.fetchNextRootNode.mockResolvedValue({
@@ -790,6 +844,30 @@ describe('useJobEvents', () => {
           numChildren: 19,
         });
       });
+    });
+  });
+
+  describe('addEventGaps', () => {
+    test('should add missing events to list', () => {
+      const state = reducer(emptyState, {
+        type: ADD_EVENT_GAPS,
+        counterIds: [3, 4, 5],
+      });
+
+      expect(state.eventGaps).toEqual([3, 4, 5]);
+    });
+
+    test('should not add duplicates', () => {
+      const state = reducer(emptyState, {
+        type: ADD_EVENT_GAPS,
+        counterIds: [3, 4, 5],
+      });
+      const state2 = reducer(state, {
+        type: ADD_EVENT_GAPS,
+        counterIds: [4, 5, 6],
+      });
+
+      expect(state2.eventGaps).toEqual([3, 4, 5, 6]);
     });
   });
 
@@ -1185,6 +1263,45 @@ describe('useJobEvents', () => {
       const node = wrapper.find('#test').prop('getNodeForRow')(51);
       expect(node).toEqual({
         eventIndex: 52,
+        isCollapsed: false,
+        children: [],
+      });
+    });
+  });
+
+  describe('getEventforRow', () => {
+    let wrapper;
+    beforeEach(() => {
+      wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+    });
+
+    test('should get event & node', () => {
+      const { event, node } = wrapper.find('#test').prop('getEventForRow')(5);
+      expect(event).toEqual(eventsList[5]);
+      expect(node).toEqual({
+        eventIndex: 6,
+        isCollapsed: false,
+        children: [
+          { eventIndex: 7, isCollapsed: false, children: [] },
+          { eventIndex: 8, isCollapsed: false, children: [] },
+          { eventIndex: 9, isCollapsed: false, children: [] },
+        ],
+      });
+    });
+
+    test('should get stub event', () => {
+      wrapper.find('#test').prop('addEventGaps')([10, 11]);
+      wrapper.update();
+
+      const { event, node } = wrapper.find('#test').prop('getEventForRow')(10);
+      expect(event).toEqual({
+        counter: 11,
+        stdout: '',
+        isMockEvent: true,
+      });
+      expect(node).toEqual({
+        eventIndex: 11,
         isCollapsed: false,
         children: [],
       });
