@@ -3,6 +3,7 @@ import yaml
 import time
 
 from receptorctl.socket_interface import ReceptorControl
+
 from django.conf import settings
 
 from enum import Enum, unique
@@ -110,9 +111,10 @@ def run_until_complete(node, timing_data=None, **kwargs):
 
     finally:
 
-        res = receptor_ctl.simple_command(f"work release {unit_id}")
-        if res != {'released': unit_id}:
-            logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
+        if settings.RECEPTOR_RELEASE_WORK:
+            res = receptor_ctl.simple_command(f"work release {unit_id}")
+            if res != {'released': unit_id}:
+                logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
 
         receptor_ctl.close()
 

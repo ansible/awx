@@ -397,13 +397,14 @@ def _cleanup_images_and_files(**kwargs):
         return
     this_inst = Instance.objects.me()
     runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    stdout = ''
-    with StringIO() as buffer:
-        with redirect_stdout(buffer):
-            ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
-            stdout = buffer.getvalue()
-    if '(changed: True)' in stdout:
-        logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+    if runner_cleanup_kwargs:
+        stdout = ''
+        with StringIO() as buffer:
+            with redirect_stdout(buffer):
+                ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+                stdout = buffer.getvalue()
+        if '(changed: True)' in stdout:
+            logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
     checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
@@ -411,6 +412,8 @@ def _cleanup_images_and_files(**kwargs):
         logger.info(f'Running execution node cleanup with kwargs {kwargs}')
         for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
             runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+            if not runner_cleanup_kwargs:
+                continue
             try:
                 stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
                 if '(changed: True)' in stdout:
@@ -3178,7 +3181,7 @@ class AWXReceptorJob:
                 receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
-            if self.work_type == 'ansible-runner':
+            if self.work_type == 'ansible-runner' and settings.AWX_CLEANUP_PATHS:
                 # on execution nodes, we rely on the private data dir being deleted
                 cli_params = f"--private-data-dir={private_data_dir} --delete"
             else:
