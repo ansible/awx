@@ -500,7 +500,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
-    // TODO update remoteRowCount if job running?
     return getJobModel(job.type)
       .readEvents(job.id, params)
       .then((response) => {
@@ -540,6 +539,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const scrollToRow = (rowIndex) => {
+    setIsFollowModeEnabled(false);
     if (listRef.current) {
       listRef.current.scrollToRow(rowIndex);
     }

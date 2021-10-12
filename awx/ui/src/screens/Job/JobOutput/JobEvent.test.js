@@ -91,7 +91,9 @@ describe('<JobEvent />', () => {
   test("events without stdout aren't rendered", () => {
     const missingStdoutEvent = { ...mockOnPlayStartEvent };
     delete missingStdoutEvent.stdout;
-    const wrapper = shallow(<JobEvent event={missingStdoutEvent} />);
+    const wrapper = shallow(
+      <JobEvent lineTextHtml={[]} event={missingStdoutEvent} />
+    );
     expect(wrapper.find('JobEventLineText')).toHaveLength(0);
   });
 });

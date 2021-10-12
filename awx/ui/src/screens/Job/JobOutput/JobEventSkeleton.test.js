@@ -5,17 +5,17 @@ import JobEventSkeleton from './JobEventSkeleton';
 
 const contentSelector = 'JobEventSkeletonContent';
 
-describe('<JobEvenSkeletont />', () => {
+describe('<JobEvenSkeleton />', () => {
   test('initially renders successfully', () => {
     const wrapper = mountWithContexts(
-      <JobEventSkeleton contentLength={80} counter={100} />
+      <JobEventSkeleton measure={jest.fn()} contentLength={80} counter={100} />
     );
     expect(wrapper.find(contentSelector).length).toEqual(1);
   });
 
   test('always skips first counter', () => {
     const wrapper = mountWithContexts(
-      <JobEventSkeleton contentLength={80} counter={1} />
+      <JobEventSkeleton measure={jest.fn()} contentLength={80} counter={1} />
     );
     expect(wrapper.find(contentSelector).length).toEqual(0);
   });

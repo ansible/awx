@@ -18,9 +18,10 @@ function JobEvent({
   onToggleCollapsed,
   hasChildren,
 }) {
+  const numOutputLines = lineTextHtml?.length || 0;
   useEffect(() => {
     measure();
-  }, [lineTextHtml.length, isCollapsed, measure]);
+  }, [numOutputLines, isCollapsed, measure]);
 
   let toggleLineIndex = -1;
   if (hasChildren) {
