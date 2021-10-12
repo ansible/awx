@@ -54,6 +54,9 @@ ADD requirements/requirements.txt \
 
 RUN cd /tmp && make requirements_awx
 
+ARG VERSION
+ARG SETUPTOOLS_SCM_PRETEND_VERSION
+
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev

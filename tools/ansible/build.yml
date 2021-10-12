@@ -2,7 +2,24 @@
 - name: Build AWX Docker Images
   hosts: localhost
   gather_facts: true
-  roles:
-    - {role: dockerfile}
-    - {role: image_build}
-    - {role: image_push, when: "docker_registry is defined"}
+  tasks:
+    - name: Get version from SCM if not explicitly provided
+      shell: |
+        python setup.py --version | cut -d + -f -1
+      args:
+        chdir: '../../'
+      register: setup_py_version
+      when: awx_version is not defined
+
+    - name: Set awx_version
+      set_fact:
+        awx_version: "{{ setup_py_version.stdout }}"
+      when: awx_version is not defined
+
+    - include_role:
+        name: dockerfile
+    - include_role:
+        name: image_build
+    - include_role:
+        name: image_push
+      when: push | default(false) | bool
