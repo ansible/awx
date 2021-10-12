@@ -17,6 +17,4 @@ set -e
 
 wait-for-migrations
 
-awx-manage collectstatic --noinput --clear
-
 supervisord -c /etc/supervisord.conf

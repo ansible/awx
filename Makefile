@@ -379,7 +379,7 @@ clean-ui:
 awx/ui/node_modules:
 	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui --loglevel warn ci
 
-$(UI_BUILD_FLAG_FILE):
+$(UI_BUILD_FLAG_FILE): awx/ui/node_modules
 	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
@@ -391,7 +391,9 @@ $(UI_BUILD_FLAG_FILE):
 	cp -r awx/ui/build/static/media/* awx/public/static/media
 	touch $@
 
-ui-release: awx/ui/node_modules $(UI_BUILD_FLAG_FILE)
+
+
+ui-release: $(UI_BUILD_FLAG_FILE)
 
 ui-devel: awx/ui/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
@@ -420,10 +422,17 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-dist/$(SDIST_TAR_FILE): ui-release VERSION
+HEADLESS ?= no
+ifeq ($(HEADLESS), yes)
+dist/$(SDIST_TAR_FILE):
+else
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
+endif
 	$(PYTHON) setup.py $(SDIST_COMMAND)
+	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
 
 sdist: dist/$(SDIST_TAR_FILE)
+	echo $(HEADLESS)
 	@echo "#############################################"
 	@echo "Artifacts:"
 	@echo dist/$(SDIST_TAR_FILE)
