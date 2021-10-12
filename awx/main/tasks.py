@@ -432,9 +432,9 @@ def cleanup_images_and_files():
 
 @task(queue=get_local_queuename)
 def cluster_node_health_check(node):
-    '''
+    """
     Used for the health check endpoint, refreshes the status of the instance, but must be ran on target node
-    '''
+    """
     if node == '':
         logger.warn('Local health check incorrectly called with blank string')
         return
