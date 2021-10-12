@@ -108,7 +108,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client, worker_cleanup
+from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client, worker_cleanup, administrative_workunit_reaper
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -397,20 +397,22 @@ def _cleanup_images_and_files(**kwargs):
         return
     this_inst = Instance.objects.me()
     runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    stdout = ''
-    with StringIO() as buffer:
-        with redirect_stdout(buffer):
-            ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
-            stdout = buffer.getvalue()
-    if '(changed: True)' in stdout:
-        logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+    if runner_cleanup_kwargs:
+        stdout = ''
+        with StringIO() as buffer:
+            with redirect_stdout(buffer):
+                ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+                stdout = buffer.getvalue()
+        if '(changed: True)' in stdout:
+            logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
     checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
     if checker_instance and this_inst.hostname == checker_instance.hostname:
-        logger.info(f'Running execution node cleanup with kwargs {kwargs}')
         for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
             runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+            if not runner_cleanup_kwargs:
+                continue
             try:
                 stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
                 if '(changed: True)' in stdout:
@@ -648,6 +650,8 @@ def awx_receptor_workunit_reaper():
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
         receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
         receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+
+    administrative_workunit_reaper(receptor_work_list)
 
 
 @task(queue=get_local_queuename)
@@ -3184,7 +3188,7 @@ class AWXReceptorJob:
                 receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
-            if self.work_type == 'ansible-runner':
+            if self.work_type == 'ansible-runner' and settings.AWX_CLEANUP_PATHS:
                 # on execution nodes, we rely on the private data dir being deleted
                 cli_params = f"--private-data-dir={private_data_dir} --delete"
             else:

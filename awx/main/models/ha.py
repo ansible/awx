@@ -162,7 +162,9 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         returns a dict that is passed to the python interface for the runner method corresponding to that command
         any kwargs will override that key=value combination in the returned dict
         """
-        vargs = dict(file_pattern='/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*'))
+        vargs = dict()
+        if settings.AWX_CLEANUP_PATHS:
+            vargs['file_pattern'] = '/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*')
         vargs.update(kwargs)
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
             active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')).values_list('pk', flat=True))
