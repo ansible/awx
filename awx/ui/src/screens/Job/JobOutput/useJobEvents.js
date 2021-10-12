@@ -18,6 +18,7 @@ export const ADD_EVENT_GAPS = 'ADD_EVENT_GAPS';
 export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
 export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
 export const CLEAR_EVENTS = 'CLEAR_EVENTS';
+export const REBUILD_TREE = 'REBUILD_TREE';
 
 export default function useJobEvents(callbacks, isFlatMode) {
   const [actionQueue, setActionQueue] = useState([]);
@@ -56,6 +57,7 @@ export default function useJobEvents(callbacks, isFlatMode) {
     getCounterForRow: (rowIndex) => getCounterForRow(state, rowIndex),
     getEvent: (eventIndex) => getEvent(state, eventIndex),
     clearLoadedEvents: () => dispatch({ type: CLEAR_EVENTS }),
+    rebuildEventsTree: () => dispatch({ type: REBUILD_TREE }),
   };
 }
 
@@ -72,6 +74,8 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         return setEventNumChildren(state, action.uuid, action.numChildren);
       case CLEAR_EVENTS:
         return initialState;
+      case REBUILD_TREE:
+        return rebuildTree(state);
       default:
         throw new Error(`Unrecognized action: ${action.type}`);
     }
@@ -265,6 +269,11 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       },
       newEvents
     );
+  }
+
+  function rebuildTree(state) {
+    const events = Object.values(state.events);
+    return addEvents(initialState, events);
   }
 }
 
