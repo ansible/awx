@@ -493,8 +493,8 @@ docker-compose-build:
 
 docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	if [ $(shell docker images | grep "awx_devel") ]; then \
-	  docker images | grep "awx_devel" | awk '{print $$3}' | xargs docker rmi --force; \
+	if [ "$(shell docker images | grep awx_devel)" ]; then \
+	  docker images | grep awx_devel | awk '{print $$3}' | xargs docker rmi --force; \
 	fi
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
