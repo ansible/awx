@@ -482,20 +482,17 @@ def create_schema_nodes(module, response, schema, workflow_id):
 
         # Lookup Job Template ID
         if workflow_node['unified_job_template']['name']:
-            search_fields = {'name': workflow_node['unified_job_template']['name']}
             if workflow_node['unified_job_template']['type'] is None:
                 module.fail_json(msg='Could not find unified job template type in schema {1}'.format(workflow_node))
             if workflow_node['unified_job_template']['type'] == 'inventory_source':
-                # workflow_node['unified_job_template']['inventory']:
                 organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
                 search_fields['organization'] = organization_id
             elif workflow_node['unified_job_template']['type'] == 'workflow_approval':
                 pass
             else:
-                # workflow_node['unified_job_template']['organization']:
                 organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
                 search_fields['organization'] = organization_id
-            unified_job_template = module.get_one('unified_job_templates', **{'data': search_fields})
+            unified_job_template = module.get_one('unified_job_templates', name_or_id=workflow_node['unified_job_template']['name'], **{'data': search_fields})
             if unified_job_template:
                 workflow_node_fields['unified_job_template'] = unified_job_template['id']
             else:
