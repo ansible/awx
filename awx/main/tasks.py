@@ -432,9 +432,9 @@ def cleanup_images_and_files():
 
 @task(queue=get_local_queuename)
 def cluster_node_health_check(node):
-    '''
+    """
     Used for the health check endpoint, refreshes the status of the instance, but must be ran on target node
-    '''
+    """
     if node == '':
         logger.warn('Local health check incorrectly called with blank string')
         return
@@ -2655,6 +2655,7 @@ class RunInventoryUpdate(BaseTask):
                     celery_task_id=inventory_update.celery_task_id,
                 )
             )
+            create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # associate the inventory update before calling run() so that a
             # cancel() call on the inventory update can cancel the project update
             local_project_sync.scm_inventory_updates.add(inventory_update)
