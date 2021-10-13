@@ -5,6 +5,14 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import DataListToolbar from './DataListToolbar';
 import AddDropDownButton from '../AddDropDownButton/AddDropDownButton';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    pathname: '/organizations',
+    search: 'template.name__icontains=name',
+  }),
+}));
+
 describe('<DataListToolbar />', () => {
   let toolbar;
 
