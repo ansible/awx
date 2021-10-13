@@ -21,7 +21,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || : || :
 
       - name: Build image
         run: |
@@ -93,7 +93,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
@@ -117,7 +117,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
@@ -165,7 +165,7 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
 
       - name: Build image
         run: |
