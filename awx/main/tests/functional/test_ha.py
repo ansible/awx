@@ -14,6 +14,6 @@ def test_multiple_instances():
 
 @pytest.mark.django_db
 def test_db_localhost():
-    Instance.objects.create(hostname='foo', node_type='hybrd')
+    Instance.objects.create(hostname='foo', node_type='hybrid')
     Instance.objects.create(hostname='bar', node_type='execution')
     assert is_ha_environment() is False
