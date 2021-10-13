@@ -5,7 +5,10 @@
 To build a custom awx image to use with the awx-operator, use the `build_image` role:
 
 ```
-$ ansible-playbook tools/ansible/build.yml -v -e awx_image=registry.example.com/awx -e awx_version=test
+$ ansible-playbook tools/ansible/build.yml \
+    -e registry=registry.example.com \
+    -e awx_image=ansible/awx \
+    -e awx_version=test -v
 ```
 
 > Note: The development image (`make docker-compose-build`) will not work with the awx-operator, the UI is not built in that image, among other things (see Dockerfile.j2 for more info).
@@ -21,7 +24,7 @@ $ docker push registry.example.com/awx:test
 ## Using this image with the awx-operator
 
 In the spec section of the `my-awx.yml` file described in the [install docs](./../INSTALL.md#deploy-awx),
-specify the new custom image.  
+specify the new custom image.
 
 ```
 spec:
