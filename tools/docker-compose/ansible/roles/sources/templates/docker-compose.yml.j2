@@ -30,18 +30,20 @@ services:
       - redis_{{ container_postfix }}
     working_dir: "/awx_devel"
     volumes:
-      - "../../../:/awx_devel"
-      - "../../docker-compose/supervisor.conf:/etc/supervisord.conf"
-      - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
-      - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
-      - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
-      - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
-      - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
-      - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
-      - "../../docker-compose/_sources/receptor/work_private_key.pem:/etc/receptor/work_private_key.pem"
-      # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
+      - "{{ (playbook_dir + '/../../../') | realpath() }}:/awx_devel"
+      - "{{ (playbook_dir + '/../') | realpath() }}/supervisor.conf:/etc/supervisord.conf"
+      - "./database.py:/etc/tower/conf.d/database.py"
+      - "./websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
+      - "./local_settings.py:/etc/tower/conf.d/local_settings.py"
+      - "./SECRET_KEY:/etc/tower/SECRET_KEY"
+      - "./receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "./receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
+      - "./receptor/work_private_key.pem:/etc/receptor/work_private_key.pem"
+      # - "./certs:/etc/receptor/certs"  # TODO: optionally generate certs
       - "/sys/fs/cgroup:/sys/fs/cgroup"
+{% if minikube_container_group|bool %}
       - "~/.kube/config:/var/lib/awx/.kube/config"
+{% endif %}
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
     tty: true
@@ -59,7 +61,7 @@ services:
     image: redis:latest
     container_name: tools_redis_{{ container_postfix }}
     volumes:
-      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "{{ (playbook_dir + '/../../redis/') | realpath() }}/redis.conf:/usr/local/etc/redis/redis.conf"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
@@ -108,7 +110,7 @@ services:
     ports:
       - "5555:5555"
     volumes:
-      - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
+      - "./receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
   {% for i in range(execution_node_count|int) -%}
   receptor-{{ loop.index }}:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
@@ -121,9 +123,9 @@ services:
     links:
       - receptor-hop
     volumes:
-      - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "./receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
-      - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
+      - "./receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
     privileged: true
   {% endfor %}
 {% endif %}
