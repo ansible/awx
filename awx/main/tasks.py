@@ -3120,7 +3120,7 @@ class AWXReceptorJob:
                 except RuntimeError as e:
                     detail = ''
                     state_name = ''
-                    logger.warn(e)
+                    logger.exception(e)
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
