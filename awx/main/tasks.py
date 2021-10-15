@@ -3071,7 +3071,13 @@ class AWXReceptorJob:
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
-                receptor_ctl.simple_command(f"work release {self.unit_id}")
+                try:
+                    receptor_ctl.simple_command(f"work release {self.unit_id}")
+                except RuntimeError:
+                    logger.exception(f"Unable to release work item {self.unit_id}")
+            # If an error occured without the job itself failing, it could be a broken instance
+            if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
+                execution_node_health_check.delay(self.task.instance.execution_node)
 
     @property
     def sign_work(self):
