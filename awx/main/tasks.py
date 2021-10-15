@@ -1914,6 +1914,7 @@ class RunJob(BaseTask):
                 status='running',
                 instance_group=pu_ig,
                 execution_node=pu_en,
+                controller_node=pu_en,
                 celery_task_id=job.celery_task_id,
             )
             if branch_override:
@@ -1922,6 +1923,8 @@ class RunJob(BaseTask):
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
+            local_project_sync.log_lifecycle("controller_node_chosen")
+            local_project_sync.log_lifecycle("execution_node_chosen")
             create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
@@ -2214,10 +2217,13 @@ class RunProjectUpdate(BaseTask):
                         status='running',
                         instance_group=instance_group,
                         execution_node=project_update.execution_node,
+                        controller_node=project_update.execution_node,
                         source_project_update=project_update,
                         celery_task_id=project_update.celery_task_id,
                     )
                 )
+                local_inv_update.log_lifecycle("controller_node_chosen")
+                local_inv_update.log_lifecycle("execution_node_chosen")
             try:
                 create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
                 inv_update_class().run(local_inv_update.id)
@@ -2665,10 +2671,13 @@ class RunInventoryUpdate(BaseTask):
                     job_tags=','.join(sync_needs),
                     status='running',
                     execution_node=Instance.objects.me().hostname,
+                    controller_node=Instance.objects.me().hostname,
                     instance_group=inventory_update.instance_group,
                     celery_task_id=inventory_update.celery_task_id,
                 )
             )
+            local_project_sync.log_lifecycle("controller_node_chosen")
+            local_project_sync.log_lifecycle("execution_node_chosen")
             create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # associate the inventory update before calling run() so that a
             # cancel() call on the inventory update can cancel the project update
