@@ -85,7 +85,7 @@ from awx.main.models import (
     build_safe_env,
 )
 from awx.main.constants import ACTIVE_STATES
-from awx.main.exceptions import AwxTaskError, PostRunError
+from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
@@ -1546,6 +1546,8 @@ class BaseTask(object):
                 # ensure failure notification sends even if playbook_on_stats event is not triggered
                 handle_success_and_failure_notifications.apply_async([self.instance.job.id])
 
+        except ReceptorNodeNotFound as exc:
+            extra_update_fields['job_explanation'] = str(exc)
         except Exception:
             # this could catch programming or file system errors
             extra_update_fields['result_traceback'] = traceback.format_exc()
@@ -3069,7 +3071,7 @@ class AWXReceptorJob:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
             # If an error occured without the job itself failing, it could be a broken instance
             if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
-                execution_node_health_check(self.task.instance.execution_node)
+                execution_node_health_check.delay(self.task.instance.execution_node)
 
     @property
     def sign_work(self):
