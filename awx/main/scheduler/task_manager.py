@@ -291,6 +291,7 @@ class TaskManager:
                     # act as the controller for k8s API interaction
                     try:
                         task.controller_node = Instance.choose_online_control_plane_node()
+                        task.log_lifecycle("controller_node_chosen")
                     except IndexError:
                         logger.warning("No control plane nodes available to run containerized job {}".format(task.log_format))
                         return
@@ -298,19 +299,23 @@ class TaskManager:
                     # project updates and system jobs don't *actually* run in pods, so
                     # just pick *any* non-containerized host and use it as the execution node
                     task.execution_node = Instance.choose_online_control_plane_node()
+                    task.log_lifecycle("execution_node_chosen")
                     logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
+                task.log_lifecycle("execution_node_chosen")
                 if instance.node_type == 'execution':
                     try:
                         task.controller_node = Instance.choose_online_control_plane_node()
+                        task.log_lifecycle("controller_node_chosen")
                     except IndexError:
                         logger.warning("No control plane nodes available to manage {}".format(task.log_format))
                         return
                 else:
                     # control plane nodes will manage jobs locally for performance and resilience
                     task.controller_node = task.execution_node
+                    task.log_lifecycle("controller_node_chosen")
                 logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, task.controller_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
