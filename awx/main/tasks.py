@@ -3134,7 +3134,7 @@ class AWXReceptorJob:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
-                except RuntimeError as e:
+                except RuntimeError:
                     detail = ''
                     state_name = ''
                     logger.exception(f'Unable to retrieve work status for {self.unit_id}')
@@ -3145,6 +3145,11 @@ class AWXReceptorJob:
                     logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
+
+                # if we did not exceed the quota, continue with shutting down the job
+                resultsock.shutdown(socket.SHUT_RDWR)
+                resultfile.close()
+
                 # If ansible-runner ran, but an error occured at runtime, the traceback information
                 # is saved via the status_handler passed in to the processor.
                 if state_name == 'Succeeded':
@@ -3224,9 +3229,20 @@ class AWXReceptorJob:
 
     @cleanup_new_process
     def cancel_watcher(self, processor_future):
+        receptor_ctl = get_receptor_ctl()
         while True:
             if processor_future.done():
                 return processor_future.result()
+
+            # cancel job if receptor no longer knows about work item
+            try:
+                receptor_ctl.simple_command(f'work status {self.unit_id}')
+            except RuntimeError:
+                self.task.instance.result_traceback = traceback.format_exc()
+                self.task.instance.save(update_fields=['result_traceback'])
+
+                result = namedtuple('result', ['status', 'rc'])
+                return result('error', 1)
 
             if self.task.cancel_callback():
                 result = namedtuple('result', ['status', 'rc'])
