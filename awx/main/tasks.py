@@ -3151,6 +3151,7 @@ class AWXReceptorJob:
                     except Exception:
                         raise RuntimeError(detail)
 
+        time.sleep(3)
         return res
 
     # Spawned in a thread so Receptor can start reading before we finish writing, we
