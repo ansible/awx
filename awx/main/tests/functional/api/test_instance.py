@@ -51,6 +51,20 @@ def test_auditor_user_health_check(get, post, system_auditor):
 
 
 @pytest.mark.django_db
+def test_health_check_throws_error(post, admin_user):
+    instance = Instance.objects.create(node_type='execution', **INSTANCE_KWARGS)
+    url = reverse('api:instance_health_check', kwargs={'pk': instance.pk})
+    # we will simulate a receptor error, similar to this one
+    # https://github.com/ansible/receptor/blob/156e6e24a49fbf868734507f9943ac96208ed8f5/receptorctl/receptorctl/socket_interface.py#L204
+    # related to issue https://github.com/ansible/tower/issues/5315
+    with mock.patch('awx.main.utils.receptor.run_until_complete', side_effect=RuntimeError('Remote error: foobar')):
+        post(url=url, user=admin_user, expect=200)
+    instance.refresh_from_db()
+    assert 'Remote error: foobar' in instance.errors
+    assert instance.capacity == 0
+
+
+@pytest.mark.django_db
 @mock.patch.object(redis.client.Redis, 'ping', lambda self: True)
 def test_health_check_usage(get, post, admin_user):
     instance = Instance.objects.create(**INSTANCE_KWARGS)
