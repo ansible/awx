@@ -3117,9 +3117,14 @@ class AWXReceptorJob:
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
             elif res.status == 'error':
-                unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
-                detail = unit_status['Detail']
-                state_name = unit_status['StateName']
+                try:
+                    unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
+                    detail = unit_status.get('Detail', None)
+                    state_name = unit_status.get('StateName', None)
+                except RuntimeError as e:
+                    detail = ''
+                    state_name = ''
+                    logger.exception(e)
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
