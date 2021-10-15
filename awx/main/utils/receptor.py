@@ -186,7 +186,7 @@ def worker_info(node_name, work_type='ansible-runner'):
         else:
             error_list.append(details)
 
-    except ReceptorNodeNotFound as exc:
+    except (ReceptorNodeNotFound, RuntimeError) as exc:
         error_list.append(str(exc))
 
     # If we have a connection error, missing keys would be trivial consequence of that
