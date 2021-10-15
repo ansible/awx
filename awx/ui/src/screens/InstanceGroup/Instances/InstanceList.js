@@ -147,7 +147,10 @@ function InstanceList() {
   const fetchInstancesToAssociate = useCallback(
     (params) =>
       InstancesAPI.read(
-        mergeParams(params, { not__rampart_groups__id: instanceGroupId })
+        mergeParams(params, {
+          ...{ not__rampart_groups__id: instanceGroupId },
+          ...{ not__node_type: 'control' },
+        })
       ),
     [instanceGroupId]
   );
