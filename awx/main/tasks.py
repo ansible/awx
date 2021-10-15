@@ -3137,7 +3137,7 @@ class AWXReceptorJob:
                 except RuntimeError as e:
                     detail = ''
                     state_name = ''
-                    logger.exception(e)
+                    logger.exception(f'Unable to retrieve work status for {self.unit_id}')
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
