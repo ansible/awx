@@ -3126,7 +3126,7 @@ class AWXReceptorJob:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
-                except RuntimeError as e:
+                except RuntimeError:
                     detail = ''
                     state_name = ''
                     logger.exception(f'Unable to retrieve work status for {self.unit_id}')
@@ -3228,8 +3228,8 @@ class AWXReceptorJob:
 
             # cancel job if receptor no longer knows about work item
             try:
-                unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
-            except RuntimeError as e:
+                receptor_ctl.simple_command(f'work status {self.unit_id}')
+            except RuntimeError:
                 self.task.instance.result_traceback = traceback.format_exc()
                 self.task.instance.save(update_fields=['result_traceback'])
 
