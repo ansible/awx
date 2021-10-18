@@ -3177,10 +3177,6 @@ class AWXReceptorJob:
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
 
-                # if we did not exceed the quota, continue with shutting down the job
-                resultsock.shutdown(socket.SHUT_RDWR)
-                resultfile.close()
-
                 # If ansible-runner ran, but an error occured at runtime, the traceback information
                 # is saved via the status_handler passed in to the processor.
                 if state_name == 'Succeeded':
@@ -3193,7 +3189,12 @@ class AWXReceptorJob:
                         self.task.instance.result_traceback = b"".join(lines).decode()
                         self.task.instance.save(update_fields=['result_traceback'])
                     except Exception:
+                        resultsock.shutdown(socket.SHUT_RDWR)
+                        resultfile.close()
                         raise RuntimeError(detail)
+
+                resultsock.shutdown(socket.SHUT_RDWR)
+                resultfile.close()
 
         time.sleep(3)
         return res
