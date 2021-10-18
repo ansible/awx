@@ -19,7 +19,6 @@ description:
       the path in the command would be /path/to/controller_inventory.(yml|yaml). If some arguments in the config file
       are missing, this plugin will try to fill in missing arguments by reading from environment variables.
     - If reading configurations from environment variables, the path in the command must be @controller_inventory.
-extends_documentation_fragment: awx.awx.auth_plugin
 options:
     inventory_id:
         description:
@@ -35,6 +34,7 @@ options:
         description: Make extra requests to provide all group vars with metadata about the source host.
         type: bool
         default: False
+extends_documentation_fragment: awx.awx.auth_plugin
 '''
 
 EXAMPLES = '''
