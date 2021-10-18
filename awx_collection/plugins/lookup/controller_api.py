@@ -15,7 +15,6 @@ description:
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/index.html) for API usage.
   - For use that is cross-compatible between the awx.awx and ansible.controller collection
     see the controller_meta module
-extends_documentation_fragment: awx.awx.auth_plugin
 options:
   _terms:
     description:
@@ -63,7 +62,7 @@ options:
       - If a list view returns more an max_objects an exception will be raised
     type: integer
     default: 1000
-
+extends_documentation_fragment: awx.awx.auth_plugin
 notes:
   - If the query is not filtered properly this can cause a performance impact.
 """
