@@ -3182,7 +3182,7 @@ class AWXReceptorJob:
                 if state_name == 'Succeeded':
                     return res
 
-                if not self.task.instance.result_traceback:
+                if not (self.task.instance.result_traceback or self.task.instance.job_explanation):
                     try:
                         resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
                         lines = resultsock.readlines()
