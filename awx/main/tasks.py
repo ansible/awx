@@ -667,13 +667,13 @@ def awx_receptor_workunit_reaper():
                 logger.exception(f'Unexpected error releasing work unit {job.work_unit_id}')
 
     active_unit_ids = [id for (id, data) in receptor_work_list.items() if data.get('StateName') in RECEPTOR_ACTIVE_STATES]
+    active_unit_ids.append('')  # exclude jobs that have not yet started a receptor work unit
 
     jobs_without_active_work_unit = UnifiedJob.objects.filter(status__in=ACTIVE_STATES, controller_node=settings.CLUSTER_HOST_ID).exclude(
         work_unit_id__in=active_unit_ids
     )
 
     for job in jobs_without_active_work_unit:
-        # TODO: skip if events came in recently
         job.cancel_flag = True
         job.status = 'error'
         if job.work_unit_id in receptor_work_list:
