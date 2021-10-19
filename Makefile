@@ -7,6 +7,7 @@ CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION := $(shell $(PYTHON) setup.py --version)
+COLLECTION_VERSION := $(shell $(PYTHON) setup.py --version | cut -d . -f 1-3)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -321,12 +322,16 @@ symlink_collection:
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
 build_collection:
-	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION) -e '{"awx_template_version":false}'
+	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
+	  -e collection_package=$(COLLECTION_PACKAGE) \
+	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
+	  -e collection_version=$(COLLECTION_VERSION) \
+	  -e '{"awx_template_version":false}'
 	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
-	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(VERSION).tar.gz
+	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(COLLECTION_VERSION).tar.gz
 
 test_collection_sanity: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity
