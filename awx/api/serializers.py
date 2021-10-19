@@ -5003,6 +5003,7 @@ class ActivityStreamSerializer(BaseSerializer):
             ('credential_type', ('id', 'name', 'description', 'kind', 'managed')),
             ('ad_hoc_command', ('id', 'name', 'status', 'limit')),
             ('workflow_approval', ('id', 'name', 'unified_job_id')),
+            ('instance', ('id', 'hostname')),
         ]
         return field_list
 

@@ -288,6 +288,9 @@ def apply_cluster_membership_policies():
                     continue
                 instances_to_add = set(g.instances) - set(g.prior_instances)
                 instances_to_remove = set(g.prior_instances) - set(g.instances)
+                # The following writes to the db don't spam the activity stream, because
+                # InstanceGroup is special-cased in signals.py to connect to only the non-m2m
+                # signal handlers.
                 if instances_to_add:
                     logger.debug('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
                     g.obj.instances.add(*instances_to_add)
