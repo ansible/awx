@@ -4,8 +4,6 @@ env:
   BRANCH: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:
-  push:
-    branches: [devel]
 jobs:
   api-test:
     runs-on: ubuntu-latest
