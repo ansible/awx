@@ -85,7 +85,7 @@ jobs:
           -e CYPRESS_baseUrl="https://$AWX_IP:8043" \
           -e CYPRESS_AWX_E2E_USERNAME=admin \
           -e CYPRESS_AWX_E2E_PASSWORD='password' \
-          -e COMMAND="npm run cypress-gha" \
+          -e COMMAND="npm run cypress-concurrently-gha" \
           -v /dev/shm:/dev/shm \
           -v $PWD:/e2e \
           -w /e2e \
