@@ -5,10 +5,13 @@ ARG TARGET='https://awx:8043'
 ENV TARGET=${TARGET}
 ENV CI=true
 WORKDIR /ui
+ADD .eslintignore .eslintignore
+ADD .eslintrc .eslintrc
+ADD .linguirc .linguirc
+ADD jsconfig.json jsconfig.json
 ADD public public
 ADD package.json package.json
 ADD package-lock.json package-lock.json
-ADD .linguirc .linguirc
 COPY ${NPMRC_FILE} .npmrc
 RUN npm install
 ADD src src
