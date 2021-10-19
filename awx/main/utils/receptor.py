@@ -1,12 +1,14 @@
 import logging
 import yaml
 import time
+from enum import Enum, unique
 
 from receptorctl.socket_interface import ReceptorControl
 
+from awx.main.exceptions import ReceptorNodeNotFound
+
 from django.conf import settings
 
-from enum import Enum, unique
 
 logger = logging.getLogger('awx.main.utils.receptor')
 
@@ -63,6 +65,7 @@ def get_conn_type(node_name, receptor_ctl):
     for node in all_nodes:
         if node.get('NodeID') == node_name:
             return ReceptorConnectionType(node.get('ConnType'))
+    raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
 
 
 def administrative_workunit_reaper(work_list=None):
@@ -182,6 +185,9 @@ def worker_info(node_name, work_type='ansible-runner'):
             error_list.append(f'Old version (2.0.1 or earlier) of ansible-runner on node {node_name} without --worker-info')
         else:
             error_list.append(details)
+
+    except ReceptorNodeNotFound as exc:
+        error_list.append(str(exc))
 
     # If we have a connection error, missing keys would be trivial consequence of that
     if not data['errors']:
