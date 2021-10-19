@@ -534,7 +534,7 @@ def inspect_execution_nodes(instance_list):
                 # check
                 logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
                 execution_node_health_check.apply_async([hostname])
-            elif instance.capacity == 0:
+            elif instance.capacity == 0 and instance.enabled:
                 # nodes with proven connection but need remediation run health checks are reduced frequency
                 if not instance.last_health_check or (nowtime - instance.last_health_check).total_seconds() >= settings.EXECUTION_NODE_REMEDIATION_CHECKS:
                     # Periodically re-run the health check of errored nodes, in case someone fixed it
@@ -3069,9 +3069,6 @@ class AWXReceptorJob:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
-            # If an error occured without the job itself failing, it could be a broken instance
-            if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
-                execution_node_health_check.delay(self.task.instance.execution_node)
 
     @property
     def sign_work(self):
