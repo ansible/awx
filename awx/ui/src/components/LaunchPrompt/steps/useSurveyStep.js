@@ -128,9 +128,9 @@ function checkForError(launchConfig, surveyConfig, values) {
           hasError = true;
         }
       }
-      if (isNumeric && (value || value === 0)) {
+      if (isNumeric) {
         if (
-          (value < question.min || value > question.max) &&
+          (value < question.min || value > question.max || value === '') &&
           question.required
         ) {
           hasError = true;
