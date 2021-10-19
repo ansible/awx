@@ -2,6 +2,7 @@ import pytest
 from unittest import mock
 
 from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate, ProjectUpdate
+from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance, InstanceGroup
 from awx.main.tasks import apply_cluster_membership_policies
 from awx.api.versioning import reverse
@@ -72,6 +73,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
+
     ig_all = instance_group_factory("all", instances=[i1, i2, i3])
     ig_dup = instance_group_factory("duplicates", instances=[i1])
     project.organization.instance_groups.add(ig_all, ig_dup)
@@ -83,7 +85,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     api_num_instances_oa = list(list_response2.data.items())[0][1]
 
     assert actual_num_instances == api_num_instances_auditor
-    # Note: The org_admin will not see the default 'tower' node (instance fixture) because it is not in it's group, as expected
+    # Note: The org_admin will not see the default 'tower' node (instance fixture) because it is not in its group, as expected
     assert api_num_instances_oa == (actual_num_instances - 1)
 
 
@@ -94,7 +96,13 @@ def test_policy_instance_few_instances(instance_factory, instance_group_factory)
     ig_2 = instance_group_factory("ig2", percentage=25)
     ig_3 = instance_group_factory("ig3", percentage=25)
     ig_4 = instance_group_factory("ig4", percentage=25)
+
+    count = ActivityStream.objects.count()
+
     apply_cluster_membership_policies()
+    # running apply_cluster_membership_policies shouldn't spam the activity stream
+    assert ActivityStream.objects.count() == count
+
     assert len(ig_1.instances.all()) == 1
     assert i1 in ig_1.instances.all()
     assert len(ig_2.instances.all()) == 1
@@ -103,8 +111,12 @@ def test_policy_instance_few_instances(instance_factory, instance_group_factory)
     assert i1 in ig_3.instances.all()
     assert len(ig_4.instances.all()) == 1
     assert i1 in ig_4.instances.all()
+
     i2 = instance_factory("i2")
+    count += 1
     apply_cluster_membership_policies()
+    assert ActivityStream.objects.count() == count
+
     assert len(ig_1.instances.all()) == 1
     assert i1 in ig_1.instances.all()
     assert len(ig_2.instances.all()) == 1
