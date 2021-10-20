@@ -23,8 +23,9 @@ generate_requirements() {
   ${pip_compile} --output-file requirements.txt "${requirements_in}" "${requirements_git}"
   # consider the git requirements for purposes of resolving deps
   # Then remove any git+ lines from requirements.txt
-  cp requirements.txt requirements_tmp.txt
-  grep -v "^git+" requirements_tmp.txt > requirements.txt && rm requirements_tmp.txt
+  while IFS= read -r line; do
+    sed -i "\!${line%#*}!d" requirements.txt
+  done < "${requirements_git}"
 }
 
 main() {
