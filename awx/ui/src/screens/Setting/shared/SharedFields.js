@@ -440,10 +440,8 @@ const ObjectField = ({ name, config, isRequired = false }) => {
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
-  const emptyDefault = config?.type === 'list' ? '[]' : '{}';
-  const defaultRevertValue = config?.default
-    ? JSON.stringify(config.default, null, 2)
-    : emptyDefault;
+  const defaultRevertValue =
+    config?.default !== null ? JSON.stringify(config.default, null, 2) : null;
 
   return config ? (
     <FormFullWidthLayout>
@@ -458,7 +456,12 @@ const ObjectField = ({ name, config, isRequired = false }) => {
       >
         <CodeEditor
           {...field}
-          rows="auto"
+          value={
+            field.value === null
+              ? JSON.stringify(field.value, null, 2)
+              : field.value
+          }
+          rows={field.value !== null ? 'auto' : 1}
           id={name}
           mode="javascript"
           onChange={(value) => {
