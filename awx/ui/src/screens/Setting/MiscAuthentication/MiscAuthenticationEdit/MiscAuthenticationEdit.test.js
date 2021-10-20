@@ -29,9 +29,9 @@ const authenticationData = {
     'awx.sso.backends.TACACSPlusBackend',
     'awx.main.backends.AWXModelBackend',
   ],
-  SOCIAL_AUTH_ORGANIZATION_MAP: {},
-  SOCIAL_AUTH_TEAM_MAP: {},
-  SOCIAL_AUTH_USER_FIELDS: [],
+  SOCIAL_AUTH_ORGANIZATION_MAP: null,
+  SOCIAL_AUTH_TEAM_MAP: null,
+  SOCIAL_AUTH_USER_FIELDS: null,
 };
 
 describe('<MiscAuthenticationEdit />', () => {
