@@ -362,8 +362,14 @@ function SlackFields() {
         type="textarea"
         validate={required(null)}
         isRequired
-        tooltip={t`Enter one Slack channel per line. The pound symbol (#)
-          is required for channels.`}
+        tooltip={
+          <>
+            {t`Enter one Slack channel per line. The pound symbol (#)
+          is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack`}{' '}
+            <a href="https://api.slack.com/messaging/retrieving#individual_messages">{t`documentation`}</a>{' '}
+            <span>{t`for more information.`}</span>
+          </>
+        }
       />
       <PasswordField
         id="slack-token"
