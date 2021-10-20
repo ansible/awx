@@ -655,6 +655,7 @@ def awx_receptor_workunit_reaper():
     receptor_ctl = get_receptor_ctl()
     receptor_work_list = receptor_ctl.simple_command("work list")
 
+    # Release work units for inactive jobs
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
     for job in jobs_with_unreleased_receptor_units:
@@ -666,6 +667,7 @@ def awx_receptor_workunit_reaper():
             if 'unknown work unit' not in str(exc):
                 logger.exception(f'Unexpected error releasing work unit {job.work_unit_id}')
 
+    # Cancel jobs missing active work units
     active_unit_ids = [id for (id, data) in receptor_work_list.items() if data.get('StateName') in RECEPTOR_ACTIVE_STATES]
     active_unit_ids.append('')  # exclude jobs that have not yet started a receptor work unit
 
