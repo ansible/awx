@@ -24,7 +24,7 @@ def test_send_messages():
                 message,
             ]
         )
-        WebClient_mock.chat_postMessage.assert_called_once_with(channel='random', as_user=True, text='test subject')
+        WebClient_mock.chat_postMessage.assert_called_once_with(channel='random', thread_ts=None, as_user=True, text='test subject')
         assert sent_messages == 1
 
 
@@ -47,7 +47,9 @@ def test_send_messages_with_color():
             ]
         )
 
-        WebClient_mock.chat_postMessage.assert_called_once_with(channel='random', as_user=True, attachments=[{'color': '#006699', 'text': 'test subject'}])
+        WebClient_mock.chat_postMessage.assert_called_once_with(
+            channel='random', as_user=True, thread_ts=None, attachments=[{'color': '#006699', 'text': 'test subject'}]
+        )
         assert sent_messages == 1
 
 

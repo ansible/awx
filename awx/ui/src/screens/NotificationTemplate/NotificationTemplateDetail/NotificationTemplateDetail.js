@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import {
   Button,
@@ -20,13 +20,20 @@ import {
 import CodeDetail from 'components/DetailList/CodeDetail';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
-import { NotificationTemplatesAPI } from 'api';
+import { NotificationTemplatesAPI, NotificationsAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import StatusLabel from 'components/StatusLabel';
 import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
 
+const NUM_RETRIES = 25;
+const RETRY_TIMEOUT = 5000;
+
 function NotificationTemplateDetail({ template, defaultMessages }) {
   const history = useHistory();
+  const [testStatus, setTestStatus] = useState(
+    template.summary_fields?.recent_notifications[0]?.status ?? undefined
+  );
 
   const {
     created,
@@ -64,9 +71,35 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
     }, [template.id, history])
   );
 
-  const { error, dismissError } = useDismissableError(deleteError);
-  const typeMessageDefaults = defaultMessages[template.notification_type];
+  const { request: sendTestNotification, error: testError } = useRequest(
+    useCallback(async () => {
+      setTestStatus('running');
 
+      let retries = NUM_RETRIES;
+      const {
+        data: { notification: notificationId },
+      } = await NotificationTemplatesAPI.test(template.id);
+
+      async function pollForStatusChange() {
+        const { data: notification } = await NotificationsAPI.readDetail(
+          notificationId
+        );
+        if (notification.status !== 'pending') {
+          setTestStatus(notification.status);
+          return;
+        }
+        retries--;
+        if (retries > 0) {
+          setTimeout(pollForStatusChange, RETRY_TIMEOUT);
+        }
+      }
+
+      setTimeout(pollForStatusChange, RETRY_TIMEOUT);
+    }, [template.id])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError || testError);
+  const typeMessageDefaults = defaultMessages[template.notification_type];
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -76,6 +109,12 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           value={template.description}
           dataCy="nt-detail-description"
         />
+        {summary_fields.recent_notifications.length && (
+          <Detail
+            label={t`Status`}
+            value={<StatusLabel status={testStatus} />}
+          />
+        )}
         {summary_fields.organization ? (
           <Detail
             label={t`Organization`}
@@ -354,8 +393,8 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
         )}
       </DetailList>
       <CardActionsRow>
-        {summary_fields.user_capabilities &&
-          summary_fields.user_capabilities.edit && (
+        {summary_fields.user_capabilities?.edit && (
+          <>
             <Button
               ouiaId="notification-template-detail-edit-button"
               component={Link}
@@ -364,18 +403,23 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
             >
               {t`Edit`}
             </Button>
-          )}
-        {summary_fields.user_capabilities &&
-          summary_fields.user_capabilities.delete && (
-            <DeleteButton
-              name={template.name}
-              modalTitle={t`Delete Notification`}
-              onConfirm={deleteTemplate}
-              isDisabled={isLoading}
-            >
-              {t`Delete`}
-            </DeleteButton>
-          )}
+            <Button
+              onClick={sendTestNotification}
+              variant="secondary"
+              isDisabled={testStatus === ('running' || 'pending')}
+            >{t`Test`}</Button>
+          </>
+        )}
+        {summary_fields.user_capabilities?.delete && (
+          <DeleteButton
+            name={template.name}
+            modalTitle={t`Delete Notification`}
+            onConfirm={deleteTemplate}
+            isDisabled={isLoading}
+          >
+            {t`Delete`}
+          </DeleteButton>
+        )}
       </CardActionsRow>
       {error && (
         <AlertModal
@@ -384,7 +428,9 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           title={t`Error!`}
           onClose={dismissError}
         >
-          {t`Failed to delete notification.`}
+          {deleteError
+            ? t`Failed to delete notification.`
+            : t`Notification test failed.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}

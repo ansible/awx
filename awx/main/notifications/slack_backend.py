@@ -36,10 +36,17 @@ class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 for r in m.recipients():
                     if r.startswith('#'):
                         r = r[1:]
+                    thread = None
+                    channel = r
+                    thread = None
+                    if ',' in r:
+                        channel, thread = r.split(',')
                     if self.color:
-                        response = client.chat_postMessage(channel=r, as_user=True, attachments=[{"color": self.color, "text": m.subject}])
+                        response = client.chat_postMessage(
+                            channel=channel, thread_ts=thread, as_user=True, attachments=[{"color": self.color, "text": m.subject}]
+                        )
                     else:
-                        response = client.chat_postMessage(channel=r, as_user=True, text=m.subject)
+                        response = client.chat_postMessage(channel=channel, thread_ts=thread, as_user=True, text=m.subject)
                     logger.debug(response)
                     if response['ok']:
                         sent_messages += 1
