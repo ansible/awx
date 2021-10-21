@@ -48,8 +48,8 @@ from rest_framework import status
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
 
-# ANSIConv
-import ansiconv
+# ansi2html
+from ansi2html import Ansi2HTMLConverter
 
 # Python Social Auth
 from social_core.backends.utils import load_backends
@@ -4020,7 +4020,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
 
-                body = ansiconv.to_html(html.escape(content))
+                body = Ansi2HTMLConverter().convert(html.escape(content), full=False)
 
                 context = {'title': get_view_name(self.__class__), 'body': mark_safe(body), 'dark': dark_bg, 'content_only': content_only}
                 data = render_to_string('api/stdout.html', context).strip()
