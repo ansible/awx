@@ -3,6 +3,7 @@ import pytest
 from unittest import mock
 
 from awx.api.versioning import reverse
+from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance
 
 import redis
@@ -17,6 +18,7 @@ INSTANCE_KWARGS = dict(hostname='example-host', cpu=6, memory=36000000000, cpu_c
 @pytest.mark.django_db
 def test_disabled_zeros_capacity(patch, admin_user):
     instance = Instance.objects.create(**INSTANCE_KWARGS)
+    assert ActivityStream.objects.filter(instance=instance).count() == 1
 
     url = reverse('api:instance_detail', kwargs={'pk': instance.pk})
 
@@ -25,12 +27,14 @@ def test_disabled_zeros_capacity(patch, admin_user):
 
     instance.refresh_from_db()
     assert instance.capacity == 0
+    assert ActivityStream.objects.filter(instance=instance).count() == 2
 
 
 @pytest.mark.django_db
 def test_enabled_sets_capacity(patch, admin_user):
     instance = Instance.objects.create(enabled=False, capacity=0, **INSTANCE_KWARGS)
     assert instance.capacity == 0
+    assert ActivityStream.objects.filter(instance=instance).count() == 1
 
     url = reverse('api:instance_detail', kwargs={'pk': instance.pk})
 
@@ -39,6 +43,7 @@ def test_enabled_sets_capacity(patch, admin_user):
 
     instance.refresh_from_db()
     assert instance.capacity > 0
+    assert ActivityStream.objects.filter(instance=instance).count() == 2
 
 
 @pytest.mark.django_db

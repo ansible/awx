@@ -170,7 +170,7 @@ def test_activity_stream_actor(admin_user):
 
 
 @pytest.mark.django_db
-def test_annon_user_action():
+def test_anon_user_action():
     with mock.patch('awx.main.signals.get_current_user') as u_mock:
         u_mock.return_value = AnonymousUser()
         inv = Inventory.objects.create(name='ainventory')

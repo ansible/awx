@@ -34,7 +34,6 @@ from awx.main.models import (
     ExecutionEnvironment,
     Group,
     Host,
-    InstanceGroup,
     Inventory,
     InventorySource,
     Job,
@@ -377,6 +376,7 @@ def model_serializer_mapping():
         models.Inventory: serializers.InventorySerializer,
         models.Host: serializers.HostSerializer,
         models.Group: serializers.GroupSerializer,
+        models.Instance: serializers.InstanceSerializer,
         models.InstanceGroup: serializers.InstanceGroupSerializer,
         models.InventorySource: serializers.InventorySourceSerializer,
         models.Credential: serializers.CredentialSerializer,
@@ -675,9 +675,3 @@ def create_access_token_user_if_missing(sender, **kwargs):
         post_save.disconnect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
         obj.save()
         post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
-
-
-# Connect the Instance Group to Activity Stream receivers.
-post_save.connect(activity_stream_create, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_create")
-pre_save.connect(activity_stream_update, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_update")
-pre_delete.connect(activity_stream_delete, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_delete")
