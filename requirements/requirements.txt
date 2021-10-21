@@ -320,7 +320,6 @@ requests==2.23.0
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
-    #   slackclient
     #   social-auth-core
     #   twilio
 requests-oauthlib==1.3.0
@@ -358,13 +357,12 @@ six==1.14.0
     #   pyrad
     #   pyrsistent
     #   python-dateutil
-    #   slackclient
     #   social-auth-app-django
     #   social-auth-core
     #   tacacs-plus
     #   twilio
     #   websocket-client
-slackclient==1.1.2
+slack-sdk==3.11.2
     # via -r /awx_devel/requirements/requirements.in
 smmap==3.0.1
     # via gitdb
@@ -399,9 +397,7 @@ uwsgi==2.0.18
 uwsgitop==0.11
     # via -r /awx_devel/requirements/requirements.in
 websocket-client==0.57.0
-    # via
-    #   kubernetes
-    #   slackclient
+    # via kubernetes
 wheel==0.36.2
     # via -r /awx_devel/requirements/requirements.in
 xmlsec==1.3.3

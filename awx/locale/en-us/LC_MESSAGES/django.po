@@ -4856,7 +4856,7 @@ msgid "Exception connecting to PagerDuty: {}"
 msgstr ""
 
 #: awx/main/notifications/pagerduty_backend.py:87
-#: awx/main/notifications/slack_backend.py:48
+#: awx/main/notifications/slack_backend.py:49
 #: awx/main/notifications/twilio_backend.py:47
 msgid "Exception sending messages: {}"
 msgstr ""

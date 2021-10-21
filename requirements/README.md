@@ -108,12 +108,6 @@ Upgrading to 4.0.0 causes error because imports changed.
 ImportError: cannot import name 'KeyVaultClient'
 ```
 
-### slackclient
-
-Imports as used in `awx/main/notifications/slack_backend.py` changed
-in version 2.0. This plugin code will need to change and be re-tested
-as the upgrade takes place.
-
 ### django-jsonfield
 
 Instead of calling a `loads()` operation, the returned value is casted into
