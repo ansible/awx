@@ -34,7 +34,6 @@ from awx.main.models import (
     ExecutionEnvironment,
     Group,
     Host,
-    InstanceGroup,
     Inventory,
     InventorySource,
     Job,
