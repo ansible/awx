@@ -86,6 +86,8 @@ def administrative_workunit_reaper(work_list=None):
         if (extra_data is None) or (extra_data.get('RemoteWorkType') != 'ansible-runner'):
             continue  # if this is not ansible-runner work, we do not want to touch it
         params = extra_data.get('RemoteParams', {}).get('params')
+        if not params:
+            continue
         if not (params == '--worker-info' or params.startswith('cleanup')):
             continue  # if this is not a cleanup or health check, we do not want to touch it
         if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
