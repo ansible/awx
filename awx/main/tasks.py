@@ -191,6 +191,8 @@ def inform_cluster_of_shutdown():
 
 @task(queue=get_local_queuename)
 def apply_cluster_membership_policies():
+    from awx.main.signals import disable_activity_stream
+
     started_waiting = time.time()
     with advisory_lock('cluster_policy_lock', wait=True):
         lock_time = time.time() - started_waiting
@@ -282,21 +284,19 @@ def apply_cluster_membership_policies():
 
         # On a differential basis, apply instances to groups
         with transaction.atomic():
-            for g in actual_groups:
-                if g.obj.is_container_group:
-                    logger.debug('Skipping containerized group {} for policy calculation'.format(g.obj.name))
-                    continue
-                instances_to_add = set(g.instances) - set(g.prior_instances)
-                instances_to_remove = set(g.prior_instances) - set(g.instances)
-                # The following writes to the db don't spam the activity stream, because
-                # InstanceGroup is special-cased in signals.py to connect to only the non-m2m
-                # signal handlers.
-                if instances_to_add:
-                    logger.debug('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
-                    g.obj.instances.add(*instances_to_add)
-                if instances_to_remove:
-                    logger.debug('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
-                    g.obj.instances.remove(*instances_to_remove)
+            with disable_activity_stream():
+                for g in actual_groups:
+                    if g.obj.is_container_group:
+                        logger.debug('Skipping containerized group {} for policy calculation'.format(g.obj.name))
+                        continue
+                    instances_to_add = set(g.instances) - set(g.prior_instances)
+                    instances_to_remove = set(g.prior_instances) - set(g.instances)
+                    if instances_to_add:
+                        logger.debug('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
+                        g.obj.instances.add(*instances_to_add)
+                    if instances_to_remove:
+                        logger.debug('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
+                        g.obj.instances.remove(*instances_to_remove)
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
