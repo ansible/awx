@@ -4023,11 +4023,18 @@ class UnifiedJobStdout(RetrieveAPIView):
                 inline = len(content) < 5000
                 conv = Ansi2HTMLConverter(inline=inline, dark_bg=dark_bg, title=get_view_name(self.__class__))
                 if content_only:
+                    headers = ''
                     if not inline:
                         headers = conv.produce_headers()
                     body = conv.convert(content, full=False)
                     data = '\n'.join([headers, body])
-                    data = '<div class="nocode body_foreground body_background">%s</div>' % data
+                    if inline:
+                        data = '<div class="nocode" style="color:{}; background-color:{}">{}</div>'.format(
+                            '#f5f5f5' if dark_bg else '#000000', '#000000' if dark_bg else '#f5f5f5', data
+                        )
+                    else:
+                        data = '<div class="nocode body_foreground body_background">{}</div>'.format(data)
+
                 else:
                     data = conv.convert(content)
 
