@@ -4020,8 +4020,19 @@ class UnifiedJobStdout(RetrieveAPIView):
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
 
-                conv = Ansi2HTMLConverter(dark_bg=dark_bg, title=get_view_name(self.__class__))
-                data = conv.convert(html.escape(content), full=not content_only)
+                inline = len(content) < 5000
+                conv = Ansi2HTMLConverter(inline=inline, dark_bg=dark_bg, title=get_view_name(self.__class__))
+                if content_only:
+                    if not inline:
+                        headers = conv.produce_headers()
+                    body = conv.convert(content, full=False)
+                    data = '\n'.join([headers, body])
+                    data = '<div class="nocode body_foreground body_background">%s</div>' % data
+                else:
+                    data = conv.convert(content)
+
+                # Fix ugly grey background used by default.
+                data = data.replace('.body_background { background-color: #AAAAAA; }', '.body_background { background-color: #f5f5f5; }')
 
                 if target_format == 'api':
                     return Response(mark_safe(data))
