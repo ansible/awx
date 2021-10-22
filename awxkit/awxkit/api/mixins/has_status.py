@@ -34,9 +34,9 @@ class HasStatus(object):
             self.assert_status(status)
         return self
 
-    def wait_until_completed(self, interval=5, timeout=60, **kwargs):
+    def wait_until_completed(self, interval=5, timeout=60, *, status=None, **kwargs):
         start_time = datetime.utcnow()
-        HasStatus.wait_until_status(self, self.completed_statuses, interval=interval, timeout=timeout, **kwargs)
+        HasStatus.wait_until_status(self, status or self.completed_statuses, interval=interval, timeout=timeout, **kwargs)
         if not getattr(self, 'event_processing_finished', True):
             elapsed = datetime.utcnow() - start_time
             time_left = timeout - elapsed.total_seconds()

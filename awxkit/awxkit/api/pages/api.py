@@ -240,7 +240,8 @@ class ApiV2(base.Base):
                         # When creating a project, we need to wait for its
                         # first project update to finish so that associated
                         # JTs have valid options for playbook names
-                        _page.wait_until_completed()
+                        status = _page.completed_statuses + ['ok']
+                        _page.wait_until_completed(status=status)
                 else:
                     _page = _page.put(post_data)
                     changed = True
