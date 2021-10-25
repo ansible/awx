@@ -42,7 +42,6 @@ pipeline {
         docker { 
           image env.AWX_BUILDER
           args "-u $JENKINSID:$DOCKERGID -v $WORKSPACE:/home/jenkins:rw -v /etc/passwd:/etc/passwd:ro -v /home/jenkins/.docker/config.json:/home/jenkins/.docker/config.json:ro -v /var/run/docker.sock:/var/run/docker.sock -v ${env.DOCKER_MOUNT}"
-          label 'docker'
         }
       }
         steps {
