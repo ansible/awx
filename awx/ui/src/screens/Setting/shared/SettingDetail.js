@@ -5,7 +5,7 @@ import { Detail } from 'components/DetailList';
 import CodeDetail from 'components/DetailList/CodeDetail';
 
 function sortObj(obj) {
-  if (typeof obj !== 'object' || Array.isArray(obj)) {
+  if (typeof obj !== 'object' || Array.isArray(obj) || obj === null) {
     return obj;
   }
   const sorted = {};
@@ -30,7 +30,7 @@ export default ({ helpText, id, label, type, unit = '', value }) => {
           label={label}
           mode="javascript"
           rows={4}
-          value={JSON.stringify(sortObj(value || {}), undefined, 2)}
+          value={JSON.stringify(sortObj(value), undefined, 2)}
         />
       );
       break;
@@ -42,7 +42,7 @@ export default ({ helpText, id, label, type, unit = '', value }) => {
           label={label}
           mode="javascript"
           rows={4}
-          value={JSON.stringify(value || [], undefined, 2)}
+          value={JSON.stringify(value, undefined, 2)}
         />
       );
       break;
