@@ -23,15 +23,17 @@ pipeline {
 
   stages {
     stage('Get Jenkins vars') {
-      steps {
-        script {
-          JENKINSID = sh(script: 'id -u jenkins', returnStdout: true).trim()
-          DOCKERGID = sh(script: 'getent group docker | awk -F ":" \'{ print \$3 }\'', returnStdout: true).trim()
+      agent { label 'deploy-lt' }
+        steps {
+          script {
+            JENKINSID = sh(script: 'id -u jenkins', returnStdout: true).trim()
+            DOCKERGID = sh(script: 'getent group docker | awk -F ":" \'{ print \$3 }\'', returnStdout: true).trim()
+          }
         }
-      }
     }
 
     stage('Create mounts and set permissions') {
+      agent { label 'deploy-lt' }
         steps {
           sh(script: "mkdir -p .docker .config workspace && chown ${JENKINSID}:${DOCKERGID} .docker .config workspace", returnStdout: true)
         }
@@ -39,9 +41,10 @@ pipeline {
 
     stage('Build and publish image') {
       agent {
-        docker { 
+        docker {
           image env.AWX_BUILDER
           args "-u $JENKINSID:$DOCKERGID -v $WORKSPACE:/home/jenkins:rw -v /etc/passwd:/etc/passwd:ro -v /home/jenkins/.docker/config.json:/home/jenkins/.docker/config.json:ro -v /var/run/docker.sock:/var/run/docker.sock -v ${env.DOCKER_MOUNT}"
+          label 'deploy-lt'
         }
       }
         steps {
