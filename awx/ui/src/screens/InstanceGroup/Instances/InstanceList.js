@@ -280,6 +280,10 @@ function InstanceList() {
           title={t`Select Instances`}
           optionsRequest={readInstancesOptions}
           displayKey="hostname"
+          columns={[
+            { key: 'hostname', name: t`Name` },
+            { key: 'node_type', name: t`Node Type` },
+          ]}
         />
       )}
       {error && (
