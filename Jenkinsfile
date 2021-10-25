@@ -6,7 +6,7 @@ def BUILDER   = "${AWX_builder}"
 def MOUNT     = "${Docker_mount}"
 
 pipeline {
-  agent { label 'docker' }
+  agent { label 'deploy-lt' }
 
   options {
     disableConcurrentBuilds()
