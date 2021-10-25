@@ -48,7 +48,7 @@ pipeline {
         steps {
           sh "ansible --version"
           sh "git clone https://github.com/ansible/awx-logos.git && cd awx-logos && git checkout 7064a4635a3f857c67a5f5a8608ca52c27cdf26c"
-          sh "echo ${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG} > VERSION"
+          sh "echo ${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}0 > VERSION"
           sh "ansible-playbook -i installer/inventory -e use_container_for_build=false -e awx_official=true -e ssl_certificate=fake -e docker_registry=\"${REGISTRY}\" -e docker_registry_repository=\"${NAMESPACE}\" -e awx_version=\"${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}\" installer/build.yml -vvv"
           sh "docker build --build-arg VERSION=${REGISTRY}/${NAMESPACE}/awx:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG} --tag ${REGISTRY}/${NAMESPACE}/awx-isolated:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG} tools/docker-isolated/"
           sh "docker push ${REGISTRY}/${NAMESPACE}/awx-isolated:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}"
