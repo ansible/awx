@@ -3107,7 +3107,21 @@ class AWXReceptorJob:
             _kw['tlsclient'] = get_tls_client(use_stream_tls)
         result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=self.sign_work, **_kw)
         self.unit_id = result['unitid']
+        # Update the job with the work unit in-memory so that the log_lifecycle
+        # will print out the work unit that is to be associated with the job in the database
+        # via the update_model() call.
+        # We want to log the work_unit_id as early as possible. A failure can happen in between
+        # when we start the job in receptor and when we associate the job <-> work_unit_id.
+        # In that case, there will be work running in receptor and Controller will not know
+        # which Job it is associated with.
+        # We do not programatically handle this case. Ideally, we would handle this with a reaper case.
+        # The two distinct job lifecycle log events below allow for us to at least detect when this
+        # edge case occurs. If the lifecycle event work_unit_id_received occurs without the
+        # work_unit_id_assigned event then this case may have occured.
+        self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
+        self.task.instance.log_lifecycle("work_unit_id_received")
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
+        self.task.instance.log_lifecycle("work_unit_id_assigned")
 
         sockin.close()
         sockout.close()

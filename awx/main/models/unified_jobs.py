@@ -1497,7 +1497,12 @@ class UnifiedJob(
         return False
 
     def log_lifecycle(self, state, blocked_by=None):
-        extra = {'type': self._meta.model_name, 'task_id': self.id, 'state': state}
+        extra = {
+            'type': self._meta.model_name,
+            'task_id': self.id,
+            'state': state,
+            'work_unit_id': self.work_unit_id,
+        }
         if self.unified_job_template:
             extra["template_name"] = self.unified_job_template.name
         if state == "blocked" and blocked_by:
