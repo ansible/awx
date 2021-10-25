@@ -78,7 +78,8 @@ WORKDIR /tmp/src/
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
-RUN /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
+RUN SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 {% endif %}
 
 {% endif %}

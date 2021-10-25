@@ -151,7 +151,7 @@ def manage():
     from django.core.management import execute_from_command_line
 
     # enforce the postgres version is equal to 12. if not, then terminate program with exit code of 1
-    if not MODE == 'development':
+    if not os.getenv('SKIP_PG_VERSION_CHECK', False) and not MODE == 'development':
         if (connection.pg_version // 10000) < 12:
             sys.stderr.write("Postgres version 12 is required\n")
             sys.exit(1)
