@@ -20,7 +20,8 @@ export function toSearchParams(string = '') {
   const unescapeString = (v) =>
     //  This is necessary when editing a string that was initially
     //  escaped to allow white space
-    v.replace(/"/g, '');
+    v ? v.replace(/"/g, '') : '';
+
   return orArr
     .join(' and ')
     .split(/ and | or /)
@@ -158,4 +159,33 @@ export function removeDefaultParams(config, obj = {}) {
     delete clonedObj[keyToOmit];
   });
   return clonedObj;
+}
+
+/**
+ * Helper function to update host_filter value
+ * @param {string} value A string with host_filter value from querystring
+ * @param {object} obj An object returned by toSearchParams - in which the
+ * host_filter value was partially removed.
+ * @return {object} An object with the value of host_filter modified
+ */
+export function modifyHostFilter(value, obj) {
+  if (!value.includes('host_filter=')) return obj;
+  const clonedObj = { ...obj };
+  const host_filter = {};
+  value.split(' ').forEach((item) => {
+    if (item.includes('host_filter')) {
+      host_filter.host_filter = item.slice('host_filter='.length);
+    }
+  });
+
+  Object.keys(clonedObj).forEach((key) => {
+    if (key.indexOf('host_filter') !== -1) {
+      delete clonedObj[key];
+    }
+  });
+
+  return {
+    ...clonedObj,
+    ...host_filter,
+  };
 }

@@ -44,6 +44,8 @@ function Search({
   maxSelectHeight,
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
+  handleIsAnsibleFactsSelected,
+  isFilterCleared,
 }) {
   const location = useLocation();
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
@@ -96,11 +98,14 @@ function Search({
     }
   };
 
-  const chipsByKey = getChipsByKey(
-    parseQueryString(qsConfig, location.search),
-    columns,
-    qsConfig
-  );
+  const params = parseQueryString(qsConfig, location.search);
+  if (params?.host_filter) {
+    params.ansible_facts = params.host_filter.substring(
+      'ansible_facts__'.length
+    );
+    delete params.host_filter;
+  }
+  const chipsByKey = getChipsByKey(params, columns, qsConfig);
 
   const { name: searchColumnName } = columns.find(
     ({ key }) => key === searchKey
@@ -161,6 +166,8 @@ function Search({
               maxSelectHeight={maxSelectHeight}
               enableNegativeFiltering={enableNegativeFiltering}
               enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
+              handleIsAnsibleFactsSelected={handleIsAnsibleFactsSelected}
+              isFilterCleared={isFilterCleared}
             />
           )) ||
             (options && (
@@ -258,7 +265,11 @@ function Search({
             chips={chipsByKey[leftoverKey] ? chipsByKey[leftoverKey].chips : []}
             deleteChip={(unusedKey, chip) => {
               const [columnKey, ...value] = chip.key.split(':');
-              onRemove(columnKey, value.join(':'));
+              if (columnKey === 'ansible_facts') {
+                onRemove('host_filter', `${columnKey}__${value}`);
+              } else {
+                onRemove(columnKey, value.join(':'));
+              }
             }}
             categoryName={
               chipsByKey[leftoverKey]

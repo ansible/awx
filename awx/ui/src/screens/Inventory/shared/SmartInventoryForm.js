@@ -111,10 +111,18 @@ function SmartInventoryForm({
   const queryParams = new URLSearchParams(search);
   const hostFilterFromParams = queryParams.get('host_filter');
 
+  function addHostFilter(string) {
+    if (!string) return null;
+    if (string.includes('ansible_facts') && !string.includes('host_filter')) {
+      return string.replace('ansible_facts', 'host_filter=ansible_facts');
+    }
+    return string;
+  }
+
   const initialValues = {
     description: inventory.description || '',
     host_filter:
-      inventory.host_filter ||
+      addHostFilter(inventory.host_filter) ||
       (hostFilterFromParams
         ? toHostFilter(toSearchParams(hostFilterFromParams))
         : ''),
