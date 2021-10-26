@@ -32,7 +32,7 @@ import JobOutputSearch from './JobOutputSearch';
 import { HostStatusBar, OutputToolbar } from './shared';
 import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
-import getEventRequestParams, { range } from './getEventRequestParams';
+import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
 import {
   fetchCount,
@@ -281,10 +281,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     };
   }, [isJobRunning(jobStatus)]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // useEffect(() => {
-  //   rebuildEventsTree();
-  // }, [isFlatMode])
-
   useEffect(() => {
     if (listRef.current?.recomputeRowHeights) {
       listRef.current.recomputeRowHeights();
@@ -377,7 +373,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         return;
       }
       let newCssMap;
+      let rowNumber = 0;
       fetchedEvents.forEach((event) => {
+        event.rowNumber = rowNumber;
+        rowNumber++;
         const { lineCssMap } = getLineTextHtml(event);
         newCssMap = {
           ...newCssMap,
@@ -476,18 +475,21 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     );
   };
 
-  const loadMoreRows = ({ startIndex, stopIndex }) => {
+  const loadMoreRows = async ({ startIndex, stopIndex }) => {
     if (!isMounted.current) {
-      return Promise.resolve(null);
+      return;
     }
     if (startIndex === 0 && stopIndex === 0) {
-      return Promise.resolve(null);
+      return;
     }
 
     const diff = stopIndex - startIndex;
 
     const startCounter = getCounterForRow(startIndex);
-    const loadRange = range(startCounter, startCounter + diff);
+    // const rowNumberOffset = startCounter - startIndex;
+    console.log('LOAD MORE');
+    console.log({ startIndex, stopIndex, startCounter });
+    // const loadRange = range(startCounter, startCounter + diff);
 
     if (isMounted.current) {
       setCurrentlyLoading((prevCurrentlyLoading) =>
@@ -495,48 +497,65 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       );
     }
 
-    const params = {
-      counter__gte: startCounter,
-      limit: diff + 1,
-      ...parseQueryString(QS_CONFIG, location.search),
+    // const params = {
+    //   counter__gte: startCounter,
+    //   limit: diff + 1,
+    //   ...parseQueryString(QS_CONFIG, location.search),
+    // };
+    const [requestParams1, loadRange] = getEventRequestParams(
+      job,
+      remoteRowCount,
+      [startCounter, startCounter + diff]
+    );
+    const qs = parseQueryString(QS_CONFIG, location.search);
+    const params1 = {
+      ...requestParams1,
+      ...qs,
     };
 
-    return getJobModel(job.type)
-      .readEvents(job.id, params)
-      .then((response) => {
-        if (!isMounted.current) {
-          return;
-        }
-        const events = response.data.results;
+    const model = getJobModel(job.type);
 
-        let newCssMap;
-        events.forEach((event) => {
-          const { lineCssMap } = getLineTextHtml(event);
-          newCssMap = {
-            ...newCssMap,
-            ...lineCssMap,
-          };
-        });
-        setCssMap((prevCssMap) => ({
-          ...prevCssMap,
-          ...newCssMap,
-        }));
+    const response = await model.readEvents(job.id, params1);
+    if (!isMounted.current) {
+      return;
+    }
+    const events = response.data.results;
+    const firstIndex = (params1.page - 1) * params1.page_size;
+    // TODO: load second page if stopIndex > Math.max(loadRange) (or firstIndex + 50)
 
-        const lastCounter = events[events.length - 1]?.counter || 50;
-        addEvents(events);
-        addEventGaps(
-          listMissingEvents(events, startCounter, startCounter + diff)
-        );
-        if (lastCounter > highestLoadedCounter) {
-          setHighestLoadedCounter(lastCounter);
-        }
-        setCurrentlyLoading((prevCurrentlyLoading) =>
-          prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
-        );
-        loadRange.forEach((n) => {
-          cache.clear(n);
-        });
-      });
+    let newCssMap;
+    let rowNumber = firstIndex;
+    console.log(
+      `more Loaded; row numbers beginning ${rowNumber}`,
+      { firstIndex },
+      events
+    );
+    events.forEach((event) => {
+      event.rowNumber = rowNumber;
+      rowNumber++;
+      const { lineCssMap } = getLineTextHtml(event);
+      newCssMap = {
+        ...newCssMap,
+        ...lineCssMap,
+      };
+    });
+    setCssMap((prevCssMap) => ({
+      ...prevCssMap,
+      ...newCssMap,
+    }));
+
+    const lastCounter = events[events.length - 1]?.counter || 50;
+    addEvents(events);
+    addEventGaps(listMissingEvents(events, startCounter, startCounter + diff));
+    if (lastCounter > highestLoadedCounter) {
+      setHighestLoadedCounter(lastCounter);
+    }
+    setCurrentlyLoading((prevCurrentlyLoading) =>
+      prevCurrentlyLoading.filter((n) => !loadRange.includes(n))
+    );
+    loadRange.forEach((n) => {
+      cache.clear(n);
+    });
   };
 
   const scrollToRow = (rowIndex) => {

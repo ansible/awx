@@ -90,6 +90,12 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
     const gaps = new Set(state.eventGaps);
     const parentsToFetch = new Set();
     newEvents.forEach((event) => {
+      if (
+        typeof event.rowNumber !== 'number' ||
+        Number.isNaN(event.rowNumber)
+      ) {
+        throw new Error('Cannot add event; missing rowNumber');
+      }
       const eventIndex = event.counter;
       gaps.delete(eventIndex);
       if (state.events[eventIndex]) {
@@ -235,6 +241,7 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       numChildren,
     });
     if (sibling) {
+      sibling.rowNumber = event.rowNumber + numChildren + 1;
       enqueueAction({
         type: ADD_EVENTS,
         events: [sibling],
@@ -287,43 +294,39 @@ function addEventGaps(state, counterIds) {
 }
 
 function getEventForRow(state, rowIndex) {
-  const { node, expectedCounter } = _getNodeForRow(
-    state,
-    rowIndex + 1,
-    state.tree
-  );
+  const { node, expectedCounter } = _getNodeForRow(state, rowIndex, state.tree);
   if (node) {
     return {
       node,
       event: state.events[node.eventIndex],
     };
   }
-  if (state.eventGaps.includes(expectedCounter)) {
-    return {
-      event: {
-        counter: expectedCounter,
-        stdout: '',
-        isMockEvent: true,
-      },
-      node: {
-        eventIndex: expectedCounter,
-        isCollapsed: false,
-        children: [],
-      },
-    };
-  }
+  // if (state.eventGaps.includes(expectedCounter)) {
+  //   return {
+  //     event: {
+  //       counter: expectedCounter,
+  //       stdout: '',
+  //       isMockEvent: true,
+  //     },
+  //     node: {
+  //       eventIndex: expectedCounter,
+  //       isCollapsed: false,
+  //       children: [],
+  //     },
+  //   };
+  // }
   return null;
 }
 
 function getNodeForRow(state, rowToFind) {
-  const { node } = _getNodeForRow(state, rowToFind + 1, state.tree);
+  const { node } = _getNodeForRow(state, rowToFind, state.tree);
   return node;
 }
 
 function getCounterForRow(state, rowToFind) {
   const { node, expectedCounter } = _getNodeForRow(
     state,
-    rowToFind + 1,
+    rowToFind,
     state.tree
   );
 
@@ -335,60 +338,94 @@ function getCounterForRow(state, rowToFind) {
 }
 
 function _getNodeForRow(state, rowToFind, nodes) {
-  let remainingCount = rowToFind;
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    if (remainingCount === 1) {
+    const event = state.events[node.eventIndex];
+    if (event.rowNumber === rowToFind) {
+      // TODO return event too since we have it?
       return { node };
     }
-    remainingCount--;
-    if (remainingCount < 1) {
-      return { node: null };
+    if (event.rowNumber > rowToFind) {
+      console.error('Too far!', { event, rowToFind });
     }
     const totalNodeDescendants = getTotalNumChildren(node);
-    const nodeChildren = totalNodeDescendants - getNumCollapsedChildren(node);
-    if (nodeChildren >= remainingCount) {
-      return _getNodeInChildren(state, node, remainingCount);
+    const numCollapsedChildren = getNumCollapsedChildren(node);
+    const nodeChildren = totalNodeDescendants - numCollapsedChildren;
+    if (event.rowNumber + nodeChildren >= rowToFind) {
+      // requested row is in children/descendants
+      return _getNodeInChildren(state, node, rowToFind);
     }
-    remainingCount -= nodeChildren;
+    rowToFind += numCollapsedChildren;
 
     const nextNode = nodes[i + 1];
-    if (nextNode) {
-      // check for a gap between this node and the next one
-      const lastChildCounter = node.eventIndex + totalNodeDescendants;
-      const counterGap = nextNode.eventIndex - (lastChildCounter + 1);
-      if (remainingCount - counterGap < 1) {
-        return {
-          node: null,
-          expectedCounter: lastChildCounter + remainingCount,
-        };
-      }
-      remainingCount -= counterGap;
+    if (!nextNode) {
+      continue;
     }
+    const nextEvent = state.events[nextNode.eventIndex];
+    const lastChild = _getLastDescendantNode([node]);
+    if (nextEvent.rowNumber > rowToFind) {
+      // requested row is not loaded; return best guess at counter number
+      const lastChildEvent = state.events[lastChild.eventIndex];
+      const rowDiff = rowToFind - lastChildEvent.rowNumber;
+      console.log({
+        at: 'A',
+        rowToFind,
+        lastChildRowNumber: lastChildEvent.rowNumber,
+        rowDiff,
+      });
+      return {
+        node: null,
+        expectedCounter: lastChild.eventIndex + rowDiff,
+      };
+    }
+
+    // const rowGap = nextEvent.rowNumber - event.rowNumber - nodeChildren - 1;
+    // if (remainingCount < rowGap) {
+    //   let lastChild = node;
+    //   while (lastChild.children.length) {
+    //     lastChild = lastChild.children[lastChild.children.length - 1];
+    //   }
+    //   return {
+    //     node: null,
+    //     expectedCounter: lastChild.eventIndex + remainingCount - nodeChildren,
+    //   };
+    // }
+    // remainingCount -= rowGap;
   }
 
+  // TODO repeating logic after !nextNode:continue above... delete?
   const lastDescendant = _getLastDescendantNode(nodes);
   if (!lastDescendant) {
-    return { node: null, remainingCount, expectedCounter: rowToFind };
+    // console.log({ at: 'B', rowToFind });
+    return { node: null, expectedCounter: rowToFind };
   }
 
+  const lastDescendantEvent = state.events[lastDescendant.eventIndex];
+  const rowDiff = rowToFind - lastDescendantEvent.rowNumber;
+  // console.log({
+  //   at: 'C',
+  //   rowToFind,
+  //   lastDescendantRowNumber: lastDescendantEvent.rowNumber,
+  //   rowDiff,
+  // });
   return {
     node: null,
-    remainingCount,
-    expectedCounter: lastDescendant.eventIndex + remainingCount,
+    expectedCounter: lastDescendant.eventIndex + rowDiff,
   };
 }
 
-function _getNodeInChildren(state, node, remainingCount) {
-  const counterGap = node.children[0].eventIndex - (node.eventIndex + 1);
-  if (remainingCount - counterGap <= 0) {
+function _getNodeInChildren(state, node, rowToFind) {
+  const event = state.events[node.eventIndex];
+  const firstChild = state.events[node.children[0].eventIndex];
+  if (rowToFind < firstChild.rowNumber) {
+    const rowDiff = rowToFind - event.rowNumber;
+    console.log({ at: 'D', counter: event.counter, rowDiff });
     return {
       node: null,
-      expectedCounter: node.eventIndex + remainingCount,
+      expectedCounter: event.counter + rowDiff,
     };
   }
-  remainingCount -= counterGap;
-  return _getNodeForRow(state, remainingCount, node.children);
+  return _getNodeForRow(state, rowToFind, node.children);
 }
 
 function _getLastDescendantNode(nodes) {
@@ -507,13 +544,13 @@ function getEvent(state, eventIndex) {
   if (event) {
     return event;
   }
-  if (state.eventGaps.includes(eventIndex)) {
-    return {
-      counter: eventIndex,
-      stdout: '',
-      isMockEvent: true,
-    };
-  }
+  // if (state.eventGaps.includes(eventIndex)) {
+  //   return {
+  //     counter: eventIndex,
+  //     stdout: '',
+  //     isMockEvent: true,
+  //   };
+  // }
 
   return null;
 }

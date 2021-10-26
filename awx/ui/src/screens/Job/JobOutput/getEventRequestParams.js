@@ -19,7 +19,7 @@ export default function getEventRequestParams(
     stopIndex
   );
   const loadRange = range(
-    firstIndex,
+    firstIndex + 1,
     Math.min(firstIndex + pageSize, remoteRowCount)
   );
 

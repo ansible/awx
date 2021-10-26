@@ -29,10 +29,18 @@ function HookTest({
 }
 
 const eventsList = [
-  { id: 101, counter: 1, uuid: 'abc-001', event_level: 0, parent_uuid: '' },
+  {
+    id: 101,
+    counter: 1,
+    rowNumber: 0,
+    uuid: 'abc-001',
+    event_level: 0,
+    parent_uuid: '',
+  },
   {
     id: 102,
     counter: 2,
+    rowNumber: 1,
     uuid: 'abc-002',
     event_level: 1,
     parent_uuid: 'abc-001',
@@ -40,6 +48,7 @@ const eventsList = [
   {
     id: 103,
     counter: 3,
+    rowNumber: 2,
     uuid: 'abc-003',
     event_level: 2,
     parent_uuid: 'abc-002',
@@ -47,6 +56,7 @@ const eventsList = [
   {
     id: 104,
     counter: 4,
+    rowNumber: 3,
     uuid: 'abc-004',
     event_level: 2,
     parent_uuid: 'abc-002',
@@ -54,6 +64,7 @@ const eventsList = [
   {
     id: 105,
     counter: 5,
+    rowNumber: 4,
     uuid: 'abc-005',
     event_level: 2,
     parent_uuid: 'abc-002',
@@ -61,6 +72,7 @@ const eventsList = [
   {
     id: 106,
     counter: 6,
+    rowNumber: 5,
     uuid: 'abc-006',
     event_level: 1,
     parent_uuid: 'abc-001',
@@ -68,6 +80,7 @@ const eventsList = [
   {
     id: 107,
     counter: 7,
+    rowNumber: 6,
     uuid: 'abc-007',
     event_level: 2,
     parent_uuid: 'abc-006',
@@ -75,6 +88,7 @@ const eventsList = [
   {
     id: 108,
     counter: 8,
+    rowNumber: 7,
     uuid: 'abc-008',
     event_level: 2,
     parent_uuid: 'abc-006',
@@ -82,6 +96,7 @@ const eventsList = [
   {
     id: 109,
     counter: 9,
+    rowNumber: 8,
     uuid: 'abc-009',
     event_level: 2,
     parent_uuid: 'abc-006',
@@ -178,6 +193,7 @@ describe('useJobEvents', () => {
         {
           id: 110,
           counter: 10,
+          rowNumber: 9,
           uuid: 'abc-010',
           event_level: 2,
           parent_uuid: 'abc-006',
@@ -185,6 +201,7 @@ describe('useJobEvents', () => {
         {
           id: 111,
           counter: 11,
+          rowNumber: 10,
           uuid: 'abc-011',
           event_level: 1,
           parent_uuid: 'abc-001',
@@ -192,6 +209,7 @@ describe('useJobEvents', () => {
         {
           id: 112,
           counter: 12,
+          rowNumber: 11,
           uuid: 'abc-012',
           event_level: 0,
           parent_uuid: '',
@@ -294,6 +312,7 @@ describe('useJobEvents', () => {
       const newNode = {
         id: 110,
         counter: 10,
+        rowNumber: 9,
         uuid: 'abc-010',
         event_level: 2,
         parent_uuid: 'abc-006',
@@ -358,6 +377,7 @@ describe('useJobEvents', () => {
         {
           id: 112,
           counter: 12,
+          rowNumber: 11,
           uuid: 'abc-012',
           event_level: 2,
           parent_uuid: 'abc-010',
@@ -378,6 +398,7 @@ describe('useJobEvents', () => {
         {
           id: 112,
           counter: 12,
+          rowNumber: 11,
           uuid: 'abc-012',
           event_level: 2,
           parent_uuid: 'abc-010',
@@ -385,6 +406,7 @@ describe('useJobEvents', () => {
         {
           id: 113,
           counter: 13,
+          rowNumber: 12,
           uuid: 'abc-013',
           event_level: 2,
           parent_uuid: 'abc-010',
@@ -406,6 +428,7 @@ describe('useJobEvents', () => {
         {
           id: 114,
           counter: 14,
+          rowNumber: 13,
           uuid: 'abc-014',
           event_level: 2,
           parent_uuid: 'abc-012',
@@ -413,6 +436,7 @@ describe('useJobEvents', () => {
         {
           id: 115,
           counter: 15,
+          rowNumber: 14,
           uuid: 'abc-015',
           event_level: 1,
           parent_uuid: 'abc-011',
@@ -435,6 +459,7 @@ describe('useJobEvents', () => {
         {
           id: 112,
           counter: 12,
+          rowNumber: 11,
           uuid: 'abc-012',
           event_level: 2,
           parent_uuid: 'abc-010',
@@ -455,6 +480,7 @@ describe('useJobEvents', () => {
       const childEvent = {
         id: 112,
         counter: 12,
+        rowNumber: 11,
         uuid: 'abc-012',
         event_level: 1,
         parent_uuid: 'abc-010',
@@ -468,6 +494,7 @@ describe('useJobEvents', () => {
       const parentEvent = {
         id: 110,
         counter: 10,
+        rowNumber: 9,
         uuid: 'abc-010',
         event_level: 0,
         parent_uuid: '',
@@ -502,6 +529,7 @@ describe('useJobEvents', () => {
       const event3 = {
         id: 103,
         counter: 3,
+        rowNumber: 2,
         uuid: 'abc-003',
         event_level: 2,
         parent_uuid: 'abc-002',
@@ -515,6 +543,7 @@ describe('useJobEvents', () => {
       const event2 = {
         id: 102,
         counter: 2,
+        rowNumber: 1,
         uuid: 'abc-002',
         event_level: 1,
         parent_uuid: 'abc-001',
@@ -534,6 +563,7 @@ describe('useJobEvents', () => {
       const event1 = {
         id: 101,
         counter: 1,
+        rowNumber: 0,
         uuid: 'abc-001',
         event_level: 0,
         parent_uuid: '',
@@ -574,6 +604,7 @@ describe('useJobEvents', () => {
         {
           id: 101,
           counter: 1,
+          rowNumber: 0,
           uuid: 'abc-001',
           event_level: 0,
           parent_uuid: '',
@@ -581,6 +612,7 @@ describe('useJobEvents', () => {
         {
           id: 102,
           counter: 2,
+          rowNumber: 1,
           uuid: 'abc-002',
           event_level: 0,
           parent_uuid: '',
@@ -588,6 +620,7 @@ describe('useJobEvents', () => {
         {
           id: 103,
           counter: 3,
+          rowNumber: 2,
           uuid: 'abc-003',
           event_level: 0,
           parent_uuid: '',
@@ -706,6 +739,7 @@ describe('useJobEvents', () => {
         callbacks.fetchNextRootNode.mockResolvedValue({
           id: 121,
           counter: 21,
+          rowNumber: 20,
           uuid: 'abc-021',
           event_level: 0,
           parent_uuid: '',
@@ -773,6 +807,7 @@ describe('useJobEvents', () => {
         callbacks.fetchNextSibling.mockResolvedValue({
           id: 20,
           counter: 20,
+          rowNumber: 19,
           uuid: 'abc-020',
           event_level: 1,
           parent_uuid: 'abc-001',
@@ -820,6 +855,7 @@ describe('useJobEvents', () => {
         callbacks.fetchNextRootNode.mockResolvedValue({
           id: 121,
           counter: 21,
+          rowNumber: 20,
           uuid: 'abc-021',
           event_level: 0,
           parent_uuid: '',
@@ -1014,10 +1050,19 @@ describe('useJobEvents', () => {
       expect(node.children).toHaveLength(0);
     });
 
+    test('should get last child node', () => {
+      const node = wrapper.find('#test').prop('getNodeForRow')(4);
+
+      expect(node.eventIndex).toEqual(5);
+      expect(node.isCollapsed).toEqual(false);
+      expect(node.children).toHaveLength(0);
+    });
+
     test('should get a second root-level node', () => {
       const lastNode = {
         id: 110,
         counter: 10,
+        rowNumber: 9,
         uuid: 'abc-010',
         event_level: 0,
         parent_uuid: '',
@@ -1070,10 +1115,11 @@ describe('useJobEvents', () => {
     test('should skip deeply-nested collapsed nodes', () => {
       wrapper = shallow(<HookTest />);
       wrapper.find('#test').prop('addEvents')([
-        { id: 101, counter: 1, uuid: 'abc-001', event_level: 0 },
+        { id: 101, counter: 1, rowNumber: 0, uuid: 'abc-001', event_level: 0 },
         {
           id: 102,
           counter: 2,
+          rowNumber: 1,
           uuid: 'abc-002',
           event_level: 1,
           parent_uuid: 'abc-001',
@@ -1081,6 +1127,7 @@ describe('useJobEvents', () => {
         {
           id: 103,
           counter: 3,
+          rowNumber: 2,
           uuid: 'abc-003',
           event_level: 2,
           parent_uuid: 'abc-002',
@@ -1088,6 +1135,7 @@ describe('useJobEvents', () => {
         {
           id: 104,
           counter: 4,
+          rowNumber: 3,
           uuid: 'abc-004',
           event_level: 2,
           parent_uuid: 'abc-002',
@@ -1095,6 +1143,7 @@ describe('useJobEvents', () => {
         {
           id: 105,
           counter: 5,
+          rowNumber: 4,
           uuid: 'abc-005',
           event_level: 3,
           parent_uuid: 'abc-004',
@@ -1102,6 +1151,7 @@ describe('useJobEvents', () => {
         {
           id: 106,
           counter: 6,
+          rowNumber: 5,
           uuid: 'abc-006',
           event_level: 3,
           parent_uuid: 'abc-004',
@@ -1109,6 +1159,7 @@ describe('useJobEvents', () => {
         {
           id: 107,
           counter: 7,
+          rowNumber: 6,
           uuid: 'abc-007',
           event_level: 2,
           parent_uuid: 'abc-002',
@@ -1116,6 +1167,7 @@ describe('useJobEvents', () => {
         {
           id: 108,
           counter: 8,
+          rowNumber: 7,
           uuid: 'abc-008',
           event_level: 1,
           parent_uuid: 'abc-001',
@@ -1123,6 +1175,7 @@ describe('useJobEvents', () => {
         {
           id: 109,
           counter: 9,
+          rowNumber: 8,
           uuid: 'abc-009',
           event_level: 2,
           parent_uuid: 'abc-008',
@@ -1130,6 +1183,7 @@ describe('useJobEvents', () => {
         {
           id: 110,
           counter: 10,
+          rowNumber: 9,
           uuid: 'abc-010',
           event_level: 2,
           parent_uuid: 'abc-008',
@@ -1147,10 +1201,11 @@ describe('useJobEvents', () => {
     test('should skip full sub-tree of collapsed node', () => {
       wrapper = shallow(<HookTest />);
       wrapper.find('#test').prop('addEvents')([
-        { id: 101, counter: 1, uuid: 'abc-001', event_level: 0 },
+        { id: 101, counter: 1, rowNumber: 0, uuid: 'abc-001', event_level: 0 },
         {
           id: 102,
           counter: 2,
+          rowNumber: 1,
           uuid: 'abc-002',
           event_level: 1,
           parent_uuid: 'abc-001',
@@ -1158,6 +1213,7 @@ describe('useJobEvents', () => {
         {
           id: 103,
           counter: 3,
+          rowNumber: 2,
           uuid: 'abc-003',
           event_level: 2,
           parent_uuid: 'abc-002',
@@ -1165,6 +1221,7 @@ describe('useJobEvents', () => {
         {
           id: 104,
           counter: 4,
+          rowNumber: 3,
           uuid: 'abc-004',
           event_level: 2,
           parent_uuid: 'abc-002',
@@ -1172,6 +1229,7 @@ describe('useJobEvents', () => {
         {
           id: 105,
           counter: 5,
+          rowNumber: 4,
           uuid: 'abc-005',
           event_level: 3,
           parent_uuid: 'abc-004',
@@ -1179,6 +1237,7 @@ describe('useJobEvents', () => {
         {
           id: 106,
           counter: 6,
+          rowNumber: 5,
           uuid: 'abc-006',
           event_level: 3,
           parent_uuid: 'abc-004',
@@ -1186,6 +1245,7 @@ describe('useJobEvents', () => {
         {
           id: 107,
           counter: 7,
+          rowNumber: 6,
           uuid: 'abc-007',
           event_level: 2,
           parent_uuid: 'abc-002',
@@ -1193,6 +1253,7 @@ describe('useJobEvents', () => {
         {
           id: 108,
           counter: 8,
+          rowNumber: 7,
           uuid: 'abc-008',
           event_level: 1,
           parent_uuid: 'abc-001',
@@ -1200,6 +1261,7 @@ describe('useJobEvents', () => {
         {
           id: 109,
           counter: 9,
+          rowNumber: 8,
           uuid: 'abc-009',
           event_level: 2,
           parent_uuid: 'abc-008',
@@ -1207,6 +1269,7 @@ describe('useJobEvents', () => {
         {
           id: 110,
           counter: 10,
+          rowNumber: 9,
           uuid: 'abc-010',
           event_level: 2,
           parent_uuid: 'abc-008',
@@ -1234,6 +1297,7 @@ describe('useJobEvents', () => {
         {
           id: 151,
           counter: 51,
+          rowNumber: 50,
           uuid: 'abc-051',
           event_level: 2,
           parent_uuid: 'abc-006',
@@ -1241,6 +1305,7 @@ describe('useJobEvents', () => {
         {
           id: 152,
           counter: 52,
+          rowNumber: 51,
           uuid: 'abc-052',
           event_level: 2,
           parent_uuid: 'abc-006',
@@ -1248,6 +1313,7 @@ describe('useJobEvents', () => {
         {
           id: 153,
           counter: 53,
+          rowNumber: 52,
           uuid: 'abc-052',
           event_level: 2,
           parent_uuid: 'abc-006',
@@ -1263,6 +1329,26 @@ describe('useJobEvents', () => {
       const node = wrapper.find('#test').prop('getNodeForRow')(51);
       expect(node).toEqual({
         eventIndex: 52,
+        isCollapsed: false,
+        children: [],
+      });
+    });
+
+    test('should skip gaps in counter', () => {
+      const nextNode = {
+        id: 112,
+        counter: 12,
+        rowNumber: 9,
+        uuid: 'abc-012',
+        event_level: 0,
+        parent_uuid: '',
+      };
+      wrapper.find('#test').prop('addEvents')([nextNode]);
+
+      const node = wrapper.find('#test').prop('getNodeForRow')(9);
+
+      expect(node).toEqual({
+        eventIndex: 12,
         isCollapsed: false,
         children: [],
       });
@@ -1290,22 +1376,23 @@ describe('useJobEvents', () => {
       });
     });
 
-    test('should get stub event', () => {
-      wrapper.find('#test').prop('addEventGaps')([10, 11]);
-      wrapper.update();
-
-      const { event, node } = wrapper.find('#test').prop('getEventForRow')(10);
-      expect(event).toEqual({
-        counter: 11,
-        stdout: '',
-        isMockEvent: true,
-      });
-      expect(node).toEqual({
-        eventIndex: 11,
-        isCollapsed: false,
-        children: [],
-      });
-    });
+    // test('should get stub event', () => {
+    //   wrapper.find('#test').prop('addEventGaps')([10, 11]);
+    //   wrapper.update();
+    //
+    //   const { event, node } = wrapper.find('#test').prop('getEventForRow')(10);
+    //   expect(event).toEqual({
+    //     counter: 11,
+    //     rowNumber: 10,
+    //     stdout: '',
+    //     isMockEvent: true,
+    //   });
+    //   expect(node).toEqual({
+    //     eventIndex: 11,
+    //     isCollapsed: false,
+    //     children: [],
+    //   });
+    // });
   });
 
   describe('getEvent', () => {
@@ -1320,17 +1407,18 @@ describe('useJobEvents', () => {
       expect(event).toEqual(eventsList[6]);
     });
 
-    test('should get stubbed event', () => {
-      wrapper.find('#test').prop('addEventGaps')([10]);
-      wrapper.update();
-
-      const event = wrapper.find('#test').prop('getEvent')(10);
-      expect(event).toEqual({
-        counter: 10,
-        stdout: '',
-        isMockEvent: true,
-      });
-    });
+    // test('should get stubbed event', () => {
+    //   wrapper.find('#test').prop('addEventGaps')([10]);
+    //   wrapper.update();
+    //
+    //   const event = wrapper.find('#test').prop('getEvent')(10);
+    //   expect(event).toEqual({
+    //     counter: 10,
+    //     rowNumber: 9,
+    //     stdout: '',
+    //     isMockEvent: true,
+    //   });
+    // });
   });
 
   describe('getTotalNumChildren', () => {
@@ -1385,6 +1473,7 @@ describe('useJobEvents', () => {
           {
             id: 130,
             counter: 30,
+            rowNumber: 29,
             uuid: 'abc-030',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1426,6 +1515,7 @@ describe('useJobEvents', () => {
           {
             id: 169,
             counter: 69,
+            rowNumber: 68,
             event_level: 2,
             uuid: 'abc-069',
             parent_uuid: 'abc-001',
@@ -1453,6 +1543,7 @@ describe('useJobEvents', () => {
           {
             id: 102,
             counter: 2,
+            rowNumber: 1,
             uuid: 'abc-002',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1460,6 +1551,7 @@ describe('useJobEvents', () => {
           {
             id: 103,
             counter: 3,
+            rowNumber: 2,
             uuid: 'abc-003',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1467,6 +1559,7 @@ describe('useJobEvents', () => {
           {
             id: 120,
             counter: 20,
+            rowNumber: 19,
             uuid: 'abc-020',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1474,6 +1567,7 @@ describe('useJobEvents', () => {
           {
             id: 121,
             counter: 21,
+            rowNumber: 20,
             uuid: 'abc-021',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1481,6 +1575,7 @@ describe('useJobEvents', () => {
           {
             id: 122,
             counter: 22,
+            rowNumber: 21,
             uuid: 'abc-022',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1507,6 +1602,7 @@ describe('useJobEvents', () => {
           {
             id: 120,
             counter: 20,
+            rowNumber: 19,
             uuid: 'abc-020',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1514,6 +1610,7 @@ describe('useJobEvents', () => {
           {
             id: 121,
             counter: 21,
+            rowNumber: 20,
             uuid: 'abc-021',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1521,6 +1618,7 @@ describe('useJobEvents', () => {
           {
             id: 122,
             counter: 22,
+            rowNumber: 21,
             uuid: 'abc-022',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1547,6 +1645,7 @@ describe('useJobEvents', () => {
           {
             id: 109,
             counter: 9,
+            rowNumber: 8,
             uuid: 'abc-009',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1554,6 +1653,7 @@ describe('useJobEvents', () => {
           {
             id: 110,
             counter: 10,
+            rowNumber: 9,
             uuid: 'abc-010',
             event_level: 1,
             parent_uuid: 'abc-001',
@@ -1561,6 +1661,7 @@ describe('useJobEvents', () => {
           {
             id: 111,
             counter: 11,
+            rowNumber: 10,
             uuid: 'abc-011',
             event_level: 1,
             parent_uuid: 'abc-001',
