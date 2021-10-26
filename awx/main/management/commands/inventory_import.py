@@ -2,12 +2,15 @@
 # All Rights Reserved.
 
 # Python
+from base64 import b64encode
 import json
 import logging
 import os
 import re
+import stat
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 from collections import OrderedDict
@@ -76,7 +79,24 @@ class AnsibleInventoryLoader(object):
         bargs.extend(['-v', '{0}:{0}:Z'.format(self.source)])
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
-        bargs.extend([get_default_execution_environment().image])
+        ee = get_default_execution_environment()
+        bargs.extend([ee.image])
+
+        if ee.cred:
+            if not ee.cred.has_inputs(field_names=('host', 'username', 'password')):
+                raise RuntimeError(f"Registry credential for execution environment `{ee}` is missing either the host, username, or password.")
+
+            host = ee.cred.get_input('host')
+            username = ee.cred.get_input('username')
+            password = ee.cred.get_input('password')
+            token = f"{username}:{password}"
+            auth_data = {'auths': {host: {'auth': b64encode(token.encode('utf-8')).decode('utf-8')}}}
+            self.authfile.write(json.dumps(auth_data, indent=4).encode('utf-8'))
+            bargs.append(f'--authfile={self.authfile.name}')
+
+        if ee.pull:
+            bargs.append(f'--pull={ee.pull}')
+
         bargs.extend(['ansible-inventory', '-i', self.source])
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])
         if self.verbosity:
@@ -110,11 +130,12 @@ class AnsibleInventoryLoader(object):
         return data
 
     def load(self):
-        base_args = self.get_base_args()
-
-        logger.info('Reading Ansible inventory source: %s', self.source)
-
-        return self.command_to_json(base_args)
+        with tempfile.NamedTemporaryFile() as f:
+            self.authfile = f
+            os.chmod(self.authfile.name, stat.S_IRUSR | stat.S_IWUSR)
+            base_args = self.get_base_args()
+            logger.info('Reading Ansible inventory source: %s', self.source)
+            return self.command_to_json(base_args)
 
 
 class Command(BaseCommand):
