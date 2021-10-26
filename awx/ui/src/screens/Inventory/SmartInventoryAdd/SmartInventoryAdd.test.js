@@ -89,6 +89,26 @@ describe('<SmartInventoryAdd />', () => {
       expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(1, 2);
     });
 
+    test('should parse host_filter with ansible facts', async () => {
+      const modifiedForm = {
+        ...formData,
+        host_filter:
+          'host_filter=ansible_facts__ansible_env__PYTHONUNBUFFERED="true"',
+      };
+      await act(async () => {
+        wrapper.find('SmartInventoryForm').invoke('onSubmit')(modifiedForm);
+      });
+      const { instance_groups, ...formRequest } = modifiedForm;
+      expect(InventoriesAPI.create).toHaveBeenCalledTimes(1);
+      expect(InventoriesAPI.create).toHaveBeenCalledWith({
+        ...formRequest,
+        organization: formRequest.organization.id,
+        host_filter: 'ansible_facts__ansible_env__PYTHONUNBUFFERED="true"',
+      });
+      expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledTimes(1);
+      expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(1, 2);
+    });
+
     test('successful form submission should trigger redirect to details', async () => {
       expect(history.location.pathname).toEqual(
         '/inventories/smart_inventory/1/details'

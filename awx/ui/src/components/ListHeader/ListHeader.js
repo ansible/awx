@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,6 +27,7 @@ const EmptyStateControlsWrapper = styled.div`
 `;
 function ListHeader(props) {
   const { search, pathname } = useLocation();
+  const [isFilterCleared, setIsFilterCleared] = useState(false);
   const history = useHistory();
   const {
     emptyStateControls,
@@ -73,6 +74,7 @@ function ListHeader(props) {
     delete oldParams.page_size;
     delete oldParams.order_by;
     const qs = updateQueryString(qsConfig, search, oldParams);
+    setIsFilterCleared(true);
     pushHistoryState(qs);
   };
 
@@ -120,6 +122,7 @@ function ListHeader(props) {
             clearAllFilters: handleRemoveAll,
             qsConfig,
             pagination,
+            isFilterCleared,
           })}
         </>
       )}

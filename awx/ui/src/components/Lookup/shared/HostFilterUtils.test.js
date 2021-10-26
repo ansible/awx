@@ -4,6 +4,7 @@ import {
   toHostFilter,
   toQueryString,
   toSearchParams,
+  modifyHostFilter,
 } from './HostFilterUtils';
 
 const QS_CONFIG = {
@@ -169,5 +170,36 @@ describe('removeDefaultParams', () => {
       foo: ['bar', 'baz', 'qux'],
       apat: 'lima',
     });
+  });
+});
+
+describe('modifyHostFilter', () => {
+  test('should modify host_filter', () => {
+    const object = {
+      foo: ['bar', 'baz', 'qux'],
+      apat: 'lima',
+      page: 10,
+      order_by: '-name',
+    };
+    expect(
+      modifyHostFilter(
+        'host_filter=ansible_facts__ansible_lo__ipv6[]__scope="host"',
+        object
+      )
+    ).toEqual({
+      apat: 'lima',
+      foo: ['bar', 'baz', 'qux'],
+      host_filter: 'ansible_facts__ansible_lo__ipv6[]__scope="host"',
+      order_by: '-name',
+      page: 10,
+    });
+  });
+  test('should not modify host_filter', () => {
+    const object = { groups__name__icontains: '1' };
+    expect(
+      modifyHostFilter('groups__name__icontains=1', {
+        groups__name__icontains: '1',
+      })
+    ).toEqual(object);
   });
 });
