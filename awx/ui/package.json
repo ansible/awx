@@ -101,6 +101,9 @@
     "coveragePathIgnorePatterns": [
       "<rootDir>/src/locales",
       "index.js"
+    ],
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!d3)/"
     ]
   }
 }
