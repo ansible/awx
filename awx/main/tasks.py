@@ -3073,8 +3073,8 @@ class AWXReceptorJob:
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 try:
                     receptor_ctl.simple_command(f"work release {self.unit_id}")
-                except Exception as e:
-                    logger.exception(e)
+                except Exception:
+                    logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     @property
     def sign_work(self):
@@ -3131,10 +3131,10 @@ class AWXReceptorJob:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
-                except Exception as e:
+                except Exception:
                     detail = ''
                     state_name = ''
-                    logger.exception(e)
+                    logger.exception(f'An error was encountered while canceling work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
