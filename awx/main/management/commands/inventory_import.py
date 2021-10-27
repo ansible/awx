@@ -82,13 +82,13 @@ class AnsibleInventoryLoader(object):
         ee = get_default_execution_environment()
         bargs.extend([ee.image])
 
-        if ee.cred:
-            if not ee.cred.has_inputs(field_names=('host', 'username', 'password')):
+        if ee.credential:
+            if not ee.credential.has_inputs(field_names=('host', 'username', 'password')):
                 raise RuntimeError(f"Registry credential for execution environment `{ee}` is missing either the host, username, or password.")
 
-            host = ee.cred.get_input('host')
-            username = ee.cred.get_input('username')
-            password = ee.cred.get_input('password')
+            host = ee.credential.get_input('host')
+            username = ee.credential.get_input('username')
+            password = ee.credential.get_input('password')
             token = f"{username}:{password}"
             auth_data = {'auths': {host: {'auth': b64encode(token.encode('utf-8')).decode('utf-8')}}}
             self.authfile.write(json.dumps(auth_data, indent=4).encode('utf-8'))
