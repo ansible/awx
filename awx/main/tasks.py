@@ -3134,7 +3134,7 @@ class AWXReceptorJob:
                 except Exception:
                     detail = ''
                     state_name = ''
-                    logger.exception(f'An error was encountered while canceling work unit {self.unit_id}')
+                    logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
