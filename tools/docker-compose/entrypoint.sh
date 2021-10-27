@@ -5,6 +5,7 @@ if [ `id -u` -ge 500 ] || [ -z "${CURRENT_UID}" ]; then
 cat << EOF > /etc/passwd
 root:x:0:0:root:/root:/bin/bash
 awx:x:`id -u`:`id -g`:,,,:/var/lib/awx:/bin/bash
+nginx:x:`id -u nginx`:`id -g nginx`:Nginx web server:/var/lib/nginx:/sbin/nologin
 EOF
 
 cat <<EOF >> /etc/group

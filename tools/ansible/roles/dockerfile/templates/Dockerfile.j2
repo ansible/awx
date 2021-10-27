@@ -171,6 +171,11 @@ RUN dnf install -y podman
 RUN echo -e '[engine]\ncgroup_manager = "cgroupfs"\nevents_logger = "file"\nruntime = "crun"' > /etc/containers/containers.conf
 {% endif %}
 
+# Fix overlay filesystem issue
+{% if build_dev|bool %}
+RUN sed -i '/^#mount_program/s/^#//' /etc/containers/storage.conf
+{% endif %}
+
 # Ensure we must use fully qualified image names
 # This prevents podman prompt that hangs when trying to pull unqualified images
 RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
