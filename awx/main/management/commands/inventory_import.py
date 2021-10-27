@@ -159,7 +159,7 @@ class Command(BaseCommand):
             type=str,
             default=None,
             metavar='v',
-            help='host variable used to ' 'set/clear enabled flag when host is online/offline, may ' 'be specified as "foo.bar" to traverse nested dicts.',
+            help='host variable used to set/clear enabled flag when host is online/offline, may be specified as "foo.bar" to traverse nested dicts.',
         )
         parser.add_argument(
             '--enabled-value',
@@ -167,7 +167,7 @@ class Command(BaseCommand):
             type=str,
             default=None,
             metavar='v',
-            help='value of host variable ' 'specified by --enabled-var that indicates host is ' 'enabled/online.',
+            help='value of host variable specified by --enabled-var that indicates host is enabled/online.',
         )
         parser.add_argument(
             '--group-filter',
@@ -175,7 +175,7 @@ class Command(BaseCommand):
             type=str,
             default=None,
             metavar='regex',
-            help='regular expression ' 'to filter group name(s); only matches are imported.',
+            help='regular expression to filter group name(s); only matches are imported.',
         )
         parser.add_argument(
             '--host-filter',
@@ -183,14 +183,14 @@ class Command(BaseCommand):
             type=str,
             default=None,
             metavar='regex',
-            help='regular expression ' 'to filter host name(s); only matches are imported.',
+            help='regular expression to filter host name(s); only matches are imported.',
         )
         parser.add_argument(
             '--exclude-empty-groups',
             dest='exclude_empty_groups',
             action='store_true',
             default=False,
-            help='when set, ' 'exclude all groups that have no child groups, hosts, or ' 'variables.',
+            help='when set, exclude all groups that have no child groups, hosts, or variables.',
         )
         parser.add_argument(
             '--instance-id-var',
@@ -198,7 +198,7 @@ class Command(BaseCommand):
             type=str,
             default=None,
             metavar='v',
-            help='host variable that ' 'specifies the unique, immutable instance ID, may be ' 'specified as "foo.bar" to traverse nested dicts.',
+            help='host variable that specifies the unique, immutable instance ID, may be specified as "foo.bar" to traverse nested dicts.',
         )
 
     def set_logging_level(self, verbosity):
@@ -1038,4 +1038,4 @@ class Command(BaseCommand):
             if settings.SQL_DEBUG:
                 queries_this_import = connection.queries[queries_before:]
                 sqltime = sum(float(x['time']) for x in queries_this_import)
-                logger.warning('Inventory import required %d queries ' 'taking %0.3fs', len(queries_this_import), sqltime)
+                logger.warning('Inventory import required %d queries taking %0.3fs', len(queries_this_import), sqltime)
