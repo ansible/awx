@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { t } from '@lingui/macro';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 
 import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
@@ -14,6 +14,7 @@ import ContainerGroupAdd from './ContainerGroupAdd';
 import ContainerGroup from './ContainerGroup';
 
 function InstanceGroups() {
+  const { pathname } = useLocation();
   const {
     request: settingsRequest,
     isLoading: isSettingsRequestLoading,
@@ -62,10 +63,14 @@ function InstanceGroups() {
     });
   }, []);
 
+  const streamType = pathname.includes('instances')
+    ? 'instance'
+    : 'instance_group';
+
   return (
     <>
       <ScreenHeader
-        streamType="instance_group"
+        streamType={streamType}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>

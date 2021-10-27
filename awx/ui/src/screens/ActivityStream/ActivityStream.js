@@ -188,6 +188,10 @@ function ActivityStream() {
             >
               {t`Notification Templates`}
             </SelectOption>
+            <SelectOption
+              key="instance"
+              value="instance"
+            >{t`Instances`}</SelectOption>
             <SelectOption key="instance_groups" value="instance_group">
               {t`Instance Groups`}
             </SelectOption>
