@@ -80,7 +80,6 @@ class AnsibleInventoryLoader(object):
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
         ee = get_default_execution_environment()
-        bargs.extend([ee.image])
 
         if ee.credential:
             if not ee.credential.has_inputs(field_names=('host', 'username', 'password')):
@@ -96,6 +95,8 @@ class AnsibleInventoryLoader(object):
 
         if ee.pull:
             bargs.append(f'--pull={ee.pull}')
+
+        bargs.extend([ee.image])
 
         bargs.extend(['ansible-inventory', '-i', self.source])
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])
