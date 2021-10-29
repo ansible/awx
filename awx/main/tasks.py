@@ -514,6 +514,7 @@ def inspect_execution_nodes(instance_list):
                 logger.warn(f"Registered execution node '{hostname}' (marked disabled by default)")
             else:
                 logger.warn(f"Unrecognized node on mesh advertising ansible-runner work type: {hostname}")
+                continue
 
             was_lost = instance.is_lost(ref_time=nowtime)
             last_seen = parse_date(ad['Time'])
