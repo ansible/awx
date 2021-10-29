@@ -1,6 +1,3 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
@@ -596,7 +593,7 @@ msgstr "提供的变量 {} 没有要替换的数据库值。"
 
 #: awx/api/serializers.py:3739
 msgid "\"$encrypted$ is a reserved keyword, may not be used for {}.\""
-msgstr "\"$encrypted$ 是一个保留的关键字，可能不能用于 {}\""
+msgstr "\"$encrypted$ 是一个保留关键字，可能无法用于 {}。\""
 
 #: awx/api/serializers.py:4212
 msgid "A project is required to run a job."
@@ -1031,7 +1028,7 @@ msgstr "对于受管执行环境，只能编辑 'pull' 字段。"
 
 #: awx/api/views/__init__.py:805
 msgid "Project Schedules"
-msgstr "项目调度"
+msgstr "项目计划"
 
 #: awx/api/views/__init__.py:816
 msgid "Project SCM Inventory Sources"
@@ -1253,14 +1250,14 @@ msgstr "默认的选择必须从列出的选择中回答。"
 msgid ""
 "$encrypted$ is a reserved keyword for password question defaults, survey "
 "question {idx} is type {survey_item[type]}."
-msgstr "$encrypted$ 是密码问题默认值的保留关键字，问卷调查问题 {idx} 的类型是 {survey_item[type]}。"
+msgstr "$encrypted$ 是密码问题默认值的保留关键字，问卷调查问题 {idx} 是类型 {survey_item[type]}。"
 
 #: awx/api/views/__init__.py:2567
 #, python-brace-format
 msgid ""
 "$encrypted$ is a reserved keyword, may not be used for new default in "
 "position {idx}."
-msgstr "$encrypted$ 是一个保留关键字，可能无法用于位置 {idx} 中的新默认值。"
+msgstr "$encrypted$ 是一个保留关键字，无法用于位置 {idx} 中的新默认值。"
 
 #: awx/api/views/__init__.py:2639
 #, python-brace-format
@@ -2865,7 +2862,7 @@ msgstr "Secret 的路径"
 
 #: awx/main/credential_plugins/hashivault.py:78
 msgid "Path to Auth"
-msgstr "Auth 的路径"
+msgstr "到 Auth 的路径"
 
 #: awx/main/credential_plugins/hashivault.py:81
 msgid "The path where the Authentication method is mounted e.g, approle"
@@ -3979,7 +3976,7 @@ msgid ""
 "The host would be marked enabled. If power_state where any value other than "
 "powered_on then the host would be disabled when imported. If the key is not "
 "found then the host will be enabled"
-msgstr "仅在设置 enabled_var 时使用。 主机被视为启用时的值。 例如： if enabled_var=\"status.power_state\"and enabled_value=\"powered_on\" with host variables:{ \"status\": { \"power_state\": \"powered_on\", \"created\": \"2020-08-04T18:13:04+00:00\", \"healthy\": true }, \"name\": \"foobar\", \"ip_address\": \"192.168.2.1\"}The host would be marked enabled. 如果 power_state 在除 powered_on 以外的任何值，则会在导入时禁用主机。如果没有找到密钥，则会启用主机"
+msgstr "仅在设置 enabled_var 时使用。 主机被视为启用时的值。 例如：是否 enabled_var=\"status.power_state\"and enabled_value=\"powered_on\" with host variables:{   \"status\": {     \"power_state\": \"powered_on\",     \"created\": \"2020-08-04T18:13:04+00:00\",     \"healthy\": true    },    \"name\": \"foobar\",    \"ip_address\": \"192.168.2.1\"}。如果 power_state 在除 powered_on 以外的任何值，则会在导入时禁用主机。如果没有找到密钥，则会启用主机"
 
 #: awx/main/models/inventory.py:878
 msgid "Regex where only matching hosts will be imported."
@@ -6133,7 +6130,7 @@ msgstr "您的帐户不活跃"
 #: awx/sso/validators.py:24 awx/sso/validators.py:51
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
-msgstr "DN 必须包含 \"%%\" 占位符用于用户名：%s"
+msgstr "DN 必须包含 \"%%(user)s\" 占位符用于用户名：%s"
 
 #: awx/sso/validators.py:31
 #, python-format
@@ -6263,4 +6260,3 @@ msgstr "%s 当前正在升级。"
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "完成后，此页面会刷新。"
-
