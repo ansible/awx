@@ -1,4 +1,4 @@
-import { isJobRunning } from 'util/jobs';
+// import { isJobRunning } from 'util/jobs';
 import getRowRangePageSize from './shared/jobOutputUtils';
 
 export default function getEventRequestParams(
@@ -7,13 +7,13 @@ export default function getEventRequestParams(
   requestRange
 ) {
   const [startIndex, stopIndex] = requestRange;
-  if (isJobRunning(job?.status)) {
-    return [
-      { counter__gte: startIndex, limit: stopIndex - startIndex + 1 },
-      range(startIndex, Math.min(stopIndex, remoteRowCount)),
-      startIndex,
-    ];
-  }
+  // if (isJobRunning(job?.status)) {
+  //   return [
+  //     { counter__gte: startIndex, limit: stopIndex - startIndex + 1 },
+  //     range(startIndex, Math.min(stopIndex, remoteRowCount)),
+  //     startIndex,
+  //   ];
+  // }
   const { page, pageSize, firstIndex } = getRowRangePageSize(
     startIndex,
     stopIndex

@@ -187,6 +187,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     },
     isFlatMode
   );
+  const [wsEvents, setWsEvents] = useState([]);
   const [cssMap, setCssMap] = useState({});
   const [remoteRowCount, setRemoteRowCount] = useState(0);
   const [contentError, setContentError] = useState(null);
@@ -233,6 +234,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       const addBatchedEvents = () => {
         let min;
         let max;
+        let newCssMap;
         batchedEvents.forEach((event) => {
           if (!min || event.counter < min) {
             min = event.counter;
@@ -240,9 +242,21 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           if (!max || event.counter > max) {
             max = event.counter;
           }
+          const { lineCssMap } = getLineTextHtml(event);
+          newCssMap = {
+            ...newCssMap,
+            ...lineCssMap,
+          };
         });
-        addEvents(batchedEvents);
-        addEventGaps(listMissingEvents(batchedEvents, min, max));
+        setWsEvents((oldWsEvents) => {
+          const updated = oldWsEvents.concat(batchedEvents);
+          jobSocketCounter.current = updated.length;
+          return updated.sort((a, b) => a.counter - b.counter);
+        });
+        setCssMap((prevCssMap) => ({
+          ...prevCssMap,
+          ...newCssMap,
+        }));
         if (max > jobSocketCounter.current) {
           jobSocketCounter.current = max;
         }
@@ -285,15 +299,15 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current?.recomputeRowHeights) {
       listRef.current.recomputeRowHeights();
     }
-  }, [currentlyLoading, cssMap, remoteRowCount]);
+  }, [currentlyLoading, cssMap, remoteRowCount, wsEvents.length]);
 
   useEffect(() => {
     if (!jobStatus || isJobRunning(jobStatus)) {
       return;
     }
-    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-      setRemoteRowCount(jobSocketCounter.current);
-    }
+    // if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+    //   setRemoteRowCount(jobSocketCounter.current);
+    // }
 
     if (isMonitoringWebsocket) {
       setIsMonitoringWebsocket(false);
@@ -334,9 +348,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
-    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-      setRemoteRowCount(jobSocketCounter.current);
-    }
+    // if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+    //   setRemoteRowCount(jobSocketCounter.current);
+    // }
     if (
       jobSocketCounter.current === remoteRowCount &&
       !isJobRunning(job.status)
@@ -413,6 +427,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (getEvent(counter)) {
       return true;
     }
+    if (index > remoteRowCount && index < remoteRowCount + wsEvents.length) {
+      return true;
+    }
     return currentlyLoading.includes(counter);
   };
 
@@ -429,7 +446,19 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current && isFollowModeEnabled) {
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
-    const { event, node } = getEventForRow(index) || {};
+    let { event, node } = getEventForRow(index) || {};
+    if (
+      !event &&
+      index > remoteRowCount &&
+      index < remoteRowCount + wsEvents.length
+    ) {
+      event = wsEvents[index - remoteRowCount];
+      node = {
+        eventIndex: event?.counter,
+        isCollapsed: false,
+        children: [],
+      };
+    }
     let actualLineTextHtml = [];
     if (event) {
       const { lineTextHtml } = getLineTextHtml(event);
@@ -582,7 +611,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const handleScrollLast = () => {
-    scrollToRow(totalNonCollapsedRows);
+    scrollToRow(totalNonCollapsedRows + wsEvents.length);
   };
 
   const handleResize = ({ width }) => {
@@ -655,7 +684,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
-            rowCount={totalNonCollapsedRows}
+            rowCount={totalNonCollapsedRows + wsEvents.length}
             minimumBatchSize={50}
           >
             {({ onRowsRendered, registerChild }) => (
@@ -675,7 +704,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                         deferredMeasurementCache={cache}
                         height={height || 1}
                         onRowsRendered={onRowsRendered}
-                        rowCount={totalNonCollapsedRows}
+                        rowCount={totalNonCollapsedRows + wsEvents.length}
                         rowHeight={cache.rowHeight}
                         rowRenderer={rowRenderer}
                         scrollToAlignment="start"

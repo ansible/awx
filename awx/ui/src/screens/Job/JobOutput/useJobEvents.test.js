@@ -18,13 +18,17 @@ function HookTest({
   fetchNextSibling = () => {},
   fetchNextRootNode = () => {},
   fetchNumEvents = () => {},
+  isFlatMode = false,
 }) {
-  const hookFuncs = useJobEvents({
-    fetchEventByUuid,
-    fetchNextSibling,
-    fetchNextRootNode,
-    fetchNumEvents,
-  });
+  const hookFuncs = useJobEvents(
+    {
+      fetchEventByUuid,
+      fetchNextSibling,
+      fetchNextRootNode,
+      fetchNumEvents,
+    },
+    isFlatMode
+  );
   return <Child id="test" {...hookFuncs} />;
 }
 
@@ -1375,24 +1379,6 @@ describe('useJobEvents', () => {
         ],
       });
     });
-
-    // test('should get stub event', () => {
-    //   wrapper.find('#test').prop('addEventGaps')([10, 11]);
-    //   wrapper.update();
-    //
-    //   const { event, node } = wrapper.find('#test').prop('getEventForRow')(10);
-    //   expect(event).toEqual({
-    //     counter: 11,
-    //     rowNumber: 10,
-    //     stdout: '',
-    //     isMockEvent: true,
-    //   });
-    //   expect(node).toEqual({
-    //     eventIndex: 11,
-    //     isCollapsed: false,
-    //     children: [],
-    //   });
-    // });
   });
 
   describe('getEvent', () => {
@@ -1406,19 +1392,6 @@ describe('useJobEvents', () => {
       const event = wrapper.find('#test').prop('getEvent')(7);
       expect(event).toEqual(eventsList[6]);
     });
-
-    // test('should get stubbed event', () => {
-    //   wrapper.find('#test').prop('addEventGaps')([10]);
-    //   wrapper.update();
-    //
-    //   const event = wrapper.find('#test').prop('getEvent')(10);
-    //   expect(event).toEqual({
-    //     counter: 10,
-    //     rowNumber: 9,
-    //     stdout: '',
-    //     isMockEvent: true,
-    //   });
-    // });
   });
 
   describe('getTotalNumChildren', () => {
