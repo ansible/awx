@@ -1,6 +1,3 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
@@ -596,7 +593,7 @@ msgstr "指定された変数 {} には置き換えるデータベースの値�
 
 #: awx/api/serializers.py:3739
 msgid "\"$encrypted$ is a reserved keyword, may not be used for {}.\""
-msgstr "\"$encrypted$ は予約されたキーワードで、{} には使用できません。\""
+msgstr "\"$encrypted は予約されたキーワードで {} には使用できません。\""
 
 #: awx/api/serializers.py:4212
 msgid "A project is required to run a job."
@@ -824,7 +821,7 @@ msgstr "ポリシーインスタンスの割合"
 msgid ""
 "Minimum percentage of all instances that will be automatically assigned to "
 "this group when new instances come online."
-msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンスの割合を選択します。"
+msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンスの割合"
 
 #: awx/api/serializers.py:4853
 msgid "Policy Instance Minimum"
@@ -1253,7 +1250,7 @@ msgstr "デフォルトで指定されている選択項目は、一覧から回
 msgid ""
 "$encrypted$ is a reserved keyword for password question defaults, survey "
 "question {idx} is type {survey_item[type]}."
-msgstr "$encrypted$ は、デフォルト設定されているパスワードの質問に予約されたキーワードで、Survey の質問 {idx} は {survey_item[type]} タイプです。"
+msgstr "$encrypted$ はパスワードの質問のデフォルトの予約されたキーワードで、Survey の質問 {idx} はタイプ {survey_item[type]} です。"
 
 #: awx/api/views/__init__.py:2567
 #, python-brace-format
@@ -3638,7 +3635,7 @@ msgstr "ホスト OK"
 
 #: awx/main/models/events.py:169
 msgid "Host Failure"
-msgstr "ホストの失敗"
+msgstr "ホストの障害"
 
 #: awx/main/models/events.py:170 awx/main/models/events.py:767
 msgid "Host Skipped"
@@ -4694,7 +4691,7 @@ msgstr "取り消されました"
 
 #: awx/main/models/unified_jobs.py:84
 msgid "Never Updated"
-msgstr "更新されていません"
+msgstr "未更新"
 
 #: awx/main/models/unified_jobs.py:88
 msgid "OK"
@@ -6261,4 +6258,3 @@ msgstr "%s が現在アップグレード中です。"
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "このページは完了すると更新されます。"
-
