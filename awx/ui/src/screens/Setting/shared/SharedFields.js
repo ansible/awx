@@ -22,7 +22,7 @@ import CodeEditor from 'components/CodeEditor';
 import { PasswordInput } from 'components/FormField';
 import { FormFullWidthLayout } from 'components/FormLayout';
 import Popover from 'components/Popover';
-import { combine, integer, minMaxValue, required, url } from 'util/validators';
+import { combine, minMaxValue, required, url, number } from 'util/validators';
 import AlertModal from 'components/AlertModal';
 import RevertButton from './RevertButton';
 
@@ -365,12 +365,11 @@ const InputField = ({ name, config, type = 'text', isRequired = false }) => {
   const validators = [
     ...(isRequired ? [required(null)] : []),
     ...(type === 'url' ? [url()] : []),
-    ...(type === 'number'
-      ? [integer(), minMaxValue(min_value, max_value)]
-      : []),
+    ...(type === 'number' ? [number(), minMaxValue(min_value, max_value)] : []),
   ];
   const [field, meta] = useField({ name, validate: combine(validators) });
   const isValid = !(meta.touched && meta.error);
+
   return config ? (
     <SettingGroup
       defaultValue={config.default ?? ''}
@@ -382,6 +381,7 @@ const InputField = ({ name, config, type = 'text', isRequired = false }) => {
       validated={isValid ? 'default' : 'error'}
     >
       <TextInput
+        type={type}
         id={name}
         isRequired={isRequired}
         placeholder={config.placeholder}
