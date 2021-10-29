@@ -36,7 +36,7 @@ class RegisterQueue:
             ig.policy_instance_minimum = self.instance_min
             changed = True
 
-        if self.is_container_group:
+        if self.is_container_group and (ig.is_container_group != self.is_container_group):
             ig.is_container_group = self.is_container_group
             changed = True
 
