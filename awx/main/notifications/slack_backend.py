@@ -2,7 +2,8 @@
 # All Rights Reserved.
 
 import logging
-from slackclient import SlackClient
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -28,7 +29,7 @@ class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
             self.color = hex_color
 
     def send_messages(self, messages):
-        connection = SlackClient(self.token)
+        client = WebClient(self.token)
         sent_messages = 0
         for m in messages:
             try:
@@ -36,15 +37,15 @@ class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
                     if r.startswith('#'):
                         r = r[1:]
                     if self.color:
-                        ret = connection.api_call("chat.postMessage", channel=r, as_user=True, attachments=[{"color": self.color, "text": m.subject}])
+                        response = client.chat_postMessage(channel=r, as_user=True, attachments=[{"color": self.color, "text": m.subject}])
                     else:
-                        ret = connection.api_call("chat.postMessage", channel=r, as_user=True, text=m.subject)
-                    logger.debug(ret)
-                    if ret['ok']:
+                        response = client.chat_postMessage(channel=r, as_user=True, text=m.subject)
+                    logger.debug(response)
+                    if response['ok']:
                         sent_messages += 1
                     else:
-                        raise RuntimeError("Slack Notification unable to send {}: {} ({})".format(r, m.subject, ret['error']))
-            except Exception as e:
+                        raise RuntimeError("Slack Notification unable to send {}: {} ({})".format(r, m.subject, response['error']))
+            except SlackApiError as e:
                 logger.error(smart_text(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:
                     raise
