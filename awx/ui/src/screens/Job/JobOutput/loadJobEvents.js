@@ -43,14 +43,3 @@ export function prependTraceback(job, events) {
     countOffset,
   };
 }
-
-export function listMissingEvents(eventsList, startCounter, endCounter) {
-  const missing = [];
-  for (let i = startCounter; i <= endCounter; i++) {
-    const event = eventsList.find((e) => e.counter === i);
-    if (!event) {
-      missing.push(i);
-    }
-  }
-  return missing;
-}

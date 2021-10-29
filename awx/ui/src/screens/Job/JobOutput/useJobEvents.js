@@ -88,7 +88,7 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       tree: [...origState.tree],
     };
     const gaps = new Set(state.eventGaps);
-    const parentsToFetch = new Set();
+    const parentsToFetch = {};
     newEvents.forEach((event) => {
       if (
         typeof event.rowNumber !== 'number' ||
@@ -111,16 +111,25 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       let isParentFound;
       [state, isParentFound] = _addNestedLevelEvent(state, event);
       if (!isParentFound) {
-        parentsToFetch.add(event.parent_uuid);
+        parentsToFetch[event.parent_uuid] = {
+          childCounter: event.counter,
+          childRowNumber: event.rowNumber,
+        };
         state = _addEventWithoutParent(state, event);
       }
     });
 
-    parentsToFetch.forEach(async (uuid) => {
-      const event = await callbacks.fetchEventByUuid(uuid);
+    Object.keys(parentsToFetch).forEach(async (uuid) => {
+      const { childCounter, childRowNumber } = parentsToFetch[uuid];
+      const parent = await callbacks.fetchEventByUuid(uuid);
+      const numPrevSiblings = await callbacks.fetchNumEvents(
+        parent.counter,
+        childCounter
+      );
+      parent.rowNumber = childRowNumber - numPrevSiblings - 1;
       enqueueAction({
         type: ADD_EVENTS,
-        events: [event],
+        events: [parent],
       });
     });
 
@@ -284,14 +293,14 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
   }
 }
 
-function addEventGaps(state, counterIds) {
-  const gaps = new Set(state.eventGaps);
-  counterIds.forEach((id) => gaps.add(id));
-  return {
-    ...state,
-    eventGaps: [...gaps],
-  };
-}
+// function addEventGaps(state, counterIds) {
+//   const gaps = new Set(state.eventGaps);
+//   counterIds.forEach((id) => gaps.add(id));
+//   return {
+//     ...state,
+//     eventGaps: [...gaps],
+//   };
+// }
 
 function getEventForRow(state, rowIndex) {
   const { node, expectedCounter } = _getNodeForRow(state, rowIndex, state.tree);

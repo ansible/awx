@@ -34,11 +34,7 @@ import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
 import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
-import {
-  fetchCount,
-  prependTraceback,
-  listMissingEvents,
-} from './loadJobEvents';
+import { fetchCount, prependTraceback } from './loadJobEvents';
 import useJobEvents from './useJobEvents';
 
 const QS_CONFIG = getQSConfig('job_output', {
@@ -170,7 +166,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const {
     addEvents,
-    addEventGaps,
     toggleNodeIsCollapsed,
     getEventForRow,
     getNumCollapsedEvents,
@@ -404,7 +399,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       const { events, countOffset } = prependTraceback(job, fetchedEvents);
       const lastCounter = events[events.length - 1]?.counter || 50;
       addEvents(events);
-      addEventGaps(listMissingEvents(events, 0, lastCounter));
       setHighestLoadedCounter(lastCounter);
       setRemoteRowCount(count + countOffset);
     } catch (err) {
@@ -575,7 +569,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     const lastCounter = events[events.length - 1]?.counter || 50;
     addEvents(events);
-    addEventGaps(listMissingEvents(events, startCounter, startCounter + diff));
     if (lastCounter > highestLoadedCounter) {
       setHighestLoadedCounter(lastCounter);
     }
