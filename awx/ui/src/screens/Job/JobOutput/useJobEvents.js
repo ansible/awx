@@ -10,11 +10,8 @@ const initialState = {
   // events with parent events that aren't yet loaded.
   // arrays indexed by parent uuid
   eventsWithoutParents: {},
-  // counter where gaps occur in counter series or events with no stdout appear
-  eventGaps: [],
 };
 export const ADD_EVENTS = 'ADD_EVENTS';
-export const ADD_EVENT_GAPS = 'ADD_EVENT_GAPS';
 export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
 export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
 export const CLEAR_EVENTS = 'CLEAR_EVENTS';
@@ -41,8 +38,6 @@ export default function useJobEvents(callbacks, isFlatMode) {
 
   return {
     addEvents: (events) => dispatch({ type: ADD_EVENTS, events }),
-    addEventGaps: (counterIds) =>
-      dispatch({ type: ADD_EVENT_GAPS, counterIds }),
     getNodeByUuid: (uuid) => getNodeByUuid(state, uuid),
     toggleNodeIsCollapsed: (uuid) =>
       dispatch({ type: TOGGLE_NODE_COLLAPSED, uuid }),
@@ -66,8 +61,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
     switch (action.type) {
       case ADD_EVENTS:
         return addEvents(state, action.events);
-      case ADD_EVENT_GAPS:
-        return addEventGaps(state, action.counterIds);
       case TOGGLE_NODE_COLLAPSED:
         return toggleNodeIsCollapsed(state, action.uuid);
       case SET_EVENT_NUM_CHILDREN:
@@ -87,7 +80,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       events: { ...origState.events },
       tree: [...origState.tree],
     };
-    const gaps = new Set(state.eventGaps);
     const parentsToFetch = {};
     newEvents.forEach((event) => {
       if (
@@ -97,7 +89,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         throw new Error('Cannot add event; missing rowNumber');
       }
       const eventIndex = event.counter;
-      gaps.delete(eventIndex);
       if (state.events[eventIndex]) {
         state.events[eventIndex] = event;
         state = _gatherEventsForNewParent(state, event.uuid);
@@ -133,10 +124,7 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       });
     });
 
-    return {
-      ...state,
-      eventGaps: [...gaps],
-    };
+    return state;
   }
 
   function _addRootLevelEvent(state, event) {
@@ -293,37 +281,14 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
   }
 }
 
-// function addEventGaps(state, counterIds) {
-//   const gaps = new Set(state.eventGaps);
-//   counterIds.forEach((id) => gaps.add(id));
-//   return {
-//     ...state,
-//     eventGaps: [...gaps],
-//   };
-// }
-
 function getEventForRow(state, rowIndex) {
-  const { node, expectedCounter } = _getNodeForRow(state, rowIndex, state.tree);
+  const { node } = _getNodeForRow(state, rowIndex, state.tree);
   if (node) {
     return {
       node,
       event: state.events[node.eventIndex],
     };
   }
-  // if (state.eventGaps.includes(expectedCounter)) {
-  //   return {
-  //     event: {
-  //       counter: expectedCounter,
-  //       stdout: '',
-  //       isMockEvent: true,
-  //     },
-  //     node: {
-  //       eventIndex: expectedCounter,
-  //       isCollapsed: false,
-  //       children: [],
-  //     },
-  //   };
-  // }
   return null;
 }
 
@@ -354,9 +319,6 @@ function _getNodeForRow(state, rowToFind, nodes) {
       // TODO return event too since we have it?
       return { node };
     }
-    if (event.rowNumber > rowToFind) {
-      console.error('Too far!', { event, rowToFind });
-    }
     const totalNodeDescendants = getTotalNumChildren(node);
     const numCollapsedChildren = getNumCollapsedChildren(node);
     const nodeChildren = totalNodeDescendants - numCollapsedChildren;
@@ -376,47 +338,21 @@ function _getNodeForRow(state, rowToFind, nodes) {
       // requested row is not loaded; return best guess at counter number
       const lastChildEvent = state.events[lastChild.eventIndex];
       const rowDiff = rowToFind - lastChildEvent.rowNumber;
-      console.log({
-        at: 'A',
-        rowToFind,
-        lastChildRowNumber: lastChildEvent.rowNumber,
-        rowDiff,
-      });
       return {
         node: null,
         expectedCounter: lastChild.eventIndex + rowDiff,
       };
     }
-
-    // const rowGap = nextEvent.rowNumber - event.rowNumber - nodeChildren - 1;
-    // if (remainingCount < rowGap) {
-    //   let lastChild = node;
-    //   while (lastChild.children.length) {
-    //     lastChild = lastChild.children[lastChild.children.length - 1];
-    //   }
-    //   return {
-    //     node: null,
-    //     expectedCounter: lastChild.eventIndex + remainingCount - nodeChildren,
-    //   };
-    // }
-    // remainingCount -= rowGap;
   }
 
   // TODO repeating logic after !nextNode:continue above... delete?
   const lastDescendant = _getLastDescendantNode(nodes);
   if (!lastDescendant) {
-    // console.log({ at: 'B', rowToFind });
     return { node: null, expectedCounter: rowToFind };
   }
 
   const lastDescendantEvent = state.events[lastDescendant.eventIndex];
   const rowDiff = rowToFind - lastDescendantEvent.rowNumber;
-  // console.log({
-  //   at: 'C',
-  //   rowToFind,
-  //   lastDescendantRowNumber: lastDescendantEvent.rowNumber,
-  //   rowDiff,
-  // });
   return {
     node: null,
     expectedCounter: lastDescendant.eventIndex + rowDiff,
@@ -428,7 +364,6 @@ function _getNodeInChildren(state, node, rowToFind) {
   const firstChild = state.events[node.children[0].eventIndex];
   if (rowToFind < firstChild.rowNumber) {
     const rowDiff = rowToFind - event.rowNumber;
-    console.log({ at: 'D', counter: event.counter, rowDiff });
     return {
       node: null,
       expectedCounter: event.counter + rowDiff,
@@ -553,13 +488,6 @@ function getEvent(state, eventIndex) {
   if (event) {
     return event;
   }
-  // if (state.eventGaps.includes(eventIndex)) {
-  //   return {
-  //     counter: eventIndex,
-  //     stdout: '',
-  //     isMockEvent: true,
-  //   };
-  // }
 
   return null;
 }

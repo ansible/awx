@@ -509,10 +509,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     const diff = stopIndex - startIndex;
 
     const startCounter = getCounterForRow(startIndex);
-    // const rowNumberOffset = startCounter - startIndex;
-    console.log('LOAD MORE');
-    console.log({ startIndex, stopIndex, startCounter });
-    // const loadRange = range(startCounter, startCounter + diff);
 
     if (isMounted.current) {
       setCurrentlyLoading((prevCurrentlyLoading) =>
@@ -520,11 +516,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       );
     }
 
-    // const params = {
-    //   counter__gte: startCounter,
-    //   limit: diff + 1,
-    //   ...parseQueryString(QS_CONFIG, location.search),
-    // };
     const [requestParams1, loadRange] = getEventRequestParams(
       job,
       remoteRowCount,
@@ -548,11 +539,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     let newCssMap;
     let rowNumber = firstIndex;
-    console.log(
-      `more Loaded; row numbers beginning ${rowNumber}`,
-      { firstIndex },
-      events
-    );
     events.forEach((event) => {
       event.rowNumber = rowNumber;
       rowNumber++;
