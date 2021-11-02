@@ -34,7 +34,7 @@ import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
 import getEventRequestParams from './getEventRequestParams';
 import isHostEvent from './isHostEvent';
-import { fetchCount, prependTraceback } from './loadJobEvents';
+import { prependTraceback } from './loadJobEvents';
 import useJobEvents from './useJobEvents';
 
 const QS_CONFIG = getQSConfig('job_output', {
@@ -197,6 +197,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     isJobRunning(job.status)
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
+  const [lastScrollPosition, setLastScrollPosition] = useState(0);
 
   const totalNonCollapsedRows = Math.max(
     remoteRowCount - getNumCollapsedEvents(),
@@ -221,6 +222,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   useEffect(() => {
     if (!isJobRunning(jobStatus)) {
+      loadJobEvents().then(() => {
+        setWsEvents([]);
+        scrollToRow(lastScrollPosition);
+      });
       return;
     }
     let batchTimeout;
@@ -371,19 +376,17 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     });
 
     try {
-      const [
-        {
-          data: { results: fetchedEvents = [] },
-        },
-        count,
-      ] = await Promise.all([eventPromise, fetchCount(job, qsParams)]);
+      const {
+        data: { count, results: fetchedEvents = [] },
+      } = await eventPromise;
 
       if (!isMounted.current) {
         return;
       }
       let newCssMap;
       let rowNumber = 0;
-      fetchedEvents.forEach((event) => {
+      const { events, countOffset } = prependTraceback(job, fetchedEvents);
+      events.forEach((event) => {
         event.rowNumber = rowNumber;
         rowNumber++;
         const { lineCssMap } = getLineTextHtml(event);
@@ -396,7 +399,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         ...prevCssMap,
         ...newCssMap,
       }));
-      const { events, countOffset } = prependTraceback(job, fetchedEvents);
       const lastCounter = events[events.length - 1]?.counter || 50;
       addEvents(events);
       setHighestLoadedCounter(lastCounter);
@@ -505,6 +507,12 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (startIndex === 0 && stopIndex === 0) {
       return;
     }
+    console.log('Load more', {
+      startIndex,
+      stopIndex,
+      remoteRowCount,
+      totalNonCollapsedRows,
+    });
 
     const diff = stopIndex - startIndex;
 
@@ -567,6 +575,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const scrollToRow = (rowIndex) => {
+    setLastScrollPosition(rowIndex);
     setIsFollowModeEnabled(false);
     if (listRef.current) {
       listRef.current.scrollToRow(rowIndex);
