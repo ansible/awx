@@ -3151,8 +3151,15 @@ class AWXReceptorJob:
                     try:
                         resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
                         lines = resultsock.readlines()
-                        self.task.instance.result_traceback = b"".join(lines).decode()
-                        self.task.instance.save(update_fields=['result_traceback'])
+                        receptor_output = b"".join(lines).decode()
+                        if receptor_output:
+                            self.task.instance.result_traceback = receptor_output
+                            self.task.instance.save(update_fields=['result_traceback'])
+                        elif detail:
+                            self.task.instance.result_traceback = detail
+                            self.task.instance.save(update_fields=['result_traceback'])
+                        else:
+                            logger.warn(f'No result details or output from {self.task.instance.log_format}, status:\n{unit_status}')
                     except Exception:
                         raise RuntimeError(detail)
 
