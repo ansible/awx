@@ -19,6 +19,8 @@ VENV_BASE ?= /var/lib/awx/venv
 DEV_DOCKER_TAG_BASE ?= quay.io/awx
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
+RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
+
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
@@ -463,6 +465,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
+	    -e receptor_image=$(RECEPTOR_IMAGE) \
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
