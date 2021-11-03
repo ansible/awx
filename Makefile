@@ -503,7 +503,7 @@ docker-compose-container-group-clean:
 
 # Base development image build
 docker-compose-build:
-	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True
+	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
@@ -547,13 +547,14 @@ VERSION:
 	@echo "awx: $(VERSION)"
 
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml
+	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)
 
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
-	    -e template_dest=_build_kube_dev
+	    -e template_dest=_build_kube_dev \
+	    -e receptor_image=$(RECEPTOR_IMAGE)
 
 awx-kube-dev-build: Dockerfile.kube-dev
 	docker build -f Dockerfile.kube-dev \
