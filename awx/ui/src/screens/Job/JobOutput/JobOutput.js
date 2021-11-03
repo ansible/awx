@@ -507,15 +507,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (startIndex === 0 && stopIndex === 0) {
       return;
     }
-    console.log('Load more', {
-      startIndex,
-      stopIndex,
-      remoteRowCount,
-      totalNonCollapsedRows,
-    });
 
     const diff = stopIndex - startIndex;
-
     const startCounter = getCounterForRow(startIndex);
 
     if (isMounted.current) {
@@ -543,7 +536,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
     const events = response.data.results;
     const firstIndex = (params1.page - 1) * params1.page_size;
-    // TODO: load second page if stopIndex > Math.max(loadRange) (or firstIndex + 50)
 
     let newCssMap;
     let rowNumber = firstIndex;

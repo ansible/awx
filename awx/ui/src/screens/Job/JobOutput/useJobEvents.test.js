@@ -4,7 +4,6 @@ import { shallow, mount } from 'enzyme';
 import useJobEvents, {
   jobEventsReducer,
   ADD_EVENTS,
-  ADD_EVENT_GAPS,
   TOGGLE_NODE_COLLAPSED,
   SET_EVENT_NUM_CHILDREN,
 } from './useJobEvents';
@@ -168,6 +167,10 @@ describe('useJobEvents', () => {
       eventsWithoutParents: {},
       eventGaps: [],
     };
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
   });
 
   describe('addEvents', () => {
@@ -371,7 +374,10 @@ describe('useJobEvents', () => {
       ]);
     });
 
-    test('should fetch parent for events with missing parent', () => {
+    test('should fetch parent for events with missing parent', async () => {
+      callbacks.fetchEventByUuid.mockResolvedValue({
+        counter: 10,
+      });
       const state = reducer(emptyState, {
         type: ADD_EVENTS,
         events: eventsList,
@@ -393,6 +399,9 @@ describe('useJobEvents', () => {
     });
 
     test('should batch parent fetches by uuid', () => {
+      callbacks.fetchEventByUuid.mockResolvedValue({
+        counter: 10,
+      });
       const state = reducer(emptyState, {
         type: ADD_EVENTS,
         events: eventsList,
@@ -423,6 +432,9 @@ describe('useJobEvents', () => {
     });
 
     test('should fetch multiple parent fetches by uuid', () => {
+      callbacks.fetchEventByUuid.mockResolvedValue({
+        counter: 10,
+      });
       const state = reducer(emptyState, {
         type: ADD_EVENTS,
         events: eventsList,
@@ -454,6 +466,9 @@ describe('useJobEvents', () => {
     });
 
     test('should set eventsWithoutParents while fetching parent events', () => {
+      callbacks.fetchEventByUuid.mockResolvedValue({
+        counter: 10,
+      });
       const state = reducer(emptyState, {
         type: ADD_EVENTS,
         events: eventsList,
@@ -530,6 +545,12 @@ describe('useJobEvents', () => {
     });
 
     test('should fetch parent of parent and compile them together', () => {
+      callbacks.fetchEventByUuid.mockResolvedValueOnce({
+        counter: 2,
+      });
+      callbacks.fetchEventByUuid.mockResolvedValueOnce({
+        counter: 1,
+      });
       const event3 = {
         id: 103,
         counter: 3,
@@ -718,26 +739,6 @@ describe('useJobEvents', () => {
       });
     });
 
-    test('should replace eventGap', () => {
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList.slice(0, 8),
-      });
-      const state2 = reducer(state, {
-        type: ADD_EVENT_GAPS,
-        counterIds: [9],
-      });
-      expect(state2.eventGaps).toEqual([9]);
-
-      const state3 = reducer(state2, {
-        type: ADD_EVENTS,
-        events: [eventsList[8]],
-      });
-
-      expect(state3.events).toEqual(basicEvents);
-      expect(state3.eventGaps).toEqual([]);
-    });
-
     describe('fetchNumChildren', () => {
       test('should find child count for root node', async () => {
         callbacks.fetchNextRootNode.mockResolvedValue({
@@ -884,30 +885,6 @@ describe('useJobEvents', () => {
           numChildren: 19,
         });
       });
-    });
-  });
-
-  describe('addEventGaps', () => {
-    test('should add missing events to list', () => {
-      const state = reducer(emptyState, {
-        type: ADD_EVENT_GAPS,
-        counterIds: [3, 4, 5],
-      });
-
-      expect(state.eventGaps).toEqual([3, 4, 5]);
-    });
-
-    test('should not add duplicates', () => {
-      const state = reducer(emptyState, {
-        type: ADD_EVENT_GAPS,
-        counterIds: [3, 4, 5],
-      });
-      const state2 = reducer(state, {
-        type: ADD_EVENT_GAPS,
-        counterIds: [4, 5, 6],
-      });
-
-      expect(state2.eventGaps).toEqual([3, 4, 5, 6]);
     });
   });
 
