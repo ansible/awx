@@ -576,7 +576,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const scrollToRow = (rowIndex) => {
     setLastScrollPosition(rowIndex);
-    setIsFollowModeEnabled(false);
     if (listRef.current) {
       listRef.current.scrollToRow(rowIndex);
     }
@@ -587,15 +586,18 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
     const scrollRange = stopIndex - startIndex + 1;
     scrollToRow(Math.max(0, startIndex - scrollRange));
+    setIsFollowModeEnabled(false);
   };
 
   const handleScrollNext = () => {
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
     scrollToRow(stopIndex - 1);
+    setIsFollowModeEnabled(false);
   };
 
   const handleScrollFirst = () => {
     scrollToRow(0);
+    setIsFollowModeEnabled(false);
   };
 
   const handleScrollLast = () => {
