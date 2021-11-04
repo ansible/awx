@@ -139,7 +139,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const fetchNumEvents = async (startCounter, endCounter) => {
-    if (endCounter === startCounter + 1) {
+    if (endCounter <= startCounter + 1) {
       return 0;
     }
     const key = `${startCounter}-${endCounter}`;
@@ -440,6 +440,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const rowRenderer = ({ index, parent, key, style }) => {
     if (listRef.current && isFollowModeEnabled) {
+      // TODO: add wsEvents count to this ?
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
     let { event, node } = getEventForRow(index) || {};

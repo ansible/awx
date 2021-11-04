@@ -38,33 +38,6 @@ const applyJobEventMock = (mockJobEvents) => {
   });
 };
 
-async function findScrollButtons(wrapper) {
-  const pageControls = await waitForElement(wrapper, 'PageControls');
-  const scrollFirstButton = pageControls.find(
-    'button[aria-label="Scroll first"]'
-  );
-  const scrollLastButton = pageControls.find(
-    'button[aria-label="Scroll last"]'
-  );
-  const scrollPreviousButton = pageControls.find(
-    'button[aria-label="Scroll previous"]'
-  );
-  return {
-    scrollFirstButton,
-    scrollLastButton,
-    scrollPreviousButton,
-  };
-}
-
-const originalOffsetHeight = Object.getOwnPropertyDescriptor(
-  HTMLElement.prototype,
-  'offsetHeight'
-);
-const originalOffsetWidth = Object.getOwnPropertyDescriptor(
-  HTMLElement.prototype,
-  'offsetWidth'
-);
-
 describe('<JobOutput />', () => {
   let wrapper;
   const mockJob = mockJobData;
@@ -83,60 +56,6 @@ describe('<JobOutput />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  test('navigation buttons should display output properly', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    });
-    await waitForElement(wrapper, 'JobEvent', (el) => el.length > 0);
-    const { scrollFirstButton, scrollLastButton, scrollPreviousButton } =
-      await findScrollButtons(wrapper);
-    let jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(0).prop('event').stdout).toBe('');
-    expect(jobEvents.at(1).prop('event').stdout).toBe(
-      '\r\nPLAY [all] *********************************************************************'
-    );
-    await act(async () => {
-      scrollLastButton.simulate('click');
-    });
-    wrapper.update();
-    jobEvents = wrapper.find('JobEvent');
-
-    expect(jobEvents.at(jobEvents.length - 2).prop('event').stdout).toBe(
-      '\u001b[0;32mok: [localhost] => (item=94) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 94"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    );
-    await act(async () => {
-      scrollPreviousButton.simulate('click');
-    });
-    wrapper.update();
-    jobEvents = wrapper.find('JobEvent');
-    expect(jobEvents.at(20).prop('event').stdout).toBe(
-      '\u001b[0;32mok: [localhost] => (item=26) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 26"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    );
-    expect(jobEvents.at(21).prop('event').stdout).toBe(
-      '\u001b[0;32mok: [localhost] => (item=27) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 27"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
-    );
-    await act(async () => {
-      scrollFirstButton.simulate('click');
-    });
-    wrapper.update();
-    jobEvents = wrapper.find('JobEvent');
-
-    expect(jobEvents.at(0).prop('event').stdout).toBe('');
-    expect(jobEvents.at(1).prop('event').stdout).toBe(
-      '\r\nPLAY [all] *********************************************************************'
-    );
-    Object.defineProperty(
-      HTMLElement.prototype,
-      'offsetHeight',
-      originalOffsetHeight
-    );
-    Object.defineProperty(
-      HTMLElement.prototype,
-      'offsetWidth',
-      originalOffsetWidth
-    );
   });
 
   test('should make expected api call for delete', async () => {

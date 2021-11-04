@@ -86,7 +86,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         typeof event.rowNumber !== 'number' ||
         Number.isNaN(event.rowNumber)
       ) {
-        console.error(event, newEvents);
         throw new Error('Cannot add event; missing rowNumber');
       }
       const eventIndex = event.counter;
