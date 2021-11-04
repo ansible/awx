@@ -137,14 +137,14 @@ function PaginatedTable({
   return (
     <>
       <ListHeader
-        itemCount={itemCount}
-        renderToolbar={renderToolbar}
         emptyStateControls={emptyStateControls}
+        itemCount={itemCount}
+        pagination={ToolbarPagination}
+        qsConfig={qsConfig}
+        relatedSearchableKeys={toolbarRelatedSearchableKeys}
+        renderToolbar={renderToolbar}
         searchColumns={searchColumns}
         searchableKeys={toolbarSearchableKeys}
-        relatedSearchableKeys={toolbarRelatedSearchableKeys}
-        qsConfig={qsConfig}
-        pagination={ToolbarPagination}
       />
       {Content}
       {items.length ? (

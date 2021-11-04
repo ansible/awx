@@ -12,8 +12,7 @@ jest.mock('../../../api');
 
 describe('<TeamAdd />', () => {
   test('handleSubmit should post to api', async () => {
-    TeamsAPI.create.mockResolvedValueOnce({ data: {} });
-    const wrapper = mountWithContexts(<TeamAdd />);
+    const history = createMemoryHistory({});
     const updatedTeamData = {
       name: 'new name',
       description: 'new description',
@@ -22,6 +21,10 @@ describe('<TeamAdd />', () => {
         name: 'Default',
       },
     };
+    TeamsAPI.create.mockResolvedValueOnce({ data: {} });
+    const wrapper = mountWithContexts(<TeamAdd />, {
+      context: { router: { history } },
+    });
     await act(async () => {
       wrapper.find('TeamForm').invoke('handleSubmit')(updatedTeamData);
     });
