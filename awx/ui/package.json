@@ -15,7 +15,7 @@
     "axios": "0.22.0",
     "babel-plugin-macros": "^3.0.1",
     "codemirror": "^5.47.0",
-    "d3": "6.7.0",
+    "d3": "7.1.1",
     "dagre": "^0.8.4",
     "formik": "2.2.9",
     "has-ansi": "4.0.0",
@@ -101,6 +101,9 @@
     "coveragePathIgnorePatterns": [
       "<rootDir>/src/locales",
       "index.js"
+    ],
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!d3)/"
     ]
   }
 }
