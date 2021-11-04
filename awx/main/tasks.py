@@ -1909,6 +1909,7 @@ class RunJob(BaseTask):
                 status='running',
                 instance_group=pu_ig,
                 execution_node=pu_en,
+                controller_node=pu_en,
                 celery_task_id=job.celery_task_id,
             )
             if branch_override:
@@ -1917,6 +1918,8 @@ class RunJob(BaseTask):
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
+            local_project_sync.log_lifecycle("controller_node_chosen")
+            local_project_sync.log_lifecycle("execution_node_chosen")
             create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
@@ -2209,10 +2212,13 @@ class RunProjectUpdate(BaseTask):
                         status='running',
                         instance_group=instance_group,
                         execution_node=project_update.execution_node,
+                        controller_node=project_update.execution_node,
                         source_project_update=project_update,
                         celery_task_id=project_update.celery_task_id,
                     )
                 )
+                local_inv_update.log_lifecycle("controller_node_chosen")
+                local_inv_update.log_lifecycle("execution_node_chosen")
             try:
                 create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
                 inv_update_class().run(local_inv_update.id)
@@ -2660,10 +2666,13 @@ class RunInventoryUpdate(BaseTask):
                     job_tags=','.join(sync_needs),
                     status='running',
                     execution_node=Instance.objects.me().hostname,
+                    controller_node=Instance.objects.me().hostname,
                     instance_group=inventory_update.instance_group,
                     celery_task_id=inventory_update.celery_task_id,
                 )
             )
+            local_project_sync.log_lifecycle("controller_node_chosen")
+            local_project_sync.log_lifecycle("execution_node_chosen")
             create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # associate the inventory update before calling run() so that a
             # cancel() call on the inventory update can cancel the project update
@@ -3093,7 +3102,21 @@ class AWXReceptorJob:
             _kw['tlsclient'] = get_tls_client(use_stream_tls)
         result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=self.sign_work, **_kw)
         self.unit_id = result['unitid']
+        # Update the job with the work unit in-memory so that the log_lifecycle
+        # will print out the work unit that is to be associated with the job in the database
+        # via the update_model() call.
+        # We want to log the work_unit_id as early as possible. A failure can happen in between
+        # when we start the job in receptor and when we associate the job <-> work_unit_id.
+        # In that case, there will be work running in receptor and Controller will not know
+        # which Job it is associated with.
+        # We do not programatically handle this case. Ideally, we would handle this with a reaper case.
+        # The two distinct job lifecycle log events below allow for us to at least detect when this
+        # edge case occurs. If the lifecycle event work_unit_id_received occurs without the
+        # work_unit_id_assigned event then this case may have occured.
+        self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
+        self.task.instance.log_lifecycle("work_unit_id_received")
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
+        self.task.instance.log_lifecycle("work_unit_id_assigned")
 
         sockin.close()
         sockout.close()
