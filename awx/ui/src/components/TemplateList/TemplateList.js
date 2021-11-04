@@ -215,6 +215,10 @@ function TemplateList({ defaultParams }) {
               name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
+            {
+              name: t`Label`,
+              key: 'labels__name__icontains',
+            },
           ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
