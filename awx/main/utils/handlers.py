@@ -76,7 +76,7 @@ class SpecialInventoryHandler(logging.Handler):
     def emit(self, record):
         # check cancel and timeout status regardless of log level
         this_time = now()
-        if (this_time - self.last_check).total_seconds() > 0.5:  # cancel callback is expensive
+        if (this_time - self.last_check).total_seconds() > 0.1:
             self.last_check = this_time
             if self.cancel_callback():
                 raise PostRunError('Inventory update has been canceled', status='canceled')

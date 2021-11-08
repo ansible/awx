@@ -1,6 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 import logging
+import yaml
 
 from django.conf import settings
 from django.core.cache import cache as django_cache
@@ -30,7 +31,16 @@ class Command(BaseCommand):
             '--reload',
             dest='reload',
             action='store_true',
-            help=('cause the dispatcher to recycle all of its worker processes;' 'running jobs will run to completion first'),
+            help=('cause the dispatcher to recycle all of its worker processes; running jobs will run to completion first'),
+        )
+        parser.add_argument(
+            '--cancel',
+            dest='cancel',
+            help=(
+                'Cancel a particular task id. Takes either a single id string, or a JSON list of multiple ids. '
+                'Can take in output from the --running argument as input to cancel all tasks. '
+                'Only running tasks can be canceled, queued tasks must be started before they can be canceled.'
+            ),
         )
 
     def handle(self, *arg, **options):
@@ -42,6 +52,16 @@ class Command(BaseCommand):
             return
         if options.get('reload'):
             return Control('dispatcher').control({'control': 'reload'})
+        if options.get('cancel'):
+            cancel_str = options.get('cancel')
+            try:
+                cancel_data = yaml.safe_load(cancel_str)
+            except Exception:
+                cancel_data = [cancel_str]
+            if not isinstance(cancel_data, list):
+                cancel_data = [cancel_str]
+            print(Control('dispatcher').cancel(cancel_data))
+            return
 
         # It's important to close these because we're _about_ to fork, and we
         # don't want the forked processes to inherit the open sockets

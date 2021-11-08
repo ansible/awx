@@ -63,7 +63,7 @@ class AWXConsumerBase(object):
     def control(self, body):
         logger.warning(f'Received control signal:\n{body}')
         control = body.get('control')
-        if control in ('status', 'running'):
+        if control in ('status', 'running', 'cancel'):
             reply_queue = body['reply_to']
             if control == 'status':
                 msg = '\n'.join([self.listening_on, self.pool.debug()])
@@ -72,6 +72,17 @@ class AWXConsumerBase(object):
                 for worker in self.pool.workers:
                     worker.calculate_managed_tasks()
                     msg.extend(worker.managed_tasks.keys())
+            elif control == 'cancel':
+                msg = []
+                task_ids = set(body['task_ids'])
+                for worker in self.pool.workers:
+                    task = worker.current_task
+                    if task and task['uuid'] in task_ids:
+                        logger.warn(f'Sending SIGTERM to task id={task["uuid"]}, task={task.get("task")}, args={task.get("args")}')
+                        os.kill(worker.pid, signal.SIGTERM)
+                        msg.append(task['uuid'])
+                if task_ids and not msg:
+                    logger.info(f'Could not locate running tasks to cancel with ids={task_ids}')
 
             with pg_bus_conn() as conn:
                 conn.notify(reply_queue, json.dumps(msg))
