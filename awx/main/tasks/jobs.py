@@ -9,6 +9,7 @@ import logging
 import os
 from pathlib import Path
 import shutil
+import signal
 import stat
 import yaml
 import tempfile
@@ -22,7 +23,6 @@ from uuid import uuid4
 from django_guid.middleware import GuidMiddleware
 from django.conf import settings
 from django.db import transaction, DatabaseError
-from django.utils.timezone import now
 
 
 # Runner
@@ -82,6 +82,21 @@ from django.utils.translation import ugettext_lazy as _
 logger = logging.getLogger('awx.main.tasks.jobs')
 
 
+class SigtermWatcher:
+    SIGNALS = (signal.SIGTERM, signal.SIGINT)
+
+    def __init__(self):
+        self.sigterm_flag = False
+        for s in self.SIGNALS:
+            signal.signal(s, self.set_flag)
+
+    def set_flag(self, *args):
+        self.sigterm_flag = True
+
+    def cancel_callback(self):
+        return self.sigterm_flag
+
+
 def with_path_cleanup(f):
     @functools.wraps(f)
     def _wrapped(self, *args, **kwargs):
@@ -106,13 +121,18 @@ class BaseTask(object):
     event_model = None
     abstract = True
 
-    def __init__(self):
+    def __init__(self, sigterm_watcher=None):
         self.cleanup_paths = []
         self.parent_workflow_job_id = None
         self.host_map = {}
         self.guid = GuidMiddleware.get_guid()
         self.job_created = None
         self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
+        # start watching for SIGTERM before loading the model to catch cancel signal at any time
+        if sigterm_watcher:
+            self.sigterm_watcher = sigterm_watcher  # inherit watcher from parent if local dependent task
+        else:
+            self.sigterm_watcher = SigtermWatcher()
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -551,22 +571,6 @@ class BaseTask(object):
 
         return False
 
-    def cancel_callback(self):
-        """
-        Ansible runner callback to tell the job when/if it is canceled
-        """
-        unified_job_id = self.instance.pk
-        self.instance = self.update_model(unified_job_id)
-        if not self.instance:
-            logger.error('unified job {} was deleted while running, canceling'.format(unified_job_id))
-            return True
-        if self.instance.cancel_flag or self.instance.status == 'canceled':
-            cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
-            if cancel_wait > 5:
-                logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
-            return True
-        return False
-
     def finished_callback(self, runner_obj):
         """
         Ansible runner callback triggered on finished run
@@ -643,8 +647,10 @@ class BaseTask(object):
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
-            if self.instance.cancel_flag:
+
+            if self.instance.cancel_flag or self.sigterm_watcher.cancel_callback():
                 self.instance = self.update_model(self.instance.pk, status='canceled')
+
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
                 # already been canceled.
@@ -732,11 +738,11 @@ class BaseTask(object):
                     event_handler=self.event_handler,
                     finished_callback=self.finished_callback,
                     status_handler=self.status_handler,
-                    cancel_callback=self.cancel_callback,
+                    cancel_callback=self.sigterm_watcher.cancel_callback,
                     **params,
                 )
             else:
-                receptor_job = AWXReceptorJob(self, params)
+                receptor_job = AWXReceptorJob(self, params, sigterm_watcher=self.sigterm_watcher)
                 res = receptor_job.run()
                 self.unit_id = receptor_job.unit_id
 
@@ -1140,7 +1146,7 @@ class RunJob(BaseTask):
             project_update_task = local_project_sync._get_task_class()
             try:
                 # the job private_data_dir is passed so sync can download roles and collections there
-                sync_task = project_update_task(job_private_data_dir=private_data_dir)
+                sync_task = project_update_task(job_private_data_dir=private_data_dir, sigterm_watcher=self.sigterm_watcher)
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
                 job = self.update_model(job.pk, scm_revision=local_project_sync.scm_revision)
@@ -1433,7 +1439,7 @@ class RunProjectUpdate(BaseTask):
                 local_inv_update.log_lifecycle("execution_node_chosen")
             try:
                 create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
-                inv_update_class().run(local_inv_update.id)
+                inv_update_class(sigterm_watcher=self.sigterm_watcher).run(local_inv_update.id)
             except Exception:
                 logger.exception('{} Unhandled exception updating dependent SCM inventory sources.'.format(project_update.log_format))
 
@@ -1892,7 +1898,7 @@ class RunInventoryUpdate(BaseTask):
 
             project_update_task = local_project_sync._get_task_class()
             try:
-                sync_task = project_update_task(job_private_data_dir=private_data_dir)
+                sync_task = project_update_task(job_private_data_dir=private_data_dir, sigterm_watcher=self.sigterm_watcher)
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
                 inventory_update.inventory_source.scm_last_revision = local_project_sync.scm_revision
@@ -1951,7 +1957,7 @@ class RunInventoryUpdate(BaseTask):
 
         handler = SpecialInventoryHandler(
             self.event_handler,
-            self.cancel_callback,
+            self.sigterm_watcher.cancel_callback,
             verbosity=inventory_update.verbosity,
             job_timeout=self.get_instance_timeout(self.instance),
             start_time=inventory_update.started,

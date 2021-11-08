@@ -247,6 +247,12 @@ def handle_setting_changes(setting_keys):
         reconfigure_rsyslog()
 
 
+@task(queue=get_local_queuename)
+def cancel_unified_job(celery_task_id):
+    """Triggers special action in awx.main.dispatch.pool, this is a placeholder"""
+    pass
+
+
 @task(queue='tower_broadcast_all')
 def delete_project_files(project_path):
     # TODO: possibly implement some retry logic
