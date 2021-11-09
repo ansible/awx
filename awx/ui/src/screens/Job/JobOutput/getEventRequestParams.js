@@ -1,4 +1,3 @@
-// import { isJobRunning } from 'util/jobs';
 import getRowRangePageSize from './shared/jobOutputUtils';
 
 export default function getEventRequestParams(
