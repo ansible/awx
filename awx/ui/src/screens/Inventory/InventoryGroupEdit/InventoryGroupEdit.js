@@ -13,14 +13,14 @@ function InventoryGroupEdit({ inventoryGroup }) {
   const handleSubmit = async (values) => {
     try {
       await GroupsAPI.update(groupId, values);
-      history.push(`/inventories/inventory/${id}/groups/${groupId}`);
+      history.push(`/inventories/inventory/${id}/groups/${groupId}/details`);
     } catch (err) {
       setError(err);
     }
   };
 
   const handleCancel = () => {
-    history.push(`/inventories/inventory/${id}/groups/${groupId}`);
+    history.push(`/inventories/inventory/${id}/groups/${groupId}/details`);
   };
 
   return (
