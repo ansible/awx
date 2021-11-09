@@ -316,7 +316,6 @@ function _getNodeForRow(state, rowToFind, nodes) {
     const node = nodes[i];
     const event = state.events[node.eventIndex];
     if (event.rowNumber === rowToFind) {
-      // TODO return event too since we have it?
       return { node };
     }
     const totalNodeDescendants = getTotalNumChildren(node);
@@ -345,7 +344,6 @@ function _getNodeForRow(state, rowToFind, nodes) {
     }
   }
 
-  // TODO repeating logic after !nextNode:continue above... delete?
   const lastDescendant = _getLastDescendantNode(nodes);
   if (!lastDescendant) {
     return { node: null, expectedCounter: rowToFind };

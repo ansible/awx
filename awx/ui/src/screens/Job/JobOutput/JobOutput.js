@@ -271,9 +271,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         } else {
           batchTimeout = setTimeout(addBatchedEvents, 500);
         }
-        // if (data.counter && data.counter > jobSocketCounter.current) {
-        //   jobSocketCounter.current = data.counter;
-        // }
       }
       if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
         if (data.final_counter) {
@@ -305,9 +302,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (!jobStatus || isJobRunning(jobStatus)) {
       return;
     }
-    // if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-    //   setRemoteRowCount(jobSocketCounter.current);
-    // }
 
     if (isMonitoringWebsocket) {
       setIsMonitoringWebsocket(false);
@@ -348,9 +342,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
-    // if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
-    //   setRemoteRowCount(jobSocketCounter.current);
-    // }
     if (
       jobSocketCounter.current === remoteRowCount &&
       !isJobRunning(job.status)
@@ -440,7 +431,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const rowRenderer = ({ index, parent, key, style }) => {
     if (listRef.current && isFollowModeEnabled) {
-      // TODO: add wsEvents count to this ?
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
     let { event, node } = getEventForRow(index) || {};
