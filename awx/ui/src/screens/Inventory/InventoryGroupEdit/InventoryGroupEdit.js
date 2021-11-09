@@ -20,7 +20,7 @@ function InventoryGroupEdit({ inventoryGroup }) {
   };
 
   const handleCancel = () => {
-    history.push(`/inventories/inventory/${id}/groups/${groupId}/details`);
+    history.push(`/inventories/inventory/${id}/groups/${groupId}`);
   };
 
   return (
