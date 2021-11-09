@@ -6,13 +6,6 @@ export default function getEventRequestParams(
   requestRange
 ) {
   const [startIndex, stopIndex] = requestRange;
-  // if (isJobRunning(job?.status)) {
-  //   return [
-  //     { counter__gte: startIndex, limit: stopIndex - startIndex + 1 },
-  //     range(startIndex, Math.min(stopIndex, remoteRowCount)),
-  //     startIndex,
-  //   ];
-  // }
   const { page, pageSize, firstIndex } = getRowRangePageSize(
     startIndex,
     stopIndex
