@@ -2562,11 +2562,13 @@ class JobTemplateSurveySpec(GenericAPIView):
                             status=status.HTTP_400_BAD_REQUEST,
                         )
             # if it's a multiselect or multiple choice, it must have coices listed
-            # choices and defualts must come in as strings seperated by /n characters.
+            # choices and defualts must come in as list or strings seperated by /n characters.
             if qtype == 'multiselect' or qtype == 'multiplechoice':
                 if 'choices' in survey_item:
                     if isinstance(survey_item['choices'], str):
                         survey_item['choices'] = '\n'.join(choice for choice in survey_item['choices'].splitlines() if choice.strip() != '')
+                    if isinstance(survey_item['choices'], list):
+                        survey_item['choices'] = '\n'.join(choice for choice in survey_item['choices'] if choice.strip() != '')
                 else:
                     return Response(
                         dict(error=_("Survey question {idx} of type {survey_item[type]} must specify choices.".format(**context))),
