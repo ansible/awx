@@ -112,10 +112,9 @@ function SAMLEdit() {
   const initialValues = (fields) =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
-        const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
         acc[key] = fields[key].value
           ? JSON.stringify(fields[key].value, null, 2)
-          : emptyDefault;
+          : null;
       } else {
         acc[key] = fields[key].value ?? '';
       }

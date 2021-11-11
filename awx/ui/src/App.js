@@ -98,8 +98,13 @@ const AuthorizedRoutes = ({ routeConfig }) => {
   );
 };
 
-const ProtectedRoute = ({ children, ...rest }) => {
-  const { authRedirectTo, setAuthRedirectTo } = useSession();
+export function ProtectedRoute({ children, ...rest }) {
+  const {
+    authRedirectTo,
+    setAuthRedirectTo,
+    loginRedirectOverride,
+    isUserBeingLoggedOut,
+  } = useSession();
   const location = useLocation();
 
   useEffect(() => {
@@ -120,8 +125,16 @@ const ProtectedRoute = ({ children, ...rest }) => {
     );
   }
 
+  if (
+    loginRedirectOverride &&
+    !window.location.href.includes('/login') &&
+    !isUserBeingLoggedOut
+  ) {
+    window.location.replace(loginRedirectOverride);
+    return null;
+  }
   return <Redirect to="/login" />;
-};
+}
 
 function App() {
   const history = useHistory();

@@ -1,15 +1,20 @@
 import logging
 import yaml
 import time
+from enum import Enum, unique
 
 from receptorctl.socket_interface import ReceptorControl
+
+from awx.main.exceptions import ReceptorNodeNotFound
+
 from django.conf import settings
 
-from enum import Enum, unique
 
 logger = logging.getLogger('awx.main.utils.receptor')
 
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
+
+RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
 
 @unique
@@ -60,6 +65,35 @@ def get_conn_type(node_name, receptor_ctl):
     for node in all_nodes:
         if node.get('NodeID') == node_name:
             return ReceptorConnectionType(node.get('ConnType'))
+    raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
+
+
+def administrative_workunit_reaper(work_list=None):
+    """
+    This releases completed work units that were spawned by actions inside of this module
+    specifically, this should catch any completed work unit left by
+     - worker_info
+     - worker_cleanup
+    These should ordinarily be released when the method finishes, but this is a
+    cleanup of last-resort, in case something went awry
+    """
+    receptor_ctl = get_receptor_ctl()
+    if work_list is None:
+        work_list = receptor_ctl.simple_command("work list")
+
+    for unit_id, work_data in work_list.items():
+        extra_data = work_data.get('ExtraData')
+        if (extra_data is None) or (extra_data.get('RemoteWorkType') != 'ansible-runner'):
+            continue  # if this is not ansible-runner work, we do not want to touch it
+        params = extra_data.get('RemoteParams', {}).get('params')
+        if not params:
+            continue
+        if not (params == '--worker-info' or params.startswith('cleanup')):
+            continue  # if this is not a cleanup or health check, we do not want to touch it
+        if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
+            continue  # do not want to touch active work units
+        logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
+        receptor_ctl.simple_command(f"work release {unit_id}")
 
 
 class RemoteJobError(RuntimeError):
@@ -95,7 +129,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
         while run_timing < 20.0:
             status = receptor_ctl.simple_command(f'work status {unit_id}')
             state_name = status.get('StateName')
-            if state_name not in ('Pending', 'Running'):
+            if state_name not in RECEPTOR_ACTIVE_STATES:
                 break
             run_timing = time.time() - run_start
             time.sleep(0.5)
@@ -110,9 +144,10 @@ def run_until_complete(node, timing_data=None, **kwargs):
 
     finally:
 
-        res = receptor_ctl.simple_command(f"work release {unit_id}")
-        if res != {'released': unit_id}:
-            logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
+        if settings.RECEPTOR_RELEASE_WORK:
+            res = receptor_ctl.simple_command(f"work release {unit_id}")
+            if res != {'released': unit_id}:
+                logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
 
         receptor_ctl.close()
 
@@ -152,6 +187,9 @@ def worker_info(node_name, work_type='ansible-runner'):
             error_list.append(f'Old version (2.0.1 or earlier) of ansible-runner on node {node_name} without --worker-info')
         else:
             error_list.append(details)
+
+    except (ReceptorNodeNotFound, RuntimeError) as exc:
+        error_list.append(str(exc))
 
     # If we have a connection error, missing keys would be trivial consequence of that
     if not data['errors']:

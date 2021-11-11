@@ -47,18 +47,12 @@ function AWXLogin({ alt, isAuthenticated }) {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
     request: fetchCustomLoginInfo,
-    result: {
-      brandName,
-      logo,
-      loginInfo,
-      socialAuthOptions,
-      loginRedirectOverride,
-    },
+    result: { brandName, logo, loginInfo, socialAuthOptions },
   } = useRequest(
     useCallback(async () => {
       const [
         {
-          data: { custom_logo, custom_login_info, login_redirect_override },
+          data: { custom_logo, custom_login_info },
         },
         {
           data: { BRAND_NAME },
@@ -78,7 +72,6 @@ function AWXLogin({ alt, isAuthenticated }) {
         logo: logoSrc,
         loginInfo: custom_login_info,
         socialAuthOptions: authData,
-        loginRedirectOverride: login_redirect_override,
       };
     }, []),
     {
@@ -116,10 +109,6 @@ function AWXLogin({ alt, isAuthenticated }) {
   };
 
   if (isCustomLoginInfoLoading) {
-    return null;
-  }
-  if (!isAuthenticated(document.cookie) && loginRedirectOverride) {
-    window.location.replace(loginRedirectOverride);
     return null;
   }
   if (isAuthenticated(document.cookie)) {

@@ -111,7 +111,7 @@ services:
       - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
   {% for i in range(execution_node_count|int) -%}
   receptor-{{ loop.index }}:
-    image: quay.io/awx/awx_devel:devel
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
     user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_{{ loop.index }}
     hostname: receptor-{{ loop.index }}

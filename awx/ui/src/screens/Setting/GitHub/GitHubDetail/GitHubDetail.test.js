@@ -147,8 +147,8 @@ describe('<GitHubDetail />', () => {
       );
       assertDetail(wrapper, 'GitHub OAuth2 Key', 'mock github key');
       assertDetail(wrapper, 'GitHub OAuth2 Secret', 'Encrypted');
-      assertVariableDetail(wrapper, 'GitHub OAuth2 Organization Map', '{}');
-      assertVariableDetail(wrapper, 'GitHub OAuth2 Team Map', '{}');
+      assertVariableDetail(wrapper, 'GitHub OAuth2 Organization Map', 'null');
+      assertVariableDetail(wrapper, 'GitHub OAuth2 Team Map', 'null');
     });
 
     test('should hide edit button from non-superusers', async () => {
@@ -226,12 +226,12 @@ describe('<GitHubDetail />', () => {
       assertVariableDetail(
         wrapper,
         'GitHub Organization OAuth2 Organization Map',
-        '{}'
+        'null'
       );
       assertVariableDetail(
         wrapper,
         'GitHub Organization OAuth2 Team Map',
-        '{}'
+        'null'
       );
     });
   });
@@ -333,9 +333,13 @@ describe('<GitHubDetail />', () => {
       assertVariableDetail(
         wrapper,
         'GitHub Enterprise OAuth2 Organization Map',
-        '{}'
+        'null'
       );
-      assertVariableDetail(wrapper, 'GitHub Enterprise OAuth2 Team Map', '{}');
+      assertVariableDetail(
+        wrapper,
+        'GitHub Enterprise OAuth2 Team Map',
+        'null'
+      );
     });
   });
 
@@ -398,12 +402,12 @@ describe('<GitHubDetail />', () => {
       assertVariableDetail(
         wrapper,
         'GitHub Enterprise Organization OAuth2 Organization Map',
-        '{}'
+        'null'
       );
       assertVariableDetail(
         wrapper,
         'GitHub Enterprise Organization OAuth2 Team Map',
-        '{}'
+        'null'
       );
     });
   });
@@ -463,12 +467,12 @@ describe('<GitHubDetail />', () => {
       assertVariableDetail(
         wrapper,
         'GitHub Enterprise Team OAuth2 Organization Map',
-        '{}'
+        'null'
       );
       assertVariableDetail(
         wrapper,
         'GitHub Enterprise Team OAuth2 Team Map',
-        '{}'
+        'null'
       );
     });
   });

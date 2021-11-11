@@ -147,7 +147,10 @@ function InstanceList() {
   const fetchInstancesToAssociate = useCallback(
     (params) =>
       InstancesAPI.read(
-        mergeParams(params, { not__rampart_groups__id: instanceGroupId })
+        mergeParams(params, {
+          ...{ not__rampart_groups__id: instanceGroupId },
+          ...{ not__node_type: 'control' },
+        })
       ),
     [instanceGroupId]
   );
@@ -280,6 +283,10 @@ function InstanceList() {
           title={t`Select Instances`}
           optionsRequest={readInstancesOptions}
           displayKey="hostname"
+          columns={[
+            { key: 'hostname', name: t`Name` },
+            { key: 'node_type', name: t`Node Type` },
+          ]}
         />
       )}
       {error && (

@@ -85,7 +85,7 @@ from awx.main.models import (
     build_safe_env,
 )
 from awx.main.constants import ACTIVE_STATES
-from awx.main.exceptions import AwxTaskError, PostRunError
+from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
@@ -108,7 +108,7 @@ from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client, worker_cleanup
+from awx.main.utils.receptor import get_receptor_ctl, worker_info, get_conn_type, get_tls_client, worker_cleanup, administrative_workunit_reaper
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -191,6 +191,8 @@ def inform_cluster_of_shutdown():
 
 @task(queue=get_local_queuename)
 def apply_cluster_membership_policies():
+    from awx.main.signals import disable_activity_stream
+
     started_waiting = time.time()
     with advisory_lock('cluster_policy_lock', wait=True):
         lock_time = time.time() - started_waiting
@@ -282,18 +284,19 @@ def apply_cluster_membership_policies():
 
         # On a differential basis, apply instances to groups
         with transaction.atomic():
-            for g in actual_groups:
-                if g.obj.is_container_group:
-                    logger.debug('Skipping containerized group {} for policy calculation'.format(g.obj.name))
-                    continue
-                instances_to_add = set(g.instances) - set(g.prior_instances)
-                instances_to_remove = set(g.prior_instances) - set(g.instances)
-                if instances_to_add:
-                    logger.debug('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
-                    g.obj.instances.add(*instances_to_add)
-                if instances_to_remove:
-                    logger.debug('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
-                    g.obj.instances.remove(*instances_to_remove)
+            with disable_activity_stream():
+                for g in actual_groups:
+                    if g.obj.is_container_group:
+                        logger.debug('Skipping containerized group {} for policy calculation'.format(g.obj.name))
+                        continue
+                    instances_to_add = set(g.instances) - set(g.prior_instances)
+                    instances_to_remove = set(g.prior_instances) - set(g.instances)
+                    if instances_to_add:
+                        logger.debug('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
+                        g.obj.instances.add(*instances_to_add)
+                    if instances_to_remove:
+                        logger.debug('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
+                        g.obj.instances.remove(*instances_to_remove)
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
@@ -397,20 +400,22 @@ def _cleanup_images_and_files(**kwargs):
         return
     this_inst = Instance.objects.me()
     runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    stdout = ''
-    with StringIO() as buffer:
-        with redirect_stdout(buffer):
-            ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
-            stdout = buffer.getvalue()
-    if '(changed: True)' in stdout:
-        logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+    if runner_cleanup_kwargs:
+        stdout = ''
+        with StringIO() as buffer:
+            with redirect_stdout(buffer):
+                ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+                stdout = buffer.getvalue()
+        if '(changed: True)' in stdout:
+            logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
     checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
     if checker_instance and this_inst.hostname == checker_instance.hostname:
-        logger.info(f'Running execution node cleanup with kwargs {kwargs}')
         for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
             runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+            if not runner_cleanup_kwargs:
+                continue
             try:
                 stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
                 if '(changed: True)' in stdout:
@@ -532,7 +537,7 @@ def inspect_execution_nodes(instance_list):
                 # check
                 logger.warn(f'Execution node attempting to rejoin as instance {hostname}.')
                 execution_node_health_check.apply_async([hostname])
-            elif instance.capacity == 0:
+            elif instance.capacity == 0 and instance.enabled:
                 # nodes with proven connection but need remediation run health checks are reduced frequency
                 if not instance.last_health_check or (nowtime - instance.last_health_check).total_seconds() >= settings.EXECUTION_NODE_REMEDIATION_CHECKS:
                     # Periodically re-run the health check of errored nodes, in case someone fixed it
@@ -648,6 +653,8 @@ def awx_receptor_workunit_reaper():
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
         receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
         receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+
+    administrative_workunit_reaper(receptor_work_list)
 
 
 @task(queue=get_local_queuename)
@@ -1542,6 +1549,8 @@ class BaseTask(object):
                 # ensure failure notification sends even if playbook_on_stats event is not triggered
                 handle_success_and_failure_notifications.apply_async([self.instance.job.id])
 
+        except ReceptorNodeNotFound as exc:
+            extra_update_fields['job_explanation'] = str(exc)
         except Exception:
             # this could catch programming or file system errors
             extra_update_fields['result_traceback'] = traceback.format_exc()
@@ -1905,6 +1914,7 @@ class RunJob(BaseTask):
                 status='running',
                 instance_group=pu_ig,
                 execution_node=pu_en,
+                controller_node=pu_en,
                 celery_task_id=job.celery_task_id,
             )
             if branch_override:
@@ -1913,6 +1923,8 @@ class RunJob(BaseTask):
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
             local_project_sync = job.project.create_project_update(_eager_fields=sync_metafields)
+            local_project_sync.log_lifecycle("controller_node_chosen")
+            local_project_sync.log_lifecycle("execution_node_chosen")
             create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
@@ -2205,10 +2217,13 @@ class RunProjectUpdate(BaseTask):
                         status='running',
                         instance_group=instance_group,
                         execution_node=project_update.execution_node,
+                        controller_node=project_update.execution_node,
                         source_project_update=project_update,
                         celery_task_id=project_update.celery_task_id,
                     )
                 )
+                local_inv_update.log_lifecycle("controller_node_chosen")
+                local_inv_update.log_lifecycle("execution_node_chosen")
             try:
                 create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
                 inv_update_class().run(local_inv_update.id)
@@ -2656,10 +2671,13 @@ class RunInventoryUpdate(BaseTask):
                     job_tags=','.join(sync_needs),
                     status='running',
                     execution_node=Instance.objects.me().hostname,
+                    controller_node=Instance.objects.me().hostname,
                     instance_group=inventory_update.instance_group,
                     celery_task_id=inventory_update.celery_task_id,
                 )
             )
+            local_project_sync.log_lifecycle("controller_node_chosen")
+            local_project_sync.log_lifecycle("execution_node_chosen")
             create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
             # associate the inventory update before calling run() so that a
             # cancel() call on the inventory update can cancel the project update
@@ -3062,10 +3080,10 @@ class AWXReceptorJob:
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
-                receptor_ctl.simple_command(f"work release {self.unit_id}")
-            # If an error occured without the job itself failing, it could be a broken instance
-            if self.work_type == 'ansible-runner' and ((res is None) or (getattr(res, 'rc', None) is None)):
-                execution_node_health_check(self.task.instance.execution_node)
+                try:
+                    receptor_ctl.simple_command(f"work release {self.unit_id}")
+                except Exception:
+                    logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     @property
     def sign_work(self):
@@ -3089,7 +3107,21 @@ class AWXReceptorJob:
             _kw['tlsclient'] = get_tls_client(use_stream_tls)
         result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=self.sign_work, **_kw)
         self.unit_id = result['unitid']
+        # Update the job with the work unit in-memory so that the log_lifecycle
+        # will print out the work unit that is to be associated with the job in the database
+        # via the update_model() call.
+        # We want to log the work_unit_id as early as possible. A failure can happen in between
+        # when we start the job in receptor and when we associate the job <-> work_unit_id.
+        # In that case, there will be work running in receptor and Controller will not know
+        # which Job it is associated with.
+        # We do not programatically handle this case. Ideally, we would handle this with a reaper case.
+        # The two distinct job lifecycle log events below allow for us to at least detect when this
+        # edge case occurs. If the lifecycle event work_unit_id_received occurs without the
+        # work_unit_id_assigned event then this case may have occured.
+        self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
+        self.task.instance.log_lifecycle("work_unit_id_received")
         self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
+        self.task.instance.log_lifecycle("work_unit_id_assigned")
 
         sockin.close()
         sockout.close()
@@ -3118,9 +3150,14 @@ class AWXReceptorJob:
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
             elif res.status == 'error':
-                unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
-                detail = unit_status['Detail']
-                state_name = unit_status['StateName']
+                try:
+                    unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
+                    detail = unit_status.get('Detail', None)
+                    state_name = unit_status.get('StateName', None)
+                except Exception:
+                    detail = ''
+                    state_name = ''
+                    logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
@@ -3137,11 +3174,19 @@ class AWXReceptorJob:
                     try:
                         resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
                         lines = resultsock.readlines()
-                        self.task.instance.result_traceback = b"".join(lines).decode()
-                        self.task.instance.save(update_fields=['result_traceback'])
+                        receptor_output = b"".join(lines).decode()
+                        if receptor_output:
+                            self.task.instance.result_traceback = receptor_output
+                            self.task.instance.save(update_fields=['result_traceback'])
+                        elif detail:
+                            self.task.instance.result_traceback = detail
+                            self.task.instance.save(update_fields=['result_traceback'])
+                        else:
+                            logger.warn(f'No result details or output from {self.task.instance.log_format}, status:\n{unit_status}')
                     except Exception:
                         raise RuntimeError(detail)
 
+        time.sleep(3)
         return res
 
     # Spawned in a thread so Receptor can start reading before we finish writing, we
@@ -3184,7 +3229,7 @@ class AWXReceptorJob:
                 receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
-            if self.work_type == 'ansible-runner':
+            if self.work_type == 'ansible-runner' and settings.AWX_CLEANUP_PATHS:
                 # on execution nodes, we rely on the private data dir being deleted
                 cli_params = f"--private-data-dir={private_data_dir} --delete"
             else:

@@ -122,7 +122,7 @@ describe('<GitHubOrgEdit />', () => {
       SOCIAL_AUTH_GITHUB_ORG_KEY: '',
       SOCIAL_AUTH_GITHUB_ORG_SECRET: '',
       SOCIAL_AUTH_GITHUB_ORG_NAME: 'new org',
-      SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: {},
+      SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
       SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: {
         Default: {
           users: false,

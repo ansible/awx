@@ -47,7 +47,7 @@ class Command(BaseCommand):
                     color = '\033[90m[DISABLED] '
                 if no_color:
                     color = ''
-                fmt = '\t' + color + '{0.hostname} capacity={0.capacity} version={1}'
+                fmt = '\t' + color + '{0.hostname} capacity={0.capacity} node_type={0.node_type} version={1}'
                 if x.capacity:
                     fmt += ' heartbeat="{0.modified:%Y-%m-%d %H:%M:%S}"'
                 print((fmt + '\033[0m').format(x, x.version or '?'))
