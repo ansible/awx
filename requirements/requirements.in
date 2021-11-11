@@ -1,15 +1,15 @@
-aiohttp
+aiohttp>=3.7.4
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 autobahn>=20.12.3  # CVE-2020-35678
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
-cryptography<3.0.0
+cryptography>=3.2
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
-django==2.2.20  # see UPGRADE BLOCKERs
+django==2.2.24  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers>=3.5.0
 django-crum
@@ -29,7 +29,7 @@ djangorestframework>=3.12.1
 djangorestframework-yaml
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
-jinja2>=2.11.0  # required for ChainableUndefined
+jinja2>=2.11.3  # CVE-2020-28493
 JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
