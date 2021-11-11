@@ -103,8 +103,8 @@
       "index.js"
     ],
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!has-ansi)/",
-      "<rootDir>/node_modules/(?!d3)/"
+      "<rootDir>/node_modules/(?!d3)/",
+      "<rootDir>/node_modules/(?!has-ansi)/"
     ]
   }
 }
