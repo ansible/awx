@@ -9,6 +9,7 @@ import copy
 import errno
 import sys
 import traceback
+import socket
 
 # Django Split Settings
 from split_settings.tools import optional, include
@@ -88,4 +89,8 @@ except IOError:
 
 # The below runs AFTER all of the custom settings are imported.
 
-DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa
+CLUSTER_HOST_ID = socket.gethostname()
+
+DATABASES.setdefault('default', dict()).setdefault('OPTIONS', dict()).setdefault(
+    'application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]
+)  # noqa
