@@ -28,7 +28,7 @@ directory = /awx_devel
 environment =
     UWSGI_DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne tower-processes:wsbroadcast'
 {% else %}
-command = /var/lib/awx/venv/awx/bin/uwsgi --socket 127.0.0.1:8050 --module=awx.wsgi:application --vacuum --processes=5 --harakiri=120 --no-orphans --master --max-requests=1000 --master-fifo=/var/lib/awx/awxfifo --lazy-apps -b 32768
+command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
 directory = /var/lib/awx
 {% endif %}
 autostart = true
