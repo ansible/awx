@@ -3,7 +3,7 @@ import Base from '../Base';
 class WorkflowApprovals extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/workflow_approvals/';
+    this.baseUrl = 'api/v2/workflow_approvals/';
   }
 
   approve(id) {

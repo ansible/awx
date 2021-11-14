@@ -4,7 +4,7 @@ import RunnableMixin from '../mixins/Runnable.mixin';
 class WorkflowJobs extends RunnableMixin(Base) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/workflow_jobs/';
+    this.baseUrl = 'api/v2/workflow_jobs/';
   }
 
   readNodes(id, params) {

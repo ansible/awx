@@ -41,7 +41,7 @@ function About({ version, isOpen, onClose }) {
       onClose={onClose}
       productName={brandName}
       trademark={`${copyright} ${new Date().getFullYear()} ${redHatInc}`}
-      brandImageSrc="/static/media/logo-header.svg"
+      brandImageSrc="static/media/logo-header.svg"
       brandImageAlt={t`Brand Image`}
     >
       <pre>

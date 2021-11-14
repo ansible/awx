@@ -107,7 +107,7 @@ function AnalyticsStep() {
       <Flex alignItems={{ default: 'alignItemsCenter' }}>
         <img
           width="300"
-          src="/static/media/insights-analytics-dashboard.jpeg"
+          src="static/media/insights-analytics-dashboard.jpeg"
           alt={t`Insights for Ansible Automation Platform dashboard`}
         />
         <Button
