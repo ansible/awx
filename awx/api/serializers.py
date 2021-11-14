@@ -391,7 +391,20 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         view = self.context.get('view', None)
         if view and (hasattr(view, 'retrieve') or view.request.method == 'POST') and type(obj) in settings.NAMED_URL_GRAPH:
             original_url = self.get_url(obj)
-            res['named_url'] = self._generate_named_url(original_url, obj, settings.NAMED_URL_GRAPH[type(obj)])
+
+            # If the app is running at a location other than /, temporarily remove the
+            # prefix. This is to avoid changing the code in _generate_named_url where
+            # it is assumed the ID of the resource is at url_units[4].
+            url_prefix = view.request.META.get('SCRIPT_NAME', '')
+            if url_prefix:
+                original_url = removeprefix(original_url, url_prefix)
+
+            named_url = self._generate_named_url(original_url, obj, settings.NAMED_URL_GRAPH[type(obj)])
+
+            if url_prefix:
+                named_url = url_prefix + named_url
+
+            res['named_url'] = named_url
         if getattr(obj, 'created_by', None):
             res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):
