@@ -1,0 +1,46 @@
+---
+- name: Add Projects
+  project:
+    name:                                 "{{ __controller_project_item.name | mandatory }}"
+    copy_from:                            "{{ __controller_project_item.copy_from | default(omit, true) }}"
+    description:                          "{{ __controller_project_item.description | default(omit, true) }}"
+    scm_type:                             "{{ __controller_project_item.scm_type | default('manual') }}"
+    scm_url:                              "{{ __controller_project_item.scm_url | default(omit, true) }}"
+    default_environment:                  "{{ __controller_project_item.default_environment | default(omit, true) }}"
+    local_path:                           "{{ __controller_project_item.local_path | default(omit, true) }}"
+    scm_branch:                           "{{ __controller_project_item.scm_branch | default(omit, true)  }}"
+    scm_refspec:                          "{{ __controller_project_item.scm_refspec | default(omit, true) }}"
+    credential:                           "{{ __controller_project_item.credential.name | default(__controller_project_item.credential | default(__controller_project_item.scm_credential | default(omit, true))) }}"
+    scm_clean:                            "{{ __controller_project_item.scm_clean | default(omit) }}"
+    scm_delete_on_update:                 "{{ __controller_project_item.scm_delete_on_update | default(omit) }}"
+    scm_track_submodules:                 "{{ __controller_project_item.scm_track_submodules | default(omit) }}"
+    scm_update_on_launch:                 "{{ __controller_project_item.scm_update_on_launch | default(omit) }}"
+    scm_update_cache_timeout:             "{{ __controller_project_item.scm_update_cache_timeout | default(omit, true) }}"
+    allow_override:                       "{{ __controller_project_item.allow_override | default(omit) }}"
+    timeout:                              "{{ __controller_project_item.job_timeout | default(__controller_project_item.timeout | default(omit, true)) }}"
+    custom_virtualenv:                    "{{ __controller_project_item.custom_virtualenv | default(omit, true) }}"
+    organization:                         "{{ __controller_project_item.organization.name | default( __controller_project_item.organization | default(omit) ) }}"
+    state:                                "{{ __controller_project_item.state | default(controller_state | default('present')) }}"
+    wait:                                 "{{ __controller_project_item.wait | default(omit) }}"
+    update_project:                       "{{ __controller_project_item.update_project | default(omit) }}"
+    interval:                             "{{ __controller_project_item.interval | default(1) }}"
+    notification_templates_started:       "{{ __controller_project_item.notification_templates_started | default(__controller_project_item.related.notification_templates_started | default([]) | map(attribute='name') | list ) }}"
+    notification_templates_success:       "{{ __controller_project_item.notification_templates_success | default(__controller_project_item.related.notification_templates_success | default([]) | map(attribute='name') | list ) }}"
+    notification_templates_error:         "{{ __controller_project_item.notification_templates_error | default(__controller_project_item.related.notification_templates_error | default([]) | map(attribute='name') | list ) }}"
+
+    # Role Standard Options
+    controller_username:                  "{{ controller_username | default(omit, true) }}"
+    controller_password:                  "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:                "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:                      "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:               "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                       "{{ controller_validate_certs | default(omit) }}"
+  check_mode: "{{ __controller_project_item.check_mode | default(controller_check_mode | default(omit, true)) }}"
+  ignore_errors: "{{ __controller_project_item.ignore_errors | default(controller_ignore_errors | default(omit, true)) }}"
+  loop: "{{ controller_projects }}"
+  register: controller_projects_results
+  loop_control:
+    loop_var: __controller_project_item
+  no_log: "{{ controller_configuration_projects_secure_logging }}"
+  
+...

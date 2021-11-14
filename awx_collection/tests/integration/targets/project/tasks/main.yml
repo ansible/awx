@@ -17,43 +17,18 @@
         credential_type: Source Control
       register: result
 
-    - assert:
+    - name: Assert SCM Credential created successfully
+      assert:
         that:
           - result is changed
 
-    - name: Create a git project without credentials and wait
-      project:
-        name: "{{ project_name1 }}"
-        organization: Default
-        scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
-        wait: true
-      register: result
-
-    - assert:
-        that:
-          - result is changed
-
-    - name: Recreate the project to validate not changed
-      project:
-        name: "{{ project_name1 }}"
-        organization: Default
-        scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
-        wait: false
-      register: result
-      ignore_errors: true
-
-    - assert:
-        that:
-          - result is not changed
-
-    - name: Create organizations
+    - name: Create organization
       organization:
         name: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert organization created successfully
+      assert:
         that:
           - result is changed
 
@@ -64,98 +39,96 @@
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert credential created successfully
+      assert:
         that:
           - result is changed
 
-    - name: Create a new test project in check_mode
-      project:
-        name: "{{ project_name2 }}"
-        organization: "{{ org_name }}"
-        scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
-        scm_credential: "{{ cred_name }}"
-      check_mode: true
+    - name: Create project tests
+      set_fact:
+        controller_projects:
+          - name: "{{ project_name1 }}"
+            description: Create a git project without credentials and wait
+            organization: Default
+            scm_type: git
+            scm_url: https://github.com/ansible/test-playbooks
+            wait: true
+          - name: "{{ project_name1 }}"
+            # description: Recreate the project to validate not changed
+            organization: Default
+            scm_type: git
+            scm_url: https://github.com/ansible/test-playbooks
+            wait: true
+          - name: "asdf{{ project_name2 }}"
+            description: Create a new test project in check_mode
+            organization: Default
+            scm_type: git
+            scm_url: https://github.com/ansible/test-playbooks
+            wait: true
+            check_mode: true
+          - name: "{{ project_name2 }}"
+            description: "Copy project from {{ project_name1 }}"
+            copy_from: "{{ project_name1 }}"
+            organization: "{{ org_name }}"
+            scm_type: git
+            scm_credential: "{{ cred_name }}"
+          - name: "{{ project_name2 }}"
+            description: Check module fails with correct msg when given non-existing org as param
+            organization: Non_Existing_Org
+            scm_type: git
+            scm_url: https://github.com/ansible/test-playbooks
+            scm_credential: "{{ cred_name }}"
+            ignore_errors: true
+          - name: "{{ project_name2 }}"
+            description: Check module fails with correct msg when given non-existing credential as param
+            organization: "{{ org_name }}"
+            scm_type: git
+            scm_url: https://github.com/ansible/test-playbooks
+            scm_credential: Non_Existing_Credential
+            ignore_errors: true
+          - name: "{{ project_name3 }}"
+            description: Create a git project without credentials without waiting
+            organization: Default
+            scm_type: git
+            scm_branch: empty_branch
+            scm_url: https://github.com/ansible/test-playbooks
+            allow_override: true
+          - name: "{{ project_name3 }}"
+            description: Update the project and wait. Verify not changed as no change made to repo and refspec not changed
+            organization: Default
+            scm_type: git
+            scm_branch: empty_branch
+            scm_url: https://github.com/ansible/test-playbooks
+            allow_override: true
+            wait: true
+            update_project: true
 
-    - name: "Copy project from {{ project_name1 }}"
-      project:
-        name: "{{ project_name2 }}"
-        copy_from: "{{ project_name1 }}"
-        organization: "{{ org_name }}"
-        scm_type: git
-        scm_credential: "{{ cred_name }}"
-        state: present
-      register: result
+    - name: Run projects role
+      include_role:
+        name: projects
 
-    # If this fails it may be because the check_mode task actually already created
-    # the project, or it could be because the module actually failed somehow
-    - assert:
+    - debug:
+        var: controller_projects_results
+
+    - name: Assert projects tests passed
+      assert:
         that:
-          - result.copied
-
-    - name: Check module fails with correct msg when given non-existing org as param
-      project:
-        name: "{{ project_name2 }}"
-        organization: Non_Existing_Org
-        scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
-        scm_credential: "{{ cred_name }}"
-      register: result
-      ignore_errors: true
-
-    - assert:
-        that:
-          - "result is failed"
-          - "result is not changed"
-          - "'Non_Existing_Org' in result.msg"
-          - "result.total_results == 0"
-
-    - name: Check module fails with correct msg when given non-existing credential as param
-      project:
-        name: "{{ project_name2 }}"
-        organization: "{{ org_name }}"
-        scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
-        scm_credential: Non_Existing_Credential
-      register: result
-      ignore_errors: true
-
-    - assert:
-        that:
-          - "result is failed"
-          - "result is not changed"
-          - "'Non_Existing_Credential' in result.msg"
-          - "result.total_results == 0"
-
-    - name: Create a git project without credentials without waiting
-      project:
-        name: "{{ project_name3 }}"
-        organization: Default
-        scm_type: git
-        scm_branch: empty_branch
-        scm_url: https://github.com/ansible/test-playbooks
-        allow_override: true
-      register: result
-
-    - assert:
-        that:
-          - result is changed
-
-    - name: Update the project and wait. Verify not changed as no change made to repo and refspec not changed
-      project:
-        name: "{{ project_name3 }}"
-        organization: Default
-        scm_type: git
-        scm_branch: empty_branch
-        scm_url: https://github.com/ansible/test-playbooks
-        allow_override: true
-        wait: true
-        update_project: true
-      register: result
-
-    - assert:
-        that:
-          - result is not changed
+          - controller_projects_results.results[0] is changed
+          - controller_projects_results.results[1] is not changed
+          # 2 check mode reports as changed, but does not create the project
+          # If 3 fails it may be because the check_mode task actually already created
+          # the project, or it could be because the module actually failed somehow
+          - controller_projects_results.results[3].copied
+          - controller_projects_results.results[4] is failed
+          - controller_projects_results.results[4] is not changed
+          - "'Non_Existing_Org' in controller_projects_results.results[4].msg"
+          - controller_projects_results.results[4].total_results == 0
+          - controller_projects_results.results[5] is failed
+          - controller_projects_results.results[5] is not changed
+          - "'Non_Existing_Credential' in controller_projects_results.results[5].msg"
+          - controller_projects_results.results[5].total_results == 0
+          - controller_projects_results.results[6] is changed
+          - controller_projects_results.results[7] is not changed
 
     - name: Create a job template that overrides the project scm_branch
       job_template:
@@ -184,23 +157,12 @@
           - job is successful
 
   always:
+
     - name: Delete the test job_template
       job_template:
         name: "{{ jt1 }}"
         project: "{{ project_name3 }}"
         inventory: "Demo Inventory"
-        state: absent
-
-    - name: Delete the test project 3
-      project:
-        name: "{{ project_name3 }}"
-        organization: Default
-        state: absent
-
-    - name: Delete the test project 2
-      project:
-        name: "{{ project_name2 }}"
-        organization: "{{ org_name }}"
         state: absent
 
     - name: Delete the SCM Credential
@@ -211,20 +173,25 @@
         state: absent
       register: result
 
-    - assert:
+    - name: Assert Credential is removed
+      assert:
         that:
           - result is changed
 
-    - name: Delete the test project 1
-      project:
-        name: "{{ project_name1 }}"
-        organization: Default
-        state: absent
-      register: result
+    - name: Set State overide
+      set_fact:
+        controller_state: absent
 
-    - assert:
+    - name: Run projects role
+      include_role:
+        name: projects
+
+    - name: Assert projects tests passed
+      assert:
         that:
-          - result is changed
+          - controller_projects_results.results[0] is changed
+          - controller_projects_results.results[3] is changed
+          - controller_projects_results.results[6] is changed
 
     - name: Delete credential
       credential:
@@ -234,7 +201,8 @@
         state: absent
       register: result
 
-    - assert:
+    - name: Assert Credential is removed
+      assert:
         that:
           - result is changed
 
@@ -244,6 +212,7 @@
         state: absent
       register: result
 
-    - assert:
+    - name: Assert organization is removed
+      assert:
         that:
           - result is changed
