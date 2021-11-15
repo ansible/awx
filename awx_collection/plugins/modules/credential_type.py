@@ -43,7 +43,7 @@ options:
       description:
         - >-
           Enter inputs using either JSON or YAML syntax. Refer to the
-          Automation Platform Controler documentation for example syntax.
+          Automation Platform Controller documentation for example syntax.
       type: dict
     injectors:
       description:
