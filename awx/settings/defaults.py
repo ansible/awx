@@ -242,6 +242,9 @@ SUBSYSTEM_METRICS_INTERVAL_SAVE_TO_REDIS = 2
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
 
+# Name of our session cookie
+SESSION_COOKIE_NAME = 'awxsessionid'
+
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
