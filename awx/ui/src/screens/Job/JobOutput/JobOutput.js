@@ -575,7 +575,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const handleScrollNext = () => {
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
     scrollToRow(stopIndex - 1);
-    setIsFollowModeEnabled(false);
   };
 
   const handleScrollFirst = () => {
