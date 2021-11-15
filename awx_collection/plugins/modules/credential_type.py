@@ -71,6 +71,26 @@ EXAMPLES = '''
     state: present
     validate_certs: false
 
+- name: Custom Credential type with inputs as a YAML
+  credential_type:
+      name: Nexus
+      description: Credentials type for Nexus
+      kind: cloud
+      inputs:
+        fields:
+          - type: string
+            id: username
+            label: Username
+          - type: string
+            id: password
+            label: Password
+            secret: true
+        required:
+          - username
+          - password
+      state: present
+      validate_certs: false
+
 - credential_type:
     name: Nexus
     state: absent
