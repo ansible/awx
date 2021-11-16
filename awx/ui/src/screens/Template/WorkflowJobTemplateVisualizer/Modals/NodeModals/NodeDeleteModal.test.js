@@ -23,6 +23,13 @@ describe('NodeDeleteModal', () => {
                   name: 'Test JT',
                   type: 'job_template',
                 },
+                fullUnifiedJobTemplate: {
+                  name: 'Bar',
+                },
+                originalNodeObject: {
+                  identifier: '654160ef-4013-4b90-8e4b-87dee0cb6783',
+                  summary_fields: { unified_job_template: { name: 'Bar' } },
+                },
               },
             }}
           >
@@ -37,6 +44,7 @@ describe('NodeDeleteModal', () => {
     });
 
     test('Confirm button dispatches as expected', () => {
+      expect(wrapper.find('Title').text('Remove Node Bar'));
       wrapper.find('button#confirm-node-removal').simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'DELETE_NODE',

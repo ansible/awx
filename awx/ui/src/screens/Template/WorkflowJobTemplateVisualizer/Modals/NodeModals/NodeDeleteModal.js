@@ -8,14 +8,24 @@ import {
   WorkflowStateContext,
 } from 'contexts/Workflow';
 import AlertModal from 'components/AlertModal';
+import { stringIsUUID } from 'util/strings';
 
 function NodeDeleteModal() {
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToDelete } = useContext(WorkflowStateContext);
+  const identifier = nodeToDelete?.originalNodeObject?.identifier;
+  const nodeIdentifier =
+    identifier && !stringIsUUID(identifier)
+      ? identifier
+      : nodeToDelete?.identifier;
+  const unifiedJobTemplate =
+    nodeToDelete?.fullUnifiedJobTemplate ||
+    nodeToDelete?.originalNodeObject?.summary_fields?.unified_job_template;
+  const nodeName = nodeIdentifier || unifiedJobTemplate?.name;
   return (
     <AlertModal
       variant="danger"
-      title={t`Remove Node`}
+      title={t`Remove Node ${nodeName}`}
       isOpen={nodeToDelete}
       onClose={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
       actions={[
