@@ -379,32 +379,22 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
     def _get_related(self, obj):
         return {} if obj is None else self.get_related(obj)
 
-    def _generate_named_url(self, url_path, obj, node):
-        url_units = url_path.split('/')
+    def _generate_friendly_id(self, obj, node):
         reset_counters()
-        named_url = node.generate_named_url(obj)
-        url_units[4] = named_url
-        return '/'.join(url_units)
+        return node.generate_named_url(obj)
 
     def get_related(self, obj):
         res = OrderedDict()
         view = self.context.get('view', None)
         if view and (hasattr(view, 'retrieve') or view.request.method == 'POST') and type(obj) in settings.NAMED_URL_GRAPH:
-            original_url = self.get_url(obj)
+            original_path = self.get_url(obj)
+            path_components = original_path.lstrip('/').rstrip('/').split('/')
 
-            # If the app is running at a location other than /, temporarily remove the
-            # prefix. This is to avoid changing the code in _generate_named_url where
-            # it is assumed the ID of the resource is at url_units[4].
-            url_prefix = view.request.META.get('SCRIPT_NAME', '')
-            if url_prefix:
-                original_url = removeprefix(original_url, url_prefix)
+            friendly_id = self._generate_friendly_id(obj, settings.NAMED_URL_GRAPH[type(obj)])
+            path_components[-1] = friendly_id
 
-            named_url = self._generate_named_url(original_url, obj, settings.NAMED_URL_GRAPH[type(obj)])
-
-            if url_prefix:
-                named_url = url_prefix + named_url
-
-            res['named_url'] = named_url
+            new_path = '/' + '/'.join(path_components) + '/'
+            res['named_url'] = new_path
         if getattr(obj, 'created_by', None):
             res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):
