@@ -167,6 +167,11 @@ function JobTemplateDetail({ template }) {
     );
   };
 
+  const buildLinkURL = (instance) =>
+    instance.is_container_group
+      ? '/instance_groups/container_group/'
+      : '/instance_groups/';
+
   if (instanceGroupsError) {
     return <ContentError error={instanceGroupsError} />;
   }
@@ -322,9 +327,11 @@ function JobTemplateDetail({ template }) {
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map((ig) => (
-                  <Chip key={ig.id} isReadOnly>
-                    {ig.name}
-                  </Chip>
+                  <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
+                    <Chip key={ig.id} isReadOnly>
+                      {ig.name}
+                    </Chip>
+                  </Link>
                 ))}
               </ChipGroup>
             }
