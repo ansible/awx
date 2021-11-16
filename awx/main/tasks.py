@@ -3069,6 +3069,9 @@ class AWXReceptorJob:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
             self.runner_params.update(execution_environment_params)
 
+        if not settings.IS_K8S and self.work_type == 'local' and 'only_transmit_kwargs' not in self.runner_params:
+            self.runner_params['only_transmit_kwargs'] = True
+
     def run(self):
         # We establish a connection to the Receptor socket
         receptor_ctl = get_receptor_ctl()
@@ -3193,9 +3196,6 @@ class AWXReceptorJob:
     # write our payload to the left side of our socketpair.
     @cleanup_new_process
     def transmit(self, _socket):
-        if not settings.IS_K8S and self.work_type == 'local' and 'only_transmit_kwargs' not in self.runner_params:
-            self.runner_params['only_transmit_kwargs'] = True
-
         try:
             ansible_runner.interface.run(streamer='transmit', _output=_socket.makefile('wb'), **self.runner_params)
         finally:
