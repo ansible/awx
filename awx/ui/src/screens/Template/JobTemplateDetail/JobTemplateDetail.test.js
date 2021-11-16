@@ -110,6 +110,13 @@ describe('<JobTemplateDetail />', () => {
     expect(SCMBranch.prop('value')).toBe('Foo branch');
   });
 
+  test('should render instance groups link', async () => {
+    const instanceGroups = wrapper.find('Detail[label="Instance Groups"]');
+    expect(
+      instanceGroups.find('Link[to="/instance_groups/2/details"]')
+    ).toHaveLength(1);
+  });
+
   test('should show content error for failed instance group fetch', async () => {
     JobTemplatesAPI.readInstanceGroups.mockImplementationOnce(() =>
       Promise.reject(new Error())
