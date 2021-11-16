@@ -2628,7 +2628,7 @@ msgstr ""
 #: screens/Credential/CredentialDetail/CredentialDetail.js:148
 #: screens/Setting/shared/SettingDetail.js:87
 msgid "Encrypted"
-msgstr "Crypté"
+msgstr "Chiffré"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:490
 msgid "End"
@@ -5685,7 +5685,7 @@ msgstr "Désactivé"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:233
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "On"
-msgstr "Le"
+msgstr "Activé"
 
 #: components/Workflow/WorkflowLegend.js:126
 #: components/Workflow/WorkflowLinkHelp.js:30
@@ -9671,7 +9671,7 @@ msgstr "Modifier"
 
 #: screens/Template/Survey/SurveyListItem.js:65
 msgid "encrypted"
-msgstr "crypté"
+msgstr "chiffré"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:232
 msgid "for more info."

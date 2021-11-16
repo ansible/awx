@@ -40,7 +40,7 @@ msgstr "secondes"
 
 #: awx/api/conf.py:29
 msgid "Maximum number of simultaneous logged in sessions"
-msgstr "Le nombre maximum de sessions actives en simultané"
+msgstr "Nombre maximum de sessions actives en simultané"
 
 #: awx/api/conf.py:30
 msgid ""
