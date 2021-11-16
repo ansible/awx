@@ -178,7 +178,7 @@ function InstanceList() {
         toolbarSearchColumns={[
           {
             name: t`Name`,
-            key: 'hostname',
+            key: 'hostname__icontains',
             isDefault: true,
           },
         ]}

@@ -67,7 +67,7 @@ function SmartInventoryHostList({ inventory }) {
         toolbarSearchColumns={[
           {
             name: t`Name`,
-            key: 'name',
+            key: 'name__icontains',
             isDefault: true,
           },
           {
