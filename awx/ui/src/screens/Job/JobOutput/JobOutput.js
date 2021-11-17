@@ -499,19 +499,23 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       return;
     }
 
-    const diff = stopIndex - startIndex;
-    const startCounter = getCounterForRow(startIndex);
-
     if (isMounted.current) {
       setCurrentlyLoading((prevCurrentlyLoading) =>
         prevCurrentlyLoading.concat(loadRange)
       );
     }
 
+    let range = [startIndex, stopIndex];
+    if (!isFlatMode) {
+      const diff = stopIndex - startIndex;
+      const startCounter = getCounterForRow(startIndex);
+      range = [startCounter, startCounter + diff];
+    }
+
     const [requestParams1, loadRange] = getEventRequestParams(
       job,
       remoteRowCount,
-      [startCounter, startCounter + diff]
+      range
     );
     const qs = parseQueryString(QS_CONFIG, location.search);
     const params1 = {

@@ -1336,6 +1336,21 @@ describe('useJobEvents', () => {
     });
   });
 
+  describe('getNumCollapsedEvents', () => {
+    let wrapper;
+    beforeEach(() => {
+      wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
+    });
+
+    test('should return number of collapsed events', () => {
+      expect(wrapper.find('#test').prop('getNumCollapsedEvents')()).toEqual(0);
+
+      wrapper.find('#test').prop('toggleNodeIsCollapsed')('abc-002');
+      expect(wrapper.find('#test').prop('getNumCollapsedEvents')()).toEqual(3);
+    });
+  });
+
   describe('getEventforRow', () => {
     let wrapper;
     beforeEach(() => {
