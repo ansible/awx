@@ -58,7 +58,7 @@ function InstanceGroupList({
   const match = useRouteMatch();
   const {
     error: protectedItemsError,
-    isloading: isLoadingProtectedItems,
+    isLoading: isLoadingProtectedItems,
     request: fetchProtectedItems,
     result: { defaultControlPlane, defaultExecution },
   } = useRequest(
@@ -248,6 +248,13 @@ function InstanceGroupList({
             clearSelected={clearSelected}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            toolbarSearchColumns={[
+              {
+                name: t`Name`,
+                key: 'name__icontains',
+                isDefault: true,
+              },
+            ]}
             renderToolbar={(props) => (
               <DatalistToolbar
                 {...props}
