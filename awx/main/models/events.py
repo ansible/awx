@@ -544,6 +544,9 @@ class JobEvent(BasePlaybookEvent):
             from awx.main.models import Host, JobHostSummary  # circular import
             from awx.main.models import Host, JobHostSummary, HostMetric
 
+            if settings.UNIQUE_HOST_RETENTION_ENABLED:
+                from awx.main.models import UniqueHost
+
             all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
             existing_host_ids = set(h.id for h in all_hosts)
 
@@ -578,6 +581,13 @@ class JobEvent(BasePlaybookEvent):
                 if h.id in host_mapping:
                     h.last_job_host_summary_id = host_mapping[h.id]
                     updated_hosts.add(h)
+
+                # Populate unique host retention table if enabled
+                if settings.UNIQUE_HOST_RETENTION_ENABLED:
+                    # If host already exists, update it, else create it
+                    UniqueHost.objects.update_or_create(
+                        host_name=h.name, defaults={'created': now(), 'modified': now(), 'job_host_summary_id': h.last_job_host_summary_id, 'host_id': h.id}
+                    )
 
             Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
 

@@ -981,3 +981,6 @@ DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'
 # Name of the default controlplane queue
 DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
+
+# Enable unique host retention
+UNIQUE_HOST_RETENTION_ENABLED = False

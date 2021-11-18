@@ -29,6 +29,11 @@ from awx.main.models.jobs import (  # noqa
     SystemJob,
     SystemJobTemplate,
 )
+
+if settings.UNIQUE_HOST_RETENTION_ENABLED:
+    from awx.main.models.jobs import (
+        UniqueHost,
+    )
 from awx.main.models.events import (  # noqa
     AdHocCommandEvent,
     InventoryUpdateEvent,

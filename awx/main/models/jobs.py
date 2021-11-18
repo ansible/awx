@@ -1088,6 +1088,53 @@ class JobHostSummary(CreatedModifiedModel):
         super(JobHostSummary, self).save(*args, **kwargs)
 
 
+class UniqueHost(CreatedModifiedModel):
+    """
+    Retention of unique host targets (optional)
+    """
+
+    class Meta:
+        app_label = 'main'
+        constraints = [models.UniqueConstraint(name='ensure_unique_hosts', fields=['host_name'])]
+        verbose_name_plural = _('unique hosts')
+        ordering = ('-pk',)
+
+    job_host_summary = models.ForeignKey(
+        'JobHostSummary',
+        related_name='unique_hosts',
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        editable=False,
+    )
+
+    host = models.ForeignKey(
+        'Host',
+        related_name='unique_hosts',
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        editable=False,
+    )
+
+    host_name = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
+
+    recorded_date = models.DateTimeField(
+        default=None,
+        editable=False,
+        null=True,
+    )
+
+    def save(self, *args, **kwargs):
+        if self.host is not None:
+            self.host_name = self.host.name
+        super(UniqueHost, self).save(*args, **kwargs)
+
+
 class SystemJobOptions(BaseModel):
     """
     Common fields for SystemJobTemplate and SystemJob.
