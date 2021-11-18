@@ -45,7 +45,7 @@ const mockTemplate = {
       delete: true,
       copy: true,
     },
-    recent_notifications: [],
+    recent_notifications: [{ status: 'success' }],
   },
   created: '2021-06-16T18:52:23.811374Z',
   modified: '2021-06-16T18:53:37.631371Z',
