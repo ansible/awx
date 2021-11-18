@@ -14,7 +14,7 @@ from oauthlib import oauth2
 from oauthlib.common import generate_token
 
 # Jinja
-from jinja2 import sandbox, StrictUndefined
+from jinja2 import Environment, sandbox, StrictUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # Django
@@ -4490,7 +4490,9 @@ class NotificationTemplateSerializer(BaseSerializer):
                 body = messages[event].get('body', {})
                 if body:
                     try:
-                        potential_body = json.loads(body)
+                        rendered_body = Environment(undefined=DescriptiveUndefined).from_string(body).render(JobNotificationMixin.context_stub())
+                        logger.error("RENDERED " + rendered_body)
+                        potential_body = json.loads(rendered_body)
                         if not isinstance(potential_body, dict):
                             error_list.append(
                                 _("Webhook body for '{}' should be a json dictionary. Found type '{}'.".format(event, type(potential_body).__name__))
