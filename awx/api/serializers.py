@@ -4491,7 +4491,6 @@ class NotificationTemplateSerializer(BaseSerializer):
                 if body:
                     try:
                         rendered_body = Environment(undefined=DescriptiveUndefined).from_string(body).render(JobNotificationMixin.context_stub())
-                        logger.error("RENDERED " + rendered_body)
                         potential_body = json.loads(rendered_body)
                         if not isinstance(potential_body, dict):
                             error_list.append(
