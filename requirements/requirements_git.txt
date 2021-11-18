@@ -1,2 +1,1 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
-https://receptor-nightlies.s3.amazonaws.com/receptorctl/receptorctl-0.0.0-py3-none-any.whl
