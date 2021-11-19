@@ -1,0 +1,123 @@
+---
+name: Stage Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'AWX version.'
+        required: true
+        default: ''
+      operator_version:
+        description: 'Operator version. Leave blank to skip staging awx-operator.'
+        default: ''
+      confirm:
+        description: 'Are you sure? Set this to yes.'
+        required: true
+        default: 'no'
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+    steps:
+      - name: Verify inputs
+        run: |
+          set -e
+
+          if [[ ${{ github.event.inputs.confirm }} != "yes" ]]; then
+            >&2 echo "Confirm must be 'yes'"
+            exit 1
+          fi
+
+          if [[ ${{ github.event.inputs.version }} == "" ]]; then
+            >&2 echo "Set version to continue."
+            exit 1
+          fi
+
+          exit 0
+
+      - name: Checkout awx
+        uses: actions/checkout@v2
+        with:
+          path: awx
+
+      - name: Checkout awx-logos
+        uses: actions/checkout@v2
+        with:
+          repository: ansible/awx-logos
+          path: awx-logos
+
+      - name: Checkout awx-operator
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository_owner }}/awx-operator
+          path: awx-operator
+
+      - name: Install playbook dependencies
+        run: |
+          python3 -m pip install docker
+
+      - name: Build and stage AWX
+        working-directory: awx
+        run: |
+          ansible-playbook -v tools/ansible/build.yml \
+            -e registry=ghcr.io \
+            -e registry_username=${{ github.actor }} \
+            -e registry_password=${{ secrets.GITHUB_TOKEN }} \
+            -e awx_image=${{ github.repository }} \
+            -e awx_version=${{ github.event.inputs.version }} \
+            -e ansible_python_interpreter=$(which python3) \
+            -e push=yes \
+            -e awx_official=yes
+
+      - name: Build and stage awx-operator
+        working-directory: awx-operator
+        run: |
+          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }}" \
+          IMAGE_TAG_BASE=ghcr.io/${{ github.repository_owner }}/awx-operator \
+          VERSION=${{ github.event.inputs.operator_version }} make docker-build docker-push
+
+      - name: Run test deployment with awx-operator
+        working-directory: awx-operator
+        run: |
+          python3 -m pip install -r molecule/requirements.txt
+          ansible-galaxy collection install -r molecule/requirements.yml
+          sudo rm -f $(which kustomize)
+          make kustomize
+          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule test -s kind
+        env:
+          AWX_TEST_IMAGE: ${{ github.repository }}
+          AWX_TEST_VERSION: ${{ github.event.inputs.version }}
+
+      - name: Generate changelog
+        uses: shanemcd/simple-changelog-generator@v1
+        id: changelog
+        with:
+          repo: "${{ github.repository }}"
+
+      - name: Write changelog to file
+        run: |
+          cat << 'EOF' > /tmp/awx-changelog
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
+
+      - name: Create draft release for AWX
+        working-directory: awx
+        run: |
+          ansible-playbook -v tools/ansible/stage.yml \
+            -e changelog_path=/tmp/awx-changelog \
+            -e repo=${{ github.repository }} \
+            -e awx_image=ghcr.io/${{ github.repository }} \
+            -e version=${{ github.event.inputs.version }} \
+            -e github_token=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create draft release for awx-operator
+        if: ${{ github.event.inputs.operator_version != '' }}
+        working-directory: awx
+        run: |
+          ansible-playbook tools/ansible/stage.yml \
+            -e version=${{ github.event.inputs.operator_version }} \
+            -e repo=${{ github.repository_owner }}/awx-operator \
+            -e github_token=${{ secrets.AWX_OPERATOR_RELEASE_TOKEN }}
