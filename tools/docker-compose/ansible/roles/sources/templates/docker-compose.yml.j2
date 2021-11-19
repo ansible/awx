@@ -98,7 +98,7 @@ services:
       - "awx_db:/var/lib/postgresql/data"
 {% if execution_node_count|int > 0 %}
   receptor-hop:
-    image: quay.io/ansible/receptor:devel
+    image: {{ receptor_image }}
     user: root
     container_name: tools_receptor_hop
     hostname: receptor-hop
