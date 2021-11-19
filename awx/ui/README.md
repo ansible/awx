@@ -109,7 +109,7 @@ To run:
 ```shell
 cd awx/awx/ui
 docker build -t awx-ui-next .
-docker run --name tools_ui_1 --network tools_default --link 'tools_awx_1:awx' -e TARGET="https://awx:8043" -p '3001:3001' --rm -v $(pwd)/src:/ui/src awx-ui-next
+docker run --name tools_ui_1 --network _sources_default --link 'tools_awx_1:awx' -e TARGET="https://awx:8043" -p '3001:3001' --rm -v $(pwd)/src:/ui/src awx-ui-next
 ```
 
 **Note:** This is for CI, test systems, zuul, etc. For local development, see [usage](https://github.com/ansible/awx/blob/devel/awx/ui/README.md#Development)
