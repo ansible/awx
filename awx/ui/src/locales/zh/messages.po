@@ -672,7 +672,7 @@ msgstr "返回到实例组"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:167
 msgid "Back to Instances"
-msgstr ""
+msgstr "返回到实例"
 
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
@@ -2630,11 +2630,11 @@ msgstr "最终用户许可证协议"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "End date"
-msgstr ""
+msgstr "结束日期"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:542
 msgid "End date/time"
-msgstr ""
+msgstr "结束日期/时间"
 
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
@@ -2642,7 +2642,7 @@ msgstr "结束与预期值不匹配"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "End time"
-msgstr ""
+msgstr "结束时间"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
