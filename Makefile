@@ -19,6 +19,8 @@ VENV_BASE ?= /var/lib/awx/venv
 DEV_DOCKER_TAG_BASE ?= quay.io/awx
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
+RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
+
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
@@ -463,6 +465,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
+	    -e receptor_image=$(RECEPTOR_IMAGE) \
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
@@ -500,7 +503,7 @@ docker-compose-container-group-clean:
 
 # Base development image build
 docker-compose-build:
-	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True
+	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
@@ -544,13 +547,14 @@ VERSION:
 	@echo "awx: $(VERSION)"
 
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml
+	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)
 
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
-	    -e template_dest=_build_kube_dev
+	    -e template_dest=_build_kube_dev \
+	    -e receptor_image=$(RECEPTOR_IMAGE)
 
 awx-kube-dev-build: Dockerfile.kube-dev
 	docker build -f Dockerfile.kube-dev \

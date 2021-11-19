@@ -83,6 +83,29 @@ ansible/awx_devel                            latest              ba9ec3e8df74   
 
 > By default, this image will be tagged with your branch name. You can specify a custom tag by setting an environment variable, for example: `DEVEL_IMAGE_NAME=quay.io/your_user/awx_devel:17.0.1`
 
+#### Customizing the Receptor Image
+
+By default, the development environment will use the `devel` image from receptor.
+This is used directly in `docker-compose.yml` for the hop nodes.
+The receptor binary is also copied over to the main awx_devel image, used in all other AWX nodes.
+
+Because of this, the `RECEPTOR_IMAGE` environment variable must be set when running
+both docker-compose-build and docker-compose in order to use the correct receptor in all containers.
+
+If you need to create a new receptor image, you can check out receptor and build it like this:
+
+```bash
+CONTAINERCMD=docker TAG=quay.io/ansible/receptor:release_1.1 make container
+```
+
+Then that can be used by AWX like this:
+
+```bash
+export RECEPTOR_IMAGE=quay.io/ansible/receptor:release_1.1
+make docker-compose-build
+make docker-compose
+```
+
 ### Run AWX
 
 ##### Start the containers
