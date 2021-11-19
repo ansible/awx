@@ -18,7 +18,7 @@
     "d3": "7.1.1",
     "dagre": "^0.8.4",
     "formik": "2.2.9",
-    "has-ansi": "4.0.0",
+    "has-ansi": "5.0.1",
     "html-entities": "2.3.2",
     "js-yaml": "^3.13.1",
     "luxon": "^2.0.1",
@@ -103,7 +103,8 @@
       "index.js"
     ],
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!d3)/"
+      "<rootDir>/node_modules/(?!d3)/",
+      "<rootDir>/node_modules/(?!has-ansi)/"
     ]
   }
 }

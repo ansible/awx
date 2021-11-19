@@ -1,4 +1,5 @@
 aiohttp
+ansible-runner==2.1.1
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 autobahn>=20.12.3  # CVE-2020-35678
@@ -45,6 +46,7 @@ python-dsv-sdk
 python-tss-sdk==1.0.0
 python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
+receptorctl==1.1.1
 schedule==0.6.0
 social-auth-core==3.3.1  # see UPGRADE BLOCKERs
 social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
@@ -59,7 +61,3 @@ uwsgitop
 wheel
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools==58.2.0  # see UPGRADE BLOCKERs
-
-# Temporarily added to use ansible-runner from git branch, to be removed
-# when ansible-runner moves from requirements_git.txt to here
-pbr
