@@ -418,7 +418,7 @@ ui-lint:
 
 ui-test:
 	$(NPM_BIN) --prefix awx/ui install
-	$(NPM_BIN) run --prefix awx/ui test -- --coverage --maxWorkers=4 --watchAll=false
+	$(NPM_BIN) run --prefix awx/ui test 
 
 
 # Build a pip-installable package into dist/ with a timestamped version number.
