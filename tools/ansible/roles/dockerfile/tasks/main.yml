@@ -1,5 +1,4 @@
 ---
-
 - name: Create _build directory
   file:
     path: "{{ dockerfile_dest }}/{{ template_dest }}"
