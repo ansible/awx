@@ -1,6 +1,3 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
@@ -2255,7 +2252,6 @@ msgid ""
 "Maximum number of messages to update the UI live job output with per second. "
 "Value of 0 means no limit."
 msgstr "Nombre maximal de messages pour mettre à jour la sortie du Job dans l'interface live utilisateur, par seconde. La valeur de 0 signifie qu'il n'y a pas de limite."
-
 #: awx/main/conf.py:380
 msgid "Maximum Scheduled Jobs"
 msgstr "Nombre max. de tâches planifiées"
@@ -2812,7 +2808,7 @@ msgstr "URL du coffre HashiCorp"
 #: awx/main/models/credential/__init__.py:920
 #: awx/main/models/credential/__init__.py:939
 msgid "Token"
-msgstr "Token"
+msgstr "Jeton"
 
 #: awx/main/credential_plugins/hashivault.py:25
 msgid "The access token used to authenticate to the Vault server"
@@ -3724,7 +3720,7 @@ msgstr "interne : à la non-importation pour l'hôte"
 
 #: awx/main/models/events.py:193
 msgid "Play Started"
-msgstr "Scène démarrée"
+msgstr "Play Démarrage"
 
 #: awx/main/models/events.py:194
 msgid "Playbook Complete"
@@ -3981,7 +3977,7 @@ msgid ""
 "The host would be marked enabled. If power_state where any value other than "
 "powered_on then the host would be disabled when imported. If the key is not "
 "found then the host will be enabled"
-msgstr "Utilisé uniquement lorsque enabled_var est défini. Valeur lorsque l'hôte est considéré comme activé. Par exemple, si enabled_var=\"status.power_state \" et enabled_value=\"powered_on\" avec les variables de l'hôte:{ \"status\" : { \"power_state\" : \"powered_on\", \"created\" : \"2020-08-04T18:13:04+00:00\", \"healthy\" : true }, \"name\" : \"foobar\", \"ip_address\" : \"192.168.2.1\"}, l'hôte serait marqué comme étant activé. Si power_state contient une valeur autre que power_on, alors l'hôte sera désactivé lors de l'importation. Si la clé n'est pas trouvée, alors l'hôte sera activé"
+msgstr "Utilisé uniquement lorsque enabled_var est défini. Valeur lorsque l'hôte est considéré comme activé. Par exemple, si enabled_var=\"status.power_state \" et enabled_value=\"powered_on\" avec les variables de l'hôte:{   \"status\": {     \"power_state\": \"powered_on\",     \"created\": \"2020-08-04T18:13:04+00:00\",     \"healthy\": true    },\"name\" : \"foobar\", \"ip_address\" : \"192.168.2.1\"}, l'hôte serait marqué comme étant activé. Si power_state contient une valeur autre que power_on, alors l'hôte sera désactivé lors de l'importation. Si la clé n'est pas trouvée, alors l'hôte sera activé"
 
 #: awx/main/models/inventory.py:878
 msgid "Regex where only matching hosts will be imported."
@@ -4301,7 +4297,7 @@ msgstr "Utilisé pour une vérification plus rigoureuse de l'accès à une appli
 #: awx/main/models/oauth.py:74
 msgid ""
 "Set to Public or Confidential depending on how secure the client device is."
-msgstr "Défini sur sur Public ou Confidentiel selon le degré de sécurité du périphérique client."
+msgstr "Définir sur sur Public ou Confidentiel selon le degré de sécurité du périphérique client."
 
 #: awx/main/models/oauth.py:76
 msgid ""
@@ -4555,7 +4551,7 @@ msgstr "Utilisation"
 
 #: awx/main/models/rbac.py:52
 msgid "Approve"
-msgstr "Approbation"
+msgstr "Approuver"
 
 #: awx/main/models/rbac.py:56
 msgid "Can manage all aspects of the system"
@@ -5147,7 +5143,7 @@ msgstr "Au moins %(min_certs)d certificats sont requis, seulement %(cert_count)d
 #: awx/main/validators.py:152
 #, python-format
 msgid "Only one certificate is allowed, %(cert_count)d provided."
-msgstr "Un seul certificat est autorisé, %(cert_count)d ont été fournis."
+msgstr "Un seul certificat est autorisé, %(cert_count) ont été fournis."
 
 #: awx/main/validators.py:154
 #, python-format
@@ -5633,7 +5629,7 @@ msgstr "Nom de l'organisation GitHub"
 msgid ""
 "The name of your GitHub organization, as used in your organization's URL: "
 "https://github.com/<yourorg>/."
-msgstr "Nom de votre organisation GitHub, tel qu'utilisé dans l'URL de votre organisation : https://github.com/<votreorg>/."
+msgstr "Nom de votre organisation GitHub, tel qu'utilisé dans l'URL de votre organisation : https://github.com/<yourorg>/."
 
 #: awx/sso/conf.py:762
 msgid "GitHub Organization OAuth2 Organization Map"
@@ -5653,7 +5649,7 @@ msgid ""
 "<yourorg>/settings/applications and obtain an OAuth2 key (Client ID) and "
 "secret (Client Secret). Provide this URL as the callback URL for your "
 "application."
-msgstr "Créez une application appartenant à une organisation sur https://github.com/organizations/<votreorg>/settings/applications et obtenez une clé OAuth2 (ID client) et un secret (secret client). Entrez cette URL comme URL de rappel de votre application."
+msgstr "Créez une application appartenant à une organisation sur https://github.com/organizations/<yourorg>/settings/applications et obtenez une clé OAuth2 (ID client) et un secret (secret client). Entrez cette URL comme URL de rappel de votre application."
 
 #: awx/sso/conf.py:797 awx/sso/conf.py:809 awx/sso/conf.py:820
 #: awx/sso/conf.py:832 awx/sso/conf.py:843 awx/sso/conf.py:855
@@ -5789,7 +5785,7 @@ msgstr "Nom de l'organisation GitHub Enterprise"
 msgid ""
 "The name of your GitHub Enterprise organization, as used in your "
 "organization's URL: https://github.com/<yourorg>/."
-msgstr "Nom de votre organisation GitHub Enterprise, tel qu'utilisé dans l'URL de votre organisation : https://github.com/<votreorg>/."
+msgstr "Nom de votre organisation GitHub Enterprise, tel qu'utilisé dans l'URL de votre organisation : https://github.com/<yourorg>/."
 
 #: awx/sso/conf.py:1030
 msgid "GitHub Enterprise Organization OAuth2 Organization Map"
