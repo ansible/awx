@@ -26,6 +26,10 @@ options:
         - The name to use for the inventory.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      type: str
     copy_from:
       description:
         - Name or id to copy the inventory from.
@@ -99,6 +103,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         copy_from=dict(),
         description=dict(),
         organization=dict(required=True),
@@ -114,6 +119,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     copy_from = module.params.get('copy_from')
     description = module.params.get('description')
     organization = module.params.get('organization')
@@ -146,7 +152,7 @@ def main():
 
     # Create the data that gets sent for create and update
     inventory_fields = {
-        'name': module.get_item_name(inventory) if inventory else name,
+        'name': new_name if new_name else (module.get_item_name(inventory) if inventory else name),
         'organization': org_id,
         'kind': kind,
         'host_filter': host_filter,

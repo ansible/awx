@@ -70,9 +70,19 @@
     name: "{{ group_name1 }}"
     state: absent
 
-- name: "Remove the organization"
+- name: "Rename the organization"
   organization:
     name: "{{ org_name }}"
+    new_name: "{{ org_name }}a"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: "Remove the organization"
+  organization:
+    name: "{{ org_name }}a"
     state: absent
   register: result
 

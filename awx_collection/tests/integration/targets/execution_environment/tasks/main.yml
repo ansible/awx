@@ -34,13 +34,27 @@
         that:
           - "result is failed"
 
-  always:
-    - name: Delete the Test EE
+    - name: Rename the Test EEs
       execution_environment:
         name: "{{ ee_name }}"
+        new_name: "{{ ee_name }}a"
+        image: quay.io/ansible/awx-ee
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+  always:
+    - name: Delete the Test EEs
+      execution_environment:
+        name: "{{ item }}"
         state: absent
         image: quay.io/ansible/awx-ee
       register: result
+      loop:
+        - "{{ ee_name }}"
+        - "{{ ee_name }}a"
 
     - assert:
         that:

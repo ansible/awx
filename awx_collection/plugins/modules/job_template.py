@@ -28,7 +28,7 @@ options:
       type: str
     new_name:
       description:
-        - Setting this option will change the existing name (looed up via the name field.
+        - Setting this option will change the existing name (looked up via the name field.
       type: str
     copy_from:
       description:

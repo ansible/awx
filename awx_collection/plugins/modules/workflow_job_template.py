@@ -810,7 +810,7 @@ def main():
     )
 
     # Get Workflow information in case one was just created.
-    existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
+    existing_item = module.get_one('workflow_job_templates', name_or_id=new_name if new_name else name, **{'data': search_fields})
     workflow_job_template_id = existing_item['id']
     # Destroy current nodes if selected.
     if destroy_current_schema:

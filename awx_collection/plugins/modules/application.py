@@ -26,6 +26,10 @@ options:
         - Name of the application.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      type: str
     description:
       description:
         - Description of the application.
@@ -96,6 +100,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         description=dict(),
         authorization_grant_type=dict(choices=["password", "authorization-code"]),
         client_type=dict(choices=['public', 'confidential']),
@@ -110,6 +115,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     description = module.params.get('description')
     authorization_grant_type = module.params.get('authorization_grant_type')
     client_type = module.params.get('client_type')
@@ -129,7 +135,7 @@ def main():
 
     # Create the data that gets sent for create and update
     application_fields = {
-        'name': name,
+        'name': new_name if new_name else (module.get_item_name(application) if application else name),
         'organization': org_id,
     }
     if authorization_grant_type is not None:
