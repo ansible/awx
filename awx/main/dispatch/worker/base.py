@@ -60,7 +60,7 @@ class AWXConsumerBase(object):
         return f'listening on {self.queues}'
 
     def control(self, body):
-        logger.warn(body)
+        logger.warn(f'Received control signal:\n{body}')
         control = body.get('control')
         if control in ('status', 'running'):
             reply_queue = body['reply_to']
@@ -137,7 +137,7 @@ class AWXConsumerPG(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
 
-        logger.warn(f"Running worker {self.name} listening to queues {self.queues}")
+        logger.info(f"Running worker {self.name} listening to queues {self.queues}")
         init = False
 
         while True:

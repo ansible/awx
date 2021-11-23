@@ -239,7 +239,7 @@ class TaskManager:
                 update_fields = ['status', 'start_args']
                 workflow_job.status = new_status
                 if reason:
-                    logger.info(reason)
+                    logger.info(f'Workflow job {workflow_job.id} failed due to reason: {reason}')
                     workflow_job.job_explanation = gettext_noop("No error handling paths found, marking workflow as failed")
                     update_fields.append('job_explanation')
                 workflow_job.start_args = ''  # blank field to remove encrypted passwords
