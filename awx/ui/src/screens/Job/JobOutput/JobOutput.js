@@ -212,8 +212,16 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
 
   useEffect(() => {
-    clearLoadedEvents();
-    loadJobEvents();
+    const pendingRequests = [
+      ...Object.values(eventByUuidRequests.current || {}),
+      ...Object.values(siblingRequests.current || {}),
+      ...Object.values(numEventsRequests.current || {}),
+    ];
+    Promise.all(pendingRequests).then(() => {
+      setRemoteRowCount(0);
+      clearLoadedEvents();
+      loadJobEvents();
+    });
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -433,7 +441,15 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (listRef.current && isFollowModeEnabled) {
       setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
     }
-    let { event, node } = getEventForRow(index) || {};
+    let event;
+    let node;
+    try {
+      const eventForRow = getEventForRow(index) || {};
+      event = eventForRow.event;
+      node = eventForRow.node;
+    } catch (e) {
+      event = null;
+    }
     if (
       !event &&
       index > remoteRowCount &&

@@ -475,6 +475,9 @@ function _getNodeByIndex(arr, index) {
 }
 
 function setEventNumChildren(state, uuid, numChildren) {
+  if (!state.uuidMap[uuid]) {
+    return state;
+  }
   return updateNodeByUuid(state, uuid, (node) => ({
     ...node,
     numChildren,
