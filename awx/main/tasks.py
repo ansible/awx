@@ -1542,9 +1542,11 @@ class BaseTask(object):
             status = res.status
             rc = res.rc
 
-            if status == 'timeout':
-                self.instance.job_explanation = "Job terminated due to timeout"
-                status = 'failed'
+            if status in ('timeout', 'error'):
+                self.instance.job_explanation = f"Job terminated due to {status}"
+                if status == 'timeout':
+                    status = 'failed'
+
                 extra_update_fields['job_explanation'] = self.instance.job_explanation
                 # ensure failure notification sends even if playbook_on_stats event is not triggered
                 handle_success_and_failure_notifications.apply_async([self.instance.job.id])
