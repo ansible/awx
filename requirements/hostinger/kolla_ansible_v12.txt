@@ -1,0 +1,16 @@
+# psutil is mondatory in every AWX env
+psutil
+
+#
+pbr!=2.1.0,>=2.0.0
+oslo.config>=5.2.0
+PyYAML>=3.12
+cryptography>=2.1,<35
+oslo.utils>=3.33.0
+Jinja2>=2.10
+jmespath>=0.9.3
+ansible<2.10
+hvac==0.10.5
+netaddr
+pyparsing<3
+https://github.com/hostinger/packages/releases/download/v1.0.0/kolla-ansible-12.2.0-hostinger.tar.gz

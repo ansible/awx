@@ -232,7 +232,11 @@ ansible_ovzcloud:
 	virtualenv -p python3 $(VENV_BASE)/ansible_ovzcloud
 	cat requirements/ansible_ovzcloud.txt | $(VENV_BASE)/ansible_ovzcloud/bin/pip install -r /dev/stdin
 
-requirements_hostinger: requirements_custom_envs ansible_repo ansible_cloud ansible_cloud_legacy ansible_infra ansible_cpanel ansible_network ansible_ovzcloud
+kolla_ansible_v12:
+	virtualenv -p python3 $(VENV_BASE)/kolla_ansible_v12
+	cat requirements/kolla_ansible_v12.txt | $(VENV_BASE)/kolla_ansible_v12/bin/pip install -r /dev/stdin
+
+requirements_hostinger: requirements_custom_envs ansible_repo ansible_cloud ansible_cloud_legacy ansible_infra ansible_cpanel ansible_network ansible_ovzcloud kolla_ansible_v12
 # customization end
 
 # Install third-party requirements needed for AWX's environment.
