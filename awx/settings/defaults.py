@@ -986,5 +986,7 @@ DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'
+# pod spec used when the default execution queue is a container group, e.g. when deploying on k8s/ocp with the operator
+DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE = ''
 # Name of the default controlplane queue
 DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'

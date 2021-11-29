@@ -17,13 +17,14 @@ class InstanceNotFound(Exception):
 
 
 class RegisterQueue:
-    def __init__(self, queuename, instance_percent, inst_min, hostname_list, is_container_group=None):
+    def __init__(self, queuename, instance_percent, inst_min, hostname_list, is_container_group=None, pod_spec_override=None):
         self.instance_not_found_err = None
         self.queuename = queuename
         self.instance_percent = instance_percent
         self.instance_min = inst_min
         self.hostname_list = hostname_list
         self.is_container_group = is_container_group
+        self.pod_spec_override = pod_spec_override
 
     def get_create_update_instance_group(self):
         created = False
@@ -38,6 +39,10 @@ class RegisterQueue:
 
         if self.is_container_group and (ig.is_container_group != self.is_container_group):
             ig.is_container_group = self.is_container_group
+            changed = True
+
+        if self.pod_spec_override and (ig.pod_spec_override != self.pod_spec_override):
+            ig.pod_spec_override = self.pod_spec_override
             changed = True
 
         if changed:
