@@ -29,7 +29,7 @@ msgstr "* Ce champ sera récupéré dans un système externe de gestion des secr
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:229
 msgid "/ (project root)"
-msgstr "/ (project root)"
+msgstr "/ (Projet racine)"
 
 #: components/AdHocCommands/AdHocCommands.js:30
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:134
@@ -50,7 +50,7 @@ msgstr "0 (Avertissement)"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:110
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:80
 msgid "1 (Info)"
-msgstr "1 (info)"
+msgstr "1 (Info)"
 
 #: components/AdHocCommands/AdHocCommands.js:31
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:135
@@ -77,7 +77,7 @@ msgstr "2 (Déboguer)"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:107
 #: screens/Template/shared/JobTemplateForm.js:212
 msgid "2 (More Verbose)"
-msgstr "2 (Verbeux +)"
+msgstr "2 (+ Verbeux)"
 
 #: components/AdHocCommands/AdHocCommands.js:33
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:137
@@ -110,7 +110,7 @@ msgid ""
 "A refspec to fetch (passed to the Ansible git\n"
 "module). This parameter allows access to references via\n"
 "the branch field not otherwise available."
-msgstr "Refspec à récupérer (passé au module git Ansible).  Ce paramètre permet d'accéder aux références via le champ de branche non disponible par ailleurs."
+msgstr "Refspec à récupérer (passé au module git Ansible). Ce paramètre permet d'accéder aux références via le champ de branche non disponible par ailleurs."
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:123
 msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <0>access.redhat.com</0>. For more information, see the <1>User Guide</1>."
@@ -285,7 +285,7 @@ msgstr "Ajouter des rôles"
 
 #: components/AddRole/AddResourceRole.js:180
 msgid "Add Team Roles"
-msgstr "Ajouter  des rôles d’équipe"
+msgstr "Ajouter des rôles d’équipe"
 
 #: components/AddRole/AddResourceRole.js:177
 msgid "Add User Roles"
@@ -310,7 +310,7 @@ msgstr "Ajouter un groupe existant"
 
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:152
 msgid "Add existing host"
-msgstr "Ajouter une hôte existant"
+msgstr "Ajouter un hôte existant"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:187
 msgid "Add instance group"
@@ -520,8 +520,8 @@ msgid "Approved"
 msgstr "Approuvé"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:52
-msgid "Approved - {0}.  See the Activity Stream for more information."
-msgstr "Approuvé - {0}.  Voir le flux d'activité pour plus d'informations."
+msgid "Approved - {0}. See the Activity Stream for more information."
+msgstr "Approuvé - {0}. Voir le flux d'activité pour plus d'informations."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:49
 msgid "Approved by {0} - {1}"
@@ -540,12 +540,12 @@ msgid "Are you sure you want to delete:"
 msgstr "Êtes-vous sûr de vouloir supprimer :"
 
 #: screens/Setting/shared/SharedFields.js:142
-msgid "Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
-msgstr "Êtes-vous sûr de vouloir désactiver l'authentification locale ?  Cela pourrait avoir un impact sur la capacité des utilisateurs à se connecter et sur la capacité de l'administrateur système à annuler ce changement."
+msgid "Are you sure you want to disable local authentication? Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
+msgstr "Êtes-vous sûr de vouloir désactiver l'authentification locale ? Cela pourrait avoir un impact sur la capacité des utilisateurs à se connecter et sur la capacité de l'administrateur système à annuler ce changement."
 
 #: screens/Setting/shared/SharedFields.js:350
-msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
-msgstr "Êtes-vous sûr de vouloir modifier l'URL de substitution de la redirection de la connexion ?  Cela pourrait avoir un impact sur la capacité des utilisateurs à se connecter au système une fois que l'authentification locale est également désactivée."
+msgid "Are you sure you want to edit login redirect override URL? Doing so could impact users' ability to log in to the system once local authentication is also disabled."
+msgstr "Êtes-vous sûr de vouloir modifier l'URL de substitution de la redirection de la connexion ? Cela pourrait avoir un impact sur la capacité des utilisateurs à se connecter au système une fois que l'authentification locale est également désactivée."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.js:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
@@ -568,8 +568,8 @@ msgid "Are you sure you want to remove this node?"
 msgstr "Êtes-vous sûr de vouloir supprimer ce nœud ?"
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:42
-msgid "Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team."
-msgstr "Êtes-vous sûr de vouloir supprimer l'accès {0} de {1} ?  Cela affectera tous les membres de l'équipe."
+msgid "Are you sure you want to remove {0} access from {1}? Doing so affects all members of the team."
+msgstr "Êtes-vous sûr de vouloir supprimer l'accès {0} de {1} ? Cela affectera tous les membres de l'équipe."
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:49
 msgid "Are you sure you want to remove {0} access from {username}?"
@@ -778,7 +778,7 @@ msgid ""
 "you can input tags, commit hashes, and arbitrary refs. Some\n"
 "commit hashes and refs may not be available unless you also\n"
 "provide a custom refspec."
-msgstr "Branche à extraire.  En plus des branches, vous pouvez saisir des balises, des hachages de validation et des références arbitraires.  Certains hachages et références de validation peuvent ne pas être disponibles à moins que vous ne fournissiez également une refspec personnalisée."
+msgstr "Branche à extraire. En plus des branches, vous pouvez saisir des balises, des hachages de validation et des références arbitraires. Certains hachages et références de validation peuvent ne pas être disponibles à moins que vous ne fournissiez également une refspec personnalisée."
 
 #: components/About/About.js:45
 msgid "Brand Image"
@@ -1055,16 +1055,16 @@ msgid ""
 msgstr "Spécifiez le type de format ou de type de réponse que vous souhaitez pour interroger l'utilisateur. Consultez la documentation d’Ansible Tower pour en savoir plus sur chaque option."
 
 #: components/AddRole/SelectRoleStep.js:20
-msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
-msgstr "Choisissez les rôles à appliquer aux ressources sélectionnées.  Notez que tous les rôles sélectionnés seront appliqués à toutes les ressources sélectionnées."
+msgid "Choose roles to apply to the selected resources. Note that all selected roles will be applied to all selected resources."
+msgstr "Choisissez les rôles à appliquer aux ressources sélectionnées. Notez que tous les rôles sélectionnés seront appliqués à toutes les ressources sélectionnées."
 
 #: components/AddRole/SelectResourceStep.js:81
-msgid "Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step."
-msgstr "Choisissez les ressources qui recevront de nouveaux rôles.  Vous pourrez sélectionner les rôles à postuler lors de l'étape suivante.  Notez que les ressources choisies ici recevront tous les rôles choisis à l'étape suivante."
+msgid "Choose the resources that will be receiving new roles. You'll be able to select the roles to apply in the next step. Note that the resources chosen here will receive all roles chosen in the next step."
+msgstr "Choisissez les ressources qui recevront de nouveaux rôles. Vous pourrez sélectionner les rôles à postuler lors de l'étape suivante. Notez que les ressources choisies ici recevront tous les rôles choisis à l'étape suivante."
 
 #: components/AddRole/AddResourceRole.js:193
-msgid "Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step."
-msgstr "Choisissez le type de ressource qui recevra de nouveaux rôles.  Par exemple, si vous souhaitez ajouter de nouveaux rôles à un ensemble d'utilisateurs, veuillez choisir Utilisateurs et cliquer sur Suivant.  Vous pourrez sélectionner les ressources spécifiques dans l'étape suivante."
+msgid "Choose the type of resource that will be receiving new roles. For example, if you'd like to add new roles to a set of users please choose Users and click Next. You'll be able to select the specific resources in the next step."
+msgstr "Choisissez le type de ressource qui recevra de nouveaux rôles. Par exemple, si vous souhaitez ajouter de nouveaux rôles à un ensemble d'utilisateurs, veuillez choisir Utilisateurs et cliquer sur Suivant. Vous pourrez sélectionner les ressources spécifiques dans l'étape suivante."
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:69
 msgid "Clean"
@@ -1089,8 +1089,8 @@ msgid "Clear subscription selection"
 msgstr "Effacer la sélection d'abonnement"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerGraph.js:232
-msgid "Click an available node to create a new link.  Click outside the graph to cancel."
-msgstr "Cliquez sur un nœud disponible pour créer un nouveau lien.  Cliquez en dehors du graphique pour annuler."
+msgid "Click an available node to create a new link. Click outside the graph to cancel."
+msgstr "Cliquez sur un nœud disponible pour créer un nouveau lien. Cliquez en dehors du graphique pour annuler."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:129
 msgid "Click the Edit button below to reconfigure the node."
@@ -1602,8 +1602,8 @@ msgid "Credentials"
 msgstr "Informations d’identification"
 
 #: components/LaunchPrompt/steps/credentialsValidator.js:52
-msgid "Credentials that require passwords on launch are not permitted.  Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
-msgstr "Les informations d'identification qui nécessitent un mot de passe au lancement ne sont pas autorisées.  Veuillez supprimer ou remplacer les informations d'identification suivantes par des informations d'identification du même type pour pouvoir continuer : {0}"
+msgid "Credentials that require passwords on launch are not permitted. Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
+msgstr "Les informations d'identification qui nécessitent un mot de passe au lancement ne sont pas autorisées. Veuillez supprimer ou remplacer les informations d'identification suivantes par des informations d'identification du même type pour pouvoir continuer : {0}"
 
 #: components/Pagination/Pagination.js:34
 msgid "Current page"
@@ -1892,7 +1892,7 @@ msgstr "Supprimer ce nœud"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:163
 msgid "Delete {pluralizedItemName}?"
-msgstr "Supprimer  {pluralizedItemName} ?"
+msgstr "Supprimer {pluralizedItemName} ?"
 
 #: components/DetailList/DeletedDetail.js:15
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:131
@@ -1918,8 +1918,8 @@ msgid "Denied"
 msgstr "Refusé"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:31
-msgid "Denied - {0}.  See the Activity Stream for more information."
-msgstr "Refusé - {0}.  Voir le flux d'activité pour plus d'informations."
+msgid "Denied - {0}. See the Activity Stream for more information."
+msgstr "Refusé - {0}. Voir le flux d'activité pour plus d'informations."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:28
 msgid "Denied by {0} - {1}"
@@ -2670,11 +2670,11 @@ msgstr "Veuillez saisir une expression de recherche au moins pour créer un nouv
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:43
 msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Entrez les injecteurs avec la syntaxe JSON ou YAML.  Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
+msgstr "Entrez les injecteurs avec la syntaxe JSON ou YAML. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:35
 msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Entrez les variables avec la syntaxe JSON ou YAML.  Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
+msgstr "Entrez les variables avec la syntaxe JSON ou YAML. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid ""
@@ -2707,7 +2707,7 @@ msgstr "Saisir un canal IRC ou un nom d'utilisateur par ligne. Le symbole dièse
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:367
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
-"is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack"
+"is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit. ie:#destination-channel, 1231257890.006423. See Slack"
 msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
@@ -3380,8 +3380,8 @@ msgid "Failed to disassociate one or more teams."
 msgstr "N'a pas réussi à dissocier une ou plusieurs équipes."
 
 #: screens/Login/Login.js:198
-msgid "Failed to fetch custom login configuration settings.  System defaults will be shown instead."
-msgstr "Impossible de récupérer les paramètres de configuration de connexion personnalisés.  Les paramètres par défaut du système seront affichés à la place."
+msgid "Failed to fetch custom login configuration settings. System defaults will be shown instead."
+msgstr "Impossible de récupérer les paramètres de configuration de connexion personnalisés. Les paramètres par défaut du système seront affichés à la place."
 
 #: screens/Project/ProjectList/ProjectList.js:290
 msgid "Failed to fetch the updated project data."
@@ -4114,9 +4114,9 @@ msgstr "Ajout de fichier"
 #: components/HostToggle/HostToggle.js:16
 msgid ""
 "Indicates if a host is available and should be included in running\n"
-"jobs.  For hosts that are part of an external inventory, this may be\n"
+"jobs. For hosts that are part of an external inventory, this may be\n"
 "reset by the inventory sync process."
-msgstr "Indique si un hôte est disponible et doit être inclus dans les Jobs en cours.  Pour les hôtes qui font partie d'un inventaire externe, cela peut être réinitialisé par le processus de synchronisation de l'inventaire."
+msgstr "Indique si un hôte est disponible et doit être inclus dans les Jobs en cours. Pour les hôtes qui font partie d'un inventaire externe, cela peut être réinitialisé par le processus de synchronisation de l'inventaire."
 
 #: components/AppContainer/PageHeaderToolbar.js:105
 msgid "Info"
@@ -4240,7 +4240,7 @@ msgstr "Format de fichier non valide. Veuillez télécharger un manifeste d'abon
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
 msgid "Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported."
-msgstr "Cible de lien invalide.  Impossible d'établir un lien avec les dépendants ou les nœuds des ancêtres.  Les cycles de graphiques ne sont pas pris en charge."
+msgstr "Cible de lien invalide. Impossible d'établir un lien avec les dépendants ou les nœuds des ancêtres. Les cycles de graphiques ne sont pas pris en charge."
 
 #: util/validators.js:33
 msgid "Invalid time format"
@@ -4493,8 +4493,8 @@ msgid "Job Template"
 msgstr "Modèle de Job"
 
 #: components/LaunchPrompt/steps/credentialsValidator.js:38
-msgid "Job Template default credentials must be replaced with one of the same type.  Please select a credential for the following types in order to proceed: {0}"
-msgstr "Les informations d'identification par défaut du modèle de Job doivent être remplacées par une information du même type.  Veuillez sélectionner un justificatif d'identité pour les types suivants afin de procéder : {0}"
+msgid "Job Template default credentials must be replaced with one of the same type. Please select a credential for the following types in order to proceed: {0}"
+msgstr "Les informations d'identification par défaut du modèle de Job doivent être remplacées par une information du même type. Veuillez sélectionner un justificatif d'identité pour les types suivants afin de procéder : {0}"
 
 #: screens/Project/Project.js:115
 #: screens/Project/Projects.js:31
@@ -4505,8 +4505,8 @@ msgid "Job Templates"
 msgstr "Modèles de Jobs"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/useNodeTypeStep.js:25
-msgid "Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed."
-msgstr "Les modèles de Job dont l'inventaire ou le projet est manquant ne peuvent pas être sélectionnés lors de la création ou de la modification de nœuds.  Sélectionnez un autre modèle ou corrigez les champs manquants pour continuer."
+msgid "Job Templates with a missing inventory or project cannot be selected when creating or editing nodes. Select another template or fix the missing fields to proceed."
+msgstr "Les modèles de Job dont l'inventaire ou le projet est manquant ne peuvent pas être sélectionnés lors de la création ou de la modification de nœuds. Sélectionnez un autre modèle ou corrigez les champs manquants pour continuer."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useWorkflowNodeSteps.js:316
 msgid "Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes"
@@ -4769,7 +4769,7 @@ msgstr "Lancer le job de gestion"
 #: components/TemplateList/TemplateListItem.js:197
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:82
 msgid "Launch Template"
-msgstr "Lacer le modèle."
+msgstr "Lancer le modèle."
 
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:32
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:34
@@ -5576,9 +5576,9 @@ msgstr "Notez que seuls les hôtes qui sont directement dans ce groupe peuvent �
 msgid ""
 "Note that you may still see the group in the list after\n"
 "disassociating if the host is also a member of that group’s\n"
-"children.  This list shows all groups the host is associated\n"
+"children. This list shows all groups the host is associated\n"
 "with directly and indirectly."
-msgstr "Notez que vous pouvez toujours voir le groupe dans la liste après l'avoir dissocié si l'hôte est également membre des dépendants de ce groupe.  Cette liste montre tous les groupes auxquels l'hôte est associé directement et indirectement."
+msgstr "Notez que vous pouvez toujours voir le groupe dans la liste après l'avoir dissocié si l'hôte est également membre des dépendants de ce groupe. Cette liste montre tous les groupes auxquels l'hôte est associé directement et indirectement."
 
 #: components/Lookup/InstanceGroupsLookup.js:90
 msgid "Note: The order in which these are selected sets the execution precedence. Select more than one to enable drag."
@@ -6049,8 +6049,8 @@ msgid "Please add a Schedule to populate this list."
 msgstr "Veuillez ajouter une programmation pour remplir cette liste"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:152
-msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
-msgstr "Veuillez ajouter une programmation pour remplir cette liste.  Les programmations peuvent être ajoutées à un modèle, un projet ou une source d'inventaire."
+msgid "Please add a Schedule to populate this list. Schedules can be added to a Template, Project, or Inventory Source."
+msgstr "Veuillez ajouter une programmation pour remplir cette liste. Les programmations peuvent être ajoutées à un modèle, un projet ou une source d'inventaire."
 
 #: screens/Template/Survey/SurveyList.js:146
 msgid "Please add survey questions."
@@ -6125,7 +6125,7 @@ msgid ""
 "Populate the hosts for this inventory by using a search\n"
 "filter. Example: ansible_facts.ansible_distribution:\"RedHat\".\n"
 "Refer to the documentation for further syntax and\n"
-"examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+"examples. Refer to the Ansible Tower documentation for further syntax and\n"
 "examples."
 msgstr "Remplissez les hôtes pour cet inventaire en utilisant un filtre de recherche. Exemple : ansible_facts.ansible_distribution : \"RedHat\". Reportez-vous à la documentation pour plus de syntaxe et d'exemples."
 
@@ -6297,7 +6297,7 @@ msgid ""
 "below and you can choose from a list of your available subscriptions.\n"
 "The credentials you use will be stored for future use in\n"
 "retrieving renewal or expanded subscriptions."
-msgstr "Fournissez vos informations d’identification client Red Hat ou Red Hat Satellite et choisissez parmi une liste d’abonnements disponibles.  Les informations d'identification que vous utilisez seront stockées pour une utilisation ultérieure lors de la récupération des abonnements renouvelés ou étendus."
+msgstr "Fournissez vos informations d’identification client Red Hat ou Red Hat Satellite et choisissez parmi une liste d’abonnements disponibles. Les informations d'identification que vous utilisez seront stockées pour une utilisation ultérieure lors de la récupération des abonnements renouvelés ou étendus."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:83
 msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
@@ -6631,8 +6631,8 @@ msgid "Returns results that have values other than this one as well as other fil
 msgstr "Renvoie les résultats qui ont des valeurs autres que celle-ci ainsi que d'autres filtres."
 
 #: components/Search/AdvancedSearch.js:121
-msgid "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
-msgstr "Retourne des résultats qui satisfont à ce filtre ainsi qu'à d'autres filtres.  Il s'agit du type d'ensemble par défaut si rien n'est sélectionné."
+msgid "Returns results that satisfy this one as well as other filters. This is the default set type if nothing is selected."
+msgstr "Retourne des résultats qui satisfont à ce filtre ainsi qu'à d'autres filtres. Il s'agit du type d'ensemble par défaut si rien n'est sélectionné."
 
 #: components/Search/AdvancedSearch.js:127
 msgid "Returns results that satisfy this one or any other filters."
@@ -7553,8 +7553,8 @@ msgid "Some of the previous step(s) have errors"
 msgstr "Certaines des étapes précédentes comportent des erreurs"
 
 #: screens/Host/HostList/SmartInventoryButton.js:12
-msgid "Some search modifiers like not__ and __search are not supported in Smart Inventory host filters.  Remove these to create a new Smart Inventory with this filter."
-msgstr "Certains modificateurs de recherche, comme not__ et __search, ne sont pas pris en charge par les filtres hôte de Smart Inventory.  Supprimez-les pour créer un nouveau Smart Inventory avec ce filtre."
+msgid "Some search modifiers like not__ and __search are not supported in Smart Inventory host filters. Remove these to create a new Smart Inventory with this filter."
+msgstr "Certains modificateurs de recherche, comme not__ et __search, ne sont pas pris en charge par les filtres hôte de Smart Inventory. Supprimez-les pour créer un nouveau Smart Inventory avec ce filtre."
 
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginTestAlert.js:39
 msgid "Something went wrong with the request to test this credential and metadata."
@@ -8199,7 +8199,7 @@ msgid ""
 "The first fetches all references. The second\n"
 "fetches the Github pull request number 62, in this example\n"
 "the branch needs to be \"pull/62/head\"."
-msgstr "Le premier extrait toutes les références.  Le second extrait la requête Github pull numéro 62, dans cet exemple la branche doit être `pull/62/head`."
+msgstr "Le premier extrait toutes les références. Le second extrait la requête Github pull numéro 62, dans cet exemple la branche doit être `pull/62/head`."
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:104
 msgid "The full image location, including the container registry, image name, and version tag."
@@ -8222,7 +8222,7 @@ msgid ""
 msgstr "Le nombre de processus parallèles ou simultanés à utiliser lors de l'exécution du playbook. Une valeur vide, ou une valeur inférieure à 1 utilisera la valeur par défaut Ansible qui est généralement 5. Le nombre de fourches par défaut peut être remplacé par un changement vers"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:180
-msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
+msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file. You can find more information"
 msgstr "Nombre de processus parallèles ou simultanés à utiliser lors de l'exécution du playbook. La saisie d'aucune valeur entraînera l'utilisation de la valeur par défaut du fichier de configuration ansible. Vous pourrez trouver plus d’informations."
 
 #: components/ContentError/ContentError.js:40
@@ -8244,8 +8244,8 @@ msgid "The project must be synced before a revision is available."
 msgstr "Le projet doit être synchronisé avant qu'une révision soit disponible."
 
 #: screens/Project/ProjectList/ProjectListItem.js:126
-msgid "The project revision is currently out of date.  Please refresh to fetch the most recent revision."
-msgstr "La révision du projet est actuellement périmée.  Veuillez actualiser pour obtenir la révision la plus récente."
+msgid "The project revision is currently out of date. Please refresh to fetch the most recent revision."
+msgstr "La révision du projet est actuellement périmée. Veuillez actualiser pour obtenir la révision la plus récente."
 
 #: components/Workflow/WorkflowNodeHelp.js:139
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:126
@@ -8922,7 +8922,7 @@ msgstr "Utilisateur"
 
 #: components/AppContainer/PageHeaderToolbar.js:153
 msgid "User Details"
-msgstr "Détails de l'erreur"
+msgstr "Détails de l'utilisateur"
 
 #: screens/Setting/SettingList.js:117
 #: screens/Setting/Settings.js:114
@@ -9605,7 +9605,7 @@ msgstr "Vous n'avez pas la permission de supprimer les groupes suivants : {items
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:152
 msgid "You do not have permission to delete {pluralizedItemName}: {itemsUnableToDelete}"
-msgstr "Vous n'avez pas la permission de supprimer  {pluralizedItemName} : {itemsUnableToDelete}"
+msgstr "Vous n'avez pas la permission de supprimer {pluralizedItemName} : {itemsUnableToDelete}"
 
 #: components/DisassociateButton/DisassociateButton.js:50
 msgid "You do not have permission to disassociate the following: {itemsUnableToDisassociate}"
