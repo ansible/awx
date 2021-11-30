@@ -795,7 +795,12 @@ LOGGING = {
         'job_lifecycle': {'()': 'awx.main.utils.formatters.JobLifeCycleFormatter'},
     },
     'handlers': {
-        'console': {'()': 'logging.StreamHandler', 'level': 'DEBUG', 'filters': ['require_debug_true_or_test', 'guid'], 'formatter': 'simple'},
+        'console': {
+            '()': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'filters': ['require_debug_true_or_test', 'dynamic_level_filter', 'guid'],
+            'formatter': 'simple',
+        },
         'null': {'class': 'logging.NullHandler'},
         'file': {'class': 'logging.NullHandler', 'formatter': 'simple'},
         'syslog': {'level': 'WARNING', 'filters': ['require_debug_false'], 'class': 'logging.NullHandler', 'formatter': 'simple'},

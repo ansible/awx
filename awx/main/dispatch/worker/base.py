@@ -188,7 +188,7 @@ class BaseWorker(object):
                 if 'uuid' in body:
                     uuid = body['uuid']
                     finished.put(uuid)
-        logger.warn('worker exiting gracefully pid:{}'.format(os.getpid()))
+        logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def perform_work(self, body):
         raise NotImplementedError()
