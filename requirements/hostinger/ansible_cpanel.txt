@@ -21,4 +21,5 @@ tldextract==3.1.2
 typer==0.4.0
 urllib3==1.26.7
 hvac==0.10.5
-ansible==2.9.25
+ansible<2.10
+ansible-modules-hashivault==4.6.4
