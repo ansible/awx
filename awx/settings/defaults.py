@@ -536,6 +536,9 @@ SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
 SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
 SOCIAL_AUTH_SAML_TEAM_ATTR = {}
 
+# Enable ansible-runner's process isolation setting to support using execution environments
+RUNNER_PROCESS_ISOLATION = True
+
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment
 

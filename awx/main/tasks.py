@@ -969,6 +969,9 @@ class BaseTask(object):
         if settings.IS_K8S:
             return {}
 
+        if not settings.RUNNER_PROCESS_ISOLATION:
+            return {"process_isolation": False}
+
         image = instance.execution_environment.image
         params = {
             "container_image": image,
