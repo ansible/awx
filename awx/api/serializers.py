@@ -4480,7 +4480,10 @@ class NotificationTemplateSerializer(BaseSerializer):
                 body = messages[event].get('body', {})
                 if body:
                     try:
-                        potential_body = json.loads(body)
+                        rendered_body = (
+                            sandbox.ImmutableSandboxedEnvironment(undefined=DescriptiveUndefined).from_string(body).render(JobNotificationMixin.context_stub())
+                        )
+                        potential_body = json.loads(rendered_body)
                         if not isinstance(potential_body, dict):
                             error_list.append(
                                 _("Webhook body for '{}' should be a json dictionary. Found type '{}'.".format(event, type(potential_body).__name__))
