@@ -373,6 +373,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       ...params,
       ...qsParams,
     });
+    if (isFlatMode) {
+      params.stdout = '';
+    }
 
     try {
       const {
@@ -528,25 +531,28 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       range = [startCounter, startCounter + diff];
     }
 
-    const [requestParams1, loadRange] = getEventRequestParams(
+    const [requestParams, loadRange] = getEventRequestParams(
       job,
       remoteRowCount,
       range
     );
     const qs = parseQueryString(QS_CONFIG, location.search);
-    const params1 = {
-      ...requestParams1,
+    const params = {
+      ...requestParams,
       ...qs,
     };
+    if (isFlatMode) {
+      params.stdout = '';
+    }
 
     const model = getJobModel(job.type);
 
-    const response = await model.readEvents(job.id, params1);
+    const response = await model.readEvents(job.id, params);
     if (!isMounted.current) {
       return;
     }
     const events = response.data.results;
-    const firstIndex = (params1.page - 1) * params1.page_size;
+    const firstIndex = (params.page - 1) * params.page_size;
 
     let newCssMap;
     let rowNumber = firstIndex;
