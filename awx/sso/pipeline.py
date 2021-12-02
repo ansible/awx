@@ -229,3 +229,23 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
     if team_map.get('remove', True):
         [t.member_role.members.remove(user) for t in Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
+
+
+def update_user_flags(backend, details, user=None, *args, **kwargs):
+    if not user:
+        return
+    attributes = kwargs.get('response', {}).get('attributes', {})
+    logger.warn(attributes)
+    if 'is_superuser' in attributes and attributes['is_superuser']:
+        logger.warn("Setting is_superuser to true from %s for %s" % (attributes['is_superuser'], user.id))
+        user.is_superuser = True
+    elif user.is_superuser:
+        logger.warn("Revoking is_superuser from %s" % (user.id))
+        user.is_superuser = False
+
+    if 'is_system_auditor' in attributes and attributes['is_system_auditor']:
+        logger.warn("Setting is_system_auditor to true from %s for %s" % (attributes['is_system_auditor'], user.id))
+        user.is_system_auditor = True
+    elif user.is_system_auditor:
+        logger.warn("Revoking is_system_auditor from %s" % (user.id))
+        user.is_system_auditor = False

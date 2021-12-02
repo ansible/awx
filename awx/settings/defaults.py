@@ -473,6 +473,7 @@ SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
     'awx.sso.pipeline.update_user_teams_by_saml_attr',
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
+    'awx.sso.pipeline.update_user_flags',
 )
 SAML_AUTO_CREATE_OBJECTS = True
 
