@@ -32,6 +32,7 @@ from awx.sso.fields import (
     SAMLOrgInfoField,
     SAMLSecurityField,
     SAMLTeamAttrField,
+    SAMLUserFlagsAttrField,
     SocialOrganizationMapField,
     SocialTeamMapField,
 )
@@ -1521,6 +1522,25 @@ register(
             ),
         ]
     ),
+)
+
+register(
+    'SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR',
+    field_class=SAMLUserFlagsAttrField,
+    allow_null=True,
+    default=None,
+    label=_('SAML User Flags Attribute Mapping'),
+    help_text=_('Used to map super users and system auditors from SAML.'),
+    category=_('SAML'),
+    category_slug='saml',
+    placeholder=[
+        ('is_superuser_attr', 'saml_attr'),
+        ('is_superuser_value', 'value'),
+        ('is_superuser_role', 'saml_role'),
+        ('is_system_auditor_attr', 'saml_attr'),
+        ('is_system_auditor_value', 'value'),
+        ('is_system_auditor_role', 'saml_role'),
+    ],
 )
 
 

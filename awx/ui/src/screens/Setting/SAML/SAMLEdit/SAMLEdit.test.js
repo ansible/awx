@@ -40,6 +40,7 @@ describe('<SAMLEdit />', () => {
         SOCIAL_AUTH_SAML_TEAM_MAP: {},
         SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
         SOCIAL_AUTH_SAML_TEAM_ATTR: {},
+        SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR: {},
         SOCIAL_AUTH_SAML_SECURITY_CONFIG: {
           requestedAuthnContext: false,
         },
@@ -180,6 +181,7 @@ describe('<SAMLEdit />', () => {
       SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: 'mock_cert',
       SOCIAL_AUTH_SAML_SUPPORT_CONTACT: {},
       SOCIAL_AUTH_SAML_TEAM_ATTR: {},
+      SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR: {},
       SOCIAL_AUTH_SAML_TEAM_MAP: {},
       SOCIAL_AUTH_SAML_TECHNICAL_CONTACT: {},
       SOCIAL_AUTH_SAML_SECURITY_CONFIG: {
