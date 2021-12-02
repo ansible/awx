@@ -421,7 +421,13 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const isRowLoaded = ({ index }) => {
-    const counter = getCounterForRow(index);
+    let counter;
+    try {
+      counter = getCounterForRow(index);
+    } catch (e) {
+      console.error(e); // eslint-disable-line no-console
+      return false;
+    }
     if (getEvent(counter)) {
       return true;
     }
@@ -547,7 +553,15 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     const model = getJobModel(job.type);
 
-    const response = await model.readEvents(job.id, params);
+    let response;
+    try {
+      response = await model.readEvents(job.id, params);
+    } catch (error) {
+      if (error.response.status === 404) {
+        return;
+      }
+      throw error;
+    }
     if (!isMounted.current) {
       return;
     }

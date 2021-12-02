@@ -31,7 +31,11 @@ export default function useJobEvents(callbacks, isFlatMode) {
       if (!action) {
         return queue;
       }
-      dispatch(action);
+      try {
+        dispatch(action);
+      } catch (e) {
+        console.error(e); // eslint-disable-line no-console
+      }
       return queue.slice(1);
     });
   }, [actionQueue]);
