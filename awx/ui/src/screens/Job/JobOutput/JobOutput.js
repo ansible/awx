@@ -368,14 +368,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       );
     }
 
+    if (isFlatMode) {
+      params.not__stdout = '';
+    }
     const qsParams = parseQueryString(QS_CONFIG, location.search);
     const eventPromise = getJobModel(job.type).readEvents(job.id, {
       ...params,
       ...qsParams,
     });
-    if (isFlatMode) {
-      params.stdout = '';
-    }
 
     try {
       const {
@@ -548,7 +548,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       ...qs,
     };
     if (isFlatMode) {
-      params.stdout = '';
+      params.not__stdout = '';
     }
 
     const model = getJobModel(job.type);
