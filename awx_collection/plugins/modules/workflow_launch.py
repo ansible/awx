@@ -64,6 +64,11 @@ options:
         - If waiting for the workflow to complete this will abort after this
           amount of seconds
       type: int
+    check_prompt:
+      description:
+        - Check if module send value for field prompted in AWX
+      type: bool
+      default: False
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -106,6 +111,7 @@ def main():
         wait=dict(required=False, default=True, type='bool'),
         interval=dict(required=False, default=1.0, type='float'),
         timeout=dict(required=False, default=None, type='int'),
+        check_prompt=dict(default=False, type='bool'),
     )
 
     # Create a module for ourselves
@@ -120,6 +126,7 @@ def main():
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
+    check_prompt = module.params.get('check_prompt')
 
     # Special treatment of extra_vars parameter
     extra_vars = module.params.get('extra_vars')
@@ -157,9 +164,17 @@ def main():
     for variable_name, prompt in check_vars_to_prompts.items():
         if variable_name in post_data and not workflow_job_template[prompt]:
             param_errors.append("The field {0} was specified but the workflow job template does not allow for it to be overridden".format(variable_name))
+        if check_prompt:
+            if not module.params.get(variable_name) and job_template[prompt]:
+                param_errors.append("The field {0} was not specified but the job template prompted for this field".format(variable_name))
+
     # Check if Either ask_variables_on_launch, or survey_enabled is enabled for use of extra vars.
     if module.params.get('extra_vars') and not (workflow_job_template['ask_variables_on_launch'] or workflow_job_template['survey_enabled']):
         param_errors.append("The field extra_vars was specified but the workflow job template does not allow for it to be overridden")
+    if check_prompt:
+        if not module.params.get('extra_vars') and (job_template['ask_variables_on_launch'] or job_template['survey_enabled']):
+            param_errors.append("The field extra_vars was not specified but the job template is prompted for this field")
+
     if len(param_errors) > 0:
         module.fail_json(msg="Parameters specified which can not be passed into workflow job template, see errors for details", errors=param_errors)
 
