@@ -102,9 +102,9 @@ options:
         - If waiting for the job to complete this will abort after this
           amount of seconds
       type: int
-    check_prompted:
+    check_prompt:
       description:
-        - Check if field prompted are send by module
+        - Check if module send value for field prompted in AWX
       type: bool
       default: False
 extends_documentation_fragment: awx.awx.auth
@@ -173,7 +173,7 @@ def main():
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
         timeout=dict(default=None, type='int'),
-        check_prompted=dict(default=False, type='bool'),
+        check_prompt=dict(default=False, type='bool'),
     )
 
     # Create a module for ourselves
@@ -188,7 +188,7 @@ def main():
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
-    check_prompted = module.params.get('check_prompted')
+    check_prompt = module.params.get('check_prompt')
 
     for field_name in (
         'job_type',
@@ -253,7 +253,7 @@ def main():
     for variable_name, prompt in check_vars_to_prompts.items():
         if module.params.get(variable_name) and not job_template[prompt]:
             param_errors.append("The field {0} was specified but the job template does not allow for it to be overridden".format(variable_name))
-        if check_prompted:
+        if check_prompt:
             if not module.params.get(variable_name) and job_template[prompt]:
                 param_errors.append("The field {0} was not specified but the job template prompted for this field".format(variable_name))
 
@@ -261,7 +261,7 @@ def main():
     if module.params.get('extra_vars') and not (job_template['ask_variables_on_launch'] or job_template['survey_enabled']):
         param_errors.append("The field extra_vars was specified but the job template does not allow for it to be overridden")
     
-    if check_prompted:
+    if check_prompt:
         if not module.params.get('extra_vars') and (job_template['ask_variables_on_launch'] or job_template['survey_enabled']):
             param_errors.append("The field extra_vars was not specified but the job template is prompted for this field")
 
