@@ -163,6 +163,10 @@ def main():
     if password is not None:
         new_fields['password'] = password
 
+    # Prevent password reset when the user exists and update_secrets is False
+    if existing_item and existing_item.get('password') is None and not module.update_secrets:
+      del new_fields['password']
+
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
 
