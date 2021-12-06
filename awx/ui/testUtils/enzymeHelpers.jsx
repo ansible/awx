@@ -103,7 +103,7 @@ function applyDefaultContexts(context) {
     return defaultContexts;
   }
   const newContext = {};
-  Object.keys(defaultContexts).forEach(key => {
+  Object.keys(defaultContexts).forEach((key) => {
     newContext[key] = {
       ...defaultContexts[key],
       ...context[key],
@@ -148,7 +148,7 @@ export function mountWithContexts(node, options = {}) {
 export function waitForElement(
   wrapper,
   selector,
-  callback = el => el.length === 1
+  callback = (el) => el.length === 1
 ) {
   const interval = 100;
   return new Promise((resolve, reject) => {
