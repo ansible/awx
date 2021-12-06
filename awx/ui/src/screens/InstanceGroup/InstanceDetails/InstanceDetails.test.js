@@ -230,9 +230,9 @@ describe('<InstanceDetails/>', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-    expect(
-      wrapper.find("Button[ouiaId='disassociate-button']").prop('isDisabled')
-    ).toBe(true);
+    expect(wrapper.find("Button[ouiaId='disassociate-button']")).toHaveLength(
+      0
+    );
     expect(
       wrapper.find("Button[ouiaId='health-check-button']").prop('isDisabled')
     ).toBe(true);
@@ -412,7 +412,7 @@ describe('<InstanceDetails/>', () => {
       },
     });
     jest.spyOn(ConfigContext, 'useConfig').mockImplementation(() => ({
-      me: { is_system_auditor: true },
+      me: { is_superuser: true },
     }));
     await act(async () => {
       wrapper = mountWithContexts(
@@ -463,7 +463,7 @@ describe('<InstanceDetails/>', () => {
       },
     });
     jest.spyOn(ConfigContext, 'useConfig').mockImplementation(() => ({
-      me: { is_system_auditor: true },
+      me: { is_superuser: true },
     }));
     await act(async () => {
       wrapper = mountWithContexts(
@@ -474,6 +474,7 @@ describe('<InstanceDetails/>', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+
     await act(async () =>
       wrapper.find('Button[ouiaId="disassociate-button"]').prop('onClick')()
     );

@@ -273,13 +273,15 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
               {t`Health Check`}
             </Button>
           </Tooltip>
-          <DisassociateButton
-            verifyCannotDisassociate={!me.is_superuser}
-            key="disassociate"
-            onDisassociate={disassociateInstance}
-            itemsToDisassociate={[instance]}
-            modalTitle={t`Disassociate instance from instance group?`}
-          />
+          {me.is_superuser && instance.node_type !== 'control' && (
+            <DisassociateButton
+              verifyCannotDisassociate={!me.is_superuser}
+              key="disassociate"
+              onDisassociate={disassociateInstance}
+              itemsToDisassociate={[instance]}
+              modalTitle={t`Disassociate instance from instance group?`}
+            />
+          )}
           <InstanceToggle
             css="display: inline-flex;"
             fetchInstances={fetchDetails}
