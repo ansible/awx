@@ -1,24 +1,17 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
-class AppendBody extends Component {
-  constructor(props) {
-    super(props);
-    this.el = document.createElement('div');
-  }
+function AppendBody({ children }) {
+  const el = document.createElement('div');
 
-  componentDidMount() {
-    document.body.appendChild(this.el);
-  }
+  useEffect(() => {
+    document.body.appendChild(el);
+    return () => {
+      document.body.removeChild(el);
+    };
+  }, [el]);
 
-  componentWillUnmount() {
-    document.body.removeChild(this.el);
-  }
-
-  render() {
-    const { children } = this.props;
-    return ReactDOM.createPortal(children, this.el);
-  }
+  return ReactDOM.createPortal(children, el);
 }
 
 export default AppendBody;

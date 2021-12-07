@@ -7,11 +7,15 @@ describe('ListHeader', () => {
   const qsConfig = {
     namespace: 'item',
     defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
-    integerFields: [],
+    integerFields: ['id', 'page', 'page_size'],
+    dateFields: ['modified', 'created'],
   };
   const renderToolbarFn = jest.fn();
 
   test('initially renders without crashing', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/teams'],
+    });
     const wrapper = mountWithContexts(
       <ListHeader
         itemCount={50}
@@ -21,7 +25,8 @@ describe('ListHeader', () => {
         ]}
         sortColumns={[{ name: 'foo', key: 'foo' }]}
         renderToolbar={renderToolbarFn}
-      />
+      />,
+      { context: { router: { history } } }
     );
     expect(wrapper.length).toBe(1);
   });

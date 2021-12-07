@@ -2721,9 +2721,8 @@ msgstr "Ingrese un canal de IRC o nombre de usuario por línea. El símbolo nume
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:367
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
-"is required for channels."
-msgstr "Ingrese un canal de Slack por línea. El símbolo numeral (#)\n"
-"es necesario para los canales."
+"is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack"
+msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
 msgid ""
@@ -5655,12 +5654,7 @@ msgid ""
 "not support password authentication when using SSH. GIT\n"
 "read only protocol (git://) does not use username or\n"
 "password information."
-msgstr "Note: Si utiliza el protocolo SSH para GitHub o Bitbucket,\n"
-"ingrese solo la clave de SSH; no ingrese un nombre de usuario\n"
-"(distinto de git). Además, GitHub y Bitbucket no admiten\n"
-"la autenticación de contraseña cuando se utiliza SSH. El protocolo\n"
-"de solo lectura de GIT (git://) no utiliza información\n"
-"de nombre de usuario o contraseña."
+msgstr "Note: Si utiliza el protocolo SSH para GitHub o Bitbucket, ingrese solo la clave de SSH; no ingrese un nombre de usuario (distinto de git). Además, GitHub y Bitbucket no admiten la autenticación de contraseña cuando se utiliza SSH. El protocolo de solo lectura de GIT (git://) no utiliza información de nombre de usuario o contraseña."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:319
 msgid "Notification Color"

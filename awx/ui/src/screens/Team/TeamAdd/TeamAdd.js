@@ -1,5 +1,5 @@
-import React from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
 import { TeamsAPI } from 'api';
@@ -7,54 +7,48 @@ import { Config } from 'contexts/Config';
 import { CardBody } from 'components/Card';
 import TeamForm from '../shared/TeamForm';
 
-class TeamAdd extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleCancel = this.handleCancel.bind(this);
-    this.state = { error: null };
-  }
+function TeamAdd() {
+  const [submitError, setSubmitError] = useState(null);
+  const history = useHistory();
 
-  async handleSubmit(values) {
-    const { history } = this.props;
+  const handleSubmit = async (values) => {
     try {
-      const valuesToSend = { ...values };
-      valuesToSend.organization = valuesToSend.organization.id;
+      const {
+        name,
+        description,
+        organization: { id },
+      } = values;
+      const valuesToSend = { name, description, organization: id };
       const { data: response } = await TeamsAPI.create(valuesToSend);
       history.push(`/teams/${response.id}`);
     } catch (error) {
-      this.setState({ error });
+      setSubmitError(error);
     }
-  }
+  };
 
-  handleCancel() {
-    const { history } = this.props;
+  const handleCancel = () => {
     history.push('/teams');
-  }
+  };
 
-  render() {
-    const { error } = this.state;
-
-    return (
-      <PageSection>
-        <Card>
-          <CardBody>
-            <Config>
-              {({ me }) => (
-                <TeamForm
-                  handleSubmit={this.handleSubmit}
-                  handleCancel={this.handleCancel}
-                  me={me || {}}
-                  submitError={error}
-                />
-              )}
-            </Config>
-          </CardBody>
-        </Card>
-      </PageSection>
-    );
-  }
+  return (
+    <PageSection>
+      <Card>
+        <CardBody>
+          <Config>
+            {({ me }) => (
+              <TeamForm
+                handleSubmit={handleSubmit}
+                handleCancel={handleCancel}
+                me={me || {}}
+                submitError={submitError}
+              />
+            )}
+          </Config>
+        </CardBody>
+      </Card>
+    </PageSection>
+  );
 }
 
 export { TeamAdd as _TeamAdd };
-export default withRouter(TeamAdd);
+export default TeamAdd;
