@@ -242,10 +242,10 @@ def _check_flag(user, flag, attributes, roles, user_flags_settings):
     if role_setting:
         # We do a 2 layer check here so that we don't spit out the else message if there is no role defined
         if role_setting in roles:
-            logger.warn("User %s has %s role %s" % (user.username, flag, role_setting))
+            logger.debug("User %s has %s role %s" % (user.username, flag, role_setting))
             new_flag = True
         else:
-            logger.warn("User %s is missing the %s role %s" % (user.username, flag, role_setting))
+            logger.debug("User %s is missing the %s role %s" % (user.username, flag, role_setting))
 
     # Next, check to see if we are respecting an attribute; this will take prio over the role if its defined
     attr_setting = user_flags_settings.get(is_attr_key, None)
@@ -257,24 +257,24 @@ def _check_flag(user, flag, attributes, roles, user_flags_settings):
             if isinstance(attribute_value, (list, tuple)):
                 attribute_value = attribute_value[0]
             if attribute_value == user_flags_settings.get(is_value_key):
-                logger.warn("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
+                logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
                 new_flag = True
             # if they don't match make sure that new_flag is false
             else:
-                logger.warn(
+                logger.debug(
                     "Refusing %s for %s because attr %s (%s) did not match value '%s'"
                     % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
                 )
                 new_flag = False
         # If there was no required value then we can just allow them in because of the attribute
         else:
-            logger.warn("Giving %s %s from attribute %s" % (user.username, flag, attr_setting))
+            logger.debug("Giving %s %s from attribute %s" % (user.username, flag, attr_setting))
             new_flag = True
 
     # If the user was flagged and we are going to make them not flagged make sure there is a message
     old_value = getattr(user, "is_%s" % (flag))
     if old_value and not new_flag:
-        logger.warn("Revoking %s from %s" % (flag, user.username))
+        logger.debug("Revoking %s from %s" % (flag, user.username))
 
     return new_flag, old_value != new_flag
 
@@ -286,12 +286,12 @@ def update_user_flags(backend, details, user=None, *args, **kwargs):
     from django.conf import settings
 
     user_flags_settings = settings.SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR
-    logger.warn(user_flags_settings)
+    logger.debug(user_flags_settings)
 
     attributes = kwargs.get('response', {}).get('attributes', {})
     roles = attributes.get('Role', [])
-    logger.warn("User attributes for %s: %s" % (user.username, attributes))
-    logger.warn("User roles for %s: %s" % (user.username, roles))
+    logger.debug("User attributes for %s: %s" % (user.username, attributes))
+    logger.debug("User roles for %s: %s" % (user.username, roles))
 
     initial_superuser = user.is_superuser
     initial_auditor = user.is_system_auditor
