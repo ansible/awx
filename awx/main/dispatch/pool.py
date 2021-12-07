@@ -248,7 +248,7 @@ class WorkerPool(object):
         except Exception:
             logger.exception('could not fork')
         else:
-            logger.warn('scaling up worker pid:{}'.format(worker.pid))
+            logger.debug('scaling up worker pid:{}'.format(worker.pid))
         return idx, worker
 
     def debug(self, *args, **kwargs):
@@ -387,7 +387,7 @@ class AutoscalePool(WorkerPool):
                 # more processes in the pool than we need (> min)
                 # send this process a message so it will exit gracefully
                 # at the next opportunity
-                logger.warn('scaling down worker pid:{}'.format(w.pid))
+                logger.debug('scaling down worker pid:{}'.format(w.pid))
                 w.quit()
                 self.workers.remove(w)
             if w.alive:

@@ -35,13 +35,6 @@ LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  #
 LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()  # noqa
 COLOR_LOGS = True
 
-# celery is annoyingly loud when docker containers start
-LOGGING['loggers'].pop('celery', None)  # noqa
-# avoid awx.main.dispatch WARNING-level scaling worker up/down messages
-LOGGING['loggers']['awx.main.dispatch']['level'] = 'ERROR'  # noqa
-# suppress the spamminess of the awx.main.scheduler and .tasks loggers
-LOGGING['loggers']['awx']['level'] = 'INFO'  # noqa
-
 ALLOWED_HOSTS = ['*']
 
 mimetypes.add_type("image/svg+xml", ".svg", True)
@@ -56,13 +49,6 @@ CSRF_COOKIE_SECURE = False
 # Override django.template.loaders.cached.Loader in defaults.py
 template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None)  # noqa
 template['OPTIONS']['loaders'] = ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
-
-CALLBACK_QUEUE = "callback_tasks"
-
-# Enable dynamically pulling roles from a requirement.yml file
-# when updating SCM projects
-# Note: This setting may be overridden by database settings.
-AWX_ROLES_ENABLED = True
 
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
