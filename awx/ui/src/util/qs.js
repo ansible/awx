@@ -228,7 +228,7 @@ export function updateQueryString(config, queryString, newParams) {
   return encodeQueryString(allParams);
 }
 
-function parseFullQueryString(queryString) {
+function parseFullQueryString(queryString = '') {
   const allParams = {};
   queryString
     .replace(/^\?/, '')

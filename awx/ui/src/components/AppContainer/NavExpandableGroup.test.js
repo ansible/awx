@@ -1,9 +1,11 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, withRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 
 import { Nav } from '@patternfly/react-core';
-import NavExpandableGroup from './NavExpandableGroup';
+import _NavExpandableGroup from './NavExpandableGroup';
+
+const NavExpandableGroup = withRouter(_NavExpandableGroup);
 
 describe('NavExpandableGroup', () => {
   test('initialization and render', () => {
@@ -21,47 +23,88 @@ describe('NavExpandableGroup', () => {
           />
         </Nav>
       </MemoryRouter>
-    )
-      .find('NavExpandableGroup')
-      .instance();
+    ).find('NavExpandableGroup');
 
-    expect(component.navItemPaths).toEqual(['/foo', '/bar', '/fiz']);
-    expect(component.isActiveGroup()).toEqual(true);
+    expect(component.find('NavItem').length).toEqual(3);
+    let link = component.find('NavItem').at(0);
+    expect(component.find('NavItem').at(0).prop('isActive')).toBeTruthy();
+    expect(link.find('Link').prop('to')).toBe('/foo');
+
+    link = component.find('NavItem').at(1);
+    expect(link.prop('isActive')).toBeFalsy();
+    expect(link.find('Link').prop('to')).toBe('/bar');
+
+    link = component.find('NavItem').at(2);
+    expect(link.prop('isActive')).toBeFalsy();
+    expect(link.find('Link').prop('to')).toBe('/fiz');
   });
 
-  describe('isActivePath', () => {
-    const params = [
-      ['/fo', '/foo', false],
-      ['/foo', '/foo', true],
-      ['/foo/1/bar/fiz', '/foo', true],
-      ['/foo/1/bar/fiz', 'foo', false],
-      ['/foo/1/bar/fiz', 'foo/', false],
-      ['/foo/1/bar/fiz', '/bar', false],
-      ['/foo/1/bar/fiz', '/fiz', false],
-    ];
+  test('when location is /foo/1/bar/fiz isActive returns false', () => {
+    const component = mount(
+      <MemoryRouter initialEntries={['/foo/1/bar/fiz']}>
+        <Nav aria-label="Test Navigation">
+          <NavExpandableGroup
+            groupId="test"
+            groupTitle="Test"
+            routes={[
+              { path: '/foo', title: 'Foo' },
+              { path: '/bar', title: 'Bar' },
+              { path: '/fiz', title: 'Fiz' },
+            ]}
+          />
+        </Nav>
+      </MemoryRouter>
+    ).find('NavExpandableGroup');
 
-    params.forEach(([location, path, expected]) => {
-      test(`when location is ${location}, isActivePath('${path}') returns ${expected} `, () => {
-        const component = mount(
-          <MemoryRouter initialEntries={[location]}>
-            <Nav aria-label="Test Navigation">
-              <NavExpandableGroup
-                groupId="test"
-                groupTitle="Test"
-                routes={[
-                  { path: '/foo', title: 'Foo' },
-                  { path: '/bar', title: 'Bar' },
-                  { path: '/fiz', title: 'Fiz' },
-                ]}
-              />
-            </Nav>
-          </MemoryRouter>
-        )
-          .find('NavExpandableGroup')
-          .instance();
+    expect(component.find('NavItem').length).toEqual(3);
+    const link = component.find('NavItem').at(0);
+    expect(component.find('NavItem').at(0).prop('isActive')).toBeTruthy();
+    expect(link.find('Link').prop('to')).toBe('/foo');
+  });
 
-        expect(component.isActivePath(path)).toEqual(expected);
-      });
-    });
+  test('when location is /fo isActive returns false', () => {
+    const component = mount(
+      <MemoryRouter initialEntries={['/fo']}>
+        <Nav aria-label="Test Navigation">
+          <NavExpandableGroup
+            groupId="test"
+            groupTitle="Test"
+            routes={[
+              { path: '/foo', title: 'Foo' },
+              { path: '/bar', title: 'Bar' },
+              { path: '/fiz', title: 'Fiz' },
+            ]}
+          />
+        </Nav>
+      </MemoryRouter>
+    ).find('NavExpandableGroup');
+
+    expect(component.find('NavItem').length).toEqual(3);
+    const link = component.find('NavItem').at(0);
+    expect(component.find('NavItem').at(0).prop('isActive')).toBeFalsy();
+    expect(link.find('Link').prop('to')).toBe('/foo');
+  });
+
+  test('when location is /foo isActive returns true', () => {
+    const component = mount(
+      <MemoryRouter initialEntries={['/foo']}>
+        <Nav aria-label="Test Navigation">
+          <NavExpandableGroup
+            groupId="test"
+            groupTitle="Test"
+            routes={[
+              { path: '/foo', title: 'Foo' },
+              { path: '/bar', title: 'Bar' },
+              { path: '/fiz', title: 'Fiz' },
+            ]}
+          />
+        </Nav>
+      </MemoryRouter>
+    ).find('NavExpandableGroup');
+
+    expect(component.find('NavItem').length).toEqual(3);
+    const link = component.find('NavItem').at(0);
+    expect(component.find('NavItem').at(0).prop('isActive')).toBeTruthy();
+    expect(link.find('Link').prop('to')).toBe('/foo');
   });
 });

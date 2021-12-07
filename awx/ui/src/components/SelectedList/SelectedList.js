@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Chip, Split as PFSplit, SplitItem } from '@patternfly/react-core';
 
@@ -16,42 +16,34 @@ const SplitLabelItem = styled(SplitItem)`
   word-break: initial;
 `;
 
-class SelectedList extends Component {
-  render() {
-    const {
-      label,
-      selected,
-      onRemove,
-      displayKey,
-      isReadOnly,
-      renderItemChip,
-    } = this.props;
+function SelectedList(props) {
+  const { label, selected, onRemove, displayKey, isReadOnly, renderItemChip } =
+    props;
 
-    const renderChip =
-      renderItemChip ||
-      (({ item, removeItem }) => (
-        <Chip key={item.id} onClick={removeItem} isReadOnly={isReadOnly}>
-          {item[displayKey]}
-        </Chip>
-      ));
+  const renderChip =
+    renderItemChip ||
+    (({ item, removeItem }) => (
+      <Chip key={item.id} onClick={removeItem} isReadOnly={isReadOnly}>
+        {item[displayKey]}
+      </Chip>
+    ));
 
-    return (
-      <Split>
-        <SplitLabelItem>{label}</SplitLabelItem>
-        <SplitItem>
-          <ChipGroup numChips={5} totalChips={selected.length}>
-            {selected.map((item) =>
-              renderChip({
-                item,
-                removeItem: () => onRemove(item),
-                canDelete: !isReadOnly,
-              })
-            )}
-          </ChipGroup>
-        </SplitItem>
-      </Split>
-    );
-  }
+  return (
+    <Split>
+      <SplitLabelItem>{label}</SplitLabelItem>
+      <SplitItem>
+        <ChipGroup numChips={5} totalChips={selected.length}>
+          {selected.map((item) =>
+            renderChip({
+              item,
+              removeItem: () => onRemove(item),
+              canDelete: !isReadOnly,
+            })
+          )}
+        </ChipGroup>
+      </SplitItem>
+    </Split>
+  );
 }
 
 SelectedList.propTypes = {

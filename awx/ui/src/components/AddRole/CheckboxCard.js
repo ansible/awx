@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox as PFCheckbox } from '@patternfly/react-core';
 import styled from 'styled-components';
@@ -17,27 +17,25 @@ const Checkbox = styled(PFCheckbox)`
   }
 `;
 
-class CheckboxCard extends Component {
-  render() {
-    const { name, description, isSelected, onSelect, itemId } = this.props;
-    return (
-      <CheckboxWrapper>
-        <Checkbox
-          isChecked={isSelected}
-          onChange={onSelect}
-          aria-label={name}
-          id={`checkbox-card-${itemId}`}
-          label={
-            <>
-              <div style={{ fontWeight: 'bold' }}>{name}</div>
-              <div>{description}</div>
-            </>
-          }
-          value={itemId}
-        />
-      </CheckboxWrapper>
-    );
-  }
+function CheckboxCard(props) {
+  const { name, description, isSelected, onSelect, itemId } = props;
+  return (
+    <CheckboxWrapper>
+      <Checkbox
+        isChecked={isSelected}
+        onChange={onSelect}
+        aria-label={name}
+        id={`checkbox-card-${itemId}`}
+        label={
+          <>
+            <div style={{ fontWeight: 'bold' }}>{name}</div>
+            <div>{description}</div>
+          </>
+        }
+        value={itemId}
+      />
+    </CheckboxWrapper>
+  );
 }
 
 CheckboxCard.propTypes = {
