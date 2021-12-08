@@ -6,7 +6,6 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import InventoryAdd from './InventoryAdd';
 
@@ -43,7 +42,6 @@ describe('<InventoryAdd />', () => {
         instanceGroups,
       });
     });
-    await sleep(1);
     expect(InventoriesAPI.create).toHaveBeenCalledWith({
       name: 'new Foo',
       organization: 2,
