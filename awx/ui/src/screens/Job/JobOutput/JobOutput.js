@@ -162,7 +162,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     return data.count || 0;
   };
 
-  const isFlatMode = isJobRunning(job.status) || location.search.length > 1;
+  const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
+  const isFlatMode = isJobRunning(jobStatus) || location.search.length > 1;
 
   const {
     addEvents,
@@ -190,7 +191,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [hostEvent, setHostEvent] = useState({});
   const [isHostModalOpen, setIsHostModalOpen] = useState(false);
-  const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [highestLoadedCounter, setHighestLoadedCounter] = useState(0);
   const [isFollowModeEnabled, setIsFollowModeEnabled] = useState(
@@ -225,15 +225,20 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!isJobRunning(jobStatus)) {
+      setIsFollowModeEnabled(false);
+    }
     rebuildEventsTree();
   }, [isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isJobRunning(jobStatus)) {
-      loadJobEvents().then(() => {
-        setWsEvents([]);
-        scrollToRow(lastScrollPosition);
-      });
+      setTimeout(() => {
+        loadJobEvents().then(() => {
+          setWsEvents([]);
+          scrollToRow(lastScrollPosition);
+        });
+      }, 250);
       return;
     }
     let batchTimeout;
