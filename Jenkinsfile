@@ -32,10 +32,10 @@ pipeline {
         }
     }
 
-    stage('Create mounts and set permissions') {
+    stage('Create folders and set permissions') {
       agent { label 'deploy-lt' }
         steps {
-          sh(script: "mkdir -p .docker .config workspace && chown ${JENKINSID}:${DOCKERGID} .docker .config workspace", returnStdout: true)
+          sh(script: "sudo mkdir -p .docker .config workspace && sudo chown -R ${JENKINSID}:${DOCKERGID} .docker .config workspace", returnStdout: true)
         }
     }
 
@@ -59,7 +59,13 @@ pipeline {
           sh "docker rmi ${REGISTRY}/${NAMESPACE}/awx:latest"
           sh "docker rmi ${REGISTRY}/${NAMESPACE}/awx:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}0"
           sh "docker rmi ${REGISTRY}/${NAMESPACE}/awx-isolated:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}0"
-          sh "mkdir -p .docker .config workspace && chown ${JENKINSID}:${DOCKERGID} .docker .config workspace"
+        }
+    }
+
+    stage('Fix folders and set permissions') {
+      agent { label 'deploy-lt' }
+        steps {
+          sh(script: "sudo mkdir -p .docker .config workspace && sudo chown -R ${JENKINSID}:${DOCKERGID} .docker .config workspace", returnStdout: true)
         }
     }
   }
