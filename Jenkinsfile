@@ -59,6 +59,7 @@ pipeline {
           sh "docker rmi ${REGISTRY}/${NAMESPACE}/awx:latest"
           sh "docker rmi ${REGISTRY}/${NAMESPACE}/awx:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}0"
           sh "docker rmi ${REGISTRY}/${NAMESPACE}/awx-isolated:${env.VERSION}.${env.BUILD_NUMBER}.${env.TAG}0"
+          sh "mkdir -p .docker .config workspace && chown ${JENKINSID}:${DOCKERGID} .docker .config workspace"
         }
     }
   }
