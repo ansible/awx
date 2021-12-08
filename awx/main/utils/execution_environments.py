@@ -21,6 +21,12 @@ def get_default_execution_environment():
     return ExecutionEnvironment.objects.filter(organization=None, managed=False).first()
 
 
+# this is the root of the private data dir as seen from inside
+# of the container running a job. if process isolation is disabled
+# then this should just be host project root directory
+CONTAINER_ROOT = '/runner' if settings.RUNNER_PROCESS_ISOLATION else settings.PROJECTS_ROOT
+
+
 def get_default_pod_spec():
     ee = get_default_execution_environment()
     if ee is None:
@@ -35,16 +41,11 @@ def get_default_pod_spec():
                 {
                     "image": ee.image,
                     "name": 'worker',
-                    "args": ['ansible-runner', 'worker', '--private-data-dir=/runner'],
+                    "args": ['ansible-runner', 'worker', f'--private-data-dir={CONTAINER_ROOT}'],
                 }
             ],
         },
     }
-
-
-# this is the root of the private data dir as seen from inside
-# of the container running a job
-CONTAINER_ROOT = '/runner'
 
 
 def to_container_path(path, private_data_dir):
