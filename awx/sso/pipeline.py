@@ -231,7 +231,7 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
         [t.member_role.members.remove(user) for t in Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
 
 
-def _check_flag(user, flag, attributes, roles, user_flags_settings):
+def _check_flag(user, flag, attributes, user_flags_settings):
     new_flag = False
     is_role_key = "is_%s_role" % (flag)
     is_attr_key = "is_%s_attr" % (flag)
@@ -241,7 +241,7 @@ def _check_flag(user, flag, attributes, roles, user_flags_settings):
     role_setting = user_flags_settings.get(is_role_key, None)
     if role_setting:
         # We do a 2 layer check here so that we don't spit out the else message if there is no role defined
-        if role_setting in roles:
+        if role_setting in attributes.get('Role', []):
             logger.debug("User %s has %s role %s" % (user.username, flag, role_setting))
             new_flag = True
         else:
@@ -289,14 +289,12 @@ def update_user_flags(backend, details, user=None, *args, **kwargs):
     logger.debug(user_flags_settings)
 
     attributes = kwargs.get('response', {}).get('attributes', {})
-    roles = attributes.get('Role', [])
     logger.debug("User attributes for %s: %s" % (user.username, attributes))
-    logger.debug("User roles for %s: %s" % (user.username, roles))
 
     initial_superuser = user.is_superuser
     initial_auditor = user.is_system_auditor
-    user.is_superuser, superuser_changed = _check_flag(user, 'superuser', attributes, roles, user_flags_settings)
-    user.is_system_auditor, auditor_changed = _check_flag(user, 'system_auditor', attributes, roles, user_flags_settings)
+    user.is_superuser, superuser_changed = _check_flag(user, 'superuser', attributes, user_flags_settings)
+    user.is_system_auditor, auditor_changed = _check_flag(user, 'system_auditor', attributes, user_flags_settings)
 
     if superuser_changed or auditor_changed:
         user.save()
