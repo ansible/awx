@@ -7,7 +7,8 @@ import useJobEvents, {
   TOGGLE_NODE_COLLAPSED,
   SET_EVENT_NUM_CHILDREN,
 } from './useJobEvents';
-import { sleep } from '../../../../testUtils/testUtils';
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function Child() {
   return <div />;
