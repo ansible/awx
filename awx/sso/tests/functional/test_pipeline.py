@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.utils.timezone import now
 
-from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr
+from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr, _check_flag
 
 from awx.main.models import User, Team, Organization, Credential, CredentialType
 
@@ -357,3 +357,73 @@ class TestSAMLAttr:
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
             assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+
+
+@pytest.mark.django_db
+class TestSAMLUserFlags:
+    @pytest.mark.parametrize(
+        "user_flags_settings, expected",
+        [
+            # In this case we will pass no user flags so new_flag should be false and changed will def be false
+            (
+                {},
+                (False, False),
+            ),
+            # In this case we will give the user a group to make them an admin
+            (
+                {'is_superuser_role': 'test-role-1'},
+                (True, True),
+            ),
+            # In this case we will give the user a flag that will make then an admin
+            (
+                {'is_superuser_attr': 'is_superuser'},
+                (True, True),
+            ),
+            # In this case we will give the user a flag but the wrong value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
+                (False, False),
+            ),
+            # In this case we will give the user a flag and the right value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
+                (True, True),
+            ),
+            # In this case we will give the user a proper role and an is_superuser_attr role that they dont have, this should make them an admin
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'gibberish', 'is_superuser_value': 'true'},
+                (True, True),
+            ),
+            # In this case we will give the user a proper role and an is_superuser_attr role that they have, this should make them an admin
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'test-role-1'},
+                (True, True),
+            ),
+            # In this case we will give the user a proper role and an is_superuser_attr role that they have but a bad value, this should make them an admin
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
+                (False, False),
+            ),
+            # In this case we will give the user everything
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
+                (True, True),
+            ),
+        ],
+    )
+    def test__check_flag(self, user_flags_settings, expected):
+        user = User()
+        user.username = 'John'
+        user.is_superuser = False
+
+        attributes = {
+            'email': ['noone@nowhere.com'],
+            'last_name': ['Westcott'],
+            'is_superuser': ['true'],
+            'username': ['test_id'],
+            'first_name': ['John'],
+            'Role': ['test-role-1'],
+            'name_id': 'test_id',
+        }
+
+        assert expected == _check_flag(user, 'superuser', attributes, user_flags_settings)
