@@ -901,7 +901,6 @@ LOGGING = {
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'propagate': False},
         'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings']},
         'social': {'handlers': ['console', 'file', 'tower_warnings']},
-        'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings']},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings']},
     },
 }
