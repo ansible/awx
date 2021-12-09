@@ -7,7 +7,7 @@ Session authentication is a safer way of utilizing HTTP(S) cookies. Theoreticall
 information from the cookie payload.
 
 Session authentication, on the other hand, sets a single `session_id` cookie. The `session_id`
-is *a random string which will be mapped to user authentication informations by server*. Crackers who
+is *a random string which will be mapped to user authentication information by server*. Crackers who
 hijack cookies will only get the `session_id` itself, which does not imply any critical user info, is valid only for
 a limited time, and can be revoked at any time.
 

@@ -159,7 +159,7 @@ Inside these folders, the internal structure is:
 - **/hooks** - Custom react [hooks](https://reactjs.org/docs/hooks-custom.html)
 - **/locales** - [Internationalization](#internationalization) config and source files.
 - **/screens** - Based on the various routes of awx.
-  - **/shared** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.
+  - **/shared** - Components that are meant to be used specifically by a particular route, but might be shareable across pages of that route. For example, a form component which is used on both add and edit screens.
 - **/util** - Stateless helper functions that aren't tied to react.
 
 ### Patterns

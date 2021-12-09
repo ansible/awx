@@ -46,6 +46,23 @@ I18N_FLAG_FILE = .i18n_built
 	VERSION docker-compose-sources \
 	.git/hooks/pre-commit
 
+shellcheck:
+	shellcheck --severity=error --enable=all --shell=bash $(shell find . -type f -name "*.sh")
+
+typos:
+	codespell --skip .git --ignore-words .codespellignore --check-filenames \
+	--skip "*.po,*.css.map,*test.js"
+
+typos-md:
+	codespell --skip .git --ignore-words .codespellignore --check-filenames $(shell find . -type f -name "*.md")
+
+fix-typos:
+	codespell --skip .git --ignore-words .codespellignore --check-filenames --write-changes --interactive=1 \
+	--skip "*.po,*.css.map,*test.js"
+
+fix-typos-md:
+	codespell --skip .git --ignore-words .codespellignore --check-filenames --write-changes --interactive=1 $(shell find . -type f -name "*.md")
+
 clean-tmp:
 	rm -rf tmp/
 
