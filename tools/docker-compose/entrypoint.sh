@@ -32,4 +32,4 @@ else
     export SDB_NOTIFY_HOST=$(ip route | head -n1 | awk '{print $3}')
 fi
 
-exec $@
+exec "$@"
