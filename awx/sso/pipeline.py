@@ -291,8 +291,6 @@ def update_user_flags(backend, details, user=None, *args, **kwargs):
     attributes = kwargs.get('response', {}).get('attributes', {})
     logger.debug("User attributes for %s: %s" % (user.username, attributes))
 
-    initial_superuser = user.is_superuser
-    initial_auditor = user.is_system_auditor
     user.is_superuser, superuser_changed = _check_flag(user, 'superuser', attributes, user_flags_settings)
     user.is_system_auditor, auditor_changed = _check_flag(user, 'system_auditor', attributes, user_flags_settings)
 
