@@ -13,6 +13,8 @@ COLLECTION_VERSION := $(shell $(PYTHON) setup.py --version | cut -d . -f 1-3)
 COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 MAIN_NODE_TYPE ?= hybrid
+# If set to true docker-compose will also start a keycloak instance
+KEYCLOAK ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -468,7 +470,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e receptor_image=$(RECEPTOR_IMAGE) \
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
-	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
+	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
+	    -e enable_keycloak=$(KEYCLOAK)
 
 
 docker-compose: awx/projects docker-compose-sources
