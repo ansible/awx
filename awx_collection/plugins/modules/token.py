@@ -85,9 +85,9 @@ EXAMPLES = '''
         controller_username: "{{ my_username }}"
         controller_password: "{{ my_password }}"
 
-    - name: Use our new token to make another call
+    - name: Use our new token (via the Ansible facts system) to make another call
       job_list:
-        controller_oauthtoken: "{{ token }}"
+        controller_oauthtoken: "{{ ansible_facts.controller_token.token }}"
 
   always:
     - name: Delete our Token with the token we created
