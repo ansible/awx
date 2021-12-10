@@ -207,12 +207,12 @@ function InstanceList() {
                   ]
                 : []),
               <DisassociateButton
-                verifyCannotDisassociate={false}
+                verifyCannotDisassociate={selected.some(
+                  (s) => s.node_type === 'control'
+                )}
                 key="disassociate"
                 onDisassociate={handleDisassociate}
-                itemsToDisassociate={selected.filter(
-                  (s) => s.node_type !== 'control'
-                )}
+                itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from instance group?`}
               />,
               <Tooltip

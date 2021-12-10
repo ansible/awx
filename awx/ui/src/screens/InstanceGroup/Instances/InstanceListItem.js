@@ -121,9 +121,8 @@ function InstanceListItem({
         <Td
           select={{
             rowIndex,
-            isSelected: isSelected && instance.node_type !== 'control',
+            isSelected,
             onSelect,
-            disable: instance.node_type === 'control',
           }}
           dataLabel={t`Selected`}
         />

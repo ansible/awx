@@ -201,24 +201,6 @@ describe('<InstanceListItem/>', () => {
     expect(wrapper.find('Td').at(1).prop('select').onSelect).toEqual(onSelect);
   });
 
-  test('should disable checkbox', async () => {
-    const onSelect = jest.fn();
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <table>
-          <tbody>
-            <InstanceListItem
-              instance={instance[1]}
-              onSelect={onSelect}
-              fetchInstances={() => {}}
-            />
-          </tbody>
-        </table>
-      );
-    });
-    expect(wrapper.find('Td').at(1).prop('select').disable).toEqual(true);
-  });
-
   test('should display instance toggle', () => {
     expect(wrapper.find('InstanceToggle').length).toBe(1);
   });

@@ -33,18 +33,30 @@ function DisassociateButton({
     }
   }, [isKebabified, isOpen, onKebabModalChange]);
 
-  function cannotDisassociate(item) {
+  function cannotDisassociateAllOthers(item) {
     return !item.summary_fields?.user_capabilities?.delete;
   }
+  function cannotDisassociateInstances(item) {
+    return item.node_type === 'control';
+  }
+
+  const cannotDisassociate = itemsToDisassociate.some(
+    (i) => i.type === 'instance'
+  )
+    ? cannotDisassociateInstances
+    : cannotDisassociateAllOthers;
 
   function renderTooltip() {
     if (verifyCannotDisassociate) {
       const itemsUnableToDisassociate = itemsToDisassociate
         .filter(cannotDisassociate)
-        .map((item) => item.name)
+        .map((item) => item.name ?? item.hostname)
         .join(', ');
-
-      if (itemsToDisassociate.some(cannotDisassociate)) {
+      if (
+        cannotDisassociate
+          ? itemsToDisassociate.some(cannotDisassociateInstances)
+          : itemsToDisassociate.some(cannotDisassociateAllOthers)
+      ) {
         return (
           <div>
             {t`You do not have permission to disassociate the following: ${itemsUnableToDisassociate}`}
@@ -79,12 +91,17 @@ function DisassociateButton({
           aria-label={t`disassociate`}
           isDisabled={isDisabled}
           component="button"
+          ouiaId="disassociate-tooltip"
           onClick={() => setIsOpen(true)}
         >
           {t`Disassociate`}
         </DropdownItem>
       ) : (
-        <Tooltip content={renderTooltip()} position="top">
+        <Tooltip
+          content={renderTooltip()}
+          ouiaId="disassociate-tooltip"
+          position="top"
+        >
           <div>
             <Button
               ouiaId="disassociate-button"

@@ -108,5 +108,21 @@ describe('<DisassociateButton />', () => {
       );
       expect(wrapper.find('button[disabled]')).toHaveLength(1);
     });
+
+    test('should disable button for control instance', () => {
+      const wrapper = mountWithContexts(
+        <DisassociateButton
+          onDisassociate={() => {}}
+          itemsToDelete={[
+            {
+              id: 1,
+              hostname: 'awx',
+              node_type: 'control',
+            },
+          ]}
+        />
+      );
+      expect(wrapper.find('button[disabled]')).toHaveLength(1);
+    });
   });
 });
