@@ -3,15 +3,8 @@ msgstr ""
 "POT-Creation-Date: 2021-06-08 18:28+0000\n"
 "Mime-Version: 1.0\n"
 "Language: nl\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -114,7 +107,7 @@ msgstr "Een refspec om op te halen (doorgegeven aan de Ansible git-module). Deze
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:123
 msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <0>access.redhat.com</0>. For more information, see the <1>User Guide</1>."
-msgstr "Een abonnementsmanifest is een export van een Red Hat-abonnement. Om een abonnementsmanifest te genereren, gaat u naar <0>access.redhat.com</0>. Zie voor meer informatie de <1>Gebruikershandleiding</1>."
+msgstr "Een abonnementsmanifest is een export van een Red Hat-abonnement. Om een abonnementsmanifest te genereren, gaat u naar <0>access.redhat.com</0>. Raadpleeg voor meer informatie de <1>Gebruikershandleiding</1>."
 
 #: screens/Job/WorkflowOutput/WorkflowOutputNode.js:143
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:299
@@ -409,7 +402,7 @@ msgstr "Overschrijven van vertakking toelaten"
 #: components/PromptDetail/PromptProjectDetail.js:66
 #: screens/Project/ProjectDetail/ProjectDetail.js:107
 msgid "Allow branch override"
-msgstr ""
+msgstr "Overschrijven van vertakking toelaten"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:104
 msgid ""
@@ -469,7 +462,7 @@ msgstr "Toepassing"
 
 #: screens/User/UserTokenList/UserTokenList.js:183
 msgid "Application Name"
-msgstr ""
+msgstr "Toepassingsnaam"
 
 #: screens/Application/Applications.js:64
 #: screens/Application/Applications.js:67
@@ -521,7 +514,7 @@ msgstr "Goedgekeurd"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:52
 msgid "Approved - {0}.  See the Activity Stream for more information."
-msgstr "Goedgekeurd - {0}.  Zie het activiteitenlogboek voor meer informatie."
+msgstr "Goedgekeurd - {0}.  Zie de activiteitenstroom voor meer informatie."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:49
 msgid "Approved by {0} - {1}"
@@ -545,7 +538,7 @@ msgstr "Weet u zeker dat u lokale authenticatie wilt uitschakelen? Als u dat doe
 
 #: screens/Setting/shared/SharedFields.js:350
 msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
-msgstr ""
+msgstr "Weet u zeker dat u de login redirect override URL wilt bewerken?  Als u dat doet, kan dat invloed hebben op de mogelijkheid van gebruikers om in te loggen op het systeem als de lokale authenticatie ook is uitgeschakeld."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.js:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
@@ -569,11 +562,11 @@ msgstr "Weet u zeker dat u dit knooppunt wilt verwijderen?"
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:42
 msgid "Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team."
-msgstr "Weet u zeker dat u de toegang van {0} wilt verwijderen uit {1}?  Als u dat doet, heeft dat gevolgen voor alle leden van het team."
+msgstr "Weet u zeker dat u de {0} toegang vanuit {1} wilt verwijderen?  Als u dat doet, heeft dat gevolgen voor alle leden van het team."
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:49
 msgid "Are you sure you want to remove {0} access from {username}?"
-msgstr "Weet u zeker dat u de toegang tot {0} wilt verwijderen uit de {username}?"
+msgstr "Weet u zeker dat u de {0} toegang vanuit {username} wilt verwijderen?"
 
 #: screens/Job/JobOutput/JobOutput.js:538
 msgid "Are you sure you want to submit the request to cancel this job?"
@@ -668,11 +661,11 @@ msgstr "Terug naar hosts"
 
 #: screens/InstanceGroup/InstanceGroup.js:74
 msgid "Back to Instance Groups"
-msgstr ""
+msgstr "Terug naar instantiegroepen"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:167
 msgid "Back to Instances"
-msgstr ""
+msgstr "Terug naar instanties"
 
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
@@ -791,7 +784,7 @@ msgstr "Bladeren"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:91
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:112
 msgid "Browse…"
-msgstr ""
+msgstr "Bladeren..."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
@@ -929,7 +922,7 @@ msgstr "Abonnement bewerken annuleren"
 #: screens/Job/JobDetail/JobDetail.js:470
 #: screens/Job/JobOutput/shared/OutputToolbar.js:135
 msgid "Cancel {0}"
-msgstr "{0} annuleren"
+msgstr "Annuleren {0}"
 
 #: components/JobList/JobList.js:226
 #: components/StatusLabel/StatusLabel.js:65
@@ -954,7 +947,7 @@ msgstr "Capaciteit"
 #: screens/InstanceGroup/Instances/InstanceList.js:257
 #: screens/InstanceGroup/Instances/InstanceListItem.js:150
 msgid "Capacity Adjustment"
-msgstr ""
+msgstr "Capaciteitsaanpassing"
 
 #: components/Search/LookupTypeInput.js:59
 msgid "Case-insensitive version of contains"
@@ -980,7 +973,8 @@ msgstr "Hoofdletterongevoelige versie van startswith."
 msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
-msgstr "Wijzig PROJECTS_ROOT bij het uitrollen van {brandName} om deze locatie te wijzigen."
+msgstr "Wijzig PROJECTS_ROOT bij het uitrollen van\n"
+"{brandName} om deze locatie te wijzigen."
 
 #: screens/Job/JobOutput/shared/HostStatusBar.js:43
 msgid "Changed"
@@ -1071,7 +1065,7 @@ msgstr "Opschonen"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:92
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:113
 msgid "Clear"
-msgstr ""
+msgstr "Wissen"
 
 #: components/DataListToolbar/DataListToolbar.js:85
 #: screens/Job/JobOutput/JobOutputSearch.js:142
@@ -1104,7 +1098,7 @@ msgstr "Klik om een nieuwe link naar dit knooppunt te maken."
 
 #: screens/Template/Survey/SurveyToolbar.js:63
 msgid "Click to rearrange the order of the survey questions"
-msgstr ""
+msgstr "Klik op om de volgorde van de enquêtevragen te wijzigen"
 
 #: screens/Template/Survey/MultipleChoiceField.js:117
 msgid "Click to toggle default value"
@@ -1620,11 +1614,11 @@ msgstr "Aangepaste virtuele omgeving {0} moet worden vervangen door een uitvoeri
 
 #: components/TemplateList/TemplateListItem.js:155
 msgid "Custom virtual environment {0} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "Aangepaste virtuele omgeving {0} moet worden vervangen door een uitvoeringsomgeving. Raadpleeg voor meer informatie over het migreren van uitvoeringsomgevingen <0>de documentatie.</0>"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:72
 msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "Aangepaste virtuele omgeving {virtualEnvironment} moet worden vervangen door een uitvoeringsomgeving. Raadpleeg voor meer informatie over het migreren van uitvoeringsomgevingen <0>de documentatie.</0>"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:61
 msgid "Customize messages…"
@@ -1655,7 +1649,7 @@ msgstr "Bewaartermijn van gegevens"
 
 #: screens/Dashboard/shared/LineChart.js:168
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:339
 #: components/Schedule/shared/FrequencyDetailSubform.js:443
@@ -1670,7 +1664,7 @@ msgstr "Dagen om gegevens te bewaren"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/DaysToKeepStep.jsx:28
 msgid "Days of data to be retained"
-msgstr ""
+msgstr "Aantal dagen dat gegevens moeten worden bewaard"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:105
 msgid "Days remaining"
@@ -1678,7 +1672,7 @@ msgstr "Resterende dagen"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useDaysToKeepStep.jsx:35
 msgid "Days to keep"
-msgstr ""
+msgstr "Te behouden dagen"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:125
 msgid "Debug"
@@ -1699,7 +1693,7 @@ msgstr "Standaard"
 #: screens/Template/Survey/SurveyReorderModal.js:207
 #: screens/Template/Survey/SurveyReorderModal.js:228
 msgid "Default Answer(s)"
-msgstr ""
+msgstr "Standaardantwoord(en)"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:40
 msgid "Default Execution Environment"
@@ -1865,7 +1859,7 @@ msgstr "Smart-inventaris maken"
 
 #: screens/Template/Survey/SurveyToolbar.js:82
 msgid "Delete survey question"
-msgstr ""
+msgstr "Vragenlijstvraag verwijderen"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:76
 msgid ""
@@ -1878,7 +1872,7 @@ msgstr "De lokale opslagplaats dient volledig verwijderd te worden voordat een u
 #: components/PromptDetail/PromptProjectDetail.js:51
 #: screens/Project/ProjectDetail/ProjectDetail.js:92
 msgid "Delete the project before syncing"
-msgstr ""
+msgstr "Verwijder het project alvorens te synchroniseren."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:83
 msgid "Delete this link"
@@ -1917,7 +1911,7 @@ msgstr "Geweigerd"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:31
 msgid "Denied - {0}.  See the Activity Stream for more information."
-msgstr "Geweigerd - {0}.  Zie het activiteitenlogboek voor meer informatie."
+msgstr "Geweigerd - {0}.  Zie de activiteitstroom voor meer informatie."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:28
 msgid "Denied by {0} - {1}"
@@ -2139,7 +2133,7 @@ msgstr "SSL-verificatie uitschakelen"
 #: components/InstanceToggle/InstanceToggle.js:56
 #: components/StatusLabel/StatusLabel.js:64
 msgid "Disabled"
-msgstr ""
+msgstr "Uitgeschakeld"
 
 #: components/DisassociateButton/DisassociateButton.js:57
 #: components/DisassociateButton/DisassociateButton.js:84
@@ -2190,7 +2184,7 @@ msgstr "Loskoppelen?"
 #: components/PromptDetail/PromptProjectDetail.js:46
 #: screens/Project/ProjectDetail/ProjectDetail.js:87
 msgid "Discard local changes before syncing"
-msgstr ""
+msgstr "Alle lokale wijzigingen vernietigen alvorens te synchroniseren"
 
 #: screens/Template/shared/JobTemplateForm.js:479
 msgid ""
@@ -2218,23 +2212,23 @@ msgstr "Download output"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:90
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:111
 msgid "Drag a file here or browse to upload"
-msgstr ""
+msgstr "Sleep een bestand hierheen of blader om te uploaden"
 
 #: components/SelectedList/DraggableSelectedList.js:68
 msgid "Draggable list to reorder and remove selected items."
-msgstr ""
+msgstr "Versleepbare lijst om geselecteerde items te herschikken en te verwijderen."
 
 #: components/SelectedList/DraggableSelectedList.js:43
 msgid "Dragging cancelled. List is unchanged."
-msgstr ""
+msgstr "Slepen geannuleerd. Lijst is ongewijzigd."
 
 #: components/SelectedList/DraggableSelectedList.js:38
 msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
-msgstr ""
+msgstr "Item slepen {id}. Item met index {oldIndex} in nu {newIndex}."
 
 #: components/SelectedList/DraggableSelectedList.js:32
 msgid "Dragging started for item id: {newId}."
-msgstr ""
+msgstr "Het slepen is begonnen voor item-id: {newId}."
 
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:81
 msgid "E-mail"
@@ -2395,7 +2389,7 @@ msgstr "Link bewerken"
 
 #: screens/Setting/shared/SharedFields.js:290
 msgid "Edit Login redirect override URL"
-msgstr ""
+msgstr "Login doorverwijzen URL overschrijven bewerken"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeEditModal.js:64
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:233
@@ -2408,7 +2402,7 @@ msgstr "Berichtsjabloon bewerken"
 
 #: screens/Template/Survey/SurveyToolbar.js:72
 msgid "Edit Order"
-msgstr ""
+msgstr "Volgorde bewerken"
 
 #: screens/Organization/OrganizationList/OrganizationListItem.js:72
 #: screens/Organization/OrganizationList/OrganizationListItem.js:76
@@ -2436,7 +2430,7 @@ msgstr "Bron bewerken"
 
 #: screens/Template/Survey/SurveyListItem.js:87
 msgid "Edit Survey"
-msgstr ""
+msgstr "Vragenlijst wijzigen"
 
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:20
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:24
@@ -2494,7 +2488,7 @@ msgstr "Instantiegroep bewerken"
 #: screens/Setting/shared/SharedFields.js:320
 #: screens/Setting/shared/SharedFields.js:322
 msgid "Edit login redirect override URL"
-msgstr ""
+msgstr "Login doorverwijzen URL overschrijven bewerken"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:70
 msgid "Edit this link"
@@ -2506,7 +2500,7 @@ msgstr "Dit knooppunt bewerken"
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:84
 msgid "Edit workflow"
-msgstr ""
+msgstr "Workflow bewerken"
 
 #: components/Workflow/WorkflowNodeHelp.js:170
 #: screens/Job/JobOutput/shared/OutputToolbar.js:123
@@ -2575,7 +2569,7 @@ msgstr "Verhoging van rechten inschakelen"
 
 #: screens/Setting/SettingList.js:53
 msgid "Enable simplified login for your {brandName} applications"
-msgstr ""
+msgstr "Eenvoudig inloggen inschakelen voor uw {brandName} toepassingen"
 
 #: screens/Template/shared/JobTemplateForm.js:588
 msgid "Enable webhook for this template."
@@ -2597,7 +2591,7 @@ msgstr "Ingeschakeld"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:183
 msgid "Enabled Options"
-msgstr ""
+msgstr "Ingeschakelde opties"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:239
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:254
@@ -2623,7 +2617,8 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template"
-msgstr "Maakt het mogelijk een provisioning terugkoppelings-URL aan te maken. Met deze URL kan een host contact opnemen met {brandName} en een verzoek indienen voor een configuratie-update met behulp van deze taaksjabloon."
+msgstr "Maakt het mogelijk een provisioning terugkoppelings-URL aan te maken. Met deze URL kan een host contact opnemen met {brandName}\n"
+"en een verzoek voor een configuratie-update indienen met behulp van deze taaksjabloon"
 
 #: screens/Template/shared/JobTemplateForm.js:568
 msgid ""
@@ -2631,7 +2626,8 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template."
-msgstr ""
+msgstr "Maakt het mogelijk een provisioning terugkoppelings-URL aan te maken. Met deze URL kan een host contact opnemen met {brandName}\n"
+"en een verzoek voor een configuratie-update indienen met behulp van deze taaksjabloon."
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:148
 #: screens/Setting/shared/SettingDetail.js:87
@@ -2648,11 +2644,11 @@ msgstr "Licentie-overeenkomst voor eindgebruikers"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "End date"
-msgstr ""
+msgstr "Einddatum"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:542
 msgid "End date/time"
-msgstr ""
+msgstr "Einddatum/-tijd"
 
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
@@ -2660,7 +2656,7 @@ msgstr "Einde kwam niet overeen met een verwachte waarde"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "End time"
-msgstr ""
+msgstr "Eindtijd"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2734,7 +2730,8 @@ msgstr "Voer één e-mailadres per regel in om een lijst met ontvangers te maken
 msgid ""
 "Enter one phone number per line to specify where to\n"
 "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-msgstr ""
+msgstr "Voer één telefoonnummer per regel in om aan te geven waar\n"
+"sms-berichten te routeren. Telefoonnummers moeten worden ingedeeld als +11231231234. Voor meer informatie zie Twilio-documentatie"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:410
 msgid ""
@@ -2744,11 +2741,11 @@ msgstr "Voer het telefoonnummer in dat hoort bij de 'Berichtenservice' in Twilio
 
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
-msgstr ""
+msgstr "Voer variabelen in om de inventaris te configureren. Voor een gedetailleerde beschrijving van het configureren van deze plug-in, zie <0>Inventarisplug-ins</0> in de documentatie en de plug-inconfiguratiegids voor <1>Insights</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
-msgstr "Voer variabelen in om de inventarisbron te configureren. Voor een gedetailleerde beschrijving om deze plug-in te configureren, zie <0>Inventarisplug-ins</0> in de documentatie en de plug-inconfiguratiegids voor <1>Tower</1>."
+msgstr "Voer variabelen in om de inventarisbron te configureren. Voor een gedetailleerde beschrijving om deze plug-in te configureren, zie<0> Inventarisplug-ins</0> in de documentatie en de plug-inconfiguratiegids voor <1>Tower</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/EC2SubForm.js:53
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>aws_ec2</1> plugin configuration guide."
@@ -2798,7 +2795,7 @@ msgstr "Fout"
 
 #: screens/Project/ProjectList/ProjectList.js:286
 msgid "Error fetching updated project"
-msgstr ""
+msgstr "Fout bij ophalen bijgewerkt project"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:485
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:141
@@ -2907,7 +2904,7 @@ msgstr "Fout:"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:256
 msgid "Errors"
-msgstr ""
+msgstr "Fouten"
 
 #: screens/ActivityStream/ActivityStream.js:256
 #: screens/ActivityStream/ActivityStreamListItem.js:46
@@ -2933,7 +2930,7 @@ msgstr "Gebeurtenissen"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
 msgid "Every minute for {0} times"
-msgstr ""
+msgstr "Elke minuut, {0} keer"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -2941,7 +2938,7 @@ msgstr "Exacte overeenkomst (standaard-opzoeken indien niet opgegeven)."
 
 #: components/Search/RelatedLookupTypeInput.js:38
 msgid "Exact search on id field."
-msgstr ""
+msgstr "Exact zoeken op id-veld."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:26
 msgid "Example URLs for GIT Source Control include:"
@@ -2990,7 +2987,7 @@ msgstr "Uitvoeringsomgeving"
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:69
 #: components/TemplateList/TemplateListItem.js:152
 msgid "Execution Environment Missing"
-msgstr ""
+msgstr "Uitvoeringsomgeving ontbreekt"
 
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:103
 #: routeConfig.js:140
@@ -3030,7 +3027,7 @@ msgstr "Uitbreiden"
 
 #: components/DataListToolbar/DataListToolbar.js:95
 msgid "Expand all rows"
-msgstr ""
+msgstr "Alle rijen uitklappen"
 
 #: components/CodeEditor/VariablesDetail.js:211
 #: components/CodeEditor/VariablesField.js:247
@@ -3092,7 +3089,7 @@ msgstr "VOLTOOID:"
 #: components/PromptDetail/PromptJobTemplateDetail.js:80
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:142
 msgid "Fact Storage"
-msgstr ""
+msgstr "Feitenopslag"
 
 #: screens/Host/Host.js:62
 #: screens/Host/HostFacts/HostFacts.js:45
@@ -3358,7 +3355,7 @@ msgstr "Kan workflow-taaksjabloon niet verwijderen."
 #: screens/Host/HostDetail/HostDetail.js:59
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:59
 msgid "Failed to delete {name}."
-msgstr "Kan {naam} niet verwijderen."
+msgstr "Kan {name} niet verwijderen."
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:262
 msgid "Failed to deny one or more workflow approval."
@@ -3393,7 +3390,7 @@ msgstr "Kan de aangepaste configuratie-instellingen voor inloggen niet ophalen. 
 
 #: screens/Project/ProjectList/ProjectList.js:290
 msgid "Failed to fetch the updated project data."
-msgstr ""
+msgstr "Kan de bijgewerkte projectgegevens niet ophalen."
 
 #: components/AdHocCommands/AdHocCommands.js:110
 #: components/LaunchButton/LaunchButton.js:164
@@ -3415,7 +3412,7 @@ msgstr "Kan geen knooppuntgegevens ophalen."
 
 #: screens/InstanceGroup/Instances/InstanceList.js:303
 msgid "Failed to run a health check on one or more instances."
-msgstr ""
+msgstr "Kan geen gezondheidscontrole uitvoeren op een of meer instanties."
 
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:169
 msgid "Failed to send test notification."
@@ -3520,7 +3517,7 @@ msgstr "Bestand, map of script"
 #: components/Search/Search.js:176
 #: components/Search/Search.js:201
 msgid "Filter By {name}"
-msgstr ""
+msgstr "Filteren op {name}"
 
 #: components/JobList/JobList.js:240
 #: components/JobList/JobListItem.js:93
@@ -3570,7 +3567,7 @@ msgstr "Drijven"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Follow"
-msgstr ""
+msgstr "Volgen"
 
 #: screens/Template/shared/JobTemplateForm.js:253
 msgid ""
@@ -3623,11 +3620,11 @@ msgstr "Vrijdag"
 
 #: components/Search/RelatedLookupTypeInput.js:45
 msgid "Fuzzy search on id, name or description fields."
-msgstr ""
+msgstr "Fuzzy search op id, naam of beschrijvingsvelden."
 
 #: components/Search/RelatedLookupTypeInput.js:32
 msgid "Fuzzy search on name field."
-msgstr ""
+msgstr "Fuzzy search op naamveld."
 
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:134
 #: screens/Organization/shared/OrganizationForm.js:101
@@ -3804,11 +3801,11 @@ msgstr "HTTP-methode"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:273
 #: screens/InstanceGroup/Instances/InstanceList.js:237
 msgid "Health Check"
-msgstr ""
+msgstr "Gezondheidscontrole"
 
 #: components/StatusLabel/StatusLabel.js:57
 msgid "Healthy"
-msgstr ""
+msgstr "Gezond"
 
 #: components/AppContainer/PageHeaderToolbar.js:115
 msgid "Help"
@@ -3938,7 +3935,7 @@ msgstr "Hosts"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:132
 msgid "Hosts automated"
-msgstr ""
+msgstr "Geautomatiseerde hosts"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:114
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:121
@@ -3947,7 +3944,7 @@ msgstr "Beschikbare hosts"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:127
 msgid "Hosts imported"
-msgstr ""
+msgstr "Geïmporteerde hosts"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:145
 msgid "Hosts remaining"
@@ -4076,17 +4073,16 @@ msgid ""
 "If enabled, this will store gathered facts so they can\n"
 "be viewed at the host level. Facts are persisted and\n"
 "injected into the fact cache at runtime."
-msgstr ""
-"Indien ingeschakeld, worden de verzamelde feiten opgeslagen zodat ze kunnen worden weergegeven op hostniveau. Feiten worden bewaard en\n"
+msgstr "Indien ingeschakeld, worden de verzamelde feiten opgeslagen zodat ze kunnen worden weergegeven op hostniveau. Feiten worden bewaard en\n"
 "geïnjecteerd in de feitencache tijdens runtime."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:266
 msgid "If specified, this field will be shown on the node instead of the resource name when viewing the workflow"
-msgstr ""
+msgstr "Indien gespecificeerd, zal dit veld worden getoond op het knooppunt in plaats van de resourcenaam bij het bekijken van de workflow"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:150
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
-msgstr "Neem zodra u klaar bent om te updaten of te verlengen <0>contact met ons op.</0>"
+msgstr "Neem zodra u klaar bent om te upgraden of te verlengen <0>contact met ons op.</0>"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:63
 msgid ""
@@ -4103,8 +4099,7 @@ msgstr "Als u alleen de toegang voor deze specifieke gebruiker wilt verwijderen,
 msgid ""
 "If you want the Inventory Source to update on\n"
 "launch and on project update, click on Update on launch, and also go to"
-msgstr ""
-"Als u wilt dat de inventarisbron wordt bijgewerkt bij\n"
+msgstr "Als u wilt dat de inventarisbron wordt bijgewerkt bij\n"
 "het opstarten en bij projectupdates, klik op Update bij opstarten, en ga ook naar"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:52
@@ -4128,8 +4123,7 @@ msgid ""
 "Indicates if a host is available and should be included in running\n"
 "jobs.  For hosts that are part of an external inventory, this may be\n"
 "reset by the inventory sync process."
-msgstr ""
-"Geeft aan of een host beschikbaar is en opgenomen moet worden in lopende taken. Voor hosts die deel uitmaken van een externe inventaris, kan dit worden\n"
+msgstr "Geeft aan of een host beschikbaar is en opgenomen moet worden in lopende taken. Voor hosts die deel uitmaken van een externe inventaris, kan dit worden\n"
 "gereset worden door het inventarissynchronisatieproces."
 
 #: components/AppContainer/PageHeaderToolbar.js:105
@@ -4211,7 +4205,7 @@ msgstr "Instantie-id"
 
 #: screens/InstanceGroup/InstanceGroups.js:54
 msgid "Instance details"
-msgstr ""
+msgstr "Instantiedetails"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:69
@@ -4224,7 +4218,7 @@ msgstr "Kan instantiegroep niet vinden."
 
 #: screens/InstanceGroup/Instances/InstanceListItem.js:172
 msgid "Instance group used capacity"
-msgstr ""
+msgstr "Gebruikte capaciteit instantiegroep"
 
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:122
 msgid "Instance groups"
@@ -4258,11 +4252,11 @@ msgstr "Ongeldige bestandsindeling. Upload een geldig Red Hat-abonnementsmanifes
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
 msgid "Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported."
-msgstr ""
+msgstr "Ongeldig linkdoel. Kan niet linken aan onder- of bovenliggende knooppunten. Grafiekcycli worden niet ondersteund."
 
 #: util/validators.js:33
 msgid "Invalid time format"
-msgstr ""
+msgstr "Ongeldige tijdsindeling"
 
 #: screens/Login/Login.js:120
 msgid "Invalid username or password. Please try again."
@@ -4337,7 +4331,7 @@ msgstr "Inventarisbron"
 
 #: screens/Job/JobDetail/JobDetail.js:228
 msgid "Inventory Source Project"
-msgstr ""
+msgstr "Project inventarisbronnen"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:87
 msgid "Inventory Source Sync"
@@ -4365,7 +4359,7 @@ msgstr "Inventarissynchronisatie"
 
 #: screens/Inventory/InventoryList/InventoryList.js:168
 msgid "Inventory Type"
-msgstr ""
+msgstr "Type inventaris"
 
 #: components/Workflow/WorkflowNodeHelp.js:71
 msgid "Inventory Update"
@@ -4390,11 +4384,11 @@ msgstr "Fout tijdens inventarissynchronisatie"
 
 #: components/DataListToolbar/DataListToolbar.js:100
 msgid "Is expanded"
-msgstr ""
+msgstr "Is uitgeklapt"
 
 #: components/DataListToolbar/DataListToolbar.js:102
 msgid "Is not expanded"
-msgstr ""
+msgstr "Is niet uitgeklapt"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:111
 msgid "Item Failed"
@@ -4462,11 +4456,11 @@ msgstr "Fout bij verwijderen taak"
 
 #: screens/Job/JobDetail/JobDetail.js:117
 msgid "Job ID"
-msgstr ""
+msgstr "Taak-id:"
 
 #: screens/Dashboard/shared/LineChart.js:128
 msgid "Job Runs"
-msgstr ""
+msgstr "Taakuitvoeringen"
 
 #: components/JobList/JobListItem.js:272
 #: screens/Job/JobDetail/JobDetail.js:301
@@ -4476,7 +4470,7 @@ msgstr "Taken verdelen"
 #: components/JobList/JobListItem.js:277
 #: screens/Job/JobDetail/JobDetail.js:308
 msgid "Job Slice Parent"
-msgstr ""
+msgstr "Ouder taken verdelen"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:160
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:234
@@ -4512,7 +4506,7 @@ msgstr "Taaksjabloon"
 
 #: components/LaunchPrompt/steps/credentialsValidator.js:38
 msgid "Job Template default credentials must be replaced with one of the same type.  Please select a credential for the following types in order to proceed: {0}"
-msgstr "De standaardreferenties van de taaksjabloon moeten worden vervangen door een van hetzelfde type.  Selecteer een toegangsgegeven voor de volgende types om verder te gaan: {0}"
+msgstr "De standaardreferenties van de taaksjabloon moeten worden vervangen door een van hetzelfde type.  Selecteer een toegangsgegeven voor de volgende typen om verder te gaan: {0}"
 
 #: screens/Project/Project.js:115
 #: screens/Project/Projects.js:31
@@ -4691,7 +4685,7 @@ msgstr "Laatste"
 #: screens/InstanceGroup/Instances/InstanceListItem.js:139
 #: screens/InstanceGroup/Instances/InstanceListItem.js:201
 msgid "Last Health Check"
-msgstr ""
+msgstr "Laatste gezondheidscontrole"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:185
 #: screens/Project/ProjectDetail/ProjectDetail.js:142
@@ -4809,7 +4803,7 @@ msgstr "Workflow opstarten"
 
 #: components/LaunchPrompt/LaunchPrompt.js:100
 msgid "Launch | {0}"
-msgstr "Opstarten | {0}"
+msgstr "Starten | {0}"
 
 #: components/DetailList/LaunchedByDetail.js:83
 msgid "Launched By"
@@ -4866,7 +4860,7 @@ msgstr "Laden"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:49
 msgid "Local"
-msgstr ""
+msgstr "Lokaal"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:270
 msgid "Local Time Zone"
@@ -4927,7 +4921,7 @@ msgstr "Toegangsgegevens machine"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:62
 msgid "Managed"
-msgstr ""
+msgstr "Beheerd"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:148
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:167
@@ -5052,11 +5046,11 @@ msgstr "Minuut"
 
 #: screens/Setting/Settings.js:96
 msgid "Miscellaneous Authentication"
-msgstr ""
+msgstr "Diversen authenticatie"
 
 #: screens/Setting/SettingList.js:107
 msgid "Miscellaneous Authentication settings"
-msgstr ""
+msgstr "Instellingen diversen authenticatie"
 
 #: screens/Setting/Settings.js:99
 msgid "Miscellaneous System"
@@ -5138,11 +5132,11 @@ msgstr "Module"
 
 #: screens/Job/JobDetail/JobDetail.js:403
 msgid "Module Arguments"
-msgstr ""
+msgstr "Module-argumenten"
 
 #: screens/Job/JobDetail/JobDetail.js:398
 msgid "Module Name"
-msgstr ""
+msgstr "Naam van de module"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:255
 msgid "Mon"
@@ -5492,7 +5486,7 @@ msgstr "Geen items gevonden."
 
 #: screens/Host/HostList/HostListItem.js:94
 msgid "No job data available"
-msgstr ""
+msgstr "Geen taakgegevens beschikbaar."
 
 #: screens/Job/JobOutput/HostEventModal.js:130
 msgid "No result found"
@@ -5531,14 +5525,14 @@ msgstr "Geen vragenlijstvragen gevonden."
 
 #: components/PaginatedTable/PaginatedTable.js:80
 msgid "No {pluralizedItemName} Found"
-msgstr "Geen {pluralizedItemName} gevonden"
+msgstr "{pluralizedItemName} niet gevonden"
 
 #: components/Workflow/WorkflowNodeHelp.js:150
 #: components/Workflow/WorkflowNodeHelp.js:184
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:264
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:265
 msgid "Node Alias"
-msgstr ""
+msgstr "Knooppunt alias"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:212
 #: screens/InstanceGroup/Instances/InstanceList.js:288
@@ -5587,7 +5581,7 @@ msgid ""
 "Note that only hosts directly in this group can\n"
 "be disassociated. Hosts in sub-groups must be disassociated\n"
 "directly from the sub-group level that they belong."
-msgstr "Let op: Alleen hosts die zich direct in deze groep bevinden, kunnen worden losgekoppeld. Hosts in subgroepen moeten rechtstreeks worden losgekoppeld van het subgroepniveau waar ze bij horen."
+msgstr "Let op: alleen hosts die zich direct in deze groep bevinden, kunnen worden losgekoppeld. Hosts in subgroepen moeten rechtstreeks worden losgekoppeld van het subgroepniveau waar ze bij horen."
 
 #: screens/Host/HostGroups/HostGroupsList.js:212
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:230
@@ -5600,11 +5594,11 @@ msgstr "Merk op dat u de groep na het ontkoppelen nog steeds in de lijst kunt zi
 
 #: components/Lookup/InstanceGroupsLookup.js:90
 msgid "Note: The order in which these are selected sets the execution precedence. Select more than one to enable drag."
-msgstr ""
+msgstr "Opmerking: de volgorde waarin deze worden geselecteerd bepaalt de voorrang bij de uitvoering. Selecteer er meer dan één om slepen mogelijk te maken."
 
 #: screens/Organization/shared/OrganizationForm.js:116
 msgid "Note: The order of these credentials sets precedence for the sync and lookup of the content. Select more than one to enable drag."
-msgstr ""
+msgstr "Opmerking: de volgorde van deze toegangsgegevens bepaalt de voorrang voor de synchronisatie en het opzoeken van de inhoud. Selecteer er meer dan één om slepen mogelijk te maken."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:61
 msgid "Note: This field assumes the remote name is \"origin\"."
@@ -5790,7 +5784,7 @@ msgstr "Opties"
 #: screens/Template/Survey/SurveyReorderModal.js:205
 #: screens/Template/Survey/SurveyReorderModal.js:220
 msgid "Order"
-msgstr ""
+msgstr "Bestellen"
 
 #: components/Lookup/ApplicationLookup.js:118
 #: components/Lookup/OrganizationLookup.js:101
@@ -5882,12 +5876,12 @@ msgstr "Overschrijven"
 #: components/PromptDetail/PromptInventorySourceDetail.js:54
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:125
 msgid "Overwrite local groups and hosts from remote inventory source"
-msgstr ""
+msgstr "Lokale groepen en hosts overschrijven op grond van externe inventarisbron"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:59
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:130
 msgid "Overwrite local variables from remote inventory source"
-msgstr ""
+msgstr "Lokale variabelen overschrijven op grond van externe inventarisbron"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:146
 msgid "Overwrite variables"
@@ -5996,11 +5990,11 @@ msgstr "Voer een zoekopdracht uit om een hostfilter te definiëren"
 #: screens/User/UserTokenDetail/UserTokenDetail.js:69
 #: screens/User/UserTokenList/UserTokenList.js:105
 msgid "Personal Access Token"
-msgstr ""
+msgstr "Persoonlijke toegangstoken"
 
 #: screens/User/UserTokenList/UserTokenListItem.js:26
 msgid "Personal access token"
-msgstr ""
+msgstr "Persoonlijke toegangstoken"
 
 #: screens/Job/JobOutput/HostEventModal.js:126
 msgid "Play"
@@ -6064,11 +6058,11 @@ msgstr "Uitvoeringen van het draaiboek"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:149
 msgid "Please add a Schedule to populate this list."
-msgstr ""
+msgstr "Voeg een schema toe om deze lijst te vullen."
 
 #: components/Schedule/ScheduleList/ScheduleList.js:152
 msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
-msgstr ""
+msgstr "Voeg een schema toe om deze lijst te vullen.  Schema's kunnen worden toegevoegd aan een sjabloon, project of inventarisatiebron."
 
 #: screens/Template/Survey/SurveyList.js:146
 msgid "Please add survey questions."
@@ -6096,7 +6090,7 @@ msgstr "Log in"
 
 #: components/JobList/JobList.js:182
 msgid "Please run a job to populate this list."
-msgstr ""
+msgstr "Voer een taak uit om deze lijst te vullen."
 
 #: components/Schedule/shared/ScheduleForm.js:590
 msgid "Please select a day number between 1 and 31."
@@ -6121,7 +6115,7 @@ msgstr "Overschrijven Podspec"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:203
 #: screens/InstanceGroup/Instances/InstanceListItem.js:197
 msgid "Policy Type"
-msgstr ""
+msgstr "Beleidstype"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:69
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:44
@@ -6145,8 +6139,7 @@ msgid ""
 "Refer to the documentation for further syntax and\n"
 "examples.  Refer to the Ansible Tower documentation for further syntax and\n"
 "examples."
-msgstr ""
-"Vul de hosts voor deze inventaris door gebruik te maken van een zoekfilter. Voorbeeld: ansible_facts.ansible_distribution: \"RedHat\".\n"
+msgstr "Vul de hosts voor deze inventaris door gebruik te maken van een zoekfilter. Voorbeeld: ansible_facts.ansible_distribution: \"RedHat\".\n"
 "Raadpleeg de documentatie voor verdere syntaxis en\n"
 "voorbeelden. Raadpleeg de documentatie  van Ansible Tower voor verdere syntaxis en\n"
 "voorbeelden."
@@ -6164,7 +6157,7 @@ msgstr "Voorwaarden voor het uitvoeren van dit knooppunt wanneer er meerdere bov
 msgid ""
 "Press 'Enter' to add more answer choices. One answer\n"
 "choice per line."
-msgstr ""
+msgstr "Druk op 'Enter' om meer antwoordkeuzen toe te voegen. Eén antwoordkeuze per regel."
 
 #: components/CodeEditor/CodeEditor.js:184
 msgid "Press Enter to edit. Press ESC to stop editing."
@@ -6176,7 +6169,10 @@ msgid ""
 "and use the arrow keys to navigate up or down.\n"
 "Press enter to confirm the drag, or any other key to\n"
 "cancel the drag operation."
-msgstr ""
+msgstr "Druk op spatie of enter om te beginnen met slepen,\n"
+"en gebruik de pijltjestoetsen om omhoog of omlaag te navigeren.\n"
+"Druk op enter om het slepen te bevestigen, of op een andere toets om\n"
+"de sleepoperatie te annuleren."
 
 #: components/AdHocCommands/useAdHocPreviewStep.jsx:17
 #: components/LaunchPrompt/steps/usePreviewStep.js:23
@@ -6385,7 +6381,7 @@ msgstr "Tabblad Lijst met recente sjablonen"
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:158
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:76
 msgid "Recent jobs"
-msgstr ""
+msgstr "Recente taken"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:153
 msgid "Recipient List"
@@ -6397,7 +6393,7 @@ msgstr "Lijst met ontvangers"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
 msgid "Red Hat Ansible Automation Platform"
-msgstr ""
+msgstr "Automatiseringsplatform voor Red Hat Ansible"
 
 #: components/Lookup/ProjectLookup.js:138
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
@@ -6459,11 +6455,11 @@ msgstr "Vernieuwingstoken vervallen"
 
 #: screens/Project/ProjectList/ProjectListItem.js:128
 msgid "Refresh for revision"
-msgstr ""
+msgstr "Synchroniseren voor herziening"
 
 #: screens/Project/ProjectList/ProjectListItem.js:130
 msgid "Refresh project revision"
-msgstr ""
+msgstr "Herziening vernieuwing project"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:135
 msgid "Regions"
@@ -6490,11 +6486,11 @@ msgstr ""
 #: components/Search/RelatedLookupTypeInput.js:16
 #: components/Search/RelatedLookupTypeInput.js:24
 msgid "Related search type"
-msgstr ""
+msgstr "Verwant zoektype"
 
 #: components/Search/RelatedLookupTypeInput.js:19
 msgid "Related search type typeahead"
-msgstr ""
+msgstr "Verwante zoekopdracht typeahead"
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
@@ -6564,11 +6560,11 @@ msgstr "Verwijder alle plaatselijke aanpassingen voordat een update uitgevoerd w
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:13
 msgid "Remove {0} Access"
-msgstr "{0} toegang verwijderen"
+msgstr "Toegang {0} verwijderen"
 
 #: components/ResourceAccessList/ResourceAccessListItem.js:45
 msgid "Remove {0} chip"
-msgstr "{0} chip verwijderen"
+msgstr "Chip {0} verwijderen"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:48
 msgid "Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch."
@@ -6576,7 +6572,7 @@ msgstr "Als u deze link verwijdert, wordt de rest van de vertakking zwevend en w
 
 #: components/SelectedList/DraggableSelectedList.js:83
 msgid "Reorder"
-msgstr ""
+msgstr "Nabestellen"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
 msgid "Repeat Frequency"
@@ -6739,11 +6735,11 @@ msgstr "Opdracht uitvoeren"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:266
 msgid "Run a health check on the instance"
-msgstr ""
+msgstr "Een gezondheidscontrole op de instantie uitvoeren"
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
-msgstr ""
+msgstr "Ad-hoc-opdracht uitvoeren"
 
 #: components/AdHocCommands/AdHocCommandsWizard.js:51
 msgid "Run command"
@@ -6891,7 +6887,7 @@ msgstr "Er ontbreekt een regel in het schema"
 
 #: components/Schedule/Schedule.js:82
 msgid "Schedule not found."
-msgstr ""
+msgstr "Schema niet gevonden."
 
 #: components/Schedule/ScheduleList/ScheduleList.js:163
 #: components/Schedule/ScheduleList/ScheduleList.js:228
@@ -7076,7 +7072,7 @@ msgstr "Selecteer een project voordat u de uitvoeringsomgeving bewerkt."
 
 #: screens/Template/Survey/SurveyToolbar.js:81
 msgid "Select a question to delete"
-msgstr ""
+msgstr "Selecteer een vraag om te verwijderen"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:18
 msgid "Select a row to approve"
@@ -7148,7 +7144,7 @@ msgstr "Type activiteit selecteren"
 
 #: screens/Metrics/Metrics.js:200
 msgid "Select an instance"
-msgstr ""
+msgstr "Selecteer een instantie"
 
 #: screens/Metrics/Metrics.js:242
 msgid "Select an instance and a metric to show chart"
@@ -7156,15 +7152,15 @@ msgstr "Instantie en metriek selecteren om grafiek te tonen"
 
 #: screens/InstanceGroup/Instances/InstanceList.js:227
 msgid "Select an instance to run a health check."
-msgstr ""
+msgstr "Selecteer een instantie om een gezondheidscontrole uit te voeren."
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
-msgstr ""
+msgstr "Selecteer een inventaris voor de workflow. Deze inventaris wordt toegepast op alle workflowknooppunten die vragen naar een inventaris."
 
 #: components/LaunchPrompt/steps/SurveyStep.js:129
 msgid "Select an option"
-msgstr ""
+msgstr "Kies een optie"
 
 #: screens/Project/shared/ProjectForm.js:200
 msgid "Select an organization before editing the default execution environment."
@@ -7197,7 +7193,7 @@ msgstr "Type taak selecteren"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:177
 msgid "Select option(s)"
-msgstr ""
+msgstr "Optie(s) selecteren"
 
 #: screens/Dashboard/DashboardGraph.js:95
 #: screens/Dashboard/DashboardGraph.js:96
@@ -7250,7 +7246,7 @@ msgstr "Selecteer de instantiegroepen waar de organisatie op uitgevoerd wordt."
 
 #: screens/User/shared/UserTokenForm.js:49
 msgid "Select the application that this token will belong to, or leave this field empty to create a Personal Access Token."
-msgstr ""
+msgstr "Selecteer de toepassing waartoe dit token zal behoren, of laat dit veld leeg om een persoonlijk toegangstoken aan te maken."
 
 #: screens/User/shared/UserTokenForm.js:49
 #~ msgid "Select the application that this token will belong to."
@@ -7346,7 +7342,7 @@ msgstr "Geselecteerde categorie"
 #: components/Schedule/shared/ScheduleForm.js:573
 #: components/Schedule/shared/ScheduleForm.js:574
 msgid "Selected date range must have at least 1 schedule occurrence."
-msgstr ""
+msgstr "Het geselecteerde datumbereik moet ten minste 1 geplande gebeurtenis hebben."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:158
 msgid "Sender Email"
@@ -7383,7 +7379,7 @@ msgstr "Stel bronpad in op"
 
 #: components/InstanceToggle/InstanceToggle.js:48
 msgid "Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance."
-msgstr ""
+msgstr "Zet de instantie aan of uit. Indien uitgeschakeld, zullen er geen taken aan deze instantie worden toegewezen."
 
 #: components/InstanceToggle/InstanceToggle.js:48
 #~ msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
@@ -7399,7 +7395,7 @@ msgstr "Type instellen"
 
 #: components/Search/AdvancedSearch.js:144
 msgid "Set type disabled for related search field fuzzy searches"
-msgstr ""
+msgstr "Zet type op uitgeschakeld voor verwant zoekveld fuzzy zoekopdrachten"
 
 #: components/Search/AdvancedSearch.js:103
 msgid "Set type select"
@@ -7578,7 +7574,7 @@ msgstr "Sommige van de vorige stappen bevatten fouten"
 
 #: screens/Host/HostList/SmartInventoryButton.js:12
 msgid "Some search modifiers like not__ and __search are not supported in Smart Inventory host filters.  Remove these to create a new Smart Inventory with this filter."
-msgstr ""
+msgstr "Sommige zoekmodifiers zoals not__ en __search worden niet ondersteund in Smart Inventory hostfilters.  Verwijder deze om een nieuwe Smart Inventory te maken met dit filter."
 
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginTestAlert.js:39
 msgid "Something went wrong with the request to test this credential and metadata."
@@ -7642,7 +7638,7 @@ msgstr "Refspec broncontrole"
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:176
 msgid "Source Control Revision"
-msgstr ""
+msgstr "Herziening broncontrole"
 
 #: components/PromptDetail/PromptProjectDetail.js:94
 #: screens/Project/ProjectDetail/ProjectDetail.js:172
@@ -7756,11 +7752,11 @@ msgstr "Starttijd"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "Start date"
-msgstr ""
+msgstr "Startdatum"
 
 #: components/Schedule/shared/ScheduleForm.js:120
 msgid "Start date/time"
-msgstr ""
+msgstr "Startdatum/-tijd"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:449
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7782,7 +7778,7 @@ msgstr "Start synchronisatie bron"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "Start time"
-msgstr ""
+msgstr "Starttijd"
 
 #: screens/Job/JobDetail/JobDetail.js:133
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
@@ -7831,8 +7827,7 @@ msgid ""
 "the revision specified by the main project.\n"
 "This is equivalent to specifying the --remote\n"
 "flag to git submodule update."
-msgstr ""
-"Submodules volgen de laatste binding op\n"
+msgstr "Submodules volgen de laatste binding op\n"
 "hun hoofdvertakking (of een andere vertakking die is gespecificeerd in\n"
 ".gitmodules). Als dat niet zo is, dan worden de submodules bewaard tijdens de revisie die door het hoofdproject gespecificeerd is.\n"
 "Dit is gelijk aan het specificeren van de vlag --remote bij de update van de git-submodule."
@@ -7930,11 +7925,11 @@ msgstr "Vragenlijst"
 
 #: screens/Template/Survey/SurveyToolbar.js:104
 msgid "Survey Disabled"
-msgstr ""
+msgstr "Enquête uitgeschakeld"
 
 #: screens/Template/Survey/SurveyToolbar.js:103
 msgid "Survey Enabled"
-msgstr ""
+msgstr "Enquête ingeschakeld"
 
 #: screens/Template/Survey/SurveyList.js:132
 #~ msgid "Survey List"
@@ -7946,7 +7941,7 @@ msgstr ""
 
 #: screens/Template/Survey/SurveyReorderModal.js:179
 msgid "Survey Question Order"
-msgstr ""
+msgstr "Volgorde vragen enquête"
 
 #: screens/Template/Survey/SurveyToolbar.js:101
 msgid "Survey Toggle"
@@ -7994,7 +7989,7 @@ msgstr "Synchroniseren voor revisie"
 
 #: screens/Project/ProjectList/ProjectListItem.js:118
 msgid "Syncing"
-msgstr ""
+msgstr "Synchroniseren"
 
 #: screens/Setting/SettingList.js:98
 #: screens/User/UserRoles/UserRolesListItem.js:18
@@ -8196,7 +8191,7 @@ msgstr "De"
 
 #: screens/Application/shared/ApplicationForm.js:86
 msgid "The Grant type the user must use to acquire tokens for this application"
-msgstr ""
+msgstr "Het type toekenning dat de gebruiker moet gebruiken om tokens te verkrijgen voor deze toepassing"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
 msgid ""
@@ -8232,7 +8227,9 @@ msgid ""
 "The execution environment that will be used when launching\n"
 "this job template. The resolved execution environment can be overridden by\n"
 "explicitly assigning a different one to this job template."
-msgstr ""
+msgstr "De uitvoeringsomgeving die zal worden gebruikt bij het starten van\n"
+"dit taaksjabloon. De geselecteerde uitvoeringsomgeving kan worden opgeheven door\n"
+"door expliciet een andere omgeving aan dit taaksjabloon toe te wijzen."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:73
 msgid ""
@@ -8276,16 +8273,16 @@ msgstr "Het patroon dat gebruikt wordt om hosts in de inventaris te targeten. Do
 
 #: screens/Project/ProjectList/ProjectListItem.js:116
 msgid "The project is currently syncing and the revision will be available after the sync is complete."
-msgstr ""
+msgstr "Het project wordt momenteel gesynchroniseerd en de revisie zal beschikbaar zijn nadat de synchronisatie is voltooid."
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:192
 #: screens/Project/ProjectList/ProjectListItem.js:103
 msgid "The project must be synced before a revision is available."
-msgstr ""
+msgstr "Het project moet zijn gesynchroniseerd voordat een revisie beschikbaar is."
 
 #: screens/Project/ProjectList/ProjectListItem.js:126
 msgid "The project revision is currently out of date.  Please refresh to fetch the most recent revision."
-msgstr ""
+msgstr "De revisie van het project is momenteel verouderd.  Vernieuw om de meest recente revisie op te halen."
 
 #: components/Workflow/WorkflowNodeHelp.js:139
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:126
@@ -8317,7 +8314,10 @@ msgid ""
 "sure the playbook files can be read by the \"awx\" system user,\n"
 "or have {brandName} directly retrieve your playbooks from\n"
 "source control using the Source Control Type option above."
-msgstr ""
+msgstr "Er zijn geen draaiboekmappen in {project_base_dir} beschikbaar.\n"
+"Die map leeg of alle inhoud ervan is al\n"
+"toegewezen aan andere projecten. Maak daar een nieuwe directory en zorg ervoor dat de draaiboekbestanden kunnen worden gelezen door de 'awx'-systeemgebruiker,\n"
+"of laat {brandName} uw draaiboeken direct ophalen uit broncontrole met behulp van de optie Type broncontrole hierboven."
 
 #: screens/Template/Survey/MultipleChoiceField.js:34
 msgid "There must be a value in at least one input"
@@ -8345,7 +8345,7 @@ msgstr "Er is een fout opgetreden bij het opslaan van de workflow."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:68
 msgid "These are the modules that {brandName} supports running commands against."
-msgstr ""
+msgstr "Dit zijn de modules waar {brandName} commando's tegen kan uitvoeren."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:138
 msgid "These are the verbosity levels for standard out of the command run that are supported."
@@ -8357,7 +8357,7 @@ msgstr "Deze argumenten worden gebruikt met de gespecificeerde module."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:110
 msgid "These arguments are used with the specified module. You can find information about {0} by clicking"
-msgstr "Deze argumenten worden gebruikt met de gespecificeerde module. U kunt informatie over {0} vinden door te klikken op"
+msgstr "Deze argumenten worden gebruikt met de gespecificeerde module. U kunt informatie over {0} vinden door te klikken"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:393
 msgid "Third"
@@ -8402,8 +8402,7 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
 "Insights for Ansible Automation Platform."
-msgstr ""
-"Deze gegevens worden gebruikt om\n"
+msgstr "Deze gegevens worden gebruikt om\n"
 "toekomstige versies van de software te verbeteren en om\n"
 "Insights for Ansible Automation Platform te bieden."
 
@@ -8421,7 +8420,7 @@ msgstr "Deze uitvoeringsomgeving wordt momenteel gebruikt door andere bronnen. W
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.js:74
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.js:79
 msgid "This feature is deprecated and will be removed in a future release."
-msgstr ""
+msgstr "Deze functie is afgeschaft en zal worden verwijderd in een toekomstige versie."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:255
 msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
@@ -8429,11 +8428,11 @@ msgstr "Dit veld wordt genegeerd, tenzij er een Ingeschakelde variabele is inges
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:61
 msgid "This field is must not be blank"
-msgstr ""
+msgstr "Dit veld mag niet leeg zijn"
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:55
 msgid "This field is must not be blank."
-msgstr ""
+msgstr "Dit veld mag niet leeg zijn."
 
 #: components/LaunchPrompt/steps/useCredentialPasswordsStep.js:50
 msgid "This field may not be blank"
@@ -8453,11 +8452,11 @@ msgstr "Dit veld moet een getal zijn en een waarde hebben tussen {min} en {max}"
 
 #: util/validators.js:64
 msgid "This field must be a number and have a value greater than {min}"
-msgstr ""
+msgstr "Dit veld moet een getal zijn en een waarde hebben die hoger is dan {min}"
 
 #: util/validators.js:61
 msgid "This field must be a number and have a value less than {max}"
-msgstr ""
+msgstr "Dit veld moet een getal zijn en een waarde hebben die lager is dan {max}"
 
 #: util/validators.js:184
 msgid "This field must be a regular expression"
@@ -8511,7 +8510,7 @@ msgstr "Deze instantiegroep wordt momenteel door andere bronnen gebruikt. Weet u
 
 #: components/LaunchPrompt/steps/useInventoryStep.js:59
 msgid "This inventory is applied to all workflow nodes within this workflow ({0}) that prompt for an inventory."
-msgstr ""
+msgstr "Deze inventaris wordt toegepast op alle workflowknooppunten binnen deze workflow ({0}) die vragen naar een inventaris."
 
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:129
 msgid "This inventory is currently being used by other resources. Are you sure you want to delete it?"
@@ -8633,7 +8632,7 @@ msgstr "Time-out seconden"
 
 #: screens/Template/Survey/SurveyReorderModal.js:182
 msgid "To reoder the survey questions drag and drop them in the desired location."
-msgstr ""
+msgstr "Om de enquêtevragen te herordenen, sleept u ze naar de gewenste locatie."
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:93
 msgid "Toggle Legend"
@@ -8834,15 +8833,15 @@ msgstr "Soortdetails"
 msgid ""
 "Type answer then click checkbox on right to select answer as\n"
 "default."
-msgstr ""
+msgstr "Typ het antwoord en klik dan op het selectievakje rechts om het antwoord als standaard te selecteren."
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:50
 msgid "UTC"
-msgstr ""
+msgstr "UTC"
 
 #: components/HostForm/HostForm.js:62
 msgid "Unable to change inventory on a host"
-msgstr ""
+msgstr "Kan inventaris op een host niet wijzigen"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:249
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:89
@@ -8853,7 +8852,7 @@ msgstr "Niet beschikbaar"
 
 #: components/StatusLabel/StatusLabel.js:67
 msgid "Undefined"
-msgstr ""
+msgstr "Ongedefinieerd"
 
 #: screens/Setting/shared/RevertButton.js:53
 #: screens/Setting/shared/RevertButton.js:62
@@ -8862,7 +8861,7 @@ msgstr "Ongedaan maken"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Unfollow"
-msgstr ""
+msgstr "Volgen ongedaan maken"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:122
 msgid "Unlimited"
@@ -8912,7 +8911,7 @@ msgstr "Update-opties"
 #: components/PromptDetail/PromptProjectDetail.js:61
 #: screens/Project/ProjectDetail/ProjectDetail.js:102
 msgid "Update revision on job launch"
-msgstr ""
+msgstr "Herziening bijwerken bij starten taak"
 
 #: screens/Setting/SettingList.js:87
 #~ msgid "Update settings pertaining to Jobs within {0}"
@@ -8920,7 +8919,7 @@ msgstr ""
 
 #: screens/Setting/SettingList.js:88
 msgid "Update settings pertaining to Jobs within {brandName}"
-msgstr ""
+msgstr "Instellingen bijwerken die betrekking hebben op taken binnen {brandName}"
 
 #: screens/Template/shared/WebhookSubForm.js:194
 msgid "Update webhook key"
@@ -8958,7 +8957,7 @@ msgstr "Gebruik aangepaste berichten om de inhoud te wijzigen van berichten die 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:238
 #: screens/InstanceGroup/Instances/InstanceList.js:258
 msgid "Used Capacity"
-msgstr ""
+msgstr "Gebruikte capaciteit"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:242
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:246
@@ -9181,7 +9180,7 @@ msgstr "Logboekregistratie-instellingen weergeven"
 
 #: screens/Setting/MiscAuthentication/MiscAuthentication.js:32
 msgid "View Miscellaneous Authentication settings"
-msgstr ""
+msgstr "Instellingen diversen authenticatie weergeven"
 
 #: screens/Setting/MiscSystem/MiscSystem.js:32
 msgid "View Miscellaneous System settings"
@@ -9462,7 +9461,7 @@ msgstr "Webhookservices kunnen dit gebruiken als een gedeeld geheim."
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:147
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:62
 msgid "Webhooks"
-msgstr ""
+msgstr "Webhooks"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:275
 msgid "Wed"
@@ -9489,8 +9488,7 @@ msgstr "Weekenddag"
 msgid ""
 "Welcome to Red Hat Ansible Automation Platform!\n"
 "Please complete the steps below to activate your subscription."
-msgstr ""
-"Welkom bij Red Hat Ansible Automation Platform! \n"
+msgstr "Welkom bij Red Hat Ansible Automation Platform! \n"
 "Volg de onderstaande stappen om uw abonnement te activeren."
 
 #: screens/Login/Login.js:146
@@ -9656,22 +9654,21 @@ msgstr "U kunt niet meerdere kluisreferenties met delfde kluis-ID selecteren. Al
 
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:96
 msgid "You do not have permission to delete the following Groups: {itemsUnableToDelete}"
-msgstr "U heeft geen rechten om de volgende groepen te verwijderen: {itemsUnableToDelete}"
+msgstr "U hebt geen machtiging om de volgende groepen te verwijderen: {itemsUnableToDelete}"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:152
 msgid "You do not have permission to delete {pluralizedItemName}: {itemsUnableToDelete}"
-msgstr "U heeft geen toestemming om {pluralizedItemName} te verwijderen: {itemsUnableToDelete}"
+msgstr "U hebt geen machtiging om {pluralizedItemName}: {itemsUnableToDelete} te verwijderen"
 
 #: components/DisassociateButton/DisassociateButton.js:50
 msgid "You do not have permission to disassociate the following: {itemsUnableToDisassociate}"
-msgstr "U hebt geen toestemming om het volgende te ontkoppelen: {itemsUnableToDisassociate}"
+msgstr "U hebt geen machtiging om het volgende te ontkoppelen: {itemsUnableToDisassociate}"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:87
 msgid ""
 "You may apply a number of possible variables in the\n"
 "message. For more information, refer to the"
-msgstr ""
-"U kunt een aantal mogelijke variabelen in het\n"
+msgstr "U kunt een aantal mogelijke variabelen in het\n"
 "bericht toepassen. Voor meer informatie, raadpleeg de"
 
 #: screens/Login/Login.js:154
@@ -9724,7 +9721,7 @@ msgstr "verwijderen annuleren"
 
 #: screens/Setting/shared/SharedFields.js:341
 msgid "cancel edit login redirect"
-msgstr ""
+msgstr "omleiden inloggen bewerken annuleren"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:232
 msgid "command"
@@ -9742,7 +9739,7 @@ msgstr "loskoppelen bevestigen"
 
 #: screens/Setting/shared/SharedFields.js:330
 msgid "confirm edit login redirect"
-msgstr ""
+msgstr "omleiden inloggen bewerken bevestigen"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:145
 msgid "deletion error"
@@ -9878,7 +9875,7 @@ msgstr "verbositeit selecteren"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:135
 msgid "since"
-msgstr ""
+msgstr "sinds"
 
 #: screens/User/UserList/UserListItem.js:49
 msgid "social login"

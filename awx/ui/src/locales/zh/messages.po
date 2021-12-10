@@ -1,17 +1,9 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2021-09-01 18:45+0000\n"
 "Mime-Version: 1.0\n"
-"Language: zh\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
+"Language: zh \n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -569,11 +561,11 @@ msgstr "您确定要从删除这个节点吗？"
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:42
 msgid "Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team."
-msgstr "您确定要从 {1} 中删除访问 {0} 吗？这样做会影响团队的所有成员。"
+msgstr "您确定要从 {1} 中删除访问 {0} 吗？这样做会影响团队所有成员。"
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:49
 msgid "Are you sure you want to remove {0} access from {username}?"
-msgstr "您确定要从 {username} 中删除 {0} 访问吗？"
+msgstr "您确定要从 {username} 中删除 {0} 吗？"
 
 #: screens/Job/JobOutput/JobOutput.js:538
 msgid "Are you sure you want to submit the request to cancel this job?"
@@ -672,7 +664,7 @@ msgstr "返回到实例组"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:167
 msgid "Back to Instances"
-msgstr ""
+msgstr "返回到实例"
 
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
@@ -1620,11 +1612,11 @@ msgstr "自定义虚拟环境 {0} 必须替换为一个执行环境。"
 
 #: components/TemplateList/TemplateListItem.js:155
 msgid "Custom virtual environment {0} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr "自定义虚拟环境 {0} 必须替换为执行环境。有关迁移到执行环境的更多信息，请参阅 <0> 文档</0>。"
+msgstr "自定义虚拟环境 {0} 必须替换为执行环境。有关迁移到执行环境的更多信息，请参阅<0>文档</0>。"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:72
 msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr "自定义虚拟环境 {virtualEnvironment} 必须替换为执行环境。有关迁移到执行环境的更多信息，请参阅 <0> 文档</0>。"
+msgstr "自定义虚拟环境 {virtualEnvironment} 必须替换为执行环境。有关迁移到执行环境的更多信息，请参阅<0>文档</0>。"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:61
 msgid "Customize messages…"
@@ -1666,7 +1658,7 @@ msgstr "天"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:273
 #: components/Schedule/shared/ScheduleForm.js:165
 msgid "Days of Data to Keep"
-msgstr "保留数据的天数"
+msgstr "要保留数据的天数"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/DaysToKeepStep.jsx:28
 msgid "Days of data to be retained"
@@ -1890,7 +1882,7 @@ msgstr "删除此节点"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:163
 msgid "Delete {pluralizedItemName}?"
-msgstr "删除 {pluralizedItemName}?"
+msgstr "删除 {pluralizedItemName}？"
 
 #: components/DetailList/DeletedDetail.js:15
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:131
@@ -1921,7 +1913,7 @@ msgstr "拒绝 - {0}。详情请查看活动流。"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:28
 msgid "Denied by {0} - {1}"
-msgstr "拒绝于 {0} - {1}"
+msgstr "已拒绝 {0} - {1}"
 
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:185
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:190
@@ -2230,7 +2222,7 @@ msgstr "拖放已取消。列表保持不变。"
 
 #: components/SelectedList/DraggableSelectedList.js:38
 msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
-msgstr "拖放项 {id}。带有索引 {oldIndex} 的项现在在 {newIndex} 中。"
+msgstr "拖动项目 {id}。带有索引 {oldIndex} 的项现在 {newIndex} 。"
 
 #: components/SelectedList/DraggableSelectedList.js:32
 msgid "Dragging started for item id: {newId}."
@@ -2611,7 +2603,7 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template"
-msgstr "允许创建部署回调 URL。使用此 URL，主机可访问 {brandName} 并使用此作业模板请求配置更新。"
+msgstr "允许创建部署回调 URL。使用此 URL，主机可访问 {brandName} 并使用此任务模板请求配置更新"
 
 #: screens/Template/shared/JobTemplateForm.js:568
 msgid ""
@@ -2619,7 +2611,7 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template."
-msgstr "允许创建部署回调 URL。使用此 URL，主机可访问 {brandName} 并使用此作业模板请求配置更新。"
+msgstr "允许创建部署回调 URL。使用此 URL，主机可访问 {brandName} 并使用此任务模板请求配置更新"
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:148
 #: screens/Setting/shared/SettingDetail.js:87
@@ -2636,11 +2628,11 @@ msgstr "最终用户许可证协议"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "End date"
-msgstr ""
+msgstr "结束日期"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:542
 msgid "End date/time"
-msgstr ""
+msgstr "结束日期/时间"
 
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
@@ -2648,7 +2640,7 @@ msgstr "结束与预期值不匹配"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "End time"
-msgstr ""
+msgstr "结束时间"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2716,7 +2708,7 @@ msgstr "每行输入一封电子邮件地址，为这类通知创建一个接收
 msgid ""
 "Enter one phone number per line to specify where to\n"
 "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-msgstr ""
+msgstr "每行输入一个电话号码以指定路由 SMS 消息的位置。电话号的格式化为 +11231231234。如需更多信息，请参阅 Twilio 文档"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:410
 msgid ""
@@ -2746,7 +2738,7 @@ msgstr "输入变量来配置清单源。有关如何配置此插件的详细描
 
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>gcp_compute</1> plugin configuration guide."
-msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述,请参阅文档中的<0>清单插件</0>和 <1>gcp_compute</1> 插件配置指南。"
+msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述,请参阅文档中的<0>清单插件</0> 和 <1>gcp_compute</1> 插件配置指南。"
 
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>openstack</1> plugin configuration guide."
@@ -2758,7 +2750,7 @@ msgstr "输入变量来配置清单源。有关如何配置此插件的详细描
 
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>vmware_vm_inventory</1> plugin configuration guide."
-msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述,请参阅文档中的<0>清单插件</0>和 <1>vmware_vm_inventory</1> 插件配置指南。"
+msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述，请参阅文档中的<0>清单插件</0>部分，以及 <1>vmware_vm_inventory</1> 插件配置指南 。"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:35
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
@@ -2889,7 +2881,7 @@ msgstr "错误："
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:256
 msgid "Errors"
-msgstr ""
+msgstr "错误"
 
 #: screens/ActivityStream/ActivityStream.js:256
 #: screens/ActivityStream/ActivityStreamListItem.js:46
@@ -2915,7 +2907,7 @@ msgstr "事件"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
 msgid "Every minute for {0} times"
-msgstr "{0} 次每分钟"
+msgstr "每分钟 {0} 次"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -3397,7 +3389,7 @@ msgstr "获取节点凭证失败。"
 
 #: screens/InstanceGroup/Instances/InstanceList.js:303
 msgid "Failed to run a health check on one or more instances."
-msgstr ""
+msgstr "在一个或多个实例上运行健康检查失败。"
 
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:169
 msgid "Failed to send test notification."
@@ -3502,7 +3494,7 @@ msgstr "文件、目录或脚本"
 #: components/Search/Search.js:176
 #: components/Search/Search.js:201
 msgid "Filter By {name}"
-msgstr ""
+msgstr "按 {name} 过滤。"
 
 #: components/JobList/JobList.js:240
 #: components/JobList/JobListItem.js:93
@@ -3536,7 +3528,7 @@ msgstr "首次运行"
 #: components/ResourceAccessList/ResourceAccessList.js:183
 #: components/ResourceAccessList/ResourceAccessListItem.js:64
 msgid "First name"
-msgstr "名字"
+msgstr "名"
 
 #: components/Search/AdvancedSearch.js:224
 msgid "First, select a key"
@@ -3786,11 +3778,11 @@ msgstr "HTTP 方法"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:273
 #: screens/InstanceGroup/Instances/InstanceList.js:237
 msgid "Health Check"
-msgstr ""
+msgstr "健康检查"
 
 #: components/StatusLabel/StatusLabel.js:57
 msgid "Healthy"
-msgstr ""
+msgstr "健康"
 
 #: components/AppContainer/PageHeaderToolbar.js:115
 msgid "Help"
@@ -4066,7 +4058,7 @@ msgstr "如果指定，则在查看工作流时此字段将显示在节点上，
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:150
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
-msgstr "如果您准备进行升级或续订，请点<0>联系我们。</0>"
+msgstr "如果您准备进行升级或续订，请<0>联系我们。</0>"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:63
 msgid ""
@@ -4187,7 +4179,7 @@ msgstr "实例 ID"
 
 #: screens/InstanceGroup/InstanceGroups.js:54
 msgid "Instance details"
-msgstr ""
+msgstr "实例详情"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:69
@@ -4663,7 +4655,7 @@ msgstr "最后"
 #: screens/InstanceGroup/Instances/InstanceListItem.js:139
 #: screens/InstanceGroup/Instances/InstanceListItem.js:201
 msgid "Last Health Check"
-msgstr ""
+msgstr "最后的健康检查"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:185
 #: screens/Project/ProjectDetail/ProjectDetail.js:142
@@ -4735,7 +4727,7 @@ msgstr "最后修改"
 #: components/ResourceAccessList/ResourceAccessList.js:184
 #: components/ResourceAccessList/ResourceAccessListItem.js:65
 msgid "Last name"
-msgstr "姓氏"
+msgstr "姓"
 
 #: screens/Project/ProjectList/ProjectListItem.js:300
 msgid "Last used"
@@ -5503,7 +5495,7 @@ msgstr "没有找到问卷调查问题"
 
 #: components/PaginatedTable/PaginatedTable.js:80
 msgid "No {pluralizedItemName} Found"
-msgstr "没有找到 {pluralizedItemName}"
+msgstr "未找到 {pluralizedItemName}。"
 
 #: components/Workflow/WorkflowNodeHelp.js:150
 #: components/Workflow/WorkflowNodeHelp.js:184
@@ -5916,8 +5908,7 @@ msgid ""
 "-e or --extra-vars command line parameter for ansible-playbook.\n"
 "Provide key/value pairs using either YAML or JSON. Refer to the\n"
 "documentation for example syntax."
-msgstr ""
-"向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML \n"
+msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML \n"
 "或 JSON 提供键/值对。示例语法请参阅相关文档。"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:215
@@ -6277,8 +6268,7 @@ msgstr "为这个字段输入值或者选择「启动时提示」选项。"
 msgid ""
 "Provide key/value pairs using either\n"
 "YAML or JSON."
-msgstr ""
-"使用 YAML 或 JSON 提供\n"
+msgstr "使用 YAML 或 JSON 提供\n"
 "键/值对。"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:193
@@ -6369,7 +6359,7 @@ msgstr "接收者列表"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
 msgid "Red Hat Ansible Automation Platform"
-msgstr ""
+msgstr "Red Hat Ansible Automation Platform"
 
 #: components/Lookup/ProjectLookup.js:138
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
@@ -6540,7 +6530,7 @@ msgstr "删除 {0} 访问"
 
 #: components/ResourceAccessList/ResourceAccessListItem.js:45
 msgid "Remove {0} chip"
-msgstr "删除 {0} chip"
+msgstr "删除 {0} 芯片"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:48
 msgid "Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch."
@@ -6711,7 +6701,7 @@ msgstr "运行命令"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:266
 msgid "Run a health check on the instance"
-msgstr ""
+msgstr "对实例运行健康检查"
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
@@ -7120,7 +7110,7 @@ msgstr "选择一个活动类型"
 
 #: screens/Metrics/Metrics.js:200
 msgid "Select an instance"
-msgstr ""
+msgstr "选择一个实例"
 
 #: screens/Metrics/Metrics.js:242
 msgid "Select an instance and a metric to show chart"
@@ -7128,7 +7118,7 @@ msgstr "选择一个实例和一个指标来显示图表"
 
 #: screens/InstanceGroup/Instances/InstanceList.js:227
 msgid "Select an instance to run a health check."
-msgstr ""
+msgstr "选择一个要运行健康检查的实例。"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
@@ -7353,7 +7343,7 @@ msgstr "设置源路径为"
 
 #: components/InstanceToggle/InstanceToggle.js:48
 msgid "Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance."
-msgstr ""
+msgstr "设置实例被启用或禁用。如果禁用，则不会将作业分配给此实例。"
 
 #: components/InstanceToggle/InstanceToggle.js:48
 #~ msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
@@ -7472,7 +7462,7 @@ msgstr "使用 SAML 登陆"
 
 #: screens/Login/Login.js:337
 msgid "Sign in with SAML {samlIDP}"
-msgstr "使用 SAML {samlIDP} 登录"
+msgstr "使用 SAML {samlIDP} 登陆"
 
 #: components/Search/Search.js:124
 #: components/Search/Search.js:125
@@ -7717,11 +7707,11 @@ msgstr "开始时间"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "Start date"
-msgstr ""
+msgstr "开始日期"
 
 #: components/Schedule/shared/ScheduleForm.js:120
 msgid "Start date/time"
-msgstr ""
+msgstr "开始日期/时间"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:449
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7743,7 +7733,7 @@ msgstr "启动同步源"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "Start time"
-msgstr ""
+msgstr "开始时间"
 
 #: screens/Job/JobDetail/JobDetail.js:133
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
@@ -7903,7 +7893,7 @@ msgstr "问卷调查切换"
 
 #: screens/Template/Survey/SurveyReorderModal.js:180
 msgid "Survey preview modal"
-msgstr "问卷调查预览模态"
+msgstr "问卷调查预览 modal"
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:119
 #: screens/Inventory/shared/InventorySourceSyncButton.js:41
@@ -8345,7 +8335,7 @@ msgstr "其他资源目前正在使用此执行环境。确定要删除它吗？
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.js:74
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.js:79
 msgid "This feature is deprecated and will be removed in a future release."
-msgstr ""
+msgstr "这个功能已被弃用并将在以后的发行版本中被删除。"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:255
 msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
@@ -8369,11 +8359,11 @@ msgstr "此字段必须是数字"
 
 #: components/LaunchPrompt/steps/useSurveyStep.js:107
 msgid "This field must be a number and have a value between {0} and {1}"
-msgstr "此字段必须是一个数字，且值介于 {0} 和 {1}"
+msgstr "此字段必须是数字，且值介于 {0} 和 {1}"
 
 #: util/validators.js:67
 msgid "This field must be a number and have a value between {min} and {max}"
-msgstr "此字段必须是一个数字，且值介于 {min} 和 {max}"
+msgstr "此字段必须是数字，且值介于 {min} 和 {max}"
 
 #: util/validators.js:64
 msgid "This field must be a number and have a value greater than {min}"
@@ -8840,7 +8830,7 @@ msgstr "启动作业时更新修订"
 
 #: screens/Setting/SettingList.js:88
 msgid "Update settings pertaining to Jobs within {brandName}"
-msgstr "更新 Tower 中与作业相关的设置"
+msgstr "更新 {brandName} 中与作业相关的设置"
 
 #: screens/Template/shared/WebhookSubForm.js:194
 msgid "Update webhook key"
@@ -9413,7 +9403,7 @@ msgstr "欢迎使用 Red Hat Ansible Automation Platform！请完成以下步骤
 
 #: screens/Login/Login.js:146
 msgid "Welcome to {brandName}!"
-msgstr "欢迎使用 {brandName}!"
+msgstr "欢迎使用 {brandName}！"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:154
 msgid ""
@@ -9562,7 +9552,7 @@ msgstr "是"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:27
 msgid "You are unable to act on the following workflow approvals: {itemsUnableToApprove}"
-msgstr "您无法对以下工作流批准进行操作：{itemsUnableToApprove}"
+msgstr "您无法对以下工作流批准进行操作： {itemsUnableToApprove}"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:27
 msgid "You are unable to act on the following workflow approvals: {itemsUnableToDeny}"
@@ -9578,7 +9568,7 @@ msgstr "您没有权限删除以下组： {itemsUnableToDelete}"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:152
 msgid "You do not have permission to delete {pluralizedItemName}: {itemsUnableToDelete}"
-msgstr "您没有删除 {pluralizedItemName} 的权限： {itemsUnableToDelete}"
+msgstr "您没有权限删除 {pluralizedItemName}：{itemsUnableToDelete}"
 
 #: components/DisassociateButton/DisassociateButton.js:50
 msgid "You do not have permission to disassociate the following: {itemsUnableToDisassociate}"
@@ -9811,15 +9801,15 @@ msgstr "工作流作业模板 webhook 密钥"
 
 #: screens/Inventory/InventoryList/InventoryListItem.js:61
 msgid "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
-msgstr ""
+msgstr "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:111
 msgid "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
-msgstr "{0, plural, one {您确定要删除以下组吗？} other {您确定要删除以下组吗？}}"
+msgstr "{0, plural, one {您确定要删除以下的组吗？} other {您确定要删除以下的组吗？}}"
 
 #: screens/InstanceGroup/Instances/InstanceList.js:221
 msgid "{0, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
-msgstr ""
+msgstr "{0, plural, one {点击来在所选的实例上运行健康检查。} other {点击来在所选的实例上运行健康检查。}}"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:84
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
@@ -9827,19 +9817,19 @@ msgstr "{0, plural, one {删除组?} other {删除组?}}"
 
 #: util/validators.js:138
 msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
-msgstr ""
+msgstr "{0, plural, one {请输入一个有效的电话号码。} other {请输入有效的电话号码。}}"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:178
 msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
-msgstr "{0, plural, one {以下实例组不能被删除} other {以下实例组不能被删除}}"
+msgstr "{0, plural, one {以下的实例组无法被删除} other {以下的实例组无法被删除}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:232
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
-msgstr "{0, plural, one {清单会处于一个待处理状态，直到最终的删除被处理完成。} other {清单会处于一个待处理状态，直到最终的删除被处理完成。}}"
+msgstr "{0, plural, one {在最后的删除被处理前，清单将会处在待处理的状态。} other {在最后的删除被处理前，清单将会处在待处理的状态。}}"
 
 #: components/JobList/JobList.js:269
 msgid "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
-msgstr "{0, plural, one {选择的作业不能删除，因为没有足够的权限或处于作业运行状态} other {选择的作业不能删除，因为没有足够的权限或处于作业运行状}}"
+msgstr "{0, plural, one {因为权限问题或正在运行，所选作业无法被删除} other {因为权限问题或正在运行，所选作业无法被删除}}"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:208
 msgid "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
@@ -9875,7 +9865,7 @@ msgstr "{0, plural, one {这个清单源正被依赖它的其他资源使用。�
 
 #: screens/Organization/OrganizationList/OrganizationList.js:166
 msgid "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr ""
+msgstr "{0, plural, one {这个机构正在被其他资源使用。您确定要删除它吗？} other {这个机构正在被其他资源使用。您确定要删除它吗？}}"
 
 #: screens/Project/ProjectList/ProjectList.js:238
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
@@ -9895,7 +9885,7 @@ msgstr "{0, plural, one {您没有权限取消以下作业：} other {您没有�
 
 #: screens/ActivityStream/ActivityStreamListItem.js:28
 msgid "{0} (deleted)"
-msgstr "{0} (删除)"
+msgstr "{0}（已删除）"
 
 #: components/ChipGroup/ChipGroup.js:13
 msgid "{0} more"
@@ -9907,11 +9897,11 @@ msgstr "{0} 更多"
 
 #: components/AppContainer/AppContainer.js:55
 msgid "{brandName} logo"
-msgstr "{brandName} 徽标"
+msgstr "{brandName} 标志"
 
 #: components/DetailList/UserDateDetail.js:23
 msgid "{dateStr} by <0>{username}</0>"
-msgstr "{dateStr} by <0>{username}</0>"
+msgstr "{dateStr}（按 <0>{username}</0>）"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:220
 #: screens/InstanceGroup/Instances/InstanceListItem.js:155
@@ -9952,7 +9942,7 @@ msgstr "{intervalValue, plural, one {年} other {年}}"
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
-msgstr "{minutes} 分钟 {seconds} 秒"
+msgstr "{minutes} 分 {seconds} 秒"
 
 #: components/JobList/JobListCancelButton.js:106
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"

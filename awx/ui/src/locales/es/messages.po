@@ -3,15 +3,7 @@ msgstr ""
 "POT-Creation-Date: 2021-06-08 18:28+0000\n"
 "Mime-Version: 1.0\n"
 "Language: es\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
+"Content-Type: text/plain; charset=UTF-8\n"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -110,11 +102,11 @@ msgid ""
 "A refspec to fetch (passed to the Ansible git\n"
 "module). This parameter allows access to references via\n"
 "the branch field not otherwise available."
-msgstr "Un refspec para extraer (pasado al módulo git de Ansible).  Este parámetro permite el acceso a las referencias a través del campo de rama no disponible de otra manera."
+msgstr "Un refspec para extraer (pasado al módulo git de Ansible). Este parámetro permite el acceso a las referencias a través del campo de rama no disponible de otra manera."
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:123
 msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <0>access.redhat.com</0>. For more information, see the <1>User Guide</1>."
-msgstr "Un manifiesto de suscripción es una exportación de una suscripción de Red Hat. Para generar un manifiesto de suscripción, vaya a <0>access.redhat.com</0>. Consulte la <1>Guía del usuario</1> para obtener más información."
+msgstr "Un manifiesto de suscripción es una exportación de una suscripción de Red Hat. Para generar un manifiesto de suscripción, vaya a <0>access.redhat.com</0>. Para más información, consulte el <1>Manual del usuario</1>."
 
 #: screens/Job/WorkflowOutput/WorkflowOutputNode.js:143
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:299
@@ -131,7 +123,7 @@ msgstr "Token API"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:304
 msgid "API service/integration key"
-msgstr "Servicio API/Clave de integración"
+msgstr "Servicio API/clave de integración"
 
 #: components/AppContainer/PageHeaderToolbar.js:123
 msgid "About"
@@ -167,7 +159,7 @@ msgstr "Cuenta SID"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:398
 msgid "Account token"
-msgstr "Cuenta Token"
+msgstr "Cuenta token"
 
 #: screens/ActivityStream/ActivityStreamDetailButton.js:50
 msgid "Action"
@@ -376,7 +368,7 @@ msgid ""
 "changes, refresh the inventory from the selected source\n"
 "before executing job tasks. This is intended for static content,\n"
 "like the Ansible inventory .ini file format."
-msgstr "Luego de cada actualización del proyecto en el que se modifique la revisión SCM, actualice el inventario del origen seleccionado antes de llevar a cabo tareas. Esto está orientado a contenidos estáticos, como el formato de archivo .ini del inventario Ansible."
+msgstr "Después de cada actualización del proyecto en el que se modifique la revisión SCM, actualice el inventario del origen seleccionado antes de llevar a cabo tareas. Esto está orientado a contenido estático, como el formato de archivo .ini del inventario Ansible."
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:506
 msgid "After number of occurrences"
@@ -409,13 +401,14 @@ msgstr "Permitir la anulación de la rama"
 #: components/PromptDetail/PromptProjectDetail.js:66
 #: screens/Project/ProjectDetail/ProjectDetail.js:107
 msgid "Allow branch override"
-msgstr ""
+msgstr "Permitir la invalidación de la rama"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:104
 msgid ""
 "Allow changing the Source Control branch or revision in a job\n"
 "template that uses this project."
-msgstr "Permitir el cambio de la rama o revisión de la fuente de control en una plantilla de trabajo que utilice este proyecto."
+msgstr "Permitir el cambio de la rama o revisión de la fuente de control\n"
+"en una plantilla de trabajo que utilice este proyecto."
 
 #: screens/Application/shared/ApplicationForm.js:116
 msgid "Allowed URIs list, space separated"
@@ -469,7 +462,7 @@ msgstr "Aplicación"
 
 #: screens/User/UserTokenList/UserTokenList.js:183
 msgid "Application Name"
-msgstr ""
+msgstr "Nombre de la aplicación"
 
 #: screens/Application/Applications.js:64
 #: screens/Application/Applications.js:67
@@ -521,7 +514,7 @@ msgstr "Aprobado"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:52
 msgid "Approved - {0}.  See the Activity Stream for more information."
-msgstr "Aprobado: {0}.  Consulte el flujo de actividad para obtener más información."
+msgstr "Aprobado - {0}.  Consulte el flujo de actividades para obtener más información."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:49
 msgid "Approved by {0} - {1}"
@@ -541,11 +534,11 @@ msgstr "¿Está seguro de que desea eliminar:"
 
 #: screens/Setting/shared/SharedFields.js:142
 msgid "Are you sure you want to disable local authentication?  Doing so could impact users' ability to log in and the system administrator's ability to reverse this change."
-msgstr "¿Está seguro de que desea deshabilitar la autenticación local?  Esto podría afectar la capacidad de los usuarios para iniciar sesión y la capacidad del administrador del sistema para revertir este cambio."
+msgstr "¿Está seguro de que desea deshabilitar la autenticación local? Esto podría afectar la capacidad de los usuarios para iniciar sesión y la capacidad del administrador del sistema para revertir este cambio."
 
 #: screens/Setting/shared/SharedFields.js:350
 msgid "Are you sure you want to edit login redirect override URL?  Doing so could impact users' ability to log in to the system once local authentication is also disabled."
-msgstr ""
+msgstr "¿Está seguro de que quiere editar la URL de redirección de inicio de sesión? Hacerlo podría afectar a la capacidad de los usuarios para iniciar sesión en el sistema una vez que la autenticación local también esté desactivada."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.js:41
 msgid "Are you sure you want to exit the Workflow Creator without saving your changes?"
@@ -569,11 +562,11 @@ msgstr "¿Está seguro de que desea eliminar este nodo?"
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:42
 msgid "Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team."
-msgstr "¿Está seguro de que desea eliminar el acceso de {1} a {0}?  Esto afecta a todos los miembros del equipo."
+msgstr "¿Está seguro de que desea eliminar el acceso de {0} a {1}? Esto afecta a todos los miembros del equipo."
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:49
 msgid "Are you sure you want to remove {0} access from {username}?"
-msgstr "¿Está seguro de que desea eliminar el acceso de {username} a {0}?"
+msgstr "¿Está seguro de que quiere eliminar el acceso de {0} a {username}?"
 
 #: screens/Job/JobOutput/JobOutput.js:538
 msgid "Are you sure you want to submit the request to cancel this job?"
@@ -668,11 +661,11 @@ msgstr "Volver a Hosts"
 
 #: screens/InstanceGroup/InstanceGroup.js:74
 msgid "Back to Instance Groups"
-msgstr ""
+msgstr "Volver a los grupos de instancias"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:167
 msgid "Back to Instances"
-msgstr ""
+msgstr "Volver a las instancias"
 
 #: screens/Inventory/Inventory.js:56
 #: screens/Inventory/SmartInventory.js:59
@@ -766,7 +759,7 @@ msgid ""
 "found inside this path will be listed in the playbook directory drop-down.\n"
 "Together the base path and selected playbook directory provide the full\n"
 "path used to locate playbooks."
-msgstr "Directorio base utilizado para encontrar playbooks. Los directorios encontrados dentro de esta ruta se mostrarán en el menú desplegable del directorio de playbooks. Junto a la ruta base y el  directorio de playbooks seleccionado, se creará la ruta completa utilizada para encontrar los playbooks."
+msgstr "Directorio base utilizado para encontrar playbooks. Los directorios encontrados dentro de esta ruta se mostrarán en el menú desplegable del directorio de playbooks. Junto a la ruta base y el directorio de playbooks seleccionado, se creará la ruta completa utilizada para encontrar los playbooks."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:450
 msgid "Basic auth password"
@@ -778,7 +771,10 @@ msgid ""
 "you can input tags, commit hashes, and arbitrary refs. Some\n"
 "commit hashes and refs may not be available unless you also\n"
 "provide a custom refspec."
-msgstr "Rama para realizar la comprobación.  Además de las ramas, puede introducir etiquetas, hashes de commit y referencias arbitrarias. Es posible que algunos hashes y referencias de commit no estén disponibles, a menos que usted también proporcione un refspec personalizado."
+msgstr "Rama para realizar la comprobación. Además de las ramas, puede\n"
+"introducir etiquetas, hashes de commit y referencias arbitrarias. Es posible\n"
+"que algunos hashes y referencias de commit no estén disponibles,\n"
+"a menos que usted también proporcione un refspec personalizado."
 
 #: components/About/About.js:45
 msgid "Brand Image"
@@ -791,11 +787,11 @@ msgstr "Navegar"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:91
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:112
 msgid "Browse…"
-msgstr ""
+msgstr "Navegar"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
 msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
-msgstr "De forma predeterminada, recopilamos y transmitimos datos analíticos sobre el uso del servicio a Red Hat. Hay dos categorías de datos recopilados por el servicio. Consulte <0>esta página de documentación de Tower</0> para obtener más información. Desmarque las siguientes casillas para deshabilitar esta funcionalidad."
+msgstr "Por defecto, recopilamos y transmitimos a Red Hat datos analíticos sobre el uso del servicio. Hay dos categorías de datos recogidos por el servicio. Para más información, consulte esta <0>página de documentación de Tower</0>. Desmarque las siguientes casillas para desactivar esta función."
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:217
 #: screens/InstanceGroup/Instances/InstanceListItem.js:152
@@ -943,8 +939,7 @@ msgstr "Cancelado"
 msgid ""
 "Cannot enable log aggregator without providing\n"
 "logging aggregator host and logging aggregator type."
-msgstr ""
-"No se puede habilitar la agregación de registros sin proporcionar\n"
+msgstr "No se puede habilitar la agregación de registros sin proporcionar\n"
 "el host y el tipo de agregación de registros."
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:292
@@ -956,7 +951,7 @@ msgstr "Capacidad"
 #: screens/InstanceGroup/Instances/InstanceList.js:257
 #: screens/InstanceGroup/Instances/InstanceListItem.js:150
 msgid "Capacity Adjustment"
-msgstr ""
+msgstr "Ajuste de la capacidad"
 
 #: components/Search/LookupTypeInput.js:59
 msgid "Case-insensitive version of contains"
@@ -982,7 +977,8 @@ msgstr "Versión de startswith que no distingue mayúsculas de minúsculas."
 msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
-msgstr "Cambie PROJECTS_ROOT al implementar {brandName} para cambiar esta ubicación."
+msgstr "Cambie PROJECTS_ROOT al implementar {brandName}\n"
+"para cambiar esta ubicación."
 
 #: screens/Job/JobOutput/shared/HostStatusBar.js:43
 msgid "Changed"
@@ -1056,15 +1052,15 @@ msgstr "Elija el tipo o formato de respuesta que desee como indicador para el us
 
 #: components/AddRole/SelectRoleStep.js:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
-msgstr "Elija los roles que se aplicarán a los recursos seleccionados.  Tenga en cuenta que todos los roles seleccionados se aplicarán a todos los recursos seleccionados."
+msgstr "Elija los roles que se aplicarán a los recursos seleccionados. Tenga en cuenta que todos los roles seleccionados se aplicarán a todos los recursos seleccionados."
 
 #: components/AddRole/SelectResourceStep.js:81
 msgid "Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step."
-msgstr "Elija los recursos que recibirán nuevos roles.  Podrá seleccionar los roles que se aplicarán en el siguiente paso.  Tenga en cuenta que los recursos elegidos aquí recibirán todos los roles elegidos en el siguiente paso."
+msgstr "Elija los recursos que recibirán nuevos roles. Podrá seleccionar los roles que se aplicarán en el siguiente paso. Tenga en cuenta que los recursos elegidos aquí recibirán todos los roles elegidos en el siguiente paso."
 
 #: components/AddRole/AddResourceRole.js:193
 msgid "Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step."
-msgstr "Elija el tipo de recurso que recibirá los nuevos roles.  Por ejemplo, si desea agregar nuevos roles a un conjunto de usuarios, elija Users (Usuarios) y haga clic en Next (Siguiente).  Podrá seleccionar los recursos específicos en el siguiente paso."
+msgstr "Elija el tipo de recurso que recibirá los nuevos roles. Por ejemplo, si desea agregar nuevos roles a un conjunto de usuarios, elija Users (Usuarios) y haga clic en Next (Siguiente). Podrá seleccionar los recursos específicos en el siguiente paso."
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:69
 msgid "Clean"
@@ -1073,7 +1069,7 @@ msgstr "Limpiar"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:92
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:113
 msgid "Clear"
-msgstr ""
+msgstr "Borrar"
 
 #: components/DataListToolbar/DataListToolbar.js:85
 #: screens/Job/JobOutput/JobOutputSearch.js:142
@@ -1090,7 +1086,7 @@ msgstr "Borrar selección de la suscripción"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerGraph.js:232
 msgid "Click an available node to create a new link.  Click outside the graph to cancel."
-msgstr "Haga clic en un nodo disponible para crear un nuevo enlace.  Haga clic fuera del gráfico para cancelar."
+msgstr "Haga clic en un nodo disponible para crear un nuevo enlace. Haga clic fuera del gráfico para cancelar."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:129
 msgid "Click the Edit button below to reconfigure the node."
@@ -1106,7 +1102,7 @@ msgstr "Haga clic para crear un nuevo enlace a este nodo."
 
 #: screens/Template/Survey/SurveyToolbar.js:63
 msgid "Click to rearrange the order of the survey questions"
-msgstr ""
+msgstr "Haga clic para cambiar el orden de las preguntas de la encuesta"
 
 #: screens/Template/Survey/MultipleChoiceField.js:117
 msgid "Click to toggle default value"
@@ -1261,13 +1257,15 @@ msgstr "Controlar el nivel de salida que producirá Ansible para las tareas de a
 msgid ""
 "Control the level of output ansible\n"
 "will produce as the playbook executes."
-msgstr "Controlar el nivel de salida que producirá Ansible al ejecutar playbooks."
+msgstr "Controlar el nivel de salida que\n"
+"producirá Ansible al ejecutar playbooks."
 
 #: screens/Template/shared/JobTemplateForm.js:464
 msgid ""
 "Control the level of output ansible will\n"
 "produce as the playbook executes."
-msgstr "Controlar el nivel de salida que producirá Ansible al ejecutar playbooks."
+msgstr "Controlar el nivel de salida que producirá\n"
+"Ansible al ejecutar playbooks."
 
 #: components/PromptDetail/PromptDetail.js:119
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:216
@@ -1364,7 +1362,7 @@ msgstr "Crear nuevo proyecto"
 #: screens/Project/Projects.js:34
 #: screens/Template/Templates.js:51
 msgid "Create New Schedule"
-msgstr "Agregar nuevo planificador"
+msgstr "Crear nuevo planificador"
 
 #: screens/Team/Teams.js:15
 #: screens/Team/Teams.js:25
@@ -1603,7 +1601,7 @@ msgstr "Credenciales"
 
 #: components/LaunchPrompt/steps/credentialsValidator.js:52
 msgid "Credentials that require passwords on launch are not permitted.  Please remove or replace the following credentials with a credential of the same type in order to proceed: {0}"
-msgstr "No se permiten las credenciales que requieran contraseñas al iniciarse. Para continuar, elimine o reemplace las siguientes credenciales por otras del mismo tipo: {0}"
+msgstr "No se permiten las credenciales que requieran contraseñas al iniciarse.  Por favor, elimine o reemplace las siguientes credenciales con una credencial del mismo tipo para poder proceder: {0}"
 
 #: components/Pagination/Pagination.js:34
 msgid "Current page"
@@ -1618,15 +1616,15 @@ msgstr "Especificaciones del pod personalizado"
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:66
 #: screens/Project/ProjectList/ProjectListItem.js:183
 msgid "Custom virtual environment {0} must be replaced by an execution environment."
-msgstr "Debe reemplazar el entorno virtual personalizado {0} por un entorno de ejecución."
+msgstr "El entorno virtual personalizado {0} debe ser sustituido por un entorno de ejecución."
 
 #: components/TemplateList/TemplateListItem.js:155
 msgid "Custom virtual environment {0} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "El entorno virtual personalizado debe ser sustituido por un entorno de ejecución. Para más información sobre la migración a entornos de ejecución, consulte la {0}documentación.</0>"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:72
 msgid "Custom virtual environment {virtualEnvironment} must be replaced by an execution environment. For more information about migrating to execution environments see <0>the documentation.</0>"
-msgstr ""
+msgstr "El entorno virtual personalizado {virtualEnvironment} debe ser sustituido por un entorno de ejecución. Para más información sobre la migración a entornos de ejecución, consulte la <0>documentación.</0>"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:61
 msgid "Customize messages…"
@@ -1657,7 +1655,7 @@ msgstr "Período de conservación de datos"
 
 #: screens/Dashboard/shared/LineChart.js:168
 msgid "Date"
-msgstr ""
+msgstr "Fecha"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:339
 #: components/Schedule/shared/FrequencyDetailSubform.js:443
@@ -1672,7 +1670,7 @@ msgstr "Días de datos para mantener"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/DaysToKeepStep.jsx:28
 msgid "Days of data to be retained"
-msgstr ""
+msgstr "Días de datos a conservar"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:105
 msgid "Days remaining"
@@ -1680,7 +1678,7 @@ msgstr "Días restantes"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useDaysToKeepStep.jsx:35
 msgid "Days to keep"
-msgstr ""
+msgstr "Días para guardar"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:125
 msgid "Debug"
@@ -1701,7 +1699,7 @@ msgstr "Predeterminado"
 #: screens/Template/Survey/SurveyReorderModal.js:207
 #: screens/Template/Survey/SurveyReorderModal.js:228
 msgid "Default Answer(s)"
-msgstr ""
+msgstr "Respuesta(s) por defecto"
 
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:40
 msgid "Default Execution Environment"
@@ -1813,11 +1811,11 @@ msgstr "Eliminar planificación"
 
 #: screens/Template/Survey/SurveyList.js:52
 msgid "Delete Survey"
-msgstr "BORRAR ENCUESTA"
+msgstr "Eliminar encuesta"
 
 #: screens/Team/TeamDetail/TeamDetail.js:66
 msgid "Delete Team"
-msgstr "Eliminar el equipo"
+msgstr "Eliminar equipo"
 
 #: screens/User/UserDetail/UserDetail.js:103
 msgid "Delete User"
@@ -1867,7 +1865,7 @@ msgstr "Eliminar inventario inteligente"
 
 #: screens/Template/Survey/SurveyToolbar.js:82
 msgid "Delete survey question"
-msgstr ""
+msgstr "Eliminar la pregunta de la encuesta"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:76
 msgid ""
@@ -1875,12 +1873,15 @@ msgid ""
 "performing an update. Depending on the size of the\n"
 "repository this may significantly increase the amount\n"
 "of time required to complete an update."
-msgstr "Elimine el repositorio local por completo antes de realizar una actualización. Según el tamaño del repositorio, esto podría incrementar significativamente el tiempo necesario para completar una actualización."
+msgstr "Elimine el repositorio local por completo antes de realizar\n"
+"una actualización. Según el tamaño del repositorio, esto\n"
+"podría incrementar significativamente el tiempo necesario\n"
+"para completar una actualización."
 
 #: components/PromptDetail/PromptProjectDetail.js:51
 #: screens/Project/ProjectDetail/ProjectDetail.js:92
 msgid "Delete the project before syncing"
-msgstr ""
+msgstr "Eliminar el proyecto antes de la sincronización."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:83
 msgid "Delete this link"
@@ -1919,7 +1920,7 @@ msgstr "Denegado"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:31
 msgid "Denied - {0}.  See the Activity Stream for more information."
-msgstr "Denegado: {0}.  Consulte el flujo de actividad para obtener más información."
+msgstr "Denegado: {0}. Consulte el flujo de actividad para obtener más información."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:28
 msgid "Denied by {0} - {1}"
@@ -2029,7 +2030,7 @@ msgstr "Canales destinatarios"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:227
 msgid "Destination channels or users"
-msgstr "Canales destinatarios o usuarios"
+msgstr "Usuarios o canales destinatarios"
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:39
 #: components/ErrorDetail/ErrorDetail.js:75
@@ -2136,12 +2137,12 @@ msgstr "Deshabilite la verificación de SSL"
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:348
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:463
 msgid "Disable SSL verification"
-msgstr "Deshabilitar la verificación SSL"
+msgstr "Deshabilitar verificación SSL"
 
 #: components/InstanceToggle/InstanceToggle.js:56
 #: components/StatusLabel/StatusLabel.js:64
 msgid "Disabled"
-msgstr ""
+msgstr "Deshabilitados"
 
 #: components/DisassociateButton/DisassociateButton.js:57
 #: components/DisassociateButton/DisassociateButton.js:84
@@ -2192,7 +2193,7 @@ msgstr "¿Disociar?"
 #: components/PromptDetail/PromptProjectDetail.js:46
 #: screens/Project/ProjectDetail/ProjectDetail.js:87
 msgid "Discard local changes before syncing"
-msgstr ""
+msgstr "Descartar los cambios locales antes de la sincronización"
 
 #: screens/Template/shared/JobTemplateForm.js:479
 msgid ""
@@ -2220,23 +2221,23 @@ msgstr "Descargar salida"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:90
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:111
 msgid "Drag a file here or browse to upload"
-msgstr ""
+msgstr "Arrastre un archivo aquí o navegue para cargarlo"
 
 #: components/SelectedList/DraggableSelectedList.js:68
 msgid "Draggable list to reorder and remove selected items."
-msgstr ""
+msgstr "Lista arrastrada para reordenar y eliminar los elementos seleccionados."
 
 #: components/SelectedList/DraggableSelectedList.js:43
 msgid "Dragging cancelled. List is unchanged."
-msgstr ""
+msgstr "Arrastre cancelado. La lista no se modifica."
 
 #: components/SelectedList/DraggableSelectedList.js:38
 msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
-msgstr ""
+msgstr "Arrastrar elemento {id}. Elemento con índice {oldIndex} en ahora {newIndex}."
 
 #: components/SelectedList/DraggableSelectedList.js:32
 msgid "Dragging started for item id: {newId}."
-msgstr ""
+msgstr "Arrastre iniciado para el id de artículo: {newId}."
 
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:81
 msgid "E-mail"
@@ -2251,13 +2252,16 @@ msgid ""
 "Each time a job runs using this inventory,\n"
 "refresh the inventory from the selected source before\n"
 "executing job tasks."
-msgstr "Cada vez que se ejecute una tarea con este inventario, actualice el inventario de la fuente seleccionada antes de ejecutar tareas de trabajo."
+msgstr "Cada vez que se ejecute una tarea con este inventario,\n"
+"actualice el inventario de la fuente seleccionada antes\n"
+"de ejecutar tareas de trabajo."
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:96
 msgid ""
 "Each time a job runs using this project, update the\n"
 "revision of the project prior to starting the job."
-msgstr "Cada vez que una tarea se ejecute con este proyecto, actualice la revisión del proyecto antes de iniciar dicha tarea."
+msgstr "Cada vez que una tarea se ejecute con este proyecto,\n"
+"actualice la revisión del proyecto antes de iniciar dicha tarea."
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:392
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:396
@@ -2397,7 +2401,7 @@ msgstr "Modificar enlace"
 
 #: screens/Setting/shared/SharedFields.js:290
 msgid "Edit Login redirect override URL"
-msgstr ""
+msgstr "Editar la URL de redirección de inicio de sesión"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeEditModal.js:64
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:233
@@ -2410,7 +2414,7 @@ msgstr "Modificar plantilla de notificación"
 
 #: screens/Template/Survey/SurveyToolbar.js:72
 msgid "Edit Order"
-msgstr ""
+msgstr "Orden de edición"
 
 #: screens/Organization/OrganizationList/OrganizationListItem.js:72
 #: screens/Organization/OrganizationList/OrganizationListItem.js:76
@@ -2438,7 +2442,7 @@ msgstr "Modificar fuente"
 
 #: screens/Template/Survey/SurveyListItem.js:87
 msgid "Edit Survey"
-msgstr ""
+msgstr "Editar el cuestionario"
 
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:20
 #: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:24
@@ -2496,7 +2500,7 @@ msgstr "Modificar grupo de instancias"
 #: screens/Setting/shared/SharedFields.js:320
 #: screens/Setting/shared/SharedFields.js:322
 msgid "Edit login redirect override URL"
-msgstr ""
+msgstr "Editar la URL de redirección de inicio de sesión"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.js:70
 msgid "Edit this link"
@@ -2508,7 +2512,7 @@ msgstr "Modificar este nodo"
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:84
 msgid "Edit workflow"
-msgstr ""
+msgstr "Editar el flujo de trabajo"
 
 #: components/Workflow/WorkflowNodeHelp.js:170
 #: screens/Job/JobOutput/shared/OutputToolbar.js:123
@@ -2577,7 +2581,7 @@ msgstr "Habilitar elevación de privilegios"
 
 #: screens/Setting/SettingList.js:53
 msgid "Enable simplified login for your {brandName} applications"
-msgstr ""
+msgstr "Habilite el inicio de sesión simplificado para sus aplicaciones {brandName}"
 
 #: screens/Template/shared/JobTemplateForm.js:588
 msgid "Enable webhook for this template."
@@ -2599,7 +2603,7 @@ msgstr "Habilitado"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:183
 msgid "Enabled Options"
-msgstr ""
+msgstr "Opciones habilitadas"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:239
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:254
@@ -2625,7 +2629,8 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template"
-msgstr "Habilita la creación de una URL de callback de aprovisionamiento. Con la URL, un host puede contactar a {BrandName} y solicitar la actualización de la configuración utilizando esta plantilla de trabajo."
+msgstr "Permite la creación de una URL de\n"
+"de aprovisionamiento. A través de esta URL, un host puede ponerse en contacto con {brandName} y solicitar una actualización de la configuración utilizando esta plantilla"
 
 #: screens/Template/shared/JobTemplateForm.js:568
 msgid ""
@@ -2633,7 +2638,8 @@ msgid ""
 "callback URL. Using the URL a host can contact {brandName}\n"
 "and request a configuration update using this job\n"
 "template."
-msgstr ""
+msgstr "Permite la creación de una URL de\n"
+"de aprovisionamiento. A través de esta URL, un host puede ponerse en contacto con {brandName} y solicitar una actualización de la configuración utilizando esta plantilla de trabajo."
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:148
 #: screens/Setting/shared/SettingDetail.js:87
@@ -2650,11 +2656,11 @@ msgstr "Acuerdo de licencia de usuario final"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "End date"
-msgstr ""
+msgstr "Fecha de terminación"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:542
 msgid "End date/time"
-msgstr ""
+msgstr "Fecha/hora de finalización"
 
 #: components/Schedule/shared/buildRuleObj.js:97
 msgid "End did not match an expected value"
@@ -2662,7 +2668,7 @@ msgstr "La finalización no coincide con un valor esperado"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "End time"
-msgstr ""
+msgstr "Hora de terminación"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2685,7 +2691,9 @@ msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
 "Ansible Tower documentation for example syntax."
-msgstr "Ingrese variables de inventario mediante el uso de la sintaxis JSON o YAML. Utilice el botón de selección para alternar entre las dos opciones. Consulte la documentación de Ansible Tower para acceder a ejemplos de sintaxis."
+msgstr "Ingrese variables de inventario mediante el uso de la sintaxis JSON o YAML.\n"
+"Utilice el botón de selección para alternar entre las dos opciones. Consulte la\n"
+"documentación de Ansible Tower para acceder a ejemplos de sintaxis."
 
 #: screens/Inventory/shared/InventoryForm.js:65
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
@@ -2700,7 +2708,9 @@ msgid ""
 "Enter one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
-msgstr "Ingrese un canal de IRC o nombre de usuario por línea. El símbolo numeral (#) para canales y el símbolo arroba (@) para usuarios no son necesarios."
+msgstr "Ingrese un canal de IRC o nombre de usuario por línea. El símbolo numeral (#)\n"
+"para canales y el símbolo arroba (@) para usuarios no son\n"
+"necesarios."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
 #~ msgid ""
@@ -2718,7 +2728,8 @@ msgstr ""
 msgid ""
 "Enter one email address per line to create a recipient\n"
 "list for this type of notification."
-msgstr "Ingrese una dirección de correo electrónico por línea para crear una lista de destinatarios para este tipo de notificación."
+msgstr "Ingrese una dirección de correo electrónico por línea\n"
+"para crear una lista de destinatarios para este tipo de notificación."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
 #~ msgid ""
@@ -2736,49 +2747,50 @@ msgstr "Ingrese una dirección de correo electrónico por línea para crear una 
 msgid ""
 "Enter one phone number per line to specify where to\n"
 "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-msgstr ""
+msgstr "Introduzca un número de teléfono por línea para especificar a dónde enviar los mensajes SMS. Los números de teléfono deben tener el formato +11231231234. Para más información, consulte la documentación de Twilio."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:410
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
-msgstr "Ingrese el número asociado con el \"Servicio de mensajería\" en Twilio con el formato +18005550199."
+msgstr "Ingrese el número asociado con el \"Servicio de mensajería\"\n"
+"en Twilio con el formato +18005550199."
 
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
-msgstr ""
+msgstr "Introduzca las variables para configurar la fuente de inventario. Para una descripción detallada de cómo configurar este plugin, consulte los plugins de inventario <0> en la documentación y la guía de configuración del plugin Insights </0>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>Tower</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1> de Tower </1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/EC2SubForm.js:53
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>aws_ec2</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>aws_ec2</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1>aws_ec2</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>azure_rm</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>azure_rm</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte <0>Plugins de inventario </0>en la documentación y la guía de configuración del plugin <1>azure_rm</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>foreman</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>foreman</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1>foreman</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>gcp_compute</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>gcp_compute</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del <1>plugin gcp_compute</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>openstack</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>openstack</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, vea <0>plugins de inventario</0> en la documentación y la guía de configuración de plugins de <1>openstack</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>ovirt</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>ovirt</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1> de ovirt</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:59
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>vmware_vm_inventory</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Consulte <0>Complementos de inventario</0> en la documentación y la guía de configuración del complemento <1>vmware_vm_inventory</1> para obtener una descripción detallada de cómo configurar este complemento."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, vea <0>plugins de inventario</0>en la documentación y la guía de configuración del plugin <1>vmware_vm_inventory</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:35
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
@@ -2800,7 +2812,7 @@ msgstr "Error"
 
 #: screens/Project/ProjectList/ProjectList.js:286
 msgid "Error fetching updated project"
-msgstr ""
+msgstr "Error al recuperar el proyecto actualizado"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:485
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:141
@@ -2909,7 +2921,7 @@ msgstr "Error:"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:256
 msgid "Errors"
-msgstr ""
+msgstr "Errores"
 
 #: screens/ActivityStream/ActivityStream.js:256
 #: screens/ActivityStream/ActivityStreamListItem.js:46
@@ -2935,7 +2947,7 @@ msgstr "Eventos"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:151
 msgid "Every minute for {0} times"
-msgstr ""
+msgstr "Cada minuto durante {0} veces"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
@@ -2943,7 +2955,7 @@ msgstr "Coincidencia exacta (búsqueda predeterminada si no se especifica)."
 
 #: components/Search/RelatedLookupTypeInput.js:38
 msgid "Exact search on id field."
-msgstr ""
+msgstr "Búsqueda exacta en el campo de identificación."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:26
 msgid "Example URLs for GIT Source Control include:"
@@ -2992,7 +3004,7 @@ msgstr "Entorno de ejecución"
 #: components/ExecutionEnvironmentDetail/ExecutionEnvironmentDetail.js:69
 #: components/TemplateList/TemplateListItem.js:152
 msgid "Execution Environment Missing"
-msgstr ""
+msgstr "Falta el entorno de ejecución"
 
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:103
 #: routeConfig.js:140
@@ -3032,7 +3044,7 @@ msgstr "Expandir"
 
 #: components/DataListToolbar/DataListToolbar.js:95
 msgid "Expand all rows"
-msgstr ""
+msgstr "Desplegar todas las filas"
 
 #: components/CodeEditor/VariablesDetail.js:211
 #: components/CodeEditor/VariablesField.js:247
@@ -3058,7 +3070,7 @@ msgstr "Expira"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:84
 msgid "Expires on"
-msgstr "Fecha de expiración:"
+msgstr "Fecha de expiración"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:94
 msgid "Expires on UTC"
@@ -3067,7 +3079,7 @@ msgstr "Fecha de expiración (UTC):"
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:34
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:11
 msgid "Expires on {0}"
-msgstr "Fecha de expiración: {0}"
+msgstr "Expira el {0}"
 
 #: components/JobList/JobListItem.js:265
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:119
@@ -3094,7 +3106,7 @@ msgstr "FINALIZADO:"
 #: components/PromptDetail/PromptJobTemplateDetail.js:80
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:142
 msgid "Fact Storage"
-msgstr ""
+msgstr "Almacenamiento de datos"
 
 #: screens/Host/Host.js:62
 #: screens/Host/HostFacts/HostFacts.js:45
@@ -3175,7 +3187,7 @@ msgstr "No se pudo cancelar una o varias tareas."
 #: screens/Job/JobDetail/JobDetail.js:471
 #: screens/Job/JobOutput/shared/OutputToolbar.js:136
 msgid "Failed to cancel {0}"
-msgstr "No se pudo cancelar {0}"
+msgstr "No se ha podido cancelar {0}"
 
 #: screens/Credential/CredentialList/CredentialListItem.js:85
 msgid "Failed to copy credential."
@@ -3360,7 +3372,7 @@ msgstr "No se pudo eliminar la plantilla de trabajo del flujo de trabajo."
 #: screens/Host/HostDetail/HostDetail.js:59
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:59
 msgid "Failed to delete {name}."
-msgstr "No se pudo eliminar {nombre}."
+msgstr "No se pudo eliminar {name}."
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:262
 msgid "Failed to deny one or more workflow approval."
@@ -3391,11 +3403,11 @@ msgstr "No se pudo disociar uno o más equipos."
 
 #: screens/Login/Login.js:198
 msgid "Failed to fetch custom login configuration settings.  System defaults will be shown instead."
-msgstr "No se pudo obtener la configuración de inicio de sesión personalizada.  En su lugar, se mostrarán los valores predeterminados del sistema."
+msgstr "No se pudo obtener la configuración de inicio de sesión personalizada. En su lugar, se mostrarán los valores predeterminados del sistema."
 
 #: screens/Project/ProjectList/ProjectList.js:290
 msgid "Failed to fetch the updated project data."
-msgstr ""
+msgstr "No se han podido obtener los datos actualizados del proyecto."
 
 #: components/AdHocCommands/AdHocCommands.js:110
 #: components/LaunchButton/LaunchButton.js:164
@@ -3417,7 +3429,7 @@ msgstr "No se pudieron recuperar las credenciales del nodo."
 
 #: screens/InstanceGroup/Instances/InstanceList.js:303
 msgid "Failed to run a health check on one or more instances."
-msgstr ""
+msgstr "No se ha podido ejecutar una comprobación de estado en una o más instancias."
 
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:169
 msgid "Failed to send test notification."
@@ -3522,7 +3534,7 @@ msgstr "Archivo, directorio o script"
 #: components/Search/Search.js:176
 #: components/Search/Search.js:201
 msgid "Filter By {name}"
-msgstr ""
+msgstr "Filtrar por {name}"
 
 #: components/JobList/JobList.js:240
 #: components/JobList/JobListItem.js:93
@@ -3572,7 +3584,7 @@ msgstr "Decimal corto"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Follow"
-msgstr ""
+msgstr "Seguir"
 
 #: screens/Template/shared/JobTemplateForm.js:253
 msgid ""
@@ -3580,14 +3592,19 @@ msgid ""
 "the playbook. Select check to only check playbook syntax,\n"
 "test environment setup, and report problems without\n"
 "executing the playbook."
-msgstr "Para las plantillas de trabajo, seleccione ejecutar para ejecutar el playbook. Seleccione marcar para marcar solo la sintaxis del manual, probar la configuración del entorno e informar problemas sin ejecutar el playbook."
+msgstr "Para las plantillas de trabajo, seleccione ejecutar para ejecutar\n"
+"el playbook. Seleccione marcar para marcar solo la sintaxis del playbook,\n"
+"probar la configuración del entorno e informar problemas sin\n"
+"ejecutar el playbook."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:113
 msgid ""
 "For job templates, select run to execute the playbook.\n"
 "Select check to only check playbook syntax, test environment setup,\n"
 "and report problems without executing the playbook."
-msgstr "Para las plantillas de trabajo, seleccione ejecutar para ejecutar el playbook. Seleccione marcar para marcar solo la sintaxis del manual, probar la configuración del entorno e informar problemas sin ejecutar el playbook."
+msgstr "Para las plantillas de trabajo, seleccione ejecutar para ejecutar el playbook.\n"
+"Seleccione marcar para marcar solo la sintaxis del manual, probar\n"
+"la configuración del entorno e informar problemas sin ejecutar el playbook."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:78
 msgid "For more information, refer to the"
@@ -3625,11 +3642,11 @@ msgstr "Viernes"
 
 #: components/Search/RelatedLookupTypeInput.js:45
 msgid "Fuzzy search on id, name or description fields."
-msgstr ""
+msgstr "Búsqueda difusa en los campos id, nombre o descripción."
 
 #: components/Search/RelatedLookupTypeInput.js:32
 msgid "Fuzzy search on name field."
-msgstr ""
+msgstr "Búsqueda difusa en el campo del nombre."
 
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:134
 #: screens/Organization/shared/OrganizationForm.js:101
@@ -3806,11 +3823,11 @@ msgstr "Método HTTP"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:273
 #: screens/InstanceGroup/Instances/InstanceList.js:237
 msgid "Health Check"
-msgstr ""
+msgstr "Comprobación de estado"
 
 #: components/StatusLabel/StatusLabel.js:57
 msgid "Healthy"
-msgstr ""
+msgstr "Saludable"
 
 #: components/AppContainer/PageHeaderToolbar.js:115
 msgid "Help"
@@ -3940,7 +3957,7 @@ msgstr "Servidores"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:132
 msgid "Hosts automated"
-msgstr ""
+msgstr "Hosts automatizados"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:114
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:121
@@ -3949,7 +3966,7 @@ msgstr "Hosts disponibles"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:127
 msgid "Hosts imported"
-msgstr ""
+msgstr "Hosts importados"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:145
 msgid "Hosts remaining"
@@ -4000,7 +4017,7 @@ msgstr "Puerto del servidor IRC"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:219
 msgid "IRC nick"
-msgstr "Alias en IRC"
+msgstr "NIC de IRC"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:211
 msgid "IRC server address"
@@ -4026,7 +4043,9 @@ msgid ""
 "If checked, all variables for child groups\n"
 "and hosts will be removed and replaced by those found\n"
 "on the external source."
-msgstr "Si las opciones están marcadas, se eliminarán todas las variables de los grupos secundarios y se reemplazarán con aquellas que se hallen en la fuente externa."
+msgstr "Si las opciones están marcadas, se eliminarán\n"
+"todas las variables de los grupos secundarios y se reemplazarán\n"
+"con aquellas que se hallen en la fuente externa."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:128
 msgid ""
@@ -4037,27 +4056,38 @@ msgid ""
 "to the next manually created group or if there is no manually\n"
 "created group to promote them into, they will be left in the \"all\"\n"
 "default group for the inventory."
-msgstr "Si las opciones están marcadas, cualquier grupo o host que estuvo presente previamente en la fuente externa pero que ahora se eliminó, se eliminará del inventario. Los hosts y grupos que no fueron gestionados por la fuente de inventario serán promovidos al siguiente grupo creado manualmente o, si no existe uno al que puedan ser promovidos, se los dejará en el grupo predeterminado \"Todo\" para el inventario."
+msgstr "Si las opciones están marcadas, cualquier grupo o host que estuvo\n"
+"presente previamente en la fuente externa pero que ahora se eliminó,\n"
+"se eliminará del inventario. Los hosts y grupos que no fueron\n"
+"gestionados por la fuente de inventario serán promovidos al siguiente\n"
+"grupo creado manualmente o, si no existe uno al que puedan ser\n"
+"promovidos, se los dejará en el grupo predeterminado \"Todo\"\n"
+"para el inventario."
 
 #: screens/Template/shared/JobTemplateForm.js:558
 msgid ""
 "If enabled, run this playbook as an\n"
 "administrator."
-msgstr "Si se habilita esta opción, ejecute este playbook como administrador."
+msgstr "Si se habilita esta opción, ejecute este playbook\n"
+"como administrador."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:175
 msgid ""
 "If enabled, show the changes made\n"
 "by Ansible tasks, where supported. This is equivalent to Ansible’s\n"
 "--diff mode."
-msgstr "Si se habilita esta opción, muestre los cambios realizados por las tareas de Ansible, donde sea compatible. Esto es equivalente al modo --diff de Ansible."
+msgstr "Si se habilita esta opción, muestre los cambios realizados\n"
+"por las tareas de Ansible, donde sea compatible. Esto es equivalente\n"
+"al modo --diff de Ansible."
 
 #: screens/Template/shared/JobTemplateForm.js:498
 msgid ""
 "If enabled, show the changes made by\n"
 "Ansible tasks, where supported. This is equivalent\n"
 "to Ansible's --diff mode."
-msgstr "Si se habilita esta opción, muestre los cambios realizados por las tareas de Ansible, donde sea compatible. Esto es equivalente al modo --diff de Ansible."
+msgstr "Si se habilita esta opción, muestre los cambios realizados\n"
+"por las tareas de Ansible, donde sea compatible. Esto es equivalente\n"
+"al modo --diff de Ansible."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:197
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode."
@@ -4067,7 +4097,8 @@ msgstr "Si se habilita esta opción, muestre los cambios realizados por las tare
 msgid ""
 "If enabled, simultaneous runs of this job\n"
 "template will be allowed."
-msgstr "Si se habilita esta opción, se permitirá la ejecución simultánea de esta plantilla de trabajo."
+msgstr "Si se habilita esta opción, se permitirá la ejecución\n"
+"simultánea de esta plantilla de trabajo."
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:240
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
@@ -4078,23 +4109,23 @@ msgid ""
 "If enabled, this will store gathered facts so they can\n"
 "be viewed at the host level. Facts are persisted and\n"
 "injected into the fact cache at runtime."
-msgstr ""
-"Si se habilita esta opción, se almacenarán los eventos recopilados para que estén visibles en el nivel de host. Los eventos persisten y\n"
+msgstr "Si se habilita esta opción, se almacenarán los eventos recopilados para que estén visibles en el nivel de host. Los eventos persisten y\n"
 "se insertan en la caché de eventos en tiempo de ejecución."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:266
 msgid "If specified, this field will be shown on the node instead of the resource name when viewing the workflow"
-msgstr ""
+msgstr "Si se especifica, este campo se mostrará en el nodo en lugar del nombre del recurso cuando se vea el flujo de trabajo"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:150
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
-msgstr "Si está listo para la actualización o la renovación, <0>contáctenos.</0>"
+msgstr "Si está listo para actualizar o renovar, <0>póngase en contacto con nosotros.</0>"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:63
 msgid ""
 "If you do not have a subscription, you can visit\n"
 "Red Hat to obtain a trial subscription."
-msgstr "Si no tiene una suscripción, puede visitar Red Hat para obtener una suscripción de prueba."
+msgstr "Si no tiene una suscripción, puede visitar\n"
+"Red Hat para obtener una suscripción de prueba."
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:45
 msgid "If you only want to remove access for this particular user, please remove them from the team."
@@ -4105,8 +4136,7 @@ msgstr "Si solo desea eliminar el acceso de este usuario específico, elimínelo
 msgid ""
 "If you want the Inventory Source to update on\n"
 "launch and on project update, click on Update on launch, and also go to"
-msgstr ""
-"Si desea que la fuente de inventario se actualice al\n"
+msgstr "Si desea que la fuente de inventario se actualice al\n"
 "ejecutar y en la actualización del proyecto, haga clic en Actualizar al ejecutar, y también vaya a"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:52
@@ -4130,9 +4160,8 @@ msgid ""
 "Indicates if a host is available and should be included in running\n"
 "jobs.  For hosts that are part of an external inventory, this may be\n"
 "reset by the inventory sync process."
-msgstr ""
-"Indica si un host está disponible y debe ser incluido en la ejecución de\n"
-"tareas.  Para los hosts que forman parte de un inventario externo, esto se puede\n"
+msgstr "Indica si un host está disponible y debe ser incluido en la ejecución de\n"
+"tareas. Para los hosts que forman parte de un inventario externo, esto se puede\n"
 "restablecer mediante el proceso de sincronización del inventario."
 
 #: components/AppContainer/PageHeaderToolbar.js:105
@@ -4214,7 +4243,7 @@ msgstr "ID de instancia"
 
 #: screens/InstanceGroup/InstanceGroups.js:54
 msgid "Instance details"
-msgstr ""
+msgstr "Detalles de la instancia"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:69
@@ -4227,7 +4256,7 @@ msgstr "No se encontró el grupo de instancias."
 
 #: screens/InstanceGroup/Instances/InstanceListItem.js:172
 msgid "Instance group used capacity"
-msgstr ""
+msgstr "Capacidad utilizada del grupo de instancias"
 
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:122
 msgid "Instance groups"
@@ -4261,11 +4290,11 @@ msgstr "Formato de archivo no válido. Cargue un manifiesto de suscripción de R
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
 msgid "Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported."
-msgstr ""
+msgstr "Objetivo de enlace no válido. No se puede enlazar con nodos secundarios o ancestros. Los ciclos del gráfico no son compatibles."
 
 #: util/validators.js:33
 msgid "Invalid time format"
-msgstr ""
+msgstr "Formato de hora no válido"
 
 #: screens/Login/Login.js:120
 msgid "Invalid username or password. Please try again."
@@ -4340,7 +4369,7 @@ msgstr "Fuente de inventario"
 
 #: screens/Job/JobDetail/JobDetail.js:228
 msgid "Inventory Source Project"
-msgstr ""
+msgstr "Proyecto de fuente de inventario"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:87
 msgid "Inventory Source Sync"
@@ -4368,7 +4397,7 @@ msgstr "Sincronización de inventario"
 
 #: screens/Inventory/InventoryList/InventoryList.js:168
 msgid "Inventory Type"
-msgstr ""
+msgstr "Tipo de inventario"
 
 #: components/Workflow/WorkflowNodeHelp.js:71
 msgid "Inventory Update"
@@ -4393,11 +4422,11 @@ msgstr "Errores de sincronización de inventario"
 
 #: components/DataListToolbar/DataListToolbar.js:100
 msgid "Is expanded"
-msgstr ""
+msgstr "Expandido"
 
 #: components/DataListToolbar/DataListToolbar.js:102
 msgid "Is not expanded"
-msgstr ""
+msgstr "No se expande"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:111
 msgid "Item Failed"
@@ -4465,11 +4494,11 @@ msgstr "Error en la eliminación de tareas"
 
 #: screens/Job/JobDetail/JobDetail.js:117
 msgid "Job ID"
-msgstr ""
+msgstr "Identificación del trabajo"
 
 #: screens/Dashboard/shared/LineChart.js:128
 msgid "Job Runs"
-msgstr ""
+msgstr "Ejecuciones de trabajo"
 
 #: components/JobList/JobListItem.js:272
 #: screens/Job/JobDetail/JobDetail.js:301
@@ -4479,7 +4508,7 @@ msgstr "Fracción de tareas"
 #: components/JobList/JobListItem.js:277
 #: screens/Job/JobDetail/JobDetail.js:308
 msgid "Job Slice Parent"
-msgstr ""
+msgstr "Fraccionamiento de los trabajos principales"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:160
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:234
@@ -4515,7 +4544,7 @@ msgstr "Plantilla de trabajo"
 
 #: components/LaunchPrompt/steps/credentialsValidator.js:38
 msgid "Job Template default credentials must be replaced with one of the same type.  Please select a credential for the following types in order to proceed: {0}"
-msgstr "Las credenciales predeterminadas de la plantilla de trabajo se deben reemplazar por una del mismo tipo.  Seleccione una credencial de los siguientes tipos para continuar: {0}"
+msgstr "Las credenciales predeterminadas de la plantilla de trabajo se deben reemplazar por una del mismo tipo. Seleccione una credencial de los siguientes tipos para continuar: {0}"
 
 #: screens/Project/Project.js:115
 #: screens/Project/Projects.js:31
@@ -4527,7 +4556,7 @@ msgstr "Plantillas de trabajo"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/useNodeTypeStep.js:25
 msgid "Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed."
-msgstr "Las plantillas de trabajo en las que falta un inventario o un proyecto no pueden seleccionarse al crear o modificar nodos.  Seleccione otra plantilla o corrija los campos que faltan para continuar."
+msgstr "Las plantillas de trabajo en las que falta un inventario o un proyecto no pueden seleccionarse al crear o modificar nodos. Seleccione otra plantilla o corrija los campos que faltan para continuar."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/useWorkflowNodeSteps.js:316
 msgid "Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes"
@@ -4694,7 +4723,7 @@ msgstr "Último"
 #: screens/InstanceGroup/Instances/InstanceListItem.js:139
 #: screens/InstanceGroup/Instances/InstanceListItem.js:201
 msgid "Last Health Check"
-msgstr ""
+msgstr "Última comprobación de estado"
 
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:185
 #: screens/Project/ProjectDetail/ProjectDetail.js:142
@@ -4869,7 +4898,7 @@ msgstr "Cargando"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:49
 msgid "Local"
-msgstr ""
+msgstr "Local"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:270
 msgid "Local Time Zone"
@@ -4930,7 +4959,7 @@ msgstr "Credenciales de máquina"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:62
 msgid "Managed"
-msgstr ""
+msgstr "Gestionado"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:148
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:167
@@ -5047,7 +5076,8 @@ msgstr "Cantidad mínima de instancias que se asignará automáticamente a este 
 msgid ""
 "Minimum percentage of all instances that will be automatically\n"
 "assigned to this group when new instances come online."
-msgstr "Porcentaje mínimo de todas las instancias que se asignará automáticamente a este grupo cuando aparezcan nuevas instancias en línea."
+msgstr "Porcentaje mínimo de todas las instancias que se asignará automáticamente\n"
+"a este grupo cuando aparezcan nuevas instancias en línea."
 
 #: components/Schedule/shared/ScheduleForm.js:152
 msgid "Minute"
@@ -5055,11 +5085,11 @@ msgstr "Minuto"
 
 #: screens/Setting/Settings.js:96
 msgid "Miscellaneous Authentication"
-msgstr ""
+msgstr "Autenticación diversa"
 
 #: screens/Setting/SettingList.js:107
 msgid "Miscellaneous Authentication settings"
-msgstr ""
+msgstr "Varios ajustes de autenticación"
 
 #: screens/Setting/Settings.js:99
 msgid "Miscellaneous System"
@@ -5141,11 +5171,11 @@ msgstr "Módulo"
 
 #: screens/Job/JobDetail/JobDetail.js:403
 msgid "Module Arguments"
-msgstr ""
+msgstr "Argumentos del módulo"
 
 #: screens/Job/JobDetail/JobDetail.js:398
 msgid "Module Name"
-msgstr ""
+msgstr "Nombre del módulo"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:255
 msgid "Mon"
@@ -5495,7 +5525,7 @@ msgstr "No se encontraron elementos."
 
 #: screens/Host/HostList/HostListItem.js:94
 msgid "No job data available"
-msgstr ""
+msgstr "No hay datos de tareas disponibles."
 
 #: screens/Job/JobOutput/HostEventModal.js:130
 msgid "No result found"
@@ -5534,14 +5564,14 @@ msgstr "No se encontraron preguntas de la encuesta."
 
 #: components/PaginatedTable/PaginatedTable.js:80
 msgid "No {pluralizedItemName} Found"
-msgstr "No se encontraron {pluralizedItemName}"
+msgstr "No se ha encontrado {pluralizedItemName}"
 
 #: components/Workflow/WorkflowNodeHelp.js:150
 #: components/Workflow/WorkflowNodeHelp.js:184
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:264
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:265
 msgid "Node Alias"
-msgstr ""
+msgstr "Alias del nodo"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:212
 #: screens/InstanceGroup/Instances/InstanceList.js:288
@@ -5590,7 +5620,9 @@ msgid ""
 "Note that only hosts directly in this group can\n"
 "be disassociated. Hosts in sub-groups must be disassociated\n"
 "directly from the sub-group level that they belong."
-msgstr "Tenga en cuenta que solo se pueden disociar los hosts asociados directamente a este grupo. Los hosts en subgrupos deben ser disociados del nivel de subgrupo al que pertenecen."
+msgstr "Tenga en cuenta que solo se pueden disociar los hosts asociados\n"
+"directamente a este grupo. Los hosts en subgrupos deben ser disociados\n"
+"del nivel de subgrupo al que pertenecen."
 
 #: screens/Host/HostGroups/HostGroupsList.js:212
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:230
@@ -5599,17 +5631,16 @@ msgid ""
 "disassociating if the host is also a member of that group’s\n"
 "children.  This list shows all groups the host is associated\n"
 "with directly and indirectly."
-msgstr ""
-"Tenga en cuenta que puede seguir viendo el grupo en la lista después de la disociación si el host también es un miembro de los elementos secundarios de ese grupo. Esta lista muestra todos los grupos a los que está asociado el host\n"
+msgstr "Tenga en cuenta que puede seguir viendo el grupo en la lista después de la disociación si el host también es un miembro de los elementos secundarios de ese grupo. Esta lista muestra todos los grupos a los que está asociado el host\n"
 "directa e indirectamente."
 
 #: components/Lookup/InstanceGroupsLookup.js:90
 msgid "Note: The order in which these are selected sets the execution precedence. Select more than one to enable drag."
-msgstr ""
+msgstr "Nota: El orden en que se seleccionan establece la precedencia de ejecución. Seleccione más de uno para habilitar el arrastre."
 
 #: screens/Organization/shared/OrganizationForm.js:116
 msgid "Note: The order of these credentials sets precedence for the sync and lookup of the content. Select more than one to enable drag."
-msgstr ""
+msgstr "Nota: El orden de estas credenciales establece la precedencia para la sincronización y búsqueda del contenido. Seleccione más de una para habilitar el arrastre."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:61
 msgid "Note: This field assumes the remote name is \"origin\"."
@@ -5623,7 +5654,12 @@ msgid ""
 "not support password authentication when using SSH. GIT\n"
 "read only protocol (git://) does not use username or\n"
 "password information."
-msgstr "Note: Si utiliza el protocolo SSH para GitHub o Bitbucket, ingrese solo la clave de SSH; no ingrese un nombre de usuario (distinto de git). Además, GitHub y Bitbucket no admiten la autenticación de contraseña cuando se utiliza SSH. El protocolo de solo lectura de GIT (git://) no utiliza información de nombre de usuario o contraseña."
+msgstr "Note: Si utiliza el protocolo SSH para GitHub o Bitbucket,\n"
+"ingrese solo la clave de SSH; no ingrese un nombre de usuario\n"
+"(distinto de git). Además, GitHub y Bitbucket no admiten\n"
+"la autenticación de contraseña cuando se utiliza SSH. El protocolo\n"
+"de solo lectura de GIT (git://) no utiliza información\n"
+"de nombre de usuario o contraseña."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:319
 msgid "Notification Color"
@@ -5775,7 +5811,9 @@ msgid ""
 "Optional labels that describe this job template,\n"
 "such as 'dev' or 'test'. Labels can be used to group and filter\n"
 "job templates and completed jobs."
-msgstr "Etiquetas opcionales que describen esta plantilla de trabajo, como 'dev' o 'test'. Las etiquetas se pueden usar para agrupar y filtrar plantillas de trabajo y tareas completadas."
+msgstr "Etiquetas opcionales que describen esta plantilla de trabajo,\n"
+"como 'dev' o 'test'. Las etiquetas se pueden usar para agrupar\n"
+"y filtrar plantillas de trabajo y tareas completadas."
 
 #: screens/Template/shared/WebhookSubForm.js:206
 msgid "Optionally select the credential to use to send status updates back to the webhook service."
@@ -5795,7 +5833,7 @@ msgstr "Opciones"
 #: screens/Template/Survey/SurveyReorderModal.js:205
 #: screens/Template/Survey/SurveyReorderModal.js:220
 msgid "Order"
-msgstr ""
+msgstr "Pedir"
 
 #: components/Lookup/ApplicationLookup.js:118
 #: components/Lookup/OrganizationLookup.js:101
@@ -5887,12 +5925,12 @@ msgstr "Anular"
 #: components/PromptDetail/PromptInventorySourceDetail.js:54
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:125
 msgid "Overwrite local groups and hosts from remote inventory source"
-msgstr ""
+msgstr "Sobrescribir grupos locales y servidores desde una fuente remota del inventario."
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:59
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:130
 msgid "Overwrite local variables from remote inventory source"
-msgstr ""
+msgstr "Sobrescribir las variables locales desde una fuente remota del inventario."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:146
 msgid "Overwrite variables"
@@ -5949,7 +5987,10 @@ msgid ""
 "-e or --extra-vars command line parameter for ansible-playbook.\n"
 "Provide key/value pairs using either YAML or JSON. Refer to the\n"
 "documentation for example syntax."
-msgstr "Traslade variables de línea de comando adicionales al playbook. Este es el parámetro de línea de comando -e o --extra-vars para el playbook de Ansible. Proporcione pares de claves/valores utilizando YAML o JSON. Consulte la documentación para ver ejemplos de sintaxis."
+msgstr "Traslade variables de línea de comando adicionales al playbook. Este es el\n"
+"parámetro de línea de comando -e o --extra-vars para el playbook de Ansible.\n"
+"Proporcione pares de claves/valores utilizando YAML o JSON. Consulte la\n"
+"documentación para ver ejemplos de sintaxis."
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:215
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
@@ -6001,11 +6042,11 @@ msgstr "Realice una búsqueda para definir un filtro de host"
 #: screens/User/UserTokenDetail/UserTokenDetail.js:69
 #: screens/User/UserTokenList/UserTokenList.js:105
 msgid "Personal Access Token"
-msgstr ""
+msgstr "Token de acceso personal"
 
 #: screens/User/UserTokenList/UserTokenListItem.js:26
 msgid "Personal access token"
-msgstr ""
+msgstr "Token de acceso personal"
 
 #: screens/Job/JobOutput/HostEventModal.js:126
 msgid "Play"
@@ -6069,11 +6110,11 @@ msgstr "Jugadas"
 
 #: components/Schedule/ScheduleList/ScheduleList.js:149
 msgid "Please add a Schedule to populate this list."
-msgstr ""
+msgstr "Añada un horario para rellenar esta lista."
 
 #: components/Schedule/ScheduleList/ScheduleList.js:152
 msgid "Please add a Schedule to populate this list.  Schedules can be added to a Template, Project, or Inventory Source."
-msgstr ""
+msgstr "Añada un horario para rellenar esta lista.  Las programaciones pueden añadirse a una plantilla, un proyecto o una fuente de inventario."
 
 #: screens/Template/Survey/SurveyList.js:146
 msgid "Please add survey questions."
@@ -6081,7 +6122,7 @@ msgstr "Agregue preguntas de la encuesta."
 
 #: components/PaginatedTable/PaginatedTable.js:93
 msgid "Please add {pluralizedItemName} to populate this list"
-msgstr "Agregue {pluralizedItemName} para completar esta lista"
+msgstr "Añada {pluralizedItemName} para poblar esta lista"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:43
 msgid "Please click the Start button to begin."
@@ -6101,7 +6142,7 @@ msgstr "Inicie sesión"
 
 #: components/JobList/JobList.js:182
 msgid "Please run a job to populate this list."
-msgstr ""
+msgstr "Ejecute un trabajo para rellenar esta lista."
 
 #: components/Schedule/shared/ScheduleForm.js:590
 msgid "Please select a day number between 1 and 31."
@@ -6126,7 +6167,7 @@ msgstr "Anulación de las especificaciones del pod"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:203
 #: screens/InstanceGroup/Instances/InstanceListItem.js:197
 msgid "Policy Type"
-msgstr ""
+msgstr "Tipo de política"
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:69
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:44
@@ -6150,11 +6191,10 @@ msgid ""
 "Refer to the documentation for further syntax and\n"
 "examples.  Refer to the Ansible Tower documentation for further syntax and\n"
 "examples."
-msgstr ""
-"Complete los hosts para este inventario utilizando un filtro de búsqueda\n"
+msgstr "Complete los hosts para este inventario utilizando un filtro de búsqueda\n"
 "de búsqueda. Ejemplo: ansible_facts.ansible_distribution: \"RedHat\".\n"
 "Consulte la documentación para obtener más sintaxis y\n"
-"ejemplos.  Consulte la documentación de Ansible Tower para obtener más sintaxis y\n"
+"ejemplos. Consulte la documentación de Ansible Tower para obtener más sintaxis y\n"
 "ejemplos."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:163
@@ -6170,11 +6210,11 @@ msgstr "Condiciones previas para ejecutar este nodo cuando hay varios elementos 
 msgid ""
 "Press 'Enter' to add more answer choices. One answer\n"
 "choice per line."
-msgstr ""
+msgstr "Presione 'Intro' para agregar más opciones de respuesta. Una opción de respuesta por línea."
 
 #: components/CodeEditor/CodeEditor.js:184
 msgid "Press Enter to edit. Press ESC to stop editing."
-msgstr "Presione Enter para modificar. Presione ESC para detener la edición."
+msgstr "Presione Intro para modificar. Presione ESC para detener la edición."
 
 #: components/SelectedList/DraggableSelectedList.js:85
 msgid ""
@@ -6182,7 +6222,9 @@ msgid ""
 "and use the arrow keys to navigate up or down.\n"
 "Press enter to confirm the drag, or any other key to\n"
 "cancel the drag operation."
-msgstr ""
+msgstr "Pulse la barra espaciadora o Intro para empezar a arrastrar,\n"
+"y utilice las teclas de flecha para desplazarse hacia arriba o hacia abajo.\n"
+"Pulse Intro para confirmar el arrastre, o cualquier otra tecla para cancelar la operación de arrastre."
 
 #: components/AdHocCommands/useAdHocPreviewStep.jsx:17
 #: components/LaunchPrompt/steps/usePreviewStep.js:23
@@ -6295,7 +6337,10 @@ msgid ""
 "the list of hosts that will be managed or affected by the\n"
 "playbook. Multiple patterns are allowed. Refer to Ansible\n"
 "documentation for more information and examples on patterns."
-msgstr "Proporcione un patrón de host para limitar aun más la lista de hosts que serán gestionados o que se verán afectados por el playbook. Se permiten distintos patrones. Consulte la documentación de Ansible para obtener más información y ejemplos relacionados con los patrones."
+msgstr "Proporcione un patrón de host para limitar aún más la lista\n"
+"de hosts que serán gestionados o que se verán afectados por el playbook.\n"
+"Se permiten distintos patrones. Consulte la documentación de Ansible\n"
+"para obtener más información y ejemplos relacionados con los patrones."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:36
 msgid ""
@@ -6303,7 +6348,10 @@ msgid ""
 "of hosts that will be managed or affected by the playbook. Multiple\n"
 "patterns are allowed. Refer to Ansible documentation for more\n"
 "information and examples on patterns."
-msgstr "Proporcione un patrón de host para limitar aun más la lista de hosts que serán gestionados o que se verán afectados por el playbook. Se permiten distintos patrones. Consulte la documentación de Ansible para obtener más información y ejemplos relacionados con los patrones."
+msgstr "Proporcione un patrón de host para limitar aúan más la lista de hosts\n"
+"que serán gestionados o que se verán afectados por el playbook.\n"
+"Se permiten distintos patrones. Consulte la documentación de Ansible\n"
+"para obtener más información y ejemplos relacionados con los patrones."
 
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:174
 msgid "Provide a value for this field or select the Prompt on launch option."
@@ -6313,8 +6361,7 @@ msgstr "Proporcione un valor para este campo o seleccione la opción Preguntar a
 msgid ""
 "Provide key/value pairs using either\n"
 "YAML or JSON."
-msgstr ""
-"Proporcione pares de clave/valor utilizando\n"
+msgstr "Proporcione pares de clave/valor utilizando\n"
 "YAML o JSON."
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:193
@@ -6323,7 +6370,10 @@ msgid ""
 "below and you can choose from a list of your available subscriptions.\n"
 "The credentials you use will be stored for future use in\n"
 "retrieving renewal or expanded subscriptions."
-msgstr "A continuación, proporcione sus credenciales de Red Hat o de Red Hat Satellite para poder elegir de una lista de sus suscripciones disponibles. Las credenciales que utilice se almacenarán para su uso futuro en la recuperación de las suscripciones de renovación o ampliadas."
+msgstr "A continuación, proporcione sus credenciales de Red Hat o de Red Hat Satellite\n"
+"para poder elegir de una lista de sus suscripciones disponibles.\n"
+"Las credenciales que utilice se almacenarán para su uso futuro\n"
+"en la recuperación de las suscripciones de renovación o ampliadas."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:83
 msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
@@ -6393,7 +6443,7 @@ msgstr "Pestaña de la lista de plantillas recientes"
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.js:158
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.js:76
 msgid "Recent jobs"
-msgstr ""
+msgstr "Trabajos recientes"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:153
 msgid "Recipient List"
@@ -6405,7 +6455,7 @@ msgstr "Lista de destinatarios"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
 msgid "Red Hat Ansible Automation Platform"
-msgstr ""
+msgstr "Plataforma Red Hat Ansible Automation"
 
 #: components/Lookup/ProjectLookup.js:138
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:92
@@ -6455,7 +6505,8 @@ msgstr "Consulte"
 msgid ""
 "Refer to the Ansible documentation for details\n"
 "about the configuration file."
-msgstr "Consulte la documentación de Ansible para obtener detalles sobre el archivo de configuración."
+msgstr "Consulte la documentación de Ansible para obtener detalles\n"
+"sobre el archivo de configuración."
 
 #: screens/User/UserTokens/UserTokens.js:77
 msgid "Refresh Token"
@@ -6467,11 +6518,11 @@ msgstr "Actualizar expiración del token"
 
 #: screens/Project/ProjectList/ProjectListItem.js:128
 msgid "Refresh for revision"
-msgstr ""
+msgstr "Actualizar para revisión"
 
 #: screens/Project/ProjectList/ProjectListItem.js:130
 msgid "Refresh project revision"
-msgstr ""
+msgstr "Actualizar la revisión del proyecto"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:135
 msgid "Regions"
@@ -6498,11 +6549,11 @@ msgstr ""
 #: components/Search/RelatedLookupTypeInput.js:16
 #: components/Search/RelatedLookupTypeInput.js:24
 msgid "Related search type"
-msgstr ""
+msgstr "Tipo de búsqueda relacionada"
 
 #: components/Search/RelatedLookupTypeInput.js:19
 msgid "Related search type typeahead"
-msgstr ""
+msgstr "Tipo de búsqueda relacionado typeahead"
 
 #: components/JobList/JobListItem.js:139
 #: components/LaunchButton/ReLaunchDropDown.js:81
@@ -6572,11 +6623,11 @@ msgstr "Eliminar cualquier modificación local antes de realizar una actualizaci
 
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:13
 msgid "Remove {0} Access"
-msgstr "Quitar acceso de {0}"
+msgstr "Eliminar el acceso de {0}"
 
 #: components/ResourceAccessList/ResourceAccessListItem.js:45
 msgid "Remove {0} chip"
-msgstr "Quitar chip de {0}"
+msgstr "Eliminar el chip de {0}"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:48
 msgid "Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch."
@@ -6584,7 +6635,7 @@ msgstr "Si quita este enlace, el resto de la rama quedará huérfano y hará que
 
 #: components/SelectedList/DraggableSelectedList.js:83
 msgid "Reorder"
-msgstr ""
+msgstr "Reordenar"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
 msgid "Repeat Frequency"
@@ -6637,7 +6688,9 @@ msgstr "Restaurar el valor inicial."
 msgid ""
 "Retrieve the enabled state from the given dict of host variables.\n"
 "The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
-msgstr "Recuperar el estado habilitado a partir del dict dado de las variables de host. La variable habilitada se puede especificar mediante notación de puntos, por ejemplo: \"foo.bar\""
+msgstr "Recuperar el estado habilitado a partir del dict dado de las variables de host.\n"
+"La variable habilitada se puede especificar mediante notación de puntos,\n"
+"por ejemplo: \"foo.bar\""
 
 #: components/JobCancelButton/JobCancelButton.js:78
 #: components/JobCancelButton/JobCancelButton.js:82
@@ -6658,7 +6711,7 @@ msgstr "Muestra los resultados que tienen valores distintos a éste y otros filt
 
 #: components/Search/AdvancedSearch.js:121
 msgid "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
-msgstr "Muestra los resultados que cumple con este y otros filtros.  Este es el tipo de conjunto predeterminado si no se selecciona nada."
+msgstr "Muestra los resultados que cumple con este y otros filtros. Este es el tipo de conjunto predeterminado si no se selecciona nada."
 
 #: components/Search/AdvancedSearch.js:127
 msgid "Returns results that satisfy this one or any other filters."
@@ -6747,11 +6800,11 @@ msgstr "Ejecutar comando"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:266
 msgid "Run a health check on the instance"
-msgstr ""
+msgstr "Ejecutar una comprobación de la salud de la instancia"
 
 #: components/AdHocCommands/AdHocCommands.js:123
 msgid "Run ad hoc command"
-msgstr ""
+msgstr "Ejecutar comando ad hoc"
 
 #: components/AdHocCommands/AdHocCommandsWizard.js:51
 msgid "Run command"
@@ -6899,7 +6952,7 @@ msgstr "Falta una regla de programación"
 
 #: components/Schedule/Schedule.js:82
 msgid "Schedule not found."
-msgstr ""
+msgstr "Programación no encontrada."
 
 #: components/Schedule/ScheduleList/ScheduleList.js:163
 #: components/Schedule/ScheduleList/ScheduleList.js:228
@@ -7043,7 +7096,8 @@ msgstr "Seleccionar un tipo de recurso"
 msgid ""
 "Select a branch for the job template. This branch is applied to\n"
 "all job template nodes that prompt for a branch."
-msgstr "Seleccione una rama para la plantilla de trabajo. Esta rama se aplica a todos los nodos de la plantilla de trabajo que indican una rama."
+msgstr "Seleccione una rama para la plantilla de trabajo. Esta rama se aplica a\n"
+"todos los nodos de la plantilla de trabajo que indican una rama."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:47
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch"
@@ -7084,7 +7138,7 @@ msgstr "Seleccione un proyecto antes de modificar el entorno de ejecución."
 
 #: screens/Template/Survey/SurveyToolbar.js:81
 msgid "Select a question to delete"
-msgstr ""
+msgstr "Seleccione una pregunta para eliminar"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:18
 msgid "Select a row to approve"
@@ -7156,7 +7210,7 @@ msgstr "Seleccionar un tipo de actividad"
 
 #: screens/Metrics/Metrics.js:200
 msgid "Select an instance"
-msgstr ""
+msgstr "Seleccione una instancia"
 
 #: screens/Metrics/Metrics.js:242
 msgid "Select an instance and a metric to show chart"
@@ -7164,15 +7218,15 @@ msgstr "Seleccionar una instancia y una métrica para mostrar el gráfico"
 
 #: screens/InstanceGroup/Instances/InstanceList.js:227
 msgid "Select an instance to run a health check."
-msgstr ""
+msgstr "Seleccione una instancia para ejecutar una comprobación de estado."
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
-msgstr ""
+msgstr "Seleccione un inventario para el flujo de trabajo. Este inventario se aplica a todos los nodos del flujo de trabajo que solicitan un inventario."
 
 #: components/LaunchPrompt/steps/SurveyStep.js:129
 msgid "Select an option"
-msgstr ""
+msgstr "Seleccione una opción"
 
 #: screens/Project/shared/ProjectForm.js:200
 msgid "Select an organization before editing the default execution environment."
@@ -7185,15 +7239,19 @@ msgid ""
 "checking \"Prompt on launch\" without selecting credentials will require you to select a machine\n"
 "credential at run time. If you select credentials and check \"Prompt on launch\", the selected\n"
 "credential(s) become the defaults that can be updated at run time."
-msgstr "Seleccione las credenciales para acceder a los nodos en función de los cuales se ejecutará este trabajo. Solo puede seleccionar una credencial de cada tipo. Para las credenciales de máquina (SSH), si marca \"Preguntar al ejecutar\" sin seleccionar las credenciales, se le pedirá que seleccione una credencial de máquina en el momento de la ejecución. Si selecciona las credenciales y marca \"Preguntar al ejecutar\", las credenciales seleccionadas se convierten en las credenciales predeterminadas que pueden actualizarse en tiempo de ejecución."
+msgstr "Seleccione las credenciales para acceder a los nodos en función de\n"
+"los cuales se ejecutará este trabajo. Solo puede seleccionar una credencial de cada tipo. Para las\n"
+"credenciales de máquina (SSH), si marca \"Preguntar al ejecutar\" sin seleccionar las credenciales,\n"
+"se le pedirá que seleccione una credencial de máquina en el momento de la ejecución. Si selecciona\n"
+"las credenciales y marca \"Preguntar al ejecutar\", las credenciales seleccionadas se convierten en las credenciales\n"
+"predeterminadas que pueden actualizarse en tiempo de ejecución."
 
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:84
 msgid ""
 "Select from the list of directories found in\n"
 "the Project Base Path. Together the base path and the playbook\n"
 "directory provide the full path used to locate playbooks."
-msgstr ""
-"Seleccione de la lista de directorios que se encuentran en\n"
+msgstr "Seleccione de la lista de directorios que se encuentran en\n"
 "la ruta base del proyecto. La ruta base y el directorio del playbook\n"
 "proporcionan la ruta completa utilizada para encontrar los playbooks."
 
@@ -7208,7 +7266,7 @@ msgstr "Seleccionar el tipo de tarea"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:177
 msgid "Select option(s)"
-msgstr ""
+msgstr "Seleccione la(s) opción(es)"
 
 #: screens/Dashboard/DashboardGraph.js:95
 #: screens/Dashboard/DashboardGraph.js:96
@@ -7261,7 +7319,7 @@ msgstr "Seleccione los grupos de instancias en los que se ejecutará esta organi
 
 #: screens/User/shared/UserTokenForm.js:49
 msgid "Select the application that this token will belong to, or leave this field empty to create a Personal Access Token."
-msgstr ""
+msgstr "Seleccione la aplicación a la que pertenecerá este token, o deje este campo vacío para crear un token de acceso personal."
 
 #: screens/User/shared/UserTokenForm.js:49
 #~ msgid "Select the application that this token will belong to."
@@ -7280,14 +7338,17 @@ msgstr "Seleccione el entorno de ejecución para esta plantilla de trabajo."
 msgid ""
 "Select the inventory containing the hosts\n"
 "you want this job to manage."
-msgstr "Seleccione el inventario que contenga los hosts que desea que gestione esta tarea."
+msgstr "Seleccione el inventario que contenga los hosts que desea\n"
+"que gestione esta tarea."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:107
 msgid ""
 "Select the inventory file\n"
 "to be synced by this source. You can select from\n"
 "the dropdown or enter a file within the input."
-msgstr "Seleccione el archivo del inventario que sincronizará esta fuente. Puede seleccionar del menú desplegable o ingresar un archivo en la entrada."
+msgstr "Seleccione el archivo del inventario que sincronizará\n"
+"esta fuente. Puede seleccionar del menú desplegable\n"
+"o ingresar un archivo en la entrada."
 
 #: components/HostForm/HostForm.js:32
 #: components/HostForm/HostForm.js:51
@@ -7302,7 +7363,8 @@ msgstr "Seleccionar el playbook a ser ejecutado por este trabajo."
 msgid ""
 "Select the project containing the playbook\n"
 "you want this job to execute."
-msgstr "Seleccione el proyecto que contiene el playbook que desea que ejecute esta tarea."
+msgstr "Seleccione el proyecto que contiene el playbook\n"
+"que desea que ejecute esta tarea."
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:79
 msgid "Select your Ansible Automation Platform subscription to use."
@@ -7357,7 +7419,7 @@ msgstr "Categoría seleccionada"
 #: components/Schedule/shared/ScheduleForm.js:573
 #: components/Schedule/shared/ScheduleForm.js:574
 msgid "Selected date range must have at least 1 schedule occurrence."
-msgstr ""
+msgstr "El intervalo de fechas seleccionado debe tener al menos 1 ocurrencia de horario."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:158
 msgid "Sender Email"
@@ -7394,7 +7456,7 @@ msgstr "Establecer la ruta de origen en"
 
 #: components/InstanceToggle/InstanceToggle.js:48
 msgid "Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance."
-msgstr ""
+msgstr "Establezca la instancia habilitada o deshabilitada. Si se desactiva, los trabajos no se asignarán a esta instancia."
 
 #: components/InstanceToggle/InstanceToggle.js:48
 #~ msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
@@ -7410,7 +7472,7 @@ msgstr "Establecer tipo"
 
 #: components/Search/AdvancedSearch.js:144
 msgid "Set type disabled for related search field fuzzy searches"
-msgstr ""
+msgstr "Establecer el tipo deshabilitado para las búsquedas difusas de campos de búsqueda relacionados"
 
 #: components/Search/AdvancedSearch.js:103
 msgid "Set type select"
@@ -7542,7 +7604,11 @@ msgid ""
 "play or task. Use commas to separate multiple tags. Refer\n"
 "to the documentation for details on the usage\n"
 "of tags."
-msgstr "La omisión de etiquetas resulta útil cuando tiene un playbook de gran tamaño y desea omitir partes específicas de la tarea o la jugada. Utilice comas para separar las distintas etiquetas. Consulte la documentación para obtener información detallada sobre el uso de etiquetas."
+msgstr "La omisión de etiquetas resulta útil cuando tiene un playbook\n"
+"de gran tamaño y desea omitir partes específicas de la tarea\n"
+"o la jugada. Utilice comas para separar las distintas etiquetas.\n"
+"Consulte la documentación para obtener información detallada\n"
+"sobre el uso de etiquetas."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:70
 msgid ""
@@ -7550,7 +7616,10 @@ msgid ""
 "playbook, and you want to skip specific parts of a play or task.\n"
 "Use commas to separate multiple tags. Refer to Ansible Tower\n"
 "documentation for details on the usage of tags."
-msgstr "La omisión de etiquetas resulta útil cuando tiene un playbook de gran tamaño y desea omitir partes específicas de la tarea o la jugada. Utilice comas para separar las distintas etiquetas. Consulte la documentación de Ansible Tower para obtener información detallada sobre el uso de etiquetas."
+msgstr "La omisión de etiquetas resulta útil cuando tiene un playbook\n"
+"de gran tamaño y desea omitir partes específicas de la tarea o la jugada.\n"
+"Utilice comas para separar las distintas etiquetas. Consulte la documentación\n"
+"de Ansible Tower para obtener información detallada sobre el uso de etiquetas."
 
 #: screens/Job/JobOutput/shared/HostStatusBar.js:39
 msgid "Skipped"
@@ -7589,7 +7658,7 @@ msgstr "Algunos de los pasos anteriores tienen errores"
 
 #: screens/Host/HostList/SmartInventoryButton.js:12
 msgid "Some search modifiers like not__ and __search are not supported in Smart Inventory host filters.  Remove these to create a new Smart Inventory with this filter."
-msgstr ""
+msgstr "Algunos modificadores de búsqueda como not__ y __search no se admiten en los filtros de host del Inventario Inteligente.  Elimínelos para crear un nuevo inventario inteligente con este filtro."
 
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginTestAlert.js:39
 msgid "Something went wrong with the request to test this credential and metadata."
@@ -7653,7 +7722,7 @@ msgstr "Refspec de fuente de control"
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:176
 msgid "Source Control Revision"
-msgstr ""
+msgstr "Revisión del control de fuentes"
 
 #: components/PromptDetail/PromptProjectDetail.js:94
 #: screens/Project/ProjectDetail/ProjectDetail.js:172
@@ -7721,13 +7790,15 @@ msgstr "Fuentes"
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
 "the Ansible Tower documentation for example syntax."
-msgstr "Especifique los encabezados HTTP en formato JSON. Consulte la documentación de Ansible Tower para obtener ejemplos de sintaxis."
+msgstr "Especifique los encabezados HTTP en formato JSON. Consulte la\n"
+"documentación de Ansible Tower para obtener ejemplos de sintaxis."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:386
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
-msgstr "Especifique un color para la notificación. Los colores aceptables son el código de color hexadecimal (ejemplo: #3af o #789abc)."
+msgstr "Especifique un color para la notificación. Los colores aceptables son\n"
+"el código de color hexadecimal (ejemplo: #3af o #789abc)."
 
 #: screens/User/shared/UserTokenForm.js:71
 msgid "Specify a scope for the token's access"
@@ -7767,11 +7838,11 @@ msgstr "Hora de inicio"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "Start date"
-msgstr ""
+msgstr "Fecha de inicio"
 
 #: components/Schedule/shared/ScheduleForm.js:120
 msgid "Start date/time"
-msgstr ""
+msgstr "Fecha/hora de inicio"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:449
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:105
@@ -7793,7 +7864,7 @@ msgstr "Iniciar fuente de sincronización"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "Start time"
-msgstr ""
+msgstr "Hora de inicio"
 
 #: screens/Job/JobDetail/JobDetail.js:133
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
@@ -7842,8 +7913,7 @@ msgid ""
 "the revision specified by the main project.\n"
 "This is equivalent to specifying the --remote\n"
 "flag to git submodule update."
-msgstr ""
-"Los submódulos realizarán el seguimiento del último commit en\n"
+msgstr "Los submódulos realizarán el seguimiento del último commit en\n"
 "su rama maestra (u otra rama especificada en\n"
 ".gitmodules). De lo contrario, el proyecto principal mantendrá los submódulos en\n"
 "la revisión especificada.\n"
@@ -7942,11 +8012,11 @@ msgstr "Encuesta"
 
 #: screens/Template/Survey/SurveyToolbar.js:104
 msgid "Survey Disabled"
-msgstr ""
+msgstr "Encuesta deshabilitada"
 
 #: screens/Template/Survey/SurveyToolbar.js:103
 msgid "Survey Enabled"
-msgstr ""
+msgstr "Encuesta habilitada"
 
 #: screens/Template/Survey/SurveyList.js:132
 #~ msgid "Survey List"
@@ -7958,7 +8028,7 @@ msgstr ""
 
 #: screens/Template/Survey/SurveyReorderModal.js:179
 msgid "Survey Question Order"
-msgstr ""
+msgstr "Orden de las preguntas de la encuesta"
 
 #: screens/Template/Survey/SurveyToolbar.js:101
 msgid "Survey Toggle"
@@ -8006,7 +8076,7 @@ msgstr "Sincronizar para revisión"
 
 #: screens/Project/ProjectList/ProjectListItem.js:118
 msgid "Syncing"
-msgstr ""
+msgstr "Sincronización"
 
 #: screens/Setting/SettingList.js:98
 #: screens/User/UserRoles/UserRolesListItem.js:18
@@ -8056,7 +8126,11 @@ msgid ""
 "play or task. Use commas to separate multiple tags.\n"
 "Refer to the documentation for details on\n"
 "the usage of tags."
-msgstr "Las etiquetas resultan útiles cuando tiene un playbook de gran tamaño y desea ejecutar una parte específica de la tarea o la jugada. Utilice comas para separar varias etiquetas. Consulte la documentación para obtener información detallada sobre el uso de etiquetas."
+msgstr "Las etiquetas resultan útiles cuando tiene un playbook\n"
+"de gran tamaño y desea ejecutar una parte específica\n"
+"de la tarea o la jugada. Utilice comas para separar varias\n"
+"etiquetas. Consulte la documentación para obtener\n"
+"información detallada sobre el uso de etiquetas."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:58
 msgid ""
@@ -8064,7 +8138,10 @@ msgid ""
 "playbook, and you want to run a specific part of a play or task.\n"
 "Use commas to separate multiple tags. Refer to Ansible Tower\n"
 "documentation for details on the usage of tags."
-msgstr "Las etiquetas resultan útiles cuando tiene un playbook de gran tamaño y desea ejecutar una parte específica de la tarea o la jugada. Utilice comas para separar varias etiquetas. Consulte la documentación de Ansible Tower para obtener información detallada sobre el uso de etiquetas."
+msgstr "Las etiquetas resultan útiles cuando tiene un playbook de gran tamaño\n"
+"y desea ejecutar una parte específica de la tarea o la jugada. Utilice comas\n"
+"para separar varias etiquetas. Consulte la documentación de Ansible Tower\n"
+"para obtener información detallada sobre el uso de etiquetas."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:195
 msgid "Tags for the Annotation"
@@ -8188,7 +8265,7 @@ msgstr "Área de texto"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:81
 msgid "Textarea"
-msgstr "Area de texto"
+msgstr "Área de texto"
 
 #: components/Lookup/Lookup.js:61
 msgid "That value was not found. Please enter or select a valid value."
@@ -8208,28 +8285,34 @@ msgstr "El"
 
 #: screens/Application/shared/ApplicationForm.js:86
 msgid "The Grant type the user must use to acquire tokens for this application"
-msgstr ""
+msgstr "El tipo de subvención que el usuario debe utilizar para adquirir tokens para esta aplicación"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:120
 msgid ""
 "The amount of time (in seconds) before the email\n"
 "notification stops trying to reach the host and times out. Ranges\n"
 "from 1 to 120 seconds."
-msgstr "La cantidad de tiempo (en segundos) antes de que la notificación de correo electrónico deje de intentar conectarse con el host y caduque el tiempo de espera. Rangos de 1 a 120 segundos."
+msgstr "La cantidad de tiempo (en segundos) antes de que la notificación\n"
+"de correo electrónico deje de intentar conectarse con el host\n"
+"y caduque el tiempo de espera. Rangos de 1 a 120 segundos."
 
 #: screens/Template/shared/JobTemplateForm.js:489
 msgid ""
 "The amount of time (in seconds) to run\n"
 "before the job is canceled. Defaults to 0 for no job\n"
 "timeout."
-msgstr "La cantidad de tiempo (en segundos) para ejecutar antes de que se cancele la tarea. Valores predeterminados en 0 para el tiempo de espera de la tarea."
+msgstr "La cantidad de tiempo (en segundos) para ejecutar\n"
+"antes de que se cancele la tarea. Valores predeterminados\n"
+"en 0 para el tiempo de espera de la tarea."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:152
 msgid ""
 "The base URL of the Grafana server - the\n"
 "/api/annotations endpoint will be added automatically to the base\n"
 "Grafana URL."
-msgstr "La URL base del servidor de Grafana: el punto de acceso /api/annotations se agregará automáticamente a la URL base de Grafana."
+msgstr "La URL base del servidor de Grafana:\n"
+"el punto de acceso /api/annotations se agregará automáticamente\n"
+"a la URL base de Grafana."
 
 #: screens/Organization/shared/OrganizationForm.js:93
 msgid "The execution environment that will be used for jobs inside of this organization. This will be used a fallback when an execution environment has not been explicitly assigned at the project, job template or workflow level."
@@ -8244,14 +8327,17 @@ msgid ""
 "The execution environment that will be used when launching\n"
 "this job template. The resolved execution environment can be overridden by\n"
 "explicitly assigning a different one to this job template."
-msgstr ""
+msgstr "El entorno de ejecución que se utilizará al lanzar\n"
+"esta plantilla de trabajo. El entorno de ejecución resuelto puede anularse asignando asignando explícitamente uno diferente a esta plantilla de trabajo."
 
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:73
 msgid ""
 "The first fetches all references. The second\n"
 "fetches the Github pull request number 62, in this example\n"
 "the branch needs to be \"pull/62/head\"."
-msgstr "El primero extrae todas las referencias. El segundo extrae el número de solicitud de extracción 62 de Github; en este ejemplo la rama debe ser \"pull/62/head\"."
+msgstr "El primero extrae todas las referencias. El segundo\n"
+"extrae el número de solicitud de extracción 62 de Github; en este ejemplo,\n"
+"la rama debe ser \"pull/62/head\"."
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:104
 msgid "The full image location, including the container registry, image name, and version tag."
@@ -8262,7 +8348,9 @@ msgid ""
 "The maximum number of hosts allowed to be managed by this organization.\n"
 "Value defaults to 0 which means no limit. Refer to the Ansible\n"
 "documentation for more details."
-msgstr "La cantidad máxima de hosts que puede administrar esta organización. El valor predeterminado es 0, que significa sin límite. Consulte la documentación de Ansible para obtener más información detallada."
+msgstr "La cantidad máxima de hosts que puede administrar esta organización.\n"
+"El valor predeterminado es 0, que significa sin límite. Consulte\n"
+"la documentación de Ansible para obtener más información detallada."
 
 #: screens/Template/shared/JobTemplateForm.js:427
 msgid ""
@@ -8271,11 +8359,14 @@ msgid ""
 "or a value less than 1 will use the Ansible default which is\n"
 "usually 5. The default number of forks can be overwritten\n"
 "with a change to"
-msgstr "La cantidad de procesos paralelos o simultáneos para utilizar durante la ejecución del playbook. Un valor vacío, o un valor menor que 1, usará el valor predeterminado de Ansible que normalmente es 5. La cantidad predeterminada de bifurcaciones puede sobreescribirse con un cambio a"
+msgstr "La cantidad de procesos paralelos o simultáneos para utilizar durante\n"
+"la ejecución del playbook. Un valor vacío, o un valor menor que 1,\n"
+"usará el valor predeterminado de Ansible que normalmente es 5. La cantidad\n"
+"predeterminada de bifurcaciones puede sobrescribirse con un cambio a"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:180
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
-msgstr "La cantidad de procesos paralelos o simultáneos para utilizar durante la ejecución del playbook. Si no ingresa un valor, se utilizará el valor predeterminado del archivo de configuración de Ansible.  Para obtener más información,"
+msgstr "La cantidad de procesos paralelos o simultáneos para utilizar durante la ejecución del playbook. Si no ingresa un valor, se utilizará el valor predeterminado del archivo de configuración de Ansible. Para obtener más información,"
 
 #: components/ContentError/ContentError.js:40
 #: screens/Job/Job.js:137
@@ -8288,16 +8379,16 @@ msgstr "El patrón utilizado para dirigir los hosts en el inventario. Si se deja
 
 #: screens/Project/ProjectList/ProjectListItem.js:116
 msgid "The project is currently syncing and the revision will be available after the sync is complete."
-msgstr ""
+msgstr "El proyecto se está sincronizando actualmente y la revisión estará disponible una vez que se haya completado la sincronización."
 
 #: screens/Project/ProjectDetail/ProjectDetail.js:192
 #: screens/Project/ProjectList/ProjectListItem.js:103
 msgid "The project must be synced before a revision is available."
-msgstr ""
+msgstr "El proyecto debe estar sincronizado antes de que una revisión esté disponible."
 
 #: screens/Project/ProjectList/ProjectListItem.js:126
 msgid "The project revision is currently out of date.  Please refresh to fetch the most recent revision."
-msgstr ""
+msgstr "La revisión del proyecto está actualmente desactualizada.  Actualice para obtener la revisión más reciente."
 
 #: components/Workflow/WorkflowNodeHelp.js:139
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:126
@@ -8309,7 +8400,9 @@ msgid ""
 "The suggested format for variable names is lowercase and\n"
 "underscore-separated (for example, foo_bar, user_id, host_name,\n"
 "etc.). Variable names with spaces are not allowed."
-msgstr "El formato sugerido para los nombres de variables es minúsculas y separados por guiones bajos (por ejemplo, foo_bar, user_id, host_name, etc.). No se permiten los nombres de variables con espacios."
+msgstr "El formato sugerido para los nombres de variables es minúsculas y\n"
+"separados por guiones bajos (por ejemplo, foo_bar, user_id, host_name,\n"
+"etc.). No se permiten los nombres de variables con espacios."
 
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:47
 #~ msgid ""
@@ -8329,7 +8422,10 @@ msgid ""
 "sure the playbook files can be read by the \"awx\" system user,\n"
 "or have {brandName} directly retrieve your playbooks from\n"
 "source control using the Source Control Type option above."
-msgstr ""
+msgstr "No hay directorios de playbook disponibles en {project_base_dir}.\n"
+"O bien ese directorio está vacío, o todo el contenido ya está\n"
+"asignado a otros proyectos. Cree un nuevo directorio allí y asegúrese de que los archivos de playbook puedan ser leídos por el usuario del sistema \"awx\", o haga que {brandName} recupere directamente sus playbooks desde\n"
+"control de fuentes utilizando la opción de tipo de control de fuentes anterior."
 
 #: screens/Template/Survey/MultipleChoiceField.js:34
 msgid "There must be a value in at least one input"
@@ -8357,7 +8453,7 @@ msgstr "Se produjo un error al guardar el flujo de trabajo."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:68
 msgid "These are the modules that {brandName} supports running commands against."
-msgstr ""
+msgstr "Estos son los módulos que {brandName} admite para ejecutar comandos."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:138
 msgid "These are the verbosity levels for standard out of the command run that are supported."
@@ -8414,8 +8510,7 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
 "Insights for Ansible Automation Platform."
-msgstr ""
-"Estos datos se utilizan para mejorar\n"
+msgstr "Estos datos se utilizan para mejorar\n"
 "futuras versiones del software y para proporcionar\n"
 "Información sobre la plataforma de automatización Ansible."
 
@@ -8424,7 +8519,9 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Tower Software and help\n"
 "streamline customer experience and success."
-msgstr "Estos datos se utilizan para mejorar futuras versiones del software Tower y para ayudar a optimizar el éxito y la experiencia del cliente."
+msgstr "Estos datos se utilizan para mejorar futuras versiones\n"
+"del software Tower y para ayudar a optimizar el éxito\n"
+"y la experiencia del cliente."
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:128
 msgid "This execution environment is currently being used by other resources. Are you sure you want to delete it?"
@@ -8433,7 +8530,7 @@ msgstr "Este entorno de ejecución está siendo utilizado por otros recursos. ¿
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.js:74
 #: screens/Setting/TACACS/TACACSDetail/TACACSDetail.js:79
 msgid "This feature is deprecated and will be removed in a future release."
-msgstr ""
+msgstr "Esta función está obsoleta y se eliminará en una futura versión."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:255
 msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
@@ -8441,11 +8538,11 @@ msgstr "Este campo se ignora a menos que se establezca una variable habilitada. 
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:61
 msgid "This field is must not be blank"
-msgstr ""
+msgstr "Este campo no debe estar en blanco"
 
 #: components/AdHocCommands/useAdHocDetailsStep.jsx:55
 msgid "This field is must not be blank."
-msgstr ""
+msgstr "Este campo no debe estar en blanco"
 
 #: components/LaunchPrompt/steps/useCredentialPasswordsStep.js:50
 msgid "This field may not be blank"
@@ -8465,11 +8562,11 @@ msgstr "Este campo debe ser un número y tener un valor entre {min} y {max}"
 
 #: util/validators.js:64
 msgid "This field must be a number and have a value greater than {min}"
-msgstr ""
+msgstr "Este campo debe ser un número y tener un valor mayor que {min}"
 
 #: util/validators.js:61
 msgid "This field must be a number and have a value less than {max}"
-msgstr ""
+msgstr "Este campo debe ser un número y tener un valor inferior a {max}"
 
 #: util/validators.js:184
 msgid "This field must be a regular expression"
@@ -8523,7 +8620,7 @@ msgstr "Este grupo de instancias está siendo utilizado por otros recursos. ¿Es
 
 #: components/LaunchPrompt/steps/useInventoryStep.js:59
 msgid "This inventory is applied to all workflow nodes within this workflow ({0}) that prompt for an inventory."
-msgstr ""
+msgstr "Este inventario se aplica a todos los nodos de este flujo de trabajo ({0}) que solicitan un inventario."
 
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:129
 msgid "This inventory is currently being used by other resources. Are you sure you want to delete it?"
@@ -8577,7 +8674,8 @@ msgstr "Este valor no coincide con la contraseña introducida anteriormente. Con
 msgid ""
 "This will revert all configuration values on this page to\n"
 "their factory defaults. Are you sure you want to proceed?"
-msgstr "Esta operación revertirá todos los valores de configuración a los valores predeterminados de fábrica. ¿Está seguro de desea continuar?"
+msgstr "Esta operación revertirá todos los valores de configuración\n"
+"a los valores predeterminados de fábrica. ¿Está seguro de desea continuar?"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:40
 msgid "This workflow does not have any nodes configured."
@@ -8611,7 +8709,12 @@ msgid ""
 "update. If it is older than Cache Timeout, it is not\n"
 "considered current, and a new project update will be\n"
 "performed."
-msgstr "Tiempo en segundos para considerar que un proyecto es actual. Durante la ejecución de trabajos y callbacks, la tarea del sistema evaluará la marca de tiempo de la última actualización del proyecto. Si es anterior al tiempo de espera de la caché, no se considera actual y se realizará una nueva actualización del proyecto."
+msgstr "Tiempo en segundos para considerar que\n"
+"un proyecto es actual. Durante la ejecución de trabajos y callbacks,\n"
+"la tarea del sistema evaluará la marca de tiempo de la última\n"
+"actualización del proyecto. Si es anterior al tiempo de espera\n"
+"de la caché, no se considera actual y se realizará una nueva\n"
+"actualización del proyecto."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:229
 msgid ""
@@ -8620,7 +8723,11 @@ msgid ""
 "evaluate the timestamp of the latest sync. If it is older than\n"
 "Cache Timeout, it is not considered current, and a new\n"
 "inventory sync will be performed."
-msgstr "Tiempo en segundos para considerar que un proyecto es actual. Durante la ejecución de trabajos y callbacks, el sistema de tareas evaluará la marca de tiempo de la última sincronización. Si es anterior al tiempo de espera de la caché, no se considera actual y se realizará una nueva sincronización del inventario."
+msgstr "Tiempo en segundos para considerar que un proyecto es actual.\n"
+"Durante la ejecución de trabajos y callbacks, el sistema de tareas\n"
+"evaluará la marca de tiempo de la última sincronización. Si es anterior\n"
+"al tiempo de espera de la caché, no se considera actual\n"
+"y se realizará una nueva sincronización del inventario."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:16
 msgid "Timed out"
@@ -8645,7 +8752,7 @@ msgstr "Tiempo de espera en segundos"
 
 #: screens/Template/Survey/SurveyReorderModal.js:182
 msgid "To reoder the survey questions drag and drop them in the desired location."
-msgstr ""
+msgstr "Para reordenar las preguntas de la encuesta, arrástrelas y suéltelas en el lugar deseado."
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:93
 msgid "Toggle Legend"
@@ -8846,15 +8953,15 @@ msgstr "Detalles del tipo"
 msgid ""
 "Type answer then click checkbox on right to select answer as\n"
 "default."
-msgstr ""
+msgstr "Escriba la respuesta y marque la casilla de verificación a la derecha para seleccionar la respuesta predeterminada."
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:50
 msgid "UTC"
-msgstr ""
+msgstr "UTC"
 
 #: components/HostForm/HostForm.js:62
 msgid "Unable to change inventory on a host"
-msgstr ""
+msgstr "Imposible modificar el inventario en un servidor."
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:249
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:89
@@ -8865,7 +8972,7 @@ msgstr "No disponible"
 
 #: components/StatusLabel/StatusLabel.js:67
 msgid "Undefined"
-msgstr ""
+msgstr "No se ha definido"
 
 #: screens/Setting/shared/RevertButton.js:53
 #: screens/Setting/shared/RevertButton.js:62
@@ -8874,7 +8981,7 @@ msgstr "Deshacer"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:180
 msgid "Unfollow"
-msgstr ""
+msgstr "Dejar de seguir a"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:122
 msgid "Unlimited"
@@ -8891,7 +8998,7 @@ msgstr "Recuento de hosts inaccesibles"
 
 #: screens/Job/JobOutput/shared/OutputToolbar.js:102
 msgid "Unreachable Hosts"
-msgstr "Host inaccesibles"
+msgstr "Hosts inaccesibles"
 
 #: util/dates.js:74
 msgid "Unrecognized day string"
@@ -8924,7 +9031,7 @@ msgstr "Actualizar opciones"
 #: components/PromptDetail/PromptProjectDetail.js:61
 #: screens/Project/ProjectDetail/ProjectDetail.js:102
 msgid "Update revision on job launch"
-msgstr ""
+msgstr "Revisión de la actualización en el lanzamiento del trabajo"
 
 #: screens/Setting/SettingList.js:87
 #~ msgid "Update settings pertaining to Jobs within {0}"
@@ -8932,7 +9039,7 @@ msgstr ""
 
 #: screens/Setting/SettingList.js:88
 msgid "Update settings pertaining to Jobs within {brandName}"
-msgstr ""
+msgstr "Actualizar la configuración de los trabajos en {brandName}"
 
 #: screens/Template/shared/WebhookSubForm.js:194
 msgid "Update webhook key"
@@ -8948,7 +9055,7 @@ msgstr "Cargar un archivo .zip"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:97
 msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <0>subscription allocations</0> on the Red Hat Customer Portal."
-msgstr "Cargue un manifiesto de suscripción de Red Hat que contenga su suscripción. Para generar su manifiesto de suscripción, vaya a <0>subscription allocations</0> (asignaciones de suscripciones) en Red Hat Customer Portal."
+msgstr "Cargue un manifiesto de suscripción de Red Hat que contenga su suscripción. Para generar su manifiesto de suscripción, vaya a las <0>asignaciones de suscripció</0>n en el Portal del Cliente de Red Hat."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:52
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:129
@@ -8965,14 +9072,13 @@ msgid ""
 "Use custom messages to change the content of\n"
 "notifications sent when a job starts, succeeds, or fails. Use\n"
 "curly braces to access information about the job:"
-msgstr ""
-"Utilice los mensajes personalizados para cambiar el contenido de las notificaciones enviadas cuando una tarea se inicie, se realice correctamente o falle. Utilice llaves\n"
+msgstr "Utilice los mensajes personalizados para cambiar el contenido de las notificaciones enviadas cuando una tarea se inicie, se realice correctamente o falle. Utilice llaves\n"
 "para acceder a la información sobre la tarea:"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:238
 #: screens/InstanceGroup/Instances/InstanceList.js:258
 msgid "Used Capacity"
-msgstr ""
+msgstr "Capacidad usada"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:242
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:246
@@ -9195,7 +9301,7 @@ msgstr "Ver la configuración del registro"
 
 #: screens/Setting/MiscAuthentication/MiscAuthentication.js:32
 msgid "View Miscellaneous Authentication settings"
-msgstr ""
+msgstr "Ver la configuración de la autenticación de varios"
 
 #: screens/Setting/MiscSystem/MiscSystem.js:32
 msgid "View Miscellaneous System settings"
@@ -9476,7 +9582,7 @@ msgstr "Los servicios de Webhook pueden usar esto como un secreto compartido."
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:147
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:62
 msgid "Webhooks"
-msgstr ""
+msgstr "Webhooks"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:275
 msgid "Wed"
@@ -9503,25 +9609,30 @@ msgstr "Día del fin de semana"
 msgid ""
 "Welcome to Red Hat Ansible Automation Platform!\n"
 "Please complete the steps below to activate your subscription."
-msgstr "¡Bienvenido a Red Hat Ansible Automation Platform! Complete los pasos a continuación para activar su suscripción."
+msgstr "¡Bienvenido a Red Hat Ansible Automation Platform!\n"
+"Complete los pasos a continuación para activar su suscripción."
 
 #: screens/Login/Login.js:146
 msgid "Welcome to {brandName}!"
-msgstr "¡Bienvenido a {brandName}!"
+msgstr "Bienvenido a {brandName}"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:154
 msgid ""
 "When not checked, a merge will be performed,\n"
 "combining local variables with those found on the\n"
 "external source."
-msgstr "Cuando esta opción no esté marcada, se llevará a cabo una fusión, que combinará las variables locales con aquellas halladas en la fuente externa."
+msgstr "Cuando esta opción no esté marcada, se llevará a cabo una fusión,\n"
+"que combinará las variables locales con aquellas halladas\n"
+"en la fuente externa."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:137
 msgid ""
 "When not checked, local child\n"
 "hosts and groups not found on the external source will remain\n"
 "untouched by the inventory update process."
-msgstr "Cuando esta opción no esté marcada, los hosts y grupos secundarios locales que no se encuentren en la fuente externa no se modificarán mediante el proceso de actualización del inventario."
+msgstr "Cuando esta opción no esté marcada, los hosts y grupos secundarios\n"
+"locales que no se encuentren en la fuente externa no se modificarán\n"
+"mediante el proceso de actualización del inventario."
 
 #: components/Workflow/WorkflowLegend.js:96
 msgid "Workflow"
@@ -9656,11 +9767,11 @@ msgstr "SÍ"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:27
 msgid "You are unable to act on the following workflow approvals: {itemsUnableToApprove}"
-msgstr "No puede realizar ninguna acción sobre las siguientes aprobaciones del flujo de trabajo: {itemsUnableToApprove}"
+msgstr "No puede actuar sobre las siguientes aprobaciones de flujo de trabajo: {itemsUnableToApprove}"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:27
 msgid "You are unable to act on the following workflow approvals: {itemsUnableToDeny}"
-msgstr "No puede realizar ninguna acción sobre las siguientes aprobaciones del flujo de trabajo: {itemsUnableToDeny}"
+msgstr "No puede actuar sobre las siguientes aprobaciones de flujo de trabajo: {itemsUnableToDeny}"
 
 #: components/Lookup/MultiCredentialsLookup.js:154
 msgid "You cannot select multiple vault credentials with the same vault ID. Doing so will automatically deselect the other with the same vault ID."
@@ -9668,22 +9779,21 @@ msgstr "No se pueden seleccionar varias credenciales con el mismo ID de Vault, y
 
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:96
 msgid "You do not have permission to delete the following Groups: {itemsUnableToDelete}"
-msgstr "No tiene permiso para eliminar los siguientes grupos: {itemsUnableToDelete}"
+msgstr "No tiene permiso para eliminar los siguientes Grupos: {itemsUnableToDelete}"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:152
 msgid "You do not have permission to delete {pluralizedItemName}: {itemsUnableToDelete}"
-msgstr "No tiene permiso para eliminar {pluralizedItemName}: {itemsUnableToDelete}"
+msgstr "No tiene permiso para borrar {pluralizedItemName}: {itemsUnableToDelete}"
 
 #: components/DisassociateButton/DisassociateButton.js:50
 msgid "You do not have permission to disassociate the following: {itemsUnableToDisassociate}"
-msgstr "No tiene permiso para disociar lo siguiente: {itemsUnableToDisassociate}"
+msgstr "No tiene permiso para desvincular lo siguiente: {itemsUnableToDisassociate}"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:87
 msgid ""
 "You may apply a number of possible variables in the\n"
 "message. For more information, refer to the"
-msgstr ""
-"Puede aplicar una serie de posibles variables en el\n"
+msgstr "Puede aplicar una serie de posibles variables en el\n"
 "mensaje. Para obtener más información, consulte"
 
 #: screens/Login/Login.js:154
@@ -9736,7 +9846,7 @@ msgstr "cancelar eliminación"
 
 #: screens/Setting/shared/SharedFields.js:341
 msgid "cancel edit login redirect"
-msgstr ""
+msgstr "cancelar la edición de la redirección de inicio de sesión"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:232
 msgid "command"
@@ -9754,7 +9864,7 @@ msgstr "confirmar disociación"
 
 #: screens/Setting/shared/SharedFields.js:330
 msgid "confirm edit login redirect"
-msgstr ""
+msgstr "confirmar la redirección del acceso a la edición"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:145
 msgid "deletion error"
@@ -9890,7 +10000,7 @@ msgstr "seleccionar nivel de detalle"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:135
 msgid "since"
-msgstr ""
+msgstr "desde"
 
 #: screens/User/UserList/UserListItem.js:49
 msgid "social login"

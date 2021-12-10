@@ -3,15 +3,8 @@ msgstr ""
 "POT-Creation-Date: 2021-09-01 18:45+0000\n"
 "Mime-Version: 1.0\n"
 "Language: fr\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
