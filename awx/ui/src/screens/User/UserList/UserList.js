@@ -112,9 +112,13 @@ function UserList() {
             clearSelected={clearSelected}
             toolbarSearchColumns={[
               {
+                name: t`Email`,
+                key: 'email__icontains',
+                isDefault: true,
+              },
+              {
                 name: t`Username`,
                 key: 'username__icontains',
-                isDefault: true,
               },
               {
                 name: t`First Name`,
