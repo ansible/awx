@@ -979,7 +979,7 @@ class BaseTask(object):
 
         if instance.execution_environment.credential:
             cred = instance.execution_environment.credential
-            if cred.has_inputs(field_names=('host', 'username', 'password')):
+            if all([cred.has_input(field_name) for field_name in ('host', 'username', 'password')]):
                 host = cred.get_input('host')
                 username = cred.get_input('username')
                 password = cred.get_input('password')
