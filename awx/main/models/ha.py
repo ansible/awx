@@ -54,6 +54,14 @@ class HasPolicyEditsMixin(HasEditsMixin):
         return self._values_have_edits(new_values)
 
 
+class InstanceLink(BaseModel):
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
+    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+
+    class Meta:
+        unique_together = ('source', 'target')
+
+
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
 
@@ -116,8 +124,15 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    NODE_TYPE_CHOICES = [("control", "Control plane node"), ("execution", "Execution plane node"), ("hybrid", "Controller and execution")]
+    NODE_TYPE_CHOICES = [
+        ("control", "Control plane node"),
+        ("execution", "Execution plane node"),
+        ("hybrid", "Controller and execution"),
+        ("hop", "Message-passing node, no execution capability"),
+    ]
     node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
+
+    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
 
     class Meta:
         app_label = 'main'
