@@ -222,9 +222,10 @@ function MiscSystemEdit() {
                   type="number"
                   isRequired
                 />
-                <InputField
+                <ObjectField
                   name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
                   config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}
+                  revertValue={system.AUTOMATION_ANALYTICS_LAST_ENTRIES.default}
                 />
                 <ObjectField
                   name="REMOTE_HOST_HEADERS"

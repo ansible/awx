@@ -575,7 +575,7 @@
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
         "required": false,
-        "label": "Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.",
+        "label": "Last gathered entries from the data collection service of Insights for Ansible Automation Platform",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -4208,7 +4208,7 @@
       },
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
-        "label": "Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.",
+        "label": "Last gathered entries from the data collection service of Insights for Ansible Automation Platform",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false

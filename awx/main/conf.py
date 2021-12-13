@@ -687,7 +687,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
     field_class=fields.CharField,
-    label=_('Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.'),
+    label=_('Last gathered entries from the data collection service of Insights for Ansible Automation Platform'),
     default='',
     allow_blank=True,
     category=_('System'),
