@@ -191,14 +191,19 @@ awx_1        |   Applying auth.0001_initial... OK
 ```
 
 ##### Keycloak Integration
-The following instructions assume we are using the built in postgres database container. If you are not using the internal database you can use this guide as a reference, updating the database fields as required for your connection.
+Keycloak is a SAML provider and can be used to test AWX social auth. This section describes how to build a reference Keycloak instance and plumb it with AWX for testing purposes.
 
-To stand up a Keycloak integration with your existing AWX instance start by creating a Keycloak database in your postgres database by running:
+First, be sure that you have the awx.awx collection installed by running `make install_collection`.
+Next, make sure you have your containers running by running `make docker-compose`.
+
+Note: The following instructions assume we are using the built in postgres database container. If you are not using the internal database you can use this guide as a reference, updating the database fields as required for your connection.
+
+Start by creating a Keycloak database in your postgres database by running:
 ```bash
 docker exec tools_postgres_1 /usr/bin/psql -U awx --command "create database keycloak with encoding 'UTF8';"
 ```
 
-Now that the database is ready we will start a Keycloak container to build our admin user. Note, the command below set the username as admin with a password of admin. This can be changed if you want.
+Now that the database is ready we will start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want.
 ```bash
 docker run -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
            -e DB_VENDOR=postgres -e DB_ADDR=postgres -e DB_DATABASE=keycloak -e DB_USER=<pg_username> -e DB_PASSWORD=<pg_password> \
@@ -212,104 +217,35 @@ Now we can restart docker-compose with the KEYCLOAK option to get a Keycloak ins
 KEYCLOAK=true make docker-compose
 ```
 
-Once the containers come up a new port (8443) should be exposed and the Keycloak interface should be running on that port. Connect to this interface and select the "Administration console" link. Log into the UI the username/password set in the previous `docker run` command.
+Once the containers come up a new port (8443) should be exposed and the Keycloak interface should be running on that port. Connect to this interface and select the "Administration console" link. Log into the UI the username/password set in the previous `docker run` command to validate Keycloak is working.
 
-Within the UI we are going to import a realm. A realm is a logical section of Keycloak and can be imported through the UI by providing a json formatted file. We have a sample file for the import but it needs a little work before it can be imported into Keycloak. In order to be able to properly import the file we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration. In the provided Keycloak template we have a place holder for the redirect URL name as `{{ awx_hostname }}`. So the first step to importing the realm is populating our sample file with the appropriate redirect URL. To do this run the following command with your container reference (see below for examples):
-```bash
-ansible -m template -a 'dest=tools/docker-compose/keycloak.awx.realm.json src=tools/docker-compose/keycloak.awx.realm.json.j2' -e awx_hostname=<container reference> localhost
-```
+Now we are ready to configure and plumb Keycloak with AWX. To do this we have provided a playbook which will:
+* Create a certificate for data exchange between Keycloak and AWX.
+* Create a realm in Keycloak with a client for AWX and 3 users.
+* Backup and configure the SMAL adapter in AWX. NOTE: the private key of any existing SAML adapters can not be backed up through the API, you need a DB backup to recover this.
 
-Here are some examples of how to choose a proper container reference.
-* I develop on a mac which runs a Fedora VM which has Ansible running within that and the browser I use to access AWX runs on the mac. The container has its own IP that I have mapped to a name like `tower.home.net`. So my "container reference" could be either the IP of the VM or the tower.home.net friendly name.
+Before we can run the playbook we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration and on the AWX side its done through the SAML settings. The playbook requires a variable called `container_reference` to be set. The container reference variable needs to be how your browser will be able to talk to the running containers.  Here are some examples of how to choose a proper container reference.
+* I develop on a mac which runs a Fedora VM which has AWX running within that and the browser I use to access AWX runs on the mac. The container has its own IP that I have mapped to a name like `tower.home.net`. So my "container reference" could be either the IP of the VM or the tower.home.net friendly name.
 * If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container reference. 
 
-Now that you have templated out the realm file we can import it from the UI with the following process:
-1. On the left hand menu hover over the drop down that says `Master` and select the `Add Realm` button.
-2. In the `Name` field enter a name of `awx` and select the create button. This will create a new initialized default realm for you.
-3. In the left hand menu validate that the `awx` realm is selected and then click on the `Import` link (first from bottom).
-3. On the import screen click on the `Select file` button and select the rendered template from the previous step. This will show you what you are about to import:
-  1. 3 users
-  2. 1 client
-  3. 1 realm role
-4. Click the `Import` button and review the summary table which should look like: ```
-ADDED	CLIENT	<container reference>:8043	cd5d4ae2-52d3-4f2f-b3d7-9ab2d8cbca7f
-ADDED	REALM_ROLE	default-roles-awx realm	dda55fbb-6ee5-4fe9-b9ff-6ecaba471a87
-ADDED	USER	awx_auditor	4ecdbc31-73cf-4819-b60a-3fc25130cd17
-ADDED	USER	awx_admin	e584a1db-9b06-4bd7-86b2-fa00abc0aae5
-ADDED	USER	awx_unpriv	febd4e9e-7b65-47c2-958a-5a4fc4a03438
-```
-5. Next click on `Realm Settings` in the left hand menu (top item).
-6. Click on the `Keys` tab.
-7. Click on the `Providers` tab.
-8. Click the delete button next to all of the providers. Note: there has to be at least one provider so it will not let you delete the last one.
-9. In `Add Keystore...` drop down at the top of the table select `RSA`.
-  1. In the `Console Display Name` enter "awx_provider".
-  2. In the `Private RSA Key` field click the `Select File` button and pick the file tools/docker-compose/keycloak.key file.
-  3. In the `X509 Certificate` field click the `Select File` button and pick the file tools/docker-compose/keycloak.cert file.
-  4. Click the `Save` button
-10. In the bread crumb link (under the tabs) click on `Keystores` and delete the last provider that is not the `awx_provider`.
-11. Click `Client Scopes` in the left hand menu.
-12. Click on `role_list` scope.
-13. Click on the `Mappers` tab.
-14. Click on the `role list` mapper.
-15. Change the `Single Role Attribute` to On and click the `Save` button.
-
-Now that are realm is populated and configured we can configure the SAML adapter within AWX. Be sure to backup any existing SAML configuration you may already have. This can be achieved by going to https://<container reference>:8043/api/v2/settings/saml/ and making a copy of the returned JSON payload. To configure a connection to Keycloak you can post the following payload:
-```
-{
-    "SAML_AUTO_CREATE_OBJECTS": true,
-    "SOCIAL_AUTH_SAML_SP_ENTITY_ID": "<container reference>:8043",
-    "SOCIAL_AUTH_SAML_SP_PUBLIC_CERT": "-----BEGIN CERTIFICATE-----\nMIIDWTCCAkGgAwIBAgIUGUvC3ctqfaD7b3y8J3hVlmf21tgwDQYJKoZIhvcNAQEL\nBQAwPDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1BMQwwCgYDVQQHDANTd2sxEjAQ\nBgNVBAoMCVdlc3Rpd2FyZTAeFw0yMTExMzAyMDU0NDVaFw0yMjExMzAyMDU0NDVa\nMDwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJNQTEMMAoGA1UEBwwDU3drMRIwEAYD\nVQQKDAlXZXN0aXdhcmUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDt\nQCFwAD0/hoWLsRuzS1JvuFhCttPAxHIVVt5Z82LbHWo8PleLotQSVK7DKDDJzR7j\nHjVpxsKU7bPgWFTwin6u2QRm44xux2rFSglHm4EP/dc9gswGL5Jisl6am5eLb2/6\ntMXkKc1Yairk0FWATighU2zsOyBu8yAKFv13PxbztN+S6qrtbEtQrfg+mYYwNZrI\nP1zTNxXtild1C5ZsgrBuqw9OYusC4BpOn0mNap9KT/OgYmoWV/uRgSqlWK1u8pNn\nXjsi70vxOVfSzzZDBJ62/8hVkzai7SVZYbYAWEPeRtZjKqjXu5QHgYR9WPIlMWoK\nhk5fAa8b6RluWojcdx4/AgMBAAGjUzBRMB0GA1UdDgQWBBSMnW3gEXWdMazztI8T\nIX6/gJYrEjAfBgNVHSMEGDAWgBSMnW3gEXWdMazztI8TIX6/gJYrEjAPBgNVHRMB\nAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQANOAlXNZIjxbY+GBwFTme02nSJ\ngoy0W8xEuzrdNdhWjxKksSossq1FxreaJkBX1unx2Q12aJcimipvAM+c4ymZABZG\nkS6xMO/rT8M23YCcVVOF4tsgdtwe85Z85qX8XfzDfxaT51wqSCeOegl0EiWX8AZT\nELVxISxqOFFvZM8z9nIxMG/YhlosebwdWEtMaYYPxjtSFI9UTv4nndbAYAxfcYmj\neCFRny06sj5+V4/28N+G4TrQ5d0eopNwhvbozbTGB92kp+yQvAlAt6+GANAXxKtL\nw04kaxTpfQvCwVl+jZiE7H2jxeb5Hx/9wIp5NNstcHkUIJEBqbmY9/p5hrNI\n-----END CERTIFICATE-----",
-    "SOCIAL_AUTH_SAML_SP_PRIVATE_KEY": "$encrypted$",
-    "SOCIAL_AUTH_SAML_ORG_INFO": {
-        "en-US": {
-            "url": "https://<container reference>:8443",
-            "name": "Keycloak",
-            "displayname": "Keycloak Solutions Engineering"
-        }
-    },
-    "SOCIAL_AUTH_SAML_TECHNICAL_CONTACT": {
-        "givenName": "Me Myself",
-        "emailAddress": "noone@nowhere.com"
-    },
-    "SOCIAL_AUTH_SAML_SUPPORT_CONTACT": {
-        "givenName": "Me Myself",
-        "emailAddress": "noone@nowhere.com"
-    },
-    "SOCIAL_AUTH_SAML_ENABLED_IDPS": {
-        "Keycloak": {
-            "attr_user_permanent_id": "name_id",
-            "entity_id": "https://<container reference>:8443/auth/realms/awx",
-            "attr_groups": "groups",
-            "url": "https://<container reference>:8443/auth/realms/awx/protocol/saml",
-            "attr_first_name": "first_name",
-            "x509cert": "-----BEGIN CERTIFICATE-----MIIDWTCCAkGgAwIBAgIUGUvC3ctqfaD7b3y8J3hVlmf21tgwDQYJKoZIhvcNAQELBQAwPDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1BMQwwCgYDVQQHDANTd2sxEjAQBgNVBAoMCVdlc3Rpd2FyZTAeFw0yMTExMzAyMDU0NDVaFw0yMjExMzAyMDU0NDVaMDwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJNQTEMMAoGA1UEBwwDU3drMRIwEAYDVQQKDAlXZXN0aXdhcmUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDtQCFwAD0/hoWLsRuzS1JvuFhCttPAxHIVVt5Z82LbHWo8PleLotQSVK7DKDDJzR7jHjVpxsKU7bPgWFTwin6u2QRm44xux2rFSglHm4EP/dc9gswGL5Jisl6am5eLb2/6tMXkKc1Yairk0FWATighU2zsOyBu8yAKFv13PxbztN+S6qrtbEtQrfg+mYYwNZrIP1zTNxXtild1C5ZsgrBuqw9OYusC4BpOn0mNap9KT/OgYmoWV/uRgSqlWK1u8pNnXjsi70vxOVfSzzZDBJ62/8hVkzai7SVZYbYAWEPeRtZjKqjXu5QHgYR9WPIlMWoKhk5fAa8b6RluWojcdx4/AgMBAAGjUzBRMB0GA1UdDgQWBBSMnW3gEXWdMazztI8TIX6/gJYrEjAfBgNVHSMEGDAWgBSMnW3gEXWdMazztI8TIX6/gJYrEjAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQANOAlXNZIjxbY+GBwFTme02nSJgoy0W8xEuzrdNdhWjxKksSossq1FxreaJkBX1unx2Q12aJcimipvAM+c4ymZABZGkS6xMO/rT8M23YCcVVOF4tsgdtwe85Z85qX8XfzDfxaT51wqSCeOegl0EiWX8AZTELVxISxqOFFvZM8z9nIxMG/YhlosebwdWEtMaYYPxjtSFI9UTv4nndbAYAxfcYmjeCFRny06sj5+V4/28N+G4TrQ5d0eopNwhvbozbTGB92kp+yQvAlAt6+GANAXxKtLw04kaxTpfQvCwVl+jZiE7H2jxeb5Hx/9wIp5NNstcHkUIJEBqbmY9/p5hrNI-----END CERTIFICATE-----",
-            "attr_email": "email",
-            "attr_last_name": "last_name",
-            "attr_username": "username"
-        }
-    },
-    "SOCIAL_AUTH_SAML_SECURITY_CONFIG": {
-        "requestedAuthnContext": false
-    },
-    "SOCIAL_AUTH_SAML_SP_EXTRA": null,
-    "SOCIAL_AUTH_SAML_EXTRA_DATA": null,
-    "SOCIAL_AUTH_SAML_ORGANIZATION_MAP": {
-        "Default": {
-            "users": true
-        }
-    },
-    "SOCIAL_AUTH_SAML_TEAM_MAP": null,
-    "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR": {},
-    "SOCIAL_AUTH_SAML_TEAM_ATTR": {},
-    "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
-        "is_superuser_attr": "is_superuser",
-        "is_system_auditor_attr": "is_system_auditor"
-    }
-}
+In addition to container reference, there are some additional variables which you can override if you need/choose to do so. Here are their names and default values:
+```yaml
+    keycloak_user: admin
+    keycloak_pass: admin
+    awx_user: admin
+    awx_pass: admin
+    cert_subject:  "/C=US/ST=NC/L=Durham/O=awx/CN="
 ```
 
-SAML should now be setup in your development environment. This realm has three users with the following username/passwords:
+keycloak_(user|pass) need to change if you modified the user when starting the initial container above. awx_(user|pass) are credentials to get you into your AWX instance so you can read and write the SAML settings. cert_subject will be the subject line of the certificate shared between AWX and keycloak you can change this if you like or just use the defaults.
+
+Now that we have all of our variables covered we can run the playbook like:
+```bash
+ansible-playbook tools/docker-compose/ansible/plumb_keycloak.yml -e container_reference=<your container reference here>
+```
+To override any of the other variables add more `-e` arguments.
+
+Once the playbook is done running SAML should now be setup in your development environment. This realm has three users with the following username/passwords:
 1. awx_unpriv:unpriv123
 2. awx_admin:admin123
 3. awx_auditor:audit123

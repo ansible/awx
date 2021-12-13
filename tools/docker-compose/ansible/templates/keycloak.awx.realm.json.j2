@@ -53,8 +53,7 @@
         "composite": true,
         "composites": {
           "realm": [
-            "offline_access",
-            "uma_authorization"
+            "offline_access"
           ],
           "client": {
             "account": [
@@ -69,7 +68,7 @@
       }
     ],
     "client": {
-      "{{ awx_hostname }}:8043": []
+      "{{ container_reference }}:8043": []
     }
   },
   "groups": [],
@@ -121,9 +120,9 @@
   "clients": [
     {
       "id": "0cb841a2-0a31-4976-86fa-a765f09426da",
-      "clientId": "{{ awx_hostname }}:8043",
+      "clientId": "{{ container_reference }}:8043",
       "name": "Ansible Tower Instance",
-      "rootUrl": "https://{{ awx_hostname }}:8043",
+      "rootUrl": "https://{{ container_reference }}:8043",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
       "enabled": true,
@@ -131,7 +130,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://{{ awx_hostname }}:8043/sso/complete/saml/"
+        "https://{{ container_reference }}:8043/sso/complete/saml/"
       ],
       "webOrigins": [
         "https://192.168.0.56:8043"
@@ -153,7 +152,7 @@
         "backchannel.logout.revoke.offline.tokens": "false",
         "saml.server.signature.keyinfo.ext": "false",
         "use.refresh.tokens": "true",
-        "saml.signing.certificate": "MIIDWTCCAkGgAwIBAgIUGUvC3ctqfaD7b3y8J3hVlmf21tgwDQYJKoZIhvcNAQELBQAwPDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1BMQwwCgYDVQQHDANTd2sxEjAQBgNVBAoMCVdlc3Rpd2FyZTAeFw0yMTExMzAyMDU0NDVaFw0yMjExMzAyMDU0NDVaMDwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJNQTEMMAoGA1UEBwwDU3drMRIwEAYDVQQKDAlXZXN0aXdhcmUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDtQCFwAD0/hoWLsRuzS1JvuFhCttPAxHIVVt5Z82LbHWo8PleLotQSVK7DKDDJzR7jHjVpxsKU7bPgWFTwin6u2QRm44xux2rFSglHm4EP/dc9gswGL5Jisl6am5eLb2/6tMXkKc1Yairk0FWATighU2zsOyBu8yAKFv13PxbztN+S6qrtbEtQrfg+mYYwNZrIP1zTNxXtild1C5ZsgrBuqw9OYusC4BpOn0mNap9KT/OgYmoWV/uRgSqlWK1u8pNnXjsi70vxOVfSzzZDBJ62/8hVkzai7SVZYbYAWEPeRtZjKqjXu5QHgYR9WPIlMWoKhk5fAa8b6RluWojcdx4/AgMBAAGjUzBRMB0GA1UdDgQWBBSMnW3gEXWdMazztI8TIX6/gJYrEjAfBgNVHSMEGDAWgBSMnW3gEXWdMazztI8TIX6/gJYrEjAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQANOAlXNZIjxbY+GBwFTme02nSJgoy0W8xEuzrdNdhWjxKksSossq1FxreaJkBX1unx2Q12aJcimipvAM+c4ymZABZGkS6xMO/rT8M23YCcVVOF4tsgdtwe85Z85qX8XfzDfxaT51wqSCeOegl0EiWX8AZTELVxISxqOFFvZM8z9nIxMG/YhlosebwdWEtMaYYPxjtSFI9UTv4nndbAYAxfcYmjeCFRny06sj5+V4/28N+G4TrQ5d0eopNwhvbozbTGB92kp+yQvAlAt6+GANAXxKtLw04kaxTpfQvCwVl+jZiE7H2jxeb5Hx/9wIp5NNstcHkUIJEBqbmY9/p5hrNI",
+        "saml.signing.certificate": "{{ public_key_trimmed }}",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "false",
         "client_credentials.use_refresh_token": "false",
@@ -163,9 +162,9 @@
         "id.token.as.detached.signature": "false",
         "saml.assertion.signature": "true",
         "saml.encrypt": "false",
-        "saml_assertion_consumer_url_post": "https://{{ awx_hostname }}:8043/sso/complete/saml/",
+        "saml_assertion_consumer_url_post": "https://{{ container_reference }}:8043/sso/complete/saml/",
         "saml.server.signature": "true",
-        "saml_idp_initiated_sso_url_name": "{{ awx_hostname }}",
+        "saml_idp_initiated_sso_url_name": "{{ container_reference }}",
         "exclude.session.state.from.auth.response": "false",
         "saml.artifact.binding.identifier": "agnl7Dg3+QU8/5lb62pWlOcQWQw=",
         "saml.artifact.binding": "false",
@@ -936,10 +935,10 @@
         "subComponents": {},
         "config": {
           "privateKey": [
-            "**********"
+            "{{ private_key }}"
           ],
           "certificate": [
-            "-----BEGIN CERTIFICATE-----\nMIIDWTCCAkGgAwIBAgIUGUvC3ctqfaD7b3y8J3hVlmf21tgwDQYJKoZIhvcNAQEL\nBQAwPDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1BMQwwCgYDVQQHDANTd2sxEjAQ\nBgNVBAoMCVdlc3Rpd2FyZTAeFw0yMTExMzAyMDU0NDVaFw0yMjExMzAyMDU0NDVa\nMDwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJNQTEMMAoGA1UEBwwDU3drMRIwEAYD\nVQQKDAlXZXN0aXdhcmUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDt\nQCFwAD0/hoWLsRuzS1JvuFhCttPAxHIVVt5Z82LbHWo8PleLotQSVK7DKDDJzR7j\nHjVpxsKU7bPgWFTwin6u2QRm44xux2rFSglHm4EP/dc9gswGL5Jisl6am5eLb2/6\ntMXkKc1Yairk0FWATighU2zsOyBu8yAKFv13PxbztN+S6qrtbEtQrfg+mYYwNZrI\nP1zTNxXtild1C5ZsgrBuqw9OYusC4BpOn0mNap9KT/OgYmoWV/uRgSqlWK1u8pNn\nXjsi70vxOVfSzzZDBJ62/8hVkzai7SVZYbYAWEPeRtZjKqjXu5QHgYR9WPIlMWoK\nhk5fAa8b6RluWojcdx4/AgMBAAGjUzBRMB0GA1UdDgQWBBSMnW3gEXWdMazztI8T\nIX6/gJYrEjAfBgNVHSMEGDAWgBSMnW3gEXWdMazztI8TIX6/gJYrEjAPBgNVHRMB\nAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQANOAlXNZIjxbY+GBwFTme02nSJ\ngoy0W8xEuzrdNdhWjxKksSossq1FxreaJkBX1unx2Q12aJcimipvAM+c4ymZABZG\nkS6xMO/rT8M23YCcVVOF4tsgdtwe85Z85qX8XfzDfxaT51wqSCeOegl0EiWX8AZT\nELVxISxqOFFvZM8z9nIxMG/YhlosebwdWEtMaYYPxjtSFI9UTv4nndbAYAxfcYmj\neCFRny06sj5+V4/28N+G4TrQ5d0eopNwhvbozbTGB92kp+yQvAlAt6+GANAXxKtL\nw04kaxTpfQvCwVl+jZiE7H2jxeb5Hx/9wIp5NNstcHkUIJEBqbmY9/p5hrNI\n-----END CERTIFICATE-----\n"
+            "{{ public_key }}"
           ],
           "active": [
             "true"
