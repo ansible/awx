@@ -1529,6 +1529,7 @@ class BaseTask(object):
                     event_handler=self.event_handler,
                     finished_callback=self.finished_callback,
                     status_handler=self.status_handler,
+                    cancel_callback=self.cancel_callback,
                     **params,
                 )
             else:
