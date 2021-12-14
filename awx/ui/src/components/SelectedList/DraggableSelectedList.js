@@ -54,7 +54,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
   return (
     <DragDrop onDrop={dragItem}>
       <Droppable>
-        <DataList>
+        <DataList data-cy="draggable-list">
           {selected.map(({ name: label, id }, index) => {
             const rowPosition = index + 1;
             return (
