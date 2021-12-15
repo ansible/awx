@@ -247,7 +247,7 @@ def _check_flag(user, flag, attributes, user_flags_settings):
         else:
             logger.debug("User %s is missing the %s role %s" % (user.username, flag, role_setting))
 
-    # Next, check to see if we are respecting an attribute; this will take prio over the role if its defined
+    # Next, check to see if we are respecting an attribute; this will take priority over the role if its defined
     attr_setting = user_flags_settings.get(is_attr_key, None)
     if attr_setting and attributes.get(attr_setting, None):
         # Do we have a required value for the attribute
