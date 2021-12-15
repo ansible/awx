@@ -12,7 +12,7 @@
     keycloak_pass: admin
     awx_user: admin
     awx_pass: admin
-    cert_subject:  "/C=US/ST=NC/L=Durham/O=awx/CN="
+    cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
   tasks:
     - name: Generate certificates for keycloak
       command: 'openssl req -new -x509 -days 365 -nodes -out {{ public_key_file }} -keyout {{ private_key_file }} -subj "{{ cert_subject }}"'
@@ -36,7 +36,7 @@
           - "{{ existing_saml }}"
 
     - pause:
-        prompt: "Continuing to run this will replace your existing saml settings (displayed above). They will all be captured except for your private key. Be sure that is backuped before continuing"
+        prompt: "Continuing to run this will replace your existing saml settings (displayed above). They will all be captured except for your private key. Be sure that is backed up before continuing"
 
     - name: Write out the existing content
       copy:
