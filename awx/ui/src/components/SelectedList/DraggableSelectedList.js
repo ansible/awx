@@ -62,7 +62,10 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
                 <DataListItem>
                   <DataListItemRow>
                     <DataListControl>
-                      <DataListDragButton isDisabled={selected.length < 2} />
+                      <DataListDragButton
+                        isDisabled={selected.length < 2}
+                        data-cy={`reorder-${label}`}
+                      />
                     </DataListControl>
                     <DataListItemCells
                       dataListCells={[
