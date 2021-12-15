@@ -214,7 +214,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
             },
             {
               name: t`Status`,
-              key: 'status',
+              key: 'or__status',
               options: [
                 [`new`, t`New`],
                 [`pending`, t`Pending`],
