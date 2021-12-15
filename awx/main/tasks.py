@@ -3272,7 +3272,11 @@ class AWXReceptorJob:
         pod_spec_override = {}
         if self.task and self.task.instance.instance_group.pod_spec_override:
             pod_spec_override = parse_yaml_or_json(self.task.instance.instance_group.pod_spec_override)
-        pod_spec = {**default_pod_spec, **pod_spec_override}
+        # According to the deepmerge docstring, the second dictionary will override when
+        # they share keys, which is the desired behavior.
+        # This allows user to only provide elements they want to override, and for us to still provide any
+        # defaults they don't want to change
+        pod_spec = deepmerge(default_pod_spec, pod_spec_override)
 
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']

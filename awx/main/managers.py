@@ -179,7 +179,9 @@ class InstanceManager(models.Manager):
             else:
                 registered = self.register(ip_address=pod_ip, uuid=settings.SYSTEM_UUID)
             RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
-            RegisterQueue(settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True).register()
+            RegisterQueue(
+                settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True, pod_spec_override=settings.DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE
+            ).register()
             return registered
         else:
             return (False, self.me())
