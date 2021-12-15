@@ -6,7 +6,8 @@ export {
   ChoiceField,
   EncryptedField,
   ExecutionEnvField,
+  InputAlertField,
   InputField,
   ObjectField,
-  InputAlertField,
+  TextAreaField,
 } from './SharedFields';

@@ -40,7 +40,8 @@ describe('<MiscSystemDetail />', () => {
         CUSTOM_VENV_PATHS: [],
         INSIGHTS_TRACKING_STATE: false,
         AUTOMATION_ANALYTICS_LAST_GATHER: null,
-        AUTOMATION_ANALYTICS_LAST_ENTRIES: 'foo',
+        AUTOMATION_ANALYTICS_LAST_ENTRIES:
+          '{"foo": "2021-11-24R06:35:15.179Z"}',
         AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
       },
     });
@@ -80,11 +81,6 @@ describe('<MiscSystemDetail />', () => {
       'Unique identifier for an installation',
       'db39b9ec-0c6e-4554-987d-42aw9c732ed8'
     );
-    assertDetail(
-      wrapper,
-      'Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.',
-      'foo'
-    );
     assertDetail(wrapper, 'All Users Visible to Organization Admins', 'On');
     assertDetail(
       wrapper,
@@ -113,6 +109,11 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'Red Hat customer username', 'name1');
     assertDetail(wrapper, 'Red Hat or Satellite password', 'Encrypted');
     assertDetail(wrapper, 'Red Hat or Satellite username', 'name2');
+    assertVariableDetail(
+      wrapper,
+      'Last gathered entries from the data collection service of Insights for Ansible Automation Platform',
+      '{\n  "foo": "2021-11-24R06:35:15.179Z"\n}'
+    );
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
     assertVariableDetail(wrapper, 'Proxy IP Allowed List', '[]');
     assertDetail(wrapper, 'Global default execution environment', 'Foo');
