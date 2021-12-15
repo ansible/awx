@@ -673,6 +673,7 @@ class BaseTask(object):
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'suppress_ansible_output': True,
+                    'suppress_output_file': True,
                 },
             }
 

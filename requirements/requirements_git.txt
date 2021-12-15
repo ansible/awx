@@ -1,1 +1,3 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
+# Remove pbr from requirements.in when moving ansible-runner to requirements.in
+git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
