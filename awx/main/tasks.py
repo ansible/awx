@@ -202,7 +202,8 @@ def apply_cluster_membership_policies():
             to_log = logger.debug
         to_log('Waited {} seconds to obtain lock name: cluster_policy_lock'.format(lock_time))
         started_compute = time.time()
-        all_instances = list(Instance.objects.order_by('id'))
+        # Hop nodes should never get assigned to an InstanceGroup.
+        all_instances = list(Instance.objects.exclude(node_type='hop').order_by('id'))
         all_groups = list(InstanceGroup.objects.prefetch_related('instances'))
 
         total_instances = len(all_instances)
@@ -253,7 +254,7 @@ def apply_cluster_membership_policies():
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
-            candidate_pool_ct = len([i for i in actual_instances if i.obj.node_type != exclude_type])
+            candidate_pool_ct = sum(1 for i in actual_instances if i.obj.node_type != exclude_type)
             if not candidate_pool_ct:
                 continue
             policy_per_added = []

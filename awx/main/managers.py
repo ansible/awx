@@ -188,7 +188,7 @@ class InstanceManager(models.Manager):
 
     def active_count(self):
         """Return count of active Tower nodes for licensing."""
-        return self.all().count()
+        return self.exclude(node_type='hop').count()
 
 
 class InstanceGroupManager(models.Manager):

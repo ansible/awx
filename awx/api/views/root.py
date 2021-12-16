@@ -149,7 +149,7 @@ class ApiV2PingView(APIView):
         response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': settings.INSTALL_UUID}
 
         response['instances'] = []
-        for instance in Instance.objects.all():
+        for instance in Instance.objects.exclude(node_type='hop'):
             response['instances'].append(
                 dict(
                     node=instance.hostname,

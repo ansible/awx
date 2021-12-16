@@ -29,7 +29,7 @@ from awx.main.models.mixins import RelatedJobsMixin
 # ansible-runner
 from ansible_runner.utils.capacity import get_cpu_count, get_mem_in_bytes
 
-__all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
+__all__ = ('Instance', 'InstanceGroup', 'InstanceLink', 'TowerScheduleState')
 
 logger = logging.getLogger('awx.main.models.ha')
 
@@ -215,7 +215,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
-        if self.enabled:
+        if self.enabled and self.node_type != 'hop':
             lower_cap = min(self.mem_capacity, self.cpu_capacity)
             higher_cap = max(self.mem_capacity, self.cpu_capacity)
             self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
@@ -320,7 +320,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
-        return sum([inst.capacity for inst in self.instances.all()])
+        return sum(inst.capacity for inst in self.instances.all())
 
     @property
     def jobs_running(self):

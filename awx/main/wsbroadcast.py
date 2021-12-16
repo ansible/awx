@@ -35,6 +35,7 @@ def get_broadcast_hosts():
     instances = (
         Instance.objects.exclude(hostname=Instance.objects.me().hostname)
         .exclude(node_type='execution')
+        .exclude(node_type='hop')
         .order_by('hostname')
         .values('hostname', 'ip_address')
         .distinct()
