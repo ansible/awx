@@ -286,7 +286,6 @@ def update_user_flags(backend, details, user=None, *args, **kwargs):
     from django.conf import settings
 
     user_flags_settings = settings.SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR
-    logger.debug(user_flags_settings)
 
     attributes = kwargs.get('response', {}).get('attributes', {})
     logger.debug("User attributes for %s: %s" % (user.username, attributes))
