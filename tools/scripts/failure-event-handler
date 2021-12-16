@@ -2,24 +2,72 @@
 import sys
 import os
 import signal
+import datetime
+
+from datetime import timezone
+
 
 def write_stdout(s):
     sys.stdout.write(s)
     sys.stdout.flush()
 
+
 def write_stderr(s):
     sys.stderr.write(s)
     sys.stderr.flush()
 
+
 def main():
     while 1:
-        write_stdout('READY\n')
+        write_stdout("READY\n")
+
+        # read header line and print it to stderr
         line = sys.stdin.readline()
-        headers = dict([ x.split(':') for x in line.split() ])
-        headers.update(dict([ x.split(':') for x in sys.stdin.read(int(headers['len'])).split()]))
-        if headers['eventname'] == 'PROCESS_STATE_FATAL':
-            os.kill(os.getppid(), signal.SIGTERM)
-        write_stdout('RESULT 2\nOK')
+
+        # parse header line and decide what to do with it
+        try:
+            headers = dict([x.split(":") for x in line.split()])
+            data = sys.stdin.read(int(headers["len"]))
+        except ValueError as e:
+            write_stderr(str(e))
+
+        # now decide what do to based on eventnames
+        if headers["eventname"] == "PROCESS_STATE_FATAL":
+            headers.update(
+                dict(
+                    [x.split(":") for x in sys.stdin.read(int(headers["len"])).split()]
+                )
+            )
+
+            try:
+                # incoming event that produced PROCESS_STATE_FATAL will have a PID. SIGTERM it!
+                write_stderr(
+                    f"{datetime.datetime.now(timezone.utc)} - sending SIGTERM to proc={headers} with data={headers}\n"
+                )
+                os.kill(headers["pid"], signal.SIGTERM)
+            except Exception as e:
+                write_stderr(str(e))
+
+        # awx-rsyslog PROCESS_LOG_STDERR handler
+        if headers["eventname"] == "PROCESS_LOG_STDERR":
+            # pertinent data to process that produced PROCES_LOG_STDERR is in the first line of the data payload; so lets extract it
+            proc_details = dict([x.split(":") for x in (data.split("\n")[0]).split()])
+
+            if proc_details["processname"] == "awx-rsyslogd":
+                log_message = "".join(data.split("\n")[1:])
+
+                # look for a 4XX HTTP CODE in the log message. if found, issue a sigkill
+                if any(str(x) in log_message.split() for x in range(400, 420)):
+                    try:
+                        write_stderr(
+                            f"{datetime.datetime.now(timezone.utc)} - sending SIGTERM to proc=[{proc_details['processname']}] with pid=[{int(proc_details['pid'])}] due to log_message=[{log_message}]\n"
+                        )
+                        os.kill(int(proc_details["pid"]), signal.SIGTERM)
+                    except Exception as e:
+                        write_stderr(str(e))
+
+        write_stdout("RESULT 2\nOK")
+
 
 if __name__ == "__main__":
     main()
