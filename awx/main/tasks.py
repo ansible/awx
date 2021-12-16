@@ -1544,7 +1544,8 @@ class BaseTask(object):
             rc = res.rc
 
             if status in ('timeout', 'error'):
-                self.instance.job_explanation = f"Job terminated due to {status}"
+                job_explanation = f"Job terminated due to {status}"
+                self.instance.job_explanation = self.instance.job_explanation or job_explanation
                 if status == 'timeout':
                     status = 'failed'
 
