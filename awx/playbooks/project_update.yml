@@ -210,6 +210,9 @@
         - install_roles
 
     - block:
+        # when a timeout occurs ansible-galaxy will result in:
+        # rc: 1 and "[ERROR]: failed to download the file: The read operation timed out"
+        # approx. 10s timeout first run + 10s delay * 12 retries == 250s
         - name: fetch galaxy collections from collections/requirements.(yml/yaml)
           command: >
             ansible-galaxy collection install -r {{ item }}
@@ -231,6 +234,11 @@
             # Put the local tmp directory in same volume as collection destination
             # otherwise, files cannot be moved accross volumes and will cause error
             ANSIBLE_LOCAL_TEMP: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/tmp"
+          retries: 12
+          delay: 10
+          until: >
+            galaxy_collection_result is succeeded or
+            'The read operation timed out' not in galaxy_collection_result.stderr
 
       when:
         - "ansible_version.full is version_compare('2.9', '>=')"
