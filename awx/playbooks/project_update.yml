@@ -103,6 +103,9 @@
             dest: "{{ project_path|quote }}/.archive"
             state: directory
 
+        # the status_code is only defined if the request was handled
+        # all status_codes >= 400 are marked as failed
+        # 10s timeout 1st attempt + 10s delay * 12 retries == 250s
         - name: Get archive from url
           get_url:
             url: "{{ scm_url|quote }}"
@@ -111,6 +114,11 @@
             url_password: "{{ scm_password|default(omit) }}"
             force_basic_auth: true
           register: get_archive
+          retries: 12
+          delay: 10
+          until: >
+            get_archive is succeeded or
+            get_archive.status_code is defined 
 
         - name: Unpack archive
           project_archive:
@@ -172,6 +180,10 @@
         - install_collections
 
     - block:
+
+        # when a timeout occurs ansible-galaxy will result in:
+        # rc: 1 and "[ERROR]: failed to download the file: The read operation timed out"
+        # approx. 10s timeout first run + 10s delay * 12 retries == 250s
         - name: fetch galaxy roles from requirements.(yml/yaml)
           command: >
             ansible-galaxy role install -r {{ item }}
@@ -187,6 +199,11 @@
           environment:
             ANSIBLE_FORCE_COLOR: false
             GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+          retries: 12
+          delay: 10
+          until: >
+            galaxy_result is succeeded or
+            'The read operation timed out' not in galaxy_result.stderr
 
       when: roles_enabled|bool
       tags:
