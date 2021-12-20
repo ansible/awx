@@ -67,6 +67,7 @@ from awx.main.models import (
     TowerScheduleState,
     Instance,
     InstanceGroup,
+    InstanceLink,
     UnifiedJob,
     Notification,
     Inventory,
@@ -495,28 +496,29 @@ def execution_node_health_check(node):
 
 def inspect_execution_nodes(instance_list):
     with advisory_lock('inspect_execution_nodes_lock', wait=False):
-        node_lookup = {}
-        for inst in instance_list:
-            if inst.node_type == 'execution':
-                node_lookup[inst.hostname] = inst
+        node_lookup = {inst.hostname: inst for inst in instance_list}
 
         ctl = get_receptor_ctl()
-        connections = ctl.simple_command('status')['Advertisements']
+        mesh_status = ctl.simple_command('status')
+
         nowtime = now()
-        for ad in connections:
+        workers = mesh_status['Advertisements']
+        for ad in workers:
             hostname = ad['NodeID']
-            commands = ad.get('WorkCommands') or []
-            worktypes = []
-            for c in commands:
-                worktypes.append(c["WorkType"])
-            if 'ansible-runner' not in worktypes:
+            if ad.get('WorkCommands') is None:
+                node_type = 'hop'
+            elif any(cmd['WorkType'] == 'ansible-runner' for cmd in ad['WorkCommands'] or []):
+                node_type = 'execution'
+            else:
                 continue
+
             changed = False
             if hostname in node_lookup:
                 instance = node_lookup[hostname]
             elif settings.MESH_AUTODISCOVERY_ENABLED:
                 defaults = dict(enabled=False)
-                (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution', defaults=defaults)
+                (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, defaults=defaults)
+                node_lookup[hostname] = instance
                 logger.warn(f"Registered execution node '{hostname}' (marked disabled by default)")
             else:
                 logger.warn(f"Unrecognized node on mesh advertising ansible-runner work type: {hostname}")
@@ -545,6 +547,17 @@ def inspect_execution_nodes(instance_list):
                     # TODO: perhaps decrease the frequency of these checks
                     logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
                     execution_node_health_check.apply_async([hostname])
+
+        links = {tuple(sorted((node, peer))) for node, peers in mesh_status['KnownConnectionCosts'].items() for peer in peers}
+        for a, b in links:
+            if a not in node_lookup:
+                logger.warn(f"Cannot link {a} to {b}: {a} not registered.")
+                continue
+            if b not in node_lookup:
+                logger.warn(f"Cannot link {a} to {b}: {b} not registered.")
+                continue
+            a_obj, b_obj = node_lookup[a], node_lookup[b]
+            InstanceLink.objects.get_or_create(source=a_obj, target=b_obj)
 
 
 @task(queue=get_local_queuename)
