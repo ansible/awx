@@ -135,7 +135,7 @@ function JobListItem({
                   <Button
                     ouiaId={`${job.id}-relaunch-button`}
                     variant="plain"
-                    onClick={handleRelaunch}
+                    onClick={() => handleRelaunch()}
                     aria-label={t`Relaunch`}
                     isDisabled={isLaunching}
                   >
