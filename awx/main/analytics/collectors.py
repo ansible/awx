@@ -356,7 +356,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           x.duration AS duration,
                           x.res->'warnings' AS warnings,
                           x.res->'deprecations' AS deprecations
-                          FROM {tbl}, json_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
+                          FROM {tbl}, jsonb_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
                           WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
         return query
 
