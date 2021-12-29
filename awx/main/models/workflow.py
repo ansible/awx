@@ -870,6 +870,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     def context(self, approval_status):
         workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/jobs/workflow/{}'.format(self.workflow_job.id))
         return {
+            'job': self.notification_data(),
             'approval_status': approval_status,
             'approval_node_name': self.workflow_approval_template.name,
             'workflow_url': workflow_url,
