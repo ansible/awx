@@ -452,7 +452,7 @@ function JobDetail({ job, inventorySourceLabels }) {
                 <Button
                   ouiaId="job-detail-relaunch-button"
                   type="submit"
-                  onClick={handleRelaunch}
+                  onClick={() => handleRelaunch()}
                   isDisabled={isLaunching}
                 >
                   {t`Relaunch`}
