@@ -21,6 +21,7 @@ import Jobs from './models/Jobs';
 import JobEvents from './models/JobEvents';
 import Labels from './models/Labels';
 import Me from './models/Me';
+import Mesh from './models/Mesh';
 import Metrics from './models/Metrics';
 import NotificationTemplates from './models/NotificationTemplates';
 import Notifications from './models/Notifications';
@@ -67,6 +68,7 @@ const JobsAPI = new Jobs();
 const JobEventsAPI = new JobEvents();
 const LabelsAPI = new Labels();
 const MeAPI = new Me();
+const MeshAPI = new Mesh();
 const MetricsAPI = new Metrics();
 const NotificationTemplatesAPI = new NotificationTemplates();
 const NotificationsAPI = new Notifications();
@@ -114,6 +116,7 @@ export {
   JobEventsAPI,
   LabelsAPI,
   MeAPI,
+  MeshAPI,
   MetricsAPI,
   NotificationTemplatesAPI,
   NotificationsAPI,
