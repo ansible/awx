@@ -19,6 +19,7 @@ import Schedules from 'screens/Schedule';
 import Settings from 'screens/Setting';
 import Teams from 'screens/Team';
 import Templates from 'screens/Template';
+import TopologyView from 'screens/TopologyView';
 import Users from 'screens/User';
 import WorkflowApprovals from 'screens/WorkflowApproval';
 import { Jobs } from 'screens/Job';
@@ -146,6 +147,11 @@ function getRouteConfig(userProfile = {}) {
           title: <Trans>Execution Environments</Trans>,
           path: '/execution_environments',
           screen: ExecutionEnvironments,
+        },
+        {
+          title: <Trans>Topology View</Trans>,
+          path: '/topology_view',
+          screen: TopologyView,
         },
       ],
     },
