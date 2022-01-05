@@ -210,20 +210,6 @@ def get_event_partition_epoch():
     return MigrationRecorder.Migration.objects.filter(app='main', name='0144_event_partitions').first().applied
 
 
-@memoize()
-def get_ansible_version():
-    """
-    Return Ansible version installed.
-    Ansible path needs to be provided to account for custom virtual environments
-    """
-    try:
-        proc = subprocess.Popen(['ansible', '--version'], stdout=subprocess.PIPE)
-        result = smart_str(proc.communicate()[0])
-        return result.split('\n')[0].replace('ansible', '').strip()
-    except Exception:
-        return 'unknown'
-
-
 def get_awx_version():
     """
     Return AWX version as reported by setuptools.
