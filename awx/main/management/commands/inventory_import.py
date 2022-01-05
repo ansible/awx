@@ -78,6 +78,10 @@ class AnsibleInventoryLoader(object):
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
         ee = get_default_execution_environment()
 
+        if settings.IS_K8S:
+            logger.warn('This command is not able to run on kubernetes-based deployment. This action should be done using the API.')
+            sys.exit(1)
+
         if ee.credential:
             process = subprocess.run(['podman', 'image', 'exists', ee.image], capture_output=True)
             if process.returncode != 0:
