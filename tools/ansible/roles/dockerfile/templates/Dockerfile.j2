@@ -233,14 +233,19 @@ RUN for dir in \
       /var/run/supervisor \
       /var/run/awx-receptor \
       /var/lib/nginx ; \
-    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp +1000 $dir ; done && \
     for file in \
       /etc/subuid \
       /etc/subgid \
       /etc/group \
       /etc/passwd \
       /var/lib/awx/rsyslog/rsyslog.conf ; \
-    do touch $file ; chmod g+rw $file ; chgrp root $file ; done
+    do touch $file ; chmod g+rw $file ; chgrp +1000 $file ; done
+
+RUN chown -R 1000:1000 /var/lib/ \
+    && chown -R 1000:1000 /var/lib/awx/rsyslog \
+    && chown -R 1000:1000 /home
+
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 RUN for dir in \
@@ -253,7 +258,7 @@ RUN for dir in \
       /var/run/awx-rsyslog \
       /.ansible \
       /var/lib/awx/vendor ; \
-    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp +1000 $dir ; done && \
     for file in \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.8/site-packages/awx.egg-link ; \
