@@ -224,7 +224,7 @@ function ProjectFormFields({
               isDisabled: true,
             },
             ...scmTypeOptions.map(([value, label]) => {
-              if (label === 'Manual') {
+              if (value === '') {
                 value = 'manual';
               }
               return {
