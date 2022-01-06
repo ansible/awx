@@ -16,10 +16,11 @@ class Command(BaseCommand):
     def handle(self, **options):
         nodes = Instance.objects.in_bulk(field_name='hostname')
         if options['source'] not in nodes:
-            raise CommandError()
+            raise CommandError(f"Host {options['source']} is not a registered instance.")
         missing_peers = set(options['peers']) - set(nodes)
         if missing_peers:
-            raise CommandError()
+            missing = ' '.join(missing_peers)
+            raise CommandError(f"Peers not currently registered as instances: {missing}")
 
         results = 0
         for target in options['peers']:
