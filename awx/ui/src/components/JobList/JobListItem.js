@@ -60,7 +60,7 @@ function JobListItem({
 
   return (
     <>
-      <Tr id={`job-row-${job.id}`}>
+      <Tr id={`job-row-${job.id}`} ouiaId={`job-row-${job.id}`}>
         <Td
           expand={{
             rowIndex: job.id,
@@ -147,7 +147,11 @@ function JobListItem({
           </ActionItem>
         </ActionsTd>
       </Tr>
-      <Tr isExpanded={isExpanded} id={`expanded-job-row-${job.id}`}>
+      <Tr
+        isExpanded={isExpanded}
+        id={`expanded-job-row-${job.id}`}
+        ouiaId={`expanded-job-row-${job.id}`}
+      >
         <Td colSpan={2} />
         <Td colSpan={showTypeColumn ? 6 : 5}>
           <ExpandableRowContent>
@@ -235,10 +239,20 @@ function JobListItem({
                 <Detail
                   fullWidth
                   label={t`Credentials`}
+                  dataCy={`job-${job.id}-credentials`}
                   value={
-                    <ChipGroup numChips={5} totalChips={credentials.length}>
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={credentials.length}
+                      ouiaId={`job-${job.id}-credential-chips`}
+                    >
                       {credentials.map((c) => (
-                        <CredentialChip key={c.id} credential={c} isReadOnly />
+                        <CredentialChip
+                          credential={c}
+                          isReadOnly
+                          key={c.id}
+                          ouiaId={`credential-${c.id}-chip`}
+                        />
                       ))}
                     </ChipGroup>
                   }
@@ -249,9 +263,17 @@ function JobListItem({
                   fullWidth
                   label={t`Labels`}
                   value={
-                    <ChipGroup numChips={5} totalChips={labels.results.length}>
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={labels.results.length}
+                      ouiaId={`job-${job.id}-label-chips`}
+                    >
                       {labels.results.map((l) => (
-                        <Chip key={l.id} isReadOnly>
+                        <Chip
+                          key={l.id}
+                          isReadOnly
+                          ouiaId={`label-${l.id}-chip`}
+                        >
                           {l.name}
                         </Chip>
                       ))}

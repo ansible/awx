@@ -275,6 +275,7 @@ function HostFilterLookup({
             key={name}
             numChips={5}
             totalChips={chips[key]?.chips?.length || 0}
+            ouiaId="host-filter-search-chips"
           >
             {chips[key]?.chips?.map((chip) => (
               <Chip key={chip.key} isReadOnly>
@@ -296,6 +297,7 @@ function HostFilterLookup({
                 key={chips[leftoverKey].key}
                 numChips={5}
                 totalChips={chips[leftoverKey]?.chips?.length || 0}
+                ouiaId="host-filter-advanced-search-chips"
               >
                 {chips[leftoverKey]?.chips?.map((chip) => (
                   <Chip key={chip.key} isReadOnly>

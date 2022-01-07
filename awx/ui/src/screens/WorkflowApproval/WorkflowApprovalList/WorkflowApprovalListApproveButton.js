@@ -41,6 +41,7 @@ function WorkflowApprovalListApproveButton({ onApprove, selectedItems }) {
           isDisabled={isDisabled}
           component="button"
           onClick={onApprove}
+          ouiaId="workflow-approval-approve-dropdown-item"
         >
           {t`Approve`}
         </DropdownItem>

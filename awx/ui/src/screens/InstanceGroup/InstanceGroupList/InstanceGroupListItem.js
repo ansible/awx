@@ -49,7 +49,7 @@ function InstanceGroupListItem({
   }
 
   return (
-    <Tr id={`ig-row-${instanceGroup.id}`}>
+    <Tr id={`ig-row-${instanceGroup.id}`} ouiaId={`ig-row-${instanceGroup.id}`}>
       <Td
         select={{
           rowIndex,

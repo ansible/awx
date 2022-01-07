@@ -42,6 +42,7 @@ function AddDropDownButton({ dropdownItems, ouiaId }) {
           />
         }
         dropdownItems={dropdownItems}
+        ouiaId="add-dropdown"
       />
     </div>
   );

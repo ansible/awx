@@ -73,7 +73,7 @@ function WorkflowOutputToolbar({ job }) {
     );
   };
   return (
-    <Toolbar id="workflow-output-toolbar">
+    <Toolbar id="workflow-output-toolbar" ouiaId="workflow-output-toolbar">
       <ToolbarJob>
         <StatusIconWithMargin status={job.status} />
         <b>{job.name}</b>

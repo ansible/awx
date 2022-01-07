@@ -99,14 +99,17 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
       title={t`Host Details`}
       aria-label={t`Host details modal`}
       width="75%"
+      ouiaId="host-event-modal"
     >
       <Tabs
         aria-label={t`Tabs`}
         activeKey={activeTabKey}
         onSelect={handleTabClick}
+        ouiaId="host-event-tabs"
       >
         <Tab
           aria-label={t`Details tab`}
+          ouiaId="details-tab"
           eventKey={0}
           title={<TabTitleText>{t`Details`}</TabTitleText>}
         >
@@ -139,6 +142,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
           eventKey={1}
           title={<TabTitleText>{t`JSON`}</TabTitleText>}
           aria-label={t`JSON tab`}
+          ouiaId="json-tab"
         >
           {activeTabKey === 1 && jsonObj ? (
             <CodeEditor
@@ -157,6 +161,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
           eventKey={2}
           title={<TabTitleText>{t`Standard Out`}</TabTitleText>}
           aria-label={t`Standard out tab`}
+          ouiaId="standard-out-tab"
         >
           {activeTabKey === 2 && stdOut ? (
             <CodeEditor
@@ -175,6 +180,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
           eventKey={3}
           title={<TabTitleText>{t`Standard Error`}</TabTitleText>}
           aria-label={t`Standard error tab`}
+          ouiaId="standard-error-tab"
         >
           {activeTabKey === 3 && stdErr ? (
             <CodeEditor

@@ -108,19 +108,33 @@ function PromptDetail({
   return (
     <>
       <DetailList gutter="sm">
-        <Detail label={t`Name`} value={buildResourceLink(resource)} />
-        <Detail label={t`Description`} value={details.description} />
+        <Detail
+          label={t`Name`}
+          dataCy="prompt-detail-name"
+          value={buildResourceLink(resource)}
+        />
+        <Detail
+          label={t`Description`}
+          dataCy="prompt-detail-description"
+          value={details.description}
+        />
         <Detail
           label={t`Type`}
+          dataCy="prompt-detail-type"
           value={toTitleCase(details.unified_job_type || details.type)}
         />
         {workflowNode && (
           <Detail
             label={t`Convergence`}
+            dataCy="prompt-detail-convergence"
             value={workflowNode?.all_parents_must_converge ? t`All` : t`Any`}
           />
         )}
-        <Detail label={t`Timeout`} value={formatTimeout(details?.timeout)} />
+        <Detail
+          label={t`Timeout`}
+          dataCy="prompt-detail-timeout"
+          value={formatTimeout(details?.timeout)}
+        />
         {details?.type === 'project' && (
           <PromptProjectDetail resource={details} />
         )}
@@ -153,10 +167,10 @@ function PromptDetail({
             rows={4}
             value={overrides.extra_vars}
             name="extra_vars"
+            dataCy="prompt-detail-variables"
           />
         )}
       </DetailList>
-
       {details?.type !== 'system_job_template' &&
         hasPromptData(launchConfig) &&
         hasOverrides && (
@@ -179,12 +193,14 @@ function PromptDetail({
                     <ChipGroup
                       numChips={5}
                       totalChips={overrides.credentials.length}
+                      ouiaId="prompt-credential-chips"
                     >
                       {overrides.credentials.map((cred) => (
                         <CredentialChip
                           key={cred.id}
                           credential={cred}
                           isReadOnly
+                          ouiaId={`credential-${cred.id}-chip`}
                         />
                       ))}
                     </ChipGroup>
@@ -220,6 +236,7 @@ function PromptDetail({
                   value={
                     <ChipGroup
                       numChips={5}
+                      ouiaId="prompt-job-tag-chips"
                       totalChips={
                         !overrides.job_tags || overrides.job_tags === ''
                           ? 0
@@ -228,7 +245,11 @@ function PromptDetail({
                     >
                       {overrides.job_tags.length > 0 &&
                         overrides.job_tags.split(',').map((jobTag) => (
-                          <Chip key={jobTag} isReadOnly>
+                          <Chip
+                            key={jobTag}
+                            isReadOnly
+                            ouiaId={`job-tag-${jobTag}-chip`}
+                          >
                             {jobTag}
                           </Chip>
                         ))}
@@ -248,10 +269,15 @@ function PromptDetail({
                           ? 0
                           : overrides.skip_tags.split(',').length
                       }
+                      ouiaId="prompt-skip-tag-chips"
                     >
                       {overrides.skip_tags.length > 0 &&
                         overrides.skip_tags.split(',').map((skipTag) => (
-                          <Chip key={skipTag} isReadOnly>
+                          <Chip
+                            key={skipTag}
+                            isReadOnly
+                            ouiaId={`skip-tag-${skipTag}-chip`}
+                          >
                             {skipTag}
                           </Chip>
                         ))}
@@ -268,6 +294,7 @@ function PromptDetail({
               {(launchConfig.survey_enabled ||
                 launchConfig.ask_variables_on_launch) && (
                 <VariablesDetail
+                  dataCy="prompt-detail-variables"
                   label={t`Variables`}
                   rows={4}
                   value={overrides.extra_vars}

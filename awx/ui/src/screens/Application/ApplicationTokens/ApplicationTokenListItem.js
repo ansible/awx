@@ -16,7 +16,7 @@ function ApplicationTokenListItem({
   rowIndex,
 }) {
   return (
-    <Tr id={`token-row-${token.id}`}>
+    <Tr id={`token-row-${token.id}`} ouiaId={`token-row-${token.id}`}>
       <Td
         select={{
           rowIndex,

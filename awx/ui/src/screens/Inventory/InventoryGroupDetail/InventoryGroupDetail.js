@@ -38,6 +38,7 @@ function InventoryGroupDetail({ inventoryGroup }) {
           value={variables}
           rows={4}
           name="variables"
+          dataCy="inventory-group-detail-variables"
         />
         <UserDateDetail label={t`Created`} date={created} user={created_by} />
         <UserDateDetail

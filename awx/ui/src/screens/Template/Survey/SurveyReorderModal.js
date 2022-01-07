@@ -131,6 +131,7 @@ function SurveyReorderModal({
         component = (
           <Select
             id={`survey-preview-multipleChoice-${q.variable}`}
+            ouiaId={`survey-preview-multipleChoice-${q.variable}`}
             isDisabled
             aria-label={t`Multiple Choice`}
             typeAheadAriaLabel={t`Multiple Choice`}
@@ -151,6 +152,7 @@ function SurveyReorderModal({
             aria-label={t`Multi-Select`}
             typeAheadAriaLabel={t`Multi-Select`}
             id={`survey-preview-multiSelect-${q.variable}`}
+            ouiaId={`survey-preview-multiSelect-${q.variable}`}
             noResultsFoundText={t`No results found`}
           >
             {q.choices.length > 0 &&
@@ -179,7 +181,7 @@ function SurveyReorderModal({
       title={t`Survey Question Order`}
       aria-label={t`Survey preview modal`}
       isOpen={isOrderModalOpen}
-      description={t`To reoder the survey questions drag and drop them in the desired location.`}
+      description={t`To reorder the survey questions drag and drop them in the desired location.`}
       onClose={() => onCloseOrderModal()}
       variant="medium"
       actions={[
@@ -201,7 +203,7 @@ function SurveyReorderModal({
     >
       <TableComposable>
         <Thead>
-          <Tr>
+          <Tr ouiaId="survey-order-table-header">
             <Th dataLabel={t`Order`}>{t`Order`}</Th>
             <Th dataLabel={t`Name`}>{t`Name`}</Th>
             <Th dataLabel={t`Default Answer(s)`}>{t`Default Answer(s)`}</Th>
@@ -216,6 +218,7 @@ function SurveyReorderModal({
               onDrop={onDrop}
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
+              ouiaId={`survey-order-row-${q.variable}`}
             >
               <Td dataLabel={t`Order`}>
                 <Button variant="plain">

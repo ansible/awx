@@ -26,6 +26,7 @@ function SmartInventoryButton({ onClick, isDisabled, hasInvalidKeys }) {
           isDisabled={isDisabled}
           component="button"
           onClick={onClick}
+          ouiaId="smart-inventory-dropdown-item"
         >
           {t`Smart Inventory`}
         </DropdownItem>

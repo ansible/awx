@@ -573,6 +573,7 @@ function JobTemplateForm({
                       </span>
                     }
                     id="option-callbacks"
+                    ouiaId="option-callbacks"
                     isChecked={allowCallbacks}
                     onChange={(checked) => {
                       setAllowCallbacks(checked);
@@ -590,6 +591,7 @@ function JobTemplateForm({
                       </span>
                     }
                     id="wfjt-enabled-webhooks"
+                    ouiaId="wfjt-enabled-webhooks"
                     isChecked={enableWebhooks}
                     onChange={(checked) => {
                       setEnableWebhooks(checked);

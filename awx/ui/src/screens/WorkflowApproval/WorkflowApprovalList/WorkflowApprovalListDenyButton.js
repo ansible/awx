@@ -41,6 +41,7 @@ function WorkflowApprovalListDenyButton({ onDeny, selectedItems }) {
           isDisabled={isDisabled}
           component="button"
           onClick={onDeny}
+          ouiaId="workflow-approval-deny-dropdown-item"
         >
           {t`Deny`}
         </DropdownItem>

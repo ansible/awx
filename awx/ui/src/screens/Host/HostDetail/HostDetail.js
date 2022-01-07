@@ -91,6 +91,7 @@ function HostDetail({ host }) {
           rows={4}
           value={variables}
           name="variables"
+          dataCy="host-detail-variables"
         />
       </DetailList>
       <CardActionsRow>

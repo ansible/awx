@@ -18,7 +18,10 @@ function CredentialTypeListItem({
   const labelId = `check-action-${credentialType.id}`;
 
   return (
-    <Tr id={`credential-type-row-${credentialType.id}`}>
+    <Tr
+      id={`credential-type-row-${credentialType.id}`}
+      ouiaId={`credential-type-row-${credentialType.id}`}
+    >
       <Td
         select={{
           rowIndex,

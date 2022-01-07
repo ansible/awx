@@ -44,6 +44,7 @@ const ManualSubForm = ({
           css="grid-column: 1/-1"
           variant="warning"
           isInline
+          ouiaId="project-manual-subform-alert"
         >
           {t`
             There are no available playbook directories in ${project_base_dir}.

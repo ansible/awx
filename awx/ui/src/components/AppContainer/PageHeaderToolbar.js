@@ -101,8 +101,13 @@ function PageHeaderToolbar({
             isOpen={isHelpOpen}
             position={DropdownPosition.right}
             onSelect={handleHelpSelect}
+            ouiaId="toolbar-info-dropdown"
             toggle={
-              <DropdownToggle onToggle={setIsHelpOpen} aria-label={t`Info`}>
+              <DropdownToggle
+                onToggle={setIsHelpOpen}
+                aria-label={t`Info`}
+                ouiaId="toolbar-info-dropdown-toggle"
+              >
                 <QuestionCircleIcon />
               </DropdownToggle>
             }
@@ -111,6 +116,7 @@ function PageHeaderToolbar({
                 key="help"
                 target="_blank"
                 href={`${getDocsBaseUrl(config)}/html/userguide/index.html`}
+                ouiaId="help-dropdown-item"
               >
                 {t`Help`}
               </DropdownItem>,
@@ -119,6 +125,7 @@ function PageHeaderToolbar({
                 component="button"
                 isDisabled={isAboutDisabled}
                 onClick={onAboutClick}
+                ouiaId="about-dropdown-item"
               >
                 {t`About`}
               </DropdownItem>,
@@ -128,12 +135,16 @@ function PageHeaderToolbar({
         <PageHeaderToolsItem>
           <Dropdown
             id="toolbar-user-dropdown"
+            ouiaId="toolbar-user-dropdown"
             isPlain
             isOpen={isUserOpen}
             position={DropdownPosition.right}
             onSelect={handleUserSelect}
             toggle={
-              <DropdownToggle onToggle={setIsUserOpen}>
+              <DropdownToggle
+                onToggle={setIsUserOpen}
+                ouiaId="toolbar-user-dropdown-toggle"
+              >
                 <UserIcon />
                 {loggedInUser && (
                   <span style={{ marginLeft: '10px' }}>
@@ -149,6 +160,7 @@ function PageHeaderToolbar({
                 href={
                   loggedInUser ? `#/users/${loggedInUser.id}/details` : '#/home'
                 }
+                ouiaId="user-dropdown-item"
               >
                 {t`User Details`}
               </DropdownItem>,
@@ -157,6 +169,7 @@ function PageHeaderToolbar({
                 component="button"
                 onClick={onLogoutClick}
                 id="logout-button"
+                ouiaId="logout-dropdown-item"
               >
                 {t`Logout`}
               </DropdownItem>,

@@ -56,6 +56,7 @@ function ActivityStreamDetailButton({ streamItem, user, description }) {
                 streamItem?.changes ? JSON.stringify(streamItem.changes) : ''
               }
               name="changes"
+              dataCy="activity-stream-detail-changes"
             />
           )}
         </DetailList>

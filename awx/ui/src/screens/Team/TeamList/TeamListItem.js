@@ -21,7 +21,7 @@ function TeamListItem({ team, isSelected, onSelect, detailUrl, rowIndex }) {
   const labelId = `check-action-${team.id}`;
 
   return (
-    <Tr id={`team-row-${team.id}`}>
+    <Tr id={`team-row-${team.id}`} ouiaId={`team-row-${team.id}`}>
       <Td
         select={{
           rowIndex,

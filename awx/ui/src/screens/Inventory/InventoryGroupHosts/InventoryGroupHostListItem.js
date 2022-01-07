@@ -28,7 +28,11 @@ function InventoryGroupHostListItem({
   const labelId = `check-action-${host.id}`;
 
   return (
-    <Tr id={host.id} arialabelledby={labelId}>
+    <Tr
+      id={host.id}
+      ouiaId={`inventory-group-host-row-${host.id}`}
+      arialabelledby={labelId}
+    >
       <Td
         select={{
           rowIndex,
