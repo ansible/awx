@@ -55,9 +55,6 @@ template['OPTIONS']['loaders'] = ('django.template.loaders.filesystem.Loader', '
 PENDO_TRACKING_STATE = "off"
 INSIGHTS_TRACKING_STATE = False
 
-# auto-discover receptor-* execution nodes
-MESH_AUTODISCOVERY_ENABLED = True
-
 # debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
 
 INSTALLED_APPS += ['rest_framework_swagger', 'debug_toolbar']  # NOQA

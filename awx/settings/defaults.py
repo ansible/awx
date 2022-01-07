@@ -262,10 +262,6 @@ CSRF_COOKIE_SECURE = True
 # Limit CSRF cookies to browser sessions
 CSRF_COOKIE_AGE = None
 
-# Auto-discover new instances that appear on receptor mesh
-# used for docker-compose environment, unsupported
-MESH_AUTODISCOVERY_ENABLED = False
-
 TEMPLATES = [
     {
         'NAME': 'default',
