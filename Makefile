@@ -11,7 +11,6 @@ COLLECTION_VERSION := $(shell $(PYTHON) setup.py --version | cut -d . -f 1-3)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
-COMPOSE_HOST ?= $(shell hostname)
 MAIN_NODE_TYPE ?= hybrid
 
 VENV_BASE ?= /var/lib/awx/venv
@@ -144,24 +143,6 @@ version_file:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
-
-# Do any one-time init tasks.
-comma := ,
-init:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST) --node_type=$(MAIN_NODE_TYPE); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;\
-	$(MANAGEMENT_COMMAND) register_queue --queuename=default --instance_percent=100;
-	if [ ! -f /etc/receptor/certs/awx.key ]; then \
-		rm -f /etc/receptor/certs/*; \
-		receptor --cert-init commonname="AWX Test CA" bits=2048 outcert=/etc/receptor/certs/ca.crt outkey=/etc/receptor/certs/ca.key; \
-		for node in $(RECEPTOR_MUTUAL_TLS); do \
-			receptor --cert-makereq bits=2048 commonname="$$node test cert" dnsname=$$node nodeid=$$node outreq=/etc/receptor/certs/$$node.csr outkey=/etc/receptor/certs/$$node.key; \
-			receptor --cert-signreq req=/etc/receptor/certs/$$node.csr cacert=/etc/receptor/certs/ca.crt cakey=/etc/receptor/certs/ca.key outcert=/etc/receptor/certs/$$node.crt verify=yes; \
-		done; \
-	fi
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
