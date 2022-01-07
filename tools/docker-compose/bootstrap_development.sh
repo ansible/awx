@@ -36,6 +36,23 @@ awx-manage provision_instance --hostname="$(hostname)" --node_type="$MAIN_NODE_T
 awx-manage register_queue --queuename=controlplane --instance_percent=100
 awx-manage register_queue --queuename=default --instance_percent=100
 
+if [[ -n "$RUN_MIGRATIONS" ]]; then
+    for (( i=1; i<$CONTROL_PLANE_NODE_COUNT; i++ )); do
+        for (( j=i + 1; j<=$CONTROL_PLANE_NODE_COUNT; j++ )); do
+            awx-manage register_peers "awx_$i" --peers "awx_$j"
+        done
+    done
+
+    if [[ $EXECUTION_NODE_COUNT > 0 ]]; then
+        awx-manage provision_instance --hostname="receptor-hop" --node_type="hop"
+        awx-manage register_peers "receptor-hop" --peers "awx_1"
+        for (( e=1; e<=$EXECUTION_NODE_COUNT; e++ )); do
+            awx-manage provision_instance --hostname="receptor-$e" --node_type="execution"
+            awx-manage register_peers "receptor-$e" --peers "receptor-hop"
+        done
+    fi
+fi
+
 # Create resource entries when using Minikube
 if [[ -n "$MINIKUBE_CONTAINER_GROUP" ]]; then
     awx-manage shell < /awx_devel/tools/docker-compose-minikube/_sources/bootstrap_minikube.py
