@@ -1,4 +1,4 @@
-PYTHON ?= python3.8
+PYTHON ?= python3.9
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 OFFICIAL ?= no
 NODE ?= node
