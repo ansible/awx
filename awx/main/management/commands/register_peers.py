@@ -35,6 +35,18 @@ class Command(BaseCommand):
         if options['exact'] and options['disconnect']:
             raise CommandError("The option --disconnect may not be used with --exact.")
 
+        # No 1-cycles
+        for collection in ('peers', 'disconnect', 'exact'):
+            if options['source'] in options[collection]:
+                raise CommandError(f"Source node {options['source']} may not also be in --{collection}.")
+
+        # No 2-cycles
+        if options['peers'] or options['exact']:
+            peers = set(options['peers'] or options['exact'])
+            incoming = set(InstanceLink.objects.filter(target=nodes[options['source']]).values_list('source__hostname', flat=True))
+            if peers & incoming:
+                raise CommandError(f"Source node {options['source']} cannot link to nodes already peering to it: {peers & incoming}.")
+
         if options['peers']:
             missing_peers = set(options['peers']) - set(nodes)
             if missing_peers:
