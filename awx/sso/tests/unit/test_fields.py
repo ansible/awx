@@ -147,6 +147,24 @@ class TestSAMLUserFlagsAttrField:
                 },
                 {'junk': ['Invalid field.']},
             ),
+            (
+                {
+                    'junk': 'something',
+                },
+                {
+                    'junk': ['Invalid field.'],
+                },
+            ),
+            (
+                {
+                    'junk': 'something',
+                    'junk2': 'else',
+                },
+                {
+                    'junk': ['Invalid field.'],
+                    'junk2': ['Invalid field.'],
+                },
+            ),
         ],
     )
     def test_internal_value_invalid(self, data, expected):
