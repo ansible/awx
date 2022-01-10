@@ -83,6 +83,7 @@ services:
 {% if enable_keycloak|bool %}
   keycloak:
     image: quay.io/keycloak/keycloak:15.0.2
+    container_name: tools_keycloak_1
     hostname: keycloak
     user: "{{ ansible_user_uid }}"
     ports:
