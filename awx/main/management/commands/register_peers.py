@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from awx.main.models import Instance, InstanceLink
 
@@ -15,13 +16,24 @@ class Command(BaseCommand):
         parser.add_argument('source', type=str, help="Receptor node opening the connections.")
         parser.add_argument('--peers', type=str, nargs='+', required=False, help="Nodes that the source node connects out to.")
         parser.add_argument('--disconnect', type=str, nargs='+', required=False, help="Nodes that should no longer be connected to by the source node.")
+        parser.add_argument(
+            '--exact',
+            type=str,
+            nargs='+',
+            required=False,
+            help="The exact set of nodes the source node should connect out to. Any existing links registered in the database that do not match will be removed.",
+        )
 
     def handle(self, **options):
         nodes = Instance.objects.in_bulk(field_name='hostname')
         if options['source'] not in nodes:
             raise CommandError(f"Host {options['source']} is not a registered instance.")
-        if not options['peers'] and not options['disconnect']:
-            raise CommandError("One of the options --peers or --disconnect is required.")
+        if not (options['peers'] or options['disconnect'] or options['exact']):
+            raise CommandError("One of the options --peers, --disconnect, or --exact is required.")
+        if options['exact'] and options['peers']:
+            raise CommandError("The option --peers may not be used with --exact.")
+        if options['exact'] and options['disconnect']:
+            raise CommandError("The option --disconnect may not be used with --exact.")
 
         if options['peers']:
             missing_peers = set(options['peers']) - set(nodes)
@@ -31,7 +43,7 @@ class Command(BaseCommand):
 
             results = 0
             for target in options['peers']:
-                instance, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
+                _, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
                 if created:
                     results += 1
 
@@ -46,3 +58,16 @@ class Command(BaseCommand):
                 results += n
 
             print(f"{results} peer links removed from the database.")
+
+        if options['exact']:
+            additions = 0
+            with transaction.atomic():
+                peers = set(options['exact'])
+                links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__hostname', flat=True))
+                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=peers - links).delete()
+                for peer in peers - links:
+                    _, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
+                    if created:
+                        additions += 1
+
+            print(f"{additions} peer links added and {removals} deleted from the database.")
