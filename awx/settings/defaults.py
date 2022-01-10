@@ -881,7 +881,7 @@ LOGGING = {
         'daphne': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'rest_framework.request': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'WARNING', 'propagate': False},
         'py.warnings': {'handlers': ['console']},
-        'awx': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger']},
+        'awx': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG'},
         'awx.conf': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
@@ -897,12 +897,12 @@ LOGGING = {
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.analytics': {'handlers': ['external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'propagate': False},
-        'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'propagate': False},
-        'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings']},
-        'social': {'handlers': ['console', 'file', 'tower_warnings']},
-        'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings']},
-        'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings']},
+        'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
+        'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
+        'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
     },
 }
 
