@@ -10,8 +10,6 @@
     keycloak_realm_template: ../_sources/keycloak.awx.realm.json
     keycloak_user: admin
     keycloak_pass: admin
-    awx_user: admin
-    awx_pass: admin
     cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
   tasks:
     - name: Generate certificates for keycloak
@@ -24,15 +22,17 @@
         private_key: "{{ private_key_content }}"
         public_key: "{{ public_key_content }}"
         public_key_trimmed: "{{ public_key_content | regex_replace('-----BEGIN CERTIFICATE-----\\\\n', '') | regex_replace('\\\\n-----END CERTIFICATE-----', '') }}"
-        existing_saml: "{{ lookup('awx.awx.controller_api', 'settings/saml', host=awx_host, password=awx_pass, username=awx_user, verify_ssl=false) }}"
+        existing_saml: "{{ lookup('awx.awx.controller_api', 'settings/saml', host=awx_host, verify_ssl=false) }}"
         new_saml: "{{ lookup('template', 'saml_settings.json.j2') }}"
       vars:
         # We add the extra \\ in here so that when jinja is templating out the files we end up with \n in the strings.
         public_key_content: "{{ lookup('file', public_key_file) | regex_replace('\n', '\\\\n') }}"
         private_key_content: "{{ lookup('file', private_key_file) | regex_replace('\n', '\\\\n') }}"
 
-    - debug:
+    - name: Displauy existing SAML configuration
+      debug:
         msg:
+          - "Here is your existing SAML configuration for reference:"
           - "{{ existing_saml }}"
 
     - pause:
@@ -47,8 +47,6 @@
       awx.awx.settings:
         settings: "{{ new_saml }}"
         controller_host: "{{ awx_host }}"
-        controller_username: "{{ awx_user }}"
-        controller_password: "{{ awx_pass }}"
         validate_certs: False
 
     - name: Get a keycloak token

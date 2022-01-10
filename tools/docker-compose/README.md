@@ -330,6 +330,11 @@ The first one time command will be creating a Keycloak database in your postgres
 docker exec tools_postgres_1 /usr/bin/psql -U awx --command "create database keycloak with encoding 'UTF8';"
 ```
 
+After running this commenad the following message should appear and you should be returned to your prompt:
+```base
+CREATE DATABASE
+```
+
 The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
 ```bash
 PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
@@ -362,19 +367,20 @@ In addition to container_reference, there are some additional variables which yo
 ```yaml
     keycloak_user: admin
     keycloak_pass: admin
-    awx_user: admin
-    awx_pass: admin
     cert_subject:  "/C=US/ST=NC/L=Durham/O=awx/CN="
 ```
 
 * keycloak_(user|pass) need to change if you modified the user when starting the initial container above.
-* awx_(user|pass) are credentials to get you into your AWX instance so you can read and write the SAML settings.
 * cert_subject will be the subject line of the certificate shared between AWX and keycloak you can change this if you like or just use the defaults.
 
-To override any of the variables above you can add more `-e` arguments to the playbook run below. For example, if you simply need to change the `awx_pass` add the argument `-r awx_pass=my_secret_pass` to the next command.
+To override any of the variables above you can add more `-e` arguments to the playbook run below. For example, if you simply need to change the `keycloak_pass` add the argument `-r keycloak_pass=my_secret_pass` to the next command.
+
+In addition, you may need to override the username or password to get into your AWX instance. We log into AWX in order to read and write the SAML settings. This can be done in several ways because we are using the awx.awx collection. The easiest way is to set environment variables such as `CONTROLLER_USERNAME`. See the awx.awx documentation for more information on setting environment variables. In the example provided below we are showing an example of specifying a username/password for authentication.
 
 Now that we have all of our variables covered we can run the playbook like:
 ```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
 ansible-playbook tools/docker-compose/ansible/plumb_keycloak.yml -e container_reference=<your container_reference here>
 ```
 
