@@ -38,9 +38,20 @@
     that:
       - "result is not changed"
 
-- name: Delete a User
+- name: Rename a User
   user:
     username: "{{ username }}"
+    new_username: "{{ username }}-renamed"
+    email: joe@example.org
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a User
+  user:
+    username: "{{ username }}-renamed"
     email: joe@example.org
     state: absent
   register: result

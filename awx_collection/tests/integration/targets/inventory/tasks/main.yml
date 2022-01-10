@@ -74,9 +74,21 @@
         that:
           - result.copied
 
-    - name: Delete an Inventory
+    - name: Rename an inventory
       inventory:
         name: "copy_{{ inv_name1 }}"
+        new_name: "copy_{{ inv_name1 }}a"
+        organization: Default
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - result.changed
+
+    - name: Delete an Inventory
+      inventory:
+        name: "copy_{{ inv_name1 }}a"
         organization: Default
         state: absent
       register: result
