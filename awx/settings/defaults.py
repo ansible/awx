@@ -473,6 +473,7 @@ SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
     'awx.sso.pipeline.update_user_teams_by_saml_attr',
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
+    'awx.sso.pipeline.update_user_flags',
 )
 SAML_AUTO_CREATE_OBJECTS = True
 
@@ -535,6 +536,7 @@ SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
 
 SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
 SOCIAL_AUTH_SAML_TEAM_ATTR = {}
+SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR = {}
 
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment

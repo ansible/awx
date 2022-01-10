@@ -229,3 +229,69 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
     if team_map.get('remove', True):
         [t.member_role.members.remove(user) for t in Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
+
+
+def _check_flag(user, flag, attributes, user_flags_settings):
+    new_flag = False
+    is_role_key = "is_%s_role" % (flag)
+    is_attr_key = "is_%s_attr" % (flag)
+    is_value_key = "is_%s_value" % (flag)
+
+    # Check to see if we are respecting a role and, if so, does our user have that role?
+    role_setting = user_flags_settings.get(is_role_key, None)
+    if role_setting:
+        # We do a 2 layer check here so that we don't spit out the else message if there is no role defined
+        if role_setting in attributes.get('Role', []):
+            logger.debug("User %s has %s role %s" % (user.username, flag, role_setting))
+            new_flag = True
+        else:
+            logger.debug("User %s is missing the %s role %s" % (user.username, flag, role_setting))
+
+    # Next, check to see if we are respecting an attribute; this will take priority over the role if its defined
+    attr_setting = user_flags_settings.get(is_attr_key, None)
+    if attr_setting and attributes.get(attr_setting, None):
+        # Do we have a required value for the attribute
+        if user_flags_settings.get(is_value_key, None):
+            # If so, check and see if the value of the attr matches the required value
+            attribute_value = attributes.get(attr_setting, None)
+            if isinstance(attribute_value, (list, tuple)):
+                attribute_value = attribute_value[0]
+            if attribute_value == user_flags_settings.get(is_value_key):
+                logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
+                new_flag = True
+            # if they don't match make sure that new_flag is false
+            else:
+                logger.debug(
+                    "Refusing %s for %s because attr %s (%s) did not match value '%s'"
+                    % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
+                )
+                new_flag = False
+        # If there was no required value then we can just allow them in because of the attribute
+        else:
+            logger.debug("Giving %s %s from attribute %s" % (user.username, flag, attr_setting))
+            new_flag = True
+
+    # If the user was flagged and we are going to make them not flagged make sure there is a message
+    old_value = getattr(user, "is_%s" % (flag))
+    if old_value and not new_flag:
+        logger.debug("Revoking %s from %s" % (flag, user.username))
+
+    return new_flag, old_value != new_flag
+
+
+def update_user_flags(backend, details, user=None, *args, **kwargs):
+    if not user:
+        return
+
+    from django.conf import settings
+
+    user_flags_settings = settings.SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR
+
+    attributes = kwargs.get('response', {}).get('attributes', {})
+    logger.debug("User attributes for %s: %s" % (user.username, attributes))
+
+    user.is_superuser, superuser_changed = _check_flag(user, 'superuser', attributes, user_flags_settings)
+    user.is_system_auditor, auditor_changed = _check_flag(user, 'system_auditor', attributes, user_flags_settings)
+
+    if superuser_changed or auditor_changed:
+        user.save()

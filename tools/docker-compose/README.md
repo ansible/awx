@@ -27,7 +27,7 @@ Here are the main `make` targets:
 
 Notable files:
 
-- `tools/docker-compose/inventory` file - used to configure the local AWX development deploymen
+- `tools/docker-compose/inventory` file - used to configure the local AWX development deployment
 - `migrate.yml` - playbook for migrating data from Local Docker to the Development Environment
 
 ### Prerequisites
@@ -241,6 +241,9 @@ $ make docker-compose
 - [Start a shell](#start-a-shell)
 - [Start AWX from the container shell](#start-awx-from-the-container-shell)
 - [Using Logstash](./docs/logstash.md)
+- [Start a Cluster](#start-a-cluster)
+- [Start with Minikube](#start-with-minikube)
+- [Keycloak Integration](#keycloak-integration)
 
 ### Start a Shell
 
@@ -311,3 +314,81 @@ If you want to clean all things once your are done, you can do:
 ```bash
 (host)$ make docker-compose-container-group-clean
 ```
+
+### Keycloak Integration
+Keycloak is a SAML provider and can be used to test AWX social auth. This section describes how to build a reference Keycloak instance and plumb it with AWX for testing purposes.
+
+First, be sure that you have the awx.awx collection installed by running `make install_collection`.
+Next, make sure you have your containers running by running `make docker-compose`.
+
+Note: The following instructions assume we are using the built-in postgres database container. If you are not using the internal database you can use this guide as a reference, updating the database fields as required for your connection.
+
+We are now ready to run two one time commands to build and pre-populate the Keycloak database.
+
+The first one time command will be creating a Keycloak database in your postgres database by running:
+```bash
+docker exec tools_postgres_1 /usr/bin/psql -U awx --command "create database keycloak with encoding 'UTF8';"
+```
+
+After running this commenad the following message should appear and you should be returned to your prompt:
+```base
+CREATE DATABASE
+```
+
+The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
+```bash
+PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
+docker run -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
+           -e DB_VENDOR=postgres -e DB_ADDR=postgres -e DB_DATABASE=keycloak -e DB_USER=awx -e DB_PASSWORD=${PG_PASSWORD} \
+           quay.io/keycloak/keycloak:15.0.2
+```
+
+Once you see a message like: `WFLYSRV0051: Admin console listening on http://127.0.0.1:9990` you can stop the container.
+
+Now that we have performed the one time setup anytime you want to run a Keycloak instance alongside AWX we can start docker-compose with the KEYCLOAK option to get a Keycloak instance with the command:
+```bash
+KEYCLOAK=true make docker-compose
+```
+
+Go ahead and stop your existing docker-compose run and restart with Keycloak before proceeding to the next steps.
+
+Once the containers come up a new port (8443) should be exposed and the Keycloak interface should be running on that port. Connect to this through a url like `https://localhost:8443` to confirm that Keycloak has stared. If you wanted to login and look at Keycloak itself you could select the "Administration console" link and log into the UI the username/password set in the previous `docker run` command. For more information about Keycloak and links to their documentation see their project at https://github.com/keycloak/keycloak.
+
+Now we are ready to configure and plumb Keycloak with AWX. To do this we have provided a playbook which will:
+* Create a certificate for data exchange between Keycloak and AWX.
+* Create a realm in Keycloak with a client for AWX and 3 users.
+* Backup and configure the SMAL adapter in AWX. NOTE: the private key of any existing SAML adapters can not be backed up through the API, you need a DB backup to recover this.
+
+Before we can run the playbook we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration and on the AWX side its done through the SAML settings. The playbook requires a variable called `container_reference` to be set. The container_reference variable needs to be how your browser will be able to talk to the running containers.  Here are some examples of how to choose a proper container_reference.
+* If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The the VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.
+* If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container_reference. 
+
+In addition to container_reference, there are some additional variables which you can override if you need/choose to do so. Here are their names and default values:
+```yaml
+    keycloak_user: admin
+    keycloak_pass: admin
+    cert_subject:  "/C=US/ST=NC/L=Durham/O=awx/CN="
+```
+
+* keycloak_(user|pass) need to change if you modified the user when starting the initial container above.
+* cert_subject will be the subject line of the certificate shared between AWX and keycloak you can change this if you like or just use the defaults.
+
+To override any of the variables above you can add more `-e` arguments to the playbook run below. For example, if you simply need to change the `keycloak_pass` add the argument `-r keycloak_pass=my_secret_pass` to the next command.
+
+In addition, you may need to override the username or password to get into your AWX instance. We log into AWX in order to read and write the SAML settings. This can be done in several ways because we are using the awx.awx collection. The easiest way is to set environment variables such as `CONTROLLER_USERNAME`. See the awx.awx documentation for more information on setting environment variables. In the example provided below we are showing an example of specifying a username/password for authentication.
+
+Now that we have all of our variables covered we can run the playbook like:
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_keycloak.yml -e container_reference=<your container_reference here>
+```
+
+Once the playbook is done running SAML should now be setup in your development environment. This realm has three users with the following username/passwords:
+1. awx_unpriv:unpriv123
+2. awx_admin:admin123
+3. awx_auditor:audit123
+
+The first account is a normal user. The second account has the attribute is_superuser set in Keycloak so will be a super user in AWX. The third account has the is_system_auditor attribute in Keycloak so it will be a system auditor in AWX. To log in with one of these Keycloak users go to the AWX login screen and click the small "Sign In With SAML Keycloak" button at the bottom of the login box.
+
+

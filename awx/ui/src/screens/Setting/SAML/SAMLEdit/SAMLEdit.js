@@ -89,6 +89,9 @@ function SAMLEdit() {
       ),
       SOCIAL_AUTH_SAML_TEAM_MAP: formatJson(form.SOCIAL_AUTH_SAML_TEAM_MAP),
       SOCIAL_AUTH_SAML_TEAM_ATTR: formatJson(form.SOCIAL_AUTH_SAML_TEAM_ATTR),
+      SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR: formatJson(
+        form.SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR
+      ),
       SOCIAL_AUTH_SAML_SECURITY_CONFIG: formatJson(
         form.SOCIAL_AUTH_SAML_SECURITY_CONFIG
       ),
@@ -180,6 +183,10 @@ function SAMLEdit() {
                 <ObjectField
                   name="SOCIAL_AUTH_SAML_TEAM_ATTR"
                   config={saml.SOCIAL_AUTH_SAML_TEAM_ATTR}
+                />
+                <ObjectField
+                  name="SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR"
+                  config={saml.SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR}
                 />
                 <ObjectField
                   name="SOCIAL_AUTH_SAML_SECURITY_CONFIG"

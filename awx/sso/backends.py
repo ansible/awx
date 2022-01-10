@@ -292,9 +292,12 @@ class SAMLAuth(BaseSAMLAuth):
         user = super(SAMLAuth, self).authenticate(request, *args, **kwargs)
         # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
         if getattr(user, 'is_new', False):
-            _decorate_enterprise_user(user, 'saml')
+            enterprise_auth = _decorate_enterprise_user(user, 'saml')
+            logger.debug("Created enterprise user %s from %s backend." % (user.username, enterprise_auth.get_provider_display()))
         elif user and not user.is_in_enterprise_category('saml'):
             return None
+        if user:
+            logger.debug("Enterprise user %s already created in Tower." % user.username)
         return user
 
     def get_user(self, user_id):

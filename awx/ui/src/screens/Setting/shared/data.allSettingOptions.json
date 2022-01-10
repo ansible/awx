@@ -3706,6 +3706,28 @@
           "required": true,
           "read_only": false
         }
+      },
+      "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "type": "nested object",
+        "required": false,
+        "label": "SAML User Flags Attribute Mapping",
+        "help_text": "Used to map super users and system auditors from SAML.",
+        "category": "SAML",
+        "category_slug": "saml",
+        "placeholder": {
+          "is_superuser_attr": "saml_attr",
+          "is_superuser_value": "value",
+          "is_superuser_role": "saml_role",
+          "is_system_auditor_attr": "saml_attr",
+          "is_system_auditor_value": "value",
+          "is_system_auditor_role": "saml_role"
+        },
+        "default": {},
+        "child": {
+          "type": "field",
+          "required": true,
+          "read_only": false
+        }
       }
     },
     "GET": {
@@ -6298,6 +6320,17 @@
         "type": "nested object",
         "label": "SAML Team Attribute Mapping",
         "help_text": "Used to translate user team membership.",
+        "category": "SAML",
+        "category_slug": "saml",
+        "defined_in_file": false,
+        "child": {
+          "type": "field"
+        }
+      },
+      "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "type": "nested object",
+	"label": "SAML User Flags Attribute Mapping",
+        "help_text": "Used to map super users and system auditors from SAML.",
         "category": "SAML",
         "category_slug": "saml",
         "defined_in_file": false,

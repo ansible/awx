@@ -247,6 +247,7 @@
   "SOCIAL_AUTH_SAML_TEAM_MAP":null,
   "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR":{},
   "SOCIAL_AUTH_SAML_TEAM_ATTR":{},
+  "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR":{},
   "NAMED_URL_FORMATS":{
     "organizations":"<name>",
     "teams":"<name>++<organization.name>",

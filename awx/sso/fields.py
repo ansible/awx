@@ -735,3 +735,15 @@ class SAMLTeamAttrField(HybridDictField):
     saml_attr = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()
+
+
+class SAMLUserFlagsAttrField(HybridDictField):
+
+    is_superuser_attr = fields.CharField(required=False, allow_null=True)
+    is_superuser_value = fields.CharField(required=False, allow_null=True)
+    is_superuser_role = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_attr = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_value = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_role = fields.CharField(required=False, allow_null=True)
+
+    child = _Forbidden()

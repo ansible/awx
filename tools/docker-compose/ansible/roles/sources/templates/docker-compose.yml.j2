@@ -80,6 +80,23 @@ services:
     - "awx_{{ container_postfix }}"
   {% endfor %}
 {% endif %}
+{% if enable_keycloak|bool %}
+  keycloak:
+    image: quay.io/keycloak/keycloak:15.0.2
+    container_name: tools_keycloak_1
+    hostname: keycloak
+    user: "{{ ansible_user_uid }}"
+    ports:
+      - "8443:8443"
+    environment:
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: {{ pg_username }}
+      DB_PASSWORD: {{ pg_password }}
+    depends_on:
+      - postgres
+{% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
   # logstash:
