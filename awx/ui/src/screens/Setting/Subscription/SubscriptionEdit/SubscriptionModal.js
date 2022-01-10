@@ -142,7 +142,7 @@ function SubscriptionModal({
       {!isLoading && !error && subscriptions?.length > 0 && (
         <TableComposable variant="compact" aria-label={t`Subscriptions table`}>
           <Thead>
-            <Tr>
+            <Tr ouiaId="subscription-table-header">
               <Th />
               <Th>{t`Name`}</Th>
               <Th modifier="fitContent">{t`Managed nodes`}</Th>
@@ -151,7 +151,11 @@ function SubscriptionModal({
           </Thead>
           <Tbody>
             {subscriptions.map((subscription) => (
-              <Tr key={`row-${subscription.pool_id}`} id={subscription.pool_id}>
+              <Tr
+                key={`row-${subscription.pool_id}`}
+                id={subscription.pool_id}
+                ouiaId={`subscription-row-${subscription.pool_id}`}
+              >
                 <Td
                   key={`row-${subscription.pool_id}`}
                   select={{

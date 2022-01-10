@@ -82,6 +82,7 @@ function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
             }
             rows={6}
             name="pod_spec_override"
+            dataCy="container-group-detail-pod-spec-override"
           />
         )}
       </DetailList>

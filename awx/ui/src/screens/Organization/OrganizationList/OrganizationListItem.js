@@ -32,7 +32,7 @@ function OrganizationListItem({
     organization.custom_virtualenv && !organization.default_environment;
 
   return (
-    <Tr id={`org-row-${organization.id}`}>
+    <Tr id={`org-row-${organization.id}`} ouiaId={`org-row-${organization.id}`}>
       <Td
         select={{
           rowIndex,

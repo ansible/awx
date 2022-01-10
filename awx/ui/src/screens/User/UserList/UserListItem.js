@@ -27,7 +27,7 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, rowIndex }) {
   const socialAuthUser = user.auth.length > 0;
 
   return (
-    <Tr id={`user-row-${user.id}`}>
+    <Tr id={`user-row-${user.id}`} ouiaId={`user-row-${user.id}`}>
       <Td
         select={{
           rowIndex,

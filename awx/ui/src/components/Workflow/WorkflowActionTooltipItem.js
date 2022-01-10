@@ -32,6 +32,7 @@ function WorkflowActionTooltipItem({
   return (
     <TooltipItem
       id={id}
+      data-cy={id}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

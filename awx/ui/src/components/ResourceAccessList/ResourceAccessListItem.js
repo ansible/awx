@@ -51,7 +51,10 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
   const [teamRoles, userRoles] = getRoleLists();
 
   return (
-    <Tr id={`access-item-row-${accessRecord.id}`}>
+    <Tr
+      id={`access-item-row-${accessRecord.id}`}
+      ouiaId={`access-item-row-${accessRecord.id}`}
+    >
       <Td id={`access-record-${accessRecord.id}`} dataLabel={t`Name`}>
         {accessRecord.id ? (
           <Link to={{ pathname: `/users/${accessRecord.id}/details` }}>
@@ -69,7 +72,11 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
             <Detail
               label={t`User Roles`}
               value={
-                <ChipGroup numChips={5} totalChips={userRoles.length}>
+                <ChipGroup
+                  numChips={5}
+                  totalChips={userRoles.length}
+                  ouiaId="user-role-chips"
+                >
                   {userRoles.map(renderChip)}
                 </ChipGroup>
               }
@@ -79,7 +86,11 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
             <Detail
               label={t`Team Roles`}
               value={
-                <ChipGroup numChips={5} totalChips={teamRoles.length}>
+                <ChipGroup
+                  numChips={5}
+                  totalChips={teamRoles.length}
+                  ouiaId="team-role-chips"
+                >
                   {teamRoles.map(renderChip)}
                 </ChipGroup>
               }

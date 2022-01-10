@@ -135,6 +135,7 @@ function Lookup(props) {
         <Button
           aria-label={t`Search`}
           id={`${id}-open`}
+          ouiaId={`${id}-open`}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.control}
           isDisabled={isLoading || isDisabled}
@@ -143,7 +144,11 @@ function Lookup(props) {
         </Button>
         {multiple ? (
           <ChipHolder isDisabled={isDisabled} className="pf-c-form-control">
-            <ChipGroup numChips={5} totalChips={items.length}>
+            <ChipGroup
+              numChips={5}
+              totalChips={items.length}
+              ouiaId={`${id}-chips`}
+            >
               {items.map((item) =>
                 renderItemChip({
                   item,
@@ -156,6 +161,7 @@ function Lookup(props) {
         ) : (
           <TextInput
             id={id}
+            ouiaId={`${id}-input`}
             value={typedText}
             onChange={(inputValue) => {
               setTypedText(inputValue);
@@ -175,6 +181,7 @@ function Lookup(props) {
         isOpen={isModalOpen}
         onClose={closeModal}
         description={state?.selectedItems?.length > 0 && modalDescription}
+        ouiaId={`${id}-modal`}
         actions={[
           <Button
             ouiaId="modal-select-button"

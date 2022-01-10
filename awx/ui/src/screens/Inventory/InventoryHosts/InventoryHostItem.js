@@ -21,7 +21,7 @@ function InventoryHostItem({
   const labelId = `check-action-${host.id}`;
 
   return (
-    <Tr id={`host-row-${host.id}`}>
+    <Tr id={`host-row-${host.id}`} ouiaId={`inventory-host-row-${host.id}`}>
       <Td
         data-cy={labelId}
         select={{

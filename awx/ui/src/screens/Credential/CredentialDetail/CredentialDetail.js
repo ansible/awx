@@ -110,9 +110,14 @@ function CredentialDetail({ credential }) {
             fullWidth
             label={<span>{label} *</span>}
             value={
-              <ChipGroup numChips={1} totalChips={1}>
+              <ChipGroup
+                numChips={1}
+                totalChips={1}
+                ouiaId={`credential-${id}-chips`}
+              >
                 <CredentialChip
                   credential={inputSources[id].summary_fields.source_credential}
+                  ouiaId={`credential-${id}-chip`}
                   isReadOnly
                 />
               </ChipGroup>

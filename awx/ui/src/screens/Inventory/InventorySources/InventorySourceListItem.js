@@ -58,7 +58,7 @@ function InventorySourceListItem({
 
   return (
     <>
-      <Tr id={`source-row-${source.id}`}>
+      <Tr id={`source-row-${source.id}`} ouiaId={`source-row-${source.id}`}>
         <Td
           data-cy={`check-action-${source.id}`}
           select={{

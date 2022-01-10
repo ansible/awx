@@ -7,7 +7,7 @@ import { Team } from 'types';
 
 function UserTeamListItem({ team, isSelected, onSelect, rowIndex }) {
   return (
-    <Tr id={`user-team-row-${team.id}`}>
+    <Tr id={`user-team-row-${team.id}`} ouiaId={`user-team-row-${team.id}`}>
       <Td
         select={{
           rowIndex,

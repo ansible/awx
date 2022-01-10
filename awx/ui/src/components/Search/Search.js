@@ -109,7 +109,12 @@ function Search({
   const searchOptions = columns
     .filter(({ key }) => key !== searchKey)
     .map(({ key, name }) => (
-      <SelectOption key={key} value={name} id={`select-option-${key}`}>
+      <SelectOption
+        data-cy={`select-option-${key}`}
+        id={`select-option-${key}`}
+        key={key}
+        value={name}
+      >
         {name}
       </SelectOption>
     ));

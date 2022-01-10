@@ -137,6 +137,7 @@ function PromptInventorySourceDetail({ resource }) {
             <ChipGroup
               numChips={5}
               totalChips={source_regions.split(',').length}
+              ouiaId="prompt-region-chips"
             >
               {source_regions.split(',').map((region) => (
                 <Chip key={region} isReadOnly>
@@ -155,6 +156,7 @@ function PromptInventorySourceDetail({ resource }) {
             <ChipGroup
               numChips={5}
               totalChips={instance_filters.split(',').length}
+              ouiaId="prompt-instance-filter-chips"
             >
               {instance_filters.split(',').map((filter) => (
                 <Chip key={filter} isReadOnly>
@@ -170,7 +172,11 @@ function PromptInventorySourceDetail({ resource }) {
           fullWidth
           label={t`Only Group By`}
           value={
-            <ChipGroup numChips={5} totalChips={group_by.split(',').length}>
+            <ChipGroup
+              numChips={5}
+              totalChips={group_by.split(',').length}
+              ouiaId="prompt-only-group-by-chips"
+            >
               {group_by.split(',').map((group) => (
                 <Chip key={group} isReadOnly>
                   {group}
@@ -185,6 +191,7 @@ function PromptInventorySourceDetail({ resource }) {
       )}
       {source_vars && (
         <VariablesDetail
+          dataCy="prompt-inventory-source-detail-source-variables"
           label={t`Source Variables`}
           rows={4}
           value={source_vars}

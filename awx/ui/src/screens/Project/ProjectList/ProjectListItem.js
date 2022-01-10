@@ -155,7 +155,7 @@ function ProjectListItem({
 
   return (
     <>
-      <Tr id={`${project.id}`}>
+      <Tr id={`${project.id}`} ouiaId={`project-row-${project.id}`}>
         <Td
           expand={{
             rowIndex,

@@ -20,7 +20,12 @@ function NavExpandableGroup(props) {
   if (routes.length === 1 && groupId === 'settings') {
     const [{ path }] = routes;
     return (
-      <NavItem itemId={groupId} isActive={isActivePath(path)} key={path}>
+      <NavItem
+        itemId={groupId}
+        isActive={isActivePath(path)}
+        key={path}
+        // ouiaId={path}
+      >
         <Link to={path}>{groupTitle}</Link>
       </NavItem>
     );
@@ -31,10 +36,16 @@ function NavExpandableGroup(props) {
       isActive={isActive}
       isExpanded
       groupId={groupId}
+      ouiaId={groupId}
       title={groupTitle}
     >
       {routes.map(({ path, title }) => (
-        <NavItem groupId={groupId} isActive={isActivePath(path)} key={path}>
+        <NavItem
+          groupId={groupId}
+          isActive={isActivePath(path)}
+          key={path}
+          // ouiaId={path}
+        >
           <Link to={path}>{title}</Link>
         </NavItem>
       ))}

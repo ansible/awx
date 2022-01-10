@@ -9,7 +9,7 @@ import { formatDateString } from 'util/dates';
 function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
   const { id } = useParams();
   return (
-    <Tr id={`token-row-${token.id}`}>
+    <Tr id={`token-row-${token.id}`} ouiaId={`token-row-${token.id}`}>
       <Td
         select={{
           rowIndex,

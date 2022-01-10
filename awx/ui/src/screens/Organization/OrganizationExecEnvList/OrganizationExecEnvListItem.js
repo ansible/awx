@@ -9,7 +9,10 @@ import { ExecutionEnvironment } from 'types';
 
 function OrganizationExecEnvListItem({ executionEnvironment, detailUrl }) {
   return (
-    <Tr id={`ee-row-${executionEnvironment.id}`}>
+    <Tr
+      id={`ee-row-${executionEnvironment.id}`}
+      ouiaId={`ee-row-${executionEnvironment.id}`}
+    >
       <Td dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>{executionEnvironment.name}</Link>
       </Td>

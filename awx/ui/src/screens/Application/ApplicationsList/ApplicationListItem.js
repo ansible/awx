@@ -18,7 +18,10 @@ function ApplicationListItem({
 }) {
   const labelId = `check-action-${application.id}`;
   return (
-    <Tr id={`application-row-${application.id}`}>
+    <Tr
+      id={`application-row-${application.id}`}
+      ouiaId={`application-row-${application.id}`}
+    >
       <Td
         select={{
           rowIndex,

@@ -207,6 +207,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
                 onChange={() => {
                   diffModeHelpers.setValue(!diffModeField.value);
                 }}
+                ouiaId="diff-mode-switch"
                 aria-label={t`toggle changes`}
               />
             </FormGroup>
@@ -236,6 +237,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
                     </span>
                   }
                   id="become_enabled"
+                  ouiaId="become_enabled"
                   isChecked={becomeEnabledField.value}
                   onChange={(checked) => {
                     becomeEnabledHelpers.setValue(checked);

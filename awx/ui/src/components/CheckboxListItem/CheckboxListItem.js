@@ -44,12 +44,21 @@ const CheckboxListItem = ({
 
       {columns?.length > 0 ? (
         columns.map((col) => (
-          <Td aria-label={col.name} dataLabel={col.key} key={col.key}>
+          <Td
+            aria-label={col.name}
+            data-cy={`item-${itemId}-${col.name}`}
+            dataLabel={col.key}
+            key={col.key}
+          >
             {item[col.key]}
           </Td>
         ))
       ) : (
-        <Td aria-labelledby={itemId} dataLabel={label}>
+        <Td
+          aria-labelledby={itemId}
+          data-cy={`item-${itemId}`}
+          dataLabel={label}
+        >
           <b>{label}</b>
         </Td>
       )}

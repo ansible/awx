@@ -57,6 +57,7 @@ function InstanceToggle({ className, fetchInstances, instance, onToggle }) {
           isChecked={isEnabled}
           isDisabled={isLoading || !me?.is_superuser}
           onChange={toggleInstance}
+          ouiaId={`host-${instance.id}-toggle`}
           aria-label={t`Toggle instance`}
         />
       </Tooltip>
