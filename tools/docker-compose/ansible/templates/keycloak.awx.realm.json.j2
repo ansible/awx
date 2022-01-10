@@ -1,3 +1,15 @@
+{#
+	This template is an export from Keycloak.
+	See https://github.com/keycloak/keycloak-documentation/blob/main/server_admin/topics/export-import.adoc for instructions on how to run the export.
+	Once you have the export you want to variablize the public cert, private cert, and the endpoints.
+	The endpoints should be replaced with the variable {{ container_reference }}
+	Some of the keys have \n's in there and some references do not.
+	The ones with the \n can be variablized by {{ private_key }} and {{ public_key }}.
+	The public key in the setting `saml.signing.certificate` should be replaced with {{ public_key_trimmed }}
+
+	Additionally, when you run the export from Keycloak it will export everything in the realm, this is not needed for import.
+	Look at the fields in the JSON and remove any additional fields that comes from your export that you don't need.
+#}
 {
   "id": "AWX Realm",
   "realm": "awx",
