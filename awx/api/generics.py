@@ -208,19 +208,40 @@ class APIView(views.APIView):
             return response
 
         if response.status_code >= 400:
-            status_msg = "status %s received by user %s attempting to access %s from %s" % (
-                response.status_code,
-                request.user,
-                request.path,
-                request.META.get('REMOTE_ADDR', None),
-            )
+            # api_400_error_message = "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}: {error}"
+            try:
+                status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(
+                    status_code=response.status_code,
+                    user_name=request.user,
+                    url_path=request.path,
+                    remote_addr=request.META.get('REMOTE_ADDR', None),
+                    error=response.data.get('error', response.status_text),
+                )
+            except Exception as e:
+                if getattr(settings, 'API_400_ERROR_LOG_FORMAT', None):
+                    logger.error("Unable to format API_400_ERROR_LOG_FORMAT setting, defaulting log message")
+                status_msg = "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}".format(
+                    status_code=response.status_code,
+                    user_name=request.user,
+                    url_path=request.path,
+                    remote_addr=request.META.get('REMOTE_ADDR', None),
+                    error=response.data.get('error', None),
+                )
+
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
                 response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
+                # To test post to https://tower.jowestco.net:8043/api/v2/settings/logging/test/
+                # This should return:
+                #   awx.api.generics status 409 received by user admin attempting to access /api/v2/settings/logging/test/ from 10.0.0.71: Logging not enabled
+                # log_api_error_msgs = getattr(settings, 'ENABLE_API_ERROR_LOGGING')
+                # if log_api_error_msgs and 'error' in response.data:
+                #    status_msg = "{}: {}".format(status_msg, response.data['error'])
                 logger.warning(status_msg)
+
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         response['X-API-Product-Version'] = get_awx_version()
