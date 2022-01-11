@@ -13,7 +13,6 @@ from django.db import transaction, connection
 from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
-from django.db.models import Q
 
 # AWX
 from awx.main.dispatch.reaper import reap_job
@@ -69,7 +68,7 @@ class TaskManager:
         """
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         """
-        instances = Instance.objects.filter(~Q(hostname=None), enabled=True)
+        instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop')
         self.real_instances = {i.hostname: i for i in instances}
 
         instances_partial = [
@@ -484,7 +483,7 @@ class TaskManager:
         return created_dependencies
 
     def process_pending_tasks(self, pending_tasks):
-        running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
+        running_workflow_templates = {wf.unified_job_template_id for wf in self.get_running_workflow_jobs()}
         tasks_to_update_job_explanation = []
         for task in pending_tasks:
             if self.start_task_limit <= 0:
@@ -593,7 +592,7 @@ class TaskManager:
         # elsewhere
         for j in UnifiedJob.objects.filter(
             status__in=['pending', 'waiting', 'running'],
-        ).exclude(execution_node__in=Instance.objects.values_list('hostname', flat=True)):
+        ).exclude(execution_node__in=Instance.objects.exclude(node_type='hop').values_list('hostname', flat=True)):
             if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')

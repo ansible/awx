@@ -364,11 +364,14 @@ class InstanceList(ListAPIView):
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
 
+    def get_queryset(self):
+        return super().get_queryset().exclude(node_type='hop')
+
 
 class InstanceDetail(RetrieveUpdateAPIView):
 
     name = _("Instance Detail")
-    model = models.Instance
+    queryset = models.Instance.objects.exclude(node_type='hop')
     serializer_class = serializers.InstanceSerializer
 
     def update(self, request, *args, **kwargs):
@@ -406,13 +409,15 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
     def is_valid_relation(self, parent, sub, created=False):
         if parent.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {parent.hostname}.")}
+        if parent.node_type == 'hop':
+            return {'msg': _(f"Cannot change instance group membership of hop node: {parent.hostname}.")}
         return None
 
 
 class InstanceHealthCheck(GenericAPIView):
 
     name = _('Instance Health Check')
-    model = models.Instance
+    queryset = models.Instance.objects.exclude(node_type='hop')
     serializer_class = serializers.InstanceHealthCheckSerializer
     permission_classes = (IsSystemAdminOrAuditor,)
 
@@ -503,6 +508,8 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     def is_valid_relation(self, parent, sub, created=False):
         if sub.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {sub.hostname}.")}
+        if sub.node_type == 'hop':
+            return {'msg': _(f"Cannot change instance group membership of hop node: {sub.hostname}.")}
         return None
 
 

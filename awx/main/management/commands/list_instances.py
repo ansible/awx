@@ -13,7 +13,7 @@ class Ungrouped(object):
 
     @property
     def instances(self):
-        return Instance.objects.filter(rampart_groups__isnull=True)
+        return Instance.objects.filter(rampart_groups__isnull=True).exclude(node_type='hop')
 
     @property
     def capacity(self):

@@ -202,7 +202,8 @@ def apply_cluster_membership_policies():
             to_log = logger.debug
         to_log('Waited {} seconds to obtain lock name: cluster_policy_lock'.format(lock_time))
         started_compute = time.time()
-        all_instances = list(Instance.objects.order_by('id'))
+        # Hop nodes should never get assigned to an InstanceGroup.
+        all_instances = list(Instance.objects.exclude(node_type='hop').order_by('id'))
         all_groups = list(InstanceGroup.objects.prefetch_related('instances'))
 
         total_instances = len(all_instances)
@@ -253,7 +254,7 @@ def apply_cluster_membership_policies():
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
-            candidate_pool_ct = len([i for i in actual_instances if i.obj.node_type != exclude_type])
+            candidate_pool_ct = sum(1 for i in actual_instances if i.obj.node_type != exclude_type)
             if not candidate_pool_ct:
                 continue
             policy_per_added = []
@@ -494,29 +495,21 @@ def execution_node_health_check(node):
 
 def inspect_execution_nodes(instance_list):
     with advisory_lock('inspect_execution_nodes_lock', wait=False):
-        node_lookup = {}
-        for inst in instance_list:
-            if inst.node_type == 'execution':
-                node_lookup[inst.hostname] = inst
+        node_lookup = {inst.hostname: inst for inst in instance_list}
 
         ctl = get_receptor_ctl()
-        connections = ctl.simple_command('status')['Advertisements']
+        mesh_status = ctl.simple_command('status')
+
         nowtime = now()
-        for ad in connections:
+        workers = mesh_status['Advertisements']
+        for ad in workers:
             hostname = ad['NodeID']
-            commands = ad.get('WorkCommands') or []
-            worktypes = []
-            for c in commands:
-                worktypes.append(c["WorkType"])
-            if 'ansible-runner' not in worktypes:
+            if not any(cmd['WorkType'] == 'ansible-runner' for cmd in ad['WorkCommands'] or []):
                 continue
+
             changed = False
             if hostname in node_lookup:
                 instance = node_lookup[hostname]
-            elif settings.MESH_AUTODISCOVERY_ENABLED:
-                defaults = dict(enabled=False)
-                (changed, instance) = Instance.objects.register(hostname=hostname, node_type='execution', defaults=defaults)
-                logger.warn(f"Registered execution node '{hostname}' (marked disabled by default)")
             else:
                 logger.warn(f"Unrecognized node on mesh advertising ansible-runner work type: {hostname}")
                 continue
