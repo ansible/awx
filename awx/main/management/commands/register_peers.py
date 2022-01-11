@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
         # No 1-cycles
         for collection in ('peers', 'disconnect', 'exact'):
-            if options['source'] in options[collection]:
+            if options[collection] and options['source'] in options[collection]:
                 raise CommandError(f"Source node {options['source']} may not also be in --{collection}.")
 
         # No 2-cycles
