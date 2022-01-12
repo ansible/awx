@@ -26,7 +26,7 @@ from awx.api.generics import APIView, GenericAPIView, ListAPIView, RetrieveUpdat
 from awx.api.permissions import IsSystemAdminOrAuditor
 from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
-from awx.main.tasks import handle_setting_changes
+from awx.main.tasks.system import handle_setting_changes
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry

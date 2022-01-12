@@ -62,7 +62,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications, update_inventory_computed_fields
+from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset, HostAccess
 from awx.api.generics import (
     APIView,
@@ -431,7 +431,7 @@ class InstanceHealthCheck(GenericAPIView):
         obj = self.get_object()
 
         if obj.node_type == 'execution':
-            from awx.main.tasks import execution_node_health_check
+            from awx.main.tasks.system import execution_node_health_check
 
             runner_data = execution_node_health_check(obj.hostname)
             obj.refresh_from_db()
@@ -441,7 +441,7 @@ class InstanceHealthCheck(GenericAPIView):
                 if extra_field in runner_data:
                     data[extra_field] = runner_data[extra_field]
         else:
-            from awx.main.tasks import cluster_node_health_check
+            from awx.main.tasks.system import cluster_node_health_check
 
             if settings.CLUSTER_HOST_ID == obj.hostname:
                 cluster_node_health_check(obj.hostname)

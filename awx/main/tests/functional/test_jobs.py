@@ -4,7 +4,7 @@ from unittest import mock
 import json
 
 from awx.main.models import Job, Instance, JobHostSummary, InventoryUpdate, InventorySource, Project, ProjectUpdate, SystemJob, AdHocCommand
-from awx.main.tasks import cluster_node_heartbeat
+from awx.main.tasks.system import cluster_node_heartbeat
 from django.test.utils import override_settings
 
 
@@ -20,7 +20,7 @@ def test_orphan_unified_job_creation(instance, inventory):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.inspect_execution_nodes', lambda *args, **kwargs: None)
+@mock.patch('awx.main.tasks.system.inspect_execution_nodes', lambda *args, **kwargs: None)
 @mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu: 8)
 @mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem: 62)
 def test_job_capacity_and_with_inactive_node():

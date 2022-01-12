@@ -7,7 +7,7 @@ from datetime import timedelta
 @pytest.mark.parametrize(
     "job_name,function_path",
     [
-        ('tower_scheduler', 'awx.main.tasks.awx_periodic_scheduler'),
+        ('tower_scheduler', 'awx.main.tasks.system.awx_periodic_scheduler'),
     ],
 )
 def test_CELERYBEAT_SCHEDULE(mocker, job_name, function_path):

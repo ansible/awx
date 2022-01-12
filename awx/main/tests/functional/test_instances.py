@@ -4,7 +4,7 @@ from unittest import mock
 from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate, ProjectUpdate
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance, InstanceGroup
-from awx.main.tasks import apply_cluster_membership_policies
+from awx.main.tasks.system import apply_cluster_membership_policies
 from awx.api.versioning import reverse
 
 from django.utils.timezone import now

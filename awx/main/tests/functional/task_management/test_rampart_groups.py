@@ -3,7 +3,7 @@ from unittest import mock
 from datetime import timedelta
 from awx.main.scheduler import TaskManager
 from awx.main.models import InstanceGroup, WorkflowJob
-from awx.main.tasks import apply_cluster_membership_policies
+from awx.main.tasks.system import apply_cluster_membership_policies
 
 
 @pytest.mark.django_db

@@ -5,7 +5,7 @@ from collections import namedtuple
 from unittest import mock  # noqa
 import pytest
 
-from awx.main.tasks import AWXReceptorJob
+from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.utils import (
     create_temporary_fifo,
 )

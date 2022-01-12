@@ -813,7 +813,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return True
 
     def send_approval_notification(self, approval_status):
-        from awx.main.tasks import send_notifications  # avoid circular import
+        from awx.main.tasks.system import send_notifications  # avoid circular import
 
         if self.workflow_job_template is None:
             return

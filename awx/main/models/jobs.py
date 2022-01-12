@@ -583,7 +583,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunJob
+        from awx.main.tasks.jobs import RunJob
 
         return RunJob
 
@@ -1213,7 +1213,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunSystemJob
+        from awx.main.tasks.jobs import RunSystemJob
 
         return RunSystemJob
 

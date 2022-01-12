@@ -62,7 +62,7 @@ def test_health_check_throws_error(post, admin_user):
     # we will simulate a receptor error, similar to this one
     # https://github.com/ansible/receptor/blob/156e6e24a49fbf868734507f9943ac96208ed8f5/receptorctl/receptorctl/socket_interface.py#L204
     # related to issue https://github.com/ansible/tower/issues/5315
-    with mock.patch('awx.main.utils.receptor.run_until_complete', side_effect=RuntimeError('Remote error: foobar')):
+    with mock.patch('awx.main.tasks.receptor.run_until_complete', side_effect=RuntimeError('Remote error: foobar')):
         post(url=url, user=admin_user, expect=200)
     instance.refresh_from_db()
     assert 'Remote error: foobar' in instance.errors

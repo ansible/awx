@@ -130,7 +130,7 @@ a telnet session:
 ```python
     # awx/main/tasks.py
 
-    class SomeTask(awx.main.tasks.BaseTask):
+    class SomeTask(awx.main.tasks.jobs.BaseTask):
 
         def run(self, pk, **kwargs):
             # This will set a breakpoint and open an interactive Python
