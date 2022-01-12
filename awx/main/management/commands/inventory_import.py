@@ -78,6 +78,20 @@ class AnsibleInventoryLoader(object):
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
         ee = get_default_execution_environment()
 
+        if settings.IS_K8S:
+            logger.warn('This command is not able to run on kubernetes-based deployment. This action should be done using the API.')
+            sys.exit(1)
+
+        if ee.credential:
+            process = subprocess.run(['podman', 'image', 'exists', ee.image], capture_output=True)
+            if process.returncode != 0:
+                logger.warn(
+                    f'The default execution environment (id={ee.id}, name={ee.name}, image={ee.image}) is not available on this node. '
+                    'The image needs to be available locally before using this command, due to registry authentication. '
+                    'To pull this image, either run a job on this node or manually pull the image.'
+                )
+                sys.exit(1)
+
         bargs.extend([ee.image])
 
         bargs.extend(['ansible-inventory', '-i', self.source])
