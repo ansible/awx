@@ -68,10 +68,14 @@ function JobsDetail() {
     },
   ];
 
+  const data = 'jobs'
+
   return (
     <>
       <RoutedTabs tabsArray={tabsArray} />
-      <CardBody>
+      <CardBody
+        datatestid = {`${data}-settings`}
+        >
         {isLoading && <ContentLoading />}
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && jobs && (
