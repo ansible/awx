@@ -71,6 +71,7 @@ function LoggingEdit() {
       LOG_AGGREGATOR_LOGGERS: formatJson(form.LOG_AGGREGATOR_LOGGERS),
       LOG_AGGREGATOR_HOST: form.LOG_AGGREGATOR_HOST || null,
       LOG_AGGREGATOR_TYPE: form.LOG_AGGREGATOR_TYPE || null,
+      API_400_ERROR_LOG_FORMAT: form.API_400_ERROR_LOG_FORMAT || null,
     });
   };
 
@@ -196,6 +197,10 @@ function LoggingEdit() {
                   name="LOG_AGGREGATOR_LOGGERS"
                   config={logging.LOG_AGGREGATOR_LOGGERS}
                 />
+		<InputField
+		  name="API_400_ERROR_LOG_FORMAT"
+		  config={logging.API_400_ERROR_LOG_FORMAT}
+		/>
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
                 <RevertFormActionGroup

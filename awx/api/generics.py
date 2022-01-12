@@ -44,6 +44,7 @@ from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
+from awx.conf import settings_registry
 
 __all__ = [
     'APIView',
@@ -208,7 +209,6 @@ class APIView(views.APIView):
             return response
 
         if response.status_code >= 400:
-            # api_400_error_message = "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}: {error}"
             try:
                 status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(
                     status_code=response.status_code,
@@ -220,12 +220,16 @@ class APIView(views.APIView):
             except Exception as e:
                 if getattr(settings, 'API_400_ERROR_LOG_FORMAT', None):
                     logger.error("Unable to format API_400_ERROR_LOG_FORMAT setting, defaulting log message")
-                status_msg = "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}".format(
-                    status_code=response.status_code,
-                    user_name=request.user,
-                    url_path=request.path,
-                    remote_addr=request.META.get('REMOTE_ADDR', None),
-                    error=response.data.get('error', None),
+                status_msg = (
+                    settings_registry.get_setting_field('API_400_ERROR_LOG_FORMAT')
+                    .get_default()
+                    .format(
+                        status_code=response.status_code,
+                        user_name=request.user,
+                        url_path=request.path,
+                        remote_addr=request.META.get('REMOTE_ADDR', None),
+                        error=response.data.get('error', None),
+                    )
                 )
 
             if hasattr(self, '__init_request_error__'):
@@ -234,12 +238,6 @@ class APIView(views.APIView):
                 response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
-                # To test post to https://tower.jowestco.net:8043/api/v2/settings/logging/test/
-                # This should return:
-                #   awx.api.generics status 409 received by user admin attempting to access /api/v2/settings/logging/test/ from 10.0.0.71: Logging not enabled
-                # log_api_error_msgs = getattr(settings, 'ENABLE_API_ERROR_LOGGING')
-                # if log_api_error_msgs and 'error' in response.data:
-                #    status_msg = "{}: {}".format(status_msg, response.data['error'])
                 logger.warning(status_msg)
 
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
