@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 peers = set(options['exact'])
                 links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__hostname', flat=True))
                 removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=peers - links).delete()
-                for peer in peers - links:
+                for target in peers - links:
                     _, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
                     if created:
                         additions += 1
