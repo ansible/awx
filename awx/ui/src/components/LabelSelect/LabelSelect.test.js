@@ -4,7 +4,7 @@ import { mount } from 'enzyme';
 import { LabelsAPI } from 'api';
 import LabelSelect from './LabelSelect';
 
-jest.mock('../../../api');
+jest.mock('../../api');
 
 const options = [
   { id: 1, name: 'one' },

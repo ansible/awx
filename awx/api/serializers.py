@@ -1642,6 +1642,7 @@ class BaseSerializerWithVariables(BaseSerializer):
     def validate_variables(self, value):
         return vars_validate_or_raise(value)
 
+
 class LabelsListMixin(object):
     def _summary_field_labels(self, obj):
         label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
@@ -1658,6 +1659,7 @@ class LabelsListMixin(object):
         res = super(LabelsListMixin, self).get_summary_fields(obj)
         res['labels'] = self._summary_field_labels(obj)
         return res
+
 
 class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']

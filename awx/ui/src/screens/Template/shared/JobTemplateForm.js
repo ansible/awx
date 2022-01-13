@@ -42,7 +42,7 @@ import {
 import Popover from 'components/Popover';
 import { JobTemplatesAPI } from 'api';
 import useIsMounted from 'hooks/useIsMounted';
-import LabelSelect from './LabelSelect';
+import LabelSelect from 'components/LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
 

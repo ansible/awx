@@ -26,7 +26,7 @@ import ContentError from 'components/ContentError';
 import CheckboxField from 'components/FormField/CheckboxField';
 import Popover from 'components/Popover';
 import { WorkFlowJobTemplate } from 'types';
-import LabelSelect from './LabelSelect';
+import LabelSelect from 'components/LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
 
 const urlOrigin = window.location.origin;
