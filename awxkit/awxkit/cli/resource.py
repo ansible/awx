@@ -11,7 +11,7 @@ from awxkit.cli.format import FORMATTERS, format_response, add_authentication_ar
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
 
-CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics']
+CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics', 'mesh_visualizer']
 
 DEPRECATED_RESOURCES = {
     'ad_hoc_commands': 'ad_hoc',

@@ -116,6 +116,7 @@ class Resources(object):
     _labels = 'labels/'
     _me = 'me/'
     _metrics = 'metrics/'
+    _mesh_visualizer = 'mesh_visualizer/'
     _notification = r'notifications/\d+/'
     _notification_template = r'notification_templates/\d+/'
     _notification_template_any = r'\w+/\d+/notification_templates_any/\d+/'
