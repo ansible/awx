@@ -19,29 +19,29 @@ class Command(BaseCommand):
         parser.add_argument(
             '--exact',
             type=str,
-            nargs='+',
+            nargs='*',
             required=False,
-            help="The exact set of nodes the source node should connect out to. Any existing links registered in the database that do not match will be removed.",
+            help="The exact set of nodes the source node should connect out to. Any existing links registered in the database that do not match will be removed. May be empty.",
         )
 
     def handle(self, **options):
         nodes = Instance.objects.in_bulk(field_name='hostname')
         if options['source'] not in nodes:
             raise CommandError(f"Host {options['source']} is not a registered instance.")
-        if not (options['peers'] or options['disconnect'] or options['exact']):
+        if not (options['peers'] or options['disconnect'] or options['exact'] is not None):
             raise CommandError("One of the options --peers, --disconnect, or --exact is required.")
-        if options['exact'] and options['peers']:
+        if options['exact'] is not None and options['peers']:
             raise CommandError("The option --peers may not be used with --exact.")
-        if options['exact'] and options['disconnect']:
+        if options['exact'] is not None and options['disconnect']:
             raise CommandError("The option --disconnect may not be used with --exact.")
 
         # No 1-cycles
         for collection in ('peers', 'disconnect', 'exact'):
-            if options[collection] and options['source'] in options[collection]:
+            if options[collection] is not None and options['source'] in options[collection]:
                 raise CommandError(f"Source node {options['source']} may not also be in --{collection}.")
 
         # No 2-cycles
-        if options['peers'] or options['exact']:
+        if options['peers'] or options['exact'] is not None:
             peers = set(options['peers'] or options['exact'])
             incoming = set(InstanceLink.objects.filter(target=nodes[options['source']]).values_list('source__hostname', flat=True))
             if peers & incoming:
@@ -71,12 +71,12 @@ class Command(BaseCommand):
 
             print(f"{results} peer links removed from the database.")
 
-        if options['exact']:
+        if options['exact'] is not None:
             additions = 0
             with transaction.atomic():
                 peers = set(options['exact'])
                 links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__hostname', flat=True))
-                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=peers - links).delete()
+                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=links - peers).delete()
                 for target in peers - links:
                     _, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
                     if created:
