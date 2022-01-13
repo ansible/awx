@@ -28,6 +28,7 @@ from awx.api.views import (
     OAuth2TokenList,
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
+    MeshVisualizer,
 )
 
 from awx.api.views.metrics import MetricsView
@@ -95,6 +96,7 @@ v2_urls = [
     url(r'^me/$', UserMeList.as_view(), name='user_me_list'),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard_view'),
     url(r'^dashboard/graphs/jobs/$', DashboardJobsGraphView.as_view(), name='dashboard_jobs_graph_view'),
+    url(r'^mesh_visualizer/', MeshVisualizer.as_view(), name='mesh_visualizer_view'),
     url(r'^settings/', include('awx.conf.urls')),
     url(r'^instances/', include(instance_urls)),
     url(r'^instance_groups/', include(instance_group_urls)),

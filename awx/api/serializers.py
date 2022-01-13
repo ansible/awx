@@ -57,6 +57,7 @@ from awx.main.models import (
     Host,
     Instance,
     InstanceGroup,
+    InstanceLink,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -4765,6 +4766,28 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         if self.context['request'].method == 'PATCH' and attrs == {'enabled': False}:
             return attrs
         return super(ScheduleSerializer, self).validate(attrs)
+
+
+class InstanceLinkSerializer(BaseSerializer):
+    class Meta:
+        model = InstanceLink
+        fields = ('source', 'target')
+
+    source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+    target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+
+
+class InstanceNodeSerializer(BaseSerializer):
+    class Meta:
+        model = Instance
+        fields = ('id', 'hostname', 'node_type', 'node_state')
+
+    node_state = serializers.SerializerMethodField()
+
+    def get_node_state(self, obj):
+        if not obj.enabled:
+            return "disabled"
+        return "unhealthy" if obj.errors else "healthy"
 
 
 class InstanceSerializer(BaseSerializer):
