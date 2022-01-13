@@ -26,7 +26,11 @@ import JobListItem from './JobListItem';
 import JobListCancelButton from './JobListCancelButton';
 import useWsJobs from './useWsJobs';
 
-function JobList({ defaultParams, showTypeColumn = false }) {
+function JobList({
+  defaultParams,
+  showTypeColumn = false,
+  additionalRelatedSearchableKeys = [],
+}) {
   const qsConfig = getQSConfig(
     'job',
     {
@@ -243,7 +247,10 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           }
           clearSelected={clearSelected}
           toolbarSearchableKeys={searchableKeys}
-          toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          toolbarRelatedSearchableKeys={[
+            ...relatedSearchableKeys,
+            ...additionalRelatedSearchableKeys,
+          ]}
           renderToolbar={(props) => (
             <DatalistToolbar
               {...props}

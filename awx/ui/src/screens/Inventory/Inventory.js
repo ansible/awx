@@ -167,6 +167,9 @@ function Inventory({ setBreadcrumb }) {
                     inventory.id,
                   or__workflowjob__inventory: inventory.id,
                 }}
+                additionalRelatedSearchableKeys={[
+                  'inventoryupdate__inventory_source__inventory',
+                ]}
               />
             </Route>,
             <Route path="*" key="not-found">
