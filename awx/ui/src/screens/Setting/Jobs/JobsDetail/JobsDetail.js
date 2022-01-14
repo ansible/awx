@@ -68,13 +68,13 @@ function JobsDetail() {
     },
   ];
 
-  const data = 'jobs'
+  const jobsRole = 'region'
 
   return (
     <>
       <RoutedTabs tabsArray={tabsArray} />
       <CardBody
-        datatestid = {`${data}-settings`}
+        role = {jobsRole}
         >
         {isLoading && <ContentLoading />}
         {!isLoading && error && <ContentError error={error} />}
