@@ -186,10 +186,6 @@ class InstanceManager(models.Manager):
         else:
             return (False, self.me())
 
-    def active_count(self):
-        """Return count of active Tower nodes for licensing."""
-        return self.exclude(node_type='hop').count()
-
 
 class InstanceGroupManager(models.Manager):
     """A custom manager class for the Instance model.

@@ -77,7 +77,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     ig_all = instance_group_factory("all", instances=[i1, i2, i3])
     ig_dup = instance_group_factory("duplicates", instances=[i1])
     project.organization.instance_groups.add(ig_all, ig_dup)
-    actual_num_instances = Instance.objects.active_count()
+    actual_num_instances = Instance.objects.count()
     list_response = get(reverse('api:instance_list'), user=system_auditor)
     api_num_instances_auditor = list(list_response.data.items())[0][1]
 
