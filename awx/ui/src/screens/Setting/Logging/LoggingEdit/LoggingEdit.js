@@ -8,7 +8,7 @@ import { CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { FormSubmitError } from 'components/FormField';
-import { FormColumnLayout } from 'components/FormLayout';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
 import { useSettings } from 'contexts/Settings';
 import useModal from 'hooks/useModal';
 import useRequest from 'hooks/useRequest';
@@ -197,10 +197,12 @@ function LoggingEdit() {
                   name="LOG_AGGREGATOR_LOGGERS"
                   config={logging.LOG_AGGREGATOR_LOGGERS}
                 />
-                <InputField
-                  name="API_400_ERROR_LOG_FORMAT"
-                  config={logging.API_400_ERROR_LOG_FORMAT}
-                />
+                <FormFullWidthLayout>
+                  <InputField
+                    name="API_400_ERROR_LOG_FORMAT"
+                    config={logging.API_400_ERROR_LOG_FORMAT}
+                  />
+                </FormFullWidthLayout>
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
                 <RevertFormActionGroup
