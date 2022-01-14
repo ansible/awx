@@ -209,28 +209,19 @@ class APIView(views.APIView):
             return response
 
         if response.status_code >= 400:
+            msg_data = {
+                'status_code': response.status_code,
+                'user_name': request.user,
+                'url_path': request.path,
+                'remote_addr': request.META.get('REMOTE_ADDR', None),
+                'error': response.data.get('error', response.status_text),
+            }
             try:
-                status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(
-                    status_code=response.status_code,
-                    user_name=request.user,
-                    url_path=request.path,
-                    remote_addr=request.META.get('REMOTE_ADDR', None),
-                    error=response.data.get('error', response.status_text),
-                )
+                status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(**msg_data)
             except Exception as e:
                 if getattr(settings, 'API_400_ERROR_LOG_FORMAT', None):
                     logger.error("Unable to format API_400_ERROR_LOG_FORMAT setting, defaulting log message")
-                status_msg = (
-                    settings_registry.get_setting_field('API_400_ERROR_LOG_FORMAT')
-                    .get_default()
-                    .format(
-                        status_code=response.status_code,
-                        user_name=request.user,
-                        url_path=request.path,
-                        remote_addr=request.META.get('REMOTE_ADDR', None),
-                        error=response.data.get('error', None),
-                    )
-                )
+                status_msg = settings_registry.get_setting_field('API_400_ERROR_LOG_FORMAT').get_default().format(**msg_data)
 
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
