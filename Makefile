@@ -105,7 +105,7 @@ virtualenv_awx:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			$(PYTHON) -m venv $(VENV_BASE)/awx; \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
+			$(VENV_BASE)/awx/bin/pip install --no-cache-dir $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
 		fi; \
 	fi
 
@@ -113,14 +113,14 @@ virtualenv_awx:
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
+	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/awx/bin/pip install --no-cache-dir $(PIP_OPTIONS) -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
+	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install --no-cache-dir $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
-	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
+	$(VENV_BASE)/awx/bin/pip install --no-cache-dir -r requirements/requirements_dev.txt
 
 requirements: requirements_awx
 
@@ -307,7 +307,7 @@ test_collection:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi && \
-	pip install ansible-core && \
+	pip install --no-cache-dir ansible-core && \
 	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
