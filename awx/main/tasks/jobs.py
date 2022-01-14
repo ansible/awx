@@ -1,5 +1,4 @@
 # Python
-from asyncio.log import logger
 from collections import deque, OrderedDict
 from distutils.dir_util import copy_tree
 import errno
@@ -39,7 +38,6 @@ from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS, JOB_FOLDER_PREFIX
-from awx.main.utils.safe_yaml import safe_dump
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Instance,
