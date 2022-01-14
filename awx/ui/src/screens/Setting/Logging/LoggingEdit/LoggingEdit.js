@@ -197,10 +197,10 @@ function LoggingEdit() {
                   name="LOG_AGGREGATOR_LOGGERS"
                   config={logging.LOG_AGGREGATOR_LOGGERS}
                 />
-		<InputField
-		  name="API_400_ERROR_LOG_FORMAT"
-		  config={logging.API_400_ERROR_LOG_FORMAT}
-		/>
+                <InputField
+                  name="API_400_ERROR_LOG_FORMAT"
+                  config={logging.API_400_ERROR_LOG_FORMAT}
+                />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
                 <RevertFormActionGroup

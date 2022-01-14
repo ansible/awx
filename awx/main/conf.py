@@ -681,13 +681,13 @@ register(
     label=_('Log Format For API 4XX Errors'),
     help_text=_(
         'The format of logged messages when an API 4XX error occurs, '
-        'the following variables will be subsituted: \n'
+        'the following variables will be substituted: \n'
         'status_code - The HTTP status code of the error\n'
         'user_name - The user name attempting to use the API\n'
         'url_path - The URL path to the API endpoint called\n'
         'remote_addr - The remote address seen for the user\n'
         'error - The error set by the api endpoint\n'
-        'Varibles need to be in the format {<variable name>}.'
+        'Variables need to be in the format {<variable name>}.'
     ),
     category=_('Logging'),
     category_slug='logging',
