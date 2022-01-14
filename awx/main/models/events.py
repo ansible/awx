@@ -541,8 +541,7 @@ class JobEvent(BasePlaybookEvent):
                 return
             job = self.job
 
-            from awx.main.models import Host, JobHostSummary  # circular import
-            from awx.main.models import Host, JobHostSummary, HostMetric
+            from awx.main.models import Host, JobHostSummary, HostMetric  # circular import
 
             all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
             existing_host_ids = set(h.id for h in all_hosts)
