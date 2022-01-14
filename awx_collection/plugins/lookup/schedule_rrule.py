@@ -90,7 +90,6 @@ from ansible.module_utils.six import raise_from
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from datetime import datetime
-from dateutil import rrule
 
 try:
     import pytz
@@ -132,10 +131,7 @@ class LookupModule(LookupBase):
     # plugin constructor
     def __init__(self, *args, **kwargs):
         if LIBRARY_IMPORT_ERROR:
-            raise_from(
-                AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)),
-                LIBRARY_IMPORT_ERROR
-            )
+            raise_from(AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)), LIBRARY_IMPORT_ERROR)
         super().__init__(*args, **kwargs)
 
     @staticmethod

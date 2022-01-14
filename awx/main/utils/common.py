@@ -10,7 +10,6 @@ import os
 import subprocess
 import re
 import stat
-import subprocess
 import urllib.parse
 import threading
 import contextlib

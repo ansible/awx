@@ -71,7 +71,7 @@ def test_survey_spec_only_changed(run_module, admin_user, organization, survey_s
 
 
 @pytest.mark.django_db
-def test_survey_spec_only_changed(run_module, admin_user, organization, survey_spec):
+def test_survey_spec_missing_field(run_module, admin_user, organization, survey_spec):
     wfjt = WorkflowJobTemplate.objects.create(organization=organization, name='foo-workflow', survey_enabled=True, survey_spec=survey_spec)
     result = run_module('workflow_job_template', {'name': 'foo-workflow', 'organization': organization.name, 'state': 'present'}, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
