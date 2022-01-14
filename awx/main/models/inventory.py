@@ -366,7 +366,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
     @transaction.atomic
     def schedule_deletion(self, user_id=None):
-        from awx.main.tasks import delete_inventory
+        from awx.main.tasks.system import delete_inventory
         from awx.main.signals import activity_stream_delete
 
         if self.pending_deletion is True:
@@ -382,7 +382,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         if self.kind == 'smart' and settings.AWX_REBUILD_SMART_MEMBERSHIP:
 
             def on_commit():
-                from awx.main.tasks import update_host_smart_inventory_memberships
+                from awx.main.tasks.system import update_host_smart_inventory_memberships
 
                 update_host_smart_inventory_memberships.delay()
 
@@ -551,7 +551,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         if settings.AWX_REBUILD_SMART_MEMBERSHIP:
 
             def on_commit():
-                from awx.main.tasks import update_host_smart_inventory_memberships
+                from awx.main.tasks.system import update_host_smart_inventory_memberships
 
                 update_host_smart_inventory_memberships.delay()
 
@@ -631,7 +631,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     @transaction.atomic
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
-        from awx.main.tasks import update_inventory_computed_fields
+        from awx.main.tasks.system import update_inventory_computed_fields
         from awx.main.signals import disable_activity_stream, activity_stream_delete
 
         def mark_actual():
@@ -1219,7 +1219,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunInventoryUpdate
+        from awx.main.tasks.jobs import RunInventoryUpdate
 
         return RunInventoryUpdate
 

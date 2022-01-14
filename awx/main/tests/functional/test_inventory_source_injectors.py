@@ -5,7 +5,7 @@ import json
 import re
 from collections import namedtuple
 
-from awx.main.tasks import RunInventoryUpdate
+from awx.main.tasks.jobs import RunInventoryUpdate
 from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
 from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.tests import data
@@ -257,6 +257,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         # Also do not send websocket status updates
         with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
             # The point of this test is that we replace run with assertions
-            with mock.patch('awx.main.tasks.AWXReceptorJob.run', substitute_run):
+            with mock.patch('awx.main.tasks.receptor.AWXReceptorJob.run', substitute_run):
                 # so this sets up everything for a run and then yields control over to substitute_run
                 task.run(inventory_update.pk)

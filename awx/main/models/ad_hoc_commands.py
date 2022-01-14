@@ -144,7 +144,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunAdHocCommand
+        from awx.main.tasks.jobs import RunAdHocCommand
 
         return RunAdHocCommand
 

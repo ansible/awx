@@ -86,13 +86,13 @@ appropriate AMQP queue:
         "uuid": "<some_unique_string>",
         "args": [1, 1],
         "kwargs": {},
-        "task": "awx.main.tasks.add"
+        "task": "awx.main.tasks.system.add"
     }
 
 When a background worker receives the message, it deserializes it and runs the
 associated Python code:
 
-    awx.main.tasks.add(123)
+    awx.main.tasks.system.add(123)
 
 
 Dispatcher Implementation

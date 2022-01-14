@@ -257,7 +257,7 @@ class TaskManager:
         if self.start_task_limit == 0:
             # schedule another run immediately after this task manager
             schedule_task_manager()
-        from awx.main.tasks import handle_work_error, handle_work_success
+        from awx.main.tasks.system import handle_work_error, handle_work_success
 
         dependent_tasks = dependent_tasks or []
 

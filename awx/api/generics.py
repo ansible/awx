@@ -817,7 +817,7 @@ class ResourceAccessList(ParentMixin, ListAPIView):
 
 
 def trigger_delayed_deep_copy(*args, **kwargs):
-    from awx.main.tasks import deep_copy_model_obj
+    from awx.main.tasks.system import deep_copy_model_obj
 
     connection.on_commit(lambda: deep_copy_model_obj.delay(*args, **kwargs))
 
