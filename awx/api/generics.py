@@ -220,7 +220,7 @@ class APIView(views.APIView):
                 status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(**msg_data)
             except Exception as e:
                 if getattr(settings, 'API_400_ERROR_LOG_FORMAT', None):
-                    logger.error("Unable to format API_400_ERROR_LOG_FORMAT setting, defaulting log message")
+                    logger.error("Unable to format API_400_ERROR_LOG_FORMAT setting, defaulting log message: {}".format(e))
                 status_msg = settings_registry.get_setting_field('API_400_ERROR_LOG_FORMAT').get_default().format(**msg_data)
 
             if hasattr(self, '__init_request_error__'):
