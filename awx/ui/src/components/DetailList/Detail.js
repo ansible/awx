@@ -50,7 +50,7 @@ const Detail = ({
 
   const labelCy = dataCy ? `${dataCy}-label` : null;
   const valueCy = dataCy ? `${dataCy}-value` : null;
-  const jobsSetting = `${dataCy}-testID`
+  const jobsSetting = `${dataCy}-name`
 
   return (
     <>
@@ -69,7 +69,7 @@ const Detail = ({
         component={TextListItemVariants.dd}
         fullWidth={fullWidth}
         data-cy={valueCy}
-        name={jobsSetting}
+        alt={jobsSetting}
         isEncrypted={isEncrypted}
         isNotConfigured={isNotConfigured}
       >
