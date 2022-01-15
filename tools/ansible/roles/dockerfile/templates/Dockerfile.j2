@@ -199,8 +199,6 @@ ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsysl
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
 
 ## File mappings
-ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
-ADD tools/scripts/awx-python /usr/bin/awx-python
 {% if build_dev|bool %}
 ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
@@ -218,6 +216,8 @@ ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
+ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
+ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 # Pre-create things we need to access
