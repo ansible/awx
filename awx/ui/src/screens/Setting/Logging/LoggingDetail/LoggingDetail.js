@@ -42,7 +42,9 @@ function LoggingDetail() {
         'LOG_AGGREGATOR_TCP_TIMEOUT',
         'LOG_AGGREGATOR_TYPE',
         'LOG_AGGREGATOR_USERNAME',
-        'LOG_AGGREGATOR_VERIFY_CERT'
+        'LOG_AGGREGATOR_VERIFY_CERT',
+        'LOG_AGGREGATOR_THREAD_MIN_MESSAGES',
+        'LOG_AGGREGATOR_WORKER_THREADS'
       );
 
       const mergedData = {};

@@ -19,6 +19,8 @@ def construct_rsyslog_conf_template(settings=settings):
     max_disk_space = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
+    thread_min_messages = getattr(settings, 'LOG_AGGREGATOR_THREAD_MIN_MESSAGES', 0)
+    worker_threads = getattr(settings, 'LOG_AGGREGATOR_WORKER_THREADS', 0)
 
     if not os.access(spool_directory, os.W_OK):
         spool_directory = '/var/lib/awx'
@@ -26,12 +28,25 @@ def construct_rsyslog_conf_template(settings=settings):
     max_bytes = settings.MAX_EVENT_RES_DATA
     if settings.LOG_AGGREGATOR_RSYSLOGD_DEBUG:
         parts.append('$DebugLevel 2')
+
+    main_queue = [
+        f'queue.spoolDirectory="{spool_directory}"',
+        f'queue.maxdiskspace="{max_disk_space}g"',
+        'queue.type="Disk"',
+        'queue.filename="awx-external-logger-backlog"',
+    ]
+    if worker_threads > 0:
+        main_queue.append(f'queue.workerthreads="{worker_threads}"')
+    if thread_min_messages > 0:
+        main_queue.append(f'queue.workerthreadminimummessages="{thread_min_messages}"')
+    main_queue = ' '.join(main_queue)
+
     parts.extend(
         [
             '$WorkDirectory /var/lib/awx/rsyslog',
             f'$MaxMessageSize {max_bytes}',
             '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
-            f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
+            f'main_queue({main_queue})',  # noqa
             'module(load="imuxsock" SysSock.Use="off")',
             'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
             'template(name="awx" type="string" string="%rawmsg-after-pri%")',

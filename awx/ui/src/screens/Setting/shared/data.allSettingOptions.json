@@ -555,6 +555,26 @@
         "category_slug": "logging",
         "default": "/var/lib/awx"
       },
+      "LOG_AGGREGATOR_THREAD_MIN_MESSAGES": {
+        "type": "integer",
+        "required": false,
+        "label": "Number of messages per one worker thread",
+        "help_text": "Specify the number of messages a worker thread is processing before another worker thread is created the external log aggregator (Use value of 0 to used default is 50000).",
+        "min_value": 1,
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": 0
+      },
+      "LOG_AGGREGATOR_WORKER_THREADS": {
+        "type": "integer",
+        "required": false,
+        "label": "Maximum number of worker threads",
+        "help_text": "Specifies the maximum number of worker threads that can be run parallel the external log aggregator (Use value of 0 to used default is 1).",
+        "min_value": 1,
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": 0
+      },
       "LOG_AGGREGATOR_RSYSLOGD_DEBUG": {
         "type": "boolean",
         "required": false,
@@ -4200,6 +4220,24 @@
         "type": "integer",
         "label": "Maximum disk persistance for external log aggregation (in GB)",
         "help_text": "Amount of data to store (in gigabytes) during an outage of the external log aggregator (defaults to 1). Equivalent to the rsyslogd queue.maxdiskspace setting.",
+        "min_value": 1,
+        "category": "Logging",
+        "category_slug": "logging",
+        "defined_in_file": false
+      },
+      "LOG_AGGREGATOR_THREAD_MIN_MESSAGES": {
+        "type": "integer",
+        "label": "Number of messages per one worker thread",
+        "help_text": "Specify the number of messages a worker thread is processing before another worker thread is created the external log aggregator (Use value of 0 to used default is 50000).",
+        "min_value": 1,
+        "category": "Logging",
+        "category_slug": "logging",
+        "defined_in_file": false
+      },
+      "LOG_AGGREGATOR_WORKER_THREADS": {
+        "type": "integer",
+        "label": "Maximum number of worker threads",
+        "help_text": "Specifies the maximum number of worker threads that can be run parallel the external log aggregator (Use value of 0 to used default is 1).",
         "min_value": 1,
         "category": "Logging",
         "category_slug": "logging",
