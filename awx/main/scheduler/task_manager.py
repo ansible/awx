@@ -38,10 +38,7 @@ from awx.main.utils.common import create_partition
 from awx.main.signals import disable_activity_stream
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import decrypt_field
-from awx.main.tasks.receptor import (
-    RECEPTOR_RUNNING_STATE,
-    receptor_work_status
-)
+from awx.main.tasks.receptor import RECEPTOR_AWX_STATE_MAP, receptor_work_status
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -486,15 +483,13 @@ class TaskManager:
         return created_dependencies
 
     def update_receptor_status(self, task):
-        logger.warn('Found pending task with work unit id {}'.format(task.work_unit_id))
         status, detail = receptor_work_status(task.work_unit_id)
-        if status.lower() != task.status:
+        if RECEPTOR_AWX_STATE_MAP[status] != task.status:
             logger.warn('Found pending task {} with work unit id {} updating to be in status {}'.format(task.log_format, task.work_unit_id, status.lower()))
-            task.status = status.lower()
+            task.status = RECEPTOR_AWX_STATE_MAP[status]
             task.save()
         else:
             logger.warn('Task {} with work unit id {} is still Pending in receptor'.format(task.log_format, task.work_unit_id))
-
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = {wf.unified_job_template_id for wf in self.get_running_workflow_jobs()}
@@ -503,6 +498,7 @@ class TaskManager:
             if self.start_task_limit <= 0:
                 break
             if task.work_unit_id:
+                logger.warn('Found pending task with work unit id {}'.format(task.work_unit_id))
                 self.update_receptor_status(task)
                 continue
             blocked_by = self.job_blocked_by(task)

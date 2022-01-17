@@ -33,6 +33,7 @@ __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 RECEPTOR_RUNNING_STATE = 'Running'
 RECEPTOR_PENDING_STATE = 'Pending'
+RECEPTOR_AWX_STATE_MAP = {'Running': 'running', 'Pending': 'pending', 'Succeeded': 'successful', 'Error': 'error', 'Failed': 'failed'}
 
 
 class ReceptorConnectionType(Enum):
@@ -75,6 +76,7 @@ def get_receptor_ctl():
         return ReceptorControl(receptor_sockfile, config=__RECEPTOR_CONF, tlsclient=get_tls_client(True))
     except RuntimeError:
         return ReceptorControl(receptor_sockfile)
+
 
 def receptor_work_status(unit_id):
     receptor_ctl = get_receptor_ctl()
