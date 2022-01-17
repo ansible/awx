@@ -31,6 +31,8 @@ from receptorctl.socket_interface import ReceptorControl
 logger = logging.getLogger('awx.main.tasks.receptor')
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
+RECEPTOR_RUNNING_STATE = 'Running'
+RECEPTOR_PENDING_STATE = 'Pending'
 
 
 class ReceptorConnectionType(Enum):
@@ -73,6 +75,19 @@ def get_receptor_ctl():
         return ReceptorControl(receptor_sockfile, config=__RECEPTOR_CONF, tlsclient=get_tls_client(True))
     except RuntimeError:
         return ReceptorControl(receptor_sockfile)
+
+def receptor_work_status(unit_id):
+    receptor_ctl = get_receptor_ctl()
+    try:
+        unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
+        detail = unit_status.get('Detail', None)
+        state_name = unit_status.get('StateName', None)
+    except Exception:
+        detail = ''
+        state_name = ''
+        logger.exception(f'An error was encountered while getting status for work unit {unit_id}')
+
+    return state_name, detail
 
 
 def get_conn_type(node_name, receptor_ctl):
@@ -331,6 +346,13 @@ class AWXReceptorJob:
         transmitter_thread.join()
 
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
+
+        if self.task and self.task.instance.is_container_group_task:
+            state_name, detail = receptor_work_status(self.unit_id)
+            if state_name == RECEPTOR_PENDING_STATE:
+                log_name = self.task.instance.log_format
+                logger.warn(f"Pod for task {log_name} has been created but is not yet running.")
+                self.task.update_model(self.task.instance.pk, status='pending')
         # Both "processor" and "cancel_watcher" are spawned in separate threads.
         # We wait for the first one to return. If cancel_watcher returns first,
         # we yank the socket out from underneath the processor, which will cause it
@@ -349,14 +371,7 @@ class AWXReceptorJob:
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
             elif res.status == 'error':
-                try:
-                    unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
-                    detail = unit_status.get('Detail', None)
-                    state_name = unit_status.get('StateName', None)
-                except Exception:
-                    detail = ''
-                    state_name = ''
-                    logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
+                state_name, detail = receptor_work_status(self.unit_id)
 
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
