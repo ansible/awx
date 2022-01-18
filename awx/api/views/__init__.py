@@ -157,6 +157,7 @@ from awx.api.views.inventory import (  # noqa
     InventoryAccessList,
     InventoryObjectRolesList,
     InventoryJobTemplateList,
+    InventoryLabelList,
     InventoryCopy,
 )
 from awx.api.views.mesh_visualizer import MeshVisualizer  # noqa

@@ -853,7 +853,12 @@ class InventoryAccess(BaseAccess):
     """
 
     model = Inventory
-    prefetch_related = ('created_by', 'modified_by', 'organization')
+    prefetch_related = (
+        'created_by',
+        'modified_by',
+        'organization',
+        Prefetch('labels', queryset=Label.objects.all().order_by('name')),
+    )
 
     def filtered_queryset(self, allowed=None, ad_hoc=None):
         return self.model.accessible_objects(self.user, 'read_role')
