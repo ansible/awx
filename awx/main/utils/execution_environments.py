@@ -38,6 +38,7 @@ def get_default_pod_spec():
                     "image": ee.image,
                     "name": 'worker',
                     "args": ['ansible-runner', 'worker', '--private-data-dir=/runner'],
+                    "resources": {"requests": {"cpu": "250m", "memory": "100Mi"}},
                 }
             ],
         },

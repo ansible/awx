@@ -381,7 +381,7 @@ class AWXReceptorJob:
                             self.task.instance.result_traceback = detail
                             self.task.instance.save(update_fields=['result_traceback'])
                         else:
-                            logger.warn(f'No result details or output from {self.task.instance.log_format}, status:\n{unit_status}')
+                            logger.warn(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
                     except Exception:
                         raise RuntimeError(detail)
 
