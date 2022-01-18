@@ -445,8 +445,8 @@ class AutoscalePool(WorkerPool):
         if 'guid' in body:
             GuidMiddleware.set_guid(body['guid'])
         try:
-            if isinstance(body, dict):
-                if body['task'] == 'cancel_unified_job':  # special local cancel triggered by job canceling
+            if isinstance(body, dict) and 'task' in body:
+                if body['task'].endswith('.cancel_unified_job'):  # special local cancel triggered by job canceling
                     self.cancel_job(body['args'][0])
                 if 'cluster_node_heartbeat' in body['task']:  # when the cluster heartbeat occurs, clean up internally
                     self.cleanup()
