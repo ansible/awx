@@ -8,14 +8,18 @@ import icons from '../StatusIcon/icons';
 const colors = {
   success: 'green',
   successful: 'green',
+  ok: 'green',
   healthy: 'green',
   failed: 'red',
   error: 'red',
+  unreachable: 'red',
   running: 'blue',
   pending: 'blue',
+  skipped: 'blue',
   waiting: 'grey',
   disabled: 'grey',
   canceled: 'orange',
+  changed: 'orange',
 };
 
 export default function StatusLabel({ status, tooltipContent = '' }) {
@@ -23,15 +27,19 @@ export default function StatusLabel({ status, tooltipContent = '' }) {
     success: t`Success`,
     healthy: t`Healthy`,
     successful: t`Successful`,
+    ok: t`OK`,
     failed: t`Failed`,
     error: t`Error`,
+    unreachable: t`Unreachable`,
     running: t`Running`,
     pending: t`Pending`,
+    skipped: t`Skipped'`,
     waiting: t`Waiting`,
     disabled: t`Disabled`,
     canceled: t`Canceled`,
+    changed: t`Changed`,
   };
-  const label = upperCaseStatus[status] || t`Undefined`;
+  const label = upperCaseStatus[status] || status;
   const color = colors[status] || 'grey';
   const Icon = icons[status];
 

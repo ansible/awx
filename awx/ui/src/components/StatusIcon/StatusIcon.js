@@ -11,13 +11,17 @@ const colors = {
   success: green,
   successful: green,
   healthy: green,
+  ok: green,
   failed: red,
   error: red,
+  unreachable: red,
   running: blue,
   pending: blue,
+  skipped: blue,
   waiting: gray,
   disabled: gray,
   canceled: orange,
+  changed: orange,
 };
 
 function StatusIcon({ status, ...props }) {
