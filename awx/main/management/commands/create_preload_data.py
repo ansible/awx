@@ -33,7 +33,7 @@ class Command(BaseCommand):
                         scm_update_cache_timeout=0,
                     )
                     p.organization = o
-                    p.save()
+                    p.save(skip_update=True)
 
                     ssh_type = CredentialType.objects.filter(namespace='ssh').first()
                     c, _ = Credential.objects.get_or_create(
