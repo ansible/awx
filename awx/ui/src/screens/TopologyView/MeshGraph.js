@@ -2,8 +2,102 @@ import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import * as d3 from 'd3';
 
-function MeshGraph({ data }) {
-  console.log('data', data);
+// function MeshGraph({ data }) {
+function MeshGraph() {
+  const data = {
+    nodes: [
+      {
+        hostname: "aapc1.local",
+        node_state: "healthy",
+        node_type: "control",
+        id: 1
+      },
+      {
+        hostname: "aapc2.local",
+        node_type: "control",
+        node_state: "disabled",
+        id: 2
+      },
+      {
+        hostname: "aapc3.local",
+        node_type: "control",
+        node_state: "healthy",
+        id: 3
+      },
+      {
+        hostname: "aape1.local",
+        node_type: "execution",
+        node_state: "error",
+        id: 4
+      },
+      {
+        hostname: "aape2.local",
+        node_type: "execution",
+        node_state: "error",
+        id: 5
+      },
+      {
+        hostname: "aape3.local",
+        node_type: "execution",
+        node_state: "healthy",
+        id: 6
+      },
+      {
+        hostname: "aape4.local",
+        node_type: "execution",
+        node_state: "healthy",
+        id: 7
+      },
+      {
+        hostname: "aaph1.local",
+        node_type: "hop",
+        node_state: "disabled",
+        id: 8
+      },
+      {
+        hostname: "aaph2.local",
+        node_type: "hop",
+        node_state: "healthy",
+        id: 9
+      },
+      {
+        hostname: "aaph3.local",
+        node_type: "hop",
+        node_state: "error",
+        id: 10
+      }
+    ],
+    links: [
+      { source: "aapc1.local", target: "aapc2.local" },
+      { source: "aapc1.local", target: "aapc3.local" },
+      { source: "aapc1.local", target: "aape1.local" },
+      { source: "aapc1.local", target: "aape2.local" },
+
+      { source: "aapc2.local", target: "aapc3.local" },
+      { source: "aapc2.local", target: "aape1.local" },
+      { source: "aapc2.local", target: "aape2.local" },
+
+      { source: "aapc3.local", target: "aape1.local" },
+      { source: "aapc3.local", target: "aape2.local" },
+
+      { source: "aape3.local", target: "aaph1.local" },
+      { source: "aape3.local", target: "aaph2.local" },
+
+      { source: "aape4.local", target: "aaph3.local" },
+
+      { source: "aaph1.local", target: "aapc1.local" },
+      { source: "aaph1.local", target: "aapc2.local" },
+      { source: "aaph1.local", target: "aapc3.local" },
+
+      { source: "aaph2.local", target: "aapc1.local" },
+      { source: "aaph2.local", target: "aapc2.local" },
+      { source: "aaph2.local", target: "aapc3.local" },
+
+      { source: "aaph3.local", target: "aaph1.local" },
+      { source: "aaph3.local", target: "aaph2.local" }
+    ]
+  };
+
   const draw = useCallback(() => {
     const margin = 80;
     const getWidth = () => {
@@ -22,6 +116,15 @@ function MeshGraph({ data }) {
     };
     const width = getWidth();
     const height = 600;
+    const defaultRadius = 6;
+    const highlightRadius = 9;
+
+    const zoom = d3
+      .zoom()
+      .scaleExtent([1, 8])
+      .on('zoom', function (event) {
+        svg.selectAll('.links, .nodes').attr('transform', event.transform);
+      });
 
     /* Add SVG */
     d3.selectAll(`#chart > *`).remove();
@@ -32,9 +135,11 @@ function MeshGraph({ data }) {
       .attr('width', `${width + margin}px`)
       .attr('height', `${height + margin}px`)
       .append('g')
-      .attr('transform', `translate(${margin}, ${margin})`);
+      .attr('transform', `translate(${margin}, ${margin})`)
+      .call(zoom);
 
     const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const graph = data;
 
     const simulation = d3
       .forceSimulation()
@@ -55,32 +160,31 @@ function MeshGraph({ data }) {
       )
       .force('center', d3.forceCenter(width / 2, height / 2));
 
-    const graph = data;
-
     const link = svg
       .append('g')
-      .attr('class', 'links')
+      .attr('class', `links`)
       .selectAll('path')
       .data(graph.links)
       .enter()
       .append('path')
+      .attr('class', (d, i) => `link-${i}`)
       .style('fill', 'none')
       .style('stroke', '#ccc')
       .style('stroke-width', '2px')
-      .attr('pointer-events', 'visibleStroke')
+      .attr('pointer-events', 'none')
       .on('mouseover', function (event, d) {
-        tooltip
-          .html(`source: ${d.source.hostname} <br>target: ${d.target.hostname}`)
-          .style('visibility', 'visible');
+        // tooltip
+        //   .html(`source: ${d.source.hostname} <br>target: ${d.target.hostname}`)
+        //   .style('visibility', 'visible');
         d3.select(this).transition().style('cursor', 'pointer');
       })
       .on('mousemove', function () {
-        tooltip
-          .style('top', event.pageY - 10 + 'px')
-          .style('left', event.pageX + 10 + 'px');
+        // tooltip
+        //   .style('top', event.pageY - 10 + 'px')
+        //   .style('left', event.pageX + 10 + 'px');
       })
       .on('mouseout', function () {
-        tooltip.html(``).style('visibility', 'hidden');
+        // tooltip.html(``).style('visibility', 'hidden');
       });
 
     const node = svg
@@ -90,52 +194,64 @@ function MeshGraph({ data }) {
       .data(graph.nodes)
       .enter()
       .append('g')
-      .on('mouseover', function (event, d) {
+      .on('mouseenter', function (event, d) {
+        d3.select(this).transition().style('cursor', 'pointer');
+        highlightSiblings(d)
         tooltip
           .html(
-            `name: ${d.hostname} <br>type: ${d.node_type} <br>status: ${d.node_state}`
+            `<h3>Details</h3> <hr>name: ${d.hostname} <br>type: ${d.node_type} <br>status: ${d.node_state} <br> <a>Click on a node to view the details</a>`
           )
-          .style('visibility', 'visible');
+          .style('visibility', 'visible')
+          // .style('visibility', 'visible');
         // d3.select(this).transition().attr('r', 9).style('cursor', 'pointer');
       })
       .on('mousemove', function () {
-        tooltip
-          .style('top', event.pageY - 10 + 'px')
-          .style('left', event.pageX + 10 + 'px');
+        // tooltip
+        //   .style('top', event.pageY - 10 + 'px')
+        //   .style('left', event.pageX + 10 + 'px');
       })
-      .on('mouseout', function () {
+      .on('mouseleave', function (event, d) {
+        deselectSiblings(d)
         tooltip.html(``).style('visibility', 'hidden');
         // d3.select(this).attr('r', 6);
       });
-    
+
     const healthRings = node
       .append('circle')
       .attr('r', 8)
       .attr('class', (d) => d.node_state)
-      .attr('stroke', d => d.node_state === 'disabled' ? '#c6c6c6' : '#50D050')
-      .attr('fill', d => d.node_state === 'disabled' ? '#c6c6c6' : '#50D050');
-    
+      .attr('stroke', d => renderHealthColor(d.node_state))
+      .attr('fill', d => renderHealthColor(d.node_state));
+
     const nodeRings = node
       .append('circle')
-      .attr('r', 6)
+      .attr('r', defaultRadius)
       .attr('class', (d) => d.node_type)
+      .attr('class', (d) => `id-${d.id}`)
       .attr('fill', function (d) {
         return color(d.node_type);
-      });
+      })
+      .attr('stroke', 'white');
     svg.call(expandGlow);
 
     const legend = svg
+      .append('text')
+      .attr('x', 10)
+      .attr('y', 20)
+      .text('Legend')
+
+      svg
       .append('g')
-      .attr('class', 'chart-legend')
       .selectAll('g')
+      .attr('class', 'chart-legend')
       .data(graph.nodes)
       .enter()
       .append('circle')
       .attr('cx', 10)
       .attr('cy', function (d, i) {
-        return 100 + i * 25;
+        return 50 + i * 25;
       })
-      .attr('r', 7)
+      .attr('r', defaultRadius)
       .attr('class', (d) => d.node_type)
       .style('fill', function (d) {
         return color(d.node_type);
@@ -150,7 +266,7 @@ function MeshGraph({ data }) {
       .append('text')
       .attr('x', 20)
       .attr('y', function (d, i) {
-        return 100 + i * 25;
+        return 50 + i * 25;
       })
       .text((d) => `${d.hostname} - ${d.node_type}`)
       .attr('text-anchor', 'left')
@@ -161,14 +277,20 @@ function MeshGraph({ data }) {
       .append('div')
       .attr('class', 'd3-tooltip')
       .style('position', 'absolute')
+      .style('top', '200px')
+      .style('right', '40px')
       .style('z-index', '10')
       .style('visibility', 'hidden')
       .style('padding', '15px')
-      .style('background', 'rgba(0,0,0,0.6)')
-      .style('border-radius', '5px')
-      .style('color', '#fff')
+      // .style('border', '1px solid #e6e6e6')
+      // .style('box-shadow', '5px 5px 5px #e6e6e6')
+      .style('max-width', '15%')
+      // .style('background', 'rgba(0,0,0,0.6)')
+      // .style('border-radius', '5px')
+      // .style('color', '#fff')
       .style('font-family', 'sans-serif')
-      .text('a simple tooltip');
+      .style('color', '#e6e6e')
+      .text('');
 
     const labels = node
       .append('text')
@@ -183,6 +305,7 @@ function MeshGraph({ data }) {
 
     function ticked() {
       link.attr('d', linkArc);
+
       node.attr('transform', function (d) {
         return 'translate(' + d.x + ',' + d.y + ')';
       });
@@ -209,7 +332,8 @@ function MeshGraph({ data }) {
     }
 
     function contractGlow() {
-      healthRings
+      svg
+        .selectAll('.healthy')
         .transition()
         .duration(1000)
         .attr('stroke-width', '1px')
@@ -217,21 +341,79 @@ function MeshGraph({ data }) {
     }
 
     function expandGlow() {
-      healthRings
+      svg
+        .selectAll('.healthy')
         .transition()
         .duration(1000)
         .attr('stroke-width', '4.5px')
         .on('end', contractGlow);
     }
 
-    const zoom = d3
-      .zoom()
-      .scaleExtent([1, 8])
-      .on('zoom', function (event) {
-        svg.selectAll('.links, .nodes').attr('transform', event.transform);
-      });
+    function renderHealthColor(nodeState) {
+      const colorKey = {
+        'disabled': '#c6c6c6',
+        'healthy': '#50D050',
+        'error': '#ff6766'
+      };
+      return colorKey[nodeState];
+    }
 
-    svg.call(zoom);
+    function renderNodeClass(nodeState) {
+      const colorKey = {
+        'disabled': 'node-disabled',
+        'healthy': 'node-healthy',
+        'error': 'node-error'
+      };
+      return colorKey[nodeState];
+    }
+
+    function highlightSiblings(node) {
+      setTimeout(function() {
+        svg.selectAll(`id-${node.id}`)
+          .attr('r', highlightRadius);
+        const immediate = graph.links.filter(link => node.hostname === link.source.hostname || node.hostname === link.target.hostname);
+        immediate.forEach(s => {
+          const links = svg.selectAll(`.link-${s.index}`)
+          .transition()
+          .style('stroke', '#6e6e6e')
+          const sourceNodes = svg.selectAll(`.id-${s.source.id}`)
+          .transition()
+            .attr('r', highlightRadius)
+          const targetNodes = svg.selectAll(`.id-${s.target.id}`)
+          .transition()
+            .attr('r', highlightRadius)
+        })
+
+      }, 0)
+
+    }
+
+    function deselectSiblings(node) {
+      svg.selectAll(`id-${node.id}`)
+          .attr('r', defaultRadius);
+        const immediate = graph.links.filter(link => node.hostname === link.source.hostname || node.hostname === link.target.hostname);
+        immediate.forEach(s => {
+          const links = svg.selectAll(`.link-${s.index}`)
+          .transition()
+          .style('stroke', '#ccc')
+          svg.selectAll(`.id-${s.source.id}`)
+          .transition()
+            .attr('r', defaultRadius)
+          svg.selectAll(`.id-${s.target.id}`)
+          .transition()
+            .attr('r', defaultRadius)
+        })
+    }
+    // const zoom = d3
+    //   .zoom()
+    //   .scaleExtent([1, 8])
+    //   .on('zoom', function (event) {
+    //     svg.selectAll('.links, .nodes').attr('transform', event.transform);
+    //   });
+
+    // svg.call(zoom);
+    // node.call(zoom);
+    // link.call(zoom);
   }, [data]);
 
   useEffect(() => {
