@@ -66,13 +66,17 @@ StatusLabel.propTypes = {
   status: oneOf([
     'success',
     'successful',
+    'ok',
     'healthy',
     'failed',
     'error',
+    'unreachable',
     'running',
     'pending',
+    'skipped',
     'waiting',
     'disabled',
     'canceled',
+    'changed',
   ]).isRequired,
 };
