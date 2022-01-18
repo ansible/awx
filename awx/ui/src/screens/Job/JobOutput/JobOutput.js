@@ -16,7 +16,7 @@ import { CardBody as _CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ErrorDetail from 'components/ErrorDetail';
-import StatusIcon from 'components/StatusIcon';
+import StatusLabel from 'components/StatusLabel';
 import { JobEventsAPI } from 'api';
 
 import { getJobModel, isJobRunning } from 'util/jobs';
@@ -51,7 +51,7 @@ const HeaderTitle = styled.div`
   display: inline-flex;
   align-items: center;
   h1 {
-    margin-left: 10px;
+    margin-right: 10px;
     font-weight: var(--pf-global--FontWeight--bold);
   }
 `;
@@ -669,8 +669,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         )}
         <OutputHeader>
           <HeaderTitle>
-            <StatusIcon status={job.status} />
             <h1>{job.name}</h1>
+            <StatusLabel status={job.status} />
           </HeaderTitle>
           <OutputToolbar
             job={job}

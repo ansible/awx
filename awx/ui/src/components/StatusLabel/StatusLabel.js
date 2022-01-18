@@ -3,28 +3,7 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { oneOf } from 'prop-types';
 import { Label, Tooltip } from '@patternfly/react-core';
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  SyncAltIcon,
-  ExclamationTriangleIcon,
-  ClockIcon,
-  MinusCircleIcon,
-} from '@patternfly/react-icons';
-import styled, { keyframes } from 'styled-components';
-
-const Spin = keyframes`
-  from {
-    transform: rotate(0);
-  }
-  to {
-    transform: rotate(1turn);
-  }
-`;
-
-const RunningIcon = styled(SyncAltIcon)`
-  animation: ${Spin} 1.75s linear infinite;
-`;
+import icons from '../StatusIcon/icons';
 
 const colors = {
   success: 'green',
@@ -37,18 +16,6 @@ const colors = {
   waiting: 'grey',
   disabled: 'grey',
   canceled: 'orange',
-};
-const icons = {
-  success: CheckCircleIcon,
-  healthy: CheckCircleIcon,
-  successful: CheckCircleIcon,
-  failed: ExclamationCircleIcon,
-  error: ExclamationCircleIcon,
-  running: RunningIcon,
-  pending: ClockIcon,
-  waiting: ClockIcon,
-  disabled: MinusCircleIcon,
-  canceled: ExclamationTriangleIcon,
 };
 
 export default function StatusLabel({ status, tooltipContent = '' }) {
