@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.timezone import now as tz_now
 from django.contrib.contenttypes.models import ContentType
 
-from awx.main.models import Instance, UnifiedJob, WorkflowJob, InstanceGroup
+from awx.main.models import Instance, UnifiedJob, WorkflowJob
 from awx.main.tasks.receptor import receptor_work_status, RECEPTOR_AWX_STATE_MAP
 
 logger = logging.getLogger('awx.main.dispatch')
@@ -15,16 +15,16 @@ def reap_job(j, status):
     if UnifiedJob.objects.get(id=j.id).status not in ('running', 'waiting'):
         # just in case, don't reap jobs that aren't running
         return
-    if j.instance_group.is_container_group:
-        status, detail = receptor_work_status(j.work_unit_id)
-        if RECEPTOR_AWX_STATE_MAP[status] != j.status:
+    if j.instance_group and j.instance_group.is_container_group:
+        receptor_status, detail = receptor_work_status(j.work_unit_id)
+        if RECEPTOR_AWX_STATE_MAP[receptor_status] != j.status:
             # Sometimes the job has exited already, but we had not had chance to update the
             # job status with one of these terminal states.
             # Update the status and return early.
             # Otherwise the job truly is gone but still marked as running, in which case it should
             # rightfully be reaped
-            j.status = RECEPTOR_AWX_STATE_MAP[status]
-            j.save()
+            j.status = RECEPTOR_AWX_STATE_MAP[receptor_status]
+            j.save(update_fields=['status'])
             return
     j.status = status
     j.start_args = ''  # blank field to remove encrypted passwords
