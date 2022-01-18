@@ -6,7 +6,7 @@ from django.utils.timezone import now as tz_now
 from django.contrib.contenttypes.models import ContentType
 
 from awx.main.models import Instance, UnifiedJob, WorkflowJob
-from awx.main.tasks.receptor import receptor_work_status, RECEPTOR_AWX_STATE_MAP
+from awx.main.tasks.receptor import receptor_work_status
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -16,14 +16,13 @@ def reap_job(j, status):
         # just in case, don't reap jobs that aren't running
         return
     if j.instance_group and j.instance_group.is_container_group:
-        receptor_status, detail = receptor_work_status(j.work_unit_id)
-        if RECEPTOR_AWX_STATE_MAP[receptor_status] != j.status:
-            # Sometimes the job has exited already, but we had not had chance to update the
-            # job status with one of these terminal states.
+        receptor_status, detail = receptor_work_status(j.work_unit_id, translate_to_awx_job_status=True)
+        if receptor_status != j.status:
+            # Sometimes the job has exited already, but we had not had chance to update the job status.
             # Update the status and return early.
             # Otherwise the job truly is gone but still marked as running, in which case it should
             # rightfully be reaped
-            j.status = RECEPTOR_AWX_STATE_MAP[receptor_status]
+            j.status = receptor_status
             j.save(update_fields=['status'])
             return
     j.status = status

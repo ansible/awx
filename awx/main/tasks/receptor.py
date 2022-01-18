@@ -78,7 +78,7 @@ def get_receptor_ctl():
         return ReceptorControl(receptor_sockfile)
 
 
-def receptor_work_status(unit_id):
+def receptor_work_status(unit_id, translate_to_awx_job_status=False):
     receptor_ctl = get_receptor_ctl()
     try:
         unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
@@ -88,6 +88,12 @@ def receptor_work_status(unit_id):
         detail = ''
         state_name = ''
         logger.exception(f'An error was encountered while getting status for work unit {unit_id}')
+
+    if translate_to_awx_job_status:
+        if not state_name:
+            logger.exception(f'An error was encountered fetching the work unit status {unit_id}, reporting awx job status as "error"')
+        awx_state_name = RECEPTOR_AWX_STATE_MAP.get(state_name, 'error')
+        return awx_state_name, detail
 
     return state_name, detail
 
