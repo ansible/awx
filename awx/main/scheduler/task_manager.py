@@ -484,6 +484,12 @@ class TaskManager:
 
     def update_receptor_status(self, task):
         receptor_status, detail = receptor_work_status(task.work_unit_id, translate_to_awx_job_status=True)
+        if detail == 'exceeded quota':
+            logger.warn('Task {} being resubmitted because work was rejected by kuberenetes API for exceeding a ResourceQuota'.format(task.log_format))
+            task.work_unit_id = None
+            task.status = 'pending'
+            task.save()
+            return
         if receptor_status != task.status:
             logger.warn('Found pending task {} with work unit id {} updating to be in status {}'.format(task.log_format, task.work_unit_id, receptor_status))
             task.status = receptor_status

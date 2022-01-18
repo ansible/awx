@@ -357,9 +357,9 @@ class AWXReceptorJob:
 
         if self.task and self.task.instance.is_container_group_task:
             state_name, detail = receptor_work_status(self.unit_id)
+            log_name = self.task.instance.log_format
             if state_name == RECEPTOR_PENDING_STATE:
-                log_name = self.task.instance.log_format
-                logger.warn(f"Pod for task {log_name} has been created but is not yet running.")
+                logger.warn(f"Pod scheduled but container not yet running for task {log_name}.")
                 self.task.update_model(self.task.instance.pk, status='pending')
         # Both "processor" and "cancel_watcher" are spawned in separate threads.
         # We wait for the first one to return. If cancel_watcher returns first,
