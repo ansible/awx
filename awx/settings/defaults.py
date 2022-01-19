@@ -989,3 +989,8 @@ DEFAULT_EXECUTION_QUEUE_NAME = 'default'
 DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE = ''
 # Name of the default controlplane queue
 DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
+
+# Extend container runtime attributes.
+# For example, to disable SELinux in containers for podman
+# DEFAULT_CONTAINER_RUN_OPTIONS = ['--security-opt', 'label=disable']
+DEFAULT_CONTAINER_RUN_OPTIONS = []
