@@ -156,7 +156,7 @@ class ApiV2PingView(APIView):
                     node=instance.hostname,
                     node_type=instance.node_type,
                     uuid=instance.uuid,
-                    heartbeat=instance.modified,
+                    heartbeat=instance.last_seen,
                     capacity=instance.capacity,
                     version=instance.version,
                 )
