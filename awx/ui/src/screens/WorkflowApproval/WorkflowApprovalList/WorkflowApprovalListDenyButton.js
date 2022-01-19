@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useContext } from 'react';
 
 import { t } from '@lingui/macro';

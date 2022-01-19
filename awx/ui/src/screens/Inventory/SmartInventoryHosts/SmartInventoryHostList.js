@@ -55,68 +55,66 @@ function SmartInventoryHostList({ inventory }) {
   }, [fetchHosts]);
 
   return (
-    <>
-      <PaginatedTable
-        contentError={contentError}
-        hasContentLoading={isLoading || isAdHocLaunchLoading}
-        items={hosts}
-        itemCount={count}
-        pluralizedItemName={t`Hosts`}
-        qsConfig={QS_CONFIG}
-        clearSelected={clearSelected}
-        toolbarSearchColumns={[
-          {
-            name: t`Name`,
-            key: 'name__icontains',
-            isDefault: true,
-          },
-          {
-            name: t`Created by (username)`,
-            key: 'created_by__username',
-          },
-          {
-            name: t`Modified by (username)`,
-            key: 'modified_by__username',
-          },
-        ]}
-        renderToolbar={(props) => (
-          <DataListToolbar
-            {...props}
-            isAllSelected={isAllSelected}
-            onSelectAll={selectAll}
-            qsConfig={QS_CONFIG}
-            additionalControls={
-              inventory?.summary_fields?.user_capabilities?.adhoc
-                ? [
-                    <AdHocCommands
-                      adHocItems={selected}
-                      hasListItems={count > 0}
-                      onLaunchLoading={setIsAdHocLaunchLoading}
-                    />,
-                  ]
-                : []
-            }
-          />
-        )}
-        headerRow={
-          <HeaderRow qsConfig={QS_CONFIG}>
-            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-            <HeaderCell>{t`Recent jobs`}</HeaderCell>
-            <HeaderCell>{t`Inventory`}</HeaderCell>
-          </HeaderRow>
-        }
-        renderRow={(host, index) => (
-          <SmartInventoryHostListItem
-            key={host.id}
-            host={host}
-            detailUrl={`/inventories/smart_inventory/${inventory.id}/hosts/${host.id}/details`}
-            isSelected={selected.some((row) => row.id === host.id)}
-            onSelect={() => handleSelect(host)}
-            rowIndex={index}
-          />
-        )}
-      />
-    </>
+    <PaginatedTable
+      contentError={contentError}
+      hasContentLoading={isLoading || isAdHocLaunchLoading}
+      items={hosts}
+      itemCount={count}
+      pluralizedItemName={t`Hosts`}
+      qsConfig={QS_CONFIG}
+      clearSelected={clearSelected}
+      toolbarSearchColumns={[
+        {
+          name: t`Name`,
+          key: 'name__icontains',
+          isDefault: true,
+        },
+        {
+          name: t`Created by (username)`,
+          key: 'created_by__username',
+        },
+        {
+          name: t`Modified by (username)`,
+          key: 'modified_by__username',
+        },
+      ]}
+      renderToolbar={(props) => (
+        <DataListToolbar
+          {...props}
+          isAllSelected={isAllSelected}
+          onSelectAll={selectAll}
+          qsConfig={QS_CONFIG}
+          additionalControls={
+            inventory?.summary_fields?.user_capabilities?.adhoc
+              ? [
+                  <AdHocCommands
+                    adHocItems={selected}
+                    hasListItems={count > 0}
+                    onLaunchLoading={setIsAdHocLaunchLoading}
+                  />,
+                ]
+              : []
+          }
+        />
+      )}
+      headerRow={
+        <HeaderRow qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+          <HeaderCell>{t`Recent jobs`}</HeaderCell>
+          <HeaderCell>{t`Inventory`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(host, index) => (
+        <SmartInventoryHostListItem
+          key={host.id}
+          host={host}
+          detailUrl={`/inventories/smart_inventory/${inventory.id}/hosts/${host.id}/details`}
+          isSelected={selected.some((row) => row.id === host.id)}
+          onSelect={() => handleSelect(host)}
+          rowIndex={index}
+        />
+      )}
+    />
   );
 }
 

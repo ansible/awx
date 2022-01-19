@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useCallback, useEffect } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 
@@ -135,9 +136,9 @@ function AWXLogin({ alt, isAuthenticated }) {
     />
   );
 
-  function setSessionRedirect() {
+  const setSessionRedirect = () => {
     window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
-  }
+  };
 
   return (
     <Login header={Header} footer={Footer}>

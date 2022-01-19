@@ -54,11 +54,11 @@ function SubscriptionModal({
 
   const { selected, setSelected } = useSelected(subscriptions);
 
-  function handleConfirm() {
+  const handleConfirm = () => {
     const [subscription] = selected;
     onConfirm(subscription);
     onClose();
-  }
+  };
 
   useEffect(() => {
     fetchSubscriptions();
@@ -109,29 +109,27 @@ function SubscriptionModal({
     >
       {isLoading && <ContentLoading />}
       {!isLoading && error && (
-        <>
-          <EmptyState variant="full">
-            <EmptyStateIcon icon={ExclamationTriangleIcon} />
-            <Title size="lg" headingLevel="h3">
-              <Trans>No subscriptions found</Trans>
-            </Title>
-            <EmptyStateBody>
-              <Trans>
-                We were unable to locate licenses associated with this account.
-              </Trans>{' '}
-              <Button
-                aria-label={t`Close subscription modal`}
-                onClick={onClose}
-                variant="link"
-                isInline
-                ouiaId="subscription-modal-close"
-              >
-                <Trans>Return to subscription management.</Trans>
-              </Button>
-            </EmptyStateBody>
-            <ErrorDetail error={error} />
-          </EmptyState>
-        </>
+        <EmptyState variant="full">
+          <EmptyStateIcon icon={ExclamationTriangleIcon} />
+          <Title size="lg" headingLevel="h3">
+            <Trans>No subscriptions found</Trans>
+          </Title>
+          <EmptyStateBody>
+            <Trans>
+              We were unable to locate licenses associated with this account.
+            </Trans>{' '}
+            <Button
+              aria-label={t`Close subscription modal`}
+              onClick={onClose}
+              variant="link"
+              isInline
+              ouiaId="subscription-modal-close"
+            >
+              <Trans>Return to subscription management.</Trans>
+            </Button>
+          </EmptyStateBody>
+          <ErrorDetail error={error} />
+        </EmptyState>
       )}
       {!isLoading && !error && subscriptions?.length === 0 && (
         <ContentEmpty

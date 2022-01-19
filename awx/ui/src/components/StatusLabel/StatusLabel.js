@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import 'styled-components/macro';
 import React from 'react';
 import { t } from '@lingui/macro';

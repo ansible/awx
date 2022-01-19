@@ -617,51 +617,49 @@ function JobTemplateForm({
             </FormFullWidthLayout>
 
             {(allowCallbacks || enableWebhooks) && (
-              <>
-                <SubFormLayout>
-                  {allowCallbacks && (
-                    <>
-                      <Title size="md" headingLevel="h4">
-                        {t`Provisioning Callback details`}
-                      </Title>
-                      <FormColumnLayout>
-                        {callbackUrl && (
-                          <FormGroup
-                            label={t`Provisioning Callback URL`}
-                            fieldId="template-callback-url"
-                          >
-                            <TextInput
-                              id="template-callback-url"
-                              isDisabled
-                              value={callbackUrl}
-                            />
-                          </FormGroup>
-                        )}
-                        <FormField
-                          id="template-host-config-key"
-                          name="host_config_key"
-                          label={t`Host Config Key`}
-                          validate={allowCallbacks ? required(null) : null}
-                          isRequired={allowCallbacks}
-                        />
-                      </FormColumnLayout>
-                    </>
-                  )}
+              <SubFormLayout>
+                {allowCallbacks && (
+                  <>
+                    <Title size="md" headingLevel="h4">
+                      {t`Provisioning Callback details`}
+                    </Title>
+                    <FormColumnLayout>
+                      {callbackUrl && (
+                        <FormGroup
+                          label={t`Provisioning Callback URL`}
+                          fieldId="template-callback-url"
+                        >
+                          <TextInput
+                            id="template-callback-url"
+                            isDisabled
+                            value={callbackUrl}
+                          />
+                        </FormGroup>
+                      )}
+                      <FormField
+                        id="template-host-config-key"
+                        name="host_config_key"
+                        label={t`Host Config Key`}
+                        validate={allowCallbacks ? required(null) : null}
+                        isRequired={allowCallbacks}
+                      />
+                    </FormColumnLayout>
+                  </>
+                )}
 
-                  {allowCallbacks && enableWebhooks && <br />}
+                {allowCallbacks && enableWebhooks && <br />}
 
-                  {enableWebhooks && (
-                    <>
-                      <Title size="md" headingLevel="h4">
-                        {t`Webhook details`}
-                      </Title>
-                      <FormColumnLayout>
-                        <WebhookSubForm templateType={template.type} />
-                      </FormColumnLayout>
-                    </>
-                  )}
-                </SubFormLayout>
-              </>
+                {enableWebhooks && (
+                  <>
+                    <Title size="md" headingLevel="h4">
+                      {t`Webhook details`}
+                    </Title>
+                    <FormColumnLayout>
+                      <WebhookSubForm templateType={template.type} />
+                    </FormColumnLayout>
+                  </>
+                )}
+              </SubFormLayout>
             )}
           </FormColumnLayout>
         </FormFullWidthLayout>

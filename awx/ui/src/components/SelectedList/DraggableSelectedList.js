@@ -37,7 +37,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
     return result;
   }
 
-  function dragItem(item, dest) {
+  const dragItem = (item, dest) => {
     if (!dest || item.index === dest.index) {
       return false;
     }
@@ -45,7 +45,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
     const newItems = reorder(selected, item.index, dest.index);
     onRowDrag(newItems);
     return true;
-  }
+  };
 
   if (selected.length <= 0) {
     return null;

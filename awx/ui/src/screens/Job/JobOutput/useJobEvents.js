@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 import { useState, useEffect, useReducer } from 'react';
 
 const initialState = {

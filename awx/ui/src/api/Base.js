@@ -1,3 +1,4 @@
+/* eslint-disable default-param-last */
 import axios from 'axios';
 import { encodeQueryString } from 'util/qs';
 import debounce from 'util/debounce';

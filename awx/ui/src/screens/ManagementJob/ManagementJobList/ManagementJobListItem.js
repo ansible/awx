@@ -75,16 +75,14 @@ function ManagementJobListItem({
             {isSuperUser ? (
               <>
                 {isPrompted ? (
-                  <>
-                    <LaunchManagementPrompt
-                      isOpen={isManagementPromptOpen}
-                      isLoading={isManagementPromptLoading}
-                      onClick={handleManagementPromptClick}
-                      onClose={handleManagementPromptClose}
-                      onConfirm={handleManagementPromptConfirm}
-                      defaultDays={30}
-                    />
-                  </>
+                  <LaunchManagementPrompt
+                    isOpen={isManagementPromptOpen}
+                    isLoading={isManagementPromptLoading}
+                    onClick={handleManagementPromptClick}
+                    onClose={handleManagementPromptClose}
+                    onConfirm={handleManagementPromptConfirm}
+                    defaultDays={30}
+                  />
                 ) : (
                   <Tooltip content={t`Launch management job`} position="top">
                     <Button

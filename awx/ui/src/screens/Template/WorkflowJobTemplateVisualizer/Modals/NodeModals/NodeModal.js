@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import 'styled-components/macro';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -118,11 +119,16 @@ function NodeModalForm({
     contentError || credentialError
   );
 
-  const nextButtonText = (activeStep) =>
-    activeStep.id === promptSteps[promptSteps?.length - 1]?.id ||
-    activeStep.name === 'Preview'
+  function nextButtonText(activeStep) {
+    let verifyPromptSteps = false;
+    if (promptSteps.length) {
+      verifyPromptSteps =
+        activeStep.id === promptSteps[promptSteps.length - 1]?.id;
+    }
+    return verifyPromptSteps || activeStep.name === 'Preview'
       ? t`Save`
       : t`Next`;
+  }
 
   const CustomFooter = (
     <WizardFooter>

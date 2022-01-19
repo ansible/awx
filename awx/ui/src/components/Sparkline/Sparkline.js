@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { arrayOf } from 'prop-types';
 
 import { Link as _Link } from 'react-router-dom';

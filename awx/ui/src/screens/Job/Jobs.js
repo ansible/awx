@@ -9,6 +9,12 @@ import Job from './Job';
 import JobTypeRedirect from './JobTypeRedirect';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
+function TypeRedirect({ view }) {
+  const { id } = useParams();
+  const { path } = useRouteMatch();
+  return <JobTypeRedirect id={id} path={path} view={view} />;
+}
+
 function Jobs() {
   const match = useRouteMatch();
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
@@ -28,12 +34,6 @@ function Jobs() {
       [`/jobs/${typeSegment}/${job.id}/details`]: t`Details`,
     });
   }, []);
-
-  function TypeRedirect({ view }) {
-    const { id } = useParams();
-    const { path } = useRouteMatch();
-    return <JobTypeRedirect id={id} path={path} view={view} />;
-  }
 
   return (
     <>

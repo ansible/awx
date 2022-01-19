@@ -36,14 +36,14 @@ function WorkflowJobTemplateAdd() {
       const {
         data: { id },
       } = await WorkflowJobTemplatesAPI.create(templatePayload);
-      await Promise.all(await submitLabels(id, labels, organizationId));
+      await Promise.all(await submitLabels(id, organizationId, labels));
       history.push(`/templates/workflow_job_template/${id}/visualizer`);
     } catch (err) {
       setFormSubmitError(err);
     }
   };
 
-  const submitLabels = async (templateId, labels = [], organizationId) => {
+  const submitLabels = async (templateId, organizationId, labels = []) => {
     if (!organizationId) {
       // eslint-disable-next-line no-useless-catch
       try {

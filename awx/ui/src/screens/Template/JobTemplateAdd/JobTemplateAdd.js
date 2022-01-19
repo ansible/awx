@@ -9,7 +9,7 @@ function JobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
-  async function handleSubmit(values) {
+  const handleSubmit = async (values) => {
     const {
       labels,
       instanceGroups,
@@ -35,7 +35,7 @@ function JobTemplateAdd() {
         execution_environment: values.execution_environment?.id,
       });
       await Promise.all([
-        submitLabels(id, labels, values.project.summary_fields.organization.id),
+        submitLabels(id, values.project.summary_fields.organization.id, labels),
         submitInstanceGroups(id, instanceGroups),
         submitCredentials(id, credentials),
       ]);
@@ -43,9 +43,9 @@ function JobTemplateAdd() {
     } catch (error) {
       setFormSubmitError(error);
     }
-  }
+  };
 
-  async function submitLabels(templateId, labels = [], orgId) {
+  async function submitLabels(templateId, orgId, labels = []) {
     if (!orgId) {
       // eslint-disable-next-line no-useless-catch
       try {
@@ -80,9 +80,9 @@ function JobTemplateAdd() {
     return Promise.all(associateCredentials);
   }
 
-  function handleCancel() {
+  const handleCancel = () => {
     history.push(`/templates`);
-  }
+  };
 
   return (
     <PageSection>

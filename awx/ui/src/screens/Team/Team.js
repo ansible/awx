@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useState, useEffect } from 'react';
 
 import { t } from '@lingui/macro';
