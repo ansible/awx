@@ -564,6 +564,15 @@
         "category_slug": "logging",
         "default": false
       },
+      "API_400_ERROR_LOG_FORMAT": {
+        "type": "string",
+        "required": false,
+        "label": "Log Format For API 4XX Errors",
+        "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
+      },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
         "required": true,
@@ -4221,6 +4230,15 @@
         "category_slug": "logging",
         "defined_in_file": false
       },
+      "API_400_ERROR_LOG_FORMAT": {
+        "type": "string",
+        "required": false,
+        "label": "Log Format For API 4XX Errors",
+        "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
+      },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
         "label": "Last gather date for Insights for Ansible Automation Platform.",
@@ -6329,7 +6347,7 @@
       },
       "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
         "type": "nested object",
-	"label": "SAML User Flags Attribute Mapping",
+	      "label": "SAML User Flags Attribute Mapping",
         "help_text": "Used to map super users and system auditors from SAML.",
         "category": "SAML",
         "category_slug": "saml",

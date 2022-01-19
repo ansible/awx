@@ -674,6 +674,24 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'API_400_ERROR_LOG_FORMAT',
+    field_class=fields.CharField,
+    default='status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}',
+    label=_('Log Format For API 4XX Errors'),
+    help_text=_(
+        'The format of logged messages when an API 4XX error occurs, '
+        'the following variables will be substituted: \n'
+        'status_code - The HTTP status code of the error\n'
+        'user_name - The user name attempting to use the API\n'
+        'url_path - The URL path to the API endpoint called\n'
+        'remote_addr - The remote address seen for the user\n'
+        'error - The error set by the api endpoint\n'
+        'Variables need to be in the format {<variable name>}.'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(

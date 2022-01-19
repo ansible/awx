@@ -32,6 +32,8 @@ SettingsAPI.readCategory.mockResolvedValue({
     LOG_AGGREGATOR_MAX_DISK_USAGE_GB: 1,
     LOG_AGGREGATOR_MAX_DISK_USAGE_PATH: '/var/lib/awx',
     LOG_AGGREGATOR_RSYSLOGD_DEBUG: false,
+    API_400_ERROR_LOG_FORMAT:
+      'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}',
   },
 });
 

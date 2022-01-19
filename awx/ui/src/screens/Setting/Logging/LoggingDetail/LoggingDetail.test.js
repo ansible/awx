@@ -59,6 +59,7 @@ describe('<LoggingDetail />', () => {
     assertDetail(wrapper, 'Logging Aggregator Protocol', 'https');
     assertDetail(wrapper, 'TCP Connection Timeout', '5 seconds');
     assertDetail(wrapper, 'Logging Aggregator Level Threshold', 'INFO');
+    assertDetail(wrapper, 'Log Format For API 4XX Errors', 'Test Log Line');
     assertDetail(
       wrapper,
       'Enable/disable HTTPS certificate verification',
