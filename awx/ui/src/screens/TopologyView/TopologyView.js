@@ -2,20 +2,15 @@ import React, { useEffect, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
-import {
-  PageSection,
-  Card,
-  CardHeader,
-  CardBody,
-} from '@patternfly/react-core';
-import MeshGraph from './MeshGraph';
+import { PageSection, Card, CardBody } from '@patternfly/react-core';
 import useRequest from 'hooks/useRequest';
 import { MeshAPI } from 'api';
+import MeshGraph from './MeshGraph';
 
 function TopologyView() {
   const {
     result: { meshData },
-    error: fetchInitialError,
+    // error: fetchInitialError,
     request: fetchMeshVisualizer,
   } = useRequest(
     useCallback(async () => {
