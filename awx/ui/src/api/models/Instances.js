@@ -7,6 +7,7 @@ class Instances extends Base {
 
     this.readHealthCheckDetail = this.readHealthCheckDetail.bind(this);
     this.healthCheck = this.healthCheck.bind(this);
+    this.readInstanceGroup = this.readInstanceGroup.bind(this);
   }
 
   healthCheck(instanceId) {
@@ -15,6 +16,10 @@ class Instances extends Base {
 
   readHealthCheckDetail(instanceId) {
     return this.http.get(`${this.baseUrl}${instanceId}/health_check/`);
+  }
+
+  readInstanceGroup(instanceId) {
+    return this.http.get(`${this.baseUrl}${instanceId}/instance_groups/`);
   }
 }
 
