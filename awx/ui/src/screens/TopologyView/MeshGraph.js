@@ -141,7 +141,6 @@ function MeshGraph({ data }) {
       .attr('transform', `translate(${margin}, ${margin})`)
       .call(zoom);
 
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
     const graph = data;
 
     const simulation = d3
@@ -215,7 +214,7 @@ function MeshGraph({ data }) {
       .attr('r', defaultRadius)
       .attr('class', (d) => d.node_type)
       .attr('class', (d) => `id-${d.id}`)
-      .attr('fill', (d) => color(d.node_type))
+      .attr('fill', (d) => renderNodeColor(d.node_type))
       .attr('stroke', 'white');
     svg.call(expandGlow);
 
@@ -233,7 +232,7 @@ function MeshGraph({ data }) {
       .attr('cy', (d, i) => 50 + i * 25)
       .attr('r', defaultRadius)
       .attr('class', (d) => d.node_type)
-      .style('fill', (d) => color(d.node_type));
+      .style('fill', (d) => renderNodeColor(d.node_type));
 
     // legend text
     svg
@@ -317,6 +316,17 @@ function MeshGraph({ data }) {
         error: '#ff6766',
       };
       return colorKey[nodeState];
+    }
+
+    function renderNodeColor(nodeType) {
+      const colorKey = {
+        hop: '#C46100',
+        execution: '#F0AB00',
+        hybrid: '#0066CC',
+        control: '#005F60'
+      };
+
+      return colorKey[nodeType];
     }
 
     function highlightSiblings(n) {
