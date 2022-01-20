@@ -126,7 +126,7 @@ function MeshGraph({ data }) {
       .zoom()
       .scaleExtent([1, 8])
       .on('zoom', (event) => {
-        svg.selectAll('.links, .nodes').attr('transform', event.transform);
+        svg.attr('transform', event.transform);
       });
 
     /* Add SVG */
