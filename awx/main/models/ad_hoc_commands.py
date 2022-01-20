@@ -160,9 +160,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @property
     def notification_templates(self):
-        all_orgs = set()
-        for h in self.hosts.all():
-            all_orgs.add(h.inventory.organization)
+        all_orgs = {h.inventory.organization for h in self.hosts.all()}
         active_templates = dict(error=set(), success=set(), started=set())
         base_notification_templates = NotificationTemplate.objects
         for org in all_orgs:
