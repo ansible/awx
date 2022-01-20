@@ -214,8 +214,15 @@ class APIView(views.APIView):
                 'user_name': request.user,
                 'url_path': request.path,
                 'remote_addr': request.META.get('REMOTE_ADDR', None),
-                'error': response.data.get('error', response.status_text),
             }
+
+            if type(response.data) is dict:
+                msg_data['error'] = response.data.get('error', response.status_text)
+            elif type(response.data) is list:
+                msg_data['error'] = ", ".join(list(map(lambda x: x.get('error', response.status_text), response.data)))
+            else:
+                msg_data['error'] = response.status_text
+
             try:
                 status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(**msg_data)
             except Exception as e:
