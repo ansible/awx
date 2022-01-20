@@ -1,5 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
+import debounce from 'util/debounce';
+import { useHistory } from 'react-router-dom';
 // import { t } from '@lingui/macro';
+import { InstancesAPI } from 'api';
 import * as d3 from 'd3';
 
 function MeshGraph({ data }) {
@@ -97,7 +100,7 @@ function MeshGraph({ data }) {
   //     { source: 'aaph3.local', target: 'aaph2.local' },
   //   ],
   // };
-
+  const history = useHistory();
   const draw = useCallback(() => {
     const margin = 80;
     const getWidth = () => {
@@ -191,6 +194,11 @@ function MeshGraph({ data }) {
       .on('mouseleave', (_, d) => {
         deselectSiblings(d);
         tooltip.html(``).style('visibility', 'hidden');
+      })
+      .on('click', (_, d) => {
+        if (d.node_type !== 'hop') {
+          redirectToDetailsPage(d);
+        }
       });
 
     // health rings on nodes
@@ -353,16 +361,17 @@ function MeshGraph({ data }) {
           .attr('r', defaultRadius);
       });
     }
-    // const zoom = d3
-    //   .zoom()
-    //   .scaleExtent([1, 8])
-    //   .on('zoom', function (event) {
-    //     svg.selectAll('.links, .nodes').attr('transform', event.transform);
-    //   });
 
-    // svg.call(zoom);
-    // node.call(zoom);
-    // link.call(zoom);
+    async function redirectToDetailsPage({ id: nodeId }) {
+      const {
+        data: { results },
+      } = await InstancesAPI.readInstanceGroup(nodeId);
+      const { id: instanceGroupId } = results[0];
+      const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
+      history.push(constructedURL);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
@@ -370,7 +379,7 @@ function MeshGraph({ data }) {
       draw();
     }
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', debounce(handleResize, 500));
 
     handleResize();
 
