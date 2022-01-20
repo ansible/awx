@@ -330,7 +330,7 @@ The first one time command will be creating a Keycloak database in your postgres
 docker exec tools_postgres_1 /usr/bin/psql -U awx --command "create database keycloak with encoding 'UTF8';"
 ```
 
-After running this commenad the following message should appear and you should be returned to your prompt:
+After running this command the following message should appear and you should be returned to your prompt:
 ```base
 CREATE DATABASE
 ```
@@ -338,7 +338,7 @@ CREATE DATABASE
 The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
 ```bash
 PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
-docker run -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
+docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
            -e DB_VENDOR=postgres -e DB_ADDR=postgres -e DB_DATABASE=keycloak -e DB_USER=awx -e DB_PASSWORD=${PG_PASSWORD} \
            quay.io/keycloak/keycloak:15.0.2
 ```
@@ -361,7 +361,7 @@ Now we are ready to configure and plumb Keycloak with AWX. To do this we have pr
 
 Before we can run the playbook we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration and on the AWX side its done through the SAML settings. The playbook requires a variable called `container_reference` to be set. The container_reference variable needs to be how your browser will be able to talk to the running containers.  Here are some examples of how to choose a proper container_reference.
 * If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The the VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.
-* If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container_reference. 
+* If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container_reference.
 
 In addition to container_reference, there are some additional variables which you can override if you need/choose to do so. Here are their names and default values:
 ```yaml
@@ -390,5 +390,3 @@ Once the playbook is done running SAML should now be setup in your development e
 3. awx_auditor:audit123
 
 The first account is a normal user. The second account has the attribute is_superuser set in Keycloak so will be a super user in AWX. The third account has the is_system_auditor attribute in Keycloak so it will be a system auditor in AWX. To log in with one of these Keycloak users go to the AWX login screen and click the small "Sign In With SAML Keycloak" button at the bottom of the login box.
-
-
