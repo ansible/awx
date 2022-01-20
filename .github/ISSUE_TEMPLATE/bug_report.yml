@@ -9,18 +9,18 @@ body:
       value: |
         Issues are for **concrete, actionable bugs and feature requests** only. For debugging help or technical support, please use:
         - The #ansible-awx channel on irc.libera.chat
-        - https://groups.google.com/forum/#!forum/awx-project
+        - The awx project mailing list, https://groups.google.com/forum/#!forum/awx-project
 
   - type: checkboxes
     id: terms
     attributes:
       label: Please confirm the following
       options:
-        - label: I agree to follow this project's [code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+        - label: I agree to follow this project's [code of conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
           required: true
         - label: I have checked the [current issues](https://github.com/ansible/awx/issues) for duplicates.
           required: true
-        - label: I understand that AWX is open source software provided for free and that I am not entitled to status updates or other assurances.
+        - label: I understand that AWX is open source software provided for free and that I might not receive a timely response.
           required: true
 
   - type: textarea
