@@ -403,10 +403,11 @@ class BaseTask(object):
         Hook for any steps to run after job/task is marked as complete.
         """
         instance.log_lifecycle("finalize_run")
-        job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
+        artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
+        job_profiling_dir = os.path.join(artifact_dir, 'playbook_profiling')
         awx_profiling_dir = '/var/log/tower/playbook_profiling/'
-        collections_info = os.path.join(private_data_dir, 'artifacts/', 'collections.json')
-        ansible_version_file = os.path.join(private_data_dir, 'artifacts/', 'ansible_version.txt')
+        collections_info = os.path.join(artifact_dir, 'collections.json')
+        ansible_version_file = os.path.join(artifact_dir, 'ansible_version.txt')
 
         if not os.path.exists(awx_profiling_dir):
             os.mkdir(awx_profiling_dir)
@@ -673,6 +674,7 @@ class BaseTask(object):
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'suppress_ansible_output': True,
+                    'suppress_output_file': True,
                 },
             }
 
@@ -1159,7 +1161,7 @@ class RunJob(BaseTask):
             return
         if job.use_fact_cache:
             job.finish_job_fact_cache(
-                os.path.join(private_data_dir, 'artifacts', 'fact_cache'),
+                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
                 fact_modification_times,
             )
 
@@ -1895,7 +1897,7 @@ class RunInventoryUpdate(BaseTask):
             return  # nothing to save, step out of the way to allow error reporting
 
         private_data_dir = inventory_update.job_env['AWX_PRIVATE_DATA_DIR']
-        expected_output = os.path.join(private_data_dir, 'artifacts', 'output.json')
+        expected_output = os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'output.json')
         with open(expected_output) as f:
             data = json.load(f)
 

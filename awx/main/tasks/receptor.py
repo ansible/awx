@@ -4,6 +4,8 @@ from collections import namedtuple
 import concurrent.futures
 from enum import Enum
 import logging
+import os
+import shutil
 import socket
 import sys
 import threading
@@ -329,6 +331,12 @@ class AWXReceptorJob:
             raise transmitter_thread.exc[1].with_traceback(transmitter_thread.exc[2])
 
         transmitter_thread.join()
+
+        # Artifacts are an output, but sometimes they are an input as well
+        # this is the case with fact cache, where clearing facts deletes a file, and this must be captured
+        artifact_dir = os.path.join(self.runner_params['private_data_dir'], 'artifacts')
+        if os.path.exists(artifact_dir):
+            shutil.rmtree(artifact_dir)
 
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
         # Both "processor" and "cancel_watcher" are spawned in separate threads.
