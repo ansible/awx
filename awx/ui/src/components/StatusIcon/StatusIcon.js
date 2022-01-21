@@ -25,7 +25,7 @@ const colors = {
 };
 
 function StatusIcon({ status, ...props }) {
-  const color = colors[status] || '	--pf-chart-global--Fill--Color--500';
+  const color = colors[status] || '--pf-chart-global--Fill--Color--500';
   const Icon = icons[status];
   return (
     <div {...props} data-job-status={status} aria-label={status}>
