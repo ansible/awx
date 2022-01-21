@@ -3,6 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { Td, Tr } from '@patternfly/react-table';
+import { ActionsTd } from 'components/PaginatedTable';
 
 const CheckboxListItem = ({
   isRadio = false,
@@ -15,6 +16,7 @@ const CheckboxListItem = ({
   onSelect,
   columns,
   item,
+  rowActions,
 }) => {
   const handleRowClick = () => {
     if (isSelected && !isRadio) {
@@ -61,6 +63,16 @@ const CheckboxListItem = ({
         >
           <b>{label}</b>
         </Td>
+      )}
+      {rowActions && (
+        <ActionsTd>
+          {rowActions.map((rowAction) => {
+            const {
+              props: { id },
+            } = rowAction;
+            return <React.Fragment key={id}>{rowAction}</React.Fragment>;
+          })}
+        </ActionsTd>
       )}
     </Tr>
   );
