@@ -17,7 +17,7 @@ npm --prefix=awx/ui start
 
 ### Build for the Development Containers
 If you just want to build a ui for the container-based awx development
-environment and do not need to workk on the ui code, use these make targets:
+environment and do not need to work on the ui code, use these make targets:
 
 ```shell
 # The ui will be reachable at https://localhost:8043 or
