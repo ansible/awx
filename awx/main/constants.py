@@ -85,3 +85,10 @@ RECEPTOR_PENDING = 'ansible-runner-???'
 # Naming pattern for AWX jobs in /tmp folder, like /tmp/awx_42_xiwm
 # also update awxkit.api.pages.unified_jobs if changed
 JOB_FOLDER_PREFIX = 'awx_%s_'
+
+# :z option tells Podman that two containers share the volume content with r/w
+# :O option tells Podman to mount the directory from the host as a temporary storage using the overlay file system.
+# see podman-run manpage for further details
+# /HOST-DIR:/CONTAINER-DIR:OPTIONS
+CONTAINER_VOLUMES_MOUNT_TYPES = ['z', 'O']
+MAX_ISOLATED_PATH_COLON_DELIMITER = 2

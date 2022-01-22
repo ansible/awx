@@ -259,10 +259,14 @@ register(
 
 register(
     'AWX_ISOLATION_SHOW_PATHS',
-    field_class=fields.StringListField,
+    field_class=fields.StringListIsolatedPathField,
     required=False,
     label=_('Paths to expose to isolated jobs'),
-    help_text=_('List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
+    help_text=_(
+        'List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. '
+        'Volumes will be mounted from the execution node to the container. '
+        'The supported format is HOST-DIR[:CONTAINER-DIR[:OPTIONS]]. '
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )

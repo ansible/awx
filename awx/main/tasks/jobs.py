@@ -37,7 +37,13 @@ from gitdb.exc import BadName as BadGitName
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, MINIMAL_EVENTS, JOB_FOLDER_PREFIX
+from awx.main.constants import (
+    PRIVILEGE_ESCALATION_METHODS,
+    STANDARD_INVENTORY_UPDATE_ENV,
+    MINIMAL_EVENTS,
+    JOB_FOLDER_PREFIX,
+    MAX_ISOLATED_PATH_COLON_DELIMITER,
+)
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Instance,
@@ -147,6 +153,9 @@ class BaseTask(object):
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
     def build_execution_environment_params(self, instance, private_data_dir):
+        """
+        Return params structure to be executed by the container runtime
+        """
         if settings.IS_K8S:
             return {}
 
@@ -157,6 +166,9 @@ class BaseTask(object):
             "process_isolation_executable": "podman",  # need to provide, runner enforces default via argparse
             "container_options": ['--user=root'],
         }
+
+        if settings.DEFAULT_CONTAINER_RUN_OPTIONS:
+            params['container_options'].extend(settings.DEFAULT_CONTAINER_RUN_OPTIONS)
 
         if instance.execution_environment.credential:
             cred = instance.execution_environment.credential
@@ -176,9 +188,17 @@ class BaseTask(object):
         if settings.AWX_ISOLATION_SHOW_PATHS:
             params['container_volume_mounts'] = []
             for this_path in settings.AWX_ISOLATION_SHOW_PATHS:
-                # Using z allows the dir to mounted by multiple containers
+                # Verify if a mount path and SELinux context has been passed
+                # Using z allows the dir to be mounted by multiple containers
                 # Uppercase Z restricts access (in weird ways) to 1 container at a time
-                params['container_volume_mounts'].append(f'{this_path}:{this_path}:z')
+                if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
+                    src, dest, scontext = this_path.split(':')
+                    params['container_volume_mounts'].append(f'{src}:{dest}:{scontext}')
+                elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
+                    src, dest = this_path.split(':')
+                    params['container_volume_mounts'].append(f'{src}:{dest}:z')
+                else:
+                    params['container_volume_mounts'].append(f'{this_path}:{this_path}:z')
         return params
 
     def build_private_data(self, instance, private_data_dir):
