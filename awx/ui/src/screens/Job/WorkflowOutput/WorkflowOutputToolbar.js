@@ -10,7 +10,7 @@ import {
   ProjectDiagramIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import StatusIcon from 'components/StatusIcon';
+import StatusLabel from 'components/StatusLabel';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
@@ -24,8 +24,13 @@ const Toolbar = styled.div`
 `;
 
 const ToolbarJob = styled.div`
+  display: inline-flex;
   align-items: center;
-  display: flex;
+
+  h1 {
+    margin-right: 10px;
+    font-weight: var(--pf-global--FontWeight--bold);
+  }
 `;
 
 const ToolbarActions = styled.div`
@@ -57,10 +62,6 @@ const ActionButton = styled(Button)`
   }
 `;
 
-const StatusIconWithMargin = styled(StatusIcon)`
-  margin-right: 20px;
-`;
-
 function WorkflowOutputToolbar({ job }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const history = useHistory();
@@ -75,8 +76,8 @@ function WorkflowOutputToolbar({ job }) {
   return (
     <Toolbar id="workflow-output-toolbar" ouiaId="workflow-output-toolbar">
       <ToolbarJob>
-        <StatusIconWithMargin status={job.status} />
-        <b>{job.name}</b>
+        <h1>{job.name}</h1>
+        <StatusLabel status={job.status} />
       </ToolbarJob>
       <ToolbarActions>
         <ActionButton

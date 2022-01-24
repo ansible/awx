@@ -63,18 +63,6 @@ const jsonValue = `{
   ]
 }`;
 
-// let detailsSection;
-// let jsonSection;
-// let standardOutSection;
-// let standardErrorSection;
-//
-// const findSections = wrapper => {
-//   detailsSection = wrapper.find('section').at(0);
-//   jsonSection = wrapper.find('section').at(1);
-//   standardOutSection = wrapper.find('section').at(2);
-//   standardErrorSection = wrapper.find('section').at(3);
-// };
-
 describe('HostEventModal', () => {
   test('initially renders successfully', () => {
     const wrapper = shallow(
@@ -105,14 +93,14 @@ describe('HostEventModal', () => {
     }
 
     const detail = wrapper.find('Detail').first();
-    expect(detail.prop('value').props.children).toEqual([null, 'foo']);
+    expect(detail.prop('value')).toEqual('foo');
     assertDetail(1, 'Play', 'all');
     assertDetail(2, 'Task', 'command');
     assertDetail(3, 'Module', 'command');
     assertDetail(4, 'Command', hostEvent.event_data.res.cmd);
   });
 
-  test('should display successful host status icon', () => {
+  test('should display successful host status label', () => {
     const successfulHostEvent = { ...hostEvent, changed: false };
     const wrapper = mountWithContexts(
       <HostEventModal
@@ -121,25 +109,21 @@ describe('HostEventModal', () => {
         isOpen
       />
     );
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('ok');
-    expect(icon.find('StatusIcon SuccessfulTop').length).toBe(1);
-    expect(icon.find('StatusIcon SuccessfulBottom').length).toBe(1);
   });
 
-  test('should display skipped host status icon', () => {
+  test('should display skipped host status label', () => {
     const skippedHostEvent = { ...hostEvent, event: 'runner_on_skipped' };
     const wrapper = mountWithContexts(
       <HostEventModal hostEvent={skippedHostEvent} onClose={() => {}} isOpen />
     );
 
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('skipped');
-    expect(icon.find('StatusIcon SkippedTop').length).toBe(1);
-    expect(icon.find('StatusIcon SkippedBottom').length).toBe(1);
   });
 
-  test('should display unreachable host status icon', () => {
+  test('should display unreachable host status label', () => {
     const unreachableHostEvent = {
       ...hostEvent,
       event: 'runner_on_unreachable',
@@ -153,13 +137,11 @@ describe('HostEventModal', () => {
       />
     );
 
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('unreachable');
-    expect(icon.find('StatusIcon UnreachableTop').length).toBe(1);
-    expect(icon.find('StatusIcon UnreachableBottom').length).toBe(1);
   });
 
-  test('should display failed host status icon', () => {
+  test('should display failed host status label', () => {
     const unreachableHostEvent = {
       ...hostEvent,
       changed: false,
@@ -174,10 +156,8 @@ describe('HostEventModal', () => {
       />
     );
 
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('failed');
-    expect(icon.find('StatusIcon FailedTop').length).toBe(1);
-    expect(icon.find('StatusIcon FailedBottom').length).toBe(1);
   });
 
   test('should display JSON tab content on tab click', () => {

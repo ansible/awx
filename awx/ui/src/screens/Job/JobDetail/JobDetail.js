@@ -21,11 +21,10 @@ import { VariablesDetail } from 'components/CodeEditor';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
 import { LaunchButton, ReLaunchDropDown } from 'components/LaunchButton';
-import StatusIcon from 'components/StatusIcon';
+import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from 'util/jobs';
-import { toTitleCase } from 'util/strings';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
 
@@ -92,25 +91,6 @@ function JobDetail({ job, inventorySourceLabels }) {
     <Link to={`/instance_groups/container_group/${item.id}`}>{item.name}</Link>
   );
 
-  const buildProjectDetailValue = () => {
-    if (projectUpdate) {
-      return (
-        <StatusDetailValue>
-          <Link to={`/jobs/project/${projectUpdate.id}`}>
-            <StatusIcon status={project.status} />
-          </Link>
-          <Link to={`/projects/${project.id}`}>{project.name}</Link>
-        </StatusDetailValue>
-      );
-    }
-    return (
-      <StatusDetailValue>
-        <StatusIcon status={project.status} />
-        <Link to={`/projects/${project.id}`}>{project.name}</Link>
-      </StatusDetailValue>
-    );
-  };
-
   return (
     <CardBody>
       <DetailList>
@@ -121,10 +101,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           label={t`Status`}
           value={
             <StatusDetailValue>
-              {job.status && <StatusIcon status={job.status} />}
-              {job.job_explanation
-                ? job.job_explanation
-                : toTitleCase(job.status)}
+              {job.status && <StatusLabel status={job.status} />}
             </StatusDetailValue>
           }
         />
@@ -229,7 +206,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             value={
               <StatusDetailValue>
                 {source_project.status && (
-                  <StatusIcon status={source_project.status} />
+                  <StatusLabel status={source_project.status} />
                 )}
                 <Link to={`/projects/${source_project.id}`}>
                   {source_project.name}
@@ -239,11 +216,26 @@ function JobDetail({ job, inventorySourceLabels }) {
           />
         )}
         {project && (
-          <Detail
-            dataCy="job-project"
-            label={t`Project`}
-            value={buildProjectDetailValue()}
-          />
+          <>
+            <Detail
+              dataCy="job-project"
+              label={t`Project`}
+              value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
+            />
+            <Detail
+              dataCy="job-project-status"
+              label={t`Project Status`}
+              value={
+                projectUpdate ? (
+                  <Link to={`/jobs/project/${projectUpdate.id}`}>
+                    <StatusLabel status={project.status} />
+                  </Link>
+                ) : (
+                  <StatusLabel status={project.status} />
+                )
+              }
+            />
+          </>
         )}
         {scmBranch && (
           <Detail

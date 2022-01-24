@@ -3,19 +3,11 @@ import { Modal, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
 import { encode } from 'html-entities';
-import StatusIcon from '../../../components/StatusIcon';
+import StatusLabel from '../../../components/StatusLabel';
 import { DetailList, Detail } from '../../../components/DetailList';
 import ContentEmpty from '../../../components/ContentEmpty';
 import CodeEditor from '../../../components/CodeEditor';
-
-const HostNameDetailValue = styled.div`
-  align-items: center;
-  display: inline-grid;
-  grid-gap: 10px;
-  grid-template-columns: auto auto;
-`;
 
 const processEventStatus = (event) => {
   let status = null;
@@ -117,15 +109,13 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             style={{ alignItems: 'center', marginTop: '20px' }}
             gutter="sm"
           >
-            <Detail
-              label={t`Host Name`}
-              value={
-                <HostNameDetailValue>
-                  {hostStatus ? <StatusIcon status={hostStatus} /> : null}
-                  {hostEvent.host_name}
-                </HostNameDetailValue>
-              }
-            />
+            <Detail label={t`Host`} value={hostEvent.host_name} />
+            {hostStatus ? (
+              <Detail
+                label={t`Status`}
+                value={<StatusLabel status={hostStatus} />}
+              />
+            ) : null}
             <Detail label={t`Play`} value={hostEvent.play} />
             <Detail label={t`Task`} value={hostEvent.task} />
             <Detail
