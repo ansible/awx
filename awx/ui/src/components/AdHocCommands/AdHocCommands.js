@@ -79,11 +79,19 @@ function AdHocCommands({
   );
 
   const handleSubmit = async (values) => {
-    const { credential, execution_environment, ...remainingValues } = values;
-    const newCredential = credential[0].id;
+    const {
+      credentials,
+      credential_passwords: { become_password, ssh_password, ssh_key_unlock },
+      execution_environment,
+      ...remainingValues
+    } = values;
+    const newCredential = credentials[0].id;
 
     const manipulatedValues = {
       credential: newCredential,
+      become_password,
+      ssh_password,
+      ssh_key_unlock,
       execution_environment: execution_environment[0]?.id,
       ...remainingValues,
     };

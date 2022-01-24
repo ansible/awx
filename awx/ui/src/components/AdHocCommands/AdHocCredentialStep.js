@@ -76,7 +76,7 @@ function AdHocCredentialStep({ credentialTypeId }) {
   }, [fetchCredentials]);
 
   const [field, meta, helpers] = useField({
-    name: 'credential',
+    name: 'credentials',
     validate: required(null),
   });
 
