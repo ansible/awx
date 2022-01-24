@@ -25,13 +25,17 @@ class Command(BaseCommand):
                 if not Organization.objects.exists():
                     o, _ = Organization.objects.get_or_create(name='Default')
 
-                    p, _ = Project.objects.get_or_create(
-                        name='Demo Project',
-                        scm_type='git',
-                        scm_url='https://github.com/ansible/ansible-tower-samples',
-                        scm_update_on_launch=True,
-                        scm_update_cache_timeout=0,
-                    )
+                    # Avoid calling directly the get_or_create() to bypass project update
+                    p = Project.objects.filter(name='Demo Project', scm_type='git').first()
+                    if not p:
+                        p = Project(
+                            name='Demo Project',
+                            scm_type='git',
+                            scm_url='https://github.com/ansible/ansible-tower-samples',
+                            scm_update_on_launch=True,
+                            scm_update_cache_timeout=0,
+                        )
+
                     p.organization = o
                     p.save(skip_update=True)
 
