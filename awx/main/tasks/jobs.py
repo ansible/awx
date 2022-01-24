@@ -40,6 +40,7 @@ from awx.main.constants import (
     STANDARD_INVENTORY_UPDATE_ENV,
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
+    CONTAINER_VOLUMES_MOUNT_TYPES,
 )
 from awx.main.models import (
     Instance,
@@ -164,6 +165,13 @@ class BaseTask(object):
                 # Uppercase Z restricts access (in weird ways) to 1 container at a time
                 if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
                     src, dest, scontext = this_path.split(':')
+
+                    # scontext validation via performed via API, but since this can be overriden via settings.py
+                    # let's ensure scontext is one that we support
+                    if scontext not in CONTAINER_VOLUMES_MOUNT_TYPES:
+                        scontext = 'z'
+                        logger.warn(f'The path {this_path} has volume mount type {scontext} which is not supported. Using "z" instead.')
+
                     params['container_volume_mounts'].append(f'{src}:{dest}:{scontext}')
                 elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
                     src, dest = this_path.split(':')

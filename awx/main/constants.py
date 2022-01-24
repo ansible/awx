@@ -88,7 +88,8 @@ JOB_FOLDER_PREFIX = 'awx_%s_'
 
 # :z option tells Podman that two containers share the volume content with r/w
 # :O option tells Podman to mount the directory from the host as a temporary storage using the overlay file system.
+# :ro or :rw option to mount a volume in read-only or read-write mode, respectively. By default, the volumes are mounted read-write.
 # see podman-run manpage for further details
 # /HOST-DIR:/CONTAINER-DIR:OPTIONS
-CONTAINER_VOLUMES_MOUNT_TYPES = ['z', 'O']
+CONTAINER_VOLUMES_MOUNT_TYPES = ['z', 'O', 'ro', 'rw']
 MAX_ISOLATED_PATH_COLON_DELIMITER = 2
