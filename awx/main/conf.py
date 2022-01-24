@@ -335,6 +335,19 @@ register(
 )
 
 register(
+    'AWX_MOUNT_ISOLATED_PATHS_ON_K8S',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Expose host paths for Container Groups'),
+    help_text=_(
+        'Expose paths via hostPath for the Pods created by a Container Group. '
+        'HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. '
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'GALAXY_IGNORE_CERTS',
     field_class=fields.BooleanField,
     default=False,
