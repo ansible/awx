@@ -436,14 +436,11 @@ def inspect_execution_nodes(instance_list):
         workers = mesh_status['Advertisements']
         for ad in workers:
             hostname = ad['NodeID']
-            if not any(cmd['WorkType'] == 'ansible-runner' for cmd in ad['WorkCommands'] or []):
-                continue
-
             changed = False
             if hostname in node_lookup:
                 instance = node_lookup[hostname]
             else:
-                logger.warn(f"Unrecognized node on mesh advertising ansible-runner work type: {hostname}")
+                logger.warn(f"Unrecognized node advertising on mesh: {hostname}")
                 continue
 
             was_lost = instance.is_lost(ref_time=nowtime)
@@ -453,6 +450,10 @@ def inspect_execution_nodes(instance_list):
                 continue
             instance.last_seen = last_seen
             instance.save(update_fields=['last_seen'])
+
+            # Make sure that hop nodes don't fall through and have the execution_node_health_check task applied
+            if not any(cmd['WorkType'] == 'ansible-runner' for cmd in ad['WorkCommands'] or []):
+                continue
 
             if changed:
                 execution_node_health_check.apply_async([hostname])
@@ -482,7 +483,6 @@ def cluster_node_heartbeat():
     for inst in instance_list:
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
-            instance_list.remove(inst)
             break
     else:
         (changed, this_inst) = Instance.objects.get_or_register()
@@ -506,7 +506,9 @@ def cluster_node_heartbeat():
         raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
     # IFF any node has a greater version than we do, then we'll shutdown services
     for other_inst in instance_list:
-        if other_inst.version == "" or other_inst.version.startswith('ansible-runner') or other_inst.node_type == 'execution':
+        if other_inst.node_type in ('execution', 'hop'):
+            continue
+        if other_inst.version == "" or other_inst.version.startswith('ansible-runner'):
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
             logger.error(
@@ -530,7 +532,7 @@ def cluster_node_heartbeat():
             #  * It was set to 0 by another tower node running this method
             #  * It was set to 0 by this node, but auto deprovisioning is off
             #
-            # If auto deprovisining is on, don't bother setting the capacity to 0
+            # If auto deprovisioning is on, don't bother setting the capacity to 0
             # since we will delete the node anyway.
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
