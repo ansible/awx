@@ -39,7 +39,7 @@ options:
     - name: CONTROLLER_PASSWORD
     - name: TOWER_PASSWORD
       deprecated:
-        removed_from_collection: 'awx.awx.controller'
+        removed_from_collection: 'awx.awx'
         removed_in: '4.0.0'
         why: Collection name change
         alternative: 'CONTROLLER_PASSWORD'
