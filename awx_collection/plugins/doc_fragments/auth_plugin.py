@@ -29,7 +29,7 @@ options:
     - name: CONTROLLER_USERNAME
     - name: TOWER_USERNAME
       deprecated:
-        removed_from_collection: 'awx.awx'
+        collection_name: 'awx.awx'
         removed_in: '4.0.0'
         why: Collection name change
         alternatives: 'CONTROLLER_USERNAME'
