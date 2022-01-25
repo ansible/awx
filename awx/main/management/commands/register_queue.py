@@ -53,14 +53,14 @@ class RegisterQueue:
     def add_instances_to_group(self, ig):
         changed = False
 
-        instance_list_unique = set([x.strip() for x in self.hostname_list if x])
+        instance_list_unique = {x for x in (x.strip() for x in self.hostname_list) if x}
         instances = []
         for inst_name in instance_list_unique:
-            instance = Instance.objects.filter(hostname=inst_name)
+            instance = Instance.objects.filter(hostname=inst_name).exclude(node_type='hop')
             if instance.exists():
                 instances.append(instance[0])
             else:
-                raise InstanceNotFound("Instance does not exist: {}".format(inst_name), changed)
+                raise InstanceNotFound("Instance does not exist or cannot run jobs: {}".format(inst_name), changed)
 
         ig.instances.add(*instances)
 

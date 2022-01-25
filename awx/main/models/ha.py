@@ -195,7 +195,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if ref_time is None:
             ref_time = now()
         grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 2
-        if self.node_type == 'execution':
+        if self.node_type in ('execution', 'hop'):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
