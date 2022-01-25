@@ -53,7 +53,7 @@ options:
         removed_from_collection: 'awx.awx'
         version: '4.0.0'
         why: Collection name change
-        alternative: 'CONTROLLER_OAUTH_TOKEN'
+        alternatives: 'CONTROLLER_OAUTH_TOKEN'
   verify_ssl:
     description:
     - Specify whether Ansible should verify the SSL certificate of the controller host.
