@@ -3,7 +3,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 
-import { ConfigAPI, MeAPI, UsersAPI, OrganizationsAPI } from 'api';
+import { ConfigAPI, MeAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
@@ -41,31 +41,9 @@ export const ConfigProvider = ({ children }) => {
         },
       ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
 
-      const [
-        {
-          data: { count: adminOrgCount },
-        },
-        {
-          data: { count: notifAdminCount },
-        },
-        {
-          data: { count: execEnvAdminCount },
-        },
-      ] = await Promise.all([
-        UsersAPI.readAdminOfOrganizations(me?.id),
-        OrganizationsAPI.read({
-          page_size: 1,
-          role_level: 'notification_admin_role',
-        }),
-        OrganizationsAPI.read({
-          page_size: 1,
-          role_level: 'execution_environment_admin_role',
-        }),
-      ]);
-
-      return { ...data, me, adminOrgCount, notifAdminCount, execEnvAdminCount };
+      return { ...data, me };
     }, []),
-    { adminOrgCount: 0, notifAdminCount: 0, execEnvAdminCount: 0 }
+    {}
   );
 
   const { error, dismissError } = useDismissableError(configError);
@@ -109,9 +87,9 @@ export const useUserProfile = () => {
   return {
     isSuperUser: !!config.me?.is_superuser,
     isSystemAuditor: !!config.me?.is_system_auditor,
-    isOrgAdmin: config.adminOrgCount,
-    isNotificationAdmin: config.notifAdminCount,
-    isExecEnvAdmin: config.execEnvAdminCount,
+    isOrgAdmin: !!config.me?.is_organization_admin,
+    isNotificationAdmin: !!config.me?.is_notification_template_admin,
+    isExecEnvAdmin: !!config.me?.is_execution_environment_admin,
   };
 };
 
