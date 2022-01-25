@@ -42,7 +42,7 @@ options:
         removed_from_collection: 'awx.awx'
         removed_in: '4.0.0'
         why: Collection name change
-        alternative: 'CONTROLLER_PASSWORD'
+        alternatives: 'CONTROLLER_PASSWORD'
   oauth_token:
     description:
     - The OAuth token to use.
