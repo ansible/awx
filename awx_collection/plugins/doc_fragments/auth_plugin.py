@@ -51,7 +51,7 @@ options:
     - name: TOWER_OAUTH_TOKEN
       deprecated:
         removed_from_collection: 'awx.awx'
-        removed_in: '4.0.0'
+        version: '4.0.0'
         why: Collection name change
         alternative: 'CONTROLLER_OAUTH_TOKEN'
   verify_ssl:
