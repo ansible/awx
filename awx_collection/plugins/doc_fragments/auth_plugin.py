@@ -66,7 +66,7 @@ options:
         removed_from_collection: 'awx.awx'
         version: '4.0.0'
         why: Collection name change
-        alternative: 'CONTROLLER_VERIFY_SSL'
+        alternatives: 'CONTROLLER_VERIFY_SSL'
     aliases: [ validate_certs ]
 
 notes:
