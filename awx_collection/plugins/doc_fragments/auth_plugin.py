@@ -50,7 +50,7 @@ options:
     - name: CONTROLLER_OAUTH_TOKEN
     - name: TOWER_OAUTH_TOKEN
       deprecated:
-        removed_from_collection: 'awx.awx'
+        collection_name: 'awx.awx'
         version: '4.0.0'
         why: Collection name change
         alternatives: 'CONTROLLER_OAUTH_TOKEN'
