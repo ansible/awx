@@ -22,7 +22,7 @@ options:
         collection_name: 'awx.awx'
         removed_in: '4.0.0'
         why: Collection name change
-        alternative: 'CONTROLLER_HOST'
+        alternatives: 'CONTROLLER_HOST'
   username:
     description: The user that you plan to use to access inventories on the controller.
     env:
