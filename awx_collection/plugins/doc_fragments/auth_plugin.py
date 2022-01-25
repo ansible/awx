@@ -30,7 +30,7 @@ options:
     - name: TOWER_USERNAME
       deprecated:
         collection_name: 'awx.awx'
-        removed_in: '4.0.0'
+        version: '4.0.0'
         why: Collection name change
         alternatives: 'CONTROLLER_USERNAME'
   password:
