@@ -1074,7 +1074,7 @@ class UserList(ListCreateAPIView):
 class UserMeList(ListAPIView):
 
     model = models.User
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.UserMeSerializer
     name = _('Me')
     ordering = ('username',)
 

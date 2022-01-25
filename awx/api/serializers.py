@@ -1095,6 +1095,32 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
+class UserMeSerializer(UserSerializer):
+    """Provide additional fields for UI navigation"""
+
+    is_execution_environment_admin = serializers.SerializerMethodField(method_name='_get_is_execution_environment_admin')
+    is_notification_template_admin = serializers.SerializerMethodField(method_name='_get_is_notification_template_admin')
+    is_organization_admin = serializers.SerializerMethodField(method_name='_get_is_organization_admin')
+
+    class Meta:
+        model = UserSerializer.Meta.model
+        fields = tuple(list(UserSerializer.Meta.fields) + ['is_execution_environment_admin', 'is_notification_template_admin', 'is_organization_admin'])
+
+    def _get_is_execution_environment_admin(self, obj):
+        admin_execution_environments = Organization.accessible_objects(obj, 'read_role') & Organization.objects.filter(
+            execution_environment_admin_role__members=obj
+        )
+        return len(admin_execution_environments) > 0
+
+    def _get_is_notification_template_admin(self, obj):
+        admin_notification_templates = Organization.accessible_objects(obj, 'read_role') & Organization.objects.filter(notification_admin_role__members=obj)
+        return len(admin_notification_templates) > 0
+
+    def _get_is_organization_admin(self, obj):
+        admin_organizations = Organization.accessible_objects(obj, 'read_role') & Organization.objects.filter(admin_role__members=obj)
+        return len(admin_organizations) > 0
+
+
 class BaseOAuth2TokenSerializer(BaseSerializer):
 
     refresh_token = serializers.SerializerMethodField()
