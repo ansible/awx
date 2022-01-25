@@ -63,7 +63,7 @@ options:
     - name: CONTROLLER_VERIFY_SSL
     - name: TOWER_VERIFY_SSL
       deprecated:
-        removed_from_collection: 'awx.awx'
+        collection_name: 'awx.awx'
         version: '4.0.0'
         why: Collection name change
         alternatives: 'CONTROLLER_VERIFY_SSL'
