@@ -42,7 +42,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install "virtualenv < 20"
+RUN pip3 install virtualenv
 
 
 # Install & build requirements
@@ -123,7 +123,7 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master
 RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
     chmod +x /usr/bin/tini
 
-RUN pip3 install "virtualenv < 20" supervisor
+RUN pip3 install virtualenv supervisor
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
