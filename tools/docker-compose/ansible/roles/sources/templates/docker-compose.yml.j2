@@ -140,6 +140,7 @@ services:
     links:
       - receptor-hop
     volumes:
+      - "../../../:/awx_devel"  # not used, but mounted so that any in-place installs can be used for whole cluster
       - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
