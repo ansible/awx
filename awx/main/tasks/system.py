@@ -437,10 +437,15 @@ def inspect_execution_nodes(instance_list):
         for ad in workers:
             hostname = ad['NodeID']
             changed = False
+
             if hostname in node_lookup:
                 instance = node_lookup[hostname]
             else:
                 logger.warn(f"Unrecognized node advertising on mesh: {hostname}")
+                continue
+
+            # Control-plane nodes are dealt with via local_health_check instead.
+            if instance.node_type in ('control', 'hybrid'):
                 continue
 
             was_lost = instance.is_lost(ref_time=nowtime)
@@ -451,8 +456,8 @@ def inspect_execution_nodes(instance_list):
             instance.last_seen = last_seen
             instance.save(update_fields=['last_seen'])
 
-            # Make sure that hop nodes don't fall through and have the execution_node_health_check task applied
-            if not any(cmd['WorkType'] == 'ansible-runner' for cmd in ad['WorkCommands'] or []):
+            # Only execution nodes should be dealt with by execution_node_health_check
+            if instance.node_type == 'hop':
                 continue
 
             if changed:
@@ -492,6 +497,8 @@ def cluster_node_heartbeat():
     inspect_execution_nodes(instance_list)
 
     for inst in list(instance_list):
+        if inst == this_inst:
+            continue
         if inst.is_lost(ref_time=nowtime):
             lost_instances.append(inst)
             instance_list.remove(inst)
