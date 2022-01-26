@@ -1,10 +1,11 @@
 import React, { useEffect, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import { PageSection, Card, CardBody } from '@patternfly/react-core';
 import useRequest from 'hooks/useRequest';
-import { MeshAPI } from 'api';
+import { MeshAPI, InstancesAPI } from 'api';
 import MeshGraph from './MeshGraph';
 
 function TopologyView() {
@@ -21,6 +22,15 @@ function TopologyView() {
     }, []),
     { meshData: { nodes: [], links: [] } }
   );
+  async function RedirectToDetailsPage({ id: nodeId }) {
+    const history = useHistory();
+    const {
+      data: { results },
+    } = await InstancesAPI.readInstanceGroup(nodeId);
+    const { id: instanceGroupId } = results[0];
+    const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
+    history.push(constructedURL);
+  }
   useEffect(() => {
     fetchMeshVisualizer();
   }, [fetchMeshVisualizer]);
@@ -30,7 +40,14 @@ function TopologyView() {
 
       <PageSection>
         <Card>
-          <CardBody>{meshData && <MeshGraph data={meshData} />}</CardBody>
+          <CardBody>
+            {meshData && (
+              <MeshGraph
+                data={meshData}
+                redirectToDetailsPage={RedirectToDetailsPage}
+              />
+            )}
+          </CardBody>
         </Card>
       </PageSection>
     </>

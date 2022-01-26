@@ -1,107 +1,89 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import debounce from 'util/debounce';
-import { useHistory } from 'react-router-dom';
 // import { t } from '@lingui/macro';
-import { InstancesAPI } from 'api';
 import * as d3 from 'd3';
 
-function MeshGraph({ data }) {
-  // function MeshGraph() {
-  // const data = {
-  //   nodes: [
-  //     {
-  //       hostname: 'aapc1.local',
-  //       node_state: 'healthy',
-  //       node_type: 'control',
-  //       id: 1,
-  //     },
-  //     {
-  //       hostname: 'aapc2.local',
-  //       node_type: 'control',
-  //       node_state: 'disabled',
-  //       id: 2,
-  //     },
-  //     {
-  //       hostname: 'aapc3.local',
-  //       node_type: 'control',
-  //       node_state: 'healthy',
-  //       id: 3,
-  //     },
-  //     {
-  //       hostname: 'aape1.local',
-  //       node_type: 'execution',
-  //       node_state: 'error',
-  //       id: 4,
-  //     },
-  //     {
-  //       hostname: 'aape2.local',
-  //       node_type: 'execution',
-  //       node_state: 'error',
-  //       id: 5,
-  //     },
-  //     {
-  //       hostname: 'aape3.local',
-  //       node_type: 'execution',
-  //       node_state: 'healthy',
-  //       id: 6,
-  //     },
-  //     {
-  //       hostname: 'aape4.local',
-  //       node_type: 'execution',
-  //       node_state: 'healthy',
-  //       id: 7,
-  //     },
-  //     {
-  //       hostname: 'aaph1.local',
-  //       node_type: 'hop',
-  //       node_state: 'disabled',
-  //       id: 8,
-  //     },
-  //     {
-  //       hostname: 'aaph2.local',
-  //       node_type: 'hop',
-  //       node_state: 'healthy',
-  //       id: 9,
-  //     },
-  //     {
-  //       hostname: 'aaph3.local',
-  //       node_type: 'hop',
-  //       node_state: 'error',
-  //       id: 10,
-  //     },
-  //   ],
-  //   links: [
-  //     { source: 'aapc1.local', target: 'aapc2.local' },
-  //     { source: 'aapc1.local', target: 'aapc3.local' },
-  //     { source: 'aapc1.local', target: 'aape1.local' },
-  //     { source: 'aapc1.local', target: 'aape2.local' },
-
-  //     { source: 'aapc2.local', target: 'aapc3.local' },
-  //     { source: 'aapc2.local', target: 'aape1.local' },
-  //     { source: 'aapc2.local', target: 'aape2.local' },
-
-  //     { source: 'aapc3.local', target: 'aape1.local' },
-  //     { source: 'aapc3.local', target: 'aape2.local' },
-
-  //     { source: 'aape3.local', target: 'aaph1.local' },
-  //     { source: 'aape3.local', target: 'aaph2.local' },
-
-  //     { source: 'aape4.local', target: 'aaph3.local' },
-
-  //     { source: 'aaph1.local', target: 'aapc1.local' },
-  //     { source: 'aaph1.local', target: 'aapc2.local' },
-  //     { source: 'aaph1.local', target: 'aapc3.local' },
-
-  //     { source: 'aaph2.local', target: 'aapc1.local' },
-  //     { source: 'aaph2.local', target: 'aapc2.local' },
-  //     { source: 'aaph2.local', target: 'aapc3.local' },
-
-  //     { source: 'aaph3.local', target: 'aaph1.local' },
-  //     { source: 'aaph3.local', target: 'aaph2.local' },
-  //   ],
-  // };
-  const history = useHistory();
+// function MeshGraph({ data }) {
+function MeshGraph({ redirectToDetailsPage }) {
   const draw = useCallback(() => {
+    const data = {
+      nodes: [
+        {
+          id: 1,
+          hostname: 'awx_1',
+          node_type: 'hybrid',
+          node_state: 'healthy',
+        },
+        {
+          id: 3,
+          hostname: 'receptor-1',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 4,
+          hostname: 'receptor-2',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 2,
+          hostname: 'receptor-hop',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 5,
+          hostname: 'receptor-hop-1',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 6,
+          hostname: 'receptor-hop-2',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 7,
+          hostname: 'receptor-hop-3',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 8,
+          hostname: 'receptor-hop-4',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+      ],
+      links: [
+        {
+          source: 'receptor-hop',
+          target: 'awx_1',
+        },
+        {
+          source: 'receptor-1',
+          target: 'receptor-hop',
+        },
+        {
+          source: 'receptor-2',
+          target: 'receptor-hop',
+        },
+        {
+          source: 'receptor-hop-3',
+          target: 'receptor-hop',
+        },
+        // {
+        //   "source": "receptor-2",
+        //   "target": "receptor-hop-1"
+        // },
+        // {
+        //   "source": "receptor-2",
+        //   "target": "receptor-hop-2"
+        // }
+      ],
+    };
     const margin = 80;
     const getWidth = () => {
       let width;
@@ -124,7 +106,7 @@ function MeshGraph({ data }) {
 
     const zoom = d3
       .zoom()
-      .scaleExtent([1, 8])
+      // .scaleExtent([1, 8])
       .on('zoom', (event) => {
         svg.attr('transform', event.transform);
       });
@@ -145,27 +127,41 @@ function MeshGraph({ data }) {
 
     const simulation = d3
       .forceSimulation()
+      .force('charge', d3.forceManyBody(75).strength(-100))
       .force(
         'link',
         d3.forceLink().id((d) => d.hostname)
       )
-      .force('charge', d3.forceManyBody().strength(-350))
-      .force(
-        'collide',
-        d3.forceCollide((d) =>
-          d.node_type === 'execution' || d.node_type === 'hop' ? 75 : 100
-        )
-      )
+      .force('collide', d3.forceCollide(80))
+      .force('forceX', d3.forceX(0))
+      .force('forceY', d3.forceY(0))
       .force('center', d3.forceCenter(width / 2, height / 2));
+
+    // const simulation = d3
+    //   .forceSimulation()
+    //   .force(
+    //     'link',
+    //     d3.forceLink().id((d) => d.hostname)
+    //   )
+    //   .force('charge', d3.forceManyBody().strength(-350))
+    //   .force(
+    //     'collide',
+    //     d3.forceCollide((d) =>
+    //       d.node_type === 'execution' || d.node_type === 'hop' ? 75 : 100
+    //     )
+    //   )
+    //   .force('center', d3.forceCenter(width / 2, height / 2));
 
     const link = svg
       .append('g')
       .attr('class', `links`)
       .attr('data-cy', 'links')
-      .selectAll('path')
+      // .selectAll('path')
+      .selectAll('line')
       .data(graph.links)
       .enter()
-      .append('path')
+      .append('line')
+      // .append('path')
       .attr('class', (d, i) => `link-${i}`)
       .attr('data-cy', (d) => `${d.source}-${d.target}`)
       .style('fill', 'none')
@@ -285,17 +281,22 @@ function MeshGraph({ data }) {
     simulation.force('link').links(graph.links);
 
     function ticked() {
-      link.attr('d', linkArc);
+      // link.attr('d', linkArc);
+      link
+        .attr('x1', (d) => d.source.x)
+        .attr('y1', (d) => d.source.y)
+        .attr('x2', (d) => d.target.x)
+        .attr('y2', (d) => d.target.y);
 
       node.attr('transform', (d) => `translate(${d.x},${d.y})`);
     }
 
-    function linkArc(d) {
-      const dx = d.target.x - d.source.x;
-      const dy = d.target.y - d.source.y;
-      const dr = Math.sqrt(dx * dx + dy * dy);
-      return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
-    }
+    // function linkArc(d) {
+    //   const dx = d.target.x - d.source.x;
+    //   const dy = d.target.y - d.source.y;
+    //   const dr = Math.sqrt(dx * dx + dy * dy);
+    //   return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    // }
 
     function contractGlow() {
       svg
@@ -329,7 +330,7 @@ function MeshGraph({ data }) {
         hop: '#C46100',
         execution: '#F0AB00',
         hybrid: '#0066CC',
-        control: '#005F60'
+        control: '#005F60',
       };
 
       return colorKey[nodeType];
@@ -377,18 +378,7 @@ function MeshGraph({ data }) {
           .attr('r', defaultRadius);
       });
     }
-
-    async function redirectToDetailsPage({ id: nodeId }) {
-      const {
-        data: { results },
-      } = await InstancesAPI.readInstanceGroup(nodeId);
-      const { id: instanceGroupId } = results[0];
-      const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
-      history.push(constructedURL);
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     function handleResize() {
@@ -396,9 +386,7 @@ function MeshGraph({ data }) {
     }
 
     window.addEventListener('resize', debounce(handleResize, 500));
-
-    handleResize();
-
+    draw();
     return () => window.removeEventListener('resize', handleResize);
   }, [draw]);
 
