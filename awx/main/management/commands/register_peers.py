@@ -1,3 +1,5 @@
+import warnings
+
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -45,7 +47,7 @@ class Command(BaseCommand):
             peers = set(options['peers'] or options['exact'])
             incoming = set(InstanceLink.objects.filter(target=nodes[options['source']]).values_list('source__hostname', flat=True))
             if peers & incoming:
-                raise CommandError(f"Source node {options['source']} cannot link to nodes already peering to it: {peers & incoming}.")
+                warnings.warn(f"Source node {options['source']} should not link to nodes already peering to it: {peers & incoming}.")
 
         if options['peers']:
             missing_peers = set(options['peers']) - set(nodes)
