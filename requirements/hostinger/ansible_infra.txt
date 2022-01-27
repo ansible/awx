@@ -22,5 +22,6 @@ netaddr==0.7.19
 pymysql==0.10.0
 jmespath==0.10.0
 hvac==0.10.5
+openstacksdk==0.61.0
 ansible-tower-cli==3.3.9
 ansible==4.4.0
