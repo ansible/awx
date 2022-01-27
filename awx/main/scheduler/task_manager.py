@@ -285,13 +285,6 @@ class TaskManager:
                 schedule_task_manager()
             elif rampart_group.is_container_group:
                 task.instance_group = rampart_group
-                if task.capacity_type != 'execution':
-                    # project updates and system jobs don't *actually* run in pods, so
-                    # just pick *any* non-containerized host and use it as the execution node
-                    # TODO: I think we could use our control node here since we know it has capacity
-                    task.execution_node = Instance.choose_online_control_plane_node()
-                    task.log_lifecycle("execution_node_chosen")
-                    logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
@@ -510,10 +503,22 @@ class TaskManager:
                 continue
 
             for rampart_group in preferred_instance_groups:
+                if task.capacity_type != 'execution' and rampart_group.is_container_group:
+                    # project updates and inventory updates for job have to run on a control node
+                    controller_node = Instance.choose_control_plane_node_with_sufficient_capacity(task)
+                    # No controller node was available, go on to next task
+                    if not controller_node:
+                        logger.warning("No control plane nodes available to run containerized job {}, returning to pending".format(task.log_format))
+                        found_acceptable_queue = False
+                        continue
+                    # If there is enough capacity, assign the node to be the execution node and break out of the sub loop
+                    task.execution_node = controller_node
+                    break
+
                 if task.capacity_type == 'execution' and rampart_group.is_container_group:
                     # find one real, non-containerized instance with capacity to
                     # act as the controller for k8s API interaction
-                    controller_node = choose_control_plane_node_with_sufficient_capacity(task)
+                    controller_node = Instance.choose_control_plane_node_with_sufficient_capacity(task)
 
                     # No controller node was available, go on to next task
                     if not controller_node:
@@ -528,9 +533,7 @@ class TaskManager:
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
 
-                    # not sure why this break is here...I think we want "continue" to go onto next task
-                    # break
-                    continue
+                    break
 
                 # TODO: remove this after we have confidence that OCP control nodes are reporting node_type=control
                 if settings.IS_K8S and task.capacity_type == 'execution':
