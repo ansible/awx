@@ -263,7 +263,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.mark_offline(perform_save=False, errors=errors)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])
 
-        self.save(update_fields=update_fields)
+        # disabling activity stream will avoid extra queries, which is important for heatbeat actions
+        from awx.main.signals import disable_activity_stream
+
+        with disable_activity_stream():
+            self.save(update_fields=update_fields)
 
     def local_health_check(self):
         """Only call this method on the instance that this record represents"""
