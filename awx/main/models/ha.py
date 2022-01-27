@@ -147,7 +147,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     @property
     def consumed_capacity(self):
         tasks = [
-            x for x in UnifiedJob.objects.filter(Q(controller_node=self.hostname) | Q(execution_node=self.hostname) & Q(status__in=('running', 'waiting')))
+            x for x in UnifiedJob.objects.filter((Q(controller_node=self.hostname) | Q(execution_node=self.hostname)) & Q(status__in=('running', 'waiting')))
         ]
         capacity_consumed = sum(x.task_impact for x in tasks)
         logger.debug(f"tasks on the host: {[(task.log_format, task.task_impact) for task in tasks]}")
