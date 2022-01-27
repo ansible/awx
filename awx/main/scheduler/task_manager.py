@@ -517,10 +517,10 @@ class TaskManager:
                         # If we are deducting capacity, "choose_online_control_plane_node" should only choose control plane nodes
                         # with capacity >0
                         # TODO would be great if this just did the right thing and only chose a control group with enough
-                        # capacity and we didn't need this try/except
+                        # capacity and we didn't need this try/except - maybe replace this with better decision making about capacity
                         task.controller_node = Instance.choose_online_control_plane_node()
                     except IndexError:
-                        task.status = 'pending'
+                        # task.status = 'pending'
                         logger.warning("No control plane nodes available to run containerized job {}, returning to pending".format(task.log_format))
                         found_acceptable_queue = False
                         continue
@@ -528,8 +528,8 @@ class TaskManager:
                     control_instance = Instance.objects.filter(hostname=task.controller_node).first()
                     control_group = control_instance.rampart_groups.first()
                     remaining_capacity = self.get_remaining_capacity(control_group.name, capacity_type='control')
-                    if task.task_impact > 0 and remaining_capacity <= 0:
-                        logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
+                    if task.task_impact > 0 and (remaining_capacity - task.task_impact) < 0:
+                        logger.debug("Skipping group {}, not enough capacity.".format(rampart_group.name))
                         continue
 
                     task.log_lifecycle("controller_node_chosen")
