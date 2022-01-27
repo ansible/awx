@@ -243,7 +243,11 @@ class InstanceGroupManager(models.Manager):
         for t in tasks:
             # TODO: dock capacity for isolated job management tasks running in queue
             impact = t.task_impact
-            if t.status == 'waiting' or not t.execution_node:
+            control_groups = []
+            if t.controller_node:
+                control_groups = instance_ig_mapping[t.controller_node]
+
+            if t.status == 'waiting' or (not t.execution_node and not t.is_container_group_task):
                 # Subtract capacity from any peer groups that share instances
                 if not t.instance_group:
                     impacted_groups = []
@@ -252,12 +256,19 @@ class InstanceGroupManager(models.Manager):
                     impacted_groups = [t.instance_group.name]
                 else:
                     impacted_groups = ig_ig_mapping[t.instance_group.name]
+                # TODO: refactor these two loops because they are repeated almost verbatim below
                 for group_name in impacted_groups:
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
                     graph[group_name]['consumed_capacity'] += impact
                     capacity_type = get_capacity_type(t)
                     graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
+                    if breakdown:
+                        graph[group_name]['committed_capacity'] += impact
+                for group_name in control_groups:
+                    if group_name not in graph:
+                        self.zero_out_group(graph, group_name, breakdown)
+                    graph[group_name][f'consumed_control_capacity'] += impact
                     if breakdown:
                         graph[group_name]['committed_capacity'] += impact
             elif t.status == 'running':
@@ -271,12 +282,19 @@ class InstanceGroupManager(models.Manager):
                         impacted_groups = []
                 else:
                     impacted_groups = instance_ig_mapping[t.execution_node]
+
                 for group_name in impacted_groups:
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
                     graph[group_name]['consumed_capacity'] += impact
                     capacity_type = get_capacity_type(t)
                     graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
+                    if breakdown:
+                        graph[group_name]['running_capacity'] += impact
+                for group_name in control_groups:
+                    if group_name not in graph:
+                        self.zero_out_group(graph, group_name, breakdown)
+                    graph[group_name][f'consumed_control_capacity'] += impact
                     if breakdown:
                         graph[group_name]['running_capacity'] += impact
             else:

@@ -145,7 +145,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @property
     def consumed_capacity(self):
-        return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+        # TODO refactor, we can probably get this done in one query
+        control_capacity_consumed = sum(x.task_impact for x in UnifiedJob.objects.filter(controller_node=self.hostname, status__in=('running', 'waiting')))
+        execution_capacity_consumed = sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+        return control_capacity_consumed + execution_capacity_consumed
 
     @property
     def remaining_capacity(self):
