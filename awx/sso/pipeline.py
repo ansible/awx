@@ -255,17 +255,18 @@ def _check_flag(user, flag, attributes, user_flags_settings):
             # If so, check and see if the value of the attr matches the required value
             attribute_value = attributes.get(attr_setting, None)
             if isinstance(attribute_value, (list, tuple)):
-                attribute_value = attribute_value[0]
-            if attribute_value == user_flags_settings.get(is_value_key):
-                logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
-                new_flag = True
-            # if they don't match make sure that new_flag is false
-            else:
-                logger.debug(
-                    "Refusing %s for %s because attr %s (%s) did not match value '%s'"
-                    % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
-                )
-                new_flag = False
+                for attribute_value in attribute_value:            
+                    if attribute_value == user_flags_settings.get(is_value_key):
+                        logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
+                        new_flag = True
+                        break
+                    # if they don't match make sure that new_flag is false
+                    else:
+                        logger.debug(
+                            "Refusing %s for %s because attr %s (%s) did not match value '%s'"
+                            % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
+                        )
+                        new_flag = False
         # If there was no required value then we can just allow them in because of the attribute
         else:
             logger.debug("Giving %s %s from attribute %s" % (user.username, flag, attr_setting))
