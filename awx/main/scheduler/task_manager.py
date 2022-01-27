@@ -513,31 +513,24 @@ class TaskManager:
                 if task.capacity_type == 'execution' and rampart_group.is_container_group:
                     # find one real, non-containerized instance with capacity to
                     # act as the controller for k8s API interaction
-                    try:
-                        # If we are deducting capacity, "choose_online_control_plane_node" should only choose control plane nodes
-                        # with capacity >0
-                        # TODO would be great if this just did the right thing and only chose a control group with enough
-                        # capacity and we didn't need this try/except - maybe replace this with better decision making about capacity
-                        task.controller_node = Instance.choose_online_control_plane_node()
-                    except IndexError:
-                        # task.status = 'pending'
+                    controller_node = choose_control_plane_node_with_sufficient_capacity(task)
+
+                    # No controller node was available, go on to next task
+                    if not controller_node:
                         logger.warning("No control plane nodes available to run containerized job {}, returning to pending".format(task.log_format))
                         found_acceptable_queue = False
                         continue
 
-                    control_instance = Instance.objects.filter(hostname=task.controller_node).first()
-                    control_group = control_instance.rampart_groups.first()
-                    remaining_capacity = self.get_remaining_capacity(control_group.name, capacity_type='control')
-                    if task.task_impact > 0 and (remaining_capacity - task.task_impact) < 0:
-                        logger.debug("Skipping group {}, not enough capacity.".format(rampart_group.name))
-                        continue
-
+                    task.controller_node = controller_node.hostname
                     task.log_lifecycle("controller_node_chosen")
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     logger.debug("{} has been assigned the container group {}".format(task.log_format, rampart_group.name))
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
-                    break
+
+                    # not sure why this break is here...I think we want "continue" to go onto next task
+                    # break
+                    continue
 
                 # TODO: remove this after we have confidence that OCP control nodes are reporting node_type=control
                 if settings.IS_K8S and task.capacity_type == 'execution':

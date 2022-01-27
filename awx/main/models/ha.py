@@ -146,12 +146,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @property
     def consumed_capacity(self):
-        # TODO refactor, we can probably get this done in one query
         capacity_consumed = sum(
             x.task_impact
             for x in UnifiedJob.objects.filter(Q(controller_node=self.hostname) | Q(execution_node=self.hostname) & Q(status__in=('running', 'waiting')))
         )
-        logger.debug("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        logger.debug(f"{capacity_consumed} capacity consumed on {self.hostname}")
         return capacity_consumed
 
     @property
@@ -177,6 +176,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return random.choice(
             Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
         )
+
+    @staticmethod
+    def choose_control_plane_node_with_sufficient_capacity(task):
+        """Returns the control plane node with most capacity or None if there is none with capacity"""
+        instances = Instance.objects.filter(enabled=True, capacity__gte=task.task_impact).filter(node_type__in=['control', 'hybrid']).all()
+        if instances:
+            return max(instances, key=lambda i: i.remaining_capacity)
+        return None
 
     def get_cleanup_task_kwargs(self, **kwargs):
         """
