@@ -285,18 +285,10 @@ class TaskManager:
                 schedule_task_manager()
             elif rampart_group.is_container_group:
                 task.instance_group = rampart_group
-                if task.capacity_type == 'execution':
-                    # find one real, non-containerized instance with capacity to
-                    # act as the controller for k8s API interaction
-                    try:
-                        task.controller_node = Instance.choose_online_control_plane_node()
-                        task.log_lifecycle("controller_node_chosen")
-                    except IndexError:
-                        logger.warning("No control plane nodes available to run containerized job {}".format(task.log_format))
-                        return
-                else:
+                if task.capacity_type != 'execution':
                     # project updates and system jobs don't *actually* run in pods, so
                     # just pick *any* non-containerized host and use it as the execution node
+                    # TODO: I think we could use our control node here since we know it has capacity
                     task.execution_node = Instance.choose_online_control_plane_node()
                     task.log_lifecycle("execution_node_chosen")
                     logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
@@ -322,6 +314,13 @@ class TaskManager:
                 task.log_lifecycle("waiting")
 
             if rampart_group is not None:
+                if rampart_group.is_container_group or task.controller_node != task.execution_node:
+                    # Consume capacity on control node instance group
+                    # TODO: Seems like there may be a better way to do this instead of having to do this Instance.objects.filter
+                    # or maybe we should consume control capacity before we start the task
+                    control_instance = Instance.objects.filter(hostname=task.controller_node).first()
+                    control_group = control_instance.rampart_groups.first()
+                    self.consume_capacity(task, control_group.name, instance=control_instance)
                 self.consume_capacity(task, rampart_group.name, instance=instance)
 
         def post_commit():
@@ -512,7 +511,30 @@ class TaskManager:
 
             for rampart_group in preferred_instance_groups:
                 if task.capacity_type == 'execution' and rampart_group.is_container_group:
+                    # find one real, non-containerized instance with capacity to
+                    # act as the controller for k8s API interaction
+                    try:
+                        # If we are deducting capacity, "choose_online_control_plane_node" should only choose control plane nodes
+                        # with capacity >0
+                        # TODO would be great if this just did the right thing and only chose a control group with enough
+                        # capacity and we didn't need this try/except
+                        task.controller_node = Instance.choose_online_control_plane_node()
+                    except IndexError:
+                        task.status = 'pending'
+                        logger.warning("No control plane nodes available to run containerized job {}, returning to pending".format(task.log_format))
+                        found_acceptable_queue = False
+                        continue
+
+                    control_instance = Instance.objects.filter(hostname=task.controller_node).first()
+                    control_group = control_instance.rampart_groups.first()
+                    remaining_capacity = self.get_remaining_capacity(control_group.name, capacity_type='control')
+                    if task.task_impact > 0 and remaining_capacity <= 0:
+                        logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
+                        continue
+
+                    task.log_lifecycle("controller_node_chosen")
                     self.graph[rampart_group.name]['graph'].add_job(task)
+                    logger.debug("{} has been assigned the container group {}".format(task.log_format, rampart_group.name))
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
@@ -597,22 +619,37 @@ class TaskManager:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
 
+            # TODO: Test with container group jobs where the control pod in k8s is deleted/goes away
+            if not j.execution_node and not j.controller_node and j.status in ['waiting', 'running']:
+                logger.error(
+                    f'Job {j.id} has no execution node or control node, but is in status {j.status}. The control node must have been lost; reaping {j.log_format}'
+                )
+                reap_job(j, 'error')
+
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
     def consume_capacity(self, task, instance_group, instance=None):
+        impact = task.task_impact
         logger.debug(
             '{} consumed {} capacity units from {} with prior total of {}'.format(
-                task.log_format, task.task_impact, instance_group, self.graph[instance_group]['consumed_capacity']
+                task.log_format, impact, instance_group, self.graph[instance_group]['consumed_capacity']
             )
         )
-        self.graph[instance_group]['consumed_capacity'] += task.task_impact
+        self.graph[instance_group]['consumed_capacity'] += impact
         for capacity_type in ('control', 'execution'):
             if instance is None or instance.node_type in ('hybrid', capacity_type):
-                self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += task.task_impact
+                logger.debug(
+                    '{} consumed {} capacity units from {} with prior total of {}'.format(
+                        task.log_format, impact, instance_group, self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+                    )
+                )
+                self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
 
     def get_remaining_capacity(self, instance_group, capacity_type='execution'):
-        return self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+        cap = self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+        logger.debug(f'{instance_group} has {cap} remaining capacity of type {capacity_type}')
+        return cap
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]
