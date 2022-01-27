@@ -12,6 +12,7 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
+from django.db.models import Q
 
 import redis
 from solo.models import SingletonModel
@@ -146,9 +147,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     @property
     def consumed_capacity(self):
         # TODO refactor, we can probably get this done in one query
-        control_capacity_consumed = sum(x.task_impact for x in UnifiedJob.objects.filter(controller_node=self.hostname, status__in=('running', 'waiting')))
-        execution_capacity_consumed = sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
-        return control_capacity_consumed + execution_capacity_consumed
+        capacity_consumed = sum(
+            x.task_impact
+            for x in UnifiedJob.objects.filter(Q(controller_node=self.hostname) | Q(execution_node=self.hostname) & Q(status__in=('running', 'waiting')))
+        )
+        logger.debug("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        return capacity_consumed
 
     @property
     def remaining_capacity(self):
