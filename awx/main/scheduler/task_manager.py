@@ -85,6 +85,12 @@ class TaskManager:
 
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
+        self.control_node_capacity = dict()
+
+        for node in instances_partial:
+            if node.node_type in ('control', 'hybrid'):
+                control_node_capacity[node] = instances_partial.remaining_capacity
+
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(
                 graph=DependencyGraph(),
@@ -94,6 +100,7 @@ class TaskManager:
                 consumed_control_capacity=0,
                 consumed_execution_capacity=0,
                 instances=[],
+                instances_remaining_capacity={},
             )
             for instance in rampart_group.instances.all():
                 if not instance.enabled:
@@ -104,6 +111,13 @@ class TaskManager:
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
+
+    def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task):
+        sufficient = {node: remaining_capacity for node, remaining_capacity in self.control_node_capacity if remaining_capacity >= task.task_impact}
+        best_instance = max(sufficient, key=sufficient.get)
+        control_node_capacity[best_instance] -= task.task_impact
+        logger.debug(f"chose {best_instance} from {sufficient}")
+        return best_instance
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -505,20 +519,20 @@ class TaskManager:
             for rampart_group in preferred_instance_groups:
                 if task.capacity_type != 'execution' and rampart_group.is_container_group:
                     # project updates and inventory updates for job have to run on a control node
-                    controller_node = Instance.choose_control_plane_node_with_sufficient_capacity(task)
+                    controller_node = self.get_and_consume_capacity_on_control_node_with_sufficient_capacity(task)
                     # No controller node was available, go on to next task
                     if not controller_node:
                         logger.warning("No control plane nodes available to run containerized job {}, returning to pending".format(task.log_format))
                         found_acceptable_queue = False
                         continue
                     # If there is enough capacity, assign the node to be the execution node and break out of the sub loop
-                    task.execution_node = controller_node.hostname
+                    task.execution_node = controller_node
                     break
 
                 if task.capacity_type == 'execution' and rampart_group.is_container_group:
                     # find one real, non-containerized instance with capacity to
                     # act as the controller for k8s API interaction
-                    controller_node = Instance.choose_control_plane_node_with_sufficient_capacity(task)
+                    controller_node = self.get_and_consume_capacity_on_control_node_with_sufficient_capacity(task)
 
                     # No controller node was available, go on to next task
                     if not controller_node:
@@ -526,7 +540,7 @@ class TaskManager:
                         found_acceptable_queue = False
                         continue
 
-                    task.controller_node = controller_node.hostname
+                    task.controller_node = controller_node
                     task.log_lifecycle("controller_node_chosen")
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     logger.debug("{} has been assigned the container group {}".format(task.log_format, rampart_group.name))
