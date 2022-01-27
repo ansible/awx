@@ -512,7 +512,7 @@ class TaskManager:
                         found_acceptable_queue = False
                         continue
                     # If there is enough capacity, assign the node to be the execution node and break out of the sub loop
-                    task.execution_node = controller_node
+                    task.execution_node = controller_node.hostname
                     break
 
                 if task.capacity_type == 'execution' and rampart_group.is_container_group:
