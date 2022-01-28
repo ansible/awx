@@ -70,7 +70,6 @@ class TaskManager:
         """
         instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop')
         self.real_instances = {i.hostname: i for i in instances}
-
         instances_partial = [
             SimpleNamespace(
                 obj=instance,
@@ -89,7 +88,9 @@ class TaskManager:
 
         for node in instances_partial:
             if node.node_type in ('control', 'hybrid'):
-                control_node_capacity[node] = instances_partial.remaining_capacity
+                self.control_node_capacity[node.obj] = node.remaining_capacity
+                # we should do something better here, we're creating this
+                # and storing the capacity but not using it later
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(
@@ -113,8 +114,8 @@ class TaskManager:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
     def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task):
-        sufficient = {node: remaining_capacity for node, remaining_capacity in self.control_node_capacity if remaining_capacity >= task.task_impact}
-        best_instance = max(sufficient, key=sufficient.get)
+        sufficient = {x for x in self.control_node_capacity if x.remaining_capacity >= task.task_impact}  # where is x getting remaining capacity from???
+        best_instance = max(sufficient, key=sufficient.get)  # TODO: Beccah you left off here, this is where it's broke
         control_node_capacity[best_instance] -= task.task_impact
         logger.debug(f"chose {best_instance} from {sufficient}")
         return best_instance
