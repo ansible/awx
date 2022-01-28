@@ -248,6 +248,8 @@ class InstanceGroupManager(models.Manager):
                 # TODO: what happens if a control node comes online after graph was built?
                 # In k8s nodes need to be able to come/go more often
                 control_groups = instance_ig_mapping.get(t.controller_node, [])
+                if not control_groups:
+                    logger.warn(f"No instance group found for {t.controller_node}, capacity consumed may be innaccurate.")
 
             if t.status == 'waiting' or (not t.execution_node and not t.is_container_group_task):
                 # Subtract capacity from any peer groups that share instances

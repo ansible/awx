@@ -102,11 +102,12 @@ class TaskManager:
                 for capacity_type in ('control', 'execution'):
                     if instance.node_type in (capacity_type, 'hybrid'):
                         self.graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
-                        if instance.hostname not in self.control_node_capacity.keys():
+                        # the below could be condensed into something more elegant
+                        if instance.node_type in ('hybrid', 'control') and instance.hostname not in self.control_node_capacity.keys():
                             self.control_node_capacity[instance] = dict()
                             self.control_node_capacity[instance]['remaining_capacity'] = instance.remaining_capacity
                             self.control_node_capacity[instance]['instance_groups'] = [rampart_group.name]
-                        else:
+                        elif instance.node_type in ('hybrid', 'control'):
                             self.control_node_capacity[instance]['instance_groups'].append(rampart_group.name)
 
             # This loop down here is strange, because we just looped over the instances
