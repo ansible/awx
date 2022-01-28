@@ -564,11 +564,6 @@ class TaskManager:
 
                     break
 
-                # TODO: remove this after we have confidence that OCP control nodes are reporting node_type=control
-                if settings.IS_K8S and task.capacity_type == 'execution':
-                    logger.debug("Skipping group {}, task cannot run on control plane".format(rampart_group.name))
-                    continue
-
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name, capacity_type=task.capacity_type)
                 if task.task_impact > 0 and remaining_capacity <= 0:
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
