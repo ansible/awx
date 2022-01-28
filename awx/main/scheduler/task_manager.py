@@ -96,9 +96,9 @@ class TaskManager:
                 consumed_execution_capacity=0,
                 instances=[],
             )
-            for instance in rampart_group.instances.all():
-                if not instance.enabled:
-                    continue
+            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
+                if instance.hostname in instances_by_hostname:
+                    self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
                 for capacity_type in ('control', 'execution'):
                     if instance.node_type in (capacity_type, 'hybrid'):
                         self.graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
@@ -109,11 +109,6 @@ class TaskManager:
                             self.control_node_capacity[instance]['instance_groups'] = [rampart_group.name]
                         elif instance.node_type in ('hybrid', 'control'):
                             self.control_node_capacity[instance]['instance_groups'].append(rampart_group.name)
-
-            # This loop down here is strange, because we just looped over the instances
-            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
-                if instance.hostname in instances_by_hostname:
-                    self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
     def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task):
         """Find a control node with enough capacity to control a job.
