@@ -644,10 +644,16 @@ class TaskManager:
                 reap_job(j, 'failed')
 
             # TODO: Test with container group jobs where the control pod in k8s is deleted/goes away
-            if not j.execution_node and not j.controller_node and j.status in ['waiting', 'running']:
-                logger.error(
-                    f'Job {j.id} has no execution node or control node, but is in status {j.status}. The control node must have been lost; reaping {j.log_format}'
-                )
+            # This may not actually catch if the control node is lost, because j.controller_node may still be set. We might need
+            # to compare against a list of current instance hostnames
+            if (
+                settings.IS_K8S
+                and j.is_container_group_task
+                and not isinstance(j, WorkflowJob)
+                and not j.controller_node
+                and j.status in ['waiting', 'running']
+            ):
+                logger.error(f'Job {j.id} has no control node, but is in status {j.status}. The control node pod must have been lost; reaping {j.log_format}')
                 reap_job(j, 'error')
 
     def calculate_capacity_consumed(self, tasks):
