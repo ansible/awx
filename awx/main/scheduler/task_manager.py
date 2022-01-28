@@ -86,12 +86,6 @@ class TaskManager:
 
         self.control_node_capacity = dict()
 
-        for node in instances_partial:
-            if node.node_type in ('control', 'hybrid'):
-                self.control_node_capacity[node.obj] = node.remaining_capacity
-                # we should do something better here, we're creating this
-                # and storing the capacity but not using it later
-
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(
                 graph=DependencyGraph(),
@@ -101,7 +95,6 @@ class TaskManager:
                 consumed_control_capacity=0,
                 consumed_execution_capacity=0,
                 instances=[],
-                instances_remaining_capacity={},
             )
             for instance in rampart_group.instances.all():
                 if not instance.enabled:
@@ -109,16 +102,43 @@ class TaskManager:
                 for capacity_type in ('control', 'execution'):
                     if instance.node_type in (capacity_type, 'hybrid'):
                         self.graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
+                        if instance.hostname not in self.control_node_capacity.keys():
+                            self.control_node_capacity[instance] = dict()
+                            self.control_node_capacity[instance]['remaining_capacity'] = instance.remaining_capacity
+                            self.control_node_capacity[instance]['instance_groups'] = [rampart_group.name]
+                        else:
+                            self.control_node_capacity[instance]['instance_groups'].append(rampart_group.name)
+
+            # This loop down here is strange, because we just looped over the instances
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
     def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task):
-        sufficient = {x for x in self.control_node_capacity if x.remaining_capacity >= task.task_impact}  # where is x getting remaining capacity from???
-        best_instance = max(sufficient, key=sufficient.get)  # TODO: Beccah you left off here, this is where it's broke
-        control_node_capacity[best_instance] -= task.task_impact
-        logger.debug(f"chose {best_instance} from {sufficient}")
-        return best_instance
+        """Find a control node with enough capacity to control a job.
+
+        Return the hostname of the control node if we find it.
+        Deduct the task impact from shared tracking data before returning
+
+        Return None if no appropriate instance found.
+        """
+        sufficient = {
+            instance: values['remaining_capacity']
+            for instance, values in self.control_node_capacity.items()
+            if values['remaining_capacity'] >= task.task_impact
+        }
+        logger.debug(f"control nodes with sufficient control node capacity {sufficient} for {task.log_format}")
+        if sufficient:
+            best_instance = max(sufficient, key=sufficient.get)
+            logger.debug(f"chose {best_instance} to run {task.log_format}")
+            self.control_node_capacity[best_instance]['remaining_capacity'] -= task.task_impact
+            for ig in self.control_node_capacity[best_instance]['instance_groups']:
+                # Consume capacity on instance groups the control node is a member of
+                # Right now this consumes both "control" and "execution" type capacity...I think thats wrong,
+                # at least for container group jobs. Maybe with just the task we can check and whether the node is the control node or execution node
+                self.consume_capacity(task, ig, instance=best_instance)
+            return best_instance.hostname
+        return None
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -322,13 +342,6 @@ class TaskManager:
                 task.log_lifecycle("waiting")
 
             if rampart_group is not None:
-                if rampart_group.is_container_group or task.controller_node != task.execution_node:
-                    # Consume capacity on control node instance group
-                    # TODO: Seems like there may be a better way to do this instead of having to do this Instance.objects.filter
-                    # or maybe we should consume control capacity before we start the task
-                    control_instance = Instance.objects.filter(hostname=task.controller_node).first()
-                    control_group = control_instance.rampart_groups.first()
-                    self.consume_capacity(task, control_group.name, instance=control_instance)
                 self.consume_capacity(task, rampart_group.name, instance=instance)
 
         def post_commit():
@@ -651,8 +664,8 @@ class TaskManager:
         for capacity_type in ('control', 'execution'):
             if instance is None or instance.node_type in ('hybrid', capacity_type):
                 logger.debug(
-                    '{} consumed {} capacity units from {} with prior total of {}'.format(
-                        task.log_format, impact, instance_group, self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+                    '{} consumed {} {}_capacity units from {} with prior total of {}'.format(
+                        task.log_format, impact, capacity_type, instance_group, self.graph[instance_group][f'consumed_{capacity_type}_capacity']
                     )
                 )
                 self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
