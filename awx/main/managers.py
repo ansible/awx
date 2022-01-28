@@ -244,7 +244,7 @@ class InstanceGroupManager(models.Manager):
             # TODO: dock capacity for isolated job management tasks running in queue
             impact = t.task_impact
             control_groups = []
-            if t.controller_node:
+            if hasattr(t, 'controller_node') and t.controller_node:
                 # TODO: what happens if a control node comes online after graph was built?
                 # In k8s nodes need to be able to come/go more often
                 control_groups = instance_ig_mapping.get(t.controller_node, [])
