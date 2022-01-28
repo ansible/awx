@@ -669,9 +669,9 @@ class TaskManager:
                 self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
 
     def get_remaining_capacity(self, instance_group, capacity_type='execution'):
-        cap = self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+        capacity = self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']
         logger.debug(f'{instance_group} has {cap} remaining capacity of type {capacity_type}')
-        return cap
+        return capacity
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]
