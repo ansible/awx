@@ -130,6 +130,7 @@ class TaskManager:
         }
         logger.debug(f"control nodes with sufficient control node capacity {sufficient} for {task.log_format}")
         if sufficient:
+            # should we additionally consult the graph to find out if the instance group this instance is in also reports that it has enough net capacity.
             best_instance = max(sufficient, key=sufficient.get)
             logger.debug(f"chose {best_instance} to run {task.log_format}")
             self.control_node_capacity[best_instance]['remaining_capacity'] -= task.task_impact
