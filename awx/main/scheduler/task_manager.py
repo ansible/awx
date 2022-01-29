@@ -54,7 +54,7 @@ class TaskManager:
         The NOOP case is short-circuit logic. If the task manager realizes that another instance
         of the task manager is already running, then it short-circuits and decides not to run.
         """
-        self.graph = dict()
+        self.ig_capacity_graph = dict()
         # start task limit indicates how many pending jobs can be started on this
         # .schedule() run. Starting jobs is expensive, and there is code in place to reap
         # the task manager after 5 minutes. At scale, the task manager can easily take more than
@@ -70,7 +70,7 @@ class TaskManager:
         """
         self.task_manager_instances = TaskManagerInstances()
         self.control_nodes = self.task_manager_instances.control_nodes
-        self.graph = self.task_manager_instances.init_graph(self.graph)
+        self.ig_capacity_graph = self.task_manager_instances.init_ig_capacity_graph(self.ig_capacity_graph)
 
     def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task):
         """Find a control node with enough capacity to control a job.
@@ -80,7 +80,7 @@ class TaskManager:
 
         Return None if no appropriate instance found.
         """
-        control_node = self.control_nodes.assign_task_to_node(task, self.task_manager_instances, self.graph)
+        control_node = self.control_nodes.assign_task_to_node(task, self.task_manager_instances, self.ig_capacity_graph)
         if not control_node:
             logger.debug(f"No control node eligible to run {task.log_format}")
             return None
@@ -94,8 +94,8 @@ class TaskManager:
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
         #       in the old task manager this was handled as a method on each task object outside of the graph and
         #       probably has the side effect of cutting down *a lot* of the logic from this task manager class
-        for g in self.graph:
-            blocked_by = self.graph[g]['graph'].task_blocked_by(task)
+        for g in self.ig_capacity_graph:
+            blocked_by = self.ig_capacity_graph[g]['dependency_graph'].task_blocked_by(task)
             if blocked_by:
                 return blocked_by
 
@@ -314,7 +314,7 @@ class TaskManager:
     def process_running_tasks(self, running_tasks):
         for task in running_tasks:
             if task.instance_group:
-                self.graph[task.instance_group.name]['graph'].add_job(task)
+                self.ig_capacity_graph[task.instance_group.name]['dependency_graph'].add_job(task)
 
     def create_project_update(self, task):
         project_task = Project.objects.get(id=task.project_id).create_project_update(_eager_fields=dict(launch_type='dependency'))
@@ -506,7 +506,7 @@ class TaskManager:
 
                     task.controller_node = controller_node
                     task.log_lifecycle("controller_node_chosen")
-                    self.graph[rampart_group.name]['graph'].add_job(task)
+                    self.ig_capacity_graph[rampart_group.name]['dependency_graph'].add_job(task)
                     logger.debug("{} has been assigned the container group {}".format(task.log_format, rampart_group.name))
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
@@ -519,8 +519,8 @@ class TaskManager:
                     continue
 
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                    task, self.graph[rampart_group.name]['instances']
-                ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'], capacity_type=task.capacity_type)
+                    task, self.ig_capacity_graph[rampart_group.name]['instances']
+                ) or InstanceGroup.find_largest_idle_instance(self.ig_capacity_graph[rampart_group.name]['instances'], capacity_type=task.capacity_type)
 
                 if execution_instance or rampart_group.is_container_group:
                     if not rampart_group.is_container_group:
@@ -534,7 +534,7 @@ class TaskManager:
 
                     if execution_instance:
                         execution_instance = self.task_manager_instances[execution_instance.hostname].obj
-                    self.graph[rampart_group.name]['graph'].add_job(task)
+                    self.ig_capacity_graph[rampart_group.name]['dependency_graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True
                     break
@@ -602,27 +602,29 @@ class TaskManager:
                 reap_job(j, 'error')
 
     def calculate_capacity_consumed(self, tasks):
-        self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
+        self.ig_capacity_graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.ig_capacity_graph)
 
     def consume_capacity(self, task, instance_group, instance=None):
         impact = task.task_impact
         logger.debug(
             '{} consumed {} capacity units from {} with prior total of {}'.format(
-                task.log_format, impact, instance_group, self.graph[instance_group]['consumed_capacity']
+                task.log_format, impact, instance_group, self.ig_capacity_graph[instance_group]['consumed_capacity']
             )
         )
-        self.graph[instance_group]['consumed_capacity'] += impact
+        self.ig_capacity_graph[instance_group]['consumed_capacity'] += impact
         for capacity_type in ('control', 'execution'):
             if instance is None or instance.node_type in ('hybrid', capacity_type):
                 logger.debug(
                     '{} consumed {} {}_capacity units from {} with prior total of {}'.format(
-                        task.log_format, impact, capacity_type, instance_group, self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+                        task.log_format, impact, capacity_type, instance_group, self.ig_capacity_graph[instance_group][f'consumed_{capacity_type}_capacity']
                     )
                 )
-                self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
+                self.ig_capacity_graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
 
     def get_remaining_capacity(self, instance_group, capacity_type='execution'):
-        capacity = self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']
+        capacity = (
+            self.ig_capacity_graph[instance_group][f'{capacity_type}_capacity'] - self.ig_capacity_graph[instance_group][f'consumed_{capacity_type}_capacity']
+        )
         logger.debug(f'{instance_group} has {capacity} remaining capacity of type {capacity_type}')
         return capacity
 

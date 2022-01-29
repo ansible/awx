@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _, gettext_noop
 
 # AWX
 from awx.main.scheduler.dependency_graph import DependencyGraph
+from awx.main.managers import InstanceGroupManager
 from awx.main.models import (
     Instance,
     InstanceGroup,
@@ -107,17 +108,12 @@ class TaskManagerInstances:
     def __getitem__(self, key):
         return self.instances_partial.get(key)
 
-    def init_graph(self, graph=dict()):
+    def init_ig_capacity_graph(self, graph=dict()):
+        breakdown = False
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
-            graph[rampart_group.name] = dict(
-                graph=DependencyGraph(),
-                execution_capacity=0,
-                control_capacity=0,
-                consumed_capacity=0,
-                consumed_control_capacity=0,
-                consumed_execution_capacity=0,
-                instances=[],
-            )
+            InstanceGroupManager.zero_out_group(graph, rampart_group.name, breakdown)
+            # Didn't move the init of DependencyGraph to InstanceGroupManager because of circular import
+            graph[rampart_group.name]['dependency_graph'] = DependencyGraph()
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in self.instances_partial:
                     graph[rampart_group.name]['instances'].append(self.instances_partial[instance.hostname])

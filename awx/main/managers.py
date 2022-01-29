@@ -217,7 +217,7 @@ class InstanceGroupManager(models.Manager):
     @staticmethod
     def zero_out_group(graph, name, breakdown):
         if name not in graph:
-            graph[name] = {}
+            graph[name] = {'dependency_graph': None, 'capacity': 0, 'instances': [], 'control_capacity': 0, 'execution_capacity': 0}
         graph[name]['consumed_capacity'] = 0
         for capacity_type in ('execution', 'control'):
             graph[name][f'consumed_{capacity_type}_capacity'] = 0
