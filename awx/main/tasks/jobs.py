@@ -418,7 +418,7 @@ class BaseTask(object):
         """
         instance.log_lifecycle("post_run")
 
-    def final_run_hook(self, instance, status, private_data_dir, fact_modification_times):
+    def final_run_hook(self, instance, status, private_data_dir):
         """
         Hook for any steps to run after job/task is marked as complete.
         """
@@ -621,7 +621,6 @@ class BaseTask(object):
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
         extra_update_fields = {}
-        fact_modification_times = {}
         self.event_ct = 0
 
         '''
@@ -658,10 +657,7 @@ class BaseTask(object):
             # Fetch "cached" fact data from prior runs and put on the disk
             # where ansible expects to find it
             if getattr(self.instance, 'use_fact_cache', False):
-                self.instance.start_job_fact_cache(
-                    os.path.join(private_data_dir, 'artifacts', str(self.instance.id), 'fact_cache'),
-                    fact_modification_times,
-                )
+                self.instance.start_job_fact_cache(private_data_dir)
 
             # May have to serialize the value
             private_data_files = self.build_private_data_files(self.instance, private_data_dir)
@@ -780,7 +776,7 @@ class BaseTask(object):
         self.instance = self.update_model(pk, status=status, emitted_events=self.event_ct, **extra_update_fields)
 
         try:
-            self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)
+            self.final_run_hook(self.instance, status, private_data_dir)
         except Exception:
             logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
 
@@ -1172,18 +1168,15 @@ class RunJob(BaseTask):
             # ran inside of the event saving code
             update_smart_memberships_for_inventory(job.inventory)
 
-    def final_run_hook(self, job, status, private_data_dir, fact_modification_times):
-        super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)
+    def final_run_hook(self, job, status, private_data_dir):
+        super(RunJob, self).final_run_hook(job, status, private_data_dir)
         if not private_data_dir:
             # If there's no private data dir, that means we didn't get into the
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
             return
         if job.use_fact_cache:
-            job.finish_job_fact_cache(
-                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                fact_modification_times,
-            )
+            job.finish_job_fact_cache(private_data_dir)
 
         try:
             inventory = job.inventory

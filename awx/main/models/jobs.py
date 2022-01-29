@@ -798,7 +798,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             return []
         return self.inventory.hosts.only(*only)
 
-    def start_job_fact_cache(self, destination, modification_times, timeout=None):
+    def start_job_fact_cache(self, private_data_dir, timeout=None):
+        artifacts_dir = os.path.join(private_data_dir, 'artifacts', str(self.id))
+        destination = os.path.join(artifacts_dir, 'fact_cache')
         self.log_lifecycle("start_job_fact_cache")
         os.makedirs(destination, mode=0o700)
         hosts = self._get_inventory_hosts()
@@ -808,6 +810,13 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             # exclude hosts with fact data older than `settings.ANSIBLE_FACT_CACHE_TIMEOUT seconds`
             timeout = now() - datetime.timedelta(seconds=timeout)
             hosts = hosts.filter(ansible_facts_modified__gte=timeout)
+        # Backdate all files to a time in the past and create a reference file to compare to
+        backdate = time.time() - datetime.timedelta(days=2).total_seconds()
+        ref_file = os.path.join(artifacts_dir, 'time_reference_fact_cache.txt')
+        with codecs.open(ref_file, 'w', encoding='utf-8') as f:
+            os.chmod(f.name, 0o600)
+            f.write('timestamp_reference')
+        os.utime(ref_file, times=(backdate, backdate))
         for host in hosts:
             filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
@@ -817,14 +826,17 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 with codecs.open(filepath, 'w', encoding='utf-8') as f:
                     os.chmod(f.name, 0o600)
                     json.dump(host.ansible_facts, f)
+                os.utime(filepath, times=(backdate, backdate))
             except IOError:
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
-            # make note of the time we wrote the file so we can check if it changed later
-            modification_times[filepath] = os.path.getmtime(filepath)
 
-    def finish_job_fact_cache(self, destination, modification_times):
+    def finish_job_fact_cache(self, private_data_dir):
         self.log_lifecycle("finish_job_fact_cache")
+        artifacts_dir = os.path.join(private_data_dir, 'artifacts', str(self.id))
+        destination = os.path.join(artifacts_dir, 'fact_cache')
+        ref_file = os.path.join(artifacts_dir, 'time_reference_fact_cache.txt')
+        backdate = os.path.getmtime(ref_file)
         for host in self._get_inventory_hosts():
             filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
@@ -833,7 +845,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             if os.path.exists(filepath):
                 # If the file changed since we wrote it pre-playbook run...
                 modified = os.path.getmtime(filepath)
-                if modified > modification_times.get(filepath, 0):
+                if modified > backdate:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         try:
                             ansible_facts = json.load(f)
