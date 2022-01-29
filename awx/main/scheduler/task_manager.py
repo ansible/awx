@@ -6,6 +6,7 @@ from datetime import timedelta
 import logging
 import uuid
 import json
+import heapq
 from types import SimpleNamespace
 
 # Django
@@ -43,6 +44,71 @@ from awx.main.utils import decrypt_field
 logger = logging.getLogger('awx.main.scheduler')
 
 
+class PrioritizableControlNode:
+    def __init__(self, remaining_capacity, hostname):
+        self.remaining_capacity = remaining_capacity
+        self.hostname = hostname
+
+    def __gt__(self, other):
+        return self.remaining_capacity > other.remaining_capacity
+
+    def __lt__(self, other):
+        return self.remaining_capacity < other.remaining_capacity
+
+    def __eq__(self, other):
+        return self.hostname == other.hostname
+
+    def __hash__(self):
+        return hash(self.hostname)
+
+    def __str__(self):
+        return f"{self.hostname}: {self.remaining_capacity} remaining capacity"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class PrioritizedControlNodes:
+    def __init__(self):
+        self.control_nodes = set()
+
+    def add(self, node):
+        self.control_nodes.add(node)
+
+    def update(self, node):
+        """The __hash__ function for PrioritizableControlNodes just compares hostnames.
+
+        We can add/remove the node to update object in PrioritizedControlNodes to have right capacity.
+        """
+        self.control_nodes.remove(node)
+        self.control_nodes.add(node)
+
+    # TODO: Maybe rename
+    def assign_task_to_node(self, task, instances_partial={}, graph=None):
+        """Find most available control instance and deduct task impact if we find it.
+
+        If no node is available, return False
+        """
+        control_heap = list(self.control_nodes)
+        heapq.heapify(control_heap)
+        best_instance = heapq.nlargest(1, control_heap).pop()
+        if best_instance.remaining_capacity < task.task_impact:
+            return False
+
+        if instances_partial and graph:
+            for ig in instances_partial[best_instance.hostname].instance_groups:
+                ig_data = graph[ig]
+                # This should really not happen since every time we assign a task to a node, we deduct from its instance group
+                # capacity as well. If we never see this, maybe we can drop this code
+                if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= task.task_impact:
+                    logger.warn(f"Somehow we had capacity on a control node {best_instance} but not on its instance_group {instance_group}")
+                    return False
+        logger.debug(f"chose {best_instance} to run {task.log_format}")
+        best_instance.remaining_capacity -= task.task_impact
+        self.update(best_instance)
+        return best_instance
+
+
 class TaskManager:
     def __init__(self):
         """
@@ -70,6 +136,7 @@ class TaskManager:
         """
         instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop').prefetch_related('rampart_groups')
         self.instances_partial = dict()
+        self.control_nodes = PrioritizedControlNodes()
         for instance in instances:
             self.instances_partial[instance.hostname] = SimpleNamespace(
                 obj=instance,
@@ -80,8 +147,8 @@ class TaskManager:
                 hostname=instance.hostname,
                 instance_groups=[ig.name for ig in instance.rampart_groups.all()],
             )
-
-        self.control_node_capacity = dict()
+            if instance.node_type in ('control', 'hybrid'):
+                self.control_nodes.add(PrioritizableControlNode(remaining_capacity=instance.remaining_capacity, hostname=instance.hostname))
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(
@@ -99,13 +166,6 @@ class TaskManager:
                 for capacity_type in ('control', 'execution'):
                     if instance.node_type in (capacity_type, 'hybrid'):
                         self.graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
-                        # the below could be condensed into something more elegant
-                        if instance.node_type in ('hybrid', 'control') and instance.hostname not in self.control_node_capacity.keys():
-                            self.control_node_capacity[instance] = dict()
-                            self.control_node_capacity[instance]['remaining_capacity'] = instance.remaining_capacity
-                            self.control_node_capacity[instance]['instance_groups'] = [rampart_group.name]
-                        elif instance.node_type in ('hybrid', 'control'):
-                            self.control_node_capacity[instance]['instance_groups'].append(rampart_group.name)
 
     def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task):
         """Find a control node with enough capacity to control a job.
@@ -115,24 +175,15 @@ class TaskManager:
 
         Return None if no appropriate instance found.
         """
-        sufficient = {
-            instance: values['remaining_capacity']
-            for instance, values in self.control_node_capacity.items()
-            if values['remaining_capacity'] >= task.task_impact
-        }
-        logger.debug(f"control nodes with sufficient control node capacity {sufficient} for {task.log_format}")
-        if sufficient:
-            # should we additionally consult the graph to find out if the instance group this instance is in also reports that it has enough net capacity.
-            best_instance = max(sufficient, key=sufficient.get)
-            logger.debug(f"chose {best_instance} to run {task.log_format}")
-            self.control_node_capacity[best_instance]['remaining_capacity'] -= task.task_impact
-            for ig in self.control_node_capacity[best_instance]['instance_groups']:
-                # Consume capacity on instance groups the control node is a member of
-                # Right now this consumes both "control" and "execution" type capacity...I think thats wrong,
-                # at least for container group jobs. Maybe with just the task we can check and whether the node is the control node or execution node
-                self.consume_capacity(task, ig, instance=best_instance)
-            return best_instance.hostname
-        return None
+        control_node = self.control_nodes.assign_task_to_node(task, self.instances_partial, self.graph)
+        if not control_node:
+            logger.debug(f"No control node eligible to run {task.log_format}")
+            return None
+
+        for ig in self.instances_partial[control_node.hostname].instance_groups:
+            # Consume capacity on instance groups the control node is a member of
+            self.consume_capacity(task, ig, instance=self.instances_partial[control_node.hostname])
+        return control_node.hostname
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
