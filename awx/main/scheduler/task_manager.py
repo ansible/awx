@@ -68,21 +68,18 @@ class TaskManager:
         """
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         """
-        instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop')
-        self.real_instances = {i.hostname: i for i in instances}
-        instances_partial = [
-            SimpleNamespace(
+        instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop').prefetch_related('rampart_groups')
+        self.instances_partial = dict()
+        for instance in instances:
+            self.instances_partial[instance.hostname] = SimpleNamespace(
                 obj=instance,
                 node_type=instance.node_type,
                 remaining_capacity=instance.remaining_capacity,
                 capacity=instance.capacity,
                 jobs_running=instance.jobs_running,
                 hostname=instance.hostname,
+                instance_groups=[ig.name for ig in instance.rampart_groups.all()],
             )
-            for instance in instances
-        ]
-
-        instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         self.control_node_capacity = dict()
 
@@ -97,8 +94,8 @@ class TaskManager:
                 instances=[],
             )
             for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
-                if instance.hostname in instances_by_hostname:
-                    self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
+                if instance.hostname in self.instances_partial:
+                    self.graph[rampart_group.name]['instances'].append(self.instances_partial[instance.hostname])
                 for capacity_type in ('control', 'execution'):
                     if instance.node_type in (capacity_type, 'hybrid'):
                         self.graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
@@ -580,7 +577,7 @@ class TaskManager:
                         )
 
                     if execution_instance:
-                        execution_instance = self.real_instances[execution_instance.hostname]
+                        execution_instance = self.instances_partial[execution_instance.hostname].obj
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True
