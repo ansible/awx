@@ -815,7 +815,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         ref_file = os.path.join(artifacts_dir, 'time_reference_fact_cache.txt')
         with codecs.open(ref_file, 'w', encoding='utf-8') as f:
             os.chmod(f.name, 0o600)
-            f.write('timestamp_reference')
         os.utime(ref_file, times=(backdate, backdate))
         for host in hosts:
             filepath = os.sep.join(map(str, [destination, host.name]))
