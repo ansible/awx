@@ -811,7 +811,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             timeout = now() - datetime.timedelta(seconds=timeout)
             hosts = hosts.filter(ansible_facts_modified__gte=timeout)
         # Backdate all files to a time in the past and create a reference file to compare to
-        backdate = time.time() - datetime.timedelta(days=2).total_seconds()
+        backdate = time.time() - 30.0
         ref_file = os.path.join(artifacts_dir, 'time_reference_fact_cache.txt')
         with codecs.open(ref_file, 'w', encoding='utf-8') as f:
             os.chmod(f.name, 0o600)
