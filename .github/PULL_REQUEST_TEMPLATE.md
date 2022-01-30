@@ -25,6 +25,8 @@ the change does.
 <!--- Name of the module/plugin/module/task -->
  - API
  - UI
+ - Installer
+ - Collection
 
 ##### AWX VERSION
 <!--- Paste verbatim output from `make VERSION` between quotes below -->

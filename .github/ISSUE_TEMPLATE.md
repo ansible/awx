@@ -17,6 +17,7 @@ https://www.ansible.com/security
  - API
  - UI
  - Installer
+ - Collection
 
 ##### SUMMARY
 <!-- Briefly describe the problem. -->
