@@ -152,7 +152,8 @@ SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
 if os.path.exists('/etc/tower/SECRET_KEY'):
-    SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
+    with open('/etc/tower/SECRET_KEY', 'rb') as f:
+        SECRET_KEY = f.read().strip()
 else:
     SECRET_KEY = base64.encodebytes(os.urandom(32)).decode().rstrip()
 

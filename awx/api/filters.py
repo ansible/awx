@@ -192,9 +192,7 @@ class FieldLookupBackend(BaseFilterBackend):
             return int(value)
 
     def value_to_python_for_field(self, field, value):
-        if isinstance(field, models.NullBooleanField):
-            return to_python_boolean(value, allow_none=True)
-        elif isinstance(field, models.BooleanField):
+        if isinstance(field, models.BooleanField):
             return to_python_boolean(value)
         elif isinstance(field, (ForeignObjectRel, ManyToManyField, GenericForeignKey, ForeignKey)):
             try:

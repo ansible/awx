@@ -788,7 +788,7 @@ class TestJobCredentials(TestJobExecution):
         password_prompts = task.get_password_prompts(passwords)
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert expect_passwords['Vault password:\s*?$'] == 'vault-me'  # noqa
+        assert expect_passwords[r'Vault password:\s*?$'] == 'vault-me'  # noqa
         assert '--ask-vault-pass' in ' '.join(args)
 
     def test_vault_password_ask(self, private_data_dir, job, mock_me):
@@ -803,7 +803,7 @@ class TestJobCredentials(TestJobExecution):
         password_prompts = task.get_password_prompts(passwords)
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert expect_passwords['Vault password:\s*?$'] == 'provided-at-launch'  # noqa
+        assert expect_passwords[r'Vault password:\s*?$'] == 'provided-at-launch'  # noqa
         assert '--ask-vault-pass' in ' '.join(args)
 
     def test_multi_vault_password(self, private_data_dir, job, mock_me):
@@ -820,10 +820,10 @@ class TestJobCredentials(TestJobExecution):
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
         vault_passwords = dict((k, v) for k, v in expect_passwords.items() if 'Vault' in k)
-        assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'pass@prod'  # noqa
-        assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'pass@dev'  # noqa
-        assert vault_passwords['Vault password \(dotted.name\):\\s*?$'] == 'pass@dotted.name'  # noqa
-        assert vault_passwords['Vault password:\\s*?$'] == ''  # noqa
+        assert vault_passwords[r'Vault password \(prod\):\s*?$'] == 'pass@prod'  # noqa
+        assert vault_passwords[r'Vault password \(dev\):\s*?$'] == 'pass@dev'  # noqa
+        assert vault_passwords[r'Vault password \(dotted.name\):\s*?$'] == 'pass@dotted.name'  # noqa
+        assert vault_passwords[r'Vault password:\s*?$'] == ''  # noqa
         assert '--ask-vault-pass' not in ' '.join(args)
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
@@ -855,9 +855,9 @@ class TestJobCredentials(TestJobExecution):
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
         vault_passwords = dict((k, v) for k, v in expect_passwords.items() if 'Vault' in k)
-        assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'provided-at-launch@prod'  # noqa
-        assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'provided-at-launch@dev'  # noqa
-        assert vault_passwords['Vault password:\\s*?$'] == ''  # noqa
+        assert vault_passwords[r'Vault password \(prod\):\s*?$'] == 'provided-at-launch@prod'  # noqa
+        assert vault_passwords[r'Vault password \(dev\):\s*?$'] == 'provided-at-launch@dev'  # noqa
+        assert vault_passwords[r'Vault password:\s*?$'] == ''  # noqa
         assert '--ask-vault-pass' not in ' '.join(args)
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)

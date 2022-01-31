@@ -198,7 +198,7 @@ def vars_validate_or_raise(vars_str):
 
 
 def validate_container_image_name(value):
-    """
+    r"""
     from https://github.com/distribution/distribution/blob/af8ac809336c2316c81b08605d92d94f8670ad15/reference/reference.go#L4
 
     Grammar
