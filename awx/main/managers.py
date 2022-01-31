@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import sys
 import logging
 import os
 from django.db import models
@@ -104,10 +103,6 @@ class InstanceManager(models.Manager):
 
     def me(self):
         """Return the currently active instance."""
-        # If we are running unit tests, return a stub record.
-        if settings.IS_TESTING(sys.argv) or hasattr(sys, '_called_from_test'):
-            return self.model(id=1, hostname=settings.CLUSTER_HOST_ID, uuid=UUID_DEFAULT)
-
         node = self.filter(hostname=settings.CLUSTER_HOST_ID)
         if node.exists():
             return node[0]

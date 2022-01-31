@@ -27,7 +27,7 @@ def test_no_worker_info_on_AWX_nodes(node_type):
 
 @pytest.mark.django_db
 class TestDependentInventoryUpdate:
-    def test_dependent_inventory_updates_is_called(self, scm_inventory_source, scm_revision_file):
+    def test_dependent_inventory_updates_is_called(self, scm_inventory_source, scm_revision_file, mock_me):
         task = RunProjectUpdate()
         task.revision_path = scm_revision_file
         proj_update = scm_inventory_source.source_project.create_project_update()
@@ -36,7 +36,7 @@ class TestDependentInventoryUpdate:
                 task.post_run_hook(proj_update, 'successful')
                 inv_update_mck.assert_called_once_with(proj_update, mock.ANY)
 
-    def test_no_unwanted_dependent_inventory_updates(self, project, scm_revision_file):
+    def test_no_unwanted_dependent_inventory_updates(self, project, scm_revision_file, mock_me):
         task = RunProjectUpdate()
         task.revision_path = scm_revision_file
         proj_update = project.create_project_update()
@@ -45,7 +45,7 @@ class TestDependentInventoryUpdate:
                 task.post_run_hook(proj_update, 'successful')
                 assert not inv_update_mck.called
 
-    def test_dependent_inventory_updates(self, scm_inventory_source, default_instance_group):
+    def test_dependent_inventory_updates(self, scm_inventory_source, default_instance_group, mock_me):
         task = RunProjectUpdate()
         scm_inventory_source.scm_last_revision = ''
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
@@ -57,7 +57,7 @@ class TestDependentInventoryUpdate:
                 iu_run_mock.assert_called_once_with(inv_update.id)
                 assert inv_update.source_project_update_id == proj_update.pk
 
-    def test_dependent_inventory_project_cancel(self, project, inventory, default_instance_group):
+    def test_dependent_inventory_project_cancel(self, project, inventory, default_instance_group, mock_me):
         """
         Test that dependent inventory updates exhibit good behavior on cancel
         of the source project update

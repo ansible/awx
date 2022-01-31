@@ -3,7 +3,7 @@ import pytest
 from unittest import mock
 from contextlib import contextmanager
 
-from awx.main.models import Credential, UnifiedJob
+from awx.main.models import Credential, UnifiedJob, Instance
 from awx.main.tests.factories import (
     create_organization,
     create_job_template,
@@ -212,3 +212,10 @@ def mock_get_event_queryset_no_job_created():
 
     with mock.patch.object(UnifiedJob, 'get_event_queryset', lambda self: event_qs(self)) as _fixture:
         yield _fixture
+
+
+@pytest.fixture
+def mock_me():
+    me_mock = mock.MagicMock(return_value=Instance(id=1, hostname=settings.CLUSTER_HOST_ID, uuid='00000000-0000-0000-0000-000000000000'))
+    with mock.patch.object(Instance.objects, 'me', me_mock):
+        yield
