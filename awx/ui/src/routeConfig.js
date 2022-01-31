@@ -8,6 +8,7 @@ import Credentials from 'screens/Credential';
 import Dashboard from 'screens/Dashboard';
 import ExecutionEnvironments from 'screens/ExecutionEnvironment';
 import Hosts from 'screens/Host';
+import Instances from 'screens/Instances';
 import InstanceGroups from 'screens/InstanceGroup';
 import Inventory from 'screens/Inventory';
 import ManagementJobs from 'screens/ManagementJob';
@@ -130,6 +131,11 @@ function getRouteConfig(userProfile = {}) {
           title: <Trans>Instance Groups</Trans>,
           path: '/instance_groups',
           screen: InstanceGroups,
+        },
+        {
+          title: <Trans>Instances</Trans>,
+          path: '/instances',
+          screen: Instances,
         },
         {
           title: <Trans>Applications</Trans>,
