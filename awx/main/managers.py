@@ -272,9 +272,9 @@ class InstanceGroupManager(models.Manager):
                 for group_name in control_groups:
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
-                    graph[group_name][f'consumed_control_capacity'] += impact
+                    graph[group_name][f'consumed_control_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
                     if breakdown:
-                        graph[group_name]['committed_capacity'] += impact
+                        graph[group_name]['committed_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
             elif t.status == 'running':
                 # Subtract capacity from all groups that contain the instance
                 if t.execution_node not in instance_ig_mapping:
@@ -298,9 +298,9 @@ class InstanceGroupManager(models.Manager):
                 for group_name in control_groups:
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
-                    graph[group_name][f'consumed_control_capacity'] += impact
+                    graph[group_name][f'consumed_control_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
                     if breakdown:
-                        graph[group_name]['running_capacity'] += impact
+                        graph[group_name]['running_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
             else:
                 logger.error('Programming error, %s not in ["running", "waiting"]', t.log_format)
         return graph
