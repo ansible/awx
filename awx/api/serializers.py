@@ -3628,7 +3628,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
-    diff_mode = serializers.NullBooleanField(required=False, default=None)
+    diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
     exclude_errors = ()
 

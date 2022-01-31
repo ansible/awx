@@ -16,7 +16,7 @@ from awx.conf import fields
 class PendoTrackingStateField(fields.ChoiceField):
     def to_internal_value(self, data):
         # Any false/null values get converted to 'off'.
-        if data in fields.NullBooleanField.FALSE_VALUES or data in fields.NullBooleanField.NULL_VALUES:
+        if data in fields.BooleanField.FALSE_VALUES or data in fields.BooleanField.NULL_VALUES:
             return 'off'
         return super(PendoTrackingStateField, self).to_internal_value(data)
 

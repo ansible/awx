@@ -457,7 +457,7 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
         params = self.get_depends_on() or {}
         params_sanitized = dict()
 
-        cls_args = inspect.getargspec(cls.__init__).args[1:]
+        cls_args = inspect.getfullargspec(cls.__init__).args[1:]
 
         if cls_args:
             if not isinstance(params, dict):
@@ -488,7 +488,7 @@ class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):
             # Fail safe
             return {}
 
-        invalid_keys = set(value.keys()) - set(inspect.getargspec(group_type_cls.__init__).args[1:])
+        invalid_keys = set(value.keys()) - set(inspect.getfullargspec(group_type_cls.__init__).args[1:])
         if invalid_keys:
             invalid_keys = sorted(list(invalid_keys))
             keys_display = json.dumps(invalid_keys).lstrip('[').rstrip(']')
@@ -583,11 +583,11 @@ class SocialMapField(fields.ListField):
     def to_representation(self, value):
         if isinstance(value, (list, tuple)):
             return super(SocialMapField, self).to_representation(value)
-        elif value in fields.NullBooleanField.TRUE_VALUES:
+        elif value in fields.BooleanField.TRUE_VALUES:
             return True
-        elif value in fields.NullBooleanField.FALSE_VALUES:
+        elif value in fields.BooleanField.FALSE_VALUES:
             return False
-        elif value in fields.NullBooleanField.NULL_VALUES:
+        elif value in fields.BooleanField.NULL_VALUES:
             return None
         elif isinstance(value, (str, type(re.compile('')))):
             return self.child.to_representation(value)
@@ -597,11 +597,11 @@ class SocialMapField(fields.ListField):
     def to_internal_value(self, data):
         if isinstance(data, (list, tuple)):
             return super(SocialMapField, self).to_internal_value(data)
-        elif data in fields.NullBooleanField.TRUE_VALUES:
+        elif data in fields.BooleanField.TRUE_VALUES:
             return True
-        elif data in fields.NullBooleanField.FALSE_VALUES:
+        elif data in fields.BooleanField.FALSE_VALUES:
             return False
-        elif data in fields.NullBooleanField.NULL_VALUES:
+        elif data in fields.BooleanField.NULL_VALUES:
             return None
         elif isinstance(data, str):
             return self.child.run_validation(data)
