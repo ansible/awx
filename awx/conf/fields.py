@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 # Django
 from django.core.validators import URLValidator, _lazy_re_compile
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField, NullBooleanField  # noqa

@@ -19,7 +19,7 @@ from functools import reduce, wraps
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
 from django.db import connection
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField

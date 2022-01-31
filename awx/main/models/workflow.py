@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 # Django
 from django.db import connection, models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 # from django import settings as tower_settings

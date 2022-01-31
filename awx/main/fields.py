@@ -28,9 +28,9 @@ from django.db.models.fields.related_descriptors import (
     ReverseManyToOneDescriptor,
     create_forward_many_to_many_manager,
 )
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # jsonschema
 from jsonschema import Draft4Validator, FormatChecker
@@ -144,7 +144,7 @@ def resolve_role_field(obj, field):
         # use extremely generous duck typing to accomidate all possible forms
         # of the model that may be used during various migrations
         if obj._meta.model_name != 'role' or obj._meta.app_label != 'main':
-            raise Exception(smart_text('{} refers to a {}, not a Role'.format(field, type(obj))))
+            raise Exception(smart_str('{} refers to a {}, not a Role'.format(field, type(obj))))
         ret.append(obj.id)
     else:
         if type(obj) is ManyToManyDescriptor:

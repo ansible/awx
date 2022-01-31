@@ -1,6 +1,6 @@
 import logging
 
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from awx.main.utils.common import set_current_apps
 from awx.main.utils.common import parse_yaml_or_json
@@ -19,7 +19,7 @@ def _get_instance_id(from_dict, new_id, default=''):
             break
         instance_id = from_dict.get(key, default)
         from_dict = instance_id
-    return smart_text(instance_id)
+    return smart_str(instance_id)
 
 
 def _get_instance_id_for_upgrade(host, new_id):
