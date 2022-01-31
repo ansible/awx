@@ -4,12 +4,13 @@ import inspect
 import json
 import re
 
+import six
+
 # Python LDAP
 import ldap
 import awx
 
 # Django
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 # Django Auth LDAP

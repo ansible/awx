@@ -1,4 +1,4 @@
-django-debug-toolbar==1.11.1
+django-debug-toolbar==3.2.4
 django-rest-swagger
 # pprofile - re-add once https://github.com/vpelletier/pprofile/issues/41 is addressed
 ipython==7.21.0

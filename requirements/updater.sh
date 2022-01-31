@@ -18,7 +18,8 @@ generate_requirements() {
   # shellcheck disable=SC1090
   source ${venv}/bin/activate
 
-  ${venv}/bin/python3 -m pip install -U pip pip-tools
+  # FIXME: https://github.com/jazzband/pip-tools/issues/1558
+  ${venv}/bin/python3 -m pip install -U 'pip<22.0' pip-tools
 
   ${pip_compile} "${requirements_in}" "${requirements_git}" --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps

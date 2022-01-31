@@ -72,6 +72,10 @@ Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 
 
 class JSONField(upstream_JSONField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.decoder_kwargs = {'cls': json.JSONDecoder}  # FIXME
+
     def db_type(self, connection):
         return 'text'
 
