@@ -103,7 +103,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                     for zone in all_zones:
                         if fname.endswith(zone):
                             return zone
-        logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
+        logger.warning('Could not detect valid zoneinfo for {}'.format(self.rrule))
         return ''
 
     @property

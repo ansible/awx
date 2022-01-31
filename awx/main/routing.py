@@ -21,7 +21,7 @@ class AWXProtocolTypeRouter(ProtocolTypeRouter):
                 logger.debug(f"cleaning up Redis key {k}")
                 r.delete(k)
         except redis.exceptions.RedisError as e:
-            logger.warn("encountered an error communicating with redis.")
+            logger.warning("encountered an error communicating with redis.")
             raise e
         super().__init__(*args, **kwargs)
 

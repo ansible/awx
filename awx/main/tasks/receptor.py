@@ -164,7 +164,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
         if settings.RECEPTOR_RELEASE_WORK:
             res = receptor_ctl.simple_command(f"work release {unit_id}")
             if res != {'released': unit_id}:
-                logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
+                logger.warning(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
 
         receptor_ctl.close()
 
@@ -358,9 +358,9 @@ class AWXReceptorJob:
                     logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
-                    logger.warn(detail)
+                    logger.warning(detail)
                     log_name = self.task.instance.log_format
-                    logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
+                    logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
                 # If ansible-runner ran, but an error occured at runtime, the traceback information
@@ -380,7 +380,7 @@ class AWXReceptorJob:
                             self.task.instance.result_traceback = detail
                             self.task.instance.save(update_fields=['result_traceback'])
                         else:
-                            logger.warn(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
+                            logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
                     except Exception:
                         raise RuntimeError(detail)
 

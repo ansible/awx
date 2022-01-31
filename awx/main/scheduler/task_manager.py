@@ -574,7 +574,7 @@ class TaskManager:
                 timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(
                     name=task.name, pk=task.pk, timeout=task.timeout
                 )
-                logger.warn(timeout_message)
+                logger.warning(timeout_message)
                 task.timed_out = True
                 task.status = 'failed'
                 task.send_approval_notification('timed_out')

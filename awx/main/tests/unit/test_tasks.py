@@ -1947,7 +1947,7 @@ def test_notification_job_not_finished(logging_getLogger, mocker):
 
     with mocker.patch('awx.main.models.UnifiedJob.objects.get', uj):
         system.handle_success_and_failure_notifications(1)
-        assert logger.warn.called_with(f"Failed to even try to send notifications for job '{uj}' due to job not being in finished state.")
+        assert logger.warning.called_with(f"Failed to even try to send notifications for job '{uj}' due to job not being in finished state.")
 
 
 def test_notification_job_finished(mocker):

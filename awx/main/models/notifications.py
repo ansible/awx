@@ -515,7 +515,7 @@ class JobNotificationMixin(object):
         try:
             notification_templates = self.get_notification_templates()
         except Exception:
-            logger.warn("No notification template defined for emitting notification")
+            logger.warning("No notification template defined for emitting notification")
             return
 
         if not notification_templates:
