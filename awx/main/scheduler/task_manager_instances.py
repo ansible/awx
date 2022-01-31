@@ -62,6 +62,9 @@ class PrioritizedNodes:
         heapq.heapify(heap)
         return heapq.nlargest(1, heap).pop()
 
+    def __str__(self):
+        return f"{[n for n in self.nodes]}"
+
 
 class TaskManagerInstances:
     def __init__(self):
@@ -99,13 +102,14 @@ class TaskManagerInstances:
                         graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
         return graph
 
-    def assign_task_to_control_node(self, task, ig_capacity_graph=None):
+    def assign_task_to_control_node(self, task, ig_capacity_graph=None, impact=None):
         """Find most available control instance and deduct task impact if we find it.
 
         If no node is available, return False
         """
         best_instance = self.control_nodes.best_node()
-        if best_instance.remaining_capacity < task.task_impact:
+        if best_instance.remaining_capacity < impact:
+            logger.warning(f"Not enough control capacity for task {task.log_format} with task impact {impact} found on nodes {self.control_nodes}")
             return False
 
         if ig_capacity_graph:
@@ -114,10 +118,14 @@ class TaskManagerInstances:
             # capacity as well. If we never see this warning, maybe we can drop this code
             for ig in self.instances_partial[best_instance.hostname].instance_groups:
                 ig_data = ig_capacity_graph[ig]
-                if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= task.task_impact:
-                    logger.warn(f"Somehow we had capacity on a control node {best_instance} but not on its instance_group {ig}")
+                if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= impact:
+                    logger.warn(
+                        f"""Somehow we had capacity on a control node {best_instance}
+                            but not on its instance_group {ig} that has {ig_data['control_capacity']} control capacity
+                            and {ig_data['consumed_control_capacity']} consumed control capacity"""
+                    )
                     return False
         logger.debug(f"chose {best_instance} to be control node for {task.log_format}")
-        best_instance.remaining_capacity -= task.task_impact
+        best_instance.remaining_capacity -= impact
         self.control_nodes.update(best_instance)
         return best_instance

@@ -81,7 +81,8 @@ def test_workflow_job_no_instancegroup(workflow_job_template_factory, default_in
 @pytest.mark.django_db
 def test_overcapacity_blocking_other_groups_unaffected(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
-    i1.capacity = 1000
+    # Need some extra capacity for the control node task impact
+    i1.capacity = 1020
     i1.save()
     i2 = instance_factory("i2")
     ig1 = instance_group_factory("ig1", instances=[i1])
