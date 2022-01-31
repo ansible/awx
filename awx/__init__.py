@@ -6,6 +6,8 @@ import os
 import sys
 import warnings
 
+import six
+
 from pkg_resources import get_distribution
 
 __version__ = get_distribution('awx').version
@@ -35,7 +37,9 @@ else:
     from django.db.models import indexes
     from django.db.backends.utils import names_digest
     from django.db import connection
+    from django import utils
 
+    utils.six = six  # FIXME: monkey patch to get us through for now
 
 if HAS_DJANGO is True:
 

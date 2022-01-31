@@ -273,8 +273,8 @@ TEMPLATES = [
     {
         'NAME': 'default',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
         'OPTIONS': {
-            'debug': DEBUG,
             'context_processors': [  # NOQA
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
@@ -289,13 +289,10 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
-            'loaders': [
-                ('django.template.loaders.cached.Loader', ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader'))
-            ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
         'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
-    }
+    },
 ]
 
 ROOT_URLCONF = 'awx.urls'

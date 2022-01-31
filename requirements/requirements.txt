@@ -14,6 +14,7 @@ asgiref==3.2.5
     #   channels
     #   channels-redis
     #   daphne
+    #   django
 async-timeout==3.0.1
     # via
     #   aiohttp
@@ -80,13 +81,12 @@ dataclasses==0.6
 defusedxml==0.6.0
     # via
     #   python3-openid
-    #   python3-saml
     #   social-auth-core
 dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
-django==2.2.24
+django==3.0.14
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -107,11 +107,11 @@ django-crum==0.7.5
     # via -r /awx_devel/requirements/requirements.in
 django-extensions==2.2.9
     # via -r /awx_devel/requirements/requirements.in
-django-guid==2.2.0
+django-guid==2.2.1
     # via -r /awx_devel/requirements/requirements.in
-django-jsonfield==1.2.0
+django-jsonfield==1.4.1
     # via -r /awx_devel/requirements/requirements.in
-django-oauth-toolkit==1.1.3
+django-oauth-toolkit==1.4.1
     # via -r /awx_devel/requirements/requirements.in
 django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
@@ -159,7 +159,7 @@ incremental==17.5.0
     # via twisted
 irc==18.0.0
     # via -r /awx_devel/requirements/requirements.in
-isodate==0.6.0
+isodate==0.6.1
     # via
     #   msrest
     #   python3-saml
@@ -180,7 +180,7 @@ jaraco.text==3.2.0
     # via
     #   irc
     #   jaraco.collections
-jinja2==2.11.2
+jinja2==3.0.3
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   openshift
@@ -192,11 +192,13 @@ kubernetes==11.0.0
     # via openshift
 lockfile==0.12.2
     # via python-daemon
-lxml==4.6.3
-    # via xmlsec
+lxml==4.7.0
+    # via
+    #   python3-saml
+    #   xmlsec
 markdown==3.2.1
     # via -r /awx_devel/requirements/requirements.in
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via jinja2
 more-itertools==8.2.0
     # via
@@ -232,8 +234,6 @@ pexpect==4.7.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
-pkgconfig==1.5.1
-    # via xmlsec
 prometheus-client==0.7.1
     # via -r /awx_devel/requirements/requirements.in
 psutil==5.8.0
@@ -293,7 +293,7 @@ python-tss-sdk==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 python3-openid==3.1.0
     # via social-auth-core
-python3-saml==1.9.0
+python3-saml==1.13.0
     # via -r /awx_devel/requirements/requirements.in
 pytz==2019.3
     # via
@@ -336,8 +336,6 @@ rsa==4.7.2
     # via google-auth
 ruamel.yaml==0.16.10
     # via openshift
-ruamel.yaml.clib==0.2.0
-    # via ruamel.yaml
 schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
 service-identity==18.1.0
@@ -348,6 +346,7 @@ six==1.14.0
     #   automat
     #   cryptography
     #   django-extensions
+    #   django-jsonfield
     #   django-pglocks
     #   google-auth
     #   isodate
@@ -407,7 +406,7 @@ websocket-client==0.57.0
     # via kubernetes
 wheel==0.36.2
     # via -r /awx_devel/requirements/requirements.in
-xmlsec==1.3.3
+xmlsec==1.3.12
     # via python3-saml
 yarl==1.4.2
     # via aiohttp
