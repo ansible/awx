@@ -14,7 +14,7 @@ from django.db import connection
 from django.shortcuts import redirect
 from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, resolve
 
 from awx.main.utils.named_url_graph import generate_graph, GraphNode

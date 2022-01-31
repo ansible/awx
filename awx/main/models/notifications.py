@@ -10,8 +10,8 @@ from django.db import models
 from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.db import connection
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str, force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str, force_str
 from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
@@ -187,7 +187,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def display_notification_configuration(self):
         field_val = self.notification_configuration.copy()
         for field in self.notification_class.init_parameters:
-            if field in field_val and force_text(field_val[field]).startswith('$encrypted$'):
+            if field in field_val and force_str(field_val[field]).startswith('$encrypted$'):
                 field_val[field] = '$encrypted$'
         return field_val
 

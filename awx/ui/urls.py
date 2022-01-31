@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
 
 from awx.main.utils.licensing import server_product_name

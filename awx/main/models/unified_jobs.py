@@ -19,9 +19,9 @@ from collections import OrderedDict
 from django.conf import settings
 from django.db import models, connection
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
 
 # REST Framework
@@ -1090,7 +1090,7 @@ class UnifiedJob(
                 # function assume a str-based fd will be returned; decode
                 # .write() calls on the fly to maintain this interface
                 _write = fd.write
-                fd.write = lambda s: _write(smart_text(s))
+                fd.write = lambda s: _write(smart_str(s))
                 tbl = self._meta.db_table + 'event'
                 created_by_cond = ''
                 if self.has_unpartitioned_events:
@@ -1273,7 +1273,7 @@ class UnifiedJob(
             id=self.id,
             name=self.name,
             url=self.get_ui_url(),
-            created_by=smart_text(self.created_by),
+            created_by=smart_str(self.created_by),
             started=self.started.isoformat() if self.started is not None else None,
             finished=self.finished.isoformat() if self.finished is not None else None,
             status=self.status,

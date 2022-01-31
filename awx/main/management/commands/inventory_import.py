@@ -16,7 +16,7 @@ from collections import OrderedDict
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 # DRF error class to distinguish license exceptions
 from rest_framework.exceptions import PermissionDenied
@@ -109,8 +109,8 @@ class AnsibleInventoryLoader(object):
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        stdout = smart_text(stdout)
-        stderr = smart_text(stderr)
+        stdout = smart_str(stdout)
+        stderr = smart_str(stderr)
 
         if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % ('ansible-inventory', proc.returncode, stdout, stderr))
@@ -224,7 +224,7 @@ class Command(BaseCommand):
                     from_dict = instance_id
                 if instance_id:
                     break
-        return smart_text(instance_id)
+        return smart_str(instance_id)
 
     def _get_enabled(self, from_dict, default=None):
         """

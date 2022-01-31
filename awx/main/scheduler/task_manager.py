@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 # Django
 from django.db import transaction, connection
-from django.utils.translation import ugettext_lazy as _, gettext_noop
+from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
 
