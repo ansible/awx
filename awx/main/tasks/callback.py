@@ -154,7 +154,7 @@ class RunnerCallback:
         if self.instance.cancel_flag or self.instance.status == 'canceled':
             cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
             if cancel_wait > 5:
-                logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
+                logger.warning('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
             return True
         return False
 

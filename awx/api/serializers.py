@@ -5078,7 +5078,7 @@ class ActivityStreamSerializer(BaseSerializer):
         try:
             return json.loads(obj.changes)
         except Exception:
-            logger.warn("Error deserializing activity stream json changes")
+            logger.warning("Error deserializing activity stream json changes")
         return {}
 
     def get_object_association(self, obj):

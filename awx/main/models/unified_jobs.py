@@ -357,7 +357,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         validated_kwargs = kwargs.copy()
         if unallowed_fields:
             if parent_field_name is None:
-                logger.warn('Fields {} are not allowed as overrides to spawn from {}.'.format(', '.join(unallowed_fields), self))
+                logger.warning('Fields {} are not allowed as overrides to spawn from {}.'.format(', '.join(unallowed_fields), self))
             for f in unallowed_fields:
                 validated_kwargs.pop(f)
 
@@ -1205,7 +1205,7 @@ class UnifiedJob(
             try:
                 extra_data_dict = parse_yaml_or_json(extra_data, silent_failure=False)
             except Exception as e:
-                logger.warn("Exception deserializing extra vars: " + str(e))
+                logger.warning("Exception deserializing extra vars: " + str(e))
             evars = self.extra_vars_dict
             evars.update(extra_data_dict)
             self.update_fields(extra_vars=json.dumps(evars))

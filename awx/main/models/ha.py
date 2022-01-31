@@ -247,7 +247,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
         if uuid is not None and self.uuid != uuid:
             if self.uuid is not None:
-                logger.warn(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
+                logger.warning(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
             self.uuid = uuid
             update_fields.append('uuid')
 

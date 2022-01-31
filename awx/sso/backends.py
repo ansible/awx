@@ -179,7 +179,7 @@ def _get_or_set_enterprise_user(username, password, provider):
         created = True
     if created or user.is_in_enterprise_category(provider):
         return user
-    logger.warn("Enterprise user %s already defined in Tower." % username)
+    logger.warning("Enterprise user %s already defined in Tower." % username)
 
 
 class RADIUSBackend(BaseRADIUSBackend):
@@ -257,7 +257,7 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         if isinstance(value, (list, tuple)):
             value = value[0]
         if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
-            logger.warn(
+            logger.warning(
                 "Could not map user detail '%s' from SAML attribute '%s'; " "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
                 conf_key[5:],
                 key,
@@ -370,7 +370,7 @@ def on_populate_user(sender, **kwargs):
         if field_len > max_len:
             setattr(user, field, getattr(user, field)[:max_len])
             force_user_update = True
-            logger.warn('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
+            logger.warning('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
 
     # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})

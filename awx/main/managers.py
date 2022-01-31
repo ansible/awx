@@ -247,7 +247,7 @@ class InstanceGroupManager(models.Manager):
             if t.controller_node:
                 control_groups = instance_ig_mapping.get(t.controller_node, [])
                 if not control_groups:
-                    logger.warn(f"No instance group found for {t.controller_node}, capacity consumed may be innaccurate.")
+                    logger.warning(f"No instance group found for {t.controller_node}, capacity consumed may be innaccurate.")
 
             if t.status == 'waiting' or (not t.execution_node and not t.is_container_group_task):
                 # Subtract capacity from any peer groups that share instances
