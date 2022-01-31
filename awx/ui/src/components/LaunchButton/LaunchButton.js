@@ -61,7 +61,7 @@ function LaunchButton({ resource, children }) {
       }
 
       if (canLaunchWithoutPrompt(launch)) {
-        launchWithParams({});
+        await launchWithParams({});
       } else {
         setShowLaunchPrompt(true);
       }
