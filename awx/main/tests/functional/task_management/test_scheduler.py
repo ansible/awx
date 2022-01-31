@@ -126,6 +126,27 @@ class TestJobLifeCycle:
             assert uj.capacity_type == 'execution'
             assert [uj.execution_node, uj.controller_node] == [execution_instance.hostname, control_instance.hostname], uj
 
+    @pytest.mark.django_db
+    def test_job_fails_to_launch_when_no_control_capacity(self, job_template, control_instance_low_capacity, execution_instance):
+        enough_capacity = job_template.create_unified_job()
+        insufficient_capacity = job_template.create_unified_job()
+        all_ujs = [enough_capacity, insufficient_capacity]
+        for uj in all_ujs:
+            uj.signal_start()
+
+        # There is only enough control capacity to run one of the jobs so one should end up in pending and the other in waiting
+        tm = TaskManager()
+        self.run_tm(tm)
+
+        for uj in all_ujs:
+            uj.refresh_from_db()
+        assert enough_capacity.status == 'waiting'
+        assert insufficient_capacity.status == 'pending'
+        assert [enough_capacity.execution_node, enough_capacity.controller_node] == [
+            execution_instance.hostname,
+            control_instance_low_capacity.hostname,
+        ], enough_capacity
+
 
 @pytest.mark.django_db
 def test_single_jt_multi_job_launch_blocks_last(controlplane_instance_group, job_template_factory, mocker):
