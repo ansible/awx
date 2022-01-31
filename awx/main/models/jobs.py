@@ -578,6 +578,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
     )
 
+    FACT_REFERENCE_FILE = 'time_reference_fact_cache.txt'
+
     def _get_parent_field_name(self):
         return 'job_template'
 
@@ -810,9 +812,11 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             # exclude hosts with fact data older than `settings.ANSIBLE_FACT_CACHE_TIMEOUT seconds`
             timeout = now() - datetime.timedelta(seconds=timeout)
             hosts = hosts.filter(ansible_facts_modified__gte=timeout)
-        # Backdate all files to a time in the past and create a reference file to compare to
-        backdate = time.time() - 30.0
-        ref_file = os.path.join(artifacts_dir, 'time_reference_fact_cache.txt')
+        # Backdate all files 2 s in the past (due to ZipFile standard) and create a reference file to compare to
+        # TODO: develop a native solution with ansible-runner which will not need this workaround
+        # https://github.com/ansible/ansible-runner/issues/983
+        backdate = time.time() - 2.0
+        ref_file = os.path.join(artifacts_dir, self.FACT_REFERENCE_FILE)
         with codecs.open(ref_file, 'w', encoding='utf-8') as f:
             os.chmod(f.name, 0o600)
         os.utime(ref_file, times=(backdate, backdate))
@@ -834,7 +838,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         self.log_lifecycle("finish_job_fact_cache")
         artifacts_dir = os.path.join(private_data_dir, 'artifacts', str(self.id))
         destination = os.path.join(artifacts_dir, 'fact_cache')
-        ref_file = os.path.join(artifacts_dir, 'time_reference_fact_cache.txt')
+        ref_file = os.path.join(artifacts_dir, self.FACT_REFERENCE_FILE)
         backdate = os.path.getmtime(ref_file)
         for host in self._get_inventory_hosts():
             filepath = os.sep.join(map(str, [destination, host.name]))
@@ -844,7 +848,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             if os.path.exists(filepath):
                 # If the file changed since we wrote it pre-playbook run...
                 modified = os.path.getmtime(filepath)
-                if modified > backdate:
+                if modified != backdate:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         try:
                             ansible_facts = json.load(f)
