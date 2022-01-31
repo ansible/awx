@@ -16,7 +16,6 @@ https://www.ansible.com/security
 <!-- Pick the area of AWX for this issue, you can have multiple, delete the rest: -->
  - API
  - UI
- - Installer
  - Collection
 
 ##### SUMMARY
