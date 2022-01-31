@@ -1,5 +1,5 @@
 # Python
-from collections import deque, OrderedDict
+from collections import OrderedDict
 from distutils.dir_util import copy_tree
 import errno
 import functools
@@ -19,10 +19,8 @@ from uuid import uuid4
 
 
 # Django
-from django_guid.middleware import GuidMiddleware
 from django.conf import settings
-from django.db import transaction, DatabaseError
-from django.utils.timezone import now
+from django.db import transaction
 
 
 # Runner
@@ -40,11 +38,9 @@ from awx.main.dispatch import get_local_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
     STANDARD_INVENTORY_UPDATE_ENV,
-    MINIMAL_EVENTS,
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
 )
-from awx.main.redact import UriCleaner
 from awx.main.models import (
     Instance,
     Inventory,
@@ -61,7 +57,13 @@ from awx.main.models import (
     SystemJobEvent,
     build_safe_env,
 )
-from awx.main.queue import CallbackQueueDispatcher
+from awx.main.tasks.callback import (
+    RunnerCallback,
+    RunnerCallbackForAdHocCommand,
+    RunnerCallbackForInventoryUpdate,
+    RunnerCallbackForProjectUpdate,
+    RunnerCallbackForSystemJob,
+)
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
@@ -76,6 +78,7 @@ from awx.main.utils.common import (
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.tasks.system import handle_success_and_failure_notifications, update_smart_memberships_for_inventory, update_inventory_computed_fields
+from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import ugettext_lazy as _
 
@@ -105,46 +108,14 @@ class BaseTask(object):
     model = None
     event_model = None
     abstract = True
+    callback_class = RunnerCallback
 
     def __init__(self):
         self.cleanup_paths = []
-        self.parent_workflow_job_id = None
-        self.host_map = {}
-        self.guid = GuidMiddleware.get_guid()
-        self.job_created = None
-        self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
+        self.runner_callback = self.callback_class(model=self.model)
 
     def update_model(self, pk, _attempt=0, **updates):
-        """Reload the model instance from the database and update the
-        given fields.
-        """
-        try:
-            with transaction.atomic():
-                # Retrieve the model instance.
-                instance = self.model.objects.get(pk=pk)
-
-                # Update the appropriate fields and save the model
-                # instance, then return the new instance.
-                if updates:
-                    update_fields = ['modified']
-                    for field, value in updates.items():
-                        setattr(instance, field, value)
-                        update_fields.append(field)
-                        if field == 'status':
-                            update_fields.append('failed')
-                    instance.save(update_fields=update_fields)
-                return instance
-        except DatabaseError as e:
-            # Log out the error to the debug logger.
-            logger.debug('Database error updating %s, retrying in 5 ' 'seconds (retry #%d): %s', self.model._meta.object_name, _attempt + 1, e)
-
-            # Attempt to retry the update, assuming we haven't already
-            # tried too many times.
-            if _attempt < 5:
-                time.sleep(5)
-                return self.update_model(pk, _attempt=_attempt + 1, **updates)
-            else:
-                logger.error('Failed to update %s after %d retries.', self.model._meta.object_name, _attempt)
+        return update_model(self.model, pk, _attempt=0, **updates)
 
     def get_path_to(self, *args):
         """
@@ -350,7 +321,7 @@ class BaseTask(object):
         script_data = instance.inventory.get_script_data(**script_params)
         # maintain a list of host_name --> host_id
         # so we can associate emitted events to Host objects
-        self.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
+        self.runner_callback.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
         json_data = json.dumps(script_data)
         path = os.path.join(private_data_dir, 'inventory')
         fn = os.path.join(path, 'hosts')
@@ -444,181 +415,6 @@ class BaseTask(object):
                 instance.ansible_version = ansible_version_info
                 instance.save(update_fields=['ansible_version'])
 
-    def event_handler(self, event_data):
-        #
-        # ⚠️  D-D-D-DANGER ZONE ⚠️
-        # This method is called once for *every event* emitted by Ansible
-        # Runner as a playbook runs.  That means that changes to the code in
-        # this method are _very_ likely to introduce performance regressions.
-        #
-        # Even if this function is made on average .05s slower, it can have
-        # devastating performance implications for playbooks that emit
-        # tens or hundreds of thousands of events.
-        #
-        # Proceed with caution!
-        #
-        """
-        Ansible runner puts a parent_uuid on each event, no matter what the type.
-        AWX only saves the parent_uuid if the event is for a Job.
-        """
-        # cache end_line locally for RunInventoryUpdate tasks
-        # which generate job events from two 'streams':
-        # ansible-inventory and the awx.main.commands.inventory_import
-        # logger
-        if isinstance(self, RunInventoryUpdate):
-            self.end_line = event_data['end_line']
-
-        if event_data.get(self.event_data_key, None):
-            if self.event_data_key != 'job_id':
-                event_data.pop('parent_uuid', None)
-        if self.parent_workflow_job_id:
-            event_data['workflow_job_id'] = self.parent_workflow_job_id
-        event_data['job_created'] = self.job_created
-        if self.host_map:
-            host = event_data.get('event_data', {}).get('host', '').strip()
-            if host:
-                event_data['host_name'] = host
-                if host in self.host_map:
-                    event_data['host_id'] = self.host_map[host]
-            else:
-                event_data['host_name'] = ''
-                event_data['host_id'] = ''
-            if event_data.get('event') == 'playbook_on_stats':
-                event_data['host_map'] = self.host_map
-
-        if isinstance(self, RunProjectUpdate):
-            # it's common for Ansible's SCM modules to print
-            # error messages on failure that contain the plaintext
-            # basic auth credentials (username + password)
-            # it's also common for the nested event data itself (['res']['...'])
-            # to contain unredacted text on failure
-            # this is a _little_ expensive to filter
-            # with regex, but project updates don't have many events,
-            # so it *should* have a negligible performance impact
-            task = event_data.get('event_data', {}).get('task_action')
-            try:
-                if task in ('git', 'svn'):
-                    event_data_json = json.dumps(event_data)
-                    event_data_json = UriCleaner.remove_sensitive(event_data_json)
-                    event_data = json.loads(event_data_json)
-            except json.JSONDecodeError:
-                pass
-
-        if 'event_data' in event_data:
-            event_data['event_data']['guid'] = self.guid
-
-        # To prevent overwhelming the broadcast queue, skip some websocket messages
-        if self.recent_event_timings:
-            cpu_time = time.time()
-            first_window_time = self.recent_event_timings[0]
-            last_window_time = self.recent_event_timings[-1]
-
-            if event_data.get('event') in MINIMAL_EVENTS:
-                should_emit = True  # always send some types like playbook_on_stats
-            elif event_data.get('stdout') == '' and event_data['start_line'] == event_data['end_line']:
-                should_emit = False  # exclude events with no output
-            else:
-                should_emit = any(
-                    [
-                        # if 30the most recent websocket message was sent over 1 second ago
-                        cpu_time - first_window_time > 1.0,
-                        # if the very last websocket message came in over 1/30 seconds ago
-                        self.recent_event_timings.maxlen * (cpu_time - last_window_time) > 1.0,
-                        # if the queue is not yet full
-                        len(self.recent_event_timings) != self.recent_event_timings.maxlen,
-                    ]
-                )
-
-            if should_emit:
-                self.recent_event_timings.append(cpu_time)
-            else:
-                event_data.setdefault('event_data', {})
-                event_data['skip_websocket_message'] = True
-
-        elif self.recent_event_timings.maxlen:
-            self.recent_event_timings.append(time.time())
-
-        event_data.setdefault(self.event_data_key, self.instance.id)
-        self.dispatcher.dispatch(event_data)
-        self.event_ct += 1
-
-        '''
-        Handle artifacts
-        '''
-        if event_data.get('event_data', {}).get('artifact_data', {}):
-            self.instance.artifacts = event_data['event_data']['artifact_data']
-            self.instance.save(update_fields=['artifacts'])
-
-        return False
-
-    def cancel_callback(self):
-        """
-        Ansible runner callback to tell the job when/if it is canceled
-        """
-        unified_job_id = self.instance.pk
-        self.instance = self.update_model(unified_job_id)
-        if not self.instance:
-            logger.error('unified job {} was deleted while running, canceling'.format(unified_job_id))
-            return True
-        if self.instance.cancel_flag or self.instance.status == 'canceled':
-            cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
-            if cancel_wait > 5:
-                logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
-            return True
-        return False
-
-    def finished_callback(self, runner_obj):
-        """
-        Ansible runner callback triggered on finished run
-        """
-        event_data = {
-            'event': 'EOF',
-            'final_counter': self.event_ct,
-            'guid': self.guid,
-        }
-        event_data.setdefault(self.event_data_key, self.instance.id)
-        self.dispatcher.dispatch(event_data)
-
-    def status_handler(self, status_data, runner_config):
-        """
-        Ansible runner callback triggered on status transition
-        """
-        if status_data['status'] == 'starting':
-            job_env = dict(runner_config.env)
-            '''
-            Take the safe environment variables and overwrite
-            '''
-            for k, v in self.safe_env.items():
-                if k in job_env:
-                    job_env[k] = v
-            from awx.main.signals import disable_activity_stream  # Circular import
-
-            with disable_activity_stream():
-                self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
-        elif status_data['status'] == 'failed':
-            # For encrypted ssh_key_data, ansible-runner worker will open and write the
-            # ssh_key_data to a named pipe. Then, once the podman container starts, ssh-agent will
-            # read from this named pipe so that the key can be used in ansible-playbook.
-            # Once the podman container exits, the named pipe is deleted.
-            # However, if the podman container fails to start in the first place, e.g. the image
-            # name is incorrect, then this pipe is not cleaned up. Eventually ansible-runner
-            # processor will attempt to write artifacts to the private data dir via unstream_dir, requiring
-            # that it open this named pipe. This leads to a hang. Thus, before any artifacts
-            # are written by the processor, it's important to remove this ssh_key_data pipe.
-            private_data_dir = self.instance.job_env.get('AWX_PRIVATE_DATA_DIR', None)
-            if private_data_dir:
-                key_data_file = os.path.join(private_data_dir, 'artifacts', str(self.instance.id), 'ssh_key_data')
-                if os.path.exists(key_data_file) and stat.S_ISFIFO(os.stat(key_data_file).st_mode):
-                    os.remove(key_data_file)
-
-        elif status_data['status'] == 'error':
-            result_traceback = status_data.get('result_traceback', None)
-            if result_traceback:
-                from awx.main.signals import disable_activity_stream  # Circular import
-
-                with disable_activity_stream():
-                    self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
-
     @with_path_cleanup
     def run(self, pk, **kwargs):
         """
@@ -638,21 +434,14 @@ class BaseTask(object):
         status, rc = 'error', None
         extra_update_fields = {}
         fact_modification_times = {}
-        self.event_ct = 0
+        self.runner_callback.event_ct = 0
 
         '''
         Needs to be an object property because status_handler uses it in a callback context
         '''
-        self.safe_env = {}
+
         self.safe_cred_env = {}
         private_data_dir = None
-
-        # store a reference to the parent workflow job (if any) so we can include
-        # it in event data JSON
-        if self.instance.spawned_by_workflow:
-            self.parent_workflow_job_id = self.instance.get_workflow_job().id
-
-        self.job_created = str(self.instance.created)
 
         try:
             self.instance.send_notification_templates("running")
@@ -685,7 +474,16 @@ class BaseTask(object):
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
-            self.safe_env = build_safe_env(env)
+            self.runner_callback.safe_env = build_safe_env(env)
+
+            self.runner_callback.instance = self.instance
+
+            # store a reference to the parent workflow job (if any) so we can include
+            # it in event data JSON
+            if self.instance.spawned_by_workflow:
+                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
+
+            self.runner_callback.job_created = str(self.instance.created)
 
             credentials = self.build_credentials_list(self.instance)
 
@@ -693,7 +491,7 @@ class BaseTask(object):
                 if credential:
                     credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir)
 
-            self.safe_env.update(self.safe_cred_env)
+            self.runner_callback.safe_env.update(self.safe_cred_env)
 
             self.write_args_file(private_data_dir, args)
 
@@ -739,16 +537,14 @@ class BaseTask(object):
                 if not params[v]:
                     del params[v]
 
-            self.dispatcher = CallbackQueueDispatcher()
-
             self.instance.log_lifecycle("running_playbook")
             if isinstance(self.instance, SystemJob):
                 res = ansible_runner.interface.run(
                     project_dir=settings.BASE_DIR,
-                    event_handler=self.event_handler,
-                    finished_callback=self.finished_callback,
-                    status_handler=self.status_handler,
-                    cancel_callback=self.cancel_callback,
+                    event_handler=self.runner_callback.event_handler,
+                    finished_callback=self.runner_callback.finished_callback,
+                    status_handler=self.runner_callback.status_handler,
+                    cancel_callback=self.runner_callback.cancel_callback,
                     **params,
                 )
             else:
@@ -779,7 +575,7 @@ class BaseTask(object):
             extra_update_fields['result_traceback'] = traceback.format_exc()
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
         finally:
-            logger.debug('%s finished running, producing %s events.', self.instance.log_format, self.event_ct)
+            logger.debug('%s finished running, producing %s events.', self.instance.log_format, self.runner_callback.event_ct)
 
         try:
             self.post_run_hook(self.instance, status)
@@ -793,7 +589,7 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, emitted_events=self.event_ct, **extra_update_fields)
+        self.instance = self.update_model(pk, status=status, emitted_events=self.runner_callback.event_ct, **extra_update_fields)
 
         try:
             self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)
@@ -816,7 +612,6 @@ class RunJob(BaseTask):
 
     model = Job
     event_model = JobEvent
-    event_data_key = 'job_id'
 
     def build_private_data(self, job, private_data_dir):
         """
@@ -1215,21 +1010,12 @@ class RunProjectUpdate(BaseTask):
 
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
-    event_data_key = 'project_update_id'
+    callback_class = RunnerCallbackForProjectUpdate
 
     def __init__(self, *args, job_private_data_dir=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
-        self.playbook_new_revision = None
         self.original_branch = None
         self.job_private_data_dir = job_private_data_dir
-
-    def event_handler(self, event_data):
-        super(RunProjectUpdate, self).event_handler(event_data)
-        returned_data = event_data.get('event_data', {})
-        if returned_data.get('task_action', '') == 'set_fact':
-            returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
-            if 'scm_version' in returned_facts:
-                self.playbook_new_revision = returned_facts['scm_version']
 
     def build_private_data(self, project_update, private_data_dir):
         """
@@ -1631,8 +1417,8 @@ class RunProjectUpdate(BaseTask):
         super(RunProjectUpdate, self).post_run_hook(instance, status)
         # To avoid hangs, very important to release lock even if errors happen here
         try:
-            if self.playbook_new_revision:
-                instance.scm_revision = self.playbook_new_revision
+            if self.runner_callback.playbook_new_revision:
+                instance.scm_revision = self.runner_callback.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
 
             # Roles and collection folders copy to durable cache
@@ -1672,8 +1458,8 @@ class RunProjectUpdate(BaseTask):
             'failed',
             'canceled',
         ):
-            if self.playbook_new_revision:
-                p.scm_revision = self.playbook_new_revision
+            if self.runner_callback.playbook_new_revision:
+                p.scm_revision = self.runner_callback.playbook_new_revision
             else:
                 if status == 'successful':
                     logger.error("{} Could not find scm revision in check".format(instance.log_format))
@@ -1709,7 +1495,7 @@ class RunInventoryUpdate(BaseTask):
 
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
-    event_data_key = 'inventory_update_id'
+    callback_class = RunnerCallbackForInventoryUpdate
 
     def build_private_data(self, inventory_update, private_data_dir):
         """
@@ -1932,6 +1718,7 @@ class RunInventoryUpdate(BaseTask):
         if status != 'successful':
             return  # nothing to save, step out of the way to allow error reporting
 
+        inventory_update.refresh_from_db()
         private_data_dir = inventory_update.job_env['AWX_PRIVATE_DATA_DIR']
         expected_output = os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'output.json')
         with open(expected_output) as f:
@@ -1966,13 +1753,13 @@ class RunInventoryUpdate(BaseTask):
             options['verbosity'] = inventory_update.verbosity
 
         handler = SpecialInventoryHandler(
-            self.event_handler,
-            self.cancel_callback,
+            self.runner_callback.event_handler,
+            self.runner_callback.cancel_callback,
             verbosity=inventory_update.verbosity,
             job_timeout=self.get_instance_timeout(self.instance),
             start_time=inventory_update.started,
-            counter=self.event_ct,
-            initial_line=self.end_line,
+            counter=self.runner_callback.event_ct,
+            initial_line=self.runner_callback.end_line,
         )
         inv_logger = logging.getLogger('awx.main.commands.inventory_import')
         formatter = inv_logger.handlers[0].formatter
@@ -2006,7 +1793,7 @@ class RunAdHocCommand(BaseTask):
 
     model = AdHocCommand
     event_model = AdHocCommandEvent
-    event_data_key = 'ad_hoc_command_id'
+    callback_class = RunnerCallbackForAdHocCommand
 
     def build_private_data(self, ad_hoc_command, private_data_dir):
         """
@@ -2164,7 +1951,7 @@ class RunSystemJob(BaseTask):
 
     model = SystemJob
     event_model = SystemJobEvent
-    event_data_key = 'system_job_id'
+    callback_class = RunnerCallbackForSystemJob
 
     def build_execution_environment_params(self, system_job, private_data_dir):
         return {}
