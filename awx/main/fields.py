@@ -94,6 +94,8 @@ class JSONBField(upstream_JSONBField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if connection.vendor == 'sqlite':
             # sqlite (which we use for tests) does not support jsonb;
+            if hasattr(value, 'adapted'):
+                value = value.adapted  # FIXME: Django 3.0 uses JsonAdapter, removed in 3.1
             return json.dumps(value, cls=DjangoJSONEncoder)
         return super(JSONBField, self).get_db_prep_value(value, connection, prepared)
 
