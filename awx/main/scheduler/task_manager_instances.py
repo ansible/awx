@@ -30,7 +30,9 @@ class PrioritizableNode:
         return self.remaining_capacity < other.remaining_capacity
 
     def __eq__(self, other):
-        return self.hostname == other.hostname
+        if hasattr(other, 'hostname'):
+            other = other.hostname
+        return self.hostname == other
 
     def __hash__(self):
         return hash(self.hostname)
@@ -48,6 +50,13 @@ class PrioritizedNodes:
 
     def add(self, node):
         self.nodes.add(node)
+
+    def __getitem__(self, hostname):
+        if hostname not in self.nodes:
+            raise KeyError(f"No control node with hostname {hostname} found")
+        for node in self.nodes:
+            if node == hostname:
+                return node
 
     def update(self, node):
         """The __hash__ function for PrioritizableNodes just compares hostnames.
@@ -102,30 +111,46 @@ class TaskManagerInstances:
                         graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
         return graph
 
-    def assign_task_to_control_node(self, task, ig_capacity_graph=None, impact=None):
-        """Find most available control instance and deduct task impact if we find it.
+    def has_sufficient_control_capacity(self, controller_node, impact):
+        if not isinstance(controller_node, PrioritizableNode) and isinstance(controller_node, str):
+            controller_node = self.control_nodes[controller_node]
+        return controller_node.remaining_capacity >= impact
 
-        If no node is available, return False
+    def consume_control_capacity(self, controller_node, impact):
+        if not isinstance(controller_node, PrioritizableNode) and isinstance(controller_node, str):
+            controller_node = self.control_nodes[controller_node]
+        controller_node.remaining_capacity -= impact
+        self.control_nodes.update(controller_node)
+
+    def assign_task_to_control_node(self, task, ig_capacity_graph, impact, controller_node=None):
+        """Account for task impact on a control node.
+
+        If no control node is specified, find the best control node available.
+        controller_node should be the string hostname
+
+        If the node does not have enough remaining capacity for the task impact, return False
         """
-        best_instance = self.control_nodes.best_node()
-        if best_instance.remaining_capacity < impact:
+        if not controller_node:
+            instance = self.control_nodes.best_node()
+        else:
+            instance = self.control_nodes[controller_node]
+
+        if not self.has_sufficient_control_capacity(instance, impact):
             logger.warning(f"Not enough control capacity for task {task.log_format} with task impact {impact} found on nodes {self.control_nodes}")
             return False
 
-        if ig_capacity_graph:
-            # This whole block is kind of paranoid.
-            # It covers a case that should really not happen since every time we assign a task to a node, we deduct from its instance group
-            # capacity as well. If we never see this warning, maybe we can drop this code
-            for ig in self.instances_partial[best_instance.hostname].instance_groups:
-                ig_data = ig_capacity_graph[ig]
-                if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= impact:
-                    logger.warn(
-                        f"""Somehow we had capacity on a control node {best_instance}
-                            but not on its instance_group {ig} that has {ig_data['control_capacity']} control capacity
-                            and {ig_data['consumed_control_capacity']} consumed control capacity"""
-                    )
-                    return False
-        logger.debug(f"chose {best_instance} to be control node for {task.log_format}")
-        best_instance.remaining_capacity -= impact
-        self.control_nodes.update(best_instance)
-        return best_instance
+        # This whole block is kind of paranoid.
+        # It covers a case that should really not happen since every time we assign a task to a node, we deduct from its instance group
+        # capacity as well. If we never see this warning, maybe we can drop this code
+        for ig in self.instances_partial[instance.hostname].instance_groups:
+            ig_data = ig_capacity_graph[ig]
+            if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= impact:
+                logger.warn(
+                    f"""Somehow we had capacity on a control node {instance}
+                        but not on its instance_group {ig} that has {ig_data['control_capacity']} control capacity
+                        and {ig_data['consumed_control_capacity']} consumed control capacity"""
+                )
+                return False
+        logger.debug(f"chose {instance} to be control node for {task.log_format}")
+        self.consume_control_capacity(instance, impact=impact)
+        return instance.hostname

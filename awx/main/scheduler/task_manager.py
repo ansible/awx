@@ -69,25 +69,27 @@ class TaskManager:
         self.task_manager_instances = TaskManagerInstances()
         self.ig_capacity_graph = self.task_manager_instances.init_ig_capacity_graph(self.ig_capacity_graph)
 
-    def get_and_consume_capacity_on_control_node_with_sufficient_capacity(self, task, impact=None):
-        """Find a control node with enough capacity to control a job.
+    def consume_control_capacity(self, task, control_node=None):
+        """Consume capacity on a control node to control a job.
 
+        If we want to force the selection of a certain control node, pass it as an argument.
         Return the hostname of the control node if we find it.
-        Deduct the task impact from shared tracking data before returning
+        Deduct the task impact from shared tracking data before returning.
 
         Return None if no appropriate instance found.
         """
-        if not impact:
-            impact = task.task_impact
-        control_node = self.task_manager_instances.assign_task_to_control_node(task, self.ig_capacity_graph, impact)
+        control_node = self.task_manager_instances.assign_task_to_control_node(
+            task, self.ig_capacity_graph, settings.AWX_CONTROL_NODE_TASK_IMPACT, control_node
+        )
+
         if not control_node:
             logger.debug(f"No control node eligible to run {task.log_format}")
             return None
 
-        for ig in self.task_manager_instances[control_node.hostname].instance_groups:
+        for ig in self.task_manager_instances[control_node].instance_groups:
             # Consume capacity on instance groups the control node is a member of
-            self.consume_capacity(task, ig, instance=self.task_manager_instances[control_node.hostname])
-        return control_node.hostname
+            self.consume_capacity(task, ig, instance=self.task_manager_instances[control_node])
+        return control_node
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -470,7 +472,7 @@ class TaskManager:
                 if rampart_group.is_container_group:
                     if task.capacity_type != 'execution':
                         # project updates and inventory updates for job have to run on a control node
-                        controller_node = self.get_and_consume_capacity_on_control_node_with_sufficient_capacity(task)
+                        controller_node = self.consume_control_capacity(task)
                         # No controller node was available, go on to next task
                         if not controller_node:
                             logger.warning("No control plane nodes available to run containerized job {}, will remain pending".format(task.log_format))
@@ -484,7 +486,7 @@ class TaskManager:
                         # task.capacity_type == 'execution':
                         # find one real, non-containerized instance with capacity to
                         # act as the controller for k8s API interaction
-                        controller_node = self.get_and_consume_capacity_on_control_node_with_sufficient_capacity(task)
+                        controller_node = self.consume_control_capacity(task)
 
                         # No controller node was available, go on to next task
                         if not controller_node:
@@ -514,8 +516,16 @@ class TaskManager:
                 if execution_instance:
                     if execution_instance.node_type in ('hybrid', 'control'):
                         controller_node = execution_instance.hostname
+                        if not self.task_manager_instances.has_sufficient_control_capacity(controller_node, settings.AWX_CONTROL_NODE_TASK_IMPACT):
+                            logger.debug(
+                                f"""Found {execution_instance} with enough execution capacity,
+                                but not enough to also allow for the additional control task impact of {settings.AWX_CONTROL_NODE_TASK_IMPACT}"""
+                            )
+                            # Move on to next instance group
+                            continue
+                        controller_node = self.consume_control_capacity(task, controller_node)
                     else:
-                        controller_node = self.get_and_consume_capacity_on_control_node_with_sufficient_capacity(task, impact=5)
+                        controller_node = self.consume_control_capacity(task)
                     if not controller_node:
                         logger.warning(
                             "Found execution node {} but there are no control plane nodes available to run {}, will remain pending".format(
