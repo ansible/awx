@@ -30,6 +30,17 @@ modification times that have increased (because Ansible updated the file via
 subsequent playbook runs, AWX will _only_ inject cached facts that are _newer_
 than `settings.ANSIBLE_FACT_CACHE_TIMEOUT` seconds.
 
+### Pitfalls
+The AWX setting `ANSIBLE_FACT_CACHE_TIMEOUT` is intended to _replace_ the use
+of the Ansible core setting of `fact_caching_timeout`, which can be
+given as an environment variable as `ANSIBLE_CACHE_PLUGIN_TIMEOUT`.
+In AWX, the ultimate source of truth is the database, but in the analog
+CLI use of Ansible, the ultimate sources of truth are json files laid
+down by the jsonfile fact cache plugin.
+The Ansible core setting has a default value of 1 day.
+If the Ansible setting is a very small value (set in `ansible.cfg`, for example),
+then the playbook may still ignore facts from the database.
+
 ## AWX Fact Logging
 New and changed facts will be logged via AWX's logging facility, specifically
 to the `system_tracking` namespace or logger. The logging payload will include
