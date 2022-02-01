@@ -110,7 +110,7 @@ class TestJobLifeCycle:
 
     @pytest.fixture
     def control_instance_low_capacity(self):
-        '''Control instance in the controlplane automatic IG'''
+        '''Control instance in the controlplane automatic IG that has low capacity'''
         ig = InstanceGroup.objects.create(name='controlplane')
         inst = Instance.objects.create(hostname='control-1', node_type='control', capacity=5)
         ig.instances.add(inst)
@@ -121,6 +121,14 @@ class TestJobLifeCycle:
         '''Execution node in the automatic default IG'''
         ig = InstanceGroup.objects.create(name='default')
         inst = Instance.objects.create(hostname='receptor-1', node_type='execution', capacity=500)
+        ig.instances.add(inst)
+        return inst
+
+    @pytest.fixture
+    def hybrid_instance(self):
+        '''Hybrid node in the automatic default IG'''
+        ig = InstanceGroup.objects.create(name='controlplane')
+        inst = Instance.objects.create(hostname='receptor-1', node_type='hybrid', capacity=500)
         ig.instances.add(inst)
         return inst
 
@@ -152,6 +160,27 @@ class TestJobLifeCycle:
 
     @pytest.mark.django_db
     def test_job_fails_to_launch_when_no_control_capacity(self, job_template, control_instance_low_capacity, execution_instance):
+        enough_capacity = job_template.create_unified_job()
+        insufficient_capacity = job_template.create_unified_job()
+        all_ujs = [enough_capacity, insufficient_capacity]
+        for uj in all_ujs:
+            uj.signal_start()
+
+        # There is only enough control capacity to run one of the jobs so one should end up in pending and the other in waiting
+        tm = TaskManager()
+        self.run_tm(tm)
+
+        for uj in all_ujs:
+            uj.refresh_from_db()
+        assert enough_capacity.status == 'waiting'
+        assert insufficient_capacity.status == 'pending'
+        assert [enough_capacity.execution_node, enough_capacity.controller_node] == [
+            execution_instance.hostname,
+            control_instance_low_capacity.hostname,
+        ], enough_capacity
+
+    @pytest.mark.django_db
+    def test_hybrid_capacity(self, job_template, control_instance_low_capacity, execution_instance, hybrid_instance):
         enough_capacity = job_template.create_unified_job()
         insufficient_capacity = job_template.create_unified_job()
         all_ujs = [enough_capacity, insufficient_capacity]
