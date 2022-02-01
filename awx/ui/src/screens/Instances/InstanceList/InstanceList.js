@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
-
-import { Plural, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
 import 'styled-components/macro';
+import { PageSection, Card } from '@patternfly/react-core';
 
 import useExpanded from 'hooks/useExpanded';
 import DataListToolbar from 'components/DataListToolbar';
@@ -13,13 +13,11 @@ import PaginatedTable, {
 } from 'components/PaginatedTable';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
 import { InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
-
-import { Button, Tooltip, PageSection, Card } from '@patternfly/react-core';
+import HealthCheckButton from 'components/HealthCheckButton';
 import InstanceListItem from './InstanceListItem';
 
 const QS_CONFIG = getQSConfig('instance', {
@@ -69,7 +67,11 @@ function InstanceList() {
     fetchInstances();
   }, [fetchInstances]);
 
-  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
+  const {
+    error: healthCheckError,
+    request: fetchHealthCheck,
+    isLoading: isHealthCheckLoading,
+  } = useRequest(
     useCallback(async () => {
       await Promise.all(
         selected
@@ -86,38 +88,13 @@ function InstanceList() {
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(instances);
 
-  const hopNodeSelected = selected.filter(
-    (instance) => instance.node_type === 'hop'
-  ).length;
-
-  const buildTooltip = () => {
-    if (hopNodeSelected) {
-      return (
-        <Plural
-          value={hopNodeSelected}
-          one="Cannot run health check on a hop node.  Deselect the hop node to run a health check."
-          other="Cannot run health check on hop nodes.  Deselect the hop nodes to run health checks."
-        />
-      );
-    }
-    return selected.length ? (
-      <Plural
-        value={selected.length}
-        one="Click to run a health check on the selected instance."
-        other="Click to run a health check on the selected instances."
-      />
-    ) : (
-      t`Select an instance to run a health check.`
-    );
-  };
-
   return (
     <>
       <PageSection>
         <Card>
           <PaginatedTable
             contentError={contentError}
-            hasContentLoading={isLoading}
+            hasContentLoading={isLoading || isHealthCheckLoading}
             items={instances}
             itemCount={count}
             pluralizedItemName={t`Instances`}
@@ -157,18 +134,10 @@ function InstanceList() {
                 onExpandAll={expandAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
-                  <Tooltip ouiaId="healthCheckTooltip" content={buildTooltip()}>
-                    <div>
-                      <Button
-                        isDisabled={
-                          !selected.length || Boolean(hopNodeSelected)
-                        }
-                        variant="secondary"
-                        ouiaId="health-check"
-                        onClick={fetchHealthCheck}
-                      >{t`Health Check`}</Button>
-                    </div>
-                  </Tooltip>,
+                  <HealthCheckButton
+                    onClick={fetchHealthCheck}
+                    selectedItems={selected}
+                  />,
                 ]}
               />
             )}
@@ -179,7 +148,7 @@ function InstanceList() {
                 <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
                 <HeaderCell sortKey="capacity_adjustment">{t`Capacity Adjustment`}</HeaderCell>
                 <HeaderCell>{t`Used Capacity`}</HeaderCell>
-                <HeaderCell sortKey="enabled">{t`Actions`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderRow={(instance, index) => (

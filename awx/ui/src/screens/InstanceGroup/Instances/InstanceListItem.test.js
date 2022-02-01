@@ -274,9 +274,8 @@ describe('<InstanceListItem/>', () => {
       );
     });
     expect(wrapper.find('InstanceListItem').prop('isExpanded')).toBe(true);
-    expect(wrapper.find('Detail[label="Node Type"]').prop('value')).toBe(
-      'hybrid'
-    );
+    expect(wrapper.find('Detail[label="Running Jobs"]').prop('value')).toBe(0);
+    expect(wrapper.find('Detail[label="Total Jobs"]').prop('value')).toBe(68);
     expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
       'Auto'
     );

@@ -61,6 +61,7 @@ function InstanceListItem({
   rowIndex,
 }) {
   const { me = {} } = useConfig();
+  const { id } = useParams();
   const [forks, setForks] = useState(
     computeForks(
       instance.mem_capacity,
@@ -68,7 +69,6 @@ function InstanceListItem({
       instance.capacity_adjustment
     )
   );
-  const { id } = useParams();
 
   const labelId = `check-action-${instance.id}`;
 
@@ -147,8 +147,7 @@ function InstanceListItem({
             <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
           </Tooltip>
         </Td>
-        <Td dataLabel={t`Running Jobs`}>{instance.jobs_running}</Td>
-        <Td dataLabel={t`Total Jobs`}>{instance.jobs_total}</Td>
+        <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
         <Td dataLabel={t`Capacity Adjustment`}>
           <SliderHolder data-cy="slider-holder">
             <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
@@ -197,7 +196,8 @@ function InstanceListItem({
         <Td colSpan={7}>
           <ExpandableRowContent>
             <DetailList>
-              <Detail label={t`Node Type`} value={instance.node_type} />
+              <Detail value={instance.jobs_running} label={t`Running Jobs`} />
+              <Detail value={instance.jobs_total} label={t`Total Jobs`} />
               <Detail
                 label={t`Policy Type`}
                 value={instance.managed_by_policy ? t`Auto` : t`Manual`}

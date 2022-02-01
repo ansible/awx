@@ -106,20 +106,25 @@ function InstanceListItem({
     );
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
-
+  const isHopNode = instance.node_type === 'hop';
   return (
     <>
       <Tr
         id={`instance-row-${instance.id}`}
         ouiaId={`instance-row-${instance.id}`}
       >
-        <Td
-          expand={{
-            rowIndex,
-            isExpanded,
-            onToggle: onExpand,
-          }}
-        />
+        {isHopNode ? (
+          <Td />
+        ) : (
+          <Td
+            expand={{
+              rowIndex,
+              isExpanded,
+              disabled: isHopNode,
+              onToggle: onExpand,
+            }}
+          />
+        )}
         <Td
           select={{
             rowIndex,
@@ -133,88 +138,92 @@ function InstanceListItem({
             <b>{instance.hostname}</b>
           </Link>
         </Td>
-        <Td dataLabel={t`Status`}>
-          <Tooltip
-            content={
-              <div>
-                {t`Last Health Check`}
-                &nbsp;
-                {formatDateString(instance.last_health_check)}
-              </div>
-            }
-          >
-            <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
-          </Tooltip>
-        </Td>
-        <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
-        {instance.node_type !== 'hop' && (
-          <Td dataLabel={t`Capacity Adjustment`}>
-            <SliderHolder data-cy="slider-holder">
-              <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
-              <SliderForks data-cy="slider-forks">
-                <div data-cy="number-forks">
-                  <Plural value={forks} one="# fork" other="# forks" />
+        {!instance.node_type !== 'hop' && (
+          <Td dataLabel={t`Status`}>
+            <Tooltip
+              content={
+                <div>
+                  {t`Last Health Check`}
+                  &nbsp;
+                  {formatDateString(instance.last_health_check)}
                 </div>
-                <Slider
-                  areCustomStepsContinuous
-                  max={1}
-                  min={0}
-                  step={0.1}
-                  value={instance.capacity_adjustment}
-                  onChange={handleChangeValue}
-                  isDisabled={!me?.is_superuser || !instance.enabled}
-                  data-cy="slider"
+              }
+            >
+              <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
+            </Tooltip>
+          </Td>
+        )}
+        <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
+        {!isHopNode && (
+          <>
+            <Td dataLabel={t`Capacity Adjustment`}>
+              <SliderHolder data-cy="slider-holder">
+                <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
+                <SliderForks data-cy="slider-forks">
+                  <div data-cy="number-forks">
+                    <Plural value={forks} one="# fork" other="# forks" />
+                  </div>
+                  <Slider
+                    areCustomStepsContinuous
+                    max={1}
+                    min={0}
+                    step={0.1}
+                    value={instance.capacity_adjustment}
+                    onChange={handleChangeValue}
+                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    data-cy="slider"
+                  />
+                </SliderForks>
+                <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
+              </SliderHolder>
+            </Td>
+
+            <Td
+              dataLabel={t`Instance group used capacity`}
+              css="--pf-c-table--cell--MinWidth: 175px;"
+            >
+              {usedCapacity(instance)}
+            </Td>
+
+            <ActionsTd
+              dataLabel={t`Actions`}
+              css="--pf-c-table--cell--Width: 125px"
+            >
+              <ActionItem visible>
+                <InstanceToggle
+                  css="display: inline-flex;"
+                  fetchInstances={fetchInstances}
+                  instance={instance}
                 />
-              </SliderForks>
-              <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
-            </SliderHolder>
-          </Td>
-        )}
-        {instance.node_type !== 'hop' && (
-          <Td
-            dataLabel={t`Instance group used capacity`}
-            css="--pf-c-table--cell--MinWidth: 175px;"
-          >
-            {usedCapacity(instance)}
-          </Td>
-        )}
-        {instance.node_type !== 'hop' && (
-          <ActionsTd
-            dataLabel={t`Actions`}
-            css="--pf-c-table--cell--Width: 125px"
-          >
-            <ActionItem visible>
-              <InstanceToggle
-                css="display: inline-flex;"
-                fetchInstances={fetchInstances}
-                instance={instance}
-              />
-            </ActionItem>
-          </ActionsTd>
+              </ActionItem>
+            </ActionsTd>
+          </>
         )}
       </Tr>
-      <Tr
-        ouiaId={`instance-row-${instance.id}-expanded`}
-        isExpanded={isExpanded}
-      >
-        <Td colSpan={2} />
-        <Td colSpan={7}>
-          <ExpandableRowContent>
-            <DetailList>
-              <Detail value={instance.jobs_running} label={t`Running Jobs`} />
-              <Detail value={instance.jobs_total} label={t`Total Jobs`} />
-              <Detail
-                label={t`Policy Type`}
-                value={instance.managed_by_policy ? t`Auto` : t`Manual`}
-              />
-              <Detail
-                label={t`Last Health Check`}
-                value={formatDateString(instance.last_health_check)}
-              />
-            </DetailList>
-          </ExpandableRowContent>
-        </Td>
-      </Tr>
+      {!isHopNode && (
+        <Tr
+          ouiaId={`instance-row-${instance.id}-expanded`}
+          isExpanded={isExpanded}
+        >
+          <Td colSpan={2} />
+          <Td colSpan={7}>
+            <ExpandableRowContent>
+              <DetailList>
+                <Detail value={instance.jobs_running} label={t`Running Jobs`} />
+                <Detail value={instance.jobs_total} label={t`Total Jobs`} />
+                <Detail
+                  label={t`Policy Type`}
+                  value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+                />
+                <Detail
+                  label={t`Last Health Check`}
+                  value={formatDateString(instance.last_health_check)}
+                />
+              </DetailList>
+            </ExpandableRowContent>
+          </Td>
+        </Tr>
+      )}
       {updateError && (
         <AlertModal
           variant="error"

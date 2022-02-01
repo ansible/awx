@@ -143,7 +143,7 @@ describe('<InstanceList/>', () => {
     expect(wrapper.find('InstanceListItem').length).toBe(4);
   });
 
-  test('should run health check', async () => {
+  test('Should run health check', async () => {
     // Ensures health check button is disabled on mount
     expect(
       wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
@@ -168,7 +168,7 @@ describe('<InstanceList/>', () => {
     );
     expect(InstancesAPI.healthCheck).toBeCalledTimes(3);
   });
-  test('should render health check error', async () => {
+  test('Should render health check error', async () => {
     InstancesAPI.healthCheck.mockRejectedValue(
       new Error({
         response: {
@@ -206,6 +206,8 @@ describe('<InstanceList/>', () => {
     expect(
       wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
     ).toBe(true);
-    expect(wrapper.find('Tooltip[ouiaId="healthCheckTooltip"]').length).toBe(1);
+    expect(wrapper.find('Tooltip[data-cy="healthCheckTooltip"]').length).toBe(
+      1
+    );
   });
 });
