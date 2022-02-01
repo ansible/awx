@@ -134,6 +134,10 @@ class TaskManagerInstances:
 
     def assign_task_to_execution_node(self, task, instance_group_name, ig_capacity_graph, execution_instance):
         # The fact that we are using this max function here tells me sometimes it is over assigned
+        if isinstance(execution_instance, str):
+            for e in ig_capacity_graph.get(instance_group_name)['instances']:
+                if e.hostname == execution_instance:
+                    execution_instance = e
         execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
         execution_instance.jobs_running += 1
 
