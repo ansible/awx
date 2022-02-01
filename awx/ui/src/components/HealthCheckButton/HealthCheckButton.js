@@ -3,7 +3,7 @@ import { Plural, t } from '@lingui/macro';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { useKebabifiedMenu } from 'contexts/Kebabified';
 
-function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
+function HealthCheckButton({ onClick, selectedItems }) {
   const { isKebabified } = useKebabifiedMenu();
   const hopNodeSelected = selectedItems.filter(
     (instance) => instance.node_type === 'hop'
@@ -28,7 +28,7 @@ function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
       t`Select an instance to run a health check.`
     );
   };
-
+  const isDisabled = hopNodeSelected || !selectedItems.length;
   if (isKebabified) {
     return (
       <Tooltip ouiaId="healthCheckTooltip" content={buildTooltip()}>

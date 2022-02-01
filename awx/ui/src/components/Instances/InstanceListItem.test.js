@@ -3,12 +3,12 @@ import { act } from 'react-dom/test-utils';
 
 import { InstancesAPI } from 'api';
 import useDebounce from 'hooks/useDebounce';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import InstanceListItem from './InstanceListItem';
 
-jest.mock('../../../api');
-jest.mock('../../../hooks/useDebounce');
+jest.mock('../../api');
+jest.mock('../../hooks/useDebounce');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -21,6 +21,10 @@ const instance = [
     id: 1,
     type: 'instance',
     url: '/api/v2/instances/1/',
+    related: {
+      jobs: '/api/v2/instances/1/jobs/',
+      instance_groups: '/api/v2/instances/1/instance_groups/',
+    },
     uuid: '00000000-0000-0000-0000-000000000000',
     hostname: 'awx',
     created: '2020-07-14T19:03:49.000054Z',
@@ -84,6 +88,8 @@ describe('<InstanceListItem/>', () => {
               isSelected={false}
               onSelect={() => {}}
               fetchInstances={() => {}}
+              isInstanceGroupContext
+              detailUrl="/instance_groups/1/instances/2/details"
             />
           </tbody>
         </table>
@@ -102,6 +108,8 @@ describe('<InstanceListItem/>', () => {
               isSelected={false}
               onSelect={() => {}}
               fetchInstances={() => {}}
+              isInstanceGroupContext
+              detailUrl="/instance_groups/1/instances/2/details"
             />
           </tbody>
         </table>
@@ -148,13 +156,15 @@ describe('<InstanceListItem/>', () => {
               isSelected={false}
               onSelect={() => {}}
               fetchInstances={() => {}}
+              isInstanceGroupContext
+              detailUrl="/instance_groups/1/instances/2/details"
             />
           </tbody>
         </table>
       );
     });
     expect(wrapper.find('Td[dataLabel="Name"]').find('Link').prop('to')).toBe(
-      '/instances/1/details'
+      '/instance_groups/1/instances/2/details'
     );
     expect(wrapper.find('Td').at(2).text()).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
@@ -185,6 +195,8 @@ describe('<InstanceListItem/>', () => {
               instance={instance[0]}
               onSelect={onSelect}
               fetchInstances={() => {}}
+              isInstanceGroupContext
+              detailUrl="/instance_groups/1/instances/2/details"
             />
           </tbody>
         </table>
@@ -226,6 +238,8 @@ describe('<InstanceListItem/>', () => {
               isSelected={false}
               onSelect={() => {}}
               fetchInstances={() => {}}
+              isInstanceGroupContext
+              detailUrl="/instance_groups/1/instances/2/details"
             />
           </tbody>
         </table>,
@@ -260,13 +274,17 @@ describe('<InstanceListItem/>', () => {
               onSelect={onSelect}
               fetchInstances={() => {}}
               isExpanded
+              isInstanceGroupContext
+              detailUrl="/instance_groups/1/instances/2/details"
             />
           </tbody>
         </table>
       );
     });
     expect(wrapper.find('InstanceListItem').prop('isExpanded')).toBe(true);
-
+    expect(wrapper.find('Detail[label="Node Type"]').prop('value')).toBe(
+      'hybrid'
+    );
     expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
       'Auto'
     );
@@ -274,6 +292,7 @@ describe('<InstanceListItem/>', () => {
       wrapper.find('Detail[label="Last Health Check"]').prop('value')
     ).toBe('9/15/2021, 6:02:07 PM');
   });
+
   test('Hop should not render some things', async () => {
     const onSelect = jest.fn();
     await act(async () => {
@@ -284,6 +303,8 @@ describe('<InstanceListItem/>', () => {
               instance={instance[1]}
               onSelect={onSelect}
               fetchInstances={() => {}}
+              isInstanceGroupContext={false}
+              detailUrl="/instances/2/details"
             />
           </tbody>
         </table>

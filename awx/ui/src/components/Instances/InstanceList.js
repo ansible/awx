@@ -6,8 +6,6 @@ import 'styled-components/macro';
 import useExpanded from 'hooks/useExpanded';
 import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
-  HeaderRow,
-  HeaderCell,
   ToolbarAddButton,
   getSearchableKeys,
 } from 'components/PaginatedTable';
@@ -21,21 +19,30 @@ import useRequest, {
 } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
-import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-import HealthCheckButton from 'components/HealthCheckButton/HealthCheckButton';
+import { parseQueryString, mergeParams } from 'util/qs';
+import HealthCheckButton from 'components/HealthCheckButton';
 import InstanceListItem from './InstanceListItem';
 
-const QS_CONFIG = getQSConfig('instance', {
-  page: 1,
-  page_size: 20,
-  order_by: 'hostname',
-});
-
-function InstanceList() {
+function InstanceList({ headerRow, QS_CONFIG }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const location = useLocation();
-  const { id: instanceGroupId } = useParams();
+  const { pathname, search } = useLocation();
 
+  const { id } = useParams();
+  const isInstanceGroupContext = pathname.includes('instance_groups');
+  const readOptions = useCallback(
+    (instanceGroupId) =>
+      isInstanceGroupContext
+        ? InstanceGroupsAPI.readInstanceOptions(instanceGroupId)
+        : InstancesAPI.readOptions(),
+    [isInstanceGroupContext]
+  );
+  const readInstances = useCallback(
+    (instanceGroupId, params) =>
+      isInstanceGroupContext
+        ? InstanceGroupsAPI.readInstances(instanceGroupId, params)
+        : InstancesAPI.read(),
+    [isInstanceGroupContext]
+  );
   const {
     result: {
       instances,
@@ -49,10 +56,10 @@ function InstanceList() {
     request: fetchInstances,
   } = useRequest(
     useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = parseQueryString(QS_CONFIG, search);
       const [response, responseActions] = await Promise.all([
-        InstanceGroupsAPI.readInstances(instanceGroupId, params),
-        InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
+        readInstances(id, params),
+        readOptions(id),
       ]);
       return {
         instances: response.data.results,
@@ -63,7 +70,7 @@ function InstanceList() {
         ).map((val) => val.slice(0, -8)),
         searchableKeys: getSearchableKeys(responseActions.data.actions?.GET),
       };
-    }, [location.search, instanceGroupId]),
+    }, [search, id, readInstances, readOptions, QS_CONFIG]),
     {
       instances: [],
       count: 0,
@@ -82,7 +89,11 @@ function InstanceList() {
 
   const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
-      await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
+      await Promise.all(
+        selected
+          .filter(({ node_type }) => node_type !== 'hop')
+          .map(({ id: instId }) => InstancesAPI.healthCheck(instId))
+      );
       fetchInstances();
       clearSelected();
     }, [selected, clearSelected, fetchInstances])
@@ -99,13 +110,10 @@ function InstanceList() {
           selected
             .filter((s) => s.node_type !== 'control')
             .map((instance) =>
-              InstanceGroupsAPI.disassociateInstance(
-                instanceGroupId,
-                instance.id
-              )
+              InstanceGroupsAPI.disassociateInstance(id, instance.id)
             )
         ),
-      [instanceGroupId, selected]
+      [id, selected]
     ),
     {
       qsConfig: QS_CONFIG,
@@ -121,12 +129,12 @@ function InstanceList() {
           instancesToAssociate
             .filter((i) => i.node_type !== 'control')
             .map((instance) =>
-              InstanceGroupsAPI.associateInstance(instanceGroupId, instance.id)
+              InstanceGroupsAPI.associateInstance(id, instance.id)
             )
         );
         fetchInstances();
       },
-      [instanceGroupId, fetchInstances]
+      [id, fetchInstances]
     )
   );
 
@@ -146,21 +154,51 @@ function InstanceList() {
     (params) =>
       InstancesAPI.read(
         mergeParams(params, {
-          ...{ not__rampart_groups__id: instanceGroupId },
+          ...{ not__rampart_groups__id: id },
           ...{ not__node_type: 'control' },
           ...{ not__node_type: 'hop' },
         })
       ),
-    [instanceGroupId]
+    [id]
   );
 
   const readInstancesOptions = useCallback(
-    () => InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
-    [instanceGroupId]
+    () => InstanceGroupsAPI.readInstanceOptions(id),
+    [id]
   );
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(instances);
+
+  const additionalControls = () => {
+    const controls = [
+      <HealthCheckButton onClick={fetchHealthCheck} selectedItems={selected} />,
+    ];
+
+    if (isInstanceGroupContext) {
+      controls.unshift(
+        ...(canAdd
+          ? [
+              <ToolbarAddButton
+                key="associate"
+                onClick={() => setIsModalOpen(true)}
+                defaultLabel={t`Associate`}
+              />,
+            ]
+          : []),
+        <DisassociateButton
+          verifyCannotDisassociate={selected.some(
+            (s) => s.node_type === 'control'
+          )}
+          key="disassociate"
+          onDisassociate={handleDisassociate}
+          itemsToDisassociate={selected}
+          modalTitle={t`Disassociate instance from instance group?`}
+        />
+      );
+    }
+    return controls;
+  };
 
   return (
     <>
@@ -195,31 +233,7 @@ function InstanceList() {
             isAllExpanded={isAllExpanded}
             onExpandAll={expandAll}
             qsConfig={QS_CONFIG}
-            additionalControls={[
-              ...(canAdd
-                ? [
-                    <ToolbarAddButton
-                      key="associate"
-                      onClick={() => setIsModalOpen(true)}
-                      defaultLabel={t`Associate`}
-                    />,
-                  ]
-                : []),
-              <DisassociateButton
-                verifyCannotDisassociate={selected.some(
-                  (s) => s.node_type === 'control'
-                )}
-                key="disassociate"
-                onDisassociate={handleDisassociate}
-                itemsToDisassociate={selected}
-                modalTitle={t`Disassociate instance from instance group?`}
-              />,
-              <HealthCheckButton
-                isDisabled={!canAdd || !selected.length}
-                onClick={fetchHealthCheck}
-                selectedItems={selected}
-              />,
-            ]}
+            additionalControls={additionalControls()}
             emptyStateControls={
               canAdd ? (
                 <ToolbarAddButton
@@ -230,19 +244,11 @@ function InstanceList() {
             }
           />
         )}
-        headerRow={
-          <HeaderRow qsConfig={QS_CONFIG} isExpandable>
-            <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
-            <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
-            <HeaderCell>{t`Running Jobs`}</HeaderCell>
-            <HeaderCell>{t`Total Jobs`}</HeaderCell>
-            <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
-            <HeaderCell>{t`Used Capacity`}</HeaderCell>
-            <HeaderCell>{t`Actions`}</HeaderCell>
-          </HeaderRow>
-        }
+        headerRow={headerRow}
         renderRow={(instance, index) => (
           <InstanceListItem
+            isInstanceGroupContext={isInstanceGroupContext}
+            detailUrl={`${pathname}/${instance.id}/details`}
             isExpanded={expanded.some((row) => row.id === instance.id)}
             onExpand={() => handleExpand(instance)}
             key={instance.id}

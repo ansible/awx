@@ -54,7 +54,7 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
   );
 }
 
-function InstanceDetail({ setBreadcrumb }) {
+function InstanceDetail({ setBreadcrumb, instanceGroup = null }) {
   const { me = {} } = useConfig();
   const { id } = useParams();
   const [forks, setForks] = useState();
@@ -93,9 +93,9 @@ function InstanceDetail({ setBreadcrumb }) {
 
   useEffect(() => {
     if (instance) {
-      setBreadcrumb(instance);
+      setBreadcrumb(instanceGroup ? (instanceGroup, instance) : instance);
     }
-  }, [instance, setBreadcrumb]);
+  }, [instance, setBreadcrumb, instanceGroup]);
 
   const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { bool, func } from 'prop-types';
 import { t, Plural } from '@lingui/macro';
 import styled from 'styled-components';
@@ -59,6 +59,8 @@ function InstanceListItem({
   onSelect,
   fetchInstances,
   rowIndex,
+  isInstanceGroupContext,
+  detailUrl,
 }) {
   const { me = {} } = useConfig();
   const [forks, setForks] = useState(
@@ -68,7 +70,6 @@ function InstanceListItem({
       instance.capacity_adjustment
     )
   );
-  const { id } = useParams();
 
   const labelId = `check-action-${instance.id}`;
 
@@ -130,7 +131,7 @@ function InstanceListItem({
           dataLabel={t`Selected`}
         />
         <Td id={labelId} dataLabel={t`Name`}>
-          <Link to={`/instance_groups/${id}/instances/${instance.id}/details`}>
+          <Link to={`${detailUrl}`}>
             <b>{instance.hostname}</b>
           </Link>
         </Td>
@@ -147,47 +148,58 @@ function InstanceListItem({
             <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
           </Tooltip>
         </Td>
-        <Td dataLabel={t`Running Jobs`}>{instance.jobs_running}</Td>
-        <Td dataLabel={t`Total Jobs`}>{instance.jobs_total}</Td>
-        <Td dataLabel={t`Capacity Adjustment`}>
-          <SliderHolder data-cy="slider-holder">
-            <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
-            <SliderForks data-cy="slider-forks">
-              <div data-cy="number-forks">
-                <Plural value={forks} one="# fork" other="# forks" />
-              </div>
-              <Slider
-                areCustomStepsContinuous
-                max={1}
-                min={0}
-                step={0.1}
-                value={instance.capacity_adjustment}
-                onChange={handleChangeValue}
-                isDisabled={!me?.is_superuser || !instance.enabled}
-                data-cy="slider"
-              />
-            </SliderForks>
-            <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
-          </SliderHolder>
-        </Td>
-        <Td
-          dataLabel={t`Instance group used capacity`}
-          css="--pf-c-table--cell--MinWidth: 175px;"
-        >
-          {usedCapacity(instance)}
-        </Td>
-        <ActionsTd
-          dataLabel={t`Actions`}
-          css="--pf-c-table--cell--Width: 125px"
-        >
-          <ActionItem visible>
-            <InstanceToggle
-              css="display: inline-flex;"
-              fetchInstances={fetchInstances}
-              instance={instance}
-            />
-          </ActionItem>
-        </ActionsTd>
+        {isInstanceGroupContext ? (
+          <>
+            <Td dataLabel={t`Running Jobs`}>{instance.jobs_running}</Td>
+            <Td dataLabel={t`Total Jobs`}>{instance.jobs_total}</Td>
+          </>
+        ) : (
+          <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
+        )}
+        {instance.node_type !== 'hop' && (
+          <>
+            <Td dataLabel={t`Capacity Adjustment`}>
+              <SliderHolder data-cy="slider-holder">
+                <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
+                <SliderForks data-cy="slider-forks">
+                  <div data-cy="number-forks">
+                    <Plural value={forks} one="# fork" other="# forks" />
+                  </div>
+                  <Slider
+                    areCustomStepsContinuous
+                    max={1}
+                    min={0}
+                    step={0.1}
+                    value={instance.capacity_adjustment}
+                    onChange={handleChangeValue}
+                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    data-cy="slider"
+                  />
+                </SliderForks>
+                <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
+              </SliderHolder>
+            </Td>
+            <Td
+              dataLabel={t`Instance group used capacity`}
+              css="--pf-c-table--cell--MinWidth: 175px;"
+            >
+              {usedCapacity(instance)}
+            </Td>
+
+            <ActionsTd
+              dataLabel={t`Actions`}
+              css="--pf-c-table--cell--Width: 125px"
+            >
+              <ActionItem visible>
+                <InstanceToggle
+                  css="display: inline-flex;"
+                  fetchInstances={fetchInstances}
+                  instance={instance}
+                />
+              </ActionItem>
+            </ActionsTd>
+          </>
+        )}
       </Tr>
       <Tr
         ouiaId={`instance-row-${instance.id}-expanded`}
@@ -196,17 +208,39 @@ function InstanceListItem({
         <Td colSpan={2} />
         <Td colSpan={7}>
           <ExpandableRowContent>
-            <DetailList>
-              <Detail label={t`Node Type`} value={instance.node_type} />
-              <Detail
-                label={t`Policy Type`}
-                value={instance.managed_by_policy ? t`Auto` : t`Manual`}
-              />
-              <Detail
-                label={t`Last Health Check`}
-                value={formatDateString(instance.last_health_check)}
-              />
-            </DetailList>
+            {isInstanceGroupContext ? (
+              <>
+                <DetailList>
+                  <Detail label={t`Node Type`} value={instance.node_type} />
+                  <Detail
+                    label={t`Policy Type`}
+                    value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+                  />
+                  <Detail
+                    label={t`Last Health Check`}
+                    value={formatDateString(instance.last_health_check)}
+                  />
+                </DetailList>
+              </>
+            ) : (
+              <>
+                <DetailList>
+                  <Detail
+                    value={instance.jobs_running}
+                    label={t`Running Jobs`}
+                  />
+                  <Detail value={instance.jobs_total} label={t`Total Jobs`} />
+                  <Detail
+                    label={t`Policy Type`}
+                    value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+                  />
+                  <Detail
+                    label={t`Last Health Check`}
+                    value={formatDateString(instance.last_health_check)}
+                  />
+                </DetailList>
+              </>
+            )}
           </ExpandableRowContent>
         </Td>
       </Tr>

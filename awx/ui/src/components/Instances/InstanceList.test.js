@@ -4,14 +4,15 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
 import { InstancesAPI, InstanceGroupsAPI } from 'api';
+import { HeaderRow, HeaderCell } from 'components/PaginatedTable';
+import { getQSConfig } from 'util/qs';
 import {
   mountWithContexts,
   waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-
+} from '../../../testUtils/enzymeHelpers';
 import InstanceList from './InstanceList';
 
-jest.mock('../../../api');
+jest.mock('../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -108,6 +109,11 @@ const options = { data: { actions: { POST: true } } };
 
 describe('<InstanceList/>', () => {
   let wrapper;
+  const QS_CONFIG = getQSConfig('instance', {
+    page: 1,
+    page_size: 20,
+    order_by: 'hostname',
+  });
 
   beforeEach(async () => {
     InstanceGroupsAPI.readInstances.mockResolvedValue({
@@ -123,7 +129,14 @@ describe('<InstanceList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Route path="/instance_groups/:id/instances">
-          <InstanceList />
+          <InstanceList
+            QS_CONFIG={QS_CONFIG}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG} isExpandable>
+                <HeaderCell sortKey="hostname">Name</HeaderCell>
+              </HeaderRow>
+            }
+          />
         </Route>,
         {
           context: {

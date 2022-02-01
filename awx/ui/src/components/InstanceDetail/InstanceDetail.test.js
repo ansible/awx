@@ -6,11 +6,11 @@ import { InstancesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
+} from '../../../testUtils/enzymeHelpers';
 import InstanceDetail from './InstanceDetail';
 
-jest.mock('../../../api');
-jest.mock('../../../hooks/useDebounce');
+jest.mock('../../api');
+jest.mock('../../hooks/useDebounce');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
