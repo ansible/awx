@@ -178,31 +178,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
-    @staticmethod
-    def choose_online_control_plane_node():
-        return random.choice(
-            Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
-        )
-
-    @staticmethod
-    def choose_control_plane_node_with_sufficient_capacity(task=None):
-        """Return an enabled control node with sufficient capacity.
-
-        Optionally provide a task that will inform the minimum amount of capacity needed,
-        otherwise an instance with remaining capacity greater than or equal to 0 will meet
-        criteria for selection.
-
-        If no instance meets criteria, return None.
-        """
-        # TODO: Replace most uses of choose_online_control_plane_node with this method.
-        impact = 0
-        if task:
-            impact = task.task_impact
-        instances = Instance.objects.filter(enabled=True, capacity__gte=impact).filter(node_type__in=['control', 'hybrid']).all()
-        if instances:
-            return max(instances, key=lambda i: i.remaining_capacity)
-        return None
-
     def get_cleanup_task_kwargs(self, **kwargs):
         """
         Produce options to use for the command: ansible-runner worker cleanup
