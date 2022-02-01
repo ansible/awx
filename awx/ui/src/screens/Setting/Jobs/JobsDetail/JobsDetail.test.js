@@ -69,6 +69,7 @@ describe('<JobsDetail />', () => {
     assertDetail(wrapper, 'Default Project Update Timeout', '0 seconds');
     assertDetail(wrapper, 'Per-Host Ansible Fact Cache Timeout', '0 seconds');
     assertDetail(wrapper, 'Maximum number of forks per job', '200');
+    assertDetail(wrapper, 'Expose host paths for Container Groups', 'Off');
     assertVariableDetail(
       wrapper,
       'Ansible Modules Allowed for Ad Hoc Jobs',

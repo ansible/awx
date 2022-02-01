@@ -276,6 +276,15 @@
         "category_slug": "jobs",
         "default": false
       },
+      "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": {
+        "type": "boolean",
+        "required": false,
+        "label": "Expose host paths for Container Groups",
+        "help_text": "Expose paths via hostPath for the Pods created by a Container Group. HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. ",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "default": false
+      },
       "GALAXY_IGNORE_CERTS": {
         "type": "boolean",
         "required": false,
@@ -3969,6 +3978,14 @@
         "type": "boolean",
         "label": "Follow symlinks",
         "help_text": "Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead to infinite recursion if a link points to a parent directory of itself.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false
+      },
+      "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": {
+        "type": "boolean",
+        "label": "Expose host paths for Container Groups",
+        "help_text": "Expose paths via hostPath for the Pods created by a Container Group. HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "defined_in_file": false
