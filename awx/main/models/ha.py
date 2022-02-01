@@ -157,7 +157,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
                 settings.AWX_CONTROL_NODE_TASK_IMPACT
                 for x in UnifiedJob.objects.filter(Q(controller_node=self.hostname) & Q(status__in=('running', 'waiting')))
             )
-        logger.debug(f"{execution_capacity_consumed} execution capacity and {control_capacity_consumed} control capacity consumed on {self.hostname}")
         return execution_capacity_consumed + control_capacity_consumed
 
     @property

@@ -7,10 +7,12 @@ from awx.main.tasks.system import apply_cluster_membership_policies
 
 
 @pytest.mark.django_db
-def test_multi_group_basic_job_launch(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
+def test_multi_group_basic_job_launch(
+    instance_factory, controlplane_instance_group, default_instance_group, mocker, instance_group_factory, job_template_factory
+):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
-    ig1 = instance_group_factory("ig1", instances=[i1])
+    ig1 = instance_group_factory("controlplane", instances=[i1])
     ig2 = instance_group_factory("ig2", instances=[i2])
     objects1 = job_template_factory('jt1', organization='org1', project='proj1', inventory='inv1', credential='cred1', jobs=["job_should_start"])
     objects1.job_template.instance_groups.add(ig1)
@@ -124,7 +126,7 @@ def test_overcapacity_blocking_other_groups_unaffected(instance_factory, default
 def test_failover_group_run(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
-    ig1 = instance_group_factory("ig1", instances=[i1])
+    ig1 = instance_group_factory("controlplane", instances=[i1])
     ig2 = instance_group_factory("ig2", instances=[i2])
     objects1 = job_template_factory('jt1', organization='org1', project='proj1', inventory='inv1', credential='cred1', jobs=["job_should_start"])
     objects1.job_template.instance_groups.add(ig1)

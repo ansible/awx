@@ -28,12 +28,15 @@ from awx.main.models import (
 #
 
 
-def mk_instance(persisted=True, hostname='instance.example.org'):
+def mk_instance(persisted=True, hostname='instance.example.org', node_type='hybrid', capacity=200):
     if not persisted:
         raise RuntimeError('creating an Instance requires persisted=True')
     from django.conf import settings
 
-    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname)[0]
+    instance = Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname, node_type=node_type, capacity=capacity)[0]
+    if node_type in ('control', 'hybrid'):
+        controlplane_ig = mk_instance_group(name='controlplane', instance=instance)
+    return instance
 
 
 def mk_instance_group(name='default', instance=None, minimum=0, percentage=0):

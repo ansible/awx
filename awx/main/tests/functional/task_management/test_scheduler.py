@@ -12,15 +12,15 @@ from django.conf import settings
 
 
 @pytest.mark.django_db
-def test_single_job_scheduler_launch(default_instance_group, job_template_factory, mocker):
-    instance = default_instance_group.instances.all()[0]
+def test_single_job_scheduler_launch(hybrid_instance, controlplane_instance_group, job_template_factory, mocker):
+    instance = hybrid_instance
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
     j.save()
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, default_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
 
 
 @pytest.mark.django_db
@@ -48,7 +48,7 @@ class TestJobLifeCycle:
                     if expect_commit is not None:
                         assert mock_commit.mock_calls == expect_commit
 
-    def test_task_manager_workflow_rescheduling(self, job_template_factory, inventory, project, default_instance_group):
+    def test_task_manager_workflow_rescheduling(self, job_template_factory, inventory, project, hybrid_instance, controlplane_instance_group):
         jt = JobTemplate.objects.create(allow_simultaneous=True, inventory=inventory, project=project, playbook='helloworld.yml')
         wfjt = WorkflowJobTemplate.objects.create(name='foo')
         for i in range(2):
@@ -100,38 +100,6 @@ class TestJobLifeCycle:
             else:
                 self.run_tm(tm, expect_schedule=[mock.call()])
             wfjts[0].refresh_from_db()
-
-    @pytest.fixture
-    def control_instance(self):
-        '''Control instance in the controlplane automatic IG'''
-        ig = InstanceGroup.objects.create(name='controlplane')
-        inst = Instance.objects.create(hostname='control-1', node_type='control', capacity=500)
-        ig.instances.add(inst)
-        return inst
-
-    @pytest.fixture
-    def control_instance_low_capacity(self):
-        '''Control instance in the controlplane automatic IG that has low capacity'''
-        ig = InstanceGroup.objects.create(name='controlplane')
-        inst = Instance.objects.create(hostname='control-1', node_type='control', capacity=5)
-        ig.instances.add(inst)
-        return inst
-
-    @pytest.fixture
-    def execution_instance(self):
-        '''Execution node in the automatic default IG'''
-        ig = InstanceGroup.objects.create(name='default')
-        inst = Instance.objects.create(hostname='receptor-1', node_type='execution', capacity=500)
-        ig.instances.add(inst)
-        return inst
-
-    @pytest.fixture
-    def hybrid_instance(self):
-        '''Hybrid node in the automatic default IG'''
-        ig = InstanceGroup.objects.create(name='controlplane')
-        inst = Instance.objects.create(hostname='receptor-1', node_type='hybrid', capacity=500)
-        ig.instances.add(inst)
-        return inst
 
     def test_control_and_execution_instance(self, project, system_job_template, job_template, inventory_source, control_instance, execution_instance):
         assert Instance.objects.count() == 2
@@ -205,8 +173,8 @@ class TestJobLifeCycle:
 
 
 @pytest.mark.django_db
-def test_single_jt_multi_job_launch_blocks_last(default_instance_group, job_template_factory, mocker):
-    instance = default_instance_group.instances.all()[0]
+def test_single_jt_multi_job_launch_blocks_last(hybrid_instance, controlplane_instance_group, job_template_factory, mocker):
+    instance = hybrid_instance
     objects = job_template_factory(
         'jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start", "job_should_not_start"]
     )
@@ -218,17 +186,17 @@ def test_single_jt_multi_job_launch_blocks_last(default_instance_group, job_temp
     j2.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j1, default_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j1, controlplane_instance_group, [], instance)
         j1.status = "successful"
         j1.save()
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j2, default_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j2, controlplane_instance_group, [], instance)
 
 
 @pytest.mark.django_db
-def test_single_jt_multi_job_launch_allow_simul_allowed(default_instance_group, job_template_factory, mocker):
-    instance = default_instance_group.instances.all()[0]
+def test_single_jt_multi_job_launch_allow_simul_allowed(hybrid_instance, controlplane_instance_group, job_template_factory, mocker):
+    instance = hybrid_instance
     objects = job_template_factory(
         'jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start", "job_should_not_start"]
     )
@@ -245,12 +213,14 @@ def test_single_jt_multi_job_launch_allow_simul_allowed(default_instance_group, 
     j2.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_has_calls([mock.call(j1, default_instance_group, [], instance), mock.call(j2, default_instance_group, [], instance)])
+        TaskManager.start_task.assert_has_calls(
+            [mock.call(j1, controlplane_instance_group, [], instance), mock.call(j2, controlplane_instance_group, [], instance)]
+        )
 
 
 @pytest.mark.django_db
-def test_multi_jt_capacity_blocking(default_instance_group, job_template_factory, mocker):
-    instance = default_instance_group.instances.all()[0]
+def test_multi_jt_capacity_blocking(hybrid_instance, controlplane_instance_group, job_template_factory, mocker):
+    instance = hybrid_instance
     objects1 = job_template_factory('jt1', organization='org1', project='proj1', inventory='inv1', credential='cred1', jobs=["job_should_start"])
     objects2 = job_template_factory('jt2', organization='org2', project='proj2', inventory='inv2', credential='cred2', jobs=["job_should_not_start"])
     j1 = objects1.jobs["job_should_start"]
@@ -264,12 +234,12 @@ def test_multi_jt_capacity_blocking(default_instance_group, job_template_factory
         mock_task_impact.return_value = 500
         with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
             tm.schedule()
-            mock_job.assert_called_once_with(j1, default_instance_group, [], instance)
+            mock_job.assert_called_once_with(j1, controlplane_instance_group, [], instance)
             j1.status = "successful"
             j1.save()
     with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
         tm.schedule()
-        mock_job.assert_called_once_with(j2, default_instance_group, [], instance)
+        mock_job.assert_called_once_with(j2, controlplane_instance_group, [], instance)
 
 
 @pytest.mark.django_db

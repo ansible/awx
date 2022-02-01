@@ -36,7 +36,7 @@ from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, sch
 from awx.main.utils.common import create_partition
 from awx.main.signals import disable_activity_stream
 from awx.main.utils import decrypt_field
-from awx.main.scheduler.task_manager_instances import TaskManagerInstances, InstanceGroupCapacityGraph
+from awx.main.scheduler.task_manager_instances import TaskManagerInstances
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -52,7 +52,6 @@ class TaskManager:
         The NOOP case is short-circuit logic. If the task manager realizes that another instance
         of the task manager is already running, then it short-circuits and decides not to run.
         """
-        self.ig_capacity_graph = dict()
         # start task limit indicates how many pending jobs can be started on this
         # .schedule() run. Starting jobs is expensive, and there is code in place to reap
         # the task manager after 5 minutes. At scale, the task manager can easily take more than
@@ -67,14 +66,13 @@ class TaskManager:
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         """
         self.task_manager_instances = TaskManagerInstances()
-        self.ig_capacity_graph = InstanceGroupCapacityGraph(self.task_manager_instances)
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
         #       in the old task manager this was handled as a method on each task object outside of the graph and
         #       probably has the side effect of cutting down *a lot* of the logic from this task manager class
-        for g in self.ig_capacity_graph.keys():
-            blocked_by = self.ig_capacity_graph.get(g)['dependency_graph'].task_blocked_by(task)
+        for g in self.task_manager_instances.instance_groups():
+            blocked_by = self.task_manager_instances.ig_dependency_graphs[g].task_blocked_by(task)
             if blocked_by:
                 return blocked_by
 
@@ -247,11 +245,10 @@ class TaskManager:
                 task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
-            elif rampart_group.is_container_group:
-                task.instance_group = rampart_group
             else:
                 task.instance_group = rampart_group
-                logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, task.controller_node))
+                if not rampart_group.is_container_group:
+                    logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, task.controller_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
@@ -277,7 +274,7 @@ class TaskManager:
     def process_running_tasks(self, running_tasks):
         for task in running_tasks:
             if task.instance_group:
-                self.ig_capacity_graph.get(task.instance_group.name)['dependency_graph'].add_job(task)
+                self.task_manager_instances.ig_dependency_graphs[task.instance_group.name].add_job(task)
 
     def create_project_update(self, task):
         project_task = Project.objects.get(id=task.project_id).create_project_update(_eager_fields=dict(launch_type='dependency'))
@@ -418,6 +415,7 @@ class TaskManager:
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = {wf.unified_job_template_id for wf in self.get_running_workflow_jobs()}
         tasks_to_update_job_explanation = []
+        controlplane_ig = self.task_manager_instances.controlplane_ig
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
@@ -442,9 +440,11 @@ class TaskManager:
                     running_workflow_templates.add(task.unified_job_template_id)
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
-            # by popular request, e.g. to make Alan happy, we will ensure we have a control node before we look for execution
-            # capacity
-            controller_node = self.task_manager_instances.best_control_node_candidate()
+
+            # Ensure we have a control node before we look for execution capacity
+            controller_node = self.task_manager_instances.fit_task_to_instance(
+                task, 'controlplane', capacity_type='control', impact=settings.AWX_CONTROL_NODE_TASK_IMPACT
+            )
             task.controller_node = controller_node
             if not controller_node:
                 found_acceptable_queue = False
@@ -455,39 +455,33 @@ class TaskManager:
                 # for all the tasks
                 break
 
-            if isinstance(task, ProjectUpdate):
-                controller_node = self.task_manager_instances.assign_task_to_control_node(task, self.ig_capacity_graph, controller_node)
+            if task.capacity_type == 'control':
+                # This is a project update or a system job that needs to run on the controlplane
+                # Consume capacity for controlling task
+                self.task_manager_instances.assign_task_to_node(task, 'controlplane', controller_node, impact=settings.AWX_CONTROL_NODE_TASK_IMPACT)
                 task.log_lifecycle("controller_node_chosen")
                 task.execution_node = controller_node
                 task.log_lifecycle("execution_node_chosen")
-                # HACK!!!
-                # Once we stop tracking instance capacity by instnace group, this can get moved out of this loop
-                self.task_manager_instances.assign_task_to_execution_node(task, 'controlplane', self.ig_capacity_graph, controller_node)
-                self.ig_capacity_graph.get(rampart_group.name)['dependency_graph'].add_job(task)
+                # Consume capacity for executing task
+                self.task_manager_instances.assign_task_to_node(task, 'controlplane', controller_node)
                 found_acceptable_queue = True
-                self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
+                self.start_task(task, controlplane_ig, task.get_jobs_fail_chain(), None)
                 # Go to next task
                 continue
 
             for rampart_group in preferred_instance_groups:
                 if rampart_group.is_container_group:
-                    self.task_manager_instances.assign_task_to_control_node(task, self.ig_capacity_graph, controller_node)
+                    # We found a container group to run the job, so go ahead and commit to the control capacity now
+                    self.task_manager_instances.assign_task_to_node(task, 'controlplane', controller_node, impact=settings.AWX_CONTROL_NODE_TASK_IMPACT)
                     task.log_lifecycle("controller_node_chosen")
+                    self.task_manager_instances.ig_dependency_graphs[rampart_group.name].add_job(task)
                     logger.debug("{} has been assigned the container group {}".format(task.log_format, rampart_group.name))
-                    self.ig_capacity_graph.get(rampart_group.name)['dependency_graph'].add_job(task)
                     found_acceptable_queue = True
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
-                    # All tasks should either be execution or not execution, so theoretically we should never reach this break.
                     break
 
-                remaining_capacity = self.ig_capacity_graph.get_remaining_capacity(rampart_group.name, capacity_type=task.capacity_type)
-                if task.task_impact > 0 and remaining_capacity <= 0:
-                    logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
-                    continue
-
-                # Look for an eligible execution instance, but don't assign it yet or consume capacity, because we might not have
-                # available control capacity.
-                execution_instance = self.task_manager_instances.fit_task_to_instance(task, rampart_group.name, self.ig_capacity_graph)
+                # Look for an eligible execution instance
+                execution_instance = self.task_manager_instances.fit_task_to_instance(task, rampart_group.name)
                 if not execution_instance:
                     logger.debug(
                         "No instance available in group {} to run job {} w/ capacity requirement {}".format(
@@ -496,34 +490,26 @@ class TaskManager:
                     )
                     found_acceptable_queue = False
                     continue
-                if execution_instance.node_type == 'hybrid':
+                if self.task_manager_instances[execution_instance].node_type == 'hybrid':
                     # Replace the other control node, we always prefer to use a hybrid for control + execution if availabe in an
                     # acceptable instance group
-                    controller_node = execution_instance.hostname
-                # As is evident in "fit_task_to_instance", sometimes we DO allow some over consumption
-                # Therefore, we're going to allow some tiny overage of 5 task impact and not do something like the below code
-                # if not self.task_manager_instances.has_sufficient_control_capacity(controller_node):
-                #     logger.debug(
-                #         f"""Found {execution_instance} with enough execution capacity,
-                #         but not enough to also allow for the additional control task impact of {settings.AWX_CONTROL_NODE_TASK_IMPACT}"""
-                #     )
-                #     # Move on to next instance group
-                #     continue
+                    controller_node = execution_instance
+                    # As is evident in "fit_task_to_instance", sometimes we DO allow some over consumption, if there is a completely idle instance
+                    # This is to prevent jobs with very large task_impact from being stuck in pending forever. If there is an idle node on the cluster, we go ahead and dedicate
+                    # the whole node to that job.
+                    # Therefore, we're going to allow some tiny overage of 5 task impact and not double check if it has the 5 extra necessary
                 task.controller_node = controller_node
-                self.task_manager_instances.assign_task_to_control_node(task, self.ig_capacity_graph, controller_node=controller_node)
+                # Now we actually commit control capacity to controlling this task
+                self.task_manager_instances.assign_task_to_node(task, 'controlplane', controller_node, impact=settings.AWX_CONTROL_NODE_TASK_IMPACT)
                 task.log_lifecycle("controller_node_chosen")
 
-                task.execution_node = execution_instance.hostname
-                self.task_manager_instances.assign_task_to_execution_node(task, rampart_group.name, self.ig_capacity_graph, execution_instance)
+                task.execution_node = execution_instance
+                # Now we actually commit execution capacity to this task
+                self.task_manager_instances.assign_task_to_node(task, rampart_group.name, execution_instance)
                 task.log_lifecycle("execution_node_chosen")
 
-                logger.debug(
-                    "Starting {} in group {} instance {} (remaining_capacity={})".format(
-                        task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity
-                    )
-                )
-                execution_instance = self.task_manager_instances[execution_instance.hostname].obj
-                self.start_task(task, rampart_group, task.get_jobs_fail_chain(), execution_instance)
+                logger.debug("Starting {} in group {} instance {})".format(task.log_format, rampart_group.name, execution_instance))
+                self.start_task(task, rampart_group, task.get_jobs_fail_chain(), self.task_manager_instances[execution_instance].obj)
                 found_acceptable_queue = True
                 break
 
@@ -586,8 +572,6 @@ class TaskManager:
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]
-
-        self.ig_capacity_graph.calculate_capacity_consumed(running_tasks)
 
         self.process_running_tasks(running_tasks)
 

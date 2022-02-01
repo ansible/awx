@@ -79,14 +79,45 @@ def instance_group_factory():
     return create_instance_group
 
 
+@pytest.fixture(autouse=True)
+def controlplane_instance_group(instance_factory, instance_group_factory):
+    """There always has to be a controlplane instancegroup and at least one instance in it"""
+    return create_instance_group("controlplane")
+
+
 @pytest.fixture
 def default_instance_group(instance_factory, instance_group_factory):
-    return create_instance_group("default", instances=[create_instance("hostA")])
+    return create_instance_group("default", instances=[create_instance("hostA", node_type='execution')])
 
 
 @pytest.fixture
-def controlplane_instance_group(instance_factory, instance_group_factory):
-    return create_instance_group("controlplane", instances=[create_instance("hostA")])
+def control_instance(controlplane_instance_group):
+    '''Control instance in the controlplane automatic IG'''
+    inst = create_instance('control-1', node_type='control', capacity=500)
+    return inst
+
+
+@pytest.fixture
+def control_instance_low_capacity(controlplane_instance_group):
+    '''Control instance in the controlplane automatic IG that has low capacity'''
+    inst = create_instance('control-1', node_type='control', capacity=5)
+    return inst
+
+
+@pytest.fixture
+def execution_instance():
+    '''Execution node in the automatic default IG'''
+    ig = create_instance_group('default')
+    inst = create_instance('receptor-1', node_type='execution', capacity=500)
+    ig.instances.add(inst)
+    return inst
+
+
+@pytest.fixture
+def hybrid_instance(controlplane_instance_group):
+    '''Hybrid node in the automatic default IG'''
+    inst = create_instance('hybrid-1', node_type='hybrid', capacity=500)
+    return inst
 
 
 @pytest.fixture
