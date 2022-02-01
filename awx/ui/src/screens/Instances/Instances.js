@@ -17,7 +17,7 @@ function Instances() {
     }
     setBreadcrumbConfig({
       '/instances': t`Instances`,
-      [`/instances/${instance.id}`]: t`${instance.hostname}`,
+      [`/instances/${instance.id}`]: `${instance.hostname}`,
       [`/instances/${instance.id}/details`]: t`Details`,
     });
   }, []);

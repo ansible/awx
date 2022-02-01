@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-
-import { Plural, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
@@ -16,7 +15,6 @@ import DisassociateButton from 'components/DisassociateButton';
 import AssociateModal from 'components/AssociateModal';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-
 import useRequest, {
   useDeleteItems,
   useDismissableError,
@@ -24,8 +22,7 @@ import useRequest, {
 import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-
-import { Button, Tooltip } from '@patternfly/react-core';
+import HealthCheckButton from 'components/HealthCheckButton/HealthCheckButton';
 import InstanceListItem from './InstanceListItem';
 
 const QS_CONFIG = getQSConfig('instance', {
@@ -87,7 +84,8 @@ function InstanceList() {
     useCallback(async () => {
       await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
       fetchInstances();
-    }, [selected, fetchInstances])
+      clearSelected();
+    }, [selected, clearSelected, fetchInstances])
   );
 
   const {
@@ -216,28 +214,11 @@ function InstanceList() {
                 itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from instance group?`}
               />,
-              <Tooltip
-                content={
-                  selected.length ? (
-                    <Plural
-                      value={selected.length}
-                      one="Click to run a health check on the selected instance."
-                      other="Click to run a health check on the selected instances."
-                    />
-                  ) : (
-                    t`Select an instance to run a health check.`
-                  )
-                }
-              >
-                <div>
-                  <Button
-                    isDisabled={!canAdd || !selected.length}
-                    variant="secondary"
-                    ouiaId="health-check"
-                    onClick={fetchHealthCheck}
-                  >{t`Health Check`}</Button>
-                </div>
-              </Tooltip>,
+              <HealthCheckButton
+                isDisabled={!canAdd || !selected.length}
+                onClick={fetchHealthCheck}
+                selectedItems={selected}
+              />,
             ]}
             emptyStateControls={
               canAdd ? (
