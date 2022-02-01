@@ -339,7 +339,7 @@ class AWXReceptorJob:
             shutil.rmtree(artifact_dir)
 
         # If we happen to leave around any pipes that could cause hangs when unstreaming
-        key_data_file = os.path.join(self.runner_params['private_data_dir'], 'artifacts', str(self.task.instance.id))
+        key_data_file = os.path.join(self.runner_params['private_data_dir'], 'artifacts', str(self.task.instance.id), 'ssh_key_data')
         if os.path.exists(key_data_file):
             os.remove(key_data_file)
 
