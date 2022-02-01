@@ -149,19 +149,18 @@ function InstanceDetail({ setBreadcrumb }) {
             }
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
-          <Detail
-            label={t`Policy Type`}
-            value={instance.managed_by_policy ? t`Auto` : t`Manual`}
-          />
-          <Detail label={t`Running Jobs`} value={instance.jobs_running} />
-          <Detail label={t`Total Jobs`} value={instance.jobs_total} />
           {!isHopNode && (
             <>
+              <Detail
+                label={t`Policy Type`}
+                value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+              />
+              <Detail label={t`Running Jobs`} value={instance.jobs_running} />
+              <Detail label={t`Total Jobs`} value={instance.jobs_total} />
               <Detail
                 label={t`Last Health Check`}
                 value={formatDateString(healthCheck?.last_health_check)}
               />
-
               <Detail
                 label={t`Capacity Adjustment`}
                 value={

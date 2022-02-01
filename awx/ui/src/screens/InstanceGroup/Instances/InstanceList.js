@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-
-import { Plural, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
@@ -16,7 +15,6 @@ import DisassociateButton from 'components/DisassociateButton';
 import AssociateModal from 'components/AssociateModal';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-
 import useRequest, {
   useDeleteItems,
   useDismissableError,
@@ -24,8 +22,7 @@ import useRequest, {
 import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-
-import { Button, Tooltip } from '@patternfly/react-core';
+import HealthCheckButton from 'components/HealthCheckButton/HealthCheckButton';
 import InstanceListItem from './InstanceListItem';
 
 const QS_CONFIG = getQSConfig('instance', {
@@ -83,11 +80,16 @@ function InstanceList() {
     fetchInstances();
   }, [fetchInstances]);
 
-  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
+  const {
+    error: healthCheckError,
+    request: fetchHealthCheck,
+    isLoading: isHealthCheckLoading,
+  } = useRequest(
     useCallback(async () => {
       await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
       fetchInstances();
-    }, [selected, fetchInstances])
+      clearSelected();
+    }, [selected, clearSelected, fetchInstances])
   );
 
   const {
@@ -168,7 +170,9 @@ function InstanceList() {
     <>
       <PaginatedTable
         contentError={contentError}
-        hasContentLoading={isLoading || isDisassociateLoading}
+        hasContentLoading={
+          isLoading || isDisassociateLoading || isHealthCheckLoading
+        }
         items={instances}
         itemCount={count}
         pluralizedItemName={t`Instances`}
@@ -181,6 +185,15 @@ function InstanceList() {
             name: t`Name`,
             key: 'hostname__icontains',
             isDefault: true,
+          },
+          {
+            name: t`Node Type`,
+            key: `or__node_type`,
+            options: [
+              [`control`, t`Control`],
+              [`execution`, t`Execution`],
+              [`hybrid`, t`Hybrid`],
+            ],
           },
         ]}
         toolbarSortColumns={[
@@ -216,28 +229,11 @@ function InstanceList() {
                 itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from instance group?`}
               />,
-              <Tooltip
-                content={
-                  selected.length ? (
-                    <Plural
-                      value={selected.length}
-                      one="Click to run a health check on the selected instance."
-                      other="Click to run a health check on the selected instances."
-                    />
-                  ) : (
-                    t`Select an instance to run a health check.`
-                  )
-                }
-              >
-                <div>
-                  <Button
-                    isDisabled={!canAdd || !selected.length}
-                    variant="secondary"
-                    ouiaId="health-check"
-                    onClick={fetchHealthCheck}
-                  >{t`Health Check`}</Button>
-                </div>
-              </Tooltip>,
+              <HealthCheckButton
+                isDisabled={!canAdd}
+                onClick={fetchHealthCheck}
+                selectedItems={selected}
+              />,
             ]}
             emptyStateControls={
               canAdd ? (
@@ -253,9 +249,8 @@ function InstanceList() {
           <HeaderRow qsConfig={QS_CONFIG} isExpandable>
             <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
             <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
-            <HeaderCell>{t`Running Jobs`}</HeaderCell>
-            <HeaderCell>{t`Total Jobs`}</HeaderCell>
-            <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
+            <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
+            <HeaderCell sortKey="capacity_adjustment">{t`Capacity Adjustment`}</HeaderCell>
             <HeaderCell>{t`Used Capacity`}</HeaderCell>
             <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>

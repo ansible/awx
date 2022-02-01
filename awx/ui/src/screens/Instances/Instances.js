@@ -17,17 +17,14 @@ function Instances() {
     }
     setBreadcrumbConfig({
       '/instances': t`Instances`,
-      [`/instances/${instance.id}`]: t`${instance.hostname}`,
+      [`/instances/${instance.id}`]: `${instance.hostname}`,
       [`/instances/${instance.id}/details`]: t`Details`,
     });
   }, []);
 
   return (
     <>
-      <ScreenHeader
-        streamType="instances"
-        breadcrumbConfig={breadcrumbConfig}
-      />
+      <ScreenHeader streamType="instance" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/instances/:id">
           <Instance setBreadcrumb={buildBreadcrumbConfig} />
