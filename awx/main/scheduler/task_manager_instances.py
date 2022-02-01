@@ -141,6 +141,18 @@ class TaskManagerInstances:
         ig_capacity_graph.consume_instance_group_capacity(task, instance_group_name, instance=execution_instance)
         ig_capacity_graph.get(instance_group_name)['dependency_graph'].add_job(task)
 
+    def best_control_node_candidate(self):
+        """Return a node with enough control capacity if it exists.
+
+        Otherwise return None
+        Does not actaully commit the capacity yet.
+        Use assign_task_to_control_node to do that.
+        """
+        node = self.control_nodes.best_node()
+        if self.has_sufficient_control_capacity(node):
+            return node
+        return None
+
     def has_sufficient_control_capacity(self, controller_node):
         if not isinstance(controller_node, PrioritizableNode) and isinstance(controller_node, str):
             controller_node = self.control_nodes[controller_node]
