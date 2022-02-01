@@ -6,6 +6,9 @@ import logging
 import heapq
 from types import SimpleNamespace
 
+# Django
+from django.conf import settings
+
 # AWX
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.managers import InstanceGroupManager
@@ -95,34 +98,38 @@ class TaskManagerInstances:
                 self.control_nodes.add(PrioritizableNode(remaining_capacity=instance.remaining_capacity, hostname=instance.hostname))
 
     def __getitem__(self, key):
-        return self.instances_partial.get(key)
+        return self.instances_partial[key]
 
-    def init_ig_capacity_graph(self, graph=dict()):
-        breakdown = False
-        for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
-            InstanceGroupManager.zero_out_group(graph, rampart_group.name, breakdown)
-            # Didn't move the init of DependencyGraph to InstanceGroupManager because of circular import
-            graph[rampart_group.name]['dependency_graph'] = DependencyGraph()
-            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
-                if instance.hostname in self.instances_partial:
-                    graph[rampart_group.name]['instances'].append(self.instances_partial[instance.hostname])
-                for capacity_type in ('control', 'execution'):
-                    if instance.node_type in (capacity_type, 'hybrid'):
-                        graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
-        return graph
+    def fit_task_to_execution_node(self, task, instance_group_name, ig_capacity_graph):
+        # TODO: make heaps of execution nodes per instance group to be able
+        # to pluck most capacity one off top
+        return InstanceGroup.fit_task_to_most_remaining_capacity_instance(
+            task, ig_capacity_graph.get(instance_group_name)['instances']
+        ) or InstanceGroup.find_largest_idle_instance(ig_capacity_graph.get(instance_group_name)['instances'], capacity_type=task.capacity_type)
 
-    def has_sufficient_control_capacity(self, controller_node, impact):
+    def assign_task_to_execution_node(self, task, instance_group_name, ig_capacity_graph, execution_instance):
+        # The fact that we are using this max function here tells me sometimes it is over assigned
+        # I'm not sure if this even works, because Instance.remaining_capacity and Instance.jobs_running are both calculated, not assignabled attributes
+        # Eventually replace this with someting like we are doing w/ control nodes
+        execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
+        execution_instance.jobs_running += 1
+
+        # This part of consuming capacity on the ig_capacity_graph would stay the same
+        ig_capacity_graph.consume_instance_group_capacity(task, instance_group_name, instance=execution_instance)
+        ig_capacity_graph.get(instance_group_name)['dependency_graph'].add_job(task)
+
+    def has_sufficient_control_capacity(self, controller_node):
         if not isinstance(controller_node, PrioritizableNode) and isinstance(controller_node, str):
             controller_node = self.control_nodes[controller_node]
-        return controller_node.remaining_capacity >= impact
+        return controller_node.remaining_capacity >= settings.AWX_CONTROL_NODE_TASK_IMPACT
 
-    def consume_control_capacity(self, controller_node, impact):
+    def consume_control_capacity(self, controller_node):
         if not isinstance(controller_node, PrioritizableNode) and isinstance(controller_node, str):
             controller_node = self.control_nodes[controller_node]
-        controller_node.remaining_capacity -= impact
+        controller_node.remaining_capacity -= settings.AWX_CONTROL_NODE_TASK_IMPACT
         self.control_nodes.update(controller_node)
 
-    def assign_task_to_control_node(self, task, ig_capacity_graph, impact, controller_node=None):
+    def assign_task_to_control_node(self, task, ig_capacity_graph, controller_node=None):
         """Account for task impact on a control node.
 
         If no control node is specified, find the best control node available.
@@ -130,27 +137,77 @@ class TaskManagerInstances:
 
         If the node does not have enough remaining capacity for the task impact, return False
         """
+        impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
         if not controller_node:
             instance = self.control_nodes.best_node()
         else:
             instance = self.control_nodes[controller_node]
 
-        if not self.has_sufficient_control_capacity(instance, impact):
+        if not self.has_sufficient_control_capacity(instance):
             logger.warning(f"Not enough control capacity for task {task.log_format} with task impact {impact} found on nodes {self.control_nodes}")
             return False
 
-        # This whole block is kind of paranoid.
-        # It covers a case that should really not happen since every time we assign a task to a node, we deduct from its instance group
-        # capacity as well. If we never see this warning, maybe we can drop this code
         for ig in self.instances_partial[instance.hostname].instance_groups:
-            ig_data = ig_capacity_graph[ig]
-            if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= impact:
+            ig_capacity_graph.consume_instance_group_capacity(task, ig, instance=self.instances_partial[instance], impact=impact)
+            ig_data = ig_capacity_graph.get(ig)
+            if not ig_data['control_capacity'] - ig_data['consumed_control_capacity'] >= 0:
+                # This whole block is kind of paranoid.
+                # It covers a case that should really not happen since every time we assign a task to a node, we deduct from its instance group
+                # capacity as well. If we never see this warning, maybe we can drop this code
                 logger.warn(
                     f"""Somehow we had capacity on a control node {instance}
                         but not on its instance_group {ig} that has {ig_data['control_capacity']} control capacity
                         and {ig_data['consumed_control_capacity']} consumed control capacity"""
                 )
-                return False
         logger.debug(f"chose {instance} to be control node for {task.log_format}")
-        self.consume_control_capacity(instance, impact=impact)
+        self.consume_control_capacity(instance)
         return instance.hostname
+
+
+class InstanceGroupCapacityGraph:
+    def __init__(self, task_manager_instances):
+        self.ig_capacity_graph = dict()
+        breakdown = False
+        for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
+            InstanceGroupManager.zero_out_group(self.ig_capacity_graph, rampart_group.name, breakdown)
+            # Didn't move the init of DependencyGraph to InstanceGroupManager because of circular import
+            self.ig_capacity_graph[rampart_group.name]['dependency_graph'] = DependencyGraph()
+            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
+                if instance.hostname in task_manager_instances.instances_partial:
+                    self.ig_capacity_graph[rampart_group.name]['instances'].append(task_manager_instances[instance.hostname])
+                for capacity_type in ('control', 'execution'):
+                    if instance.node_type in (capacity_type, 'hybrid'):
+                        self.ig_capacity_graph[rampart_group.name][f'{capacity_type}_capacity'] += instance.capacity
+
+    def get(self, key):
+        return self.ig_capacity_graph[key]
+
+    def keys(self):
+        return self.ig_capacity_graph.keys()
+
+    def calculate_capacity_consumed(self, tasks):
+        self.ig_capacity_graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.ig_capacity_graph)
+
+    def consume_instance_group_capacity(self, task, instance_group, instance=None, impact=None):
+        impact = impact if impact else task.task_impact
+        logger.debug(
+            '{} consumed {} capacity units from {} with prior total of {}'.format(
+                task.log_format, impact, instance_group, self.ig_capacity_graph[instance_group]['consumed_capacity']
+            )
+        )
+        self.ig_capacity_graph[instance_group]['consumed_capacity'] += impact
+        for capacity_type in ('control', 'execution'):
+            if instance is None or instance.node_type in ('hybrid', capacity_type):
+                logger.debug(
+                    '{} consumed {} {}_capacity units from {} with prior total of {}'.format(
+                        task.log_format, impact, capacity_type, instance_group, self.ig_capacity_graph[instance_group][f'consumed_{capacity_type}_capacity']
+                    )
+                )
+                self.ig_capacity_graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
+
+    def get_remaining_capacity(self, instance_group, capacity_type='execution'):
+        capacity = (
+            self.ig_capacity_graph[instance_group][f'{capacity_type}_capacity'] - self.ig_capacity_graph[instance_group][f'consumed_{capacity_type}_capacity']
+        )
+        logger.debug(f'{instance_group} has {capacity} remaining capacity of type {capacity_type}')
+        return capacity
