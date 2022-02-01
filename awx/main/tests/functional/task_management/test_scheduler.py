@@ -8,6 +8,7 @@ from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import encrypt_field
 from awx.main.models import WorkflowJobTemplate, JobTemplate, Job
 from awx.main.models.ha import Instance, InstanceGroup
+from django.conf import settings
 
 
 @pytest.mark.django_db
@@ -180,9 +181,10 @@ class TestJobLifeCycle:
         ], enough_capacity
 
     @pytest.mark.django_db
-    def test_hybrid_capacity(self, job_template, control_instance_low_capacity, execution_instance, hybrid_instance):
+    def test_hybrid_capacity(self, job_template, hybrid_instance):
         enough_capacity = job_template.create_unified_job()
         insufficient_capacity = job_template.create_unified_job()
+        expected_task_impact = enough_capacity.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
         all_ujs = [enough_capacity, insufficient_capacity]
         for uj in all_ujs:
             uj.signal_start()
@@ -196,9 +198,10 @@ class TestJobLifeCycle:
         assert enough_capacity.status == 'waiting'
         assert insufficient_capacity.status == 'pending'
         assert [enough_capacity.execution_node, enough_capacity.controller_node] == [
-            execution_instance.hostname,
-            control_instance_low_capacity.hostname,
+            hybrid_instance.hostname,
+            hybrid_instance.hostname,
         ], enough_capacity
+        assert expected_task_impact == hybrid_instance.consumed_capacity
 
 
 @pytest.mark.django_db
