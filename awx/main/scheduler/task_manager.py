@@ -486,7 +486,7 @@ class TaskManager:
 
                 # Look for an eligible execution instance, but don't assign it yet or consume capacity, because we might not have
                 # available control capacity.
-                execution_instance = self.task_manager_instances.fit_task_to_execution_node(task, rampart_group.name, self.ig_capacity_graph)
+                execution_instance = self.task_manager_instances.fit_task_to_instance(task, rampart_group.name, self.ig_capacity_graph)
                 if execution_instance:
                     if execution_instance.node_type in ('hybrid', 'control'):
                         controller_node = execution_instance.hostname

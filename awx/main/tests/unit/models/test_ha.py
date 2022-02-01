@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from decimal import Decimal
 
 from awx.main.models import InstanceGroup, Instance
+from awx.main.scheduler.task_manager_instances import TaskManagerInstances
 
 
 @pytest.mark.parametrize('capacity_adjustment', [0.0, 0.25, 0.5, 0.75, 1, 1.5, 3])
@@ -47,7 +48,7 @@ def Is(param):
     return instances
 
 
-class TestInstanceGroup(object):
+class TestTaskManagerInstances(object):
     @pytest.mark.parametrize(
         'task,instances,instance_fit_index,reason',
         [
@@ -61,7 +62,7 @@ class TestInstanceGroup(object):
     def test_fit_task_to_most_remaining_capacity_instance(self, task, instances, instance_fit_index, reason):
         ig = InstanceGroup(id=10)
 
-        instance_picked = ig.fit_task_to_most_remaining_capacity_instance(task, instances)
+        instance_picked = TaskManagerInstances.fit_task_to_most_remaining_capacity_instance(task, instances)
 
         if instance_fit_index is None:
             assert instance_picked is None, reason
@@ -86,9 +87,9 @@ class TestInstanceGroup(object):
         instances_online_only = filter_offline_instances(instances)
 
         if instance_fit_index is None:
-            assert ig.find_largest_idle_instance(instances_online_only) is None, reason
+            assert TaskManagerInstances.find_largest_idle_instance(instances_online_only) is None, reason
         else:
-            assert ig.find_largest_idle_instance(instances_online_only) == instances[instance_fit_index], reason
+            assert TaskManagerInstances.find_largest_idle_instance(instances_online_only) == instances[instance_fit_index], reason
 
 
 def test_cleanup_params_defaults():

@@ -100,17 +100,40 @@ class TaskManagerInstances:
     def __getitem__(self, key):
         return self.instances_partial[key]
 
-    def fit_task_to_execution_node(self, task, instance_group_name, ig_capacity_graph):
+    @staticmethod
+    def find_largest_idle_instance(instances, capacity_type='execution'):
+        largest_instance = None
+        for i in instances:
+            if i.node_type not in (capacity_type, 'hybrid'):
+                continue
+            if i.jobs_running == 0:
+                if largest_instance is None:
+                    largest_instance = i
+                elif i.capacity > largest_instance.capacity:
+                    largest_instance = i
+        return largest_instance
+
+    @staticmethod
+    def fit_task_to_most_remaining_capacity_instance(task, instances):
+        instance_most_capacity = None
+        for i in instances:
+            if i.node_type not in (task.capacity_type, 'hybrid'):
+                continue
+            if i.remaining_capacity >= task.task_impact and (
+                instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
+            ):
+                instance_most_capacity = i
+        return instance_most_capacity
+
+    def fit_task_to_instance(self, task, instance_group_name, ig_capacity_graph):
         # TODO: make heaps of execution nodes per instance group to be able
         # to pluck most capacity one off top
-        return InstanceGroup.fit_task_to_most_remaining_capacity_instance(
+        return self.fit_task_to_most_remaining_capacity_instance(
             task, ig_capacity_graph.get(instance_group_name)['instances']
-        ) or InstanceGroup.find_largest_idle_instance(ig_capacity_graph.get(instance_group_name)['instances'], capacity_type=task.capacity_type)
+        ) or self.find_largest_idle_instance(ig_capacity_graph.get(instance_group_name)['instances'], capacity_type=task.capacity_type)
 
     def assign_task_to_execution_node(self, task, instance_group_name, ig_capacity_graph, execution_instance):
         # The fact that we are using this max function here tells me sometimes it is over assigned
-        # I'm not sure if this even works, because Instance.remaining_capacity and Instance.jobs_running are both calculated, not assignabled attributes
-        # Eventually replace this with someting like we are doing w/ control nodes
         execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
         execution_instance.jobs_running += 1
 
