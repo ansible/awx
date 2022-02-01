@@ -338,6 +338,11 @@ class AWXReceptorJob:
         if os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
+        # If we happen to leave around any pipes that could cause hangs when unstreaming
+        key_data_file = os.path.join(self.runner_params['private_data_dir'], 'artifacts', str(self.task.instance.id))
+        if os.path.exists(key_data_file):
+            os.remove(key_data_file)
+
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
         # Both "processor" and "cancel_watcher" are spawned in separate threads.
         # We wait for the first one to return. If cancel_watcher returns first,
