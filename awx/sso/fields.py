@@ -614,6 +614,7 @@ class SocialSingleOrganizationMapField(HybridDictField):
     users = SocialMapField(allow_null=True, required=False)
     remove_admins = fields.BooleanField(required=False)
     remove_users = fields.BooleanField(required=False)
+    organization_alias = SocialMapField(allow_null=True, required=False)
 
     child = _Forbidden()
 
@@ -723,7 +724,6 @@ class SAMLTeamAttrTeamOrgMapField(HybridDictField):
     team = fields.CharField(required=True, allow_null=False)
     team_alias = fields.CharField(required=False, allow_null=True)
     organization = fields.CharField(required=True, allow_null=False)
-    organization_alias = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()
 
