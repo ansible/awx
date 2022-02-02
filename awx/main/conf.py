@@ -72,8 +72,8 @@ register(
         'HTTP headers and meta keys to search to determine remote host '
         'name or IP. Add additional items to this list, such as '
         '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
-        'See the "Proxy Support" section of the Adminstrator guide for '
-        'more details.'
+        'See the "Proxy Support" section of the AAP Installation guide '
+        'for more details.'
     ),
     category=_('System'),
     category_slug='system',
