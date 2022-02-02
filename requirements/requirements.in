@@ -9,13 +9,12 @@ cryptography>=3.2
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
-django==3.0.14  # see UPGRADE BLOCKERs
+django==3.1.14  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers>=3.5.0
 django-crum
 django-extensions>=2.2.9  # https://github.com/ansible/awx/pull/6441
 django-guid==2.2.1  # see https://pypi.org/project/django-guid/ for supported versions
-django-jsonfield==1.4.1
 django-oauth-toolkit==1.4.1
 django-polymorphic
 django-pglocks
@@ -25,7 +24,7 @@ django-redis
 django-solo
 django-split-settings
 django-taggit
-djangorestframework>=3.12.1
+djangorestframework==3.13.1
 djangorestframework-yaml
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
@@ -47,8 +46,8 @@ python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
 receptorctl==1.1.1
 schedule==0.6.0
-social-auth-core==3.3.1  # see UPGRADE BLOCKERs
-social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
+social-auth-core==4.2.0  # see UPGRADE BLOCKERs
+social-auth-app-django==5.0.0  # see UPGRADE BLOCKERs
 redis
 requests
 slack-sdk
