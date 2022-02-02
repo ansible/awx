@@ -70,6 +70,7 @@ class TaskManager:
         """
         instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop')
         self.real_instances = {i.hostname: i for i in instances}
+        self.controlplane_ig = None
 
         instances_partial = [
             SimpleNamespace(
@@ -86,6 +87,8 @@ class TaskManager:
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
+            if rampart_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+                self.controlplane_ig = rampart_group
             self.graph[rampart_group.name] = dict(
                 graph=DependencyGraph(),
                 execution_capacity=0,
@@ -298,7 +301,12 @@ class TaskManager:
             if rampart_group is not None:
                 self.consume_capacity(task, rampart_group.name, instance=instance)
             if task.controller_node:
-                self.consume_capacity(task, 'controlplane', instance=self.real_instances[task.controller_node], impact=settings.AWX_CONTROL_NODE_TASK_IMPACT)
+                self.consume_capacity(
+                    task,
+                    settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+                    instance=self.real_instances[task.controller_node],
+                    impact=settings.AWX_CONTROL_NODE_TASK_IMPACT,
+                )
 
         def post_commit():
             if task.status != 'failed' and type(task) is not WorkflowJob:
@@ -461,7 +469,6 @@ class TaskManager:
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = {wf.unified_job_template_id for wf in self.get_running_workflow_jobs()}
         tasks_to_update_job_explanation = []
-        controlplane_ig = InstanceGroup.objects.get(name='controlplane')
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
@@ -488,14 +495,14 @@ class TaskManager:
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
 
-            # Determine if ther is control capacity for the task
+            # Determine if there is control capacity for the task
             if task.capacity_type == 'control':
                 control_impact = task.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
             else:
                 control_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
             control_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                task, self.graph['controlplane']['instances'], impact=control_impact, capacity_type='control'
-            ) or InstanceGroup.find_largest_idle_instance(self.graph['controlplane']['instances'], capacity_type='control')
+                task, self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['instances'], impact=control_impact, capacity_type='control'
+            ) or InstanceGroup.find_largest_idle_instance(self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['instances'], capacity_type='control')
             if not control_instance:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
                 logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
@@ -508,16 +515,16 @@ class TaskManager:
                 task.execution_node = control_instance.hostname
                 control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - control_impact)
                 control_instance.jobs_running += 1
-                self.graph['controlplane']['graph'].add_job(task)
+                self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['graph'].add_job(task)
                 execution_instance = self.real_instances[control_instance.hostname]
-                self.start_task(task, controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
+                self.start_task(task, self.controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
                 found_acceptable_queue = True
                 continue
 
             for rampart_group in preferred_instance_groups:
                 if rampart_group.is_container_group:
                     control_instance.jobs_running += 1
-                    self.graph['controlplane']['graph'].add_job(task)
+                    self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
@@ -539,7 +546,7 @@ class TaskManager:
                         control_instance = execution_instance
                         task.controller_node = execution_instance.hostname
 
-                    control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - settings.AWX_CONTROL_PLANE_TASK_IMPACT)
+                    control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - settings.AWX_CONTROL_NODE_TASK_IMPACT)
                     task.log_lifecycle("controller_node_chosen")
                     if control_instance != execution_instance:
                         control_instance.jobs_running += 1

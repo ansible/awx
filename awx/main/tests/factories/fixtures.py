@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from awx.main.models import (
     Organization,
@@ -35,7 +36,7 @@ def mk_instance(persisted=True, hostname='instance.example.org', node_type='hybr
 
     instance = Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname, node_type=node_type, capacity=capacity)[0]
     if node_type in ('control', 'hybrid'):
-        mk_instance_group(name='controlplane', instance=instance)
+        mk_instance_group(name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, instance=instance)
     return instance
 
 
