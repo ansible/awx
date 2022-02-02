@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 
-from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate, ProjectUpdate
+from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance, InstanceGroup
 from awx.main.tasks.system import apply_cluster_membership_policies

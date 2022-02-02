@@ -171,6 +171,30 @@ class TestJobLifeCycle:
         ], enough_capacity
         assert expected_task_impact == hybrid_instance.consumed_capacity
 
+    @pytest.mark.django_db
+    def test_project_update_capacity(self, project, hybrid_instance, instance_group_factory, controlplane_instance_group):
+        pu = project.create_unified_job()
+        instance_group_factory(name='second_ig', instances=[hybrid_instance])
+        expected_task_impact = pu.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
+        pu.signal_start()
+
+        tm = TaskManager()
+        self.run_tm(tm)
+
+        pu.refresh_from_db()
+        assert pu.status == 'waiting'
+        assert [pu.execution_node, pu.controller_node] == [
+            hybrid_instance.hostname,
+            hybrid_instance.hostname,
+        ], pu
+        assert expected_task_impact == hybrid_instance.consumed_capacity
+        # The hybrid node is in both instance groups, but the project update should
+        # always get assigned to the controlplane
+        assert pu.instance_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME
+        pu.status = 'successful'
+        pu.save()
+        assert hybrid_instance.consumed_capacity == 0
+
 
 @pytest.mark.django_db
 def test_single_jt_multi_job_launch_blocks_last(controlplane_instance_group, job_template_factory, mocker):
