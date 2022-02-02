@@ -491,6 +491,7 @@ class TaskManager:
                 task, self.graph['controlplane']['instances'], impact=settings.AWX_CONTROL_NODE_TASK_IMPACT, capacity_type='control'
             ) or InstanceGroup.find_largest_idle_instance(self.graph['controlplane']['instances'], capacity_type='control')
             if not control_instance:
+                self.task_needs_capacity(task, tasks_to_update_job_explanation)
                 logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
                 continue
 
@@ -505,7 +506,8 @@ class TaskManager:
                     # As in other places, we accept an idle instance if the node with most capacity (the control node we already selected)
                     # does not have enough capacity.
                     logger.debug(f"Not enough control capacity on {control_instance} to run {task.log_format}")
-                    break
+                    self.task_needs_capacity(task, tasks_to_update_job_explanation)
+                    continue
                 task.execution_node = control_instance.hostname
                 control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - (task.task_impact + settings.AWX_CONTROL_PLANE_TASK_IMPACT))
                 control_instance.jobs_running += 1
@@ -567,17 +569,20 @@ class TaskManager:
                         )
                     )
             if not found_acceptable_queue:
-                task.log_lifecycle("needs_capacity")
-                job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
-                if task.job_explanation != job_explanation:
-                    if task.created < (tz_now() - self.time_delta_job_explanation):
-                        # Many launched jobs are immediately blocked, but most blocks will resolve in a few seconds.
-                        # Therefore we should only update the job_explanation after some time has elapsed to
-                        # prevent excessive task saves.
-                        task.job_explanation = job_explanation
-                        tasks_to_update_job_explanation.append(task)
-                logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
+                self.task_needs_capacity(task, tasks_to_update_job_explanation)
         UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
+
+    def task_needs_capacity(self, task, tasks_to_update_job_explanation):
+        task.log_lifecycle("needs_capacity")
+        job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
+        if task.job_explanation != job_explanation:
+            if task.created < (tz_now() - self.time_delta_job_explanation):
+                # Many launched jobs are immediately blocked, but most blocks will resolve in a few seconds.
+                # Therefore we should only update the job_explanation after some time has elapsed to
+                # prevent excessive task saves.
+                task.job_explanation = job_explanation
+                tasks_to_update_job_explanation.append(task)
+        logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def timeout_approval_node(self):
         workflow_approvals = WorkflowApproval.objects.filter(status='pending')
