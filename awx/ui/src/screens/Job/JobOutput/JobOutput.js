@@ -168,12 +168,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const {
     addEvents,
     toggleNodeIsCollapsed,
+    toggleCollapseAll,
     getEventForRow,
     getNumCollapsedEvents,
     getCounterForRow,
     getEvent,
     clearLoadedEvents,
     rebuildEventsTree,
+    isAllCollapsed,
   } = useJobEvents(
     {
       fetchEventByUuid,
@@ -504,7 +506,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               isCollapsed={node.isCollapsed}
               hasChildren={node.children.length}
               onToggleCollapsed={() => {
-                toggleNodeIsCollapsed(event.uuid);
+                toggleNodeIsCollapsed(event.uuid, !node.isCollapsed);
               }}
             />
           ) : (
@@ -653,6 +655,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     scrollHeight.current = e.scrollHeight;
   };
 
+  const handleExpandCollapseAll = () => {
+    toggleCollapseAll(!isAllCollapsed);
+  };
+
   if (contentError) {
     return <ContentError error={contentError} />;
   }
@@ -696,6 +702,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollLast={handleScrollLast}
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
+          toggleExpandCollapseAll={handleExpandCollapseAll}
+          isFlatMode={isFlatMode}
+          isTemplateJob={job.type === 'job'}
+          isAllCollapsed={isAllCollapsed}
         />
         <OutputWrapper cssMap={cssMap}>
           <InfiniteLoader
