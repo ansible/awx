@@ -286,8 +286,10 @@ class TaskManager:
             # at this point we already have control/execution nodes selected for the following cases
             else:
                 task.instance_group = rampart_group
-                queue_submitted_to = task.execution_node if task.execution_node else rampart_group.name
-                logger.debug(f'Submitting job {task.log_format} to queue {queue_submitted_to} controlled by {task.controller_node}.')
+                execution_node_msg = f' and execution node {task.execution_node}' if task.execution_node else ''
+                logger.debug(
+                    f'Submitting job {task.log_format} controlled by {task.controller_node} to instance group {rampart_group.name}{execution_node_msg}.'
+                )
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
