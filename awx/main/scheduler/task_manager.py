@@ -487,8 +487,12 @@ class TaskManager:
                 continue
 
             # Determine if ther is control capacity for the task
+            if task.capacity_type == 'control':
+                control_impact = task.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
+            else:
+                control_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
             control_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                task, self.graph['controlplane']['instances'], impact=settings.AWX_CONTROL_NODE_TASK_IMPACT, capacity_type='control'
+                task, self.graph['controlplane']['instances'], impact=control_impact, capacity_type='control'
             ) or InstanceGroup.find_largest_idle_instance(self.graph['controlplane']['instances'], capacity_type='control')
             if not control_instance:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
@@ -499,17 +503,8 @@ class TaskManager:
 
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
-                # This is a task that actually needs to run in the controlplane
-                is_idle = control_instance.jobs_running == 0
-                has_capacity_for_task_impact_and_control = control_instance.remaining_capacity >= (task.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT)
-                if not has_capacity_for_task_impact_and_control and not is_idle:
-                    # As in other places, we accept an idle instance if the node with most capacity (the control node we already selected)
-                    # does not have enough capacity.
-                    logger.debug(f"Not enough control capacity on {control_instance} to run {task.log_format}")
-                    self.task_needs_capacity(task, tasks_to_update_job_explanation)
-                    continue
                 task.execution_node = control_instance.hostname
-                control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - (task.task_impact + settings.AWX_CONTROL_PLANE_TASK_IMPACT))
+                control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - control_impact)
                 control_instance.jobs_running += 1
                 self.graph['controlplane']['graph'].add_job(task)
                 execution_instance = self.real_instances[control_instance.hostname]
@@ -532,16 +527,13 @@ class TaskManager:
                 # at this point we know the instance group is NOT a container group
                 # because if it was, it would have started the task and broke out of the loop.
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                    task, self.graph[rampart_group.name]['instances']
+                    task, self.graph[rampart_group.name]['instances'], add_hybrid_control_cost=True
                 ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'], capacity_type=task.capacity_type)
 
                 if execution_instance:
                     task.execution_node = execution_instance.hostname
                     # If our execution instance is a hybrid, prefer to do control tasks there as well.
-                    if (
-                        execution_instance.node_type == 'hybrid'
-                        and execution_instance.remaining_capacity >= task.task_impact + settings.AWX_CONTROL_PLANE_TASK_IMPACT
-                    ):
+                    if execution_instance.node_type == 'hybrid':
                         control_instance = execution_instance
                         task.controller_node = execution_instance.hostname
 

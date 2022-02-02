@@ -352,15 +352,21 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         app_label = 'main'
 
     @staticmethod
-    def fit_task_to_most_remaining_capacity_instance(task, instances, impact=None, capacity_type=None):
+    def fit_task_to_most_remaining_capacity_instance(task, instances, impact=None, capacity_type=None, add_hybrid_control_cost=False):
         impact = impact if impact else task.task_impact
         capacity_type = capacity_type if capacity_type else task.capacity_type
         instance_most_capacity = None
+        most_remaining_capacity = -1
         for i in instances:
             if i.node_type not in (capacity_type, 'hybrid'):
                 continue
-            if i.remaining_capacity >= impact and (instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity):
+            would_be_remaining = i.remaining_capacity - impact
+            # hybrid nodes _always_ control their own tasks
+            if add_hybrid_control_cost and i.node_type == 'hybrid':
+                would_be_remaining -= settings.AWX_CONTROL_NODE_TASK_IMPACT
+            if would_be_remaining >= 0 and (instance_most_capacity is None or would_be_remaining > most_remaining_capacity):
                 instance_most_capacity = i
+                most_remaining_capacity = would_be_remaining
         return instance_most_capacity
 
     @staticmethod
