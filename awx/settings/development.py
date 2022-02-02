@@ -21,6 +21,8 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
+# How much capacity controlling a task costs a node
+AWX_CONTROL_NODE_TASK_IMPACT = 5
 
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '8888', '--allow-root', '--no-browser']
