@@ -12,7 +12,7 @@ function AddDropDownButton({ dropdownItems, ouiaId }) {
 
   useEffect(() => {
     const toggle = (e) => {
-      if (!isKebabified && (!element || !element.current.contains(e.target))) {
+      if (!isKebabified && (!element || !element.current?.contains(e.target))) {
         setIsOpen(false);
       }
     };
