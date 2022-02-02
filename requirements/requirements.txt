@@ -9,7 +9,7 @@ ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25
     # via -r /awx_devel/requirements/requirements.in
-asgiref==3.2.5
+asgiref==3.5.0
     # via
     #   channels
     #   channels-redis
@@ -86,7 +86,7 @@ dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
-django==3.0.14
+django==3.1.14
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -94,28 +94,25 @@ django==3.0.14
     #   django-cors-headers
     #   django-crum
     #   django-guid
-    #   django-jsonfield
     #   django-oauth-toolkit
     #   django-polymorphic
     #   django-taggit
     #   djangorestframework
-django-auth-ldap==2.1.0
+django-auth-ldap==4.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.7.0
     # via -r /awx_devel/requirements/requirements.in
-django-crum==0.7.5
+django-crum==0.7.9
     # via -r /awx_devel/requirements/requirements.in
 django-extensions==2.2.9
     # via -r /awx_devel/requirements/requirements.in
 django-guid==2.2.1
     # via -r /awx_devel/requirements/requirements.in
-django-jsonfield==1.4.1
-    # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.4.1
     # via -r /awx_devel/requirements/requirements.in
 django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
-django-polymorphic==2.1.2
+django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-qsstats-magic==1.1.0
     # via -r /awx_devel/requirements/requirements.in
@@ -129,9 +126,9 @@ django-split-settings==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-taggit==1.2.0
     # via -r /awx_devel/requirements/requirements.in
-djangorestframework==3.12.1
+djangorestframework==3.13.1
     # via -r /awx_devel/requirements/requirements.in
-djangorestframework-yaml==1.0.3
+djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.16
     # via python-daemon
@@ -163,23 +160,23 @@ isodate==0.6.1
     # via
     #   msrest
     #   python3-saml
-jaraco.classes==3.1.0
-    # via jaraco.collections
-jaraco.collections==3.0.0
+jaraco-classes==3.1.0
+    # via jaraco-collections
+jaraco-collections==3.0.0
     # via irc
-jaraco.functools==3.0.0
+jaraco-functools==3.0.0
     # via
     #   irc
-    #   jaraco.text
+    #   jaraco-text
     #   tempora
-jaraco.logging==3.0.0
+jaraco-logging==3.0.0
     # via irc
-jaraco.stream==3.0.0
+jaraco-stream==3.0.0
     # via irc
-jaraco.text==3.2.0
+jaraco-text==3.2.0
     # via
     #   irc
-    #   jaraco.collections
+    #   jaraco-collections
 jinja2==3.0.3
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -203,8 +200,8 @@ markupsafe==2.0.1
 more-itertools==8.2.0
     # via
     #   irc
-    #   jaraco.classes
-    #   jaraco.functools
+    #   jaraco-classes
+    #   jaraco-functools
 msgpack==1.0.0
     # via channels-redis
 msrest==0.6.11
@@ -259,7 +256,7 @@ pygerduty==0.38.2
     # via -r /awx_devel/requirements/requirements.in
 pyhamcrest==2.0.2
     # via twisted
-pyjwt==1.7.1
+pyjwt==2.3.0
     # via
     #   adal
     #   social-auth-core
@@ -298,6 +295,7 @@ python3-saml==1.13.0
 pytz==2019.3
     # via
     #   django
+    #   djangorestframework
     #   irc
     #   tempora
     #   twilio
@@ -334,7 +332,7 @@ requests-oauthlib==1.3.0
     #   social-auth-core
 rsa==4.7.2
     # via google-auth
-ruamel.yaml==0.16.10
+ruamel-yaml==0.16.10
     # via openshift
 schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
@@ -346,13 +344,12 @@ six==1.14.0
     #   automat
     #   cryptography
     #   django-extensions
-    #   django-jsonfield
     #   django-pglocks
     #   google-auth
     #   isodate
-    #   jaraco.collections
-    #   jaraco.logging
-    #   jaraco.text
+    #   jaraco-collections
+    #   jaraco-logging
+    #   jaraco-text
     #   jsonschema
     #   kubernetes
     #   openshift
@@ -361,8 +358,6 @@ six==1.14.0
     #   pyrad
     #   pyrsistent
     #   python-dateutil
-    #   social-auth-app-django
-    #   social-auth-core
     #   tacacs-plus
     #   twilio
     #   websocket-client
@@ -370,20 +365,20 @@ slack-sdk==3.11.2
     # via -r /awx_devel/requirements/requirements.in
 smmap==3.0.1
     # via gitdb
-social-auth-app-django==3.1.0
+social-auth-app-django==5.0.0
     # via -r /awx_devel/requirements/requirements.in
-social-auth-core==3.3.1
+social-auth-core==4.2.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   social-auth-app-django
 sqlparse==0.3.1
     # via django
-tacacs_plus==1.0
+tacacs-plus==1.0
     # via -r /awx_devel/requirements/requirements.in
 tempora==2.1.0
     # via
     #   irc
-    #   jaraco.logging
+    #   jaraco-logging
 twilio==6.37.0
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==20.3.0
@@ -410,7 +405,7 @@ xmlsec==1.3.12
     # via python3-saml
 yarl==1.4.2
     # via aiohttp
-zope.interface==5.0.0
+zope-interface==5.0.0
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
@@ -425,4 +420,4 @@ setuptools==58.2.0
     #   kubernetes
     #   markdown
     #   python-daemon
-    #   zope.interface
+    #   zope-interface
