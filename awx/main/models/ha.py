@@ -145,7 +145,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @property
     def consumed_capacity(self):
-        return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+        capacity_consumed = 0
+        if self.node_type in ('hybrid', 'execution'):
+            capacity_consumed += sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+        if self.node_type in ('hybrid', 'control'):
+            capacity_consumed += sum(
+                settings.AWX_CONTROL_NODE_TASK_IMPACT for x in UnifiedJob.objects.filter(controller_node=self.hostname, status__in=('running', 'waiting'))
+            )
+        return capacity_consumed
 
     @property
     def remaining_capacity(self):
