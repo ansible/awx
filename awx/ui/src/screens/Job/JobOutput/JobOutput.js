@@ -240,7 +240,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           setWsEvents([]);
           scrollToRow(lastScrollPosition);
         });
-      }, 250);
+      }, 500);
       return;
     }
     let batchTimeout;
@@ -278,7 +278,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         batchedEvents = [];
       };
 
-      if (data.group_name === 'job_events') {
+      if (data.group_name === `${job.type}_events`) {
         batchedEvents.push(data);
         clearTimeout(batchTimeout);
         if (batchedEvents.length >= 25) {
