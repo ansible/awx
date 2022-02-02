@@ -352,14 +352,14 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         app_label = 'main'
 
     @staticmethod
-    def fit_task_to_most_remaining_capacity_instance(task, instances):
+    def fit_task_to_most_remaining_capacity_instance(task, instances, impact=None, capacity_type=None):
+        impact = impact if impact else task.task_impact
+        capacity_type = capacity_type if capacity_type else task.capacity_type
         instance_most_capacity = None
         for i in instances:
-            if i.node_type not in (task.capacity_type, 'hybrid'):
+            if i.node_type not in (capacity_type, 'hybrid'):
                 continue
-            if i.remaining_capacity >= task.task_impact and (
-                instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
-            ):
+            if i.remaining_capacity >= impact and (instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity):
                 instance_most_capacity = i
         return instance_most_capacity
 

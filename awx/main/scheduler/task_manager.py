@@ -488,13 +488,8 @@ class TaskManager:
                 continue
 
             # Determine if ther is control capacity for the task
-            remaining_control_capacity = self.get_remaining_capacity('controlplane', capacity_type='control')
-            if remaining_control_capacity < settings.AWX_CONTROL_PLANE_TASK_IMPACT:
-                logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
-                continue
-
             control_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                task, self.graph['controlplane']['instances']
+                task, self.graph['controlplane']['instances'], impact=settings.AWX_CONTROL_NODE_TASK_IMPACT, capacity_type='control'
             ) or InstanceGroup.find_largest_idle_instance(self.graph['controlplane']['instances'], capacity_type='control')
             if not control_instance:
                 logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
@@ -533,11 +528,6 @@ class TaskManager:
                 # TODO: remove this after we have confidence that OCP control nodes are reporting node_type=control
                 if settings.IS_K8S and task.capacity_type == 'execution':
                     logger.debug("Skipping group {}, task cannot run on control plane".format(rampart_group.name))
-                    continue
-
-                remaining_capacity = self.get_remaining_capacity(rampart_group.name, capacity_type=task.capacity_type)
-                if task.task_impact > 0 and remaining_capacity <= 0:
-                    logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
                     continue
 
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
