@@ -8,7 +8,7 @@ import Legend from './Legend';
 import Tooltip from './Tooltip';
 
 // function MeshGraph({ data }) {
-function MeshGraph() {
+function MeshGraph({ showLegend }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeDetail, setNodeDetail] = useState(null);
@@ -517,7 +517,7 @@ function MeshGraph() {
 
   return (
     <div id="chart" style={{ position: 'relative' }}>
-      <Legend />
+      {showLegend && <Legend />}
       <Tooltip
         isNodeSelected={isNodeSelected}
         renderNodeIcon={renderNodeIcon}
