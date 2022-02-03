@@ -502,7 +502,7 @@ class TaskManager:
                 control_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
             control_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
                 task, self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['instances'], impact=control_impact, capacity_type='control'
-            ) or InstanceGroup.find_largest_idle_instance(self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['instances'], capacity_type='control')
+            )
             if not control_instance:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
                 logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
