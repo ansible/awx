@@ -1,90 +1,115 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { InstancesAPI } from 'api';
 import debounce from 'util/debounce';
 // import { t } from '@lingui/macro';
 import * as d3 from 'd3';
+import Legend from './Legend';
+import Tooltip from './Tooltip';
 
-// function MeshGraph({ data }) {
-function MeshGraph({ redirectToDetailsPage }) {
-  const draw = useCallback(() => {
-    const data = {
-      nodes: [
-        {
-          id: 1,
-          hostname: 'awx_1',
-          node_type: 'hybrid',
-          node_state: 'healthy',
-        },
-        {
-          id: 3,
-          hostname: 'receptor-1',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 4,
-          hostname: 'receptor-2',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 2,
-          hostname: 'receptor-hop',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 5,
-          hostname: 'receptor-hop-1',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 6,
-          hostname: 'receptor-hop-2',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 7,
-          hostname: 'receptor-hop-3',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 8,
-          hostname: 'receptor-hop-4',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-      ],
-      links: [
-        {
-          source: 'receptor-hop',
-          target: 'awx_1',
-        },
-        {
-          source: 'receptor-1',
-          target: 'receptor-hop',
-        },
-        {
-          source: 'receptor-2',
-          target: 'receptor-hop',
-        },
-        {
-          source: 'receptor-hop-3',
-          target: 'receptor-hop',
-        },
-        // {
-        //   "source": "receptor-2",
-        //   "target": "receptor-hop-1"
-        // },
-        // {
-        //   "source": "receptor-2",
-        //   "target": "receptor-hop-2"
-        // }
-      ],
-    };
-    const margin = 80;
+function MeshGraph({ data }) {
+  // function MeshGraph() {
+  const [isNodeSelected, setIsNodeSelected] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [nodeDetail, setNodeDetail] = useState(null);
+  const history = useHistory();
+
+  const draw = () => {
+    // const data = {
+    //   nodes: [
+    //     {
+    //       id: 1,
+    //       hostname: 'awx_1',
+    //       node_type: 'hybrid',
+    //       node_state: 'healthy',
+    //     },
+    //     {
+    //       id: 3,
+    //       hostname: 'receptor-1',
+    //       node_type: 'execution',
+    //       node_state: 'healthy',
+    //     },
+    //     {
+    //       id: 4,
+    //       hostname: 'receptor-2',
+    //       node_type: 'execution',
+    //       node_state: 'healthy',
+    //     },
+    //     {
+    //       id: 2,
+    //       hostname: 'receptor-hop',
+    //       node_type: 'hop',
+    //       node_state: 'healthy',
+    //     },
+    //     {
+    //       id: 5,
+    //       hostname: 'receptor-hop-1',
+    //       node_type: 'hop',
+    //       node_state: 'healthy',
+    //     },
+    //     {
+    //       id: 6,
+    //       hostname: 'receptor-hop-2',
+    //       node_type: 'hop',
+    //       node_state: 'disabled',
+    //     },
+    //     {
+    //       id: 7,
+    //       hostname: 'receptor-hop-3',
+    //       node_type: 'hop',
+    //       node_state: 'error',
+    //     },
+    //     {
+    //       id: 8,
+    //       hostname: 'receptor-hop-4',
+    //       node_type: 'hop',
+    //       node_state: 'healthy',
+    //     },
+    //   ],
+    //   links: [
+    //     {
+    //       source: 'receptor-hop',
+    //       target: 'awx_1',
+    //     },
+    //     {
+    //       source: 'receptor-1',
+    //       target: 'receptor-hop',
+    //     },
+    //     {
+    //       source: 'receptor-2',
+    //       target: 'receptor-hop',
+    //     },
+    //     {
+    //       source: 'receptor-hop-3',
+    //       target: 'receptor-hop',
+    //     },
+    //     // {
+    //     //   "source": "receptor-hop",
+    //     //   "target": "receptor-hop-1"
+    //     // },
+    //     // {
+    //     //   "source": "receptor-1",
+    //     //   "target": "receptor-hop-2"
+    //     // },
+    //     // {
+    //     //   "source": "awx_1",
+    //     //   "target": "receptor-hop-4"
+    //     // }
+    //   ],
+    // };
+    const margin = 15;
+    const defaultRadius = 16;
+    const defaultCollisionFactor = 80;
+    const defaultForceStrength = -100;
+    const defaultForceBody = 75;
+    const defaultForceX = 0;
+    const defaultForceY = 0;
+    const height = 600;
+    const fallbackWidth = 700;
+    const defaultNodeColor = '#0066CC';
+    const defaultNodeHighlightColor = '#16407C';
+    const defaultNodeLabelColor = 'white';
+    const defaultFontSize = '12px';
     const getWidth = () => {
       let width;
       // This is in an a try/catch due to an error from jest.
@@ -92,27 +117,25 @@ function MeshGraph({ redirectToDetailsPage }) {
       // style function, it says it is null in the test
       try {
         width =
-          parseInt(d3.select(`#chart`).style('width'), 10) - margin || 700;
+          parseInt(d3.select(`#chart`).style('width'), 10) - margin ||
+          fallbackWidth;
       } catch (error) {
-        width = 700;
+        width = fallbackWidth;
       }
 
       return width;
     };
     const width = getWidth();
-    const height = 600;
-    const defaultRadius = 6;
-    const highlightRadius = 9;
 
-    const zoom = d3
-      .zoom()
-      // .scaleExtent([1, 8])
-      .on('zoom', (event) => {
-        svg.attr('transform', event.transform);
-      });
+    // const zoom = d3
+    //   .zoom()
+    //   // .scaleExtent([1, 8])
+    //   .on('zoom', (event) => {
+    //     svg.attr('transform', event.transform);
+    //   });
 
     /* Add SVG */
-    d3.selectAll(`#chart > *`).remove();
+    d3.selectAll(`#chart > svg`).remove();
 
     const svg = d3
       .select('#chart')
@@ -120,48 +143,34 @@ function MeshGraph({ redirectToDetailsPage }) {
       .attr('width', `${width + margin}px`)
       .attr('height', `${height + margin}px`)
       .append('g')
-      .attr('transform', `translate(${margin}, ${margin})`)
-      .call(zoom);
+      .attr('transform', `translate(${margin}, ${margin})`);
+    // .call(zoom);
 
     const graph = data;
 
     const simulation = d3
       .forceSimulation()
-      .force('charge', d3.forceManyBody(75).strength(-100))
+      .force(
+        'charge',
+        d3.forceManyBody(defaultForceBody).strength(defaultForceStrength)
+      )
       .force(
         'link',
         d3.forceLink().id((d) => d.hostname)
       )
-      .force('collide', d3.forceCollide(80))
-      .force('forceX', d3.forceX(0))
-      .force('forceY', d3.forceY(0))
+      .force('collide', d3.forceCollide(defaultCollisionFactor))
+      .force('forceX', d3.forceX(defaultForceX))
+      .force('forceY', d3.forceY(defaultForceY))
       .force('center', d3.forceCenter(width / 2, height / 2));
-
-    // const simulation = d3
-    //   .forceSimulation()
-    //   .force(
-    //     'link',
-    //     d3.forceLink().id((d) => d.hostname)
-    //   )
-    //   .force('charge', d3.forceManyBody().strength(-350))
-    //   .force(
-    //     'collide',
-    //     d3.forceCollide((d) =>
-    //       d.node_type === 'execution' || d.node_type === 'hop' ? 75 : 100
-    //     )
-    //   )
-    //   .force('center', d3.forceCenter(width / 2, height / 2));
 
     const link = svg
       .append('g')
       .attr('class', `links`)
       .attr('data-cy', 'links')
-      // .selectAll('path')
       .selectAll('line')
       .data(graph.links)
       .enter()
       .append('line')
-      // .append('path')
       .attr('class', (d, i) => `link-${i}`)
       .attr('data-cy', (d) => `${d.source}-${d.target}`)
       .style('fill', 'none')
@@ -183,99 +192,62 @@ function MeshGraph({ redirectToDetailsPage }) {
       .on('mouseenter', function handleNodeHover(_, d) {
         d3.select(this).transition().style('cursor', 'pointer');
         highlightSiblings(d);
-        tooltip
-          .html(
-            `<h3>Details</h3> <hr>name: ${d.hostname} <br>type: ${d.node_type} <br>status: ${d.node_state} <br> <a>Click on a node to view the details</a>`
-          )
-          .style('visibility', 'visible');
       })
       .on('mouseleave', (_, d) => {
         deselectSiblings(d);
-        tooltip.html(``).style('visibility', 'hidden');
       })
       .on('click', (_, d) => {
-        if (d.node_type !== 'hop') {
-          redirectToDetailsPage(d);
-        }
+        setNodeDetail(d);
+        highlightSelected(d);
       });
 
-    // health rings on nodes
-    node
-      .append('circle')
-      .attr('r', 8)
-      .attr('class', (d) => d.node_state)
-      .attr('stroke', (d) => renderHealthColor(d.node_state))
-      .attr('fill', (d) => renderHealthColor(d.node_state));
-
-    // inner node ring
+    // node circles
     node
       .append('circle')
       .attr('r', defaultRadius)
       .attr('class', (d) => d.node_type)
       .attr('class', (d) => `id-${d.id}`)
-      .attr('fill', (d) => renderNodeColor(d.node_type))
-      .attr('stroke', 'white');
-    svg.call(expandGlow);
+      .attr('fill', defaultNodeColor)
+      .attr('stroke', defaultNodeLabelColor);
 
-    // legend
-    svg.append('text').attr('x', 10).attr('y', 20).text('Legend');
-
-    svg
-      .append('g')
-      .selectAll('g')
-      .attr('class', 'chart-legend')
-      .attr('data-cy', 'chart-legend')
-      .data(graph.nodes)
-      .enter()
-      .append('circle')
-      .attr('cx', 10)
-      .attr('cy', (d, i) => 50 + i * 25)
-      .attr('r', defaultRadius)
-      .attr('class', (d) => d.node_type)
-      .style('fill', (d) => renderNodeColor(d.node_type));
-
-    // legend text
-    svg
-      .append('g')
-      .attr('class', 'chart-text')
-      .attr('data-cy', 'chart-text')
-      .selectAll('g')
-      .data(graph.nodes)
-      .enter()
-      .append('text')
-      .attr('x', 20)
-      .attr('y', (d, i) => 50 + i * 25)
-      .text((d) => `${d.hostname} - ${d.node_type}`)
-      .attr('text-anchor', 'left')
-      .style('alignment-baseline', 'middle');
-
-    const tooltip = d3
-      .select('#chart')
-      .append('div')
-      .attr('class', 'd3-tooltip')
-      .attr('data-cy', 'd3-tooltip')
-      .style('position', 'absolute')
-      .style('top', '200px')
-      .style('right', '40px')
-      .style('z-index', '10')
-      .style('visibility', 'hidden')
-      .style('padding', '15px')
-      // .style('border', '1px solid #e6e6e6')
-      // .style('box-shadow', '5px 5px 5px #e6e6e6')
-      .style('max-width', '15%')
-      // .style('background', 'rgba(0,0,0,0.6)')
-      // .style('border-radius', '5px')
-      // .style('color', '#fff')
-      .style('font-family', 'sans-serif')
-      .style('color', '#e6e6e')
-      .text('');
-
-    // node labels
+    // node type labels
     node
       .append('text')
-      .text((d) => d.hostname)
-      .attr('x', 16)
-      .attr('y', 3);
+      .text((d) => renderNodeType(d.node_type))
+      .attr('text-anchor', 'middle')
+      .attr('alignment-baseline', 'central')
+      .attr('fill', defaultNodeLabelColor);
+
+    // node hostname labels
+    const hostNames = node.append('g');
+    hostNames
+      .append('text')
+      .text((d) => renderLabelText(d.node_state, d.hostname))
+      .attr('fill', defaultNodeLabelColor)
+      .attr('text-anchor', 'middle')
+      .attr('y', 40)
+      .each(function calculateLabelWidth() {
+        // eslint-disable-next-line react/no-this-in-sfc
+        const bbox = this.getBBox();
+        // eslint-disable-next-line react/no-this-in-sfc
+        d3.select(this.parentNode)
+          .append('rect')
+          .attr('x', bbox.x)
+          .attr('y', bbox.y)
+          .attr('width', bbox.width)
+          .attr('height', bbox.height)
+          .attr('rx', 8)
+          .attr('ry', 8)
+          .style('fill', (d) => renderStateColor(d.node_state));
+      });
+
+    hostNames
+      .append('text')
+      .text((d) => renderLabelText(d.node_state, d.hostname))
+      .attr('font-size', defaultFontSize)
+      .attr('fill', defaultNodeLabelColor)
+      .attr('text-anchor', 'middle')
+      .attr('y', 38);
 
     simulation.nodes(graph.nodes).on('tick', ticked);
     simulation.force('link').links(graph.links);
@@ -291,54 +263,37 @@ function MeshGraph({ redirectToDetailsPage }) {
       node.attr('transform', (d) => `translate(${d.x},${d.y})`);
     }
 
-    // function linkArc(d) {
-    //   const dx = d.target.x - d.source.x;
-    //   const dy = d.target.y - d.source.y;
-    //   const dr = Math.sqrt(dx * dx + dy * dy);
-    //   return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
-    // }
-
-    function contractGlow() {
-      svg
-        .selectAll('.healthy')
-        .transition()
-        .duration(1000)
-        .attr('stroke-width', '1px')
-        .on('end', expandGlow);
-    }
-
-    function expandGlow() {
-      svg
-        .selectAll('.healthy')
-        .transition()
-        .duration(1000)
-        .attr('stroke-width', '4.5px')
-        .on('end', contractGlow);
-    }
-
-    function renderHealthColor(nodeState) {
+    function renderStateColor(nodeState) {
       const colorKey = {
-        disabled: '#c6c6c6',
-        healthy: '#50D050',
-        error: '#ff6766',
+        disabled: '#6A6E73',
+        healthy: '#3E8635',
+        error: '#C9190B',
       };
       return colorKey[nodeState];
     }
+    function renderLabelText(nodeState, name) {
+      const stateKey = {
+        disabled: '\u25EF',
+        healthy: '\u2713',
+        error: '\u0021',
+      };
+      return `${stateKey[nodeState]}  ${name}`;
+    }
 
-    function renderNodeColor(nodeType) {
-      const colorKey = {
-        hop: '#C46100',
-        execution: '#F0AB00',
-        hybrid: '#0066CC',
-        control: '#005F60',
+    function renderNodeType(nodeType) {
+      const typeKey = {
+        hop: 'h',
+        execution: 'Ex',
+        hybrid: 'Hy',
+        control: 'C',
       };
 
-      return colorKey[nodeType];
+      return typeKey[nodeType];
     }
 
     function highlightSiblings(n) {
       setTimeout(() => {
-        svg.selectAll(`id-${n.id}`).attr('r', highlightRadius);
+        svg.select(`circle.id-${n.id}`).attr('fill', defaultNodeHighlightColor);
         const immediate = graph.links.filter(
           (l) =>
             n.hostname === l.source.hostname || n.hostname === l.target.hostname
@@ -347,50 +302,91 @@ function MeshGraph({ redirectToDetailsPage }) {
           svg
             .selectAll(`.link-${s.index}`)
             .transition()
-            .style('stroke', '#6e6e6e');
-          svg
-            .selectAll(`.id-${s.source.id}`)
-            .transition()
-            .attr('r', highlightRadius);
-          svg
-            .selectAll(`.id-${s.target.id}`)
-            .transition()
-            .attr('r', highlightRadius);
+            .style('stroke', '#0066CC')
+            .style('stroke-width', '3px');
         });
       }, 0);
     }
 
     function deselectSiblings(n) {
-      svg.selectAll(`id-${n.id}`).attr('r', defaultRadius);
+      svg.select(`circle.id-${n.id}`).attr('fill', defaultNodeColor);
       const immediate = graph.links.filter(
         (l) =>
           n.hostname === l.source.hostname || n.hostname === l.target.hostname
       );
       immediate.forEach((s) => {
-        svg.selectAll(`.link-${s.index}`).transition().style('stroke', '#ccc');
         svg
-          .selectAll(`.id-${s.source.id}`)
+          .selectAll(`.link-${s.index}`)
           .transition()
-          .attr('r', defaultRadius);
-        svg
-          .selectAll(`.id-${s.target.id}`)
-          .transition()
-          .attr('r', defaultRadius);
+          .style('stroke', '#ccc')
+          .style('stroke-width', '2px');
       });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    function highlightSelected(n) {
+      if (svg.select(`circle.id-${n.id}`).attr('stroke-width') !== null) {
+        // toggle rings
+        svg.select(`circle.id-${n.id}`).attr('stroke-width', null);
+        // show default empty state of tooltip
+        setIsNodeSelected(false);
+        setSelectedNode(null);
+        return;
+      }
+      svg.selectAll('circle').attr('stroke-width', null);
+      svg
+        .select(`circle.id-${n.id}`)
+        .attr('stroke-width', '5px')
+        .attr('stroke', '#D2D2D2');
+      setIsNodeSelected(true);
+      setSelectedNode(n);
+    }
+  };
+
+  async function redirectToDetailsPage() {
+    const { id: nodeId } = selectedNode;
+    const {
+      data: { results },
+    } = await InstancesAPI.readInstanceGroup(nodeId);
+    const { id: instanceGroupId } = results[0];
+    const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
+    history.push(constructedURL);
+  }
+
+  function renderNodeIcon() {
+    if (selectedNode) {
+      const { node_type: nodeType } = selectedNode;
+      const typeKey = {
+        hop: 'h',
+        execution: 'Ex',
+        hybrid: 'Hy',
+        control: 'C',
+      };
+
+      return typeKey[nodeType];
+    }
+
+    return false;
+  }
   useEffect(() => {
     function handleResize() {
       draw();
     }
-
     window.addEventListener('resize', debounce(handleResize, 500));
-    draw();
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
-  }, [draw]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <div id="chart" />;
+  return (
+    <div id="chart" style={{ position: 'relative' }}>
+      <Legend />
+      <Tooltip
+        isNodeSelected={isNodeSelected}
+        renderNodeIcon={renderNodeIcon}
+        nodeDetail={nodeDetail}
+        redirectToDetailsPage={redirectToDetailsPage}
+      />
+    </div>
+  );
 }
 
 export default MeshGraph;

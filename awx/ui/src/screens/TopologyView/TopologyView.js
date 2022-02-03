@@ -1,15 +1,14 @@
 import React, { useEffect, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import { PageSection, Card, CardBody } from '@patternfly/react-core';
 import useRequest from 'hooks/useRequest';
-import { MeshAPI, InstancesAPI } from 'api';
+import { MeshAPI } from 'api';
 import MeshGraph from './MeshGraph';
 
 function TopologyView() {
   const {
+    isLoading,
     result: { meshData },
     // error: fetchInitialError,
     request: fetchMeshVisualizer,
@@ -22,15 +21,6 @@ function TopologyView() {
     }, []),
     { meshData: { nodes: [], links: [] } }
   );
-  async function RedirectToDetailsPage({ id: nodeId }) {
-    const history = useHistory();
-    const {
-      data: { results },
-    } = await InstancesAPI.readInstanceGroup(nodeId);
-    const { id: instanceGroupId } = results[0];
-    const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
-    history.push(constructedURL);
-  }
   useEffect(() => {
     fetchMeshVisualizer();
   }, [fetchMeshVisualizer]);
@@ -40,14 +30,7 @@ function TopologyView() {
 
       <PageSection>
         <Card>
-          <CardBody>
-            {meshData && (
-              <MeshGraph
-                data={meshData}
-                redirectToDetailsPage={RedirectToDetailsPage}
-              />
-            )}
-          </CardBody>
+          <CardBody>{!isLoading && <MeshGraph data={meshData} />}</CardBody>
         </Card>
       </PageSection>
     </>
