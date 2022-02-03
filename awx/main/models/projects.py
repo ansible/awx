@@ -38,7 +38,6 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.fields import JSONField
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -294,17 +293,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('The last revision fetched by a project update'),
     )
 
-    playbook_files = JSONField(
+    playbook_files = models.JSONField(
+        default=list,
         blank=True,
-        default=[],
         editable=False,
         verbose_name=_('Playbook Files'),
         help_text=_('List of playbooks found in the project'),
     )
 
-    inventory_files = JSONField(
+    inventory_files = models.JSONField(
+        default=list,
         blank=True,
-        default=[],
         editable=False,
         verbose_name=_('Inventory Files'),
         help_text=_('Suggested list of content that could be Ansible inventory in the project'),

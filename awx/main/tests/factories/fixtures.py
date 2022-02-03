@@ -180,8 +180,8 @@ def mk_job_template(
 
     jt.project = project
 
-    jt.survey_spec = spec
-    if jt.survey_spec is not None:
+    if spec is not None:
+        jt.survey_spec = spec
         jt.survey_enabled = True
 
     if persisted:
@@ -212,8 +212,8 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, 
 
     wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization, webhook_service=webhook_service)
 
-    wfjt.survey_spec = spec
-    if wfjt.survey_spec:
+    if spec:
+        wfjt.survey_spec = spec
         wfjt.survey_enabled = True
 
     if persisted:

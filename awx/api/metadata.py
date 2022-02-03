@@ -6,6 +6,7 @@ from uuid import UUID
 
 # Django
 from django.core.exceptions import PermissionDenied
+from django.db.models import JSONField
 from django.db.models.fields import PositiveIntegerField, BooleanField
 from django.db.models.fields.related import ForeignKey
 from django.http import Http404
@@ -22,7 +23,7 @@ from rest_framework.request import clone_request
 
 # AWX
 from awx.api.fields import ChoiceNullField
-from awx.main.fields import JSONField, ImplicitRoleField
+from awx.main.fields import ImplicitRoleField
 from awx.main.models import NotificationTemplate
 from awx.main.utils.execution_environments import get_default_pod_spec
 

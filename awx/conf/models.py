@@ -9,7 +9,6 @@ from django.db import models
 
 # AWX
 from awx.main.models.base import CreatedModifiedModel, prevent_search
-from awx.main.fields import JSONField
 from awx.main.utils import encrypt_field
 from awx.conf import settings_registry
 
@@ -19,7 +18,7 @@ __all__ = ['Setting']
 class Setting(CreatedModifiedModel):
 
     key = models.CharField(max_length=255)
-    value = JSONField(null=True)
+    value = models.JSONField(null=True)
     user = prevent_search(models.ForeignKey('auth.User', related_name='settings', default=None, null=True, editable=False, on_delete=models.CASCADE))
 
     def __str__(self):

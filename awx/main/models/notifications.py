@@ -28,7 +28,6 @@ from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.grafana_backend import GrafanaBackend
 from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
-from awx.main.fields import JSONField
 
 
 logger = logging.getLogger('awx.main.models.notifications')
@@ -70,12 +69,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = prevent_search(JSONField(blank=False))
+    notification_configuration = prevent_search(models.JSONField(default=dict))
 
     def default_messages():
         return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
-    messages = JSONField(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
+    messages = models.JSONField(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
 
     def has_message(self, condition):
         potential_template = self.messages.get(condition, {})
@@ -237,7 +236,7 @@ class Notification(CreatedModifiedModel):
         default='',
         editable=False,
     )
-    body = JSONField(blank=True)
+    body = models.JSONField(default=dict, null=True, blank=True)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)

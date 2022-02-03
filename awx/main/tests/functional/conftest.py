@@ -15,7 +15,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 
 # AWX
-from awx.main.fields import JSONBField
 from awx.main.models.projects import Project
 from awx.main.models.ha import Instance
 
@@ -753,11 +752,6 @@ def get_db_prep_save(self, value, connection, **kwargs):
         value = dumps(value)
 
     return value
-
-
-@pytest.fixture
-def monkeypatch_jsonbfield_get_db_prep_save(mocker):
-    JSONBField.get_db_prep_save = get_db_prep_save
 
 
 @pytest.fixture
