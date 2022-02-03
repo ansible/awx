@@ -33,6 +33,10 @@ class Connection(object):
     def __init__(self, server, verify=False):
         self.server = server
         self.verify = verify
+        # Note: We use the old sessionid here incase someone is trying to connect to an older AWX version
+        # There is a check below so that if AWX returns an X-API-Session-Cookie-Name we will grab it and
+        # connect with the new session cookie name.
+        self.session_cookie_name = 'sessionid'
 
         if not self.verify:
             requests.packages.urllib3.disable_warnings()
@@ -49,8 +53,10 @@ class Connection(object):
             _next = kwargs.get('next')
             if _next:
                 headers = self.session.headers.copy()
-                self.post('/api/login/', headers=headers, data=dict(username=username, password=password, next=_next))
-                self.session_id = self.session.cookies.get('sessionid')
+                response = self.post('/api/login/', headers=headers, data=dict(username=username, password=password, next=_next))
+                if 'X-API-Session-Cookie-Name' in response.headers:
+                    self.session_cookie_name = response.headers.get('X-API-Session-Cookie-Name')
+                self.session_id = self.session.cookies.get(self.session_cookie_name)
                 self.uses_session_cookie = True
             else:
                 self.session.auth = (username, password)
@@ -61,7 +67,7 @@ class Connection(object):
 
     def logout(self):
         if self.uses_session_cookie:
-            self.session.cookies.pop('sessionid', None)
+            self.session.cookies.pop(self.session_cookie_name, None)
         else:
             self.session.auth = None
 
