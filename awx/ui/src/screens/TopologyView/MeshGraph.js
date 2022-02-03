@@ -14,227 +14,46 @@ function MeshGraph({ showLegend }) {
   const [nodeDetail, setNodeDetail] = useState(null);
   const history = useHistory();
 
+  function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  let nodes = [];
+  let links = [];
+  const generateLinks = (n, r) => {
+    for (let i = 0; i < r; i++) {
+      const link = {
+        source: n[getRandomInt(0, n.length - 1)].hostname,
+        target: n[getRandomInt(0, n.length - 1)].hostname,
+      };
+      links.push(link);
+    }
+    return { nodes: n, links };
+  };
+  const generateNodes = (n) => {
+    function getRandomType() {
+      return ['hybrid', 'execution', 'control', 'hop'][getRandomInt(0, 3)];
+    }
+    function getRandomState() {
+      return ['healthy', 'error', 'disabled'][getRandomInt(0, 2)];
+    }
+    for (let i = 0; i < n; i++) {
+      const id = i + 1;
+      const randomType = getRandomType();
+      const randomState = getRandomState();
+      const node = {
+        id,
+        hostname: `node-${id}`,
+        node_type: randomType,
+        node_state: randomState,
+      };
+      nodes.push(node);
+    }
+    return generateLinks(nodes, getRandomInt(1, n - 1));
+  };
+  const data = generateNodes(getRandomInt(5, 30));
   const draw = () => {
-    const data = {
-      nodes: [
-        {
-          id: 1,
-          hostname: 'awx_1',
-          node_type: 'hybrid',
-          node_state: 'healthy',
-        },
-        {
-          id: 3,
-          hostname: 'receptor-1',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 4,
-          hostname: 'receptor-2',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 2,
-          hostname: 'receptor-hop',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 5,
-          hostname: 'receptor-hop-1',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 6,
-          hostname: 'receptor-hop-2',
-          node_type: 'hop',
-          node_state: 'disabled',
-        },
-        {
-          id: 7,
-          hostname: 'receptor-hop-3',
-          node_type: 'hop',
-          node_state: 'error',
-        },
-        {
-          id: 8,
-          hostname: 'receptor-hop-4',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 9,
-          hostname: 'receptor-hop-5',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 10,
-          hostname: 'receptor-hop-5',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 11,
-          hostname: 'receptor-hop-6',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 12,
-          hostname: 'awx_1',
-          node_type: 'hybrid',
-          node_state: 'healthy',
-        },
-        {
-          id: 13,
-          hostname: 'receptor-1',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 14,
-          hostname: 'receptor-2',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 1,
-          hostname: 'receptor-hop',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 5,
-          hostname: 'receptor-hop-1',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 6,
-          hostname: 'receptor-hop-2',
-          node_type: 'hop',
-          node_state: 'disabled',
-        },
-        {
-          id: 7,
-          hostname: 'receptor-hop-3',
-          node_type: 'hop',
-          node_state: 'error',
-        },
-        {
-          id: 8,
-          hostname: 'receptor-hop-4',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 9,
-          hostname: 'receptor-hop-5',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 10,
-          hostname: 'receptor-hop-5',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 11,
-          hostname: 'receptor-hop-6',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 14,
-          hostname: 'receptor-2',
-          node_type: 'execution',
-          node_state: 'healthy',
-        },
-        {
-          id: 1,
-          hostname: 'receptor-hop',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 5,
-          hostname: 'receptor-hop-1',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 6,
-          hostname: 'receptor-hop-2',
-          node_type: 'hop',
-          node_state: 'disabled',
-        },
-        {
-          id: 7,
-          hostname: 'receptor-hop-3',
-          node_type: 'hop',
-          node_state: 'error',
-        },
-        {
-          id: 8,
-          hostname: 'receptor-hop-4',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 9,
-          hostname: 'receptor-hop-5',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 10,
-          hostname: 'receptor-hop-5',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-        {
-          id: 11,
-          hostname: 'receptor-hop-6',
-          node_type: 'hop',
-          node_state: 'healthy',
-        },
-      ],
-      links: [
-        {
-          source: 'receptor-hop',
-          target: 'awx_1',
-        },
-        {
-          source: 'receptor-1',
-          target: 'receptor-hop',
-        },
-        {
-          source: 'receptor-2',
-          target: 'receptor-hop',
-        },
-        {
-          source: 'receptor-hop-3',
-          target: 'receptor-hop',
-        },
-        // {
-        //   "source": "receptor-hop",
-        //   "target": "receptor-hop-1"
-        // },
-        // {
-        //   "source": "receptor-1",
-        //   "target": "receptor-hop-2"
-        // },
-        // {
-        //   "source": "awx_1",
-        //   "target": "receptor-hop-4"
-        // }
-      ],
-    };
     const margin = 15;
     const defaultRadius = 16;
     const defaultCollisionFactor = 80;
