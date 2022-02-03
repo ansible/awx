@@ -105,17 +105,6 @@ Upgrading to 4.0.0 causes error because imports changed.
 ImportError: cannot import name 'KeyVaultClient'
 ```
 
-### django-jsonfield
-
-Instead of calling a `loads()` operation, the returned value is casted into
-a string in some cases, introduced in the change:
-
-https://github.com/adamchainz/django-jsonfield/pull/14
-
-This breaks a very large amount of AWX code that assumes these fields
-are returned as dicts. Upgrading this library will require a refactor
-to accommodate this change.
-
 ### pip and setuptools
 
 The offline installer needs to have functionality confirmed before upgrading these.

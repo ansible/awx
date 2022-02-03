@@ -11,7 +11,6 @@ from jinja2 import sandbox, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError, SecurityError
 
 # Django
-from django.contrib.postgres.fields import JSONField as upstream_JSONBField
 from django.core import exceptions as django_exceptions
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import (
@@ -29,15 +28,13 @@ from django.db.models.fields.related_descriptors import (
     create_forward_many_to_many_manager,
 )
 from django.utils.encoding import smart_str
+from django.db.models import JSONField
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 # jsonschema
 from jsonschema import Draft4Validator, FormatChecker
 import jsonschema.exceptions
-
-# Django-JSONField
-from jsonfield import JSONField as upstream_JSONField
 
 # DRF
 from rest_framework import serializers
@@ -52,9 +49,9 @@ from awx.main import utils
 
 
 __all__ = [
+    'JSONBlob',
     'AutoOneToOneField',
     'ImplicitRoleField',
-    'JSONField',
     'SmartFilterField',
     'OrderedManyToManyField',
     'update_role_parentage_for_instance',
@@ -71,40 +68,9 @@ def __enum_validate__(validator, enums, instance, schema):
 Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 
 
-class JSONField(upstream_JSONField):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.decoder_kwargs = {'cls': json.JSONDecoder}  # FIXME
-
-    def db_type(self, connection):
-        return 'text'
-
-    def from_db_value(self, value, expression, connection):
-        if value in {'', None} and not self.null:
-            return {}
-        return super(JSONField, self).from_db_value(value, expression, connection)
-
-
-class JSONBField(upstream_JSONBField):
-    def get_prep_lookup(self, lookup_type, value):
-        if isinstance(value, str) and value == "null":
-            return 'null'
-        return super(JSONBField, self).get_prep_lookup(lookup_type, value)
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if connection.vendor == 'sqlite':
-            # sqlite (which we use for tests) does not support jsonb;
-            if hasattr(value, 'adapted'):
-                value = value.adapted  # FIXME: Django 3.0 uses JsonAdapter, removed in 3.1
-            return json.dumps(value, cls=DjangoJSONEncoder)
-        return super(JSONBField, self).get_db_prep_value(value, connection, prepared)
-
-    def from_db_value(self, value, expression, connection):
-        # Work around a bug in django-jsonfield
-        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, str):
-            return json.loads(value)
-        return value
+class JSONBlob(JSONField):
+    def get_internal_type(self):
+        return "TextField"
 
 
 # Based on AutoOneToOneField from django-annoying:
@@ -391,7 +357,7 @@ class SmartFilterField(models.TextField):
         return super(SmartFilterField, self).get_prep_value(value)
 
 
-class JSONSchemaField(JSONBField):
+class JSONSchemaField(models.JSONField):
     """
     A JSONB field that self-validates against a defined JSON schema
     (http://json-schema.org).  This base class is intended to be overwritten by
@@ -404,8 +370,13 @@ class JSONSchemaField(JSONBField):
     # validation
     empty_values = (None, '')
 
+    def __init__(self, encoder=None, decoder=None, **options):
+        if encoder is None:
+            encoder = DjangoJSONEncoder
+        super().__init__(encoder=encoder, decoder=decoder, **options)
+
     def get_default(self):
-        return copy.deepcopy(super(JSONBField, self).get_default())
+        return copy.deepcopy(super(models.JSONField, self).get_default())
 
     def schema(self, model_instance):
         raise NotImplementedError()
