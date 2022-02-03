@@ -4,12 +4,11 @@ Security Assertion Markup Language, or SAML, is an open standard for exchanging 
 
 # Configure SAML Authentication
 Please see the [Tower documentation](https://docs.ansible.com/ansible-tower/latest/html/administration/ent_auth.html#saml-authentication-settings) as well as the [Ansible blog post](https://www.ansible.com/blog/using-saml-with-red-hat-ansible-tower) for basic SAML configuration. Note that AWX's SAML implementation relies on `python-social-auth` which uses `python-saml`. AWX exposes three fields which are directly passed to the lower libraries:
-
 * `SOCIAL_AUTH_SAML_SP_EXTRA` is passed to the `python-saml` library configuration's `sp` setting.  
 * `SOCIAL_AUTH_SAML_SECURITY_CONFIG` is passed to the `python-saml` library configuration's `security` setting.
 * `SOCIAL_AUTH_SAML_EXTRA_DATA`
 
-See https://python-social-auth.readthedocs.io/en/latest/backends/saml.html for more information.
+See https://python-social-auth.readthedocs.io/en/latest/backends/saml.html#advanced-settings for more information.
 
 
 # Configure SAML for Team and Organization Membership
@@ -35,17 +34,17 @@ Below is an example SAML attribute that embeds user organization membership in t
 Below, the corresponding AWX configuration:
 ```
 {
-  "users": "member-of",
-  "admins": "administrator-of",
+  "saml_attr": "member-of",
+  "saml_admin_attr": "administrator-of",
   "remove": true,
   'remove_admins': true
 }
 ```
-**users:** The SAML attribute name where the organization array can be found.
+**saml_attr:** The SAML attribute name where the organization array can be found.
 
-**remove_users:** Set this to `true` to remove a user from all organizations before adding the user to the list of Organizations. Set it to `false` to keep the user in whatever Organization(s) they are in while adding the user to the Organization(s) in the SAML attribute.
+**remove:** Set this to `true` to remove a user from all organizations before adding the user to the list of Organizations. Set it to `false` to keep the user in whatever Organization(s) they are in while adding the user to the Organization(s) in the SAML attribute.
 
-**admins:** The SAML attribute name where the organization administrators' array can be found.
+**saml_admin_attr:** The SAML attribute name where the organization administrators' array can be found.
 
 **remove_admins:** Set this to `true` to remove a user from all organizations that they are administrators of before adding the user to the list of Organizations admins. Set it to `false` to keep the user in whatever Organization(s) they are in as admin while adding the user as an Organization administrator in the SAML attribute.
 
@@ -93,6 +92,7 @@ Below is another example of a SAML attribute that contains a Team membership in 
 ### Example SAML User Flags Attribute Mapping
 SAML User flags can be set for users with global "System Administrator" (superuser) or "System Auditor" (system_auditor) permissions.
 
+Below is an example of a SAML attribute that contains admin attributes:
 ```
 <saml2:AttributeStatement>
     <saml2:Attribute FriendlyName="is_system_auditor" Name="is_system_auditor" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified">
@@ -104,12 +104,43 @@ SAML User flags can be set for users with global "System Administrator" (superus
 </saml2:AttributeStatement>
 ```
 
+These properties can be defined either by a role or an attribute with the following configuration options:
 ```
 {
+  "is_superuser_role": "awx_admins",
+  "is_superuser_attr": "is_superuser",
+  "is_superuser_value": "IT-Superadmin",
+  "is_system_auditor_role": "awx_auditors",
   "is_system_auditor_attr": "is_system_auditor",
-  "is_superuser_attr": "is_superuser"
+  "is_system_auditor_value": "Auditor"
 }
 ```
 
+**is_superuser_role:** Specifies a SAML role which will grant a user the superuser flag.
+
+**is_superuser_attr:** Specifies a SAML attribute which will grant a user the superuser flag.
+
+**is_superuser_value:** Specifies a specific value required for ``is_superuser_attr`` that is required for the user to be a superuser.
+
+**is_system_auditor_role:** Specifies a SAML role which will grant a user the system auditor flag.
+
+**is_system_auditor_attr:** Specifies a SAML attribute which will grant a user the system auditor flag.
+
+**is_system_auditor_value:** Specifies a specific value required for ``is_system_auditor_attr`` that is required for the user to be a system auditor.
 
 
+If `role` and `attr` are both specified for either superuser or system_auditor the settings for `attr` will take precedence over a `role`. The following table describes how the logic works.
+| Has Role | Has Attr | Has Attr Value | Is Flagged |
+|----------|----------|----------------|------------|
+| No       | No       | N/A            | No         |
+| Yes      | No       | N/A            | Yes        |
+| No       | Yes      | Yes            | Yes        |
+| No       | Yes      | No             | No         |
+| No       | Yes      | Unset          | Yes        |
+| Yes      | Yes      | Yes            | Yes        |
+| Yes      | Yes      | No             | No         |
+| Yes      | Yes      | Unset          | Yes        |
+
+
+### SAML Debugging
+You can enable logging messages for the SAML adapter the same way you can enable logging for LDAP. On the logging settings page change the log level to `Debug`. 
