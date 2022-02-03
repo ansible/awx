@@ -7,14 +7,6 @@ import re  # noqa
 import sys
 from datetime import timedelta
 
-# global settings
-from django.conf import global_settings
-
-# Update this module's local settings from the global settings module.
-this_module = sys.modules[__name__]
-for setting in dir(global_settings):
-    if setting == setting.upper():
-        setattr(this_module, setting, getattr(global_settings, setting))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -451,7 +443,7 @@ CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'u
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
-SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL  # noqa
+SOCIAL_AUTH_USER_MODEL = 'auth.User'
 
 _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
