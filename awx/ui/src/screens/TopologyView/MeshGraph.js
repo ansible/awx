@@ -7,96 +7,234 @@ import * as d3 from 'd3';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
 
-function MeshGraph({ data }) {
-  // function MeshGraph() {
+// function MeshGraph({ data }) {
+function MeshGraph() {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeDetail, setNodeDetail] = useState(null);
   const history = useHistory();
 
   const draw = () => {
-    // const data = {
-    //   nodes: [
-    //     {
-    //       id: 1,
-    //       hostname: 'awx_1',
-    //       node_type: 'hybrid',
-    //       node_state: 'healthy',
-    //     },
-    //     {
-    //       id: 3,
-    //       hostname: 'receptor-1',
-    //       node_type: 'execution',
-    //       node_state: 'healthy',
-    //     },
-    //     {
-    //       id: 4,
-    //       hostname: 'receptor-2',
-    //       node_type: 'execution',
-    //       node_state: 'healthy',
-    //     },
-    //     {
-    //       id: 2,
-    //       hostname: 'receptor-hop',
-    //       node_type: 'hop',
-    //       node_state: 'healthy',
-    //     },
-    //     {
-    //       id: 5,
-    //       hostname: 'receptor-hop-1',
-    //       node_type: 'hop',
-    //       node_state: 'healthy',
-    //     },
-    //     {
-    //       id: 6,
-    //       hostname: 'receptor-hop-2',
-    //       node_type: 'hop',
-    //       node_state: 'disabled',
-    //     },
-    //     {
-    //       id: 7,
-    //       hostname: 'receptor-hop-3',
-    //       node_type: 'hop',
-    //       node_state: 'error',
-    //     },
-    //     {
-    //       id: 8,
-    //       hostname: 'receptor-hop-4',
-    //       node_type: 'hop',
-    //       node_state: 'healthy',
-    //     },
-    //   ],
-    //   links: [
-    //     {
-    //       source: 'receptor-hop',
-    //       target: 'awx_1',
-    //     },
-    //     {
-    //       source: 'receptor-1',
-    //       target: 'receptor-hop',
-    //     },
-    //     {
-    //       source: 'receptor-2',
-    //       target: 'receptor-hop',
-    //     },
-    //     {
-    //       source: 'receptor-hop-3',
-    //       target: 'receptor-hop',
-    //     },
-    //     // {
-    //     //   "source": "receptor-hop",
-    //     //   "target": "receptor-hop-1"
-    //     // },
-    //     // {
-    //     //   "source": "receptor-1",
-    //     //   "target": "receptor-hop-2"
-    //     // },
-    //     // {
-    //     //   "source": "awx_1",
-    //     //   "target": "receptor-hop-4"
-    //     // }
-    //   ],
-    // };
+    const data = {
+      nodes: [
+        {
+          id: 1,
+          hostname: 'awx_1',
+          node_type: 'hybrid',
+          node_state: 'healthy',
+        },
+        {
+          id: 3,
+          hostname: 'receptor-1',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 4,
+          hostname: 'receptor-2',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 2,
+          hostname: 'receptor-hop',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 5,
+          hostname: 'receptor-hop-1',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 6,
+          hostname: 'receptor-hop-2',
+          node_type: 'hop',
+          node_state: 'disabled',
+        },
+        {
+          id: 7,
+          hostname: 'receptor-hop-3',
+          node_type: 'hop',
+          node_state: 'error',
+        },
+        {
+          id: 8,
+          hostname: 'receptor-hop-4',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 9,
+          hostname: 'receptor-hop-5',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 10,
+          hostname: 'receptor-hop-5',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 11,
+          hostname: 'receptor-hop-6',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 12,
+          hostname: 'awx_1',
+          node_type: 'hybrid',
+          node_state: 'healthy',
+        },
+        {
+          id: 13,
+          hostname: 'receptor-1',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 14,
+          hostname: 'receptor-2',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 1,
+          hostname: 'receptor-hop',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 5,
+          hostname: 'receptor-hop-1',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 6,
+          hostname: 'receptor-hop-2',
+          node_type: 'hop',
+          node_state: 'disabled',
+        },
+        {
+          id: 7,
+          hostname: 'receptor-hop-3',
+          node_type: 'hop',
+          node_state: 'error',
+        },
+        {
+          id: 8,
+          hostname: 'receptor-hop-4',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 9,
+          hostname: 'receptor-hop-5',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 10,
+          hostname: 'receptor-hop-5',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 11,
+          hostname: 'receptor-hop-6',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 14,
+          hostname: 'receptor-2',
+          node_type: 'execution',
+          node_state: 'healthy',
+        },
+        {
+          id: 1,
+          hostname: 'receptor-hop',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 5,
+          hostname: 'receptor-hop-1',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 6,
+          hostname: 'receptor-hop-2',
+          node_type: 'hop',
+          node_state: 'disabled',
+        },
+        {
+          id: 7,
+          hostname: 'receptor-hop-3',
+          node_type: 'hop',
+          node_state: 'error',
+        },
+        {
+          id: 8,
+          hostname: 'receptor-hop-4',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 9,
+          hostname: 'receptor-hop-5',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 10,
+          hostname: 'receptor-hop-5',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+        {
+          id: 11,
+          hostname: 'receptor-hop-6',
+          node_type: 'hop',
+          node_state: 'healthy',
+        },
+      ],
+      links: [
+        {
+          source: 'receptor-hop',
+          target: 'awx_1',
+        },
+        {
+          source: 'receptor-1',
+          target: 'receptor-hop',
+        },
+        {
+          source: 'receptor-2',
+          target: 'receptor-hop',
+        },
+        {
+          source: 'receptor-hop-3',
+          target: 'receptor-hop',
+        },
+        // {
+        //   "source": "receptor-hop",
+        //   "target": "receptor-hop-1"
+        // },
+        // {
+        //   "source": "receptor-1",
+        //   "target": "receptor-hop-2"
+        // },
+        // {
+        //   "source": "awx_1",
+        //   "target": "receptor-hop-4"
+        // }
+      ],
+    };
     const margin = 15;
     const defaultRadius = 16;
     const defaultCollisionFactor = 80;
@@ -126,13 +264,7 @@ function MeshGraph({ data }) {
       return width;
     };
     const width = getWidth();
-
-    // const zoom = d3
-    //   .zoom()
-    //   // .scaleExtent([1, 8])
-    //   .on('zoom', (event) => {
-    //     svg.attr('transform', event.transform);
-    //   });
+    const zoom = d3.zoom().scaleExtent([-40, 40]).on('zoom', zoomed);
 
     /* Add SVG */
     d3.selectAll(`#chart > svg`).remove();
@@ -142,9 +274,10 @@ function MeshGraph({ data }) {
       .append('svg')
       .attr('width', `${width + margin}px`)
       .attr('height', `${height + margin}px`)
+      .attr('viewBox', [0, 0, width, height]);
+    const mesh = svg
       .append('g')
       .attr('transform', `translate(${margin}, ${margin})`);
-    // .call(zoom);
 
     const graph = data;
 
@@ -163,7 +296,7 @@ function MeshGraph({ data }) {
       .force('forceY', d3.forceY(defaultForceY))
       .force('center', d3.forceCenter(width / 2, height / 2));
 
-    const link = svg
+    const link = mesh
       .append('g')
       .attr('class', `links`)
       .attr('data-cy', 'links')
@@ -181,7 +314,7 @@ function MeshGraph({ data }) {
         d3.select(this).transition().style('cursor', 'pointer');
       });
 
-    const node = svg
+    const node = mesh
       .append('g')
       .attr('class', 'nodes')
       .attr('data-cy', 'nodes')
@@ -263,6 +396,8 @@ function MeshGraph({ data }) {
       node.attr('transform', (d) => `translate(${d.x},${d.y})`);
     }
 
+    svg.call(zoom);
+
     function renderStateColor(nodeState) {
       const colorKey = {
         disabled: '#6A6E73',
@@ -339,6 +474,10 @@ function MeshGraph({ data }) {
         .attr('stroke', '#D2D2D2');
       setIsNodeSelected(true);
       setSelectedNode(n);
+    }
+
+    function zoomed({ transform }) {
+      mesh.attr('transform', transform);
     }
   };
 
