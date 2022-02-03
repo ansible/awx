@@ -1,2 +1,12 @@
 needs_triage:
   - '.*'
+"type:bug":
+  - "Please confirm the following"
+"type:enhancement":
+  - "Feature Idea"
+"component:ui":
+  - "\\[X\\] UI"
+"component:api":
+  - "\\[X\\] API"
+"component:docs":
+  - "\\[X\\] Docs"

@@ -1,0 +1,14 @@
+"component:api":
+  - any: ['awx/**/*', '!awx/ui/*']
+
+"component:ui":
+  - any: ['awx/ui/**/*']
+
+"component:docs":
+  - any: ['docs/**/*']
+
+"component:cli":
+  - any: ['awxkit/**/*']
+
+"component:collection":
+  - any: ['awx_collection/**/*']
