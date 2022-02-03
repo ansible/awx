@@ -23,7 +23,8 @@ const Wrapper = styled.div`
   top: -20px;
   left: 0;
   padding: 10px;
-  width: 190px;
+  width: 150px;
+  background-color: rgba(255, 255, 255, 0.85);
 `;
 const Button = styled(PFButton)`
   width: 20px;
@@ -88,7 +89,7 @@ function Legend() {
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              H
+              Hy
             </Button>
           </DescriptionListTerm>
           <DescriptionListDescription>Hybrid node</DescriptionListDescription>

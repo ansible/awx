@@ -24,6 +24,7 @@ const Wrapper = styled.div`
   right: 0;
   padding: 10px;
   width: 20%;
+  background-color: rgba(255, 255, 255, 0.85);
 `;
 const Button = styled(PFButton)`
   width: 20px;
