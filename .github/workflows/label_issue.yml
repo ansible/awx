@@ -1,21 +1,22 @@
-name: Triage
+name: Label Issue
 
 on:
   issues:
     types:
       - opened
+      - reopened
+      - edited
 
 jobs:
   triage:
     runs-on: ubuntu-latest
-    name: Label
+    name: Label Issue
 
     steps:
-      - name: Label issues
+      - name: Label Issue
         uses: github/issue-labeler@v2.4.1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           not-before: 2021-12-07T07:00:00Z
           configuration-path: .github/issue_labeler.yml
           enable-versioned-regex: 0
-        if: github.event_name == 'issues'
