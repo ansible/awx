@@ -10,18 +10,18 @@ import urllib.parse
 
 # Django
 from django.conf import settings
+from django.contrib.auth import views as auth_views
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.core.exceptions import FieldDoesNotExist
 from django.db import connection
-from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import views as auth_views
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable, UnsupportedMediaType
