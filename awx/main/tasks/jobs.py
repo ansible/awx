@@ -770,7 +770,7 @@ class BaseTask(object):
 
                 extra_update_fields['job_explanation'] = self.instance.job_explanation
                 # ensure failure notification sends even if playbook_on_stats event is not triggered
-                handle_success_and_failure_notifications.apply_async([self.instance.job.id])
+                handle_success_and_failure_notifications.apply_async([self.instance.id])
 
         except ReceptorNodeNotFound as exc:
             extra_update_fields['job_explanation'] = str(exc)
