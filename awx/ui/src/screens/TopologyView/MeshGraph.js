@@ -19,8 +19,8 @@ function MeshGraph({ showLegend }) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-  let nodes = [];
-  let links = [];
+  const nodes = [];
+  const links = [];
   const generateLinks = (n, r) => {
     for (let i = 0; i < r; i++) {
       const link = {
@@ -175,6 +175,7 @@ function MeshGraph({ showLegend }) {
     hostNames
       .append('text')
       .text((d) => renderLabelText(d.node_state, d.hostname))
+      .attr('class', 'placeholder')
       .attr('fill', defaultNodeLabelColor)
       .attr('text-anchor', 'middle')
       .attr('y', 40)
@@ -192,7 +193,7 @@ function MeshGraph({ showLegend }) {
           .attr('ry', 8)
           .style('fill', (d) => renderStateColor(d.node_state));
       });
-
+    svg.selectAll('text.placeholder').remove();
     hostNames
       .append('text')
       .text((d) => renderLabelText(d.node_state, d.hostname))
