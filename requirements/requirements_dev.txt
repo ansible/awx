@@ -4,7 +4,7 @@ django-rest-swagger
 ipython==7.21.0
 unittest2
 black
-pytest
+pytest!=7.0.0
 pytest-cov
 pytest-django
 pytest-pythonpath
