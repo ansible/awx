@@ -164,15 +164,14 @@ class BaseTask(object):
                 # Using z allows the dir to be mounted by multiple containers
                 # Uppercase Z restricts access (in weird ways) to 1 container at a time
                 if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
-                    src, dest, scontext = this_path.split(':')
+                    src, dest, mount_option = this_path.split(':')
 
-                    # scontext validation via performed via API, but since this can be overriden via settings.py
-                    # let's ensure scontext is one that we support
-                    if scontext not in CONTAINER_VOLUMES_MOUNT_TYPES:
-                        scontext = 'z'
-                        logger.warn(f'The path {this_path} has volume mount type {scontext} which is not supported. Using "z" instead.')
+                    # mount_option validation via performed via API, but since this can be overriden via settings.py
+                    if mount_option not in CONTAINER_VOLUMES_MOUNT_TYPES:
+                        mount_option = 'z'
+                        logger.warn(f'The path {this_path} has volume mount type {mount_option} which is not supported. Using "z" instead.')
 
-                    params['container_volume_mounts'].append(f'{src}:{dest}:{scontext}')
+                    params['container_volume_mounts'].append(f'{src}:{dest}:{mount_option}')
                 elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
                     src, dest = this_path.split(':')
                     params['container_volume_mounts'].append(f'{src}:{dest}:z')

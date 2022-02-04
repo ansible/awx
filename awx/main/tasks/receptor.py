@@ -500,9 +500,9 @@ class AWXReceptorJob:
             spec_volumes = []
 
             for idx, this_path in enumerate(settings.AWX_ISOLATION_SHOW_PATHS):
-                scontext = None
+                mount_option = None
                 if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
-                    src, dest, scontext = this_path.split(':')
+                    src, dest, mount_option = this_path.split(':')
                 elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
                     src, dest = this_path.split(':')
                 else:
@@ -512,7 +512,7 @@ class AWXReceptorJob:
                 # We do this so we can use the same configuration for regular scenarios and k8s
                 # Since flags like ':O', ':z' or ':Z' are not valid in the k8s realm
                 # Example: /data:/data:ro
-                read_only = bool('ro' == scontext)
+                read_only = bool('ro' == mount_option)
 
                 # Since type is not being passed, k8s by default will not perform any checks if the
                 # hostPath volume exists on the k8s node itself.
