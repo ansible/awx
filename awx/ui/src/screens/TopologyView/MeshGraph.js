@@ -8,7 +8,7 @@ import Legend from './Legend';
 import Tooltip from './Tooltip';
 
 // function MeshGraph({ data }) {
-function MeshGraph({ showLegend }) {
+function MeshGraph({ showLegend, zoom }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeDetail, setNodeDetail] = useState(null);
@@ -83,7 +83,6 @@ function MeshGraph({ showLegend }) {
       return width;
     };
     const width = getWidth();
-    const zoom = d3.zoom().scaleExtent([-40, 40]).on('zoom', zoomed);
 
     /* Add SVG */
     d3.selectAll(`#chart > svg`).remove();
@@ -91,11 +90,13 @@ function MeshGraph({ showLegend }) {
     const svg = d3
       .select('#chart')
       .append('svg')
+      .attr('class', 'mesh-svg')
       .attr('width', `${width + margin}px`)
       .attr('height', `${height + margin}px`)
       .attr('viewBox', [0, 0, width, height]);
     const mesh = svg
       .append('g')
+      .attr('class', 'mesh')
       .attr('transform', `translate(${margin}, ${margin})`);
 
     const graph = data;
@@ -294,10 +295,6 @@ function MeshGraph({ showLegend }) {
         .attr('stroke', '#D2D2D2');
       setIsNodeSelected(true);
       setSelectedNode(n);
-    }
-
-    function zoomed({ transform }) {
-      mesh.attr('transform', transform);
     }
   };
 

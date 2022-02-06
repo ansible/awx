@@ -17,9 +17,14 @@ import {
   ExpandArrowsAltIcon,
 } from '@patternfly/react-icons';
 
-const Header = ({ title, handleSwitchToggle, toggleState }) => {
+const Header = ({
+  title,
+  handleSwitchToggle,
+  toggleState,
+  zoomIn,
+  zoomOut,
+}) => {
   const { light } = PageSectionVariants;
-
   return (
     <PageSection variant={light}>
       <div
@@ -45,6 +50,7 @@ const Header = ({ title, handleSwitchToggle, toggleState }) => {
               aria-label={t`Zoom in`}
               variant="plain"
               icon={<SearchPlusIcon />}
+              onClick={zoomIn}
             >
               <SearchPlusIcon />
             </Button>
@@ -55,6 +61,7 @@ const Header = ({ title, handleSwitchToggle, toggleState }) => {
               aria-label={t`Zoom out`}
               variant="plain"
               icon={<SearchMinusIcon />}
+              onClick={zoomOut}
             >
               <SearchMinusIcon />
             </Button>

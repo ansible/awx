@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
+import * as d3 from 'd3';
 import { t } from '@lingui/macro';
 import { PageSection, Card, CardBody } from '@patternfly/react-core';
 import useRequest from 'hooks/useRequest';
@@ -25,18 +26,31 @@ function TopologyView() {
   useEffect(() => {
     fetchMeshVisualizer();
   }, [fetchMeshVisualizer]);
+
+  const zoom = d3.zoom().on('zoom', ({ transform }) => {
+    d3.select('.mesh').attr('transform', transform);
+  });
+  const zoomIn = () => {
+    d3.select('.mesh-svg').transition().call(zoom.scaleBy, 2);
+  };
+  const zoomOut = () => {
+    d3.select('.mesh-svg').transition().call(zoom.scaleBy, 0.5);
+  };
+
   return (
     <>
       <Header
         title={t`Topology View`}
         handleSwitchToggle={setShowLegend}
         toggleState={showLegend}
+        zoomIn={zoomIn}
+        zoomOut={zoomOut}
       />
       <PageSection>
         <Card>
           <CardBody>
             {!isLoading && (
-              <MeshGraph data={meshData} showLegend={showLegend} />
+              <MeshGraph data={meshData} showLegend={showLegend} zoom={zoom} />
             )}
           </CardBody>
         </Card>
