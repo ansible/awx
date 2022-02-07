@@ -19,13 +19,21 @@ function InstanceGroups() {
     request: settingsRequest,
     isLoading: isSettingsRequestLoading,
     error: settingsRequestError,
-    result: isKubernetes,
+    result: { isKubernetes, defaultControlPlane, defaultExecution },
   } = useRequest(
     useCallback(async () => {
       const {
-        data: { IS_K8S },
+        data: {
+          IS_K8S,
+          DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+          DEFAULT_EXECUTION_QUEUE_NAME,
+        },
       } = await SettingsAPI.readCategory('all');
-      return IS_K8S;
+      return {
+        isKubernetes: IS_K8S,
+        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
+      };
     }, []),
     { isLoading: true }
   );
@@ -75,16 +83,22 @@ function InstanceGroups() {
       />
       <Switch>
         <Route path="/instance_groups/container_group/add">
-          <ContainerGroupAdd />
+          <ContainerGroupAdd
+            defaultControlPlane={defaultControlPlane}
+            defaultExecution={defaultExecution}
+          />
         </Route>
         <Route path="/instance_groups/container_group/:id">
           <ContainerGroup setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
-        {!isSettingsRequestLoading && !isKubernetes ? (
+        {!isSettingsRequestLoading && !isKubernetes && (
           <Route path="/instance_groups/add">
-            <InstanceGroupAdd />
+            <InstanceGroupAdd
+              defaultControlPlane={defaultControlPlane}
+              defaultExecution={defaultExecution}
+            />
           </Route>
-        ) : null}
+        )}
         <Route path="/instance_groups/:id">
           <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
