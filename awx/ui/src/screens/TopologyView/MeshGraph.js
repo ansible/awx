@@ -52,7 +52,7 @@ function MeshGraph({ showLegend, zoom }) {
     }
     return generateLinks(nodes, getRandomInt(1, n - 1));
   };
-  const data = generateNodes(getRandomInt(5, 30));
+  const data = generateNodes(getRandomInt(250, 250));
   const draw = () => {
     const margin = 15;
     const defaultRadius = 16;

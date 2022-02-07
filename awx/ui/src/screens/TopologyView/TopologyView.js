@@ -38,13 +38,40 @@ function TopologyView() {
   };
   const resetZoom = () => {
     const margin = 15;
+    const height = 600;
     const width = parseInt(d3.select(`#chart`).style('width'), 10) - margin;
-    d3.select('.mesh-svg').transition().duration(750).call(
-      zoom.transform,
-      d3.zoomIdentity,
-      d3.zoomTransform(d3.select('.mesh-svg').node()).invert([width / 2, 600 / 2])
-    );
-  }
+    d3.select('.mesh-svg')
+      .transition()
+      .duration(750)
+      .call(
+        zoom.transform,
+        d3.zoomIdentity,
+        d3
+          .zoomTransform(d3.select('.mesh-svg').node())
+          .invert([width / 2, height / 2])
+      );
+  };
+
+  const zoomFit = () => {
+    const bounds = d3.select('.mesh').node().getBBox();
+    const parent = d3.select('.mesh').node().parentElement;
+    const fullWidth = parent.clientWidth;
+    const fullHeight = parent.clientHeight;
+    const { width, height } = bounds;
+    const midX = bounds.x + width / 2;
+    const midY = bounds.y + height / 2;
+    if (width === 0 || height === 0) return; // nothing to fit
+    const scale = 0.8 / Math.max(width / fullWidth, height / fullHeight);
+    const translate = [
+      fullWidth / 2 - scale * midX,
+      fullHeight / 2 - scale * midY,
+    ];
+    const [x, y] = translate;
+    d3.select('.mesh-svg')
+      .transition()
+      .duration(750)
+      .call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
+  };
 
   return (
     <>
@@ -54,6 +81,7 @@ function TopologyView() {
         toggleState={showLegend}
         zoomIn={zoomIn}
         zoomOut={zoomOut}
+        zoomFit={zoomFit}
         resetZoom={resetZoom}
       />
       <PageSection>
