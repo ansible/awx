@@ -46,7 +46,7 @@ describe('<JobDetail />', () => {
 
     // StatusIcon adds visibly hidden accessibility text " successful "
     assertDetail('Job ID', '2');
-    assertDetail('Status', ' successful Successful');
+    assertDetail('Status', 'Successful');
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
@@ -54,10 +54,7 @@ describe('<JobDetail />', () => {
     assertDetail('Job Type', 'Playbook Run');
     assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
     assertDetail('Inventory', mockJobData.summary_fields.inventory.name);
-    assertDetail(
-      'Project',
-      ` successful ${mockJobData.summary_fields.project.name}`
-    );
+    assertDetail('Project', mockJobData.summary_fields.project.name);
     assertDetail('Revision', mockJobData.scm_revision);
     assertDetail('Playbook', mockJobData.playbook);
     assertDetail('Verbosity', '0 (Normal)');
@@ -98,16 +95,13 @@ describe('<JobDetail />', () => {
     ).toEqual(true);
 
     const statusDetail = wrapper.find('Detail[label="Status"]');
-    expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
-    expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
+    const statusLabel = statusDetail.find('StatusLabel');
+    expect(statusLabel.prop('status')).toEqual('successful');
 
-    const projectStatusDetail = wrapper.find('Detail[label="Project"]');
-    expect(projectStatusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(
-      1
-    );
-    expect(
-      projectStatusDetail.find('StatusIcon SuccessfulBottom')
-    ).toHaveLength(1);
+    const projectStatusDetail = wrapper.find('Detail[label="Project Status"]');
+    expect(projectStatusDetail.find('StatusLabel')).toHaveLength(1);
+    const projectStatusLabel = statusDetail.find('StatusLabel');
+    expect(projectStatusLabel.prop('status')).toEqual('successful');
   });
 
   test('should not display finished date', () => {
@@ -537,7 +531,7 @@ describe('<JobDetail />', () => {
       webhook_guid: '',
     };
     wrapper = mountWithContexts(<JobDetail job={workFlowJob} />);
-    assertDetail('Status', ' successful Successful');
+    assertDetail('Status', 'Successful');
     assertDetail('Started', '7/6/2021, 7:40:17 PM');
     assertDetail('Finished', '7/6/2021, 7:40:42 PM');
     assertDetail('Job Template', 'Sliced Job Template');

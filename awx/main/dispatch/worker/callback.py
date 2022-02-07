@@ -17,7 +17,7 @@ import redis
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob, Job
-from awx.main.tasks import handle_success_and_failure_notifications
+from awx.main.tasks.system import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 import awx.main.analytics.subsystem_metrics as s_metrics

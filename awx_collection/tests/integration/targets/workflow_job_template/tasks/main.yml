@@ -200,6 +200,25 @@
     that:
       - "result is changed"
 
+- name: Create a workflow job template with bad label
+  workflow_job_template:
+    name: "{{ wfjt_name }}"
+    organization: Default
+    inventory: Demo Inventory
+    extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+    labels:
+      - label_bad
+    ask_inventory_on_launch: true
+    ask_scm_branch_on_launch: true
+    ask_limit_on_launch: true
+    ask_variables_on_launch: true
+  register: bad_label_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - "bad_label_results.msg == 'Could not find label entry with name label_bad'"
+
 # Turn off ask_ * settings to test that the issue/10057 has been fixed
 - name: Turn ask_* settings OFF
   tower_workflow_job_template:

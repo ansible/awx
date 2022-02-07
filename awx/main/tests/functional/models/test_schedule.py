@@ -308,7 +308,7 @@ def test_beginning_of_time(job_template):
     'rrule, tz',
     [
         ['DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1', 'UTC'],
-        ['DTSTART;TZID=America/New_York:20300112T210000 RRULE:FREQ=DAILY;INTERVAL=1', 'America/New_York'],
+        ['DTSTART;TZID=US/Eastern:20300112T210000 RRULE:FREQ=DAILY;INTERVAL=1', 'US/Eastern'],
     ],
 )
 def test_timezone_property(job_template, rrule, tz):

@@ -18,42 +18,42 @@ options:
     env:
     - name: CONTROLLER_HOST
     - name: TOWER_HOST
-    deprecated:
-    - removed_from_collection: 'awx.awx.controller'
-    - removed_in: '4.0.0'
-    - why: Collection name change
-    - alternative: 'CONTROLLER_HOST'
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Collection name change
+        alternatives: 'CONTROLLER_HOST'
   username:
     description: The user that you plan to use to access inventories on the controller.
     env:
     - name: CONTROLLER_USERNAME
     - name: TOWER_USERNAME
-    deprecated:
-    - removed_from_collection: 'awx.awx.controller'
-    - removed_in: '4.0.0'
-    - why: Collection name change
-    - alternative: 'CONTROLLER_USERNAME'
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Collection name change
+        alternatives: 'CONTROLLER_USERNAME'
   password:
     description: The password for your controller user.
     env:
     - name: CONTROLLER_PASSWORD
     - name: TOWER_PASSWORD
-    deprecated:
-    - removed_from_collection: 'awx.awx.controller'
-    - removed_in: '4.0.0'
-    - why: Collection name change
-    - alternative: 'CONTROLLER_PASSWORD'
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Collection name change
+        alternatives: 'CONTROLLER_PASSWORD'
   oauth_token:
     description:
     - The OAuth token to use.
     env:
     - name: CONTROLLER_OAUTH_TOKEN
     - name: TOWER_OAUTH_TOKEN
-    deprecated:
-    - removed_from_collection: 'awx.awx.controller'
-    - removed_in: '4.0.0'
-    - why: Collection name change
-    - alternative: 'CONTROLLER_OAUTH_TOKEN'
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Collection name change
+        alternatives: 'CONTROLLER_OAUTH_TOKEN'
   verify_ssl:
     description:
     - Specify whether Ansible should verify the SSL certificate of the controller host.
@@ -62,11 +62,11 @@ options:
     env:
     - name: CONTROLLER_VERIFY_SSL
     - name: TOWER_VERIFY_SSL
-    deprecated:
-    - removed_from_collection: 'awx.awx.controller'
-    - removed_in: '4.0.0'
-    - why: Collection name change
-    - alternative: 'CONTROLLER_VERIFY_SSL'
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Collection name change
+        alternatives: 'CONTROLLER_VERIFY_SSL'
     aliases: [ validate_certs ]
 
 notes:

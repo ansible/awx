@@ -1,5 +1,4 @@
-PYTHON ?= python3.8
-PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
+PYTHON ?= python3.9
 OFFICIAL ?= no
 NODE ?= node
 NPM_BIN ?= npm
@@ -11,8 +10,9 @@ COLLECTION_VERSION := $(shell $(PYTHON) setup.py --version | cut -d . -f 1-3)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
-COMPOSE_HOST ?= $(shell hostname)
 MAIN_NODE_TYPE ?= hybrid
+# If set to true docker-compose will also start a keycloak instance
+KEYCLOAK ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -43,7 +43,7 @@ I18N_FLAG_FILE = .i18n_built
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build sdist \
 	ui-release ui-devel \
-	VERSION docker-compose-sources \
+	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit
 
 clean-tmp:
@@ -144,24 +144,6 @@ version_file:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
-
-# Do any one-time init tasks.
-comma := ,
-init:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST) --node_type=$(MAIN_NODE_TYPE); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=controlplane --instance_percent=100;\
-	$(MANAGEMENT_COMMAND) register_queue --queuename=default --instance_percent=100;
-	if [ ! -f /etc/receptor/certs/awx.key ]; then \
-		rm -f /etc/receptor/certs/*; \
-		receptor --cert-init commonname="AWX Test CA" bits=2048 outcert=/etc/receptor/certs/ca.crt outkey=/etc/receptor/certs/ca.key; \
-		for node in $(RECEPTOR_MUTUAL_TLS); do \
-			receptor --cert-makereq bits=2048 commonname="$$node test cert" dnsname=$$node nodeid=$$node outreq=/etc/receptor/certs/$$node.csr outkey=/etc/receptor/certs/$$node.key; \
-			receptor --cert-signreq req=/etc/receptor/certs/$$node.csr cacert=/etc/receptor/certs/ca.crt cakey=/etc/receptor/certs/ca.key outcert=/etc/receptor/certs/$$node.crt verify=yes; \
-		done; \
-	fi
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -283,7 +265,7 @@ api-lint:
 
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/setup.py egg_info_dev
-	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
+	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/$(PYTHON)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
@@ -468,7 +450,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e receptor_image=$(RECEPTOR_IMAGE) \
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
-	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP)
+	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
+	    -e enable_keycloak=$(KEYCLOAK)
 
 
 docker-compose: awx/projects docker-compose-sources
@@ -545,6 +528,9 @@ psql-container:
 
 VERSION:
 	@echo "awx: $(VERSION)"
+
+PYTHON_VERSION:
+	@echo "$(PYTHON)" | sed 's:python::'
 
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)

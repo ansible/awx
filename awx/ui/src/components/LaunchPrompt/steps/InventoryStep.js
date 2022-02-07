@@ -21,6 +21,7 @@ const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
   page_size: 5,
   order_by: 'name',
+  role_level: 'use_role',
 });
 
 function InventoryStep({ warningMessage = null }) {

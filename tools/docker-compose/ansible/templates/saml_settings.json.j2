@@ -1,0 +1,51 @@
+{
+    "SAML_AUTO_CREATE_OBJECTS": true,
+    "SOCIAL_AUTH_SAML_SP_ENTITY_ID": "{{ container_reference }}:8043",
+    "SOCIAL_AUTH_SAML_SP_PUBLIC_CERT": "{{ public_key_content | regex_replace('\\n', '') }}",
+    "SOCIAL_AUTH_SAML_SP_PRIVATE_KEY": "{{ private_key_content | regex_replace('\\n', '') }}",
+    "SOCIAL_AUTH_SAML_ORG_INFO": {
+        "en-US": {
+            "url": "https://{{ container_reference }}:8443",
+            "name": "Keycloak",
+            "displayname": "Keycloak Solutions Engineering"
+        }
+    },
+    "SOCIAL_AUTH_SAML_TECHNICAL_CONTACT": {
+        "givenName": "Me Myself",
+        "emailAddress": "noone@nowhere.com"
+    },
+    "SOCIAL_AUTH_SAML_SUPPORT_CONTACT": {
+        "givenName": "Me Myself",
+        "emailAddress": "noone@nowhere.com"
+    },
+    "SOCIAL_AUTH_SAML_ENABLED_IDPS": {
+        "Keycloak": {
+            "attr_user_permanent_id": "name_id",
+            "entity_id": "https://{{ container_reference }}:8443/auth/realms/awx",
+            "attr_groups": "groups",
+            "url": "https://{{ container_reference }}:8443/auth/realms/awx/protocol/saml",
+            "attr_first_name": "first_name",
+            "x509cert": "{{ public_key_content | regex_replace('\\n', '') }}",
+            "attr_email": "email",
+            "attr_last_name": "last_name",
+            "attr_username": "username"
+        }
+    },
+    "SOCIAL_AUTH_SAML_SECURITY_CONFIG": {
+        "requestedAuthnContext": false
+    },
+    "SOCIAL_AUTH_SAML_SP_EXTRA": null,
+    "SOCIAL_AUTH_SAML_EXTRA_DATA": null,
+    "SOCIAL_AUTH_SAML_ORGANIZATION_MAP": {
+        "Default": {
+            "users": true
+        }
+    },
+    "SOCIAL_AUTH_SAML_TEAM_MAP": null,
+    "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR": {},
+    "SOCIAL_AUTH_SAML_TEAM_ATTR": {},
+    "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "is_superuser_attr": "is_superuser",
+        "is_system_auditor_attr": "is_system_auditor"
+    }
+}

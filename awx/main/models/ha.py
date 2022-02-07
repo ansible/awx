@@ -29,7 +29,7 @@ from awx.main.models.mixins import RelatedJobsMixin
 # ansible-runner
 from ansible_runner.utils.capacity import get_cpu_count, get_mem_in_bytes
 
-__all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
+__all__ = ('Instance', 'InstanceGroup', 'InstanceLink', 'TowerScheduleState')
 
 logger = logging.getLogger('awx.main.models.ha')
 
@@ -52,6 +52,14 @@ class HasPolicyEditsMixin(HasEditsMixin):
             raise RuntimeError('HasPolicyEditsMixin Model needs to set POLICY_FIELDS')
         new_values = self._get_fields_snapshot(fields_set=self.POLICY_FIELDS)
         return self._values_have_edits(new_values)
+
+
+class InstanceLink(BaseModel):
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
+    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+
+    class Meta:
+        unique_together = ('source', 'target')
 
 
 class Instance(HasPolicyEditsMixin, BaseModel):
@@ -116,8 +124,15 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    NODE_TYPE_CHOICES = [("control", "Control plane node"), ("execution", "Execution plane node"), ("hybrid", "Controller and execution")]
+    NODE_TYPE_CHOICES = [
+        ("control", "Control plane node"),
+        ("execution", "Execution plane node"),
+        ("hybrid", "Controller and execution"),
+        ("hop", "Message-passing node, no execution capability"),
+    ]
     node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
+
+    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
 
     class Meta:
         app_label = 'main'
@@ -180,7 +195,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if ref_time is None:
             ref_time = now()
         grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 2
-        if self.node_type == 'execution':
+        if self.node_type in ('execution', 'hop'):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
@@ -200,7 +215,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
-        if self.enabled:
+        if self.enabled and self.node_type != 'hop':
             lower_cap = min(self.mem_capacity, self.cpu_capacity)
             higher_cap = max(self.mem_capacity, self.cpu_capacity)
             self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
@@ -248,7 +263,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.mark_offline(perform_save=False, errors=errors)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])
 
-        self.save(update_fields=update_fields)
+        # disabling activity stream will avoid extra queries, which is important for heatbeat actions
+        from awx.main.signals import disable_activity_stream
+
+        with disable_activity_stream():
+            self.save(update_fields=update_fields)
 
     def local_health_check(self):
         """Only call this method on the instance that this record represents"""
@@ -305,7 +324,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
-        return sum([inst.capacity for inst in self.instances.all()])
+        return sum(inst.capacity for inst in self.instances.all())
 
     @property
     def jobs_running(self):
@@ -361,7 +380,7 @@ class TowerScheduleState(SingletonModel):
 
 
 def schedule_policy_task():
-    from awx.main.tasks import apply_cluster_membership_policies
+    from awx.main.tasks.system import apply_cluster_membership_policies
 
     connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 

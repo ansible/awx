@@ -116,10 +116,18 @@ function OrganizationDetail({ organization }) {
             fullWidth
             label={t`Instance Groups`}
             value={
-              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={instanceGroups.length}
+                ouiaId="instance-group-chips"
+              >
                 {instanceGroups.map((ig) => (
                   <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                    <Chip key={ig.id} isReadOnly>
+                    <Chip
+                      key={ig.id}
+                      isReadOnly
+                      ouiaId={`instance-group-${ig.id}-chip`}
+                    >
                       {ig.name}
                     </Chip>
                   </Link>
@@ -133,7 +141,11 @@ function OrganizationDetail({ organization }) {
             fullWidth
             label={t`Galaxy Credentials`}
             value={
-              <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={galaxy_credentials.length}
+                ouiaId="galaxy-credential-chips"
+              >
                 {galaxy_credentials.map((credential) => (
                   <Link
                     key={credential.id}
@@ -143,6 +155,7 @@ function OrganizationDetail({ organization }) {
                       credential={credential}
                       key={credential.id}
                       isReadOnly
+                      ouiaId={`galaxy-credential-${credential.id}-chip`}
                     />
                   </Link>
                 ))}

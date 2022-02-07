@@ -195,6 +195,7 @@ function PromptJobTemplateDetail({ resource }) {
             <ChipGroup
               numChips={5}
               totalChips={summary_fields.credentials.length}
+              ouiaId="prompt-jt-credential-chips"
             >
               {summary_fields.credentials.map((cred) => (
                 <CredentialChip key={cred.id} credential={cred} isReadOnly />
@@ -211,6 +212,7 @@ function PromptJobTemplateDetail({ resource }) {
             <ChipGroup
               numChips={5}
               totalChips={summary_fields.labels.results.length}
+              ouiaId="prompt-jt-label-chips"
             >
               {summary_fields.labels.results.map((label) => (
                 <Chip key={label.id} isReadOnly>
@@ -226,7 +228,11 @@ function PromptJobTemplateDetail({ resource }) {
           fullWidth
           label={t`Instance Groups`}
           value={
-            <ChipGroup numChips={5} totalChips={instance_groups.length}>
+            <ChipGroup
+              numChips={5}
+              totalChips={instance_groups.length}
+              ouiaId="prompt-jt-instance-group-chips"
+            >
               {instance_groups.map((ig) => (
                 <Chip key={ig.id} isReadOnly>
                   {ig.name}
@@ -241,7 +247,11 @@ function PromptJobTemplateDetail({ resource }) {
           fullWidth
           label={t`Job Tags`}
           value={
-            <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
+            <ChipGroup
+              numChips={5}
+              totalChips={job_tags.split(',').length}
+              ouiaId="prompt-jt-job-tag-chips"
+            >
               {job_tags.split(',').map((jobTag) => (
                 <Chip key={jobTag} isReadOnly>
                   {jobTag}
@@ -256,7 +266,11 @@ function PromptJobTemplateDetail({ resource }) {
           fullWidth
           label={t`Skip Tags`}
           value={
-            <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
+            <ChipGroup
+              numChips={5}
+              totalChips={skip_tags.split(',').length}
+              ouiaId="prompt-jt-skip-tag-chips"
+            >
               {skip_tags.split(',').map((skipTag) => (
                 <Chip key={skipTag} isReadOnly>
                   {skipTag}
@@ -272,6 +286,7 @@ function PromptJobTemplateDetail({ resource }) {
           rows={4}
           value={extra_vars}
           name="extra_vars"
+          dataCy="prompt-jt-detail-extra-vars"
         />
       )}
     </>

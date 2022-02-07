@@ -66,6 +66,18 @@
         that:
           - "result is changed"
 
+    - name: Rename an inventory
+      application:
+        name: "{{ app3_name }}"
+        new_name: "{{ app3_name }}a"
+        organization: Default
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - result.changed
+
   always:
     - name: Delete our application
       application:
@@ -77,3 +89,4 @@
         - "{{ app1_name }}"
         - "{{ app2_name }}"
         - "{{ app3_name }}"
+        - "{{ app3_name }}a"

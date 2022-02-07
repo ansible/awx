@@ -7,7 +7,8 @@ Please see the [Tower documentation](https://docs.ansible.com/ansible-tower/late
 * `SOCIAL_AUTH_SAML_SP_EXTRA` is passed to the `python-saml` library configuration's `sp` setting.  
 * `SOCIAL_AUTH_SAML_SECURITY_CONFIG` is passed to the `python-saml` library configuration's `security` setting.
 * `SOCIAL_AUTH_SAML_EXTRA_DATA`
-See http://python-social-auth-docs.readthedocs.io/en/latest/backends/saml.html#advanced-settings for more information.
+
+See https://python-social-auth.readthedocs.io/en/latest/backends/saml.html#advanced-settings for more information.
 
 
 # Configure SAML for Team and Organization Membership
@@ -86,3 +87,60 @@ Below is another example of a SAML attribute that contains a Team membership in 
 **remove:** Set this to `true` to remove user from all Teams before adding the user to the list of Teams. Set this to `false` to keep the user in whatever Team(s) they are in while adding the user to the Team(s) in the SAML attribute.
 
 **team_org_map:** An array of dictionaries of the form `{ "team": "<AWX Team Name>", "organization": "<AWX Org Name>" }` which defines mapping from AWX Team -> AWX Organization. This is needed because the same named Team can exist in multiple Organizations in Tower. The organization to which a team listed in a SAML attribute belongs to would be ambiguous without this mapping.
+
+
+### Example SAML User Flags Attribute Mapping
+SAML User flags can be set for users with global "System Administrator" (superuser) or "System Auditor" (system_auditor) permissions.
+
+Below is an example of a SAML attribute that contains admin attributes:
+```
+<saml2:AttributeStatement>
+    <saml2:Attribute FriendlyName="is_system_auditor" Name="is_system_auditor" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified">
+   	 <saml2:AttributeValue>Auditor</saml2:AttributeValue>
+    </saml2:Attribute>
+    <saml2:Attribute FriendlyName="is_superuser" Name="is_superuser" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified">
+   	 <saml2:AttributeValue>IT-Superadmin</saml2:AttributeValue>
+    </saml2:Attribute>
+</saml2:AttributeStatement>
+```
+
+These properties can be defined either by a role or an attribute with the following configuration options:
+```
+{
+  "is_superuser_role": "awx_admins",
+  "is_superuser_attr": "is_superuser",
+  "is_superuser_value": "IT-Superadmin",
+  "is_system_auditor_role": "awx_auditors",
+  "is_system_auditor_attr": "is_system_auditor",
+  "is_system_auditor_value": "Auditor"
+}
+```
+
+**is_superuser_role:** Specifies a SAML role which will grant a user the superuser flag.
+
+**is_superuser_attr:** Specifies a SAML attribute which will grant a user the superuser flag.
+
+**is_superuser_value:** Specifies a specific value required for ``is_superuser_attr`` that is required for the user to be a superuser.
+
+**is_system_auditor_role:** Specifies a SAML role which will grant a user the system auditor flag.
+
+**is_system_auditor_attr:** Specifies a SAML attribute which will grant a user the system auditor flag.
+
+**is_system_auditor_value:** Specifies a specific value required for ``is_system_auditor_attr`` that is required for the user to be a system auditor.
+
+
+If `role` and `attr` are both specified for either superuser or system_auditor the settings for `attr` will take precedence over a `role`. The following table describes how the logic works.
+| Has Role | Has Attr | Has Attr Value | Is Flagged |
+|----------|----------|----------------|------------|
+| No       | No       | N/A            | No         |
+| Yes      | No       | N/A            | Yes        |
+| No       | Yes      | Yes            | Yes        |
+| No       | Yes      | No             | No         |
+| No       | Yes      | Unset          | Yes        |
+| Yes      | Yes      | Yes            | Yes        |
+| Yes      | Yes      | No             | No         |
+| Yes      | Yes      | Unset          | Yes        |
+
+
+### SAML Debugging
+You can enable logging messages for the SAML adapter the same way you can enable logging for LDAP. On the logging settings page change the log level to `Debug`. 

@@ -13,6 +13,9 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField, NullBooleanField  # noqa
 from rest_framework.serializers import PrimaryKeyRelatedField  # noqa
 
+# AWX
+from awx.main.constants import CONTAINER_VOLUMES_MOUNT_TYPES, MAX_ISOLATED_PATH_COLON_DELIMITER
+
 logger = logging.getLogger('awx.conf.fields')
 
 # Use DRF fields to convert/validate settings:
@@ -105,6 +108,49 @@ class StringListPathField(StringListField):
                     self.fail('path_error', path=p)
 
             return super(StringListPathField, self).to_internal_value(sorted({os.path.normpath(path) for path in paths}))
+        else:
+            self.fail('type_error', input_type=type(paths))
+
+
+class StringListIsolatedPathField(StringListField):
+    # Valid formats
+    # '/etc/pki/ca-trust'
+    # '/etc/pki/ca-trust:/etc/pki/ca-trust'
+    # '/etc/pki/ca-trust:/etc/pki/ca-trust:O'
+
+    default_error_messages = {
+        'type_error': _('Expected list of strings but got {input_type} instead.'),
+        'path_error': _('{path} is not a valid path choice. You must provide an absolute path.'),
+        'mount_error': _('{scontext} is not a valid mount option. Allowed types are {mount_types}'),
+        'syntax_error': _('Invalid syntax. A string HOST-DIR[:CONTAINER-DIR[:OPTIONS]] is expected but got {path}.'),
+    }
+
+    def to_internal_value(self, paths):
+
+        if isinstance(paths, (list, tuple)):
+            for p in paths:
+                if not isinstance(p, str):
+                    self.fail('type_error', input_type=type(p))
+                if not p.startswith('/'):
+                    self.fail('path_error', path=p)
+
+                if p.count(':'):
+                    if p.count(':') > MAX_ISOLATED_PATH_COLON_DELIMITER:
+                        self.fail('syntax_error', path=p)
+                    try:
+                        src, dest, scontext = p.split(':')
+                    except ValueError:
+                        scontext = 'z'
+                        src, dest = p.split(':')
+                    finally:
+                        for sp in [src, dest]:
+                            if not len(sp):
+                                self.fail('syntax_error', path=sp)
+                            if not sp.startswith('/'):
+                                self.fail('path_error', path=sp)
+                        if scontext not in CONTAINER_VOLUMES_MOUNT_TYPES:
+                            self.fail('mount_error', scontext=scontext, mount_types=CONTAINER_VOLUMES_MOUNT_TYPES)
+            return super(StringListIsolatedPathField, self).to_internal_value(sorted(paths))
         else:
             self.fail('type_error', input_type=type(paths))
 

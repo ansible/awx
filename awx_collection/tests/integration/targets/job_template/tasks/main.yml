@@ -230,6 +230,25 @@
     that:
       - "result is changed"
 
+- name: add bad label to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    organization: Default
+    project: "{{ proj1 }}"
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    credential: "{{ cred3 }}"
+    job_type: run
+    labels:
+      - label_bad
+    state: present
+  register: bad_label_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - "bad_label_results.msg == 'Could not find label entry with name label_bad'"
+
 - name: Add survey to Job Template 2
   job_template:
     name: "{{ jt2 }}"

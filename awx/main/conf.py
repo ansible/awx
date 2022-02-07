@@ -72,8 +72,8 @@ register(
         'HTTP headers and meta keys to search to determine remote host '
         'name or IP. Add additional items to this list, such as '
         '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
-        'See the "Proxy Support" section of the Adminstrator guide for '
-        'more details.'
+        'See the "Proxy Support" section of the AAP Installation guide '
+        'for more details.'
     ),
     category=_('System'),
     category_slug='system',
@@ -259,10 +259,14 @@ register(
 
 register(
     'AWX_ISOLATION_SHOW_PATHS',
-    field_class=fields.StringListField,
+    field_class=fields.StringListIsolatedPathField,
     required=False,
     label=_('Paths to expose to isolated jobs'),
-    help_text=_('List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
+    help_text=_(
+        'List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. '
+        'Volumes will be mounted from the execution node to the container. '
+        'The supported format is HOST-DIR[:CONTAINER-DIR[:OPTIONS]]. '
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -671,6 +675,24 @@ register(
     default=False,
     label=_('Enable rsyslogd debugging'),
     help_text=_('Enabled high verbosity debugging for rsyslogd.  Useful for debugging connection issues for external log aggregation.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'API_400_ERROR_LOG_FORMAT',
+    field_class=fields.CharField,
+    default='status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}',
+    label=_('Log Format For API 4XX Errors'),
+    help_text=_(
+        'The format of logged messages when an API 4XX error occurs, '
+        'the following variables will be substituted: \n'
+        'status_code - The HTTP status code of the error\n'
+        'user_name - The user name attempting to use the API\n'
+        'url_path - The URL path to the API endpoint called\n'
+        'remote_addr - The remote address seen for the user\n'
+        'error - The error set by the api endpoint\n'
+        'Variables need to be in the format {<variable name>}.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )

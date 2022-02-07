@@ -37,7 +37,7 @@ function ActivityStreamListItem({ streamItem }) {
   const description = <ActivityStreamDescription activity={streamItem} />;
 
   return (
-    <Tr id={streamItem.id} aria-labelledby={labelId}>
+    <Tr id={streamItem.id} ouiaId={streamItem.id} aria-labelledby={labelId}>
       <Td />
       <Td dataLabel={t`Time`}>
         {streamItem.timestamp ? formatDateString(streamItem.timestamp) : ''}

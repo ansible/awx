@@ -23,11 +23,13 @@ function WorkflowJobTemplateAdd() {
       organization,
       webhook_credential,
       webhook_key,
+      limit,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id;
     templatePayload.organization = organization?.id;
     templatePayload.webhook_credential = webhook_credential?.id;
+    templatePayload.limit = limit === '' ? null : limit;
     const organizationId =
       organization?.id || inventory?.summary_fields?.organization.id;
     try {

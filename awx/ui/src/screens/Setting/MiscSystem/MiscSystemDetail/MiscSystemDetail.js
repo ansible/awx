@@ -41,7 +41,6 @@ function MiscSystemDetail() {
         );
         data.DEFAULT_EXECUTION_ENVIRONMENT = name;
       }
-
       const systemData = pluck(
         data,
         'ACTIVITY_STREAM_ENABLED',

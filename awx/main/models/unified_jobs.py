@@ -1046,7 +1046,7 @@ class UnifiedJob(
             fd = tempfile.NamedTemporaryFile(
                 mode='w', prefix='{}-{}-'.format(self.model_to_str(), self.pk), suffix='.out', dir=settings.JOBOUTPUT_ROOT, encoding='utf-8'
             )
-            from awx.main.tasks import purge_old_stdout_files  # circular import
+            from awx.main.tasks.system import purge_old_stdout_files  # circular import
 
             purge_old_stdout_files.apply_async()
 

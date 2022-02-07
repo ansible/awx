@@ -190,9 +190,10 @@ function WorkflowJobTemplateDetail({ template }) {
               <ChipGroup
                 numChips={3}
                 totalChips={summary_fields.labels.results.length}
+                ouiaId="workflow-job-template-detail-label-chips"
               >
                 {summary_fields.labels.results.map((l) => (
-                  <Chip key={l.id} isReadOnly>
+                  <Chip key={l.id} ouiaId={`${l.name}-label-chip`} isReadOnly>
                     {l.name}
                   </Chip>
                 ))}
@@ -201,6 +202,7 @@ function WorkflowJobTemplateDetail({ template }) {
           />
         )}
         <VariablesDetail
+          dataCy="workflow-job-template-detail-extra-vars"
           label={t`Variables`}
           value={extra_vars}
           rows={4}

@@ -140,6 +140,7 @@ function JobOutputSearch({
       clearAllFilters={handleRemoveAllSearchTerms}
       collapseListedFiltersBreakpoint="lg"
       clearFiltersButtonText={t`Clear all filters`}
+      ouiaId="job-output-toolbar"
     >
       <SearchToolbarContent>
         <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">

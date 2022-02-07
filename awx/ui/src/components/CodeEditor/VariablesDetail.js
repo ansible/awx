@@ -109,6 +109,7 @@ function VariablesDetail({
       <Modal
         variant="xlarge"
         title={label}
+        ouiaId={`${dataCy}-modal`}
         isOpen={isExpanded}
         onClose={() => setIsExpanded(false)}
         actions={[

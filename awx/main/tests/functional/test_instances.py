@@ -4,7 +4,7 @@ from unittest import mock
 from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate, ProjectUpdate
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance, InstanceGroup
-from awx.main.tasks import apply_cluster_membership_policies
+from awx.main.tasks.system import apply_cluster_membership_policies
 from awx.api.versioning import reverse
 
 from django.utils.timezone import now
@@ -77,15 +77,16 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     ig_all = instance_group_factory("all", instances=[i1, i2, i3])
     ig_dup = instance_group_factory("duplicates", instances=[i1])
     project.organization.instance_groups.add(ig_all, ig_dup)
-    actual_num_instances = Instance.objects.active_count()
+    actual_num_instances = Instance.objects.count()
     list_response = get(reverse('api:instance_list'), user=system_auditor)
     api_num_instances_auditor = list(list_response.data.items())[0][1]
 
     list_response2 = get(reverse('api:instance_list'), user=org_admin)
     api_num_instances_oa = list(list_response2.data.items())[0][1]
 
-    assert actual_num_instances == api_num_instances_auditor
-    # Note: The org_admin will not see the default 'tower' node (instance fixture) because it is not in its group, as expected
+    assert api_num_instances_auditor == actual_num_instances
+    # Note: The org_admin will not see the default 'tower' node
+    # (instance fixture) because it is not in its group, as expected
     assert api_num_instances_oa == (actual_num_instances - 1)
 
 

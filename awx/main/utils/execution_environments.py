@@ -31,11 +31,14 @@ def get_default_pod_spec():
         "kind": "Pod",
         "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
         "spec": {
+            "serviceAccountName": "default",
+            "automountServiceAccountToken": False,
             "containers": [
                 {
                     "image": ee.image,
                     "name": 'worker',
                     "args": ['ansible-runner', 'worker', '--private-data-dir=/runner'],
+                    "resources": {"requests": {"cpu": "250m", "memory": "100Mi"}},
                 }
             ],
         },

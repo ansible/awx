@@ -181,7 +181,7 @@ function Metrics() {
       <PageSection>
         <Card>
           <CardHeader>
-            <Toolbar>
+            <Toolbar ouiaId="metrics-toolbar">
               <ToolbarContent>
                 <ToolbarGroup>
                   <ToolbarItem>{t`Instance`}</ToolbarItem>

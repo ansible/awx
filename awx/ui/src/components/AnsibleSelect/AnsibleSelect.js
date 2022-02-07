@@ -31,6 +31,7 @@ function AnsibleSelect({
   return (
     <FormSelect
       id={id}
+      ouiaId={id}
       value={value}
       onChange={onSelectChange}
       onBlur={onBlur}

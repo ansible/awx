@@ -117,11 +117,13 @@ function Dashboard() {
               aria-label={t`Tabs`}
               activeKey={activeTabId}
               onSelect={(key, eventKey) => setActiveTabId(eventKey)}
+              ouiaId="dashboard-tabs"
             >
               <Tab
                 aria-label={t`Job status graph tab`}
                 eventKey={0}
                 title={<TabTitleText>{t`Job status`}</TabTitleText>}
+                ouiaId="job-status-graph-tab"
               >
                 <DashboardGraph />
               </Tab>
@@ -129,6 +131,7 @@ function Dashboard() {
                 aria-label={t`Recent Jobs list tab`}
                 eventKey={1}
                 title={<TabTitleText>{t`Recent Jobs`}</TabTitleText>}
+                ouiaId="recent-jobs-list-tab"
               >
                 <div>
                   {activeTabId === 1 && (
@@ -140,6 +143,7 @@ function Dashboard() {
                 aria-label={t`Recent Templates list tab`}
                 eventKey={2}
                 title={<TabTitleText>{t`Recent Templates`}</TabTitleText>}
+                ouiaId="recent-templates-list-tab"
               >
                 <div>
                   {activeTabId === 2 && (

@@ -128,6 +128,7 @@ function AdHocCommands({
             component="button"
             aria-label={t`Run Command`}
             onClick={() => setIsWizardOpen(true)}
+            ouiaId="run-command-dropdown-item"
           >
             {t`Run Command`}
           </DropdownItem>

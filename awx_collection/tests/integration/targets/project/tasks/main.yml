@@ -183,6 +183,18 @@
         that:
           - job is successful
 
+    - name: Rename an inventory
+      project:
+        name: "{{ project_name3 }}"
+        new_name: "{{ project_name3 }}a"
+        organization: Default
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - result.changed
+
   always:
     - name: Delete the test job_template
       job_template:
@@ -194,6 +206,12 @@
     - name: Delete the test project 3
       project:
         name: "{{ project_name3 }}"
+        organization: Default
+        state: absent
+
+    - name: Delete the test project 3a
+      project:
+        name: "{{ project_name3 }}a"
         organization: Default
         state: absent
 

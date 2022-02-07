@@ -63,6 +63,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
           component="button"
           aria-label={t`Delete`}
           onClick={() => setIsModalOpen(true)}
+          ouiaId="group-delete-dropdown-item"
         >
           {t`Delete`}
         </DropdownItem>
@@ -72,6 +73,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
           aria-label={t`Delete`}
           onClick={() => setIsModalOpen(true)}
           isDisabled={isDisabled || isDeleteLoading}
+          ouiaId="group-delete-button"
         >
           {t`Delete`}
         </Button>
@@ -95,6 +97,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
               variant="danger"
               key="delete"
               isDisabled={radioOption === null}
+              ouiaId="delete-modal-confirm-button"
             >
               {t`Delete`}
             </Button>,
@@ -103,6 +106,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
               onClick={() => setIsModalOpen(false)}
               variant="link"
               key="cancel"
+              ouiaId="delete-modal-cancel-button"
             >
               {t`Cancel`}
             </Button>,
@@ -126,6 +130,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
               label={t`Delete All Groups and Hosts`}
               name="option"
               onChange={() => setRadioOption('delete')}
+              ouiaId="delete-all-radio-button"
             />
             <Radio
               css="margin-top: 5px;"
@@ -134,6 +139,7 @@ const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
               label={t`Promote Child Groups and Hosts`}
               name="option"
               onChange={() => setRadioOption('promote')}
+              ouiaId="promote-radio-button"
             />
           </div>
         </AlertModal>

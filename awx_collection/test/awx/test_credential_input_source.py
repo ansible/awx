@@ -259,7 +259,7 @@ def source_cred_aim_alt(aim_cred_type):
 
 
 @pytest.mark.django_db
-def test_aim_credential_source(run_module, admin_user, organization, source_cred_aim, source_cred_aim_alt, silence_deprecation):
+def test_aim_credential_source_change_source(run_module, admin_user, organization, source_cred_aim, source_cred_aim_alt, silence_deprecation):
     ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})

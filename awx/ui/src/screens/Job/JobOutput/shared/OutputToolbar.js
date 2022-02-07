@@ -161,7 +161,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
                 <Button
                   ouiaId="job-output-relaunch-button"
                   variant="plain"
-                  onClick={handleRelaunch}
+                  onClick={() => handleRelaunch()}
                   aria-label={t`Relaunch`}
                   isDisabled={isLaunching}
                 >

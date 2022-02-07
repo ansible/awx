@@ -69,11 +69,13 @@ function PromptProjectDetail({ resource }) {
     );
   }
 
+  const prefixCy = 'prompt-project-detail';
   return (
     <>
       {summary_fields?.organization ? (
         <Detail
           label={t`Organization`}
+          dataCy={`${prefixCy}-organization`}
           value={
             <Link
               to={`/organizations/${summary_fields.organization.id}/details`}
@@ -92,14 +94,28 @@ function PromptProjectDetail({ resource }) {
       />
       <Detail
         label={t`Source Control Type`}
+        dataCy={`${prefixCy}-source-control-type`}
         value={scm_type === '' ? t`Manual` : toTitleCase(scm_type)}
       />
-      <Detail label={t`Source Control URL`} value={scm_url} />
-      <Detail label={t`Source Control Branch`} value={scm_branch} />
-      <Detail label={t`Source Control Refspec`} value={scm_refspec} />
+      <Detail
+        label={t`Source Control URL`}
+        dataCy={`${prefixCy}-source-control-url`}
+        value={scm_url}
+      />
+      <Detail
+        label={t`Source Control Branch`}
+        dataCy={`${prefixCy}-source-control-branch`}
+        value={scm_branch}
+      />
+      <Detail
+        label={t`Source Control Refspec`}
+        dataCy={`${prefixCy}-source-control-refspec`}
+        value={scm_refspec}
+      />
       {summary_fields?.credential?.id && (
         <Detail
           label={t`Source Control Credential`}
+          dataCy={`${prefixCy}-source-control-credential`}
           value={
             <CredentialChip
               key={resource.summary_fields.credential.id}
@@ -109,17 +125,32 @@ function PromptProjectDetail({ resource }) {
           }
         />
       )}
-      {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
+      {optionsList && (
+        <Detail
+          label={t`Enabled Options`}
+          dataCy={`${prefixCy}-enabled-options`}
+          value={optionsList}
+        />
+      )}
       <Detail
         label={t`Cache Timeout`}
+        dataCy={`${prefixCy}-cache-timeout`}
         value={`${scm_update_cache_timeout} ${t`Seconds`}`}
       />
       <Config>
         {({ project_base_dir }) => (
-          <Detail label={t`Project Base Path`} value={project_base_dir} />
+          <Detail
+            label={t`Project Base Path`}
+            dataCy={`${prefixCy}-project-base-path`}
+            value={project_base_dir}
+          />
         )}
       </Config>
-      <Detail label={t`Playbook Directory`} value={local_path} />
+      <Detail
+        label={t`Playbook Directory`}
+        dataCy={`${prefixCy}-playbook-directory`}
+        value={local_path}
+      />
     </>
   );
 }

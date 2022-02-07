@@ -121,9 +121,17 @@ function SmartInventoryDetail({ inventory }) {
               fullWidth
               label={t`Instance groups`}
               value={
-                <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+                <ChipGroup
+                  numChips={5}
+                  totalChips={instanceGroups.length}
+                  ouiaId="instance-group-chips"
+                >
                   {instanceGroups.map((ig) => (
-                    <Chip key={ig.id} isReadOnly>
+                    <Chip
+                      key={ig.id}
+                      isReadOnly
+                      ouiaId={`instance-group-${ig.id}-chip`}
+                    >
                       {ig.name}
                     </Chip>
                   ))}
@@ -136,6 +144,7 @@ function SmartInventoryDetail({ inventory }) {
             value={variables}
             rows={4}
             name="variables"
+            dataCy="smart-inventory-detail-variables"
           />
           <UserDateDetail label={t`Created`} date={created} user={created_by} />
           <UserDateDetail

@@ -110,6 +110,7 @@ options:
     labels:
       description:
         - The labels applied to this job template
+        - Must be created with the labels module first. This will error if the label has not been created.
       type: list
       elements: str
     state:
@@ -782,7 +783,10 @@ def main():
         association_fields['labels'] = []
         for item in labels:
             label_id = module.get_one('labels', name_or_id=item, **{'data': search_fields})
-            association_fields['labels'].append(label_id['id'])
+            if label_id is None:
+                module.fail_json(msg='Could not find label entry with name {0}'.format(item))
+            else:
+                association_fields['labels'].append(label_id['id'])
 
     on_change = None
     new_spec = module.params.get('survey_spec')
@@ -810,7 +814,7 @@ def main():
     )
 
     # Get Workflow information in case one was just created.
-    existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
+    existing_item = module.get_one('workflow_job_templates', name_or_id=new_name if new_name else name, **{'data': search_fields})
     workflow_job_template_id = existing_item['id']
     # Destroy current nodes if selected.
     if destroy_current_schema:

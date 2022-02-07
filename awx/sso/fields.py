@@ -614,6 +614,7 @@ class SocialSingleOrganizationMapField(HybridDictField):
     users = SocialMapField(allow_null=True, required=False)
     remove_admins = fields.BooleanField(required=False)
     remove_users = fields.BooleanField(required=False)
+    organization_alias = SocialMapField(allow_null=True, required=False)
 
     child = _Forbidden()
 
@@ -723,7 +724,6 @@ class SAMLTeamAttrTeamOrgMapField(HybridDictField):
     team = fields.CharField(required=True, allow_null=False)
     team_alias = fields.CharField(required=False, allow_null=True)
     organization = fields.CharField(required=True, allow_null=False)
-    organization_alias = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()
 
@@ -733,5 +733,17 @@ class SAMLTeamAttrField(HybridDictField):
     team_org_map = fields.ListField(required=False, child=SAMLTeamAttrTeamOrgMapField(), allow_null=True)
     remove = fields.BooleanField(required=False)
     saml_attr = fields.CharField(required=False, allow_null=True)
+
+    child = _Forbidden()
+
+
+class SAMLUserFlagsAttrField(HybridDictField):
+
+    is_superuser_attr = fields.CharField(required=False, allow_null=True)
+    is_superuser_value = fields.CharField(required=False, allow_null=True)
+    is_superuser_role = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_attr = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_value = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_role = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()

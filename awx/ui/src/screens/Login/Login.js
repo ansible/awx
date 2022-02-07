@@ -152,6 +152,7 @@ function AWXLogin({ alt, isAuthenticated }) {
             variant="warning"
             isInline
             title={t`Your session has expired. Please log in to continue where you left off.`}
+            ouiaId="session-expired-warning-alert"
           />
         ) : null}
         <Formik

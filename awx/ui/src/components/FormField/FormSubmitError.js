@@ -27,6 +27,7 @@ function FormSubmitError({ error }) {
       <Alert
         variant="danger"
         isInline
+        ouiaId="form-submit-error-alert"
         title={
           Array.isArray(errorMessage)
             ? errorMessage.map((msg) => <div key={msg}>{msg}</div>)

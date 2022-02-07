@@ -30,7 +30,7 @@ function HostListItem({
 
   return (
     <>
-      <Tr id={`host-row-${host.id}`}>
+      <Tr id={`host-row-${host.id}`} ouiaId={`host-row-${host.id}`}>
         <Td
           expand={{
             rowIndex,
@@ -79,7 +79,7 @@ function HostListItem({
           </ActionItem>
         </ActionsTd>
       </Tr>
-      <Tr isExpanded={isExpanded}>
+      <Tr ouiaId={`host-row-${host.id}-expanded`} isExpanded={isExpanded}>
         <Td colSpan={2} />
         <Td colSpan={4}>
           <ExpandableRowContent>

@@ -2,7 +2,8 @@ import pytest
 from unittest import mock
 import os
 
-from awx.main.tasks import RunProjectUpdate, RunInventoryUpdate, execution_node_health_check
+from awx.main.tasks.jobs import RunProjectUpdate, RunInventoryUpdate
+from awx.main.tasks.system import execution_node_health_check
 from awx.main.models import ProjectUpdate, InventoryUpdate, InventorySource, Instance
 
 
@@ -49,7 +50,7 @@ class TestDependentInventoryUpdate:
         scm_inventory_source.scm_last_revision = ''
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
         with mock.patch.object(RunInventoryUpdate, 'run') as iu_run_mock:
-            with mock.patch('awx.main.tasks.create_partition'):
+            with mock.patch('awx.main.tasks.jobs.create_partition'):
                 task._update_dependent_inventories(proj_update, [scm_inventory_source])
                 assert InventoryUpdate.objects.count() == 1
                 inv_update = InventoryUpdate.objects.first()
@@ -73,7 +74,7 @@ class TestDependentInventoryUpdate:
             ProjectUpdate.objects.all().update(cancel_flag=True)
 
         with mock.patch.object(RunInventoryUpdate, 'run') as iu_run_mock:
-            with mock.patch('awx.main.tasks.create_partition'):
+            with mock.patch('awx.main.tasks.jobs.create_partition'):
                 iu_run_mock.side_effect = user_cancels_project
                 task._update_dependent_inventories(proj_update, [is1, is2])
                 # Verify that it bails after 1st update, detecting a cancel

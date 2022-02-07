@@ -26,6 +26,10 @@ options:
         - Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
       required: True
       type: str
+    new_username:
+      description:
+        - Setting this option will change the existing username (looked up via the name field.
+      type: str
     first_name:
       description:
         - First name of the user.
@@ -114,6 +118,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         username=dict(required=True),
+        new_username=dict(),
         first_name=dict(),
         last_name=dict(),
         email=dict(),
@@ -129,6 +134,7 @@ def main():
 
     # Extract our parameters
     username = module.params.get('username')
+    new_username = module.params.get("new_username")
     first_name = module.params.get('first_name')
     last_name = module.params.get('last_name')
     email = module.params.get('email')
@@ -149,7 +155,7 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
     if username is not None:
-        new_fields['username'] = module.get_item_name(existing_item) if existing_item else username
+        new_fields['username'] = new_username if new_username else (module.get_item_name(existing_item) if existing_item else username)
     if first_name is not None:
         new_fields['first_name'] = first_name
     if last_name is not None:

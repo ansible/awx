@@ -255,7 +255,7 @@ def random_ipv4():
 
 def random_ipv6():
     """Generates a random ipv6 address;; useful for testing."""
-    return ':'.join('{0:x}'.format(random.randint(0, 2 ** 16 - 1)) for i in range(8))
+    return ':'.join('{0:x}'.format(random.randint(0, 2**16 - 1)) for i in range(8))
 
 
 def random_loopback_ip():

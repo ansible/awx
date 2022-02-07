@@ -16,7 +16,7 @@ function HostGroupItem({ group, inventoryId, isSelected, onSelect, rowIndex }) {
   const editUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/edit`;
 
   return (
-    <Tr id={`group-row-${group.id}`}>
+    <Tr id={`group-row-${group.id}`} ouiaId={`group-row-${group.id}`}>
       <Td
         select={{
           rowIndex,

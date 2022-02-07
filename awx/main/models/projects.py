@@ -471,7 +471,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         r = super(Project, self).delete(*args, **kwargs)
         for path_to_delete in paths_to_delete:
             if self.scm_type and path_to_delete:  # non-manual, concrete path
-                from awx.main.tasks import delete_project_files
+                from awx.main.tasks.system import delete_project_files
 
                 delete_project_files.delay(path_to_delete)
         return r
@@ -532,7 +532,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunProjectUpdate
+        from awx.main.tasks.jobs import RunProjectUpdate
 
         return RunProjectUpdate
 

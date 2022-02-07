@@ -51,7 +51,7 @@
         "type": "list",
         "required": true,
         "label": "Remote Host Headers",
-        "help_text": "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy. See the \"Proxy Support\" section of the Adminstrator guide for more details.",
+        "help_text": "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy. See the \"Proxy Support\" section of the AAP Installation guide for more details.",
         "category": "System",
         "category_slug": "system",
         "default": ["REMOTE_ADDR", "REMOTE_HOST"],
@@ -563,6 +563,15 @@
         "category": "Logging",
         "category_slug": "logging",
         "default": false
+      },
+      "API_400_ERROR_LOG_FORMAT": {
+        "type": "string",
+        "required": false,
+        "label": "Log Format For API 4XX Errors",
+        "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
       },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
@@ -3706,6 +3715,28 @@
           "required": true,
           "read_only": false
         }
+      },
+      "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "type": "nested object",
+        "required": false,
+        "label": "SAML User Flags Attribute Mapping",
+        "help_text": "Used to map super users and system auditors from SAML.",
+        "category": "SAML",
+        "category_slug": "saml",
+        "placeholder": {
+          "is_superuser_attr": "saml_attr",
+          "is_superuser_value": "value",
+          "is_superuser_role": "saml_role",
+          "is_system_auditor_attr": "saml_attr",
+          "is_system_auditor_value": "value",
+          "is_system_auditor_role": "saml_role"
+        },
+        "default": {},
+        "child": {
+          "type": "field",
+          "required": true,
+          "read_only": false
+        }
       }
     },
     "GET": {
@@ -4198,6 +4229,15 @@
         "category": "Logging",
         "category_slug": "logging",
         "defined_in_file": false
+      },
+      "API_400_ERROR_LOG_FORMAT": {
+        "type": "string",
+        "required": false,
+        "label": "Log Format For API 4XX Errors",
+        "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
       },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
@@ -6298,6 +6338,17 @@
         "type": "nested object",
         "label": "SAML Team Attribute Mapping",
         "help_text": "Used to translate user team membership.",
+        "category": "SAML",
+        "category_slug": "saml",
+        "defined_in_file": false,
+        "child": {
+          "type": "field"
+        }
+      },
+      "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "type": "nested object",
+	      "label": "SAML User Flags Attribute Mapping",
+        "help_text": "Used to map super users and system auditors from SAML.",
         "category": "SAML",
         "category_slug": "saml",
         "defined_in_file": false,

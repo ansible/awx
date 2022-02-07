@@ -128,6 +128,7 @@ function PaginatedTable({
       }
       onSetPage={handleSetPage}
       onPerPageSelect={handleSetPageSize}
+      ouiaId="top-pagination"
       titles={{
         paginationTitle: t`Top Pagination`,
       }}
@@ -165,6 +166,7 @@ function PaginatedTable({
           }
           onSetPage={handleSetPage}
           onPerPageSelect={handleSetPageSize}
+          ouiaId="bottom-pagination"
         />
       ) : null}
     </>

@@ -96,6 +96,7 @@ function ListHeader(props) {
           id={`${qsConfig.namespace}-list-toolbar`}
           clearAllFilters={handleRemoveAll}
           collapseListedFiltersBreakpoint="lg"
+          ouiaId={`${qsConfig.namespace}-list-toolbar`}
         >
           <ToolbarContent>
             <EmptyStateControlsWrapper>

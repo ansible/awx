@@ -2,7 +2,7 @@ import React from 'react';
 import { TextList, TextListVariants } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-const DetailList = ({ children, stacked, ...props }) => (
+const DetailList = ({ children, stacked, compact, ...props }) => (
   <TextList component={TextListVariants.dl} {...props}>
     {children}
   </TextList>
@@ -10,8 +10,8 @@ const DetailList = ({ children, stacked, ...props }) => (
 
 export default styled(DetailList)`
   display: grid;
-  grid-gap: 20px;
   align-items: start;
+  ${(props) => (props.compact ? `column-gap: 20px;` : `grid-gap: 20px;`)}
   ${(props) =>
     props.stacked
       ? `

@@ -37,6 +37,7 @@ describe('<SAMLDetail />', () => {
         SOCIAL_AUTH_SAML_TEAM_MAP: {},
         SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
         SOCIAL_AUTH_SAML_TEAM_ATTR: {},
+        SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR: {},
         SAML_AUTO_CREATE_OBJECTS: false,
       },
     });

@@ -42,7 +42,10 @@ function ProjectJobTemplateListItem({
     !template.execution_environment;
 
   return (
-    <Tr id={`template-row-${template.id}`}>
+    <Tr
+      id={`template-row-${template.id}`}
+      ouiaId={`template-row-${template.id}`}
+    >
       <Td
         select={{
           rowIndex,

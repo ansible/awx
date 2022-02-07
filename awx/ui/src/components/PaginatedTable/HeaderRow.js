@@ -38,7 +38,7 @@ export default function HeaderRow({
   // empty first Th aligns with checkboxes in table rows
   return (
     <Thead>
-      <Tr>
+      <Tr ouiaId="paginated-table-header-row">
         {isExpandable && <Th />}
         {isSelectable && <Th />}
         {React.Children.map(

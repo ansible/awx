@@ -174,7 +174,6 @@ setup(
                     "tools/scripts/automation-controller-service",
                     "tools/scripts/failure-event-handler",
                     "tools/scripts/awx-python",
-                    "tools/scripts/ansible-tower-setup",
                 ],
             ),
             ("%s" % sosconfig, ["tools/sosreport/controller.py"]),

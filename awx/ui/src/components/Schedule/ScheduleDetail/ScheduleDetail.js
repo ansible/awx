@@ -330,9 +330,18 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 fullWidth
                 label={t`Credentials`}
                 value={
-                  <ChipGroup numChips={5} totalChips={credentials.length}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={credentials.length}
+                    ouiaId="schedule-credential-chips"
+                  >
                     {credentials.map((c) => (
-                      <CredentialChip key={c.id} credential={c} isReadOnly />
+                      <CredentialChip
+                        key={c.id}
+                        credential={c}
+                        isReadOnly
+                        ouiaId={`credential-${c.id}-chip`}
+                      />
                     ))}
                   </ChipGroup>
                 }
@@ -346,9 +355,14 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                   <ChipGroup
                     numChips={5}
                     totalChips={job_tags.split(',').length}
+                    ouiaId="schedule-job-tag-chips"
                   >
                     {job_tags.split(',').map((jobTag) => (
-                      <Chip key={jobTag} isReadOnly>
+                      <Chip
+                        key={jobTag}
+                        isReadOnly
+                        ouiaId={`job-tag-${jobTag}-chip`}
+                      >
                         {jobTag}
                       </Chip>
                     ))}
@@ -364,9 +378,14 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                   <ChipGroup
                     numChips={5}
                     totalChips={skip_tags.split(',').length}
+                    ouiaId="schedule-skip-tag-chips"
                   >
                     {skip_tags.split(',').map((skipTag) => (
-                      <Chip key={skipTag} isReadOnly>
+                      <Chip
+                        key={skipTag}
+                        isReadOnly
+                        ouiaId={`skip-tag-${skipTag}-chip`}
+                      >
                         {skipTag}
                       </Chip>
                     ))}
@@ -380,6 +399,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 rows={4}
                 label={t`Variables`}
                 name="extra_vars"
+                dataCy="schedule-detail-variables"
               />
             )}
           </PromptDetailList>

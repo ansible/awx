@@ -167,6 +167,7 @@ describe('useJobEvents', () => {
       uuidMap: {},
       eventsWithoutParents: {},
       eventGaps: [],
+      isAllCollapsed: false,
     };
   });
 

@@ -42,7 +42,8 @@ function LoggingDetail() {
         'LOG_AGGREGATOR_TCP_TIMEOUT',
         'LOG_AGGREGATOR_TYPE',
         'LOG_AGGREGATOR_USERNAME',
-        'LOG_AGGREGATOR_VERIFY_CERT'
+        'LOG_AGGREGATOR_VERIFY_CERT',
+        'API_400_ERROR_LOG_FORMAT'
       );
 
       const mergedData = {};

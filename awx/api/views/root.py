@@ -123,6 +123,7 @@ class ApiVersionRootView(APIView):
         data['workflow_approvals'] = reverse('api:workflow_approval_list', request=request)
         data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
+        data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         return Response(data)
 
 
@@ -149,13 +150,13 @@ class ApiV2PingView(APIView):
         response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': settings.INSTALL_UUID}
 
         response['instances'] = []
-        for instance in Instance.objects.all():
+        for instance in Instance.objects.exclude(node_type='hop'):
             response['instances'].append(
                 dict(
                     node=instance.hostname,
                     node_type=instance.node_type,
                     uuid=instance.uuid,
-                    heartbeat=instance.modified,
+                    heartbeat=instance.last_seen,
                     capacity=instance.capacity,
                     version=instance.version,
                 )

@@ -23,7 +23,7 @@ function Jobs() {
     const typeSegment = JOB_TYPE_URL_SEGMENTS[job.type];
     setBreadcrumbConfig({
       '/jobs': t`Jobs`,
-      [`/jobs/${typeSegment}/${job.id}`]: `${job.name}`,
+      [`/jobs/${typeSegment}/${job.id}`]: `${job.id} - ${job.name}`,
       [`/jobs/${typeSegment}/${job.id}/output`]: t`Output`,
       [`/jobs/${typeSegment}/${job.id}/details`]: t`Details`,
     });

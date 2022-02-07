@@ -32,7 +32,7 @@ from awx.main.models import (
     User,
     build_safe_env,
 )
-from awx.main.models.credential import ManagedCredentialType
+from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
 
 from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
@@ -113,12 +113,12 @@ def adhoc_update_model_wrapper(adhoc_job):
 
 def test_send_notifications_not_list():
     with pytest.raises(TypeError):
-        tasks.send_notifications(None)
+        tasks.system.send_notifications(None)
 
 
 def test_send_notifications_job_id(mocker):
     with mocker.patch('awx.main.models.UnifiedJob.objects.get'):
-        tasks.send_notifications([], job_id=1)
+        tasks.system.send_notifications([], job_id=1)
         assert UnifiedJob.objects.get.called
         assert UnifiedJob.objects.get.called_with(id=1)
 
@@ -127,7 +127,7 @@ def test_work_success_callback_missing_job():
     task_data = {'type': 'project_update', 'id': 9999}
     with mock.patch('django.db.models.query.QuerySet.get') as get_mock:
         get_mock.side_effect = ProjectUpdate.DoesNotExist()
-        assert tasks.handle_work_success(task_data) is None
+        assert tasks.system.handle_work_success(task_data) is None
 
 
 @mock.patch('awx.main.models.UnifiedJob.objects.get')
@@ -138,7 +138,7 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     mock_notifications = [mocker.MagicMock(spec=Notification, subject="test", body={'hello': 'world'})]
     mock_notifications_filter.return_value = mock_notifications
 
-    tasks.send_notifications([1, 2], job_id=1)
+    tasks.system.send_notifications([1, 2], job_id=1)
     assert Notification.objects.filter.call_count == 1
     assert mock_notifications[0].status == "successful"
     assert mock_notifications[0].save.called
@@ -158,7 +158,7 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     ],
 )
 def test_safe_env_filtering(key, value):
-    assert build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
+    assert build_safe_env({key: value})[key] == HIDDEN_PASSWORD
 
 
 def test_safe_env_returns_new_copy():
@@ -168,7 +168,7 @@ def test_safe_env_returns_new_copy():
 
 @pytest.mark.parametrize("source,expected", [(None, True), (False, False), (True, True)])
 def test_openstack_client_config_generation(mocker, source, expected, private_data_dir):
-    update = tasks.RunInventoryUpdate()
+    update = tasks.jobs.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
         'host': 'https://keystone.openstack.example.org',
@@ -208,7 +208,7 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
 
 @pytest.mark.parametrize("source,expected", [(None, True), (False, False), (True, True)])
 def test_openstack_client_config_generation_with_project_domain_name(mocker, source, expected, private_data_dir):
-    update = tasks.RunInventoryUpdate()
+    update = tasks.jobs.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
         'host': 'https://keystone.openstack.example.org',
@@ -250,7 +250,7 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
 
 @pytest.mark.parametrize("source,expected", [(None, True), (False, False), (True, True)])
 def test_openstack_client_config_generation_with_region(mocker, source, expected, private_data_dir):
-    update = tasks.RunInventoryUpdate()
+    update = tasks.jobs.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
         'host': 'https://keystone.openstack.example.org',
@@ -294,7 +294,7 @@ def test_openstack_client_config_generation_with_region(mocker, source, expected
 
 @pytest.mark.parametrize("source,expected", [(False, False), (True, True)])
 def test_openstack_client_config_generation_with_private_source_vars(mocker, source, expected, private_data_dir):
-    update = tasks.RunInventoryUpdate()
+    update = tasks.jobs.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
         'host': 'https://keystone.openstack.example.org',
@@ -357,7 +357,7 @@ class TestExtraVarSanitation(TestJobExecution):
         job.created_by = User(pk=123, username='angry-spud')
         job.inventory = Inventory(pk=123, name='example-inv')
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.build_extra_vars_file(job, private_data_dir)
 
         fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
@@ -393,7 +393,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
     def test_launchtime_vars_unsafe(self, job, private_data_dir):
         job.extra_vars = json.dumps({'msg': self.UNSAFE})
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
 
@@ -404,7 +404,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
     def test_nested_launchtime_vars_unsafe(self, job, private_data_dir):
         job.extra_vars = json.dumps({'msg': {'a': [self.UNSAFE]}})
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
 
@@ -415,7 +415,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
     def test_allowed_jt_extra_vars(self, job, private_data_dir):
         job.job_template.extra_vars = job.extra_vars = json.dumps({'msg': self.UNSAFE})
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
 
@@ -427,7 +427,7 @@ class TestExtraVarSanitation(TestJobExecution):
     def test_nested_allowed_vars(self, job, private_data_dir):
         job.extra_vars = json.dumps({'msg': {'a': {'b': [self.UNSAFE]}}})
         job.job_template.extra_vars = job.extra_vars
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
 
@@ -441,7 +441,7 @@ class TestExtraVarSanitation(TestJobExecution):
         # `other_var=SENSITIVE`
         job.job_template.extra_vars = json.dumps({'msg': self.UNSAFE})
         job.extra_vars = json.dumps({'msg': 'other-value', 'other_var': self.UNSAFE})
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
 
@@ -456,7 +456,7 @@ class TestExtraVarSanitation(TestJobExecution):
     def test_overwritten_jt_extra_vars(self, job, private_data_dir):
         job.job_template.extra_vars = json.dumps({'msg': 'SAFE'})
         job.extra_vars = json.dumps({'msg': self.UNSAFE})
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
 
@@ -472,13 +472,13 @@ class TestGenericRun:
         job.websocket_emit_status = mock.Mock()
         job.execution_environment = execution_environment
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         task.update_model = mock.Mock(return_value=job)
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with mock.patch('awx.main.tasks.copy_tree'):
+        with mock.patch('awx.main.tasks.jobs.copy_tree'):
             with pytest.raises(Exception):
                 task.run(1)
 
@@ -494,13 +494,13 @@ class TestGenericRun:
         job.send_notification_templates = mock.Mock()
         job.execution_environment = execution_environment
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock()
 
-        with mock.patch('awx.main.tasks.copy_tree'):
+        with mock.patch('awx.main.tasks.jobs.copy_tree'):
             with pytest.raises(Exception):
                 task.run(1)
 
@@ -508,7 +508,7 @@ class TestGenericRun:
             assert c in task.update_model.call_args_list
 
     def test_event_count(self):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.dispatcher = mock.MagicMock()
         task.instance = Job()
         task.event_ct = 0
@@ -518,7 +518,7 @@ class TestGenericRun:
         assert 20 == task.event_ct
 
     def test_finished_callback_eof(self):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.dispatcher = mock.MagicMock()
         task.instance = Job(pk=1, id=1)
         task.event_ct = 17
@@ -529,7 +529,7 @@ class TestGenericRun:
         class MockMe:
             pass
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         task.safe_env = {'secret_key': 'redacted_value'}
         task.update_model = mock.Mock(wraps=update_model_wrapper)
@@ -546,7 +546,7 @@ class TestGenericRun:
     def test_created_by_extra_vars(self):
         job = Job(created_by=User(pk=123, username='angry-spud'))
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task._write_extra_vars_file = mock.Mock()
         task.build_extra_vars_file(job, None)
 
@@ -563,7 +563,7 @@ class TestGenericRun:
         job.extra_vars = json.dumps({'super_secret': encrypt_value('CLASSIFIED', pk=None)})
         job.survey_passwords = {'super_secret': '$encrypted$'}
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task._write_extra_vars_file = mock.Mock()
         task.build_extra_vars_file(job, None)
 
@@ -576,11 +576,11 @@ class TestGenericRun:
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         task._write_extra_vars_file = mock.Mock()
 
-        with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
+        with mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
             env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
@@ -595,7 +595,7 @@ class TestAdhocRun(TestJobExecution):
         adhoc_job.websocket_emit_status = mock.Mock()
         adhoc_job.send_notification_templates = mock.Mock()
 
-        task = tasks.RunAdHocCommand()
+        task = tasks.jobs.RunAdHocCommand()
         task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
         task.model.objects.get = mock.Mock(return_value=adhoc_job)
         task.build_inventory = mock.Mock()
@@ -619,7 +619,7 @@ class TestAdhocRun(TestJobExecution):
         })
         #adhoc_job.websocket_emit_status = mock.Mock()
 
-        task = tasks.RunAdHocCommand()
+        task = tasks.jobs.RunAdHocCommand()
         #task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
         #task.build_inventory = mock.Mock(return_value='/tmp/something.inventory')
         task._write_extra_vars_file = mock.Mock()
@@ -634,7 +634,7 @@ class TestAdhocRun(TestJobExecution):
     def test_created_by_extra_vars(self):
         adhoc_job = AdHocCommand(created_by=User(pk=123, username='angry-spud'))
 
-        task = tasks.RunAdHocCommand()
+        task = tasks.jobs.RunAdHocCommand()
         task._write_extra_vars_file = mock.Mock()
         task.build_extra_vars_file(adhoc_job, None)
 
@@ -693,7 +693,7 @@ class TestJobCredentials(TestJobExecution):
     }
 
     def test_username_jinja_usage(self, job, private_data_dir):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(pk=1, credential_type=ssh, inputs={'username': '{{ ansible_ssh_pass }}'})
         job.credentials.add(credential)
@@ -704,7 +704,7 @@ class TestJobCredentials(TestJobExecution):
 
     @pytest.mark.parametrize("flag", ['become_username', 'become_method'])
     def test_become_jinja_usage(self, job, private_data_dir, flag):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'joe', flag: '{{ ansible_ssh_pass }}'})
         job.credentials.add(credential)
@@ -715,7 +715,7 @@ class TestJobCredentials(TestJobExecution):
         assert 'Jinja variables are not allowed' in str(e.value)
 
     def test_ssh_passwords(self, job, private_data_dir, field, password_name, expected_flag):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', field: 'secret'})
         credential.inputs[field] = encrypt_field(credential, field)
@@ -732,7 +732,7 @@ class TestJobCredentials(TestJobExecution):
             assert expected_flag in ' '.join(args)
 
     def test_net_ssh_key_unlock(self, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         net = CredentialType.defaults['net']()
         credential = Credential(pk=1, credential_type=net, inputs={'ssh_key_unlock': 'secret'})
         credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
@@ -745,7 +745,7 @@ class TestJobCredentials(TestJobExecution):
         assert 'secret' in expect_passwords.values()
 
     def test_net_first_ssh_key_unlock_wins(self, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         for i in range(3):
             net = CredentialType.defaults['net']()
             credential = Credential(pk=i, credential_type=net, inputs={'ssh_key_unlock': 'secret{}'.format(i)})
@@ -759,7 +759,7 @@ class TestJobCredentials(TestJobExecution):
         assert 'secret0' in expect_passwords.values()
 
     def test_prefer_ssh_over_net_ssh_key_unlock(self, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         net = CredentialType.defaults['net']()
         net_credential = Credential(pk=1, credential_type=net, inputs={'ssh_key_unlock': 'net_secret'})
         net_credential.inputs['ssh_key_unlock'] = encrypt_field(net_credential, 'ssh_key_unlock')
@@ -778,7 +778,7 @@ class TestJobCredentials(TestJobExecution):
         assert 'ssh_secret' in expect_passwords.values()
 
     def test_vault_password(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         vault = CredentialType.defaults['vault']()
         credential = Credential(pk=1, credential_type=vault, inputs={'vault_password': 'vault-me'})
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
@@ -793,7 +793,7 @@ class TestJobCredentials(TestJobExecution):
         assert '--ask-vault-pass' in ' '.join(args)
 
     def test_vault_password_ask(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         vault = CredentialType.defaults['vault']()
         credential = Credential(pk=1, credential_type=vault, inputs={'vault_password': 'ASK'})
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
@@ -808,7 +808,7 @@ class TestJobCredentials(TestJobExecution):
         assert '--ask-vault-pass' in ' '.join(args)
 
     def test_multi_vault_password(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         vault = CredentialType.defaults['vault']()
         for i, label in enumerate(['dev', 'prod', 'dotted.name']):
             credential = Credential(pk=i, credential_type=vault, inputs={'vault_password': 'pass@{}'.format(label), 'vault_id': label})
@@ -831,7 +831,7 @@ class TestJobCredentials(TestJobExecution):
         assert '--vault-id dotted.name@prompt' in ' '.join(args)
 
     def test_multi_vault_id_conflict(self, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         vault = CredentialType.defaults['vault']()
         for i in range(2):
             credential = Credential(pk=i, credential_type=vault, inputs={'vault_password': 'some-pass', 'vault_id': 'conflict'})
@@ -844,7 +844,7 @@ class TestJobCredentials(TestJobExecution):
         assert 'multiple vault credentials were specified with --vault-id' in str(e.value)
 
     def test_multi_vault_password_ask(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         vault = CredentialType.defaults['vault']()
         for i, label in enumerate(['dev', 'prod']):
             credential = Credential(pk=i, credential_type=vault, inputs={'vault_password': 'ASK', 'vault_id': label})
@@ -897,7 +897,7 @@ class TestJobCredentials(TestJobExecution):
             assert env['K8S_AUTH_VERIFY_SSL'] == 'False'
             assert 'K8S_AUTH_SSL_CA_CERT' not in env
 
-        assert safe_env['K8S_AUTH_API_KEY'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['K8S_AUTH_API_KEY'] == HIDDEN_PASSWORD
 
     def test_aws_cloud_credential(self, job, private_data_dir):
         aws = CredentialType.defaults['aws']()
@@ -912,7 +912,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert 'AWS_SECURITY_TOKEN' not in env
-        assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AWS_SECRET_ACCESS_KEY'] == HIDDEN_PASSWORD
 
     def test_aws_cloud_credential_with_sts_token(self, private_data_dir, job):
         aws = CredentialType.defaults['aws']()
@@ -928,7 +928,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert env['AWS_SECURITY_TOKEN'] == 'token'
-        assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AWS_SECRET_ACCESS_KEY'] == HIDDEN_PASSWORD
 
     def test_gce_credentials(self, private_data_dir, job):
         gce = CredentialType.defaults['gce']()
@@ -963,7 +963,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_SECRET'] == 'some-secret'
         assert env['AZURE_TENANT'] == 'some-tenant'
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-        assert safe_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_SECRET'] == HIDDEN_PASSWORD
 
     def test_azure_rm_with_password(self, private_data_dir, job):
         azure = CredentialType.defaults['azure_rm']()
@@ -981,7 +981,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
-        assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_vmware_credentials(self, private_data_dir, job):
         vmware = CredentialType.defaults['vmware']()
@@ -996,10 +996,10 @@ class TestJobCredentials(TestJobExecution):
         assert env['VMWARE_USER'] == 'bob'
         assert env['VMWARE_PASSWORD'] == 'secret'
         assert env['VMWARE_HOST'] == 'https://example.org'
-        assert safe_env['VMWARE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['VMWARE_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_openstack_credentials(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         openstack = CredentialType.defaults['openstack']()
         credential = Credential(
@@ -1067,7 +1067,7 @@ class TestJobCredentials(TestJobExecution):
         ],
     )
     def test_net_credentials(self, authorize, expected_authorize, job, private_data_dir):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         net = CredentialType.defaults['net']()
         inputs = {'username': 'bob', 'password': 'secret', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY, 'authorize_password': 'authorizeme'}
@@ -1089,7 +1089,7 @@ class TestJobCredentials(TestJobExecution):
         if authorize:
             assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
         assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
-        assert safe_env['ANSIBLE_NET_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['ANSIBLE_NET_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir):
         some_cloud = CredentialType(
@@ -1135,7 +1135,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['TURBO_BUTTON'] == str(True)
 
     def test_custom_environment_injectors_with_reserved_env_var(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         some_cloud = CredentialType(
             kind='cloud',
@@ -1168,10 +1168,10 @@ class TestJobCredentials(TestJobExecution):
 
         assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
         assert 'SUPER-SECRET-123' not in safe_env.values()
-        assert safe_env['MY_CLOUD_PRIVATE_VAR'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['MY_CLOUD_PRIVATE_VAR'] == HIDDEN_PASSWORD
 
     def test_custom_environment_injectors_with_extra_vars(self, private_data_dir, job):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1190,7 +1190,7 @@ class TestJobCredentials(TestJobExecution):
         assert hasattr(extra_vars["api_token"], '__UNSAFE__')
 
     def test_custom_environment_injectors_with_boolean_extra_vars(self, job, private_data_dir):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1209,7 +1209,7 @@ class TestJobCredentials(TestJobExecution):
         return ['successful', 0]
 
     def test_custom_environment_injectors_with_complicated_boolean_template(self, job, private_data_dir):
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1230,7 +1230,7 @@ class TestJobCredentials(TestJobExecution):
         """
         extra_vars that contain secret field values should be censored in the DB
         """
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1331,11 +1331,11 @@ class TestJobCredentials(TestJobExecution):
         assert json_data['client_email'] == 'bob'
         assert json_data['project_id'] == 'some-project'
 
-        assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_awx_task_env(self, settings, private_data_dir, job):
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
-        task = tasks.RunJob()
+        task = tasks.jobs.RunJob()
         task.instance = job
         env = task.build_env(job, private_data_dir)
 
@@ -1362,7 +1362,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
     def test_galaxy_credentials_ignore_certs(self, private_data_dir, project_update, ignore):
         settings.GALAXY_IGNORE_CERTS = ignore
-        task = tasks.RunProjectUpdate()
+        task = tasks.jobs.RunProjectUpdate()
         task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
         if ignore:
@@ -1371,7 +1371,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
             assert 'ANSIBLE_GALAXY_IGNORE' not in env
 
     def test_galaxy_credentials_empty(self, private_data_dir, project_update):
-        class RunProjectUpdate(tasks.RunProjectUpdate):
+        class RunProjectUpdate(tasks.jobs.RunProjectUpdate):
             __vars__ = {}
 
             def _write_extra_vars_file(self, private_data_dir, extra_vars, *kw):
@@ -1390,7 +1390,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
             assert not k.startswith('ANSIBLE_GALAXY_SERVER')
 
     def test_single_public_galaxy(self, private_data_dir, project_update):
-        class RunProjectUpdate(tasks.RunProjectUpdate):
+        class RunProjectUpdate(tasks.jobs.RunProjectUpdate):
             __vars__ = {}
 
             def _write_extra_vars_file(self, private_data_dir, extra_vars, *kw):
@@ -1439,7 +1439,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         )
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
         project_update.project.organization.galaxy_credentials.add(rh)
-        task = tasks.RunProjectUpdate()
+        task = tasks.jobs.RunProjectUpdate()
         task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
         assert sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')]) == [
@@ -1481,7 +1481,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
     }
 
     def test_username_and_password_auth(self, project_update, scm_type):
-        task = tasks.RunProjectUpdate()
+        task = tasks.jobs.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = scm_type
         project_update.credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', 'password': 'secret'})
@@ -1495,7 +1495,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert 'secret' in expect_passwords.values()
 
     def test_ssh_key_auth(self, project_update, scm_type):
-        task = tasks.RunProjectUpdate()
+        task = tasks.jobs.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = scm_type
         project_update.credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
@@ -1509,7 +1509,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
     def test_awx_task_env(self, project_update, settings, private_data_dir, scm_type, execution_environment):
         project_update.execution_environment = execution_environment
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
-        task = tasks.RunProjectUpdate()
+        task = tasks.jobs.RunProjectUpdate()
         task.instance = project_update
         project_update.scm_type = scm_type
 
@@ -1524,7 +1524,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         return InventoryUpdate(pk=1, execution_environment=execution_environment, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
 
     def test_source_without_credential(self, mocker, inventory_update, private_data_dir):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         inventory_update.source = 'ec2'
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
@@ -1537,7 +1537,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert 'AWS_SECRET_ACCESS_KEY' not in env
 
     def test_ec2_source(self, private_data_dir, inventory_update, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         aws = CredentialType.defaults['aws']()
         inventory_update.source = 'ec2'
@@ -1558,10 +1558,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
 
-        assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AWS_SECRET_ACCESS_KEY'] == HIDDEN_PASSWORD
 
     def test_vmware_source(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         vmware = CredentialType.defaults['vmware']()
         inventory_update.source = 'vmware'
@@ -1589,7 +1589,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         env["VMWARE_VALIDATE_CERTS"] == "False",
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
@@ -1622,10 +1622,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-        assert safe_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_SECRET'] == HIDDEN_PASSWORD
 
     def test_azure_rm_source_with_password(self, private_data_dir, inventory_update, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
@@ -1651,10 +1651,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AZURE_PASSWORD'] == 'secret'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-        assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_gce_source(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         gce = CredentialType.defaults['gce']()
         inventory_update.source = 'gce'
@@ -1684,7 +1684,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert json_data['project_id'] == 'some-project'
 
     def test_openstack_source(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         openstack = CredentialType.defaults['openstack']()
         inventory_update.source = 'openstack'
@@ -1724,7 +1724,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
     def test_satellite6_source(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         satellite6 = CredentialType.defaults['satellite6']()
         inventory_update.source = 'satellite6'
@@ -1744,10 +1744,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env["FOREMAN_SERVER"] == "https://example.org"
         assert env["FOREMAN_USER"] == "bob"
         assert env["FOREMAN_PASSWORD"] == "secret"
-        assert safe_env["FOREMAN_PASSWORD"] == tasks.HIDDEN_PASSWORD
+        assert safe_env["FOREMAN_PASSWORD"] == HIDDEN_PASSWORD
 
     def test_insights_source(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         insights = CredentialType.defaults['insights']()
         inventory_update.source = 'insights'
@@ -1772,11 +1772,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         assert env["INSIGHTS_USER"] == "bob"
         assert env["INSIGHTS_PASSWORD"] == "secret"
-        assert safe_env['INSIGHTS_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['INSIGHTS_PASSWORD'] == HIDDEN_PASSWORD
 
     @pytest.mark.parametrize('verify', [True, False])
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         tower = CredentialType.defaults['controller']()
         inventory_update.source = 'controller'
@@ -1801,10 +1801,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert env['CONTROLLER_VERIFY_SSL'] == 'True'
         else:
             assert env['CONTROLLER_VERIFY_SSL'] == 'False'
-        assert safe_env['CONTROLLER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+        assert safe_env['CONTROLLER_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_tower_source_ssl_verify_empty(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         tower = CredentialType.defaults['controller']()
         inventory_update.source = 'controller'
@@ -1832,7 +1832,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['TOWER_VERIFY_SSL'] == 'False'
 
     def test_awx_task_env(self, inventory_update, private_data_dir, settings, mocker):
-        task = tasks.RunInventoryUpdate()
+        task = tasks.jobs.RunInventoryUpdate()
         task.instance = inventory_update
         gce = CredentialType.defaults['gce']()
         inventory_update.source = 'gce'
@@ -1883,7 +1883,7 @@ def test_aquire_lock_open_fail_logged(logging_getLogger, os_open):
     logger = mock.Mock()
     logging_getLogger.return_value = logger
 
-    ProjectUpdate = tasks.RunProjectUpdate()
+    ProjectUpdate = tasks.jobs.RunProjectUpdate()
 
     with pytest.raises(OSError):
         ProjectUpdate.acquire_lock(instance)
@@ -1910,7 +1910,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_
 
     fcntl_lockf.side_effect = err
 
-    ProjectUpdate = tasks.RunProjectUpdate()
+    ProjectUpdate = tasks.jobs.RunProjectUpdate()
     with pytest.raises(IOError):
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)
@@ -1920,7 +1920,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])
 def test_managed_injector_redaction(injector_cls):
     """See awx.main.models.inventory.PluginFileInjector._get_shared_env
-    The ordering within awx.main.tasks.BaseTask and contract with build_env
+    The ordering within awx.main.tasks.jobs.BaseTask and contract with build_env
     requires that all managed injectors are safely redacted by the
     static method build_safe_env without having to employ the safe namespace
     as in inject_credential
@@ -1947,7 +1947,7 @@ def test_notification_job_not_finished(logging_getLogger, mocker):
     logging_getLogger.return_value = logger
 
     with mocker.patch('awx.main.models.UnifiedJob.objects.get', uj):
-        tasks.handle_success_and_failure_notifications(1)
+        tasks.system.handle_success_and_failure_notifications(1)
         assert logger.warn.called_with(f"Failed to even try to send notifications for job '{uj}' due to job not being in finished state.")
 
 
@@ -1955,7 +1955,7 @@ def test_notification_job_finished(mocker):
     uj = mocker.MagicMock(send_notification_templates=mocker.MagicMock(), finished=True)
 
     with mocker.patch('awx.main.models.UnifiedJob.objects.get', mocker.MagicMock(return_value=uj)):
-        tasks.handle_success_and_failure_notifications(1)
+        tasks.system.handle_success_and_failure_notifications(1)
         uj.send_notification_templates.assert_called()
 
 
@@ -1964,12 +1964,12 @@ def test_job_run_no_ee():
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))
     job.execution_environment = None
-    task = tasks.RunJob()
+    task = tasks.jobs.RunJob()
     task.instance = job
     task.update_model = mock.Mock(return_value=job)
     task.model.objects.get = mock.Mock(return_value=job)
 
-    with mock.patch('awx.main.tasks.copy_tree'):
+    with mock.patch('awx.main.tasks.jobs.copy_tree'):
         with pytest.raises(RuntimeError) as e:
             task.pre_run_hook(job, private_data_dir)
 
@@ -1983,7 +1983,7 @@ def test_project_update_no_ee():
     proj = Project(pk=1, organization=org)
     project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
     project_update.execution_environment = None
-    task = tasks.RunProjectUpdate()
+    task = tasks.jobs.RunProjectUpdate()
     task.instance = project_update
 
     with pytest.raises(RuntimeError) as e:

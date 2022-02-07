@@ -57,6 +57,7 @@ from awx.main.models import (
     Host,
     Instance,
     InstanceGroup,
+    InstanceLink,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -861,7 +862,7 @@ class UnifiedJobSerializer(BaseSerializer):
         if 'elapsed' in ret:
             if obj and obj.pk and obj.started and not obj.finished:
                 td = now() - obj.started
-                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
+                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
             ret['elapsed'] = float(ret['elapsed'])
         # Because this string is saved in the db in the source language,
         # it must be marked for translation after it is pulled from the db, not when set
@@ -4767,6 +4768,28 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return super(ScheduleSerializer, self).validate(attrs)
 
 
+class InstanceLinkSerializer(BaseSerializer):
+    class Meta:
+        model = InstanceLink
+        fields = ('source', 'target')
+
+    source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+    target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+
+
+class InstanceNodeSerializer(BaseSerializer):
+    class Meta:
+        model = Instance
+        fields = ('id', 'hostname', 'node_type', 'node_state')
+
+    node_state = serializers.SerializerMethodField()
+
+    def get_node_state(self, obj):
+        if not obj.enabled:
+            return "disabled"
+        return "unhealthy" if obj.errors else "healthy"
+
+
 class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
@@ -4810,7 +4833,8 @@ class InstanceSerializer(BaseSerializer):
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
-            res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
+            if obj.node_type != 'hop':
+                res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
     def get_consumed_capacity(self, obj):

@@ -71,7 +71,7 @@ IS_K8S = False
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
 # Timeout when waiting for pod to enter running state. If the pod is still in pending state , it will be terminated. Valid time units are "s", "m", "h". Example : "5m" , "10s".
-AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "5m"
+AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "2h"
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -162,7 +162,7 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
-# If we is behind a reverse proxy/load balancer, use this setting to
+# If we are behind a reverse proxy/load balancer, use this setting to
 # allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
 # REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
@@ -261,10 +261,6 @@ CSRF_COOKIE_SECURE = True
 
 # Limit CSRF cookies to browser sessions
 CSRF_COOKIE_AGE = None
-
-# Auto-discover new instances that appear on receptor mesh
-# used for docker-compose environment, unsupported
-MESH_AUTODISCOVERY_ENABLED = False
 
 TEMPLATES = [
     {
@@ -429,18 +425,18 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
-    'tower_scheduler': {'task': 'awx.main.tasks.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
+    'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
     'cluster_heartbeat': {
-        'task': 'awx.main.tasks.cluster_node_heartbeat',
+        'task': 'awx.main.tasks.system.cluster_node_heartbeat',
         'schedule': timedelta(seconds=CLUSTER_NODE_HEARTBEAT_PERIOD),
         'options': {'expires': 50},
     },
-    'gather_analytics': {'task': 'awx.main.tasks.gather_analytics', 'schedule': timedelta(minutes=5)},
+    'gather_analytics': {'task': 'awx.main.tasks.system.gather_analytics', 'schedule': timedelta(minutes=5)},
     'task_manager': {'task': 'awx.main.scheduler.tasks.run_task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
-    'k8s_reaper': {'task': 'awx.main.tasks.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
-    'receptor_reaper': {'task': 'awx.main.tasks.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
+    'k8s_reaper': {'task': 'awx.main.tasks.system.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
+    'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
-    'cleanup_images': {'task': 'awx.main.tasks.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
+    'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
 }
 
 # Django Caching Configuration
@@ -473,6 +469,7 @@ SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
     'awx.sso.pipeline.update_user_teams_by_saml_attr',
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
+    'awx.sso.pipeline.update_user_flags',
 )
 SAML_AUTO_CREATE_OBJECTS = True
 
@@ -535,6 +532,7 @@ SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
 
 SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
 SOCIAL_AUTH_SAML_TEAM_ATTR = {}
+SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR = {}
 
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment
@@ -763,6 +761,7 @@ LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
+API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in a cluster,
@@ -990,3 +989,8 @@ DEFAULT_EXECUTION_QUEUE_NAME = 'default'
 DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE = ''
 # Name of the default controlplane queue
 DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
+
+# Extend container runtime attributes.
+# For example, to disable SELinux in containers for podman
+# DEFAULT_CONTAINER_RUN_OPTIONS = ['--security-opt', 'label=disable']
+DEFAULT_CONTAINER_RUN_OPTIONS = []
