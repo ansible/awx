@@ -17,7 +17,7 @@
       docker build -t {{ awx_image }}:{{ awx_image_tag }} \
         -f {{ dockerfile_name }} \
         --build-arg VERSION={{ awx_version }} \
-        --build-arg SETUPTOOLS_SCM_PRETEND_VERSION=19.5.1 \
+        --build-arg SETUPTOOLS_SCM_PRETEND_VERSION={{ awx_version }} \
         --build-arg HEADLESS={{ headless }} \
         .
 
