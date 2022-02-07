@@ -1,0 +1,33 @@
+
+- name: set public key filename
+  set_fact:
+    pubkey_fname: "{{ 'pubring.gpg' if playbook_integrity_signature_type == 'gpg' else 'cosign.pub' if playbook_integrity_signature_type == 'sigstore' else '' }}"
+- name: save public key
+  shell: mkdir -p /tmp/integrity && echo {{ playbook_integrity_public_key }} | base64 -d > /tmp/integrity/{{ pubkey_fname }}
+  when: pubkey_fname != ''
+- name: verify playbook integrity
+  playbook.integrity.verify:
+    target: "{{ project_path | quote }}"
+    signature_type: "{{ playbook_integrity_signature_type }}"
+    public_key: "{{ '/tmp/integrity/' + pubkey_fname if pubkey_fname != '' else '' }}"
+    keyless_signer_id: "{{ playbook_integrity_keyless_signer_id if playbook_integrity_keyless_signer_id != '' else '' }}"
+    action: 'report'
+  register: playbook_integrity
+- name: show integrity check result
+  debug:
+    var: playbook_integrity
+- name: check if each playbook file exists in file digest list
+  shell: grep "  {{ item }}" {{ project_path | quote }}/sha256sum.txt > /dev/null 2>&1
+  loop: "{{ playbook_integrity_files | from_json | list }}"
+  ignore_errors: yes
+  register: playbook_existence
+- name: set overall result
+  set_fact:
+    # `playbook_integrity.failed` == verification exitted with an error
+    # `playbook_integrity.detail.failed` == playbook integrity was lost
+    integrity_verified: "{{ False if playbook_integrity.failed or playbook_integrity.detail.failed else True }}"
+- name: set facts
+  set_fact:
+    playbook_integrity_verified: "{{ integrity_verified }}"
+    playbook_integrity_error: "{{ '' if integrity_verified else playbook_integrity.detail | to_json }}"
+    playbook_integrity_existence: "{{ playbook_existence.results }}"

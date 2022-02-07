@@ -6,6 +6,7 @@ import os
 import re  # noqa
 import sys
 import tempfile
+from distutils.util import strtobool
 from datetime import timedelta
 
 
@@ -1018,3 +1019,6 @@ DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
 
 # Mount exposed paths as hostPath resource in k8s/ocp
 AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
+
+# Whether playbook integrity feature is enabled or not
+PLAYBOOK_INTEGRITY_FEATURE_ENABLED = bool(strtobool(os.getenv('ENABLE_PLAYBOOK_INTEGRITY_FEATURE', 'false')))

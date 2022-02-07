@@ -894,12 +894,13 @@ class RunJob(BaseTask):
         if job.project.scm_type and ((not has_cache) or branch_override):
             sync_needs.extend(['install_roles', 'install_collections'])
 
-        playbook_integrity_sig_type = "gpg"
-        if job.project.playbook_integrity_signature_type:
-            playbook_integrity_sig_type = job.project.playbook_integrity_signature_type
-        playbook_integrity_tag = 'playbook_integrity_{}'.format(playbook_integrity_sig_type)
-        if sync_needs:
-            sync_needs.append(playbook_integrity_tag)
+        if job.project.playbook_integrity_enabled and settings.PLAYBOOK_INTEGRITY_FEATURE_ENABLED:
+            playbook_integrity_sig_type = "gpg"
+            if job.project.playbook_integrity_signature_type:
+                playbook_integrity_sig_type = job.project.playbook_integrity_signature_type
+            playbook_integrity_tag = 'playbook_integrity_{}'.format(playbook_integrity_sig_type)
+            if sync_needs:
+                sync_needs.append(playbook_integrity_tag)
 
         if sync_needs:
             pu_ig = job.instance_group
@@ -958,7 +959,7 @@ class RunJob(BaseTask):
             # Project update does not copy the folder, so copy here
             RunProjectUpdate.make_local_copy(job.project, private_data_dir, scm_revision=job_revision)
 
-        if job.project.playbook_integrity_enabled:
+        if job.project.playbook_integrity_enabled and settings.PLAYBOOK_INTEGRITY_FEATURE_ENABLED:
             playbook_integrity_result = None
             for result in job.project.playbook_integrity_latest_result:
                 if job.playbook == result.get("playbook", ""):
