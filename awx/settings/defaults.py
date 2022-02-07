@@ -74,7 +74,7 @@ AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
 AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "2h"
 
 # How much capacity controlling a task costs a hybrid or control node
-AWX_CONTROL_NODE_TASK_IMPACT = 5
+AWX_CONTROL_NODE_TASK_IMPACT = 1
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
