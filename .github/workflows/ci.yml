@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Get python version from Makefile
-        run: echo py_version=`cat Makefile | grep "^PYTHON ?=" | sed 's:^.*python::'` >> $GITHUB_ENV
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
         uses: actions/setup-python@v2
