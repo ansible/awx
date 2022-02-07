@@ -3,42 +3,48 @@ import { func, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
 
 import { t } from '@lingui/macro';
-import { Form, Tooltip } from '@patternfly/react-core';
+import { Form } from '@patternfly/react-core';
 
 import FormField, { FormSubmitError } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
-import { required, minMaxValue } from 'util/validators';
+import {
+  combine,
+  required,
+  protectedResourceName,
+  minMaxValue,
+} from 'util/validators';
 import { FormColumnLayout } from 'components/FormLayout';
 
 function InstanceGroupFormFields({ defaultControlPlane, defaultExecution }) {
-  const [{ value }, ,] = useField('name');
-  const isDisabled =
-    value === defaultExecution || value === defaultControlPlane;
+  const [, { initialValue }] = useField('name');
+  const isProtected =
+    initialValue === `${defaultControlPlane}` ||
+    initialValue === `${defaultExecution}`;
+
+  const validators = combine([
+    required(null),
+    protectedResourceName(
+      [defaultControlPlane, defaultExecution],
+      t`This is a protected name for Instance Groups. Please use a different name.`
+    ),
+  ]);
 
   return (
     <>
-      {isDisabled ? (
-        <Tooltip content={t`Name cannot be changed on this Instance Group`}>
-          <FormField
-            name="name"
-            id="instance-group-name"
-            label={t`Name`}
-            type="text"
-            validate={required(null)}
-            isRequired
-            isDisabled={isDisabled}
-          />
-        </Tooltip>
-      ) : (
-        <FormField
-          name="name"
-          id="instance-group-name"
-          label={t`Name`}
-          type="text"
-          validate={required(null)}
-          isRequired
-        />
-      )}
+      <FormField
+        name="name"
+        helperText={
+          isProtected
+            ? t`This is a protected Instance Group. The name cannot be changed.`
+            : ''
+        }
+        id="instance-group-name"
+        label={t`Name`}
+        type="text"
+        validate={validators}
+        isRequired
+        isDisabled={isProtected}
+      />
       <FormField
         id="instance-group-policy-instance-minimum"
         label={t`Policy instance minimum`}
@@ -66,7 +72,6 @@ function InstanceGroupFormFields({ defaultControlPlane, defaultExecution }) {
 
 function InstanceGroupForm({
   instanceGroup = {},
-
   onSubmit,
   onCancel,
   submitError,

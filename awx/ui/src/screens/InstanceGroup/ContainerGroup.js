@@ -30,13 +30,16 @@ function ContainerGroup({ setBreadcrumb }) {
     isLoading,
     error: contentError,
     request: fetchInstanceGroups,
-    result: { instanceGroup, defaultExecution },
+    result: { instanceGroup, defaultControlPlane, defaultExecution },
   } = useRequest(
     useCallback(async () => {
       const [
         { data },
         {
-          data: { DEFAULT_EXECUTION_QUEUE_NAME },
+          data: {
+            DEFAULT_EXECUTION_QUEUE_NAME,
+            DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+          },
         },
       ] = await Promise.all([
         InstanceGroupsAPI.readDetail(id),
@@ -44,6 +47,7 @@ function ContainerGroup({ setBreadcrumb }) {
       ]);
       return {
         instanceGroup: data,
+        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
         defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
       };
     }, [id]),
@@ -123,6 +127,7 @@ function ContainerGroup({ setBreadcrumb }) {
                 <Route path="/instance_groups/container_group/:id/edit">
                   <ContainerGroupEdit
                     instanceGroup={instanceGroup}
+                    defaultControlPlane={defaultControlPlane}
                     defaultExecution={defaultExecution}
                   />
                 </Route>

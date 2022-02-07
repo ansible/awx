@@ -186,3 +186,8 @@ export function regExp() {
     return undefined;
   };
 }
+
+export function protectedResourceName(message, names = []) {
+  return (value) =>
+    names.some((name) => value.trim() === `${name}`) ? message : undefined;
+}
