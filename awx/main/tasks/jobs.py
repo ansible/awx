@@ -14,6 +14,7 @@ import yaml
 import tempfile
 import traceback
 import time
+import datetime
 import urllib.parse as urlparse
 from uuid import uuid4
 
@@ -893,6 +894,13 @@ class RunJob(BaseTask):
         if job.project.scm_type and ((not has_cache) or branch_override):
             sync_needs.extend(['install_roles', 'install_collections'])
 
+        playbook_integrity_sig_type = "gpg"
+        if job.project.playbook_integrity_signature_type:
+            playbook_integrity_sig_type = job.project.playbook_integrity_signature_type
+        playbook_integrity_tag = 'playbook_integrity_{}'.format(playbook_integrity_sig_type)
+        if sync_needs:
+            sync_needs.append(playbook_integrity_tag)
+
         if sync_needs:
             pu_ig = job.instance_group
             pu_en = Instance.objects.me().hostname
@@ -949,6 +957,28 @@ class RunJob(BaseTask):
                 job = self.update_model(job.pk, scm_revision=job_revision)
             # Project update does not copy the folder, so copy here
             RunProjectUpdate.make_local_copy(job.project, private_data_dir, scm_revision=job_revision)
+
+        if job.project.playbook_integrity_enabled:
+            playbook_integrity_result = None
+            for result in job.project.playbook_integrity_latest_result:
+                if job.playbook == result.get("playbook", ""):
+                    playbook_integrity_result = result
+                    break
+            if playbook_integrity_result is None:
+                playbook_integrity_result = {"playbook": job.playbook, "verified": False, "error": "Failed to find playbook integrity result for this playbook"}
+            job.playbook_integrity_verified = playbook_integrity_result.get("verified", None)
+            job.playbook_integrity_result = playbook_integrity_result
+            job.save(update_fields=['playbook_integrity_verified', 'playbook_integrity_result'])
+
+            if not job.playbook_integrity_verified:
+                playbook_integrity_error = job.playbook_integrity_result.get("error", "Unknown error occurred in playbook integrity check")
+                msg = 'Playbook Integrity Check Failed: {"verified": "%s", "error": "%s"}' % (job.playbook_integrity_verified, playbook_integrity_error)
+                job = self.update_model(
+                    job.pk,
+                    status='failed',
+                    job_explanation=(msg),
+                )
+                raise RuntimeError(msg)
 
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
@@ -1143,6 +1173,10 @@ class RunProjectUpdate(BaseTask):
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
                 'galaxy_task_env': settings.GALAXY_TASK_ENV,
+                'playbook_integrity_files': json.dumps(project_update.project.playbooks),
+                'playbook_integrity_public_key': project_update.project.playbook_integrity_public_key,
+                'playbook_integrity_signature_type': project_update.project.playbook_integrity_signature_type,
+                'playbook_integrity_keyless_signer_id': project_update.project.playbook_integrity_keyless_signer_id,
             }
         )
         # apply custom refspec from user for PR refs and the like
@@ -1381,6 +1415,29 @@ class RunProjectUpdate(BaseTask):
             p.playbook_files = p.playbooks
             p.inventory_files = p.inventories
             p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
+
+        integrity_result_list = []
+        if self.runner_callback.playbook_new_integrity_result:
+            playbook_integrity_verified = self.runner_callback.playbook_new_integrity_result.get("verified", None)
+            playbook_integrity_error = self.runner_callback.playbook_new_integrity_result.get("error", "")
+            playbook_integrity_checked_playbooks = self.runner_callback.playbook_new_integrity_result.get("checked_playbooks", [])
+            for playbook in p.playbook_files:
+                now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                integrity_result = {"playbook": playbook, "verified": playbook_integrity_verified, "error": playbook_integrity_error, "timestamp": now}
+                if playbook not in playbook_integrity_checked_playbooks and playbook_integrity_verified:
+                    integrity_result["verified"] = False
+                    integrity_result["error"] = "playbook \"{}\" is not included in the digest file".format(playbook)
+                integrity_result_list.append(integrity_result)
+        p.playbook_integrity_latest_result = integrity_result_list
+        p.save(update_fields=['playbook_integrity_latest_result'])
+        instance.playbook_integrity_result = integrity_result_list
+        instance.save(update_fields=['playbook_integrity_result'])
+
+        # Update any inventories that depend on this project
+        dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
+        if len(dependent_inventory_sources) > 0:
+            if status == 'successful' and instance.launch_type != 'sync':
+                self._update_dependent_inventories(instance, dependent_inventory_sources)
 
     def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:

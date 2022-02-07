@@ -166,6 +166,19 @@ class JobOptions(BaseModel):
             "facts at the end of a playbook run to the database and caching facts for use by Ansible."
         ),
     )
+    playbook_integrity_verified = models.BooleanField(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
+        help_text=_('Overall result of playbook integrity verification'),
+    )
+    playbook_integrity_result = JSONField(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 

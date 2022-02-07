@@ -333,6 +333,45 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         ]
     )
 
+    playbook_integrity_enabled = models.BooleanField(
+        blank=True,
+        default=False,
+        editable=True,
+        help_text=_('If enabled, integrity check for a playbook will be done before execution'),
+    )
+
+    playbook_integrity_public_key = JSONField(
+        blank=True,
+        default=[],
+        editable=True,
+        help_text=_('A list of base64 encoded public keys'),
+    )
+
+    playbook_integrity_signature_type = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=True,
+        verbose_name=_('signature type for playbook integrity check'),
+        help_text=_('A signature type for playbook integrity check'),
+    )
+
+    playbook_integrity_keyless_signer_id = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=True,
+        verbose_name=_('signer id string for keyless playbook integrity check'),
+        help_text=_('A signer id string for keyless playbook integrity check'),
+    )
+
+    playbook_integrity_latest_result = JSONField(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
+    )
+
     @classmethod
     def _get_unified_job_class(cls):
         return ProjectUpdate
@@ -513,6 +552,13 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         help_text=_('The SCM Revision discovered by this update for the given project and branch.'),
     )
 
+    playbook_integrity_result = JSONField(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
+    )
+
     def _get_parent_field_name(self):
         return 'project'
 
@@ -628,6 +674,17 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
             job_tags.remove('delete')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
+        sig_type = self.project.playbook_integrity_signature_type
+        if sig_type:
+            playbook_integrity_tag = "playbook_integrity_{}".format(sig_type)
+            if self.project.playbook_integrity_enabled and playbook_integrity_tag not in self.job_tags and self.job_type == 'check':
+                self.job_tags = ','.join([self.job_tags, playbook_integrity_tag])
+                added_update_fields.append('job_tags')
+            elif (not self.project.playbook_integrity_enabled) and playbook_integrity_tag in self.job_tags:
+                job_tags = self.job_tags.split(',')
+                job_tags.remove(playbook_integrity_tag)
+                self.job_tags = ','.join(job_tags)
+                added_update_fields.append('job_tags')
         if 'update_fields' in kwargs:
             kwargs['update_fields'].extend(added_update_fields)
         return super(ProjectUpdate, self).save(*args, **kwargs)

@@ -252,6 +252,7 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
     def __init__(self, *args, **kwargs):
         super(RunnerCallbackForProjectUpdate, self).__init__(*args, **kwargs)
         self.playbook_new_revision = None
+        self.playbook_new_integrity_result = None
         self.host_map = {}
 
     def event_handler(self, event_data):
@@ -261,6 +262,22 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
             returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
             if 'scm_version' in returned_facts:
                 self.playbook_new_revision = returned_facts['scm_version']
+
+        if returned_data.get('task_action', '') == 'set_fact':
+            returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
+            if 'playbook_integrity_verified' in returned_facts:
+                playbook_integrity_verified = returned_facts['playbook_integrity_verified']
+                playbook_integrity_error = returned_facts['playbook_integrity_error']
+                checked_playbooks = []
+                for p in returned_facts['playbook_integrity_existence']:
+                    if p['rc'] == 0:
+                        checked_playbooks.append(p["item"])
+                self.playbook_new_integrity_result = {
+                    "verified": playbook_integrity_verified,
+                    "error": playbook_integrity_error,
+                    "checked_playbooks": checked_playbooks,
+                }
+
         return super_return_value
 
 

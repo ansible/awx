@@ -1468,6 +1468,11 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             'organization',
             'scm_update_on_launch',
             'scm_update_cache_timeout',
+            'playbook_integrity_enabled',
+            'playbook_integrity_public_key',
+            'playbook_integrity_signature_type',
+            'playbook_integrity_keyless_signer_id',
+            'playbook_integrity_latest_result',
             'allow_override',
             'custom_virtualenv',
             'default_environment',
@@ -1586,7 +1591,7 @@ class ProjectUpdateViewSerializer(ProjectSerializer):
 class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node')
+        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node', 'playbook_integrity_result')
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
@@ -3034,6 +3039,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
+            'playbook_integrity_verified',
+            'playbook_integrity_result',
         )
 
     def get_related(self, obj):
