@@ -25,6 +25,7 @@ const Header = ({
   zoomIn,
   zoomOut,
   resetZoom,
+  zoomFit,
 }) => {
   const { light } = PageSectionVariants;
   return (
@@ -74,6 +75,7 @@ const Header = ({
               aria-label={t`Fit to screen`}
               variant="plain"
               icon={<ExpandArrowsAltIcon />}
+              onClick={zoomFit}
             >
               <ExpandArrowsAltIcon />
             </Button>
