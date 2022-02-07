@@ -103,7 +103,7 @@ def _customize_graph():
 
 
 class URLModificationMiddleware(MiddlewareMixin):
-    def __init__(self, get_response=None):
+    def __init__(self, get_response):
         models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
         generate_graph(models)
         _customize_graph()
