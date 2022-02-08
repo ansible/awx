@@ -85,6 +85,21 @@
         that:
           - "result is changed"
 
+    - name: Add Joe as execution admin to Default Org.
+      role:
+        user: "{{ username }}"
+        role: execution_environment_admin
+        organizations: Default
+        state: "{{ item }}"
+      register: result
+      with_items:
+        - "present"
+        - "absent"
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Create a workflow
       workflow_job_template:
         name: test-role-workflow
