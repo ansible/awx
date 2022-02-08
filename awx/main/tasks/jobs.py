@@ -854,24 +854,6 @@ class RunJob(BaseTask):
                 d[r'Vault password \({}\):\s*?$'.format(vault_id)] = k
         return d
 
-    def build_execution_environment_params(self, instance, private_data_dir):
-        if settings.IS_K8S:
-            return {}
-
-        params = super(RunJob, self).build_execution_environment_params(instance, private_data_dir)
-        # If this has an insights agent and it is not already mounted then show it
-        insights_dir = os.path.dirname(settings.INSIGHTS_SYSTEM_ID_FILE)
-        if instance.use_fact_cache and os.path.exists(insights_dir):
-            logger.info('not parent of others')
-            params.setdefault('container_volume_mounts', [])
-            params['container_volume_mounts'].extend(
-                [
-                    f"{insights_dir}:{insights_dir}:Z",
-                ]
-            )
-
-        return params
-
     def pre_run_hook(self, job, private_data_dir):
         super(RunJob, self).pre_run_hook(job, private_data_dir)
         if job.inventory is None:
