@@ -39,7 +39,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='playbook_integrity_keyless_signer_id',
-            field=models.CharField(blank=True, default='', help_text='A signer id string for keyless playbook integrity check', max_length=1024, verbose_name='signer id string for keyless playbook integrity check'),
+            field=models.CharField(
+                blank=True,
+                default='',
+                help_text='A signer id string for keyless playbook integrity check',
+                max_length=1024,
+                verbose_name='signer id string for keyless playbook integrity check',
+            ),
         ),
         migrations.AddField(
             model_name='project',
@@ -54,7 +60,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='playbook_integrity_signature_type',
-            field=models.CharField(blank=True, default='', help_text='A signature type for playbook integrity check', max_length=1024, verbose_name='signature type for playbook integrity check'),
+            field=models.CharField(
+                blank=True,
+                default='',
+                help_text='A signature type for playbook integrity check',
+                max_length=1024,
+                verbose_name='signature type for playbook integrity check',
+            ),
         ),
         migrations.AddField(
             model_name='projectupdate',
