@@ -34,7 +34,7 @@ options:
         - The role type to grant/revoke.
       required: True
       choices: ["admin", "read", "member", "execute", "adhoc", "update", "use", "approval", "auditor", "project_admin", "inventory_admin", "credential_admin",
-                "workflow_admin", "notification_admin", "job_template_admin"]
+                "workflow_admin", "notification_admin", "job_template_admin", "execution_environment_admin"]
       type: str
     target_team:
       description:
@@ -173,6 +173,7 @@ def main():
                 "workflow_admin",
                 "notification_admin",
                 "job_template_admin",
+                "execution_environment_admin",
             ],
             required=True,
         ),
