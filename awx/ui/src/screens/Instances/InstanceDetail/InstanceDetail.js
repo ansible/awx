@@ -134,124 +134,122 @@ function InstanceDetail({ setBreadcrumb }) {
   }
   const isHopNode = instance.node_type === 'hop';
   return (
-    <>
-      <CardBody>
-        <DetailList gutter="sm">
-          <Detail
-            label={t`Host Name`}
-            value={instance.hostname}
-            dataCy="instance-detail-name"
-          />
-          <Detail
-            label={t`Status`}
-            value={
-              <StatusLabel status={healthCheck?.errors ? 'error' : 'healthy'} />
-            }
-          />
-          <Detail label={t`Node Type`} value={instance.node_type} />
-          {!isHopNode && (
-            <>
-              <Detail
-                label={t`Policy Type`}
-                value={instance.managed_by_policy ? t`Auto` : t`Manual`}
-              />
-              <Detail label={t`Running Jobs`} value={instance.jobs_running} />
-              <Detail label={t`Total Jobs`} value={instance.jobs_total} />
-              <Detail
-                label={t`Last Health Check`}
-                value={formatDateString(healthCheck?.last_health_check)}
-              />
-              <Detail
-                label={t`Capacity Adjustment`}
-                value={
-                  <SliderHolder data-cy="slider-holder">
-                    <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
-                    <SliderForks data-cy="slider-forks">
-                      <div data-cy="number-forks">
-                        <Plural value={forks} one="# fork" other="# forks" />
-                      </div>
-                      <Slider
-                        areCustomStepsContinuous
-                        max={1}
-                        min={0}
-                        step={0.1}
-                        value={instance.capacity_adjustment}
-                        onChange={handleChangeValue}
-                        isDisabled={!me?.is_superuser || !instance.enabled}
-                        data-cy="slider"
-                      />
-                    </SliderForks>
-                    <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
-                  </SliderHolder>
-                }
-              />
-              <Detail
-                label={t`Used Capacity`}
-                value={
-                  instance.enabled ? (
-                    <Progress
-                      title={t`Used capacity`}
-                      value={Math.round(
-                        100 - instance.percent_capacity_remaining
-                      )}
-                      measureLocation={ProgressMeasureLocation.top}
-                      size={ProgressSize.sm}
-                      aria-label={t`Used capacity`}
-                    />
-                  ) : (
-                    <Unavailable>{t`Unavailable`}</Unavailable>
-                  )
-                }
-              />
-            </>
-          )}
-          {healthCheck?.errors && (
+    <CardBody>
+      <DetailList gutter="sm">
+        <Detail
+          label={t`Host Name`}
+          value={instance.hostname}
+          dataCy="instance-detail-name"
+        />
+        <Detail
+          label={t`Status`}
+          value={
+            <StatusLabel status={healthCheck?.errors ? 'error' : 'healthy'} />
+          }
+        />
+        <Detail label={t`Node Type`} value={instance.node_type} />
+        {!isHopNode && (
+          <>
             <Detail
-              fullWidth
-              label={t`Errors`}
+              label={t`Policy Type`}
+              value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+            />
+            <Detail label={t`Running Jobs`} value={instance.jobs_running} />
+            <Detail label={t`Total Jobs`} value={instance.jobs_total} />
+            <Detail
+              label={t`Last Health Check`}
+              value={formatDateString(healthCheck?.last_health_check)}
+            />
+            <Detail
+              label={t`Capacity Adjustment`}
               value={
-                <CodeBlock>
-                  <CodeBlockCode>{healthCheck?.errors}</CodeBlockCode>
-                </CodeBlock>
+                <SliderHolder data-cy="slider-holder">
+                  <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
+                  <SliderForks data-cy="slider-forks">
+                    <div data-cy="number-forks">
+                      <Plural value={forks} one="# fork" other="# forks" />
+                    </div>
+                    <Slider
+                      areCustomStepsContinuous
+                      max={1}
+                      min={0}
+                      step={0.1}
+                      value={instance.capacity_adjustment}
+                      onChange={handleChangeValue}
+                      isDisabled={!me?.is_superuser || !instance.enabled}
+                      data-cy="slider"
+                    />
+                  </SliderForks>
+                  <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
+                </SliderHolder>
               }
             />
-          )}
-        </DetailList>
-        {!isHopNode && (
-          <CardActionsRow>
-            <Tooltip content={t`Run a health check on the instance`}>
-              <Button
-                isDisabled={!me.is_superuser}
-                variant="primary"
-                ouiaId="health-check-button"
-                onClick={fetchHealthCheck}
-              >
-                {t`Health Check`}
-              </Button>
-            </Tooltip>
-            <InstanceToggle
-              css="display: inline-flex;"
-              fetchInstances={fetchDetails}
-              instance={instance}
+            <Detail
+              label={t`Used Capacity`}
+              value={
+                instance.enabled ? (
+                  <Progress
+                    title={t`Used capacity`}
+                    value={Math.round(
+                      100 - instance.percent_capacity_remaining
+                    )}
+                    measureLocation={ProgressMeasureLocation.top}
+                    size={ProgressSize.sm}
+                    aria-label={t`Used capacity`}
+                  />
+                ) : (
+                  <Unavailable>{t`Unavailable`}</Unavailable>
+                )
+              }
             />
-          </CardActionsRow>
+          </>
         )}
+        {healthCheck?.errors && (
+          <Detail
+            fullWidth
+            label={t`Errors`}
+            value={
+              <CodeBlock>
+                <CodeBlockCode>{healthCheck?.errors}</CodeBlockCode>
+              </CodeBlock>
+            }
+          />
+        )}
+      </DetailList>
+      {!isHopNode && (
+        <CardActionsRow>
+          <Tooltip content={t`Run a health check on the instance`}>
+            <Button
+              isDisabled={!me.is_superuser}
+              variant="primary"
+              ouiaId="health-check-button"
+              onClick={fetchHealthCheck}
+            >
+              {t`Health Check`}
+            </Button>
+          </Tooltip>
+          <InstanceToggle
+            css="display: inline-flex;"
+            fetchInstances={fetchDetails}
+            instance={instance}
+          />
+        </CardActionsRow>
+      )}
 
-        {error && (
-          <AlertModal
-            isOpen={error}
-            onClose={dismissError}
-            title={t`Error!`}
-            variant="error"
-          >
-            {updateInstanceError
-              ? t`Failed to update capacity adjustment.`
-              : t`Failed to disassociate one or more instances.`}
-            <ErrorDetail error={error} />
-          </AlertModal>
-        )}
-      </CardBody>
-    </>
+      {error && (
+        <AlertModal
+          isOpen={error}
+          onClose={dismissError}
+          title={t`Error!`}
+          variant="error"
+        >
+          {updateInstanceError
+            ? t`Failed to update capacity adjustment.`
+            : t`Failed to disassociate one or more instances.`}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
+    </CardBody>
   );
 }
 

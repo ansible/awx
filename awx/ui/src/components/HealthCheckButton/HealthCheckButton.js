@@ -5,37 +5,26 @@ import { useKebabifiedMenu } from 'contexts/Kebabified';
 
 function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
   const { isKebabified } = useKebabifiedMenu();
-  const hopNodeSelected =
-    selectedItems.filter((instance) => instance.node_type === 'hop').length > 0;
-  const hasSelectedItems = selectedItems.length > 0;
 
-  const buildTooltip = () => {
-    if (hopNodeSelected) {
-      return (
-        <Plural
-          value={hopNodeSelected}
-          one="Cannot run health check on a hop node.  Deselect the hop node to run a health check."
-          other="Cannot run health check on hop nodes.  Deselect the hop nodes to run health checks."
-        />
-      );
-    }
-    return selectedItems.length ? (
+  const selectedItemsCount = selectedItems.length;
+
+  const buildTooltip = () =>
+    selectedItemsCount ? (
       <Plural
-        value={selectedItems.length}
+        value={selectedItemsCount}
         one="Click to run a health check on the selected instance."
         other="Click to run a health check on the selected instances."
       />
     ) : (
       t`Select an instance to run a health check.`
     );
-  };
 
   if (isKebabified) {
     return (
       <Tooltip data-cy="healthCheckTooltip" content={buildTooltip()}>
         <DropdownItem
           key="approve"
-          isDisabled={hopNodeSelected || isDisabled || !hasSelectedItems}
+          isDisabled={isDisabled || !selectedItemsCount}
           component="button"
           onClick={onClick}
           ouiaId="health-check"
@@ -49,7 +38,7 @@ function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
     <Tooltip data-cy="healthCheckTooltip" content={buildTooltip()}>
       <div>
         <Button
-          isDisabled={hopNodeSelected || isDisabled || !hasSelectedItems}
+          isDisabled={isDisabled || !selectedItemsCount}
           variant="secondary"
           ouiaId="health-check"
           onClick={onClick}

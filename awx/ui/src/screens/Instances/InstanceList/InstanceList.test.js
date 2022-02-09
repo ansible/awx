@@ -152,13 +152,6 @@ describe('<InstanceList/>', () => {
       wrapper.find('DataListToolbar').prop('onSelectAll')(instances)
     );
     wrapper.update();
-
-    // Ensures health check button is disabled because a hop node is among
-    // the selected.
-    expect(
-      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
-    ).toBe(true);
-
     await act(async () =>
       wrapper.find('input[aria-label="Select row 3"]').prop('onChange')(false)
     );
@@ -196,18 +189,5 @@ describe('<InstanceList/>', () => {
     );
     wrapper.update();
     expect(wrapper.find('AlertModal')).toHaveLength(1);
-  });
-
-  test('Health check button should remain disabled', async () => {
-    await act(async () =>
-      wrapper.find('input[aria-label="Select row 3"]').prop('onChange')(true)
-    );
-    wrapper.update();
-    expect(
-      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
-    ).toBe(true);
-    expect(wrapper.find('Tooltip[data-cy="healthCheckTooltip"]').length).toBe(
-      1
-    );
   });
 });

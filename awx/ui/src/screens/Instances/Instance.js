@@ -33,7 +33,6 @@ function Instance({ setBreadcrumb }) {
           <Route path="/instances/:id/details" key="details">
             <InstanceDetail setBreadcrumb={setBreadcrumb} />
           </Route>
-          ,
           <Route path="*" key="not-found">
             <ContentError isNotFound>
               {match.params.id && (
@@ -49,5 +48,4 @@ function Instance({ setBreadcrumb }) {
   );
 }
 
-export { Instance as _Instance };
 export default Instance;
