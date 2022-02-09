@@ -226,9 +226,7 @@ function MeshGraph({ showLegend, zoom }) {
         .attr('y2', (d) => d.target.y);
 
       node.attr('transform', (d) => `translate(${d.x},${d.y})`);
-      if (simulation.alpha() < simulation.alphaMin()) {
-        d3.select('.simulation-loader').style('visibility', 'hidden');
-      }
+      calculateAlphaDecay(simulation.alpha(), simulation.alphaMin(), 35);
     }
 
     svg.call(zoom);
@@ -310,9 +308,17 @@ function MeshGraph({ showLegend, zoom }) {
       setIsNodeSelected(true);
       setSelectedNode(n);
     }
+
+    function calculateAlphaDecay(a, aMin, x) {
+      const decayPercentage = Math.min((aMin / a) * 100);
+      if (decayPercentage >= x) {
+        d3.select('.simulation-loader').style('visibility', 'hidden');
+      }
+    }
   };
 
   async function redirectToDetailsPage() {
+    // TODO: redirect to top-level instances details page
     const { id: nodeId } = selectedNode;
     const {
       data: { results },
