@@ -577,6 +577,31 @@ class TestGenericRun:
             env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
+    def test_playbook_integrity_check_failure(self, patch_Job, settings, execution_environment):
+        job = Job(status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
+        job.websocket_emit_status = mock.Mock()
+        job.save = mock.Mock()
+        job.execution_environment = execution_environment
+        job.project.playbook_integrity_enabled = True
+        job.playbook_integrity_verified = False
+        settings.PLAYBOOK_INTEGRITY_FEATURE_ENABLED = True
+        job.project.playbook_integrity_latest_result = []
+
+        task = tasks.jobs.RunJob()
+        task.instance = job
+        task.update_model = mock.Mock(return_value=job)
+        task.model.objects.get = mock.Mock(return_value=job)
+
+        with mock.patch('awx.main.tasks.jobs.copy_tree'):
+            with pytest.raises(Exception):
+                task.run(1)
+
+        update_model_call = task.update_model.call_args[1]
+        assert 'RuntimeError' in update_model_call['result_traceback']
+        assert 'Playbook Integrity Check Failed' in update_model_call['result_traceback']
+        assert update_model_call['status'] == 'error'
+        assert update_model_call['emitted_events'] == 0
+
 
 @pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
