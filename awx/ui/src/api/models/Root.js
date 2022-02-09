@@ -3,7 +3,7 @@ import Base from '../Base';
 class Root extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/';
+    this.baseUrl = 'api/';
     this.redirectURL = '/api/v2/config/';
   }
 
@@ -31,7 +31,7 @@ class Root extends Base {
     // automation etc. should relocate this variable file to an importable
     // location in src prior to building. That said, a raw http call
     // works for now.
-    return this.http.get('/static/media/default.strings.json');
+    return this.http.get('static/media/default.strings.json');
   }
 }
 

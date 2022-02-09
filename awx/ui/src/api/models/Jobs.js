@@ -4,7 +4,7 @@ import RunnableMixin from '../mixins/Runnable.mixin';
 class Jobs extends RunnableMixin(Base) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/jobs/';
+    this.baseUrl = 'api/v2/jobs/';
     this.jobEventSlug = '/job_events/';
   }
 

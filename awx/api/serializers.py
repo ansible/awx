@@ -379,19 +379,22 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
     def _get_related(self, obj):
         return {} if obj is None else self.get_related(obj)
 
-    def _generate_named_url(self, url_path, obj, node):
-        url_units = url_path.split('/')
+    def _generate_friendly_id(self, obj, node):
         reset_counters()
-        named_url = node.generate_named_url(obj)
-        url_units[4] = named_url
-        return '/'.join(url_units)
+        return node.generate_named_url(obj)
 
     def get_related(self, obj):
         res = OrderedDict()
         view = self.context.get('view', None)
         if view and (hasattr(view, 'retrieve') or view.request.method == 'POST') and type(obj) in settings.NAMED_URL_GRAPH:
-            original_url = self.get_url(obj)
-            res['named_url'] = self._generate_named_url(original_url, obj, settings.NAMED_URL_GRAPH[type(obj)])
+            original_path = self.get_url(obj)
+            path_components = original_path.lstrip('/').rstrip('/').split('/')
+
+            friendly_id = self._generate_friendly_id(obj, settings.NAMED_URL_GRAPH[type(obj)])
+            path_components[-1] = friendly_id
+
+            new_path = '/' + '/'.join(path_components) + '/'
+            res['named_url'] = new_path
         if getattr(obj, 'created_by', None):
             res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):

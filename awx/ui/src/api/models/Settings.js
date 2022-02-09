@@ -3,7 +3,7 @@ import Base from '../Base';
 class Settings extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/settings/';
+    this.baseUrl = 'api/v2/settings/';
   }
 
   readAllOptions() {

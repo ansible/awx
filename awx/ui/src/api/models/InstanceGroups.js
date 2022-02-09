@@ -3,7 +3,7 @@ import Base from '../Base';
 class InstanceGroups extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/instance_groups/';
+    this.baseUrl = 'api/v2/instance_groups/';
 
     this.associateInstance = this.associateInstance.bind(this);
     this.disassociateInstance = this.disassociateInstance.bind(this);

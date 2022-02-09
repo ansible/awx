@@ -20,7 +20,7 @@ describe('OrganizationsAPI', () => {
     const testParams = { foo: 'bar' };
     const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
-    const mockBaseURL = `/api/v2/organizations/${orgId}/access_list/`;
+    const mockBaseURL = `api/v2/organizations/${orgId}/access_list/`;
 
     await OrganizationsAPI.readAccessList(orgId);
     await OrganizationsAPI.readAccessList(orgId, testParams);
@@ -41,7 +41,7 @@ describe('OrganizationsAPI', () => {
     const testParams = { foo: 'bar' };
     const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
-    const mockBaseURL = `/api/v2/organizations/${orgId}/teams/`;
+    const mockBaseURL = `api/v2/organizations/${orgId}/teams/`;
 
     await OrganizationsAPI.readTeams(orgId);
     await OrganizationsAPI.readTeams(orgId, testParams);

@@ -33,7 +33,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from 'contexts/Session';
 import { SESSION_REDIRECT_URL } from '../../constants';
 
-const loginLogoSrc = '/static/media/logo-login.svg';
+const loginLogoSrc = 'static/media/logo-login.svg';
 
 const Login = styled(PFLogin)`
   & .pf-c-brand {

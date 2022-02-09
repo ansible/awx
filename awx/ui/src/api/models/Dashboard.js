@@ -3,7 +3,7 @@ import Base from '../Base';
 class Dashboard extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/dashboard/';
+    this.baseUrl = 'api/v2/dashboard/';
   }
 
   readJobGraph(params) {
