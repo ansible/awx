@@ -237,9 +237,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
-    def save_health_data(self, version, cpu, memory, uuid=None, update_last_seen=False, errors=''):
-        self.last_health_check = now()
-        update_fields = ['last_health_check']
+    def save_health_data(self, version=None, cpu=0, memory=0, uuid=None, update_last_seen=False, errors=''):
+        update_fields = ['errors']
+        if self.node_type != 'hop':
+            self.last_health_check = now()
+            update_fields.append('last_health_check')
 
         if update_last_seen:
             self.last_seen = self.last_health_check
@@ -251,7 +253,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.uuid = uuid
             update_fields.append('uuid')
 
-        if self.version != version:
+        if version is not None and self.version != version:
             self.version = version
             update_fields.append('version')
 
@@ -270,7 +272,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.errors = ''
         else:
             self.mark_offline(perform_save=False, errors=errors)
-        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])
+        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
         # disabling activity stream will avoid extra queries, which is important for heatbeat actions
         from awx.main.signals import disable_activity_stream
