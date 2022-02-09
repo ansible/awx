@@ -8,6 +8,7 @@ import * as d3 from 'd3';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
 import ContentLoading from '../../components/ContentLoading';
+import { truncateString } from '../../util/strings';
 
 const Loader = styled(ContentLoading)`
   height: 100%;
@@ -75,6 +76,7 @@ function MeshGraph({ showLegend, zoom }) {
     const defaultNodeHighlightColor = '#16407C';
     const defaultNodeLabelColor = 'white';
     const defaultFontSize = '12px';
+    const labelMaxLen = 15;
     const getWidth = () => {
       let width;
       // This is in an a try/catch due to an error from jest.
@@ -245,7 +247,7 @@ function MeshGraph({ showLegend, zoom }) {
         healthy: '\u2713',
         error: '\u0021',
       };
-      return `${stateKey[nodeState]}  ${name}`;
+      return `${stateKey[nodeState]}  ${truncateString(name, labelMaxLen)}`;
     }
 
     function renderNodeType(nodeType) {
