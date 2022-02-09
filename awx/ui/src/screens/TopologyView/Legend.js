@@ -56,11 +56,11 @@ const Text = styled(PFText)`
 
 function Legend() {
   return (
-    <Wrapper class="legend" data-cy="legend">
+    <Wrapper className="legend" data-cy="legend">
       <TextContent>
         <Text
           component={TextVariants.small}
-          style={{ 'font-weight': 'bold', color: 'black' }}
+          style={{ fontWeight: 'bold', color: 'black' }}
         >
           Legend
         </Text>
