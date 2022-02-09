@@ -50,12 +50,12 @@ function Tooltip({
   redirectToDetailsPage,
 }) {
   return (
-    <Wrapper class="tooltip" data-cy="tooltip">
+    <Wrapper className="tooltip" data-cy="tooltip">
       {isNodeSelected === false ? (
         <TextContent>
           <Text
             component={TextVariants.small}
-            style={{ 'font-weight': 'bold', color: 'black' }}
+            style={{ fontWeight: 'bold', color: 'black' }}
           >
             Details
           </Text>
