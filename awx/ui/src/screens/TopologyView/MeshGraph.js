@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { InstancesAPI } from 'api';
 import debounce from 'util/debounce';
 // import { t } from '@lingui/macro';
 import * as d3 from 'd3';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
+import ContentLoading from '../../components/ContentLoading';
 
+const Loader = styled(ContentLoading)`
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  background: white;
+`;
 // function MeshGraph({ data }) {
 function MeshGraph({ showLegend, zoom }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
@@ -86,7 +94,6 @@ function MeshGraph({ showLegend, zoom }) {
 
     /* Add SVG */
     d3.selectAll(`#chart > svg`).remove();
-
     const svg = d3
       .select('#chart')
       .append('svg')
@@ -208,6 +215,8 @@ function MeshGraph({ showLegend, zoom }) {
 
     function ticked() {
       // link.attr('d', linkArc);
+      d3.select('.simulation-loader').style('visibility', 'visible');
+
       link
         .attr('x1', (d) => d.source.x)
         .attr('y1', (d) => d.source.y)
@@ -215,6 +224,9 @@ function MeshGraph({ showLegend, zoom }) {
         .attr('y2', (d) => d.target.y);
 
       node.attr('transform', (d) => `translate(${d.x},${d.y})`);
+      if (simulation.alpha() < simulation.alphaMin()) {
+        d3.select('.simulation-loader').style('visibility', 'hidden');
+      }
     }
 
     svg.call(zoom);
@@ -325,6 +337,7 @@ function MeshGraph({ showLegend, zoom }) {
   }
   useEffect(() => {
     function handleResize() {
+      d3.select('.simulation-loader').style('visibility', 'visible');
       draw();
     }
     window.addEventListener('resize', debounce(handleResize, 500));
@@ -341,6 +354,7 @@ function MeshGraph({ showLegend, zoom }) {
         nodeDetail={nodeDetail}
         redirectToDetailsPage={redirectToDetailsPage}
       />
+      <Loader className="simulation-loader" />
     </div>
   );
 }
