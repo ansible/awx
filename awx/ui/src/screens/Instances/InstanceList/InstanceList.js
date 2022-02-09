@@ -61,7 +61,7 @@ function InstanceList() {
   );
 
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
-    useSelected(instances);
+    useSelected(instances.filter((i) => i.node_type !== 'hop'));
 
   useEffect(() => {
     fetchInstances();
@@ -79,15 +79,16 @@ function InstanceList() {
           .map(({ id }) => InstancesAPI.healthCheck(id))
       );
       fetchInstances();
-      clearSelected();
-    }, [selected, clearSelected, fetchInstances])
+    }, [selected, fetchInstances])
   );
-
+  const handleHealthCheck = async () => {
+    await fetchHealthCheck();
+    clearSelected();
+  };
   const { error, dismissError } = useDismissableError(healthCheckError);
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(instances);
-
   return (
     <>
       <PageSection>
@@ -135,7 +136,7 @@ function InstanceList() {
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   <HealthCheckButton
-                    onClick={fetchHealthCheck}
+                    onClick={handleHealthCheck}
                     selectedItems={selected}
                   />,
                 ]}
@@ -143,10 +144,13 @@ function InstanceList() {
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG} isExpandable>
-                <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
+                <HeaderCell
+                  tooltip={t`Cannot run health check on hop nodes.`}
+                  sortKey="hostname"
+                >{t`Name`}</HeaderCell>
                 <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
                 <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
-                <HeaderCell sortKey="capacity_adjustment">{t`Capacity Adjustment`}</HeaderCell>
+                <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
                 <HeaderCell>{t`Used Capacity`}</HeaderCell>
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>

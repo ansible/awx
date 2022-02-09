@@ -19,6 +19,7 @@ import StatusLabel from 'components/StatusLabel';
 import { Instance } from 'types';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useDebounce from 'hooks/useDebounce';
+import computeForks from 'util/computeForks';
 import { InstancesAPI } from 'api';
 import { useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
@@ -41,15 +42,6 @@ const SliderForks = styled.div`
   margin-left: 8px;
   text-align: center;
 `;
-
-function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
-  const minCapacity = Math.min(memCapacity, cpuCapacity);
-  const maxCapacity = Math.max(memCapacity, cpuCapacity);
-
-  return Math.floor(
-    minCapacity + (maxCapacity - minCapacity) * selectedCapacityAdjustment
-  );
-}
 
 function InstanceListItem({
   instance,
@@ -196,13 +188,23 @@ function InstanceListItem({
         <Td colSpan={7}>
           <ExpandableRowContent>
             <DetailList>
-              <Detail value={instance.jobs_running} label={t`Running Jobs`} />
-              <Detail value={instance.jobs_total} label={t`Total Jobs`} />
               <Detail
+                data-cy="running-jobs"
+                value={instance.jobs_running}
+                label={t`Running Jobs`}
+              />
+              <Detail
+                data-cy="total-jobs"
+                value={instance.jobs_total}
+                label={t`Total Jobs`}
+              />
+              <Detail
+                data-cy="policy-type"
                 label={t`Policy Type`}
                 value={instance.managed_by_policy ? t`Auto` : t`Manual`}
               />
               <Detail
+                data-cy="last-health-check"
                 label={t`Last Health Check`}
                 value={formatDateString(instance.last_health_check)}
               />

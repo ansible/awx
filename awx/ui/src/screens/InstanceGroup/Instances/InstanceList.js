@@ -88,9 +88,13 @@ function InstanceList() {
     useCallback(async () => {
       await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
       fetchInstances();
-      clearSelected();
-    }, [selected, clearSelected, fetchInstances])
+    }, [selected, fetchInstances])
   );
+
+  const handleHealthCheck = async () => {
+    await fetchHealthCheck();
+    clearSelected();
+  };
 
   const {
     isLoading: isDisassociateLoading,
@@ -231,7 +235,7 @@ function InstanceList() {
               />,
               <HealthCheckButton
                 isDisabled={!canAdd}
-                onClick={fetchHealthCheck}
+                onClick={handleHealthCheck}
                 selectedItems={selected}
               />,
             ]}
@@ -250,7 +254,7 @@ function InstanceList() {
             <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
             <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
             <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
-            <HeaderCell sortKey="capacity_adjustment">{t`Capacity Adjustment`}</HeaderCell>
+            <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
             <HeaderCell>{t`Used Capacity`}</HeaderCell>
             <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>
