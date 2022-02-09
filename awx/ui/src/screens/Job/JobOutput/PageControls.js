@@ -42,58 +42,56 @@ const PageControls = ({
   isFlatMode,
   isTemplateJob,
 }) => (
-  <>
-    <ControllsWrapper>
-      <ExpandCollapseWrapper>
-        {!isFlatMode && isTemplateJob && (
-          <Button
-            aria-label={
-              isAllCollapsed ? t`Expand job events` : t`Collapse all job events`
-            }
-            variant="plain"
-            type="button"
-            onClick={toggleExpandCollapseAll}
-          >
-            {isAllCollapsed ? <AngleRightIcon /> : <AngleDownIcon />}
-          </Button>
-        )}
-      </ExpandCollapseWrapper>
-      <ScrollWrapper>
+  <ControllsWrapper>
+    <ExpandCollapseWrapper>
+      {!isFlatMode && isTemplateJob && (
         <Button
-          ouiaId="job-output-scroll-previous-button"
-          aria-label={t`Scroll previous`}
-          onClick={onScrollPrevious}
+          aria-label={
+            isAllCollapsed ? t`Expand job events` : t`Collapse all job events`
+          }
           variant="plain"
+          type="button"
+          onClick={toggleExpandCollapseAll}
         >
-          <AngleUpIcon />
+          {isAllCollapsed ? <AngleRightIcon /> : <AngleDownIcon />}
         </Button>
-        <Button
-          ouiaId="job-output-scroll-next-button"
-          aria-label={t`Scroll next`}
-          onClick={onScrollNext}
-          variant="plain"
-        >
-          <AngleDownIcon />
-        </Button>
-        <Button
-          ouiaId="job-output-scroll-first-button"
-          aria-label={t`Scroll first`}
-          onClick={onScrollFirst}
-          variant="plain"
-        >
-          <AngleDoubleUpIcon />
-        </Button>
-        <Button
-          ouiaId="job-output-scroll-last-button"
-          aria-label={t`Scroll last`}
-          onClick={onScrollLast}
-          variant="plain"
-        >
-          <AngleDoubleDownIcon />
-        </Button>
-      </ScrollWrapper>
-    </ControllsWrapper>
-  </>
+      )}
+    </ExpandCollapseWrapper>
+    <ScrollWrapper>
+      <Button
+        ouiaId="job-output-scroll-previous-button"
+        aria-label={t`Scroll previous`}
+        onClick={onScrollPrevious}
+        variant="plain"
+      >
+        <AngleUpIcon />
+      </Button>
+      <Button
+        ouiaId="job-output-scroll-next-button"
+        aria-label={t`Scroll next`}
+        onClick={onScrollNext}
+        variant="plain"
+      >
+        <AngleDownIcon />
+      </Button>
+      <Button
+        ouiaId="job-output-scroll-first-button"
+        aria-label={t`Scroll first`}
+        onClick={onScrollFirst}
+        variant="plain"
+      >
+        <AngleDoubleUpIcon />
+      </Button>
+      <Button
+        ouiaId="job-output-scroll-last-button"
+        aria-label={t`Scroll last`}
+        onClick={onScrollLast}
+        variant="plain"
+      >
+        <AngleDoubleDownIcon />
+      </Button>
+    </ScrollWrapper>
+  </ControllsWrapper>
 );
 
 export default PageControls;

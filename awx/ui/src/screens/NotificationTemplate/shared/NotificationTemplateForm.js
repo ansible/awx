@@ -120,7 +120,7 @@ function NotificationTemplateForm({
 
   const messages = template.messages || { workflow_approval: {} };
   const defs = defaultMessages[template.notification_type || 'email'];
-  const mergeDefaultMessages = (templ = {}, def) => ({
+  const mergeDefaultMessages = (def, templ = {}) => ({
     message: templ?.message || def.message || '',
     body: templ?.body || def.body || '',
   });
@@ -140,32 +140,32 @@ function NotificationTemplateForm({
         },
         organization: template.summary_fields?.organization,
         messages: {
-          started: { ...mergeDefaultMessages(messages.started, defs.started) },
-          success: { ...mergeDefaultMessages(messages.success, defs.success) },
-          error: { ...mergeDefaultMessages(messages.error, defs.error) },
+          started: { ...mergeDefaultMessages(defs.started, messages.started) },
+          success: { ...mergeDefaultMessages(defs.success, messages.success) },
+          error: { ...mergeDefaultMessages(defs.error, messages.error) },
           workflow_approval: {
             approved: {
               ...mergeDefaultMessages(
-                messages.workflow_approval?.approved,
-                defs.workflow_approval.approved
+                defs.workflow_approval.approved,
+                messages.workflow_approval?.approved
               ),
             },
             denied: {
               ...mergeDefaultMessages(
-                messages.workflow_approval?.denied,
-                defs.workflow_approval.denied
+                defs.workflow_approval.denied,
+                messages.workflow_approval?.denied
               ),
             },
             running: {
               ...mergeDefaultMessages(
-                messages.workflow_approval?.running,
-                defs.workflow_approval.running
+                defs.workflow_approval.running,
+                messages.workflow_approval?.running
               ),
             },
             timed_out: {
               ...mergeDefaultMessages(
-                messages.workflow_approval?.timed_out,
-                defs.workflow_approval.timed_out
+                defs.workflow_approval.timed_out,
+                messages.workflow_approval?.timed_out
               ),
             },
           },

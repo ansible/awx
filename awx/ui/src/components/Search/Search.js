@@ -164,37 +164,35 @@ function Search({
             />
           )) ||
             (options && (
-              <>
-                <Select
-                  variant={SelectVariant.checkbox}
-                  aria-label={name}
-                  typeAheadAriaLabel={name}
-                  onToggle={setIsFilterDropdownOpen}
-                  onSelect={(event, selection) =>
-                    handleFilterDropdownSelect(key, event, selection)
-                  }
-                  selections={chipsByKey[key].chips.map((chip) => {
-                    const [, ...value] = chip.key.split(':');
-                    return value.join(':');
-                  })}
-                  isOpen={isFilterDropdownOpen}
-                  placeholderText={t`Filter By ${name}`}
-                  ouiaId={`filter-by-${key}`}
-                  isDisabled={isDisabled}
-                  maxHeight={maxSelectHeight}
-                  noResultsFoundText={t`No results found`}
-                >
-                  {options.map(([optionKey, optionLabel]) => (
-                    <SelectOption
-                      key={optionKey}
-                      value={optionKey}
-                      inputId={`select-option-${optionKey}`}
-                    >
-                      {optionLabel}
-                    </SelectOption>
-                  ))}
-                </Select>
-              </>
+              <Select
+                variant={SelectVariant.checkbox}
+                aria-label={name}
+                typeAheadAriaLabel={name}
+                onToggle={setIsFilterDropdownOpen}
+                onSelect={(event, selection) =>
+                  handleFilterDropdownSelect(key, event, selection)
+                }
+                selections={chipsByKey[key].chips.map((chip) => {
+                  const [, ...value] = chip.key.split(':');
+                  return value.join(':');
+                })}
+                isOpen={isFilterDropdownOpen}
+                placeholderText={t`Filter By ${name}`}
+                ouiaId={`filter-by-${key}`}
+                isDisabled={isDisabled}
+                maxHeight={maxSelectHeight}
+                noResultsFoundText={t`No results found`}
+              >
+                {options.map(([optionKey, optionLabel]) => (
+                  <SelectOption
+                    key={optionKey}
+                    value={optionKey}
+                    inputId={`select-option-${optionKey}`}
+                  >
+                    {optionLabel}
+                  </SelectOption>
+                ))}
+              </Select>
             )) ||
             (isBoolean && (
               <Select

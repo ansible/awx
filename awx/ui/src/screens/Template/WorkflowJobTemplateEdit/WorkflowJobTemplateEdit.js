@@ -34,7 +34,7 @@ function WorkflowJobTemplateEdit({ template }) {
       organization?.id || inventory?.summary_fields?.organization.id || null;
     try {
       await Promise.all(
-        await submitLabels(labels, formOrgId, template.organization)
+        await submitLabels(formOrgId, template.organization, labels)
       );
       await WorkflowJobTemplatesAPI.update(template.id, templatePayload);
       history.push(`/templates/workflow_job_template/${template.id}/details`);
@@ -43,7 +43,7 @@ function WorkflowJobTemplateEdit({ template }) {
     }
   };
 
-  const submitLabels = async (labels = [], formOrgId, templateOrgId) => {
+  const submitLabels = async (formOrgId, templateOrgId, labels = []) => {
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.labels.results,
       labels

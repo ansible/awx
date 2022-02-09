@@ -2,7 +2,7 @@ import React from 'react';
 import { TextList, TextListVariants } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-const DetailList = ({ children, stacked, compact, ...props }) => (
+const DetailList = ({ children, stacked, ...props }) => (
   <TextList component={TextListVariants.dl} {...props}>
     {children}
   </TextList>

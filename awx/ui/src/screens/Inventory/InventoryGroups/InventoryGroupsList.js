@@ -107,104 +107,102 @@ function InventoryGroupsList() {
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   return (
-    <>
-      <PaginatedTable
-        contentError={contentError}
-        hasContentLoading={isLoading || isAdHocLaunchLoading}
-        items={groups}
-        itemCount={groupCount}
-        qsConfig={QS_CONFIG}
-        clearSelected={clearSelected}
-        toolbarSearchColumns={[
-          {
-            name: t`Name`,
-            key: 'name__icontains',
-            isDefault: true,
-          },
-          {
-            name: t`Group type`,
-            key: 'parents__isnull',
-            options: [['true', t`Show only root groups`]],
-          },
-          {
-            name: t`Created By (Username)`,
-            key: 'created_by__username__icontains',
-          },
-          {
-            name: t`Modified By (Username)`,
-            key: 'modified_by__username__icontains',
-          },
-        ]}
-        toolbarSearchableKeys={searchableKeys}
-        toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        headerRow={
-          <HeaderRow qsConfig={QS_CONFIG}>
-            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-            <HeaderCell>{t`Actions`}</HeaderCell>
-          </HeaderRow>
-        }
-        renderRow={(item, index) => (
-          <InventoryGroupItem
-            key={item.id}
-            group={item}
-            inventoryId={inventoryId}
-            isSelected={selected.some((row) => row.id === item.id)}
-            onSelect={() => handleSelect(item)}
-            rowIndex={index}
+    <PaginatedTable
+      contentError={contentError}
+      hasContentLoading={isLoading || isAdHocLaunchLoading}
+      items={groups}
+      itemCount={groupCount}
+      qsConfig={QS_CONFIG}
+      clearSelected={clearSelected}
+      toolbarSearchColumns={[
+        {
+          name: t`Name`,
+          key: 'name__icontains',
+          isDefault: true,
+        },
+        {
+          name: t`Group type`,
+          key: 'parents__isnull',
+          options: [['true', t`Show only root groups`]],
+        },
+        {
+          name: t`Created By (Username)`,
+          key: 'created_by__username__icontains',
+        },
+        {
+          name: t`Modified By (Username)`,
+          key: 'modified_by__username__icontains',
+        },
+      ]}
+      toolbarSearchableKeys={searchableKeys}
+      toolbarRelatedSearchableKeys={relatedSearchableKeys}
+      headerRow={
+        <HeaderRow qsConfig={QS_CONFIG}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+          <HeaderCell>{t`Actions`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(item, index) => (
+        <InventoryGroupItem
+          key={item.id}
+          group={item}
+          inventoryId={inventoryId}
+          isSelected={selected.some((row) => row.id === item.id)}
+          onSelect={() => handleSelect(item)}
+          rowIndex={index}
+        />
+      )}
+      renderToolbar={(props) => (
+        <DataListToolbar
+          {...props}
+          isAllSelected={isAllSelected}
+          onSelectAll={selectAll}
+          qsConfig={QS_CONFIG}
+          additionalControls={[
+            ...(canAdd
+              ? [
+                  <ToolbarAddButton
+                    key="add"
+                    linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
+                  />,
+                ]
+              : []),
+            ...(!isAdHocDisabled
+              ? [
+                  <AdHocCommands
+                    adHocItems={selected}
+                    hasListItems={groupCount > 0}
+                    onLaunchLoading={setIsAdHocLaunchLoading}
+                    moduleOptions={moduleOptions}
+                  />,
+                ]
+              : []),
+            <Tooltip content={renderTooltip()} position="top" key="delete">
+              <div>
+                <InventoryGroupsDeleteModal
+                  groups={selected}
+                  isDisabled={
+                    selected.length === 0 || selected.some(cannotDelete)
+                  }
+                  onAfterDelete={() => {
+                    fetchData();
+                    clearSelected();
+                  }}
+                />
+              </div>
+            </Tooltip>,
+          ]}
+        />
+      )}
+      emptyStateControls={
+        canAdd && (
+          <ToolbarAddButton
+            key="add"
+            linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
           />
-        )}
-        renderToolbar={(props) => (
-          <DataListToolbar
-            {...props}
-            isAllSelected={isAllSelected}
-            onSelectAll={selectAll}
-            qsConfig={QS_CONFIG}
-            additionalControls={[
-              ...(canAdd
-                ? [
-                    <ToolbarAddButton
-                      key="add"
-                      linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
-                    />,
-                  ]
-                : []),
-              ...(!isAdHocDisabled
-                ? [
-                    <AdHocCommands
-                      adHocItems={selected}
-                      hasListItems={groupCount > 0}
-                      onLaunchLoading={setIsAdHocLaunchLoading}
-                      moduleOptions={moduleOptions}
-                    />,
-                  ]
-                : []),
-              <Tooltip content={renderTooltip()} position="top" key="delete">
-                <div>
-                  <InventoryGroupsDeleteModal
-                    groups={selected}
-                    isDisabled={
-                      selected.length === 0 || selected.some(cannotDelete)
-                    }
-                    onAfterDelete={() => {
-                      fetchData();
-                      clearSelected();
-                    }}
-                  />
-                </div>
-              </Tooltip>,
-            ]}
-          />
-        )}
-        emptyStateControls={
-          canAdd && (
-            <ToolbarAddButton
-              key="add"
-              linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
-            />
-          )
-        }
-      />
-    </>
+        )
+      }
+    />
   );
 }
 export default InventoryGroupsList;

@@ -1,14 +1,19 @@
 {
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
+  "ignorePatterns": ["./node_modules/"],
   "parserOptions": {
+    "requireConfigFile": false,
     "ecmaVersion": 6,
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true,
       "modules": true
-    }
+    },
+    "babelOptions": {
+      "presets": ["@babel/preset-react"]
+   }
   },
-  "plugins": ["react-hooks", "jsx-a11y", "i18next"],
+  "plugins": ["react-hooks", "jsx-a11y", "i18next", "@babel"],
   "extends": [
     "airbnb",
     "prettier",
@@ -17,7 +22,7 @@
   ],
   "settings": {
     "react": {
-      "version": "16.5.2"
+      "version": "detect"
     },
     "import/resolver": {
       "node": {
@@ -141,6 +146,9 @@
     "jsx-a11y/label-has-associated-control": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "react/jsx-filename-extension": "off"
+    "react/jsx-filename-extension": "off",
+    "no-restricted-exports": "off",
+    "react/function-component-definition": "off",
+    "prefer-regex-literals": "off"
   }
 }

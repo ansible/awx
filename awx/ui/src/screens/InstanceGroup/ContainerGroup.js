@@ -91,7 +91,7 @@ function ContainerGroup({ setBreadcrumb }) {
             {contentError.response?.status === 404 && (
               <span>
                 {t`Container group not found.`}
-                {''}
+
                 <Link to="/instance_groups">{t`View all instance groups`}</Link>
               </span>
             )}
