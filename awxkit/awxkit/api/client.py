@@ -54,9 +54,12 @@ class Connection(object):
             if _next:
                 headers = self.session.headers.copy()
                 response = self.post('/api/login/', headers=headers, data=dict(username=username, password=password, next=_next))
-                if 'X-API-Session-Cookie-Name' in response.headers:
-                    self.session_cookie_name = response.headers.get('X-API-Session-Cookie-Name')
-                self.session_id = self.session.cookies.get(self.session_cookie_name)
+                # The login causes a redirect so we need to search the history of the request to find the header
+                for historical_response in response.history:
+                    if 'X-API-Session-Cookie-Name' in historical_response.headers:
+                        self.session_cookie_name = historical_response.headers.get('X-API-Session-Cookie-Name')
+
+                self.session_id = self.session.cookies.get(self.session_cookie_name, None)
                 self.uses_session_cookie = True
             else:
                 self.session.auth = (username, password)
