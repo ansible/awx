@@ -67,8 +67,8 @@ no_api_parameter_ok = {
     'ad_hoc_command': ['interval', 'timeout', 'wait'],
     # group parameters to perserve hosts and children.
     'group': ['preserve_existing_children', 'preserve_existing_hosts'],
-    # user parameters to rename a user.
-    'user': ['new_username'],
+    # new_username parameter to rename a user and organization allows for org admin user creation
+    'user': ['new_username', 'organization'],
     # workflow_approval parameters that do not apply when approving an approval node.
     'workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
 }
