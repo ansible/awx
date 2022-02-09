@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   AlertGroup,
   Alert,
@@ -10,13 +10,13 @@ import { shape, arrayOf, func, string, oneOf, bool, number } from 'prop-types';
 export default function useToast() {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (newToast) => {
+  const addToast = useCallback((newToast) => {
     setToasts((oldToasts) => [...oldToasts, newToast]);
-  };
+  }, []);
 
-  const removeToast = (toastId) => {
+  const removeToast = useCallback((toastId) => {
     setToasts((oldToasts) => oldToasts.filter((t) => t.id !== toastId));
-  };
+  }, []);
 
   return {
     addToast,
