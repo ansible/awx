@@ -7,7 +7,7 @@ import debounce from 'util/debounce';
 import * as d3 from 'd3';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
-import ContentLoading from '../../components/ContentLoading';
+import ContentLoading from './ContentLoading';
 import { truncateString } from '../../util/strings';
 
 const Loader = styled(ContentLoading)`
