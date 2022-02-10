@@ -166,19 +166,6 @@ class JobOptions(BaseModel):
             "facts at the end of a playbook run to the database and caching facts for use by Ansible."
         ),
     )
-    playbook_integrity_verified = models.BooleanField(
-        blank=True,
-        default=None,
-        null=True,
-        editable=False,
-        help_text=_('Overall result of playbook integrity verification'),
-    )
-    playbook_integrity_result = JSONField(
-        blank=True,
-        default=None,
-        null=True,
-        editable=False,
-    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -589,6 +576,19 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         blank=True,
         default=1,
         help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
+    )
+    playbook_integrity_verified = models.BooleanField(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
+        help_text=_('Overall result of playbook integrity verification'),
+    )
+    playbook_integrity_result = JSONField(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
     )
 
     def _get_parent_field_name(self):
