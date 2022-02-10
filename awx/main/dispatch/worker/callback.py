@@ -119,6 +119,7 @@ class CallbackBrokerWorker(BaseWorker):
             bulk_events_saved = 0
             singular_events_saved = 0
             metrics_events_batch_save_errors = 0
+            emitted_events = 0
             for cls, events in self.buff.items():
                 logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})')
                 for e in events:
@@ -143,6 +144,7 @@ class CallbackBrokerWorker(BaseWorker):
                 duration_to_save = time.perf_counter() - duration_to_save
                 for e in events:
                     if not getattr(e, '_skip_websocket_message', False):
+                        emitted_events += 1
                         emit_event_detail(e)
             self.buff = {}
             self.last_flush = time.time()
@@ -153,6 +155,7 @@ class CallbackBrokerWorker(BaseWorker):
                 self.subsystem_metrics.inc('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved)
                 self.subsystem_metrics.observe('callback_receiver_batch_events_insert_db', bulk_events_saved)
                 self.subsystem_metrics.inc('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved))
+                self.subsystem_metrics.inc('callback_receiver_emit_event_detail', emitted_events)
             if self.subsystem_metrics.should_pipe_execute() is True:
                 self.subsystem_metrics.pipe_execute()
 
