@@ -9,6 +9,7 @@ action_groups:
     - host
     - inventory
     - inventory_source
+    - inventory_source_update
     - job_cancel
     - job_launch
     - job_list
