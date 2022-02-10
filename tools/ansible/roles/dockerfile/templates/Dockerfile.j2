@@ -154,7 +154,7 @@ RUN dnf -y install \
     wget \
     diffutils \
     unzip && \
-    npm install -g n && n 14.18.3 && npm install -g npm@7.24.2 && dnf remove -y nodejs
+    npm install -g n && n 16.14.0 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
 RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout
 

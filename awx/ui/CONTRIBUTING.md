@@ -56,8 +56,8 @@ The UI is built using [ReactJS](https://reactjs.org/docs/getting-started.html) a
 
 The AWX UI requires the following:
 
-- Node 14.x LTS
-- NPM 7.x LTS
+- Node >= 16.14.0 LTS
+- NPM 8.x 
 
 Run the following to install all the dependencies:
 
