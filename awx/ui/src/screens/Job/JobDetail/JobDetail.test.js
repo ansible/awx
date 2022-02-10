@@ -275,25 +275,6 @@ describe('<JobDetail />', () => {
     expect(errorModal.length).toBe(1);
   });
 
-  test('DELETED is shown for required Job resources that have been deleted', () => {
-    const newMockData = {
-      ...mockJobData,
-      summary_fields: {
-        ...mockJobData.summary_fields,
-        inventory: null,
-        project: null,
-      },
-    };
-    wrapper = mountWithContexts(<JobDetail job={newMockData} />);
-    const detail = wrapper.find('JobDetail');
-    async function assertMissingDetail(label) {
-      expect(detail.length).toBe(1);
-      expect(detail.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(detail.find(`Detail[label="${label}"] dd`).text()).toBe('DELETED');
-    }
-    assertMissingDetail('Project');
-    assertMissingDetail('Inventory');
-  });
   test('should display Playbook Check detail', () => {
     wrapper = mountWithContexts(
       <JobDetail
