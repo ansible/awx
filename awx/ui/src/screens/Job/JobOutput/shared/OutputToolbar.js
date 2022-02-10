@@ -68,10 +68,12 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
   const taskCount = job?.playbook_counts?.task_count;
   const darkCount = job?.host_status_counts?.dark;
   const failureCount = job?.host_status_counts?.failures;
-  const totalHostCount = Object.keys(job?.host_status_counts || {}).reduce(
-    (sum, key) => sum + job?.host_status_counts[key],
-    0
-  );
+  const totalHostCount = job?.host_status_counts
+    ? Object.keys(job.host_status_counts || {}).reduce(
+        (sum, key) => sum + job.host_status_counts[key],
+        0
+      )
+    : 0;
   const { me } = useConfig();
 
   return (

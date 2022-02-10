@@ -77,7 +77,7 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
         related.remove(user)
 
 
-def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_auditors):
+def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_auditors, backend):
     from awx.main.models import Organization
     from django.conf import settings
 
@@ -86,7 +86,15 @@ def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_aud
     for org_name in attr:
         try:
             if settings.SAML_AUTO_CREATE_OBJECTS:
-                org = Organization.objects.get_or_create(name=org_name)[0]
+                try:
+                    organization_alias = backend.setting('ORGANIZATION_MAP').get(org_name).get('organization_alias')
+                    if organization_alias is not None:
+                        organization_name = organization_alias
+                    else:
+                        organization_name = org_name
+                except Exception:
+                    organization_name = org_name
+                org = Organization.objects.get_or_create(name=organization_name)[0]
                 org.create_default_galaxy_credential()
             else:
                 org = Organization.objects.get(name=org_name)
@@ -117,7 +125,12 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
 
     org_map = backend.setting('ORGANIZATION_MAP') or {}
     for org_name, org_opts in org_map.items():
-        org = Organization.objects.get_or_create(name=org_name)[0]
+        organization_alias = org_opts.get('organization_alias')
+        if organization_alias:
+            organization_name = organization_alias
+        else:
+            organization_name = org_name
+        org = Organization.objects.get_or_create(name=organization_name)[0]
         org.create_default_galaxy_credential()
 
         # Update org admins from expression(s).
@@ -173,9 +186,9 @@ def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
     attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_admin_attr'), [])
     attr_auditor_values = kwargs.get('response', {}).get('attributes', {}).get(org_map.get('saml_auditor_attr'), [])
 
-    _update_org_from_attr(user, "member_role", attr_values, remove, False, False)
-    _update_org_from_attr(user, "admin_role", attr_admin_values, False, remove_admins, False)
-    _update_org_from_attr(user, "auditor_role", attr_auditor_values, False, False, remove_auditors)
+    _update_org_from_attr(user, "member_role", attr_values, remove, False, False, backend)
+    _update_org_from_attr(user, "admin_role", attr_admin_values, False, remove_admins, False, backend)
+    _update_org_from_attr(user, "auditor_role", attr_auditor_values, False, False, remove_auditors, backend)
 
 
 def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs):
@@ -195,15 +208,11 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
         team_name = team_name_map.get('team', None)
         team_alias = team_name_map.get('team_alias', None)
         organization_name = team_name_map.get('organization', None)
-        organization_alias = team_name_map.get('organization_alias', None)
         if team_name in saml_team_names:
             if not organization_name:
                 # Settings field validation should prevent this.
                 logger.error("organization name invalid for team {}".format(team_name))
                 continue
-
-            if organization_alias:
-                organization_name = organization_alias
 
             try:
                 if settings.SAML_AUTO_CREATE_OBJECTS:

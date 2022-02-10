@@ -43,7 +43,8 @@ function AdHocPreviewStep({ hasErrors, values }) {
           ([key, value]) =>
             key !== 'extra_vars' &&
             key !== 'execution_environment' &&
-            key !== 'credential' && (
+            key !== 'credentials' &&
+            !key.startsWith('credential_passwords') && (
               <Detail key={key} label={toTitleCase(key)} value={value} />
             )
         )}

@@ -7,7 +7,7 @@ import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
 
-function showCredentialPasswordsStep(credentials = [], launchConfig) {
+function showCredentialPasswordsStep(launchConfig, credentials = []) {
   if (
     !launchConfig?.ask_credential_on_launch &&
     launchConfig?.passwords_needed_to_start
@@ -53,7 +53,7 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
     ),
     useCredentialPasswordsStep(
       launchConfig,
-      showCredentialPasswordsStep(formikValues.credentials, launchConfig),
+      showCredentialPasswordsStep(launchConfig, formikValues.credentials),
       visited
     ),
     useOtherPromptsStep(launchConfig, resource),

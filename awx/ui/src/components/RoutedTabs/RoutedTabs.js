@@ -21,12 +21,12 @@ function RoutedTabs({ tabsArray }) {
     return 0;
   };
 
-  function handleTabSelect(event, eventKey) {
+  const handleTabSelect = (event, eventKey) => {
     const match = tabsArray.find((tab) => tab.id === eventKey);
     if (match) {
       history.push(match.link);
     }
-  }
+  };
 
   return (
     <Tabs

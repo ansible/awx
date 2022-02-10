@@ -1,0 +1,20 @@
+name: Label PR
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    name: Label PR
+
+    steps:
+      - name: Label PR
+        uses: actions/labeler@v3
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: .github/pr_labeler.yml

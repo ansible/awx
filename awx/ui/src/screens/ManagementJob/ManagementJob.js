@@ -130,7 +130,7 @@ function ManagementJob({ setBreadcrumb }) {
             {error?.response?.status === 404 && (
               <span>
                 {t`Management job not found.`}
-                {''}
+
                 <Link to={basePath}>{t`View all management jobs`}</Link>
               </span>
             )}

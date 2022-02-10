@@ -28,9 +28,9 @@ const QS_CONFIG = getQSConfig('instance-group', {
 });
 
 function modifyInstanceGroups(
-  items = [],
   defaultControlPlane,
-  defaultExecution
+  defaultExecution,
+  items = []
 ) {
   return items.map((item) => {
     const clonedItem = {
@@ -128,9 +128,9 @@ function InstanceGroupList({
     useSelected(instanceGroups);
 
   const modifiedSelected = modifyInstanceGroups(
-    selected,
     defaultControlPlane,
-    defaultExecution
+    defaultExecution,
+    selected
   );
 
   const {
@@ -158,13 +158,10 @@ function InstanceGroupList({
 
   const canAdd = actions && actions.POST;
 
-  function cannotDelete(item) {
-    return (
-      !item.summary_fields.user_capabilities.delete ||
-      item.name === defaultExecution ||
-      item.name === defaultControlPlane
-    );
-  }
+  const cannotDelete = (item) =>
+    !item.summary_fields.user_capabilities.delete ||
+    item.name === defaultExecution ||
+    item.name === defaultControlPlane;
 
   const pluralizedItemName = t`Instance Groups`;
 

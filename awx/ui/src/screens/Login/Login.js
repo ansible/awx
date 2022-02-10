@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useCallback, useEffect } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 
@@ -32,7 +33,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from 'contexts/Session';
 import { SESSION_REDIRECT_URL } from '../../constants';
 
-const loginLogoSrc = '/static/media/logo-login.svg';
+const loginLogoSrc = 'static/media/logo-login.svg';
 
 const Login = styled(PFLogin)`
   & .pf-c-brand {
@@ -135,9 +136,9 @@ function AWXLogin({ alt, isAuthenticated }) {
     />
   );
 
-  function setSessionRedirect() {
+  const setSessionRedirect = () => {
     window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
-  }
+  };
 
   return (
     <Login header={Header} footer={Footer}>

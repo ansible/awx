@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
@@ -168,12 +169,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const {
     addEvents,
     toggleNodeIsCollapsed,
+    toggleCollapseAll,
     getEventForRow,
     getNumCollapsedEvents,
     getCounterForRow,
     getEvent,
     clearLoadedEvents,
     rebuildEventsTree,
+    isAllCollapsed,
   } = useJobEvents(
     {
       fetchEventByUuid,
@@ -238,7 +241,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           setWsEvents([]);
           scrollToRow(lastScrollPosition);
         });
-      }, 250);
+      }, 500);
       return;
     }
     let batchTimeout;
@@ -276,7 +279,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         batchedEvents = [];
       };
 
-      if (data.group_name === 'job_events') {
+      if (data.group_name === `${job.type}_events`) {
         batchedEvents.push(data);
         clearTimeout(batchTimeout);
         if (batchedEvents.length >= 25) {
@@ -504,7 +507,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               isCollapsed={node.isCollapsed}
               hasChildren={node.children.length}
               onToggleCollapsed={() => {
-                toggleNodeIsCollapsed(event.uuid);
+                toggleNodeIsCollapsed(event.uuid, !node.isCollapsed);
               }}
             />
           ) : (
@@ -653,6 +656,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     scrollHeight.current = e.scrollHeight;
   };
 
+  const handleExpandCollapseAll = () => {
+    toggleCollapseAll(!isAllCollapsed);
+  };
+
   if (contentError) {
     return <ContentError error={contentError} />;
   }
@@ -696,6 +703,10 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollLast={handleScrollLast}
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
+          toggleExpandCollapseAll={handleExpandCollapseAll}
+          isFlatMode={isFlatMode}
+          isTemplateJob={job.type === 'job'}
+          isAllCollapsed={isAllCollapsed}
         />
         <OutputWrapper cssMap={cssMap}>
           <InfiniteLoader

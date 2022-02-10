@@ -1,8 +1,6 @@
 ---
 name: Bug Report
 description: Create a report to help us improve
-labels:
-  - bug
 body:
   - type: markdown
     attributes:
@@ -38,6 +36,15 @@ body:
       description: What version of AWX are you running?
     validations:
       required: true
+
+  - type: checkboxes
+    id: components
+    attributes:
+      label: Select the relevant components
+      options:
+        - label: UI
+        - label: API
+        - label: Docs
 
   - type: dropdown
     id: awx-install-method

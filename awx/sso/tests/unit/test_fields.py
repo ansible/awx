@@ -79,7 +79,7 @@ class TestSAMLTeamAttrField:
                 'remove': True,
                 'saml_attr': 'foobar',
                 'team_org_map': [
-                    {'team': 'Engineering', 'team_alias': 'Engineering Team', 'organization': 'Ansible', 'organization_alias': 'Awesome Org'},
+                    {'team': 'Engineering', 'team_alias': 'Engineering Team', 'organization': 'Ansible'},
                     {'team': 'Engineering', 'organization': 'Ansible2'},
                     {'team': 'Engineering2', 'organization': 'Ansible'},
                 ],

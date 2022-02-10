@@ -8,3 +8,4 @@ node_modules
 dist
 images
 instrumented
+*test*.js

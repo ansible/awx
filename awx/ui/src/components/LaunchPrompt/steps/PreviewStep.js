@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
 import { Tooltip } from '@patternfly/react-core';

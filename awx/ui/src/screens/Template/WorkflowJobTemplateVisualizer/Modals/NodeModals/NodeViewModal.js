@@ -72,9 +72,14 @@ function NodeViewModal({ readOnly }) {
         fullUnifiedJobTemplate?.related?.webhook_receiver &&
         !fullUnifiedJobTemplate.webhook_key
       ) {
-        const {
-          data: { webhook_key },
-        } = await nodeAPI?.readWebhookKey(fullUnifiedJobTemplate.id);
+        let webhook_key = null;
+        if (nodeAPI) {
+          const { data } = await nodeAPI.readWebhookKey(
+            fullUnifiedJobTemplate.id
+          );
+          webhook_key = data.webhook_key;
+        }
+
         related.webhook_key = webhook_key;
       }
 

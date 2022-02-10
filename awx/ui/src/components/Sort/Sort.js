@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 

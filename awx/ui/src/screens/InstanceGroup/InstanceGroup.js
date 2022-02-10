@@ -102,7 +102,7 @@ function InstanceGroup({ setBreadcrumb }) {
             {contentError.response?.status === 404 && (
               <span>
                 {t`Instance group not found.`}
-                {''}
+
                 <Link to="/instance_groups">{t`View all instance groups`}</Link>
               </span>
             )}

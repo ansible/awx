@@ -3,7 +3,7 @@ import Base from '../Base';
 class WorkflowJobTemplateNodes extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/workflow_job_template_nodes/';
+    this.baseUrl = 'api/v2/workflow_job_template_nodes/';
   }
 
   createApprovalTemplate(id, data) {

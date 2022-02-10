@@ -61,7 +61,7 @@ const FormikApp = withFormik({
     const adHocItemStrings = adHocItems.map((item) => item.name).join(', ');
     return {
       limit: adHocItemStrings || 'all',
-      credential: [],
+      credentials: [],
       module_args: '',
       verbosity: verbosityOptions[0].value,
       forks: 0,
@@ -70,6 +70,7 @@ const FormikApp = withFormik({
       module_name: '',
       extra_vars: '---',
       job_type: 'run',
+      credential_passwords: {},
       execution_environment: '',
     };
   },

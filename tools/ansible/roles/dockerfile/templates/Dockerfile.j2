@@ -21,6 +21,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     gcc \
     gcc-c++ \
     git-core \
+    gettext \
     glibc-langpack-en \
     libffi-devel \
     libtool-ltdl-devel \
@@ -135,6 +136,7 @@ RUN dnf -y install \
     gtk3 \
     gettext \
     hostname \
+    procps \
     alsa-lib \
     libX11-xcb \
     libXScrnSaver \
@@ -208,6 +210,7 @@ ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanima
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
+ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 {% endif %}

@@ -22,10 +22,10 @@ function DisassociateButton({
   const [isOpen, setIsOpen] = useState(false);
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
 
-  function handleDisassociate() {
+  const handleDisassociate = () => {
     onDisassociate();
     setIsOpen(false);
-  }
+  };
 
   useEffect(() => {
     if (isKebabified) {

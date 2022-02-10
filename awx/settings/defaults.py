@@ -162,7 +162,7 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
-# If we is behind a reverse proxy/load balancer, use this setting to
+# If we are behind a reverse proxy/load balancer, use this setting to
 # allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
 # REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
