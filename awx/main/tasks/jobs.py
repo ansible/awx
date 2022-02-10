@@ -729,14 +729,6 @@ class BaseTask(object):
                 # Disable Ansible fact cache.
                 params['fact_cache_type'] = ''
 
-            if self.instance.is_container_group_task or settings.IS_K8S:
-                params['envvars'].pop('HOME', None)
-            else:
-                ee_params = self.build_execution_environment_params(self.instance, private_data_dir)
-                params.update(ee_params)
-                if self.instance.execution_node == settings.CLUSTER_HOST_ID or self.instance.execution_node == self.instance.controller_node:
-                    params['only_transmit_kwargs'] = True
-
             '''
             Delete parameters if the values are None or empty array
             '''
@@ -757,6 +749,14 @@ class BaseTask(object):
                     **params,
                 )
             else:
+                if self.instance.is_container_group_task or settings.IS_K8S:
+                    params['envvars'].pop('HOME', None)
+                else:
+                    ee_params = self.build_execution_environment_params(self.instance, private_data_dir)
+                    params.update(ee_params)
+                    if self.instance.execution_node == settings.CLUSTER_HOST_ID or self.instance.execution_node == self.instance.controller_node:
+                        params['only_transmit_kwargs'] = True
+
                 receptor_job = AWXReceptorJob(self, params)
                 res = receptor_job.run()
                 self.unit_id = receptor_job.unit_id
