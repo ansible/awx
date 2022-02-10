@@ -581,12 +581,20 @@ def awx_receptor_workunit_reaper():
     receptor_ctl = get_receptor_ctl()
     receptor_work_list = receptor_ctl.simple_command("work list")
 
-    unit_ids = [id for id in receptor_work_list]
-    jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
-    for job in jobs_with_unreleased_receptor_units:
-        logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+    managed_work_units = set(
+        UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID).filter(status__in=ACTIVE_STATES).values_list('work_unit_id', flat=True)
+    )
+    for work_unit_id in receptor_work_list.keys():
+        if work_unit_id not in managed_work_units:
+            logger.debug(f"Receptor work unit {work_unit_id} is not active, reaping")
+            try:
+                receptor_ctl.simple_command(f"work cancel {work_unit_id}")
+            except Exception:
+                logger.warning(f'Reaper failed to cancel work unit {work_unit_id}')
+            try:
+                receptor_ctl.simple_command(f"work release {work_unit_id}")
+            except Exception:
+                logger.warning(f'Reaper failed to release work unit {work_unit_id}')
 
     administrative_workunit_reaper(receptor_work_list)
 
