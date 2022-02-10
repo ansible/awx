@@ -1544,6 +1544,13 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_track_submodules', 'scm_clean'):
                 if get_field_from_model_or_attrs(fd):
                     raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
+
+        if get_field_from_model_or_attrs('playbook_integrity_enabled'):
+            sig_type_choices = Project.PLAYBOOK_SIGNATURE_TYPE_CHOICES
+            if get_field_from_model_or_attrs('playbook_integrity_signature_type') not in sig_type_choices:
+                raise serializers.ValidationError(
+                    {fd: _('Signature type must be set to one of {} for playbook integrity.'.format(json.dumps(sig_type_choices)))}
+                )
         return super(ProjectSerializer, self).validate(attrs)
 
 
