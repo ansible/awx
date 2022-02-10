@@ -169,6 +169,28 @@ options:
       required: False
       default: 2
       type: float
+    playbook_integrity_enabled:
+      description:
+        - Enable playbook integrity check for this project if True.
+      default: False
+      type: bool
+    playbook_integrity_keyless_signer_id:
+      description:
+        - A playbook signer ID for keyless playbook integrity check.
+        - Used as an alternative to public key.
+      default: ""
+      type: str
+    playbook_integrity_public_key:
+      description:
+        - A base64 encoded public key value for playbook integrity.
+      default: ""
+      type: str
+    playbook_integrity_signature_type:
+      description:
+        - Signature type string for playbook integrity check.
+      default: "gpg"
+      choices: ["gpg", "sigstore"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

@@ -162,21 +162,21 @@
   connection: local
   name: Integrity verification
   tasks:
-    - block: 
-      - name: Check module installation
-        stat:
-          path: /usr/share/ansible/collections/ansible_collections/playbook/integrity
-        register: p_integrity_dir
-      - name: Set failure result when module is not installed
-        set_fact:
-          playbook_integrity_verified: "False"
-          playbook_integrity_error: "`playbook.integrity` collection must be installed for playbook integrity, but not found."
-          playbook_integrity_existence: "{{ '[]' | from_json }}"
-        when: not p_integrity_dir.stat.exists
-      - name: Execute playbook integrity verification
-        # Using `include_tasks` enables ansible-runner to resolve `playbook.integrity.verify` module only when it is required.
-        include_tasks: playbook_integrity.yml
-        when: p_integrity_dir.stat.exists
+    - block:
+        - name: Check module installation
+          stat:
+            path: /usr/share/ansible/collections/ansible_collections/playbook/integrity
+          register: p_integrity_dir
+        - name: Set failure result when module is not installed
+          set_fact:
+            playbook_integrity_verified: "False"
+            playbook_integrity_error: "`playbook.integrity` collection must be installed for playbook integrity, but not found."
+            playbook_integrity_existence: "{{ '[]' | from_json }}"
+          when: not p_integrity_dir.stat.exists
+        - name: Execute playbook integrity verification
+          # Using `include_tasks` enables ansible-runner to resolve `playbook.integrity.verify` module only when it is required.
+          include_tasks: playbook_integrity.yml
+          when: p_integrity_dir.stat.exists
       tags:
         - playbook_integrity_gpg
         - playbook_integrity_sigstore

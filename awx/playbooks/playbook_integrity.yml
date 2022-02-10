@@ -1,4 +1,4 @@
-
+---
 - name: set public key filename
   set_fact:
     pubkey_fname: "{{ 'pubring.gpg' if playbook_integrity_signature_type == 'gpg' else 'cosign.pub' if playbook_integrity_signature_type == 'sigstore' else '' }}"
