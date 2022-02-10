@@ -1546,7 +1546,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                     raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
 
         if get_field_from_model_or_attrs('playbook_integrity_enabled'):
-            sig_type_choices = Project.PLAYBOOK_SIGNATURE_TYPE_CHOICES
+            sig_type_choices = [c[0] for c in Project.PLAYBOOK_SIGNATURE_TYPE_CHOICES]
             if get_field_from_model_or_attrs('playbook_integrity_signature_type') not in sig_type_choices:
                 raise serializers.ValidationError(
                     {fd: _('Signature type must be set to one of {} for playbook integrity.'.format(json.dumps(sig_type_choices)))}
