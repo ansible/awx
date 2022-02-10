@@ -256,6 +256,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials']
     FIELDS_TO_DISCARD_AT_COPY = ['local_path']
     FIELDS_TRIGGER_UPDATE = frozenset(['scm_url', 'scm_branch', 'scm_type', 'scm_refspec'])
+    PLAYBOOK_SIGNATURE_TYPE_CHOICES = [
+        ('gpg', _('GPG')),
+        ('sigstore', _('Sigstore')),
+    ]
 
     class Meta:
         app_label = 'main'
@@ -340,17 +344,18 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('If enabled, integrity check for a playbook will be done before execution'),
     )
 
-    playbook_integrity_public_key = JSONField(
+    playbook_integrity_public_key = models.TextField(
         blank=True,
-        default=[],
+        default="",
         editable=True,
-        help_text=_('A list of base64 encoded public keys'),
+        help_text=_('A base64 encoded public key'),
     )
 
     playbook_integrity_signature_type = models.CharField(
-        max_length=1024,
+        max_length=128,
         blank=True,
-        default='',
+        choices=PLAYBOOK_SIGNATURE_TYPE_CHOICES,
+        default='gpg',
         editable=True,
         verbose_name=_('signature type for playbook integrity check'),
         help_text=_('A signature type for playbook integrity check'),
