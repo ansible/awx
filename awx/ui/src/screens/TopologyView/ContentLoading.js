@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '@lingui/macro';
 
 import styled from 'styled-components';
 import {
@@ -30,7 +31,7 @@ const ContentLoading = ({ className }) => (
         component={TextVariants.small}
         style={{ fontWeight: 'bold', color: 'black' }}
       >
-        Please wait until the topology view is populated...
+        {t`Please wait until the topology view is populated...`}
       </Text>
     </TextContent>
     <EmptyStateIcon variant="container" component={Spinner} />
