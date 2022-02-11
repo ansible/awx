@@ -5,6 +5,7 @@ import importlib
 import json
 import logging
 import os
+import re
 from io import StringIO
 from contextlib import redirect_stdout
 import shutil
@@ -555,6 +556,23 @@ def cluster_node_heartbeat():
                 logger.exception('Error marking {} as lost'.format(other_inst.hostname))
 
 
+def job_id_from_unit_status(unit_status):
+    if 'ExtraData' not in unit_status:
+        return None
+    work_data = unit_status['ExtraData']
+    if not work_data:
+        return None
+    params = work_data.get('Params', work_data.get('RemoteParams'))
+    if isinstance(params, dict):
+        params = params.get('params')
+    if not params:
+        return None
+    match = re.search(r'\-\-private\-data\-dir=.*/awx_(?P<job_id>\d+)_.*', str(params))
+    if not match:
+        return None
+    return int(match.group('job_id'))
+
+
 @task(queue=get_local_queuename)
 def awx_receptor_workunit_reaper():
     """
@@ -581,20 +599,27 @@ def awx_receptor_workunit_reaper():
     receptor_ctl = get_receptor_ctl()
     receptor_work_list = receptor_ctl.simple_command("work list")
 
-    managed_work_units = set(
-        UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID).filter(status__in=ACTIVE_STATES).values_list('work_unit_id', flat=True)
-    )
-    for work_unit_id in receptor_work_list.keys():
-        if work_unit_id not in managed_work_units:
-            logger.debug(f"Receptor work unit {work_unit_id} is not active, reaping")
-            try:
-                receptor_ctl.simple_command(f"work cancel {work_unit_id}")
-            except Exception:
-                logger.warning(f'Reaper failed to cancel work unit {work_unit_id}')
-            try:
-                receptor_ctl.simple_command(f"work release {work_unit_id}")
-            except Exception:
-                logger.warning(f'Reaper failed to release work unit {work_unit_id}')
+    job_qs = UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID).filter(status__in=ACTIVE_STATES).values_list('id', 'work_unit_id')
+    local_job_ids = set(row[0] for row in job_qs)
+    active_work_units = set(row[1] for row in job_qs)
+    for work_unit_id, unit_status in receptor_work_list.items():
+        job_id = job_id_from_unit_status(unit_status)
+        if job_id is None:
+            if work_unit_id in active_work_units:
+                continue
+            logger.warning(f'Work unit {work_unit_id} is not associated with an active job, reaping')
+        else:
+            if job_id not in local_job_ids:
+                continue
+            logger.warning(f"Job {job_id} is not active, reaping its receptor work unit {work_unit_id}")
+        try:
+            receptor_ctl.simple_command(f"work cancel {work_unit_id}")
+        except Exception:
+            logger.warning(f'Reaper failed to cancel work unit {work_unit_id}')
+        try:
+            receptor_ctl.simple_command(f"work release {work_unit_id}")
+        except Exception:
+            logger.warning(f'Reaper failed to release work unit {work_unit_id}')
 
     administrative_workunit_reaper(receptor_work_list)
 
