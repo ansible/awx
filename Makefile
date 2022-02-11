@@ -366,7 +366,7 @@ clean-ui:
 	rm -rf $(UI_BUILD_FLAG_FILE)
 
 awx/ui/node_modules:
-	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui --loglevel warn ci
+	NODE_OPTIONS=--max-old-space-size=8192 $(NPM_BIN) --prefix awx/ui --loglevel warn ci
 
 $(UI_BUILD_FLAG_FILE): awx/ui/node_modules
 	$(PYTHON) tools/scripts/compilemessages.py
