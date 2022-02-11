@@ -394,6 +394,8 @@ ui-devel-test: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start
 
 ui-lint:
+	$(NODE) -v
+	$(NPM_BIN) -v
 	$(NPM_BIN) --prefix awx/ui install
 	$(NPM_BIN) run --prefix awx/ui lint
 	$(NPM_BIN) run --prefix awx/ui prettier-check
