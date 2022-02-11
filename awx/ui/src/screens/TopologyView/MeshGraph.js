@@ -111,14 +111,14 @@ function MeshGraph({ showLegend, zoom }) {
     const graph = data;
 
     const simulation = d3
-      .forceSimulation()
+      .forceSimulation(graph.nodes)
       .force(
         'charge',
         d3.forceManyBody(defaultForceBody).strength(defaultForceStrength)
       )
       .force(
         'link',
-        d3.forceLink().id((d) => d.hostname)
+        d3.forceLink(graph.links).id((d) => d.hostname)
       )
       .force('collide', d3.forceCollide(defaultCollisionFactor))
       .force('forceX', d3.forceX(defaultForceX))

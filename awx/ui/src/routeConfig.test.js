@@ -43,6 +43,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
       '/settings',
     ]);
   });
@@ -71,6 +72,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
       '/settings',
     ]);
   });
@@ -98,6 +100,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 
@@ -233,6 +236,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 
@@ -263,6 +267,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 });

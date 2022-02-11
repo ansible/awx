@@ -69,7 +69,7 @@ function Tooltip({
           <TextContent>
             <Text
               component={TextVariants.small}
-              style={{ 'font-weight': 'bold', color: 'black' }}
+              style={{ 'fontWeight': 'bold', color: 'black' }}
             >
               Details
             </Text>
