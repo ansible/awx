@@ -69,7 +69,7 @@ function Tooltip({
           <TextContent>
             <Text
               component={TextVariants.small}
-              style={{ 'fontWeight': 'bold', color: 'black' }}
+              style={{ fontWeight: 'bold', color: 'black' }}
             >
               Details
             </Text>
@@ -79,7 +79,7 @@ function Tooltip({
             <DescriptionListGroup>
               <DescriptionListTerm>
                 <Button variant="primary" isSmall>
-                  {renderNodeIcon()}
+                  {renderNodeIcon}
                 </Button>
               </DescriptionListTerm>
               <DescriptionListDescription>

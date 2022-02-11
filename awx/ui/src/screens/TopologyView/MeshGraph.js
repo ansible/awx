@@ -1,14 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { InstancesAPI } from 'api';
 import debounce from 'util/debounce';
 // import { t } from '@lingui/macro';
 import * as d3 from 'd3';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
 import ContentLoading from './ContentLoading';
-import { truncateString } from '../../util/strings';
+import {
+  renderStateColor,
+  renderLabelText,
+  renderNodeType,
+  renderNodeIcon,
+  redirectToDetailsPage,
+  // generateRandomNodes,
+  // getRandomInt,
+} from './utils/helpers';
+import {
+  MESH_FORCE_LAYOUT,
+  DEFAULT_RADIUS,
+  DEFAULT_NODE_COLOR,
+  DEFAULT_NODE_HIGHLIGHT_COLOR,
+  DEFAULT_NODE_LABEL_TEXT_COLOR,
+  DEFAULT_FONT_SIZE,
+  MARGIN,
+  HEIGHT,
+  FALLBACK_WIDTH,
+} from './constants';
 
 const Loader = styled(ContentLoading)`
   height: 100%;
@@ -16,67 +34,15 @@ const Loader = styled(ContentLoading)`
   width: 100%;
   background: white;
 `;
-// function MeshGraph({ data }) {
-function MeshGraph({ showLegend, zoom }) {
+function MeshGraph({ data, showLegend, zoom }) {
+  // function MeshGraph({ showLegend, zoom }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeDetail, setNodeDetail] = useState(null);
   const history = useHistory();
 
-  function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-  const nodes = [];
-  const links = [];
-  const generateLinks = (n, r) => {
-    for (let i = 0; i < r; i++) {
-      const link = {
-        source: n[getRandomInt(0, n.length - 1)].hostname,
-        target: n[getRandomInt(0, n.length - 1)].hostname,
-      };
-      links.push(link);
-    }
-    return { nodes: n, links };
-  };
-  const generateNodes = (n) => {
-    function getRandomType() {
-      return ['hybrid', 'execution', 'control', 'hop'][getRandomInt(0, 3)];
-    }
-    function getRandomState() {
-      return ['healthy', 'error', 'disabled'][getRandomInt(0, 2)];
-    }
-    for (let i = 0; i < n; i++) {
-      const id = i + 1;
-      const randomType = getRandomType();
-      const randomState = getRandomState();
-      const node = {
-        id,
-        hostname: `node-${id}`,
-        node_type: randomType,
-        node_state: randomState,
-      };
-      nodes.push(node);
-    }
-    return generateLinks(nodes, getRandomInt(1, n - 1));
-  };
-  const data = generateNodes(getRandomInt(250, 250));
+  // const data = generateRandomNodes(getRandomInt(4, 50));
   const draw = () => {
-    const margin = 15;
-    const defaultRadius = 16;
-    const defaultCollisionFactor = 80;
-    const defaultForceStrength = -100;
-    const defaultForceBody = 75;
-    const defaultForceX = 0;
-    const defaultForceY = 0;
-    const height = 600;
-    const fallbackWidth = 700;
-    const defaultNodeColor = '#0066CC';
-    const defaultNodeHighlightColor = '#16407C';
-    const defaultNodeLabelColor = 'white';
-    const defaultFontSize = '12px';
-    const labelMaxLen = 15;
     const getWidth = () => {
       let width;
       // This is in an a try/catch due to an error from jest.
@@ -84,10 +50,10 @@ function MeshGraph({ showLegend, zoom }) {
       // style function, it says it is null in the test
       try {
         width =
-          parseInt(d3.select(`#chart`).style('width'), 10) - margin ||
-          fallbackWidth;
+          parseInt(d3.select(`#chart`).style('width'), 10) - MARGIN ||
+          FALLBACK_WIDTH;
       } catch (error) {
-        width = fallbackWidth;
+        width = FALLBACK_WIDTH;
       }
 
       return width;
@@ -100,13 +66,13 @@ function MeshGraph({ showLegend, zoom }) {
       .select('#chart')
       .append('svg')
       .attr('class', 'mesh-svg')
-      .attr('width', `${width + margin}px`)
-      .attr('height', `${height + margin}px`)
-      .attr('viewBox', [0, 0, width, height]);
+      .attr('width', `${width + MARGIN}px`)
+      .attr('height', `${HEIGHT + MARGIN}px`)
+      .attr('viewBox', [0, 0, width, HEIGHT]);
     const mesh = svg
       .append('g')
       .attr('class', 'mesh')
-      .attr('transform', `translate(${margin}, ${margin})`);
+      .attr('transform', `translate(${MARGIN}, ${MARGIN})`);
 
     const graph = data;
 
@@ -114,16 +80,21 @@ function MeshGraph({ showLegend, zoom }) {
       .forceSimulation(graph.nodes)
       .force(
         'charge',
-        d3.forceManyBody(defaultForceBody).strength(defaultForceStrength)
+        d3
+          .forceManyBody(MESH_FORCE_LAYOUT.defaultForceBody)
+          .strength(MESH_FORCE_LAYOUT.defaultForceStrength)
       )
       .force(
         'link',
         d3.forceLink(graph.links).id((d) => d.hostname)
       )
-      .force('collide', d3.forceCollide(defaultCollisionFactor))
-      .force('forceX', d3.forceX(defaultForceX))
-      .force('forceY', d3.forceY(defaultForceY))
-      .force('center', d3.forceCenter(width / 2, height / 2));
+      .force(
+        'collide',
+        d3.forceCollide(MESH_FORCE_LAYOUT.defaultCollisionFactor)
+      )
+      .force('forceX', d3.forceX(MESH_FORCE_LAYOUT.defaultForceX))
+      .force('forceY', d3.forceY(MESH_FORCE_LAYOUT.defaultForceY))
+      .force('center', d3.forceCenter(width / 2, HEIGHT / 2));
 
     const link = mesh
       .append('g')
@@ -133,7 +104,7 @@ function MeshGraph({ showLegend, zoom }) {
       .data(graph.links)
       .enter()
       .append('line')
-      .attr('class', (d, i) => `link-${i}`)
+      .attr('class', (_, i) => `link-${i}`)
       .attr('data-cy', (d) => `${d.source}-${d.target}`)
       .style('fill', 'none')
       .style('stroke', '#ccc')
@@ -166,11 +137,11 @@ function MeshGraph({ showLegend, zoom }) {
     // node circles
     node
       .append('circle')
-      .attr('r', defaultRadius)
+      .attr('r', DEFAULT_RADIUS)
       .attr('class', (d) => d.node_type)
       .attr('class', (d) => `id-${d.id}`)
-      .attr('fill', defaultNodeColor)
-      .attr('stroke', defaultNodeLabelColor);
+      .attr('fill', DEFAULT_NODE_COLOR)
+      .attr('stroke', DEFAULT_NODE_LABEL_TEXT_COLOR);
 
     // node type labels
     node
@@ -178,7 +149,7 @@ function MeshGraph({ showLegend, zoom }) {
       .text((d) => renderNodeType(d.node_type))
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'central')
-      .attr('fill', defaultNodeLabelColor);
+      .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR);
 
     // node hostname labels
     const hostNames = node.append('g');
@@ -186,7 +157,7 @@ function MeshGraph({ showLegend, zoom }) {
       .append('text')
       .text((d) => renderLabelText(d.node_state, d.hostname))
       .attr('class', 'placeholder')
-      .attr('fill', defaultNodeLabelColor)
+      .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR)
       .attr('text-anchor', 'middle')
       .attr('y', 40)
       .each(function calculateLabelWidth() {
@@ -207,8 +178,8 @@ function MeshGraph({ showLegend, zoom }) {
     hostNames
       .append('text')
       .text((d) => renderLabelText(d.node_state, d.hostname))
-      .attr('font-size', defaultFontSize)
-      .attr('fill', defaultNodeLabelColor)
+      .attr('font-size', DEFAULT_FONT_SIZE)
+      .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR)
       .attr('text-anchor', 'middle')
       .attr('y', 38);
 
@@ -216,7 +187,6 @@ function MeshGraph({ showLegend, zoom }) {
     simulation.force('link').links(graph.links);
 
     function ticked() {
-      // link.attr('d', linkArc);
       d3.select('.simulation-loader').style('visibility', 'visible');
 
       link
@@ -226,42 +196,16 @@ function MeshGraph({ showLegend, zoom }) {
         .attr('y2', (d) => d.target.y);
 
       node.attr('transform', (d) => `translate(${d.x},${d.y})`);
-      calculateAlphaDecay(simulation.alpha(), simulation.alphaMin(), 35);
+      calculateAlphaDecay(simulation.alpha(), simulation.alphaMin(), 20);
     }
 
     svg.call(zoom);
 
-    function renderStateColor(nodeState) {
-      const colorKey = {
-        disabled: '#6A6E73',
-        healthy: '#3E8635',
-        error: '#C9190B',
-      };
-      return colorKey[nodeState];
-    }
-    function renderLabelText(nodeState, name) {
-      const stateKey = {
-        disabled: '\u25EF',
-        healthy: '\u2713',
-        error: '\u0021',
-      };
-      return `${stateKey[nodeState]}  ${truncateString(name, labelMaxLen)}`;
-    }
-
-    function renderNodeType(nodeType) {
-      const typeKey = {
-        hop: 'h',
-        execution: 'Ex',
-        hybrid: 'Hy',
-        control: 'C',
-      };
-
-      return typeKey[nodeType];
-    }
-
     function highlightSiblings(n) {
       setTimeout(() => {
-        svg.select(`circle.id-${n.id}`).attr('fill', defaultNodeHighlightColor);
+        svg
+          .select(`circle.id-${n.id}`)
+          .attr('fill', DEFAULT_NODE_HIGHLIGHT_COLOR);
         const immediate = graph.links.filter(
           (l) =>
             n.hostname === l.source.hostname || n.hostname === l.target.hostname
@@ -277,7 +221,7 @@ function MeshGraph({ showLegend, zoom }) {
     }
 
     function deselectSiblings(n) {
-      svg.select(`circle.id-${n.id}`).attr('fill', defaultNodeColor);
+      svg.select(`circle.id-${n.id}`).attr('fill', DEFAULT_NODE_COLOR);
       const immediate = graph.links.filter(
         (l) =>
           n.hostname === l.source.hostname || n.hostname === l.target.hostname
@@ -317,35 +261,11 @@ function MeshGraph({ showLegend, zoom }) {
     }
   };
 
-  async function redirectToDetailsPage() {
-    // TODO: redirect to top-level instances details page
-    const { id: nodeId } = selectedNode;
-    const {
-      data: { results },
-    } = await InstancesAPI.readInstanceGroup(nodeId);
-    const { id: instanceGroupId } = results[0];
-    const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
-    history.push(constructedURL);
-  }
-
-  function renderNodeIcon() {
-    if (selectedNode) {
-      const { node_type: nodeType } = selectedNode;
-      const typeKey = {
-        hop: 'h',
-        execution: 'Ex',
-        hybrid: 'Hy',
-        control: 'C',
-      };
-
-      return typeKey[nodeType];
-    }
-
-    return false;
-  }
   useEffect(() => {
     function handleResize() {
       d3.select('.simulation-loader').style('visibility', 'visible');
+      setSelectedNode(null);
+      setIsNodeSelected(false);
       draw();
     }
     window.addEventListener('resize', debounce(handleResize, 500));
@@ -358,9 +278,11 @@ function MeshGraph({ showLegend, zoom }) {
       {showLegend && <Legend />}
       <Tooltip
         isNodeSelected={isNodeSelected}
-        renderNodeIcon={renderNodeIcon}
+        renderNodeIcon={renderNodeIcon(selectedNode)}
         nodeDetail={nodeDetail}
-        redirectToDetailsPage={redirectToDetailsPage}
+        redirectToDetailsPage={() =>
+          redirectToDetailsPage(selectedNode, history)
+        }
       />
       <Loader className="simulation-loader" />
     </div>
