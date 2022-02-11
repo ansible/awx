@@ -692,28 +692,33 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     return vars_dict
 
 
-def get_cpu_effective_capacity(cpu_count):
-    from django.conf import settings
+def convert_cpu_str_to_decimal_cpu(cpu_str):
+    """Convert a string indicating cpu units to decimal.
 
-    settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
-    env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
+    Useful for dealing with cpu setting that may be expressed in units compatible with
+    kubernetes.
 
-    if env_abscpu is not None:
-        return int(env_abscpu)
-    elif settings_abscpu is not None:
-        return int(settings_abscpu)
+    See https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#cpu-units
+    """
+    cpu = cpu_str
+    millicores = False
 
-    settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
-    env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+    if cpu_str[-1] == 'm':
+        cpu = cpu_str[:-1]
+        millicores = True
 
-    if env_forkcpu:
-        forkcpu = int(env_forkcpu)
-    elif settings_forkcpu:
-        forkcpu = int(settings_forkcpu)
-    else:
-        forkcpu = 4
+    try:
+        cpu = float(cpu)
+    except ValueError:
+        cpu = 1.0
+        millicores = False
+        logger.warning(f"Could not convert SYSTEM_TASK_ABS_CPU {cpu_str} to a decimal number, falling back to default of 1 cpu")
 
-    return cpu_count * forkcpu
+    if millicores:
+        cpu = cpu / 1000
+
+    # Per kubernetes docs, fractional CPU less than .1 are not allowed
+    return max(0.1, round(cpu, 1))
 
 
 def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
@@ -725,10 +730,30 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
     env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
 
-    if env_abscpu is not None or settings_abscpu is not None:
-        return 0
+    if env_abscpu is not None:
+        return convert_cpu_str_to_decimal_cpu(env_abscpu)
+    elif settings_abscpu is not None:
+        return convert_cpu_str_to_decimal_cpu(settings_abscpu)
 
     return cpu_count  # no correction
+
+
+def get_cpu_effective_capacity(cpu_count):
+    from django.conf import settings
+
+    cpu_count = get_corrected_cpu(cpu_count)
+
+    settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
+    env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+
+    if env_forkcpu:
+        forkcpu = int(env_forkcpu)
+    elif settings_forkcpu:
+        forkcpu = int(settings_forkcpu)
+    else:
+        forkcpu = 4
+
+    return max(1, int(cpu_count * forkcpu))
 
 
 def convert_mem_str_to_bytes(mem_str):
@@ -765,13 +790,13 @@ def convert_mem_str_to_bytes(mem_str):
             mem = int(mem_str[:i])
             break
     if not mem_unit or mem_unit not in conversions.keys():
-        error = f"Unsupported value for SYSTEM_TASK_ABS_MEM: {mem_str}, memory must be expressed in bytes or with known suffix: {conversions.keys()}"
-        logger.exception(error)
+        error = f"Unsupported value for SYSTEM_TASK_ABS_MEM: {mem_str}, memory must be expressed in bytes or with known suffix: {conversions.keys()}. Falling back to 1 byte"
+        logger.warning(error)
         return 1
     return max(1, conversions[mem_unit](mem))
 
 
-def get_mem_effective_capacity(mem_bytes):
+def get_corrected_memory(memory):
     from django.conf import settings
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
@@ -780,9 +805,17 @@ def get_mem_effective_capacity(mem_bytes):
     # Runner returns memory in bytes
     # so we convert memory from settings to bytes as well.
     if env_absmem is not None:
-        mem_bytes = convert_mem_str_to_bytes(env_absmem)
+        return convert_mem_str_to_bytes(env_absmem)
     elif settings_absmem is not None:
-        mem_bytes = convert_mem_str_to_bytes(settings_absmem)
+        return convert_mem_str_to_bytes(settings_absmem)
+
+    return memory
+
+
+def get_mem_effective_capacity(mem_bytes):
+    from django.conf import settings
+
+    mem_bytes = get_corrected_memory(mem_bytes)
 
     settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
@@ -809,20 +842,6 @@ def get_mem_effective_capacity(mem_bytes):
     max_forks_based_on_memory = mem_mb // mem_mb_per_fork
 
     return max(1, max_forks_based_on_memory)
-
-
-def get_corrected_memory(memory):
-    from django.conf import settings
-
-    settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
-    env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
-
-    if env_absmem is not None:
-        return convert_mem_str_to_bytes(env_absmem)
-    elif settings_absmem is not None:
-        return convert_mem_str_to_bytes(settings_absmem)
-
-    return memory
 
 
 _inventory_updates = threading.local()

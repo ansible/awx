@@ -320,6 +320,7 @@ class AutoscalePool(WorkerPool):
         if self.max_workers is None:
             settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
             if settings_absmem is not None:
+                # There are 1073741824 bytes in a gigabyte. Convert bytes to gigabytes by dividing by 2**30
                 total_memory_gb = convert_mem_str_to_bytes(settings_absmem) // 2**30
             else:
                 total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
