@@ -4790,7 +4790,7 @@ class InstanceNodeSerializer(BaseSerializer):
     def get_node_state(self, obj):
         if not obj.enabled:
             return "disabled"
-        return "unhealthy" if obj.errors else "healthy"
+        return "error" if obj.errors else "healthy"
 
 
 class InstanceSerializer(BaseSerializer):
