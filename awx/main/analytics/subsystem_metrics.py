@@ -160,6 +160,7 @@ class Metrics:
             IntM('callback_receiver_batch_events_errors', 'Number of times batch insertion failed'),
             FloatM('callback_receiver_events_insert_db_seconds', 'Time spent saving events to database'),
             IntM('callback_receiver_events_insert_db', 'Number of events batch inserted into database'),
+            IntM('callback_receiver_events_broadcast', 'Number of events broadcast to other control plane nodes'),
             HistogramM(
                 'callback_receiver_batch_events_insert_db', 'Number of events batch inserted into database', settings.SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS
             ),
