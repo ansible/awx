@@ -31,10 +31,7 @@ def test_create_machine_credential(run_module, admin_user, organization):
     # Example from docs
     result = run_module(
         'credential',
-        dict(name='Test Machine Credential',
-             organization=organization.name,
-             credential_type='Machine',
-             state='present'),
+        dict(name='Test Machine Credential', organization=organization.name, credential_type='Machine', state='present'),
         admin_user,
     )
     assert not result.get('failed', False), result.get('msg', result)
@@ -56,11 +53,13 @@ def test_create_vault_credential(run_module, admin_user, organization):
 
     result = run_module(
         'credential',
-        dict(name='Test Vault Credential',
-             organization=organization.name,
-             credential_type='Vault',
-             inputs={'vault_id': 'bar', 'vault_password': 'foobar'},
-             state='present'),
+        dict(
+            name='Test Vault Credential',
+            organization=organization.name,
+            credential_type='Vault',
+            inputs={'vault_id': 'bar', 'vault_password': 'foobar'},
+            state='present',
+        ),
         admin_user,
     )
     assert not result.get('failed', False), result.get('msg', result)

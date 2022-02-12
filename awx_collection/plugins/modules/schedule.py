@@ -255,7 +255,8 @@ def main():
             new_fields,
             endpoint='schedules',
             item_type='schedule',
-            associations=association_fields,)
+            associations=association_fields,
+        )
 
 
 if __name__ == '__main__':

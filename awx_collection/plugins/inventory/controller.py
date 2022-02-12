@@ -131,9 +131,8 @@ class InventoryModule(BaseInventoryPlugin):
             try:
                 inventory_id = ensure_type(inventory_id, 'str')
             except ValueError as e:
-                raise_from(AnsibleOptionsError(
-                    'Invalid type for configuration option inventory_id, ' 'not integer, and cannot convert to string: {err}'.format(err=to_native(e))
-                ), e)
+                msg = 'Invalid type for configuration option inventory_id, ' 'not integer, and cannot convert to string: {err}'.format(err=to_native(e))
+                raise_from(AnsibleOptionsError(msg), e)
         inventory_id = inventory_id.replace('/', '')
         inventory_url = '/api/v2/inventories/{inv_id}/script/'.format(inv_id=inventory_id)
 

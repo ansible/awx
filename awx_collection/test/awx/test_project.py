@@ -28,7 +28,7 @@ def test_create_project(run_module, admin_user, organization, silence_warning):
 
 @pytest.mark.django_db
 def test_create_project_copy_from(run_module, admin_user, organization, silence_warning):
-    ''' Test the copy_from functionality'''
+    '''Test the copy_from functionality'''
     result = run_module(
         'project',
         dict(name='foo', organization=organization.name, scm_type='git', scm_url='https://foo.invalid', wait=False, scm_update_cache_timeout=5),

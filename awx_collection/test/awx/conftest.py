@@ -253,9 +253,7 @@ def vault_credential(organization):
 def kube_credential():
     ct = CredentialType.defaults['kubernetes_bearer_token']()
     ct.save()
-    return Credential.objects.create(
-        credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False}
-    )
+    return Credential.objects.create(credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False})
 
 
 @pytest.fixture

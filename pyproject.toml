@@ -2,4 +2,3 @@
 line-length = 160
 fast = true
 skip-string-normalization = true
-exclude = "awx_collection"
