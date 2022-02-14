@@ -5,7 +5,16 @@ import {
   AlertActionCloseButton,
   AlertVariant,
 } from '@patternfly/react-core';
-import { shape, arrayOf, func, string, oneOf, bool, number } from 'prop-types';
+import {
+  shape,
+  arrayOf,
+  func,
+  string,
+  oneOf,
+  bool,
+  number,
+  oneOfType,
+} from 'prop-types';
 
 export default function useToast() {
   const [toasts, setToasts] = useState([]);
@@ -46,7 +55,7 @@ export function Toast({ toasts, removeToast }) {
           title={toast.title}
           variant={toast.variant}
           key={`toast-message-${toast.id}`}
-          oaiaId={`toast-message-${toast.id}`}
+          ouiaId={`toast-message-${toast.id}`}
         >
           {toast.message}
         </Alert>
@@ -57,8 +66,8 @@ export function Toast({ toasts, removeToast }) {
 
 const ToastType = shape({
   title: string.isRequired,
-  variant: oneOf(AlertVariant.values).isRequired,
-  id: oneOf([string, number]).isRequired,
+  variant: oneOf(Object.values(AlertVariant)).isRequired,
+  id: oneOfType([string, number]).isRequired,
   hasTimeout: bool,
   message: string,
 });
