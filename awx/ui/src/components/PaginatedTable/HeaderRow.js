@@ -69,6 +69,7 @@ export function HeaderCell({
   idPrefix,
   className,
   children,
+  tooltip,
 }) {
   const sort = sortKey
     ? {
@@ -79,6 +80,11 @@ export function HeaderCell({
     : null;
   return (
     <Th
+      info={
+        tooltip && {
+          popover: <div>{tooltip}</div>,
+        }
+      }
       id={sortKey ? `${idPrefix}-${sortKey}` : null}
       className={className}
       sort={sort}

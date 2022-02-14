@@ -21,10 +21,6 @@ const instance = [
     id: 1,
     type: 'instance',
     url: '/api/v2/instances/1/',
-    related: {
-      jobs: '/api/v2/instances/1/jobs/',
-      instance_groups: '/api/v2/instances/1/instance_groups/',
-    },
     uuid: '00000000-0000-0000-0000-000000000000',
     hostname: 'awx',
     created: '2020-07-14T19:03:49.000054Z',
@@ -49,10 +45,6 @@ const instance = [
     id: 2,
     type: 'instance',
     url: '/api/v2/instances/1/',
-    related: {
-      jobs: '/api/v2/instances/1/jobs/',
-      instance_groups: '/api/v2/instances/1/instance_groups/',
-    },
     uuid: '00000000-0000-0000-0000-000000000001',
     hostname: 'awx-control',
     created: '2020-07-14T19:03:49.000054Z',
@@ -71,7 +63,7 @@ const instance = [
     mem_capacity: 1,
     enabled: true,
     managed_by_policy: true,
-    node_type: 'control',
+    node_type: 'hop',
   },
 ];
 
@@ -162,7 +154,7 @@ describe('<InstanceListItem/>', () => {
       );
     });
     expect(wrapper.find('Td[dataLabel="Name"]').find('Link').prop('to')).toBe(
-      '/instance_groups/1/instances/1/details'
+      '/instances/1/details'
     );
     expect(wrapper.find('Td').at(2).text()).toBe('awx');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
@@ -274,13 +266,33 @@ describe('<InstanceListItem/>', () => {
       );
     });
     expect(wrapper.find('InstanceListItem').prop('isExpanded')).toBe(true);
-    expect(wrapper.find('Detail[label="Running Jobs"]').prop('value')).toBe(0);
-    expect(wrapper.find('Detail[label="Total Jobs"]').prop('value')).toBe(68);
+
     expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
       'Auto'
     );
     expect(
       wrapper.find('Detail[label="Last Health Check"]').prop('value')
     ).toBe('9/15/2021, 6:02:07 PM');
+  });
+  test('Hop should not render some things', async () => {
+    const onSelect = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <table>
+          <tbody>
+            <InstanceListItem
+              instance={instance[1]}
+              onSelect={onSelect}
+              fetchInstances={() => {}}
+            />
+          </tbody>
+        </table>
+      );
+    });
+    expect(wrapper.find('InstanceToggle').length).toBe(0);
+    expect(
+      wrapper.find("Td[dataLabel='Instance group used capacity']").length
+    ).toBe(0);
+    expect(wrapper.find("Td[dataLabel='Capacity Adjustment']").length).toBe(0);
   });
 });
