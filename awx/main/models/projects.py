@@ -613,26 +613,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def get_notification_friendly_name(self):
         return "Project Update"
 
-    @property
-    def preferred_instance_groups(self):
-        '''
-        Project updates should pretty much always run on the control plane
-        however, we are not yet saying no to custom groupings within the control plane
-        Thus, we return custom groups and then unconditionally add the control plane
-        '''
-        if self.organization is not None:
-            organization_groups = [x for x in self.organization.instance_groups.all()]
-        else:
-            organization_groups = []
-        template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]
-        selected_groups = template_groups + organization_groups
-
-        controlplane_ig = self.control_plane_instance_group
-        if controlplane_ig and controlplane_ig[0] and controlplane_ig[0] not in selected_groups:
-            selected_groups += controlplane_ig
-
-        return selected_groups
-
     def save(self, *args, **kwargs):
         added_update_fields = []
         if not self.job_tags:

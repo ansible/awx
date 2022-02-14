@@ -132,8 +132,8 @@ def generate_teams(organization, persisted, **kwargs):
     return teams
 
 
-def create_instance(name, instance_groups=None):
-    return mk_instance(hostname=name)
+def create_instance(name, instance_groups=None, node_type='hybrid', capacity=200):
+    return mk_instance(hostname=name, node_type=node_type, capacity=capacity)
 
 
 def create_instance_group(name, instances=None, minimum=0, percentage=0):

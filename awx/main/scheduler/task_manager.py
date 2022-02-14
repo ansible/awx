@@ -70,6 +70,7 @@ class TaskManager:
         """
         instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop')
         self.real_instances = {i.hostname: i for i in instances}
+        self.controlplane_ig = None
 
         instances_partial = [
             SimpleNamespace(
@@ -86,6 +87,8 @@ class TaskManager:
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
+            if rampart_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+                self.controlplane_ig = rampart_group
             self.graph[rampart_group.name] = dict(
                 graph=DependencyGraph(),
                 execution_capacity=0,
@@ -283,39 +286,13 @@ class TaskManager:
                 task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
-            elif rampart_group.is_container_group:
-                task.instance_group = rampart_group
-                if task.capacity_type == 'execution':
-                    # find one real, non-containerized instance with capacity to
-                    # act as the controller for k8s API interaction
-                    try:
-                        task.controller_node = Instance.choose_online_control_plane_node()
-                        task.log_lifecycle("controller_node_chosen")
-                    except IndexError:
-                        logger.warning("No control plane nodes available to run containerized job {}".format(task.log_format))
-                        return
-                else:
-                    # project updates and system jobs don't *actually* run in pods, so
-                    # just pick *any* non-containerized host and use it as the execution node
-                    task.execution_node = Instance.choose_online_control_plane_node()
-                    task.log_lifecycle("execution_node_chosen")
-                    logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
+            # at this point we already have control/execution nodes selected for the following cases
             else:
                 task.instance_group = rampart_group
-                task.execution_node = instance.hostname
-                task.log_lifecycle("execution_node_chosen")
-                if instance.node_type == 'execution':
-                    try:
-                        task.controller_node = Instance.choose_online_control_plane_node()
-                        task.log_lifecycle("controller_node_chosen")
-                    except IndexError:
-                        logger.warning("No control plane nodes available to manage {}".format(task.log_format))
-                        return
-                else:
-                    # control plane nodes will manage jobs locally for performance and resilience
-                    task.controller_node = task.execution_node
-                    task.log_lifecycle("controller_node_chosen")
-                logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, task.controller_node))
+                execution_node_msg = f' and execution node {task.execution_node}' if task.execution_node else ''
+                logger.debug(
+                    f'Submitting job {task.log_format} controlled by {task.controller_node} to instance group {rampart_group.name}{execution_node_msg}.'
+                )
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
@@ -323,6 +300,13 @@ class TaskManager:
 
             if rampart_group is not None:
                 self.consume_capacity(task, rampart_group.name, instance=instance)
+            if task.controller_node:
+                self.consume_capacity(
+                    task,
+                    settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME,
+                    instance=self.real_instances[task.controller_node],
+                    impact=settings.AWX_CONTROL_NODE_TASK_IMPACT,
+                )
 
         def post_commit():
             if task.status != 'failed' and type(task) is not WorkflowJob:
@@ -497,9 +481,10 @@ class TaskManager:
                         task.job_explanation = job_explanation
                         tasks_to_update_job_explanation.append(task)
                 continue
-            preferred_instance_groups = task.preferred_instance_groups
 
             found_acceptable_queue = False
+            preferred_instance_groups = task.preferred_instance_groups
+
             if isinstance(task, WorkflowJob):
                 if task.unified_job_template_id in running_workflow_templates:
                     if not task.allow_simultaneous:
@@ -510,9 +495,36 @@ class TaskManager:
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
 
+            # Determine if there is control capacity for the task
+            if task.capacity_type == 'control':
+                control_impact = task.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
+            else:
+                control_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
+            control_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
+                task, self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['instances'], impact=control_impact, capacity_type='control'
+            )
+            if not control_instance:
+                self.task_needs_capacity(task, tasks_to_update_job_explanation)
+                logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
+                continue
+
+            task.controller_node = control_instance.hostname
+
+            # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
+            if task.capacity_type == 'control':
+                task.execution_node = control_instance.hostname
+                control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - control_impact)
+                control_instance.jobs_running += 1
+                self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['graph'].add_job(task)
+                execution_instance = self.real_instances[control_instance.hostname]
+                self.start_task(task, self.controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
+                found_acceptable_queue = True
+                continue
+
             for rampart_group in preferred_instance_groups:
-                if task.capacity_type == 'execution' and rampart_group.is_container_group:
-                    self.graph[rampart_group.name]['graph'].add_job(task)
+                if rampart_group.is_container_group:
+                    control_instance.jobs_running += 1
+                    self.graph[settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
@@ -521,28 +533,32 @@ class TaskManager:
                 if settings.IS_K8S and task.capacity_type == 'execution':
                     logger.debug("Skipping group {}, task cannot run on control plane".format(rampart_group.name))
                     continue
-
-                remaining_capacity = self.get_remaining_capacity(rampart_group.name, capacity_type=task.capacity_type)
-                if task.task_impact > 0 and remaining_capacity <= 0:
-                    logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
-                    continue
-
+                # at this point we know the instance group is NOT a container group
+                # because if it was, it would have started the task and broke out of the loop.
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
-                    task, self.graph[rampart_group.name]['instances']
+                    task, self.graph[rampart_group.name]['instances'], add_hybrid_control_cost=True
                 ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'], capacity_type=task.capacity_type)
 
-                if execution_instance or rampart_group.is_container_group:
-                    if not rampart_group.is_container_group:
-                        execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
-                        execution_instance.jobs_running += 1
-                        logger.debug(
-                            "Starting {} in group {} instance {} (remaining_capacity={})".format(
-                                task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity
-                            )
-                        )
+                if execution_instance:
+                    task.execution_node = execution_instance.hostname
+                    # If our execution instance is a hybrid, prefer to do control tasks there as well.
+                    if execution_instance.node_type == 'hybrid':
+                        control_instance = execution_instance
+                        task.controller_node = execution_instance.hostname
 
-                    if execution_instance:
-                        execution_instance = self.real_instances[execution_instance.hostname]
+                    control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - settings.AWX_CONTROL_NODE_TASK_IMPACT)
+                    task.log_lifecycle("controller_node_chosen")
+                    if control_instance != execution_instance:
+                        control_instance.jobs_running += 1
+                    execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
+                    execution_instance.jobs_running += 1
+                    task.log_lifecycle("execution_node_chosen")
+                    logger.debug(
+                        "Starting {} in group {} instance {} (remaining_capacity={})".format(
+                            task.log_format, rampart_group.name, execution_instance.hostname, execution_instance.remaining_capacity
+                        )
+                    )
+                    execution_instance = self.real_instances[execution_instance.hostname]
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True
@@ -554,17 +570,20 @@ class TaskManager:
                         )
                     )
             if not found_acceptable_queue:
-                task.log_lifecycle("needs_capacity")
-                job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
-                if task.job_explanation != job_explanation:
-                    if task.created < (tz_now() - self.time_delta_job_explanation):
-                        # Many launched jobs are immediately blocked, but most blocks will resolve in a few seconds.
-                        # Therefore we should only update the job_explanation after some time has elapsed to
-                        # prevent excessive task saves.
-                        task.job_explanation = job_explanation
-                        tasks_to_update_job_explanation.append(task)
-                logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
+                self.task_needs_capacity(task, tasks_to_update_job_explanation)
         UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
+
+    def task_needs_capacity(self, task, tasks_to_update_job_explanation):
+        task.log_lifecycle("needs_capacity")
+        job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
+        if task.job_explanation != job_explanation:
+            if task.created < (tz_now() - self.time_delta_job_explanation):
+                # Many launched jobs are immediately blocked, but most blocks will resolve in a few seconds.
+                # Therefore we should only update the job_explanation after some time has elapsed to
+                # prevent excessive task saves.
+                task.job_explanation = job_explanation
+                tasks_to_update_job_explanation.append(task)
+        logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def timeout_approval_node(self):
         workflow_approvals = WorkflowApproval.objects.filter(status='pending')
@@ -600,16 +619,17 @@ class TaskManager:
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
-    def consume_capacity(self, task, instance_group, instance=None):
+    def consume_capacity(self, task, instance_group, instance=None, impact=None):
+        impact = impact if impact else task.task_impact
         logger.debug(
             '{} consumed {} capacity units from {} with prior total of {}'.format(
-                task.log_format, task.task_impact, instance_group, self.graph[instance_group]['consumed_capacity']
+                task.log_format, impact, instance_group, self.graph[instance_group]['consumed_capacity']
             )
         )
-        self.graph[instance_group]['consumed_capacity'] += task.task_impact
+        self.graph[instance_group]['consumed_capacity'] += impact
         for capacity_type in ('control', 'execution'):
             if instance is None or instance.node_type in ('hybrid', capacity_type):
-                self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += task.task_impact
+                self.graph[instance_group][f'consumed_{capacity_type}_capacity'] += impact
 
     def get_remaining_capacity(self, instance_group, capacity_type='execution'):
         return self.graph[instance_group][f'{capacity_type}_capacity'] - self.graph[instance_group][f'consumed_{capacity_type}_capacity']

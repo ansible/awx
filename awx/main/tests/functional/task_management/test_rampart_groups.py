@@ -7,7 +7,7 @@ from awx.main.tasks.system import apply_cluster_membership_policies
 
 
 @pytest.mark.django_db
-def test_multi_group_basic_job_launch(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
+def test_multi_group_basic_job_launch(instance_factory, controlplane_instance_group, mocker, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     ig1 = instance_group_factory("ig1", instances=[i1])
@@ -67,7 +67,7 @@ def test_multi_group_with_shared_dependency(instance_factory, controlplane_insta
 
 
 @pytest.mark.django_db
-def test_workflow_job_no_instancegroup(workflow_job_template_factory, default_instance_group, mocker):
+def test_workflow_job_no_instancegroup(workflow_job_template_factory, controlplane_instance_group, mocker):
     wfjt = workflow_job_template_factory('anicedayforawalk').workflow_job_template
     wfj = WorkflowJob.objects.create(workflow_job_template=wfjt)
     wfj.status = "pending"
@@ -79,9 +79,10 @@ def test_workflow_job_no_instancegroup(workflow_job_template_factory, default_in
 
 
 @pytest.mark.django_db
-def test_overcapacity_blocking_other_groups_unaffected(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
+def test_overcapacity_blocking_other_groups_unaffected(instance_factory, controlplane_instance_group, mocker, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
-    i1.capacity = 1000
+    # need to account a little extra for controller node capacity impact
+    i1.capacity = 1020
     i1.save()
     i2 = instance_factory("i2")
     ig1 = instance_group_factory("ig1", instances=[i1])
@@ -120,7 +121,7 @@ def test_overcapacity_blocking_other_groups_unaffected(instance_factory, default
 
 
 @pytest.mark.django_db
-def test_failover_group_run(instance_factory, default_instance_group, mocker, instance_group_factory, job_template_factory):
+def test_failover_group_run(instance_factory, controlplane_instance_group, mocker, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     ig1 = instance_group_factory("ig1", instances=[i1])

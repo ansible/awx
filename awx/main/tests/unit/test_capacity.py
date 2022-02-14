@@ -18,6 +18,8 @@ class FakeObject(object):
 class Job(FakeObject):
     task_impact = 43
     is_container_group_task = False
+    controller_node = ''
+    execution_node = ''
 
     def log_format(self):
         return 'job 382 (fake)'

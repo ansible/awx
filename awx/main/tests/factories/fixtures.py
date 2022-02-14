@@ -28,12 +28,15 @@ from awx.main.models import (
 #
 
 
-def mk_instance(persisted=True, hostname='instance.example.org'):
+def mk_instance(persisted=True, hostname='instance.example.org', node_type='hybrid', capacity=100):
     if not persisted:
         raise RuntimeError('creating an Instance requires persisted=True')
     from django.conf import settings
 
-    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname)[0]
+    instance = Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname, node_type=node_type, capacity=capacity)[0]
+    if node_type in ('control', 'hybrid'):
+        mk_instance_group(name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, instance=instance)
+    return instance
 
 
 def mk_instance_group(name='default', instance=None, minimum=0, percentage=0):
@@ -52,7 +55,9 @@ def mk_organization(name, description=None, persisted=True):
     description = description or '{}-description'.format(name)
     org = Organization(name=name, description=description)
     if persisted:
-        mk_instance(persisted)
+        instances = Instance.objects.all()
+        if not instances:
+            mk_instance(persisted)
         org.save()
     return org
 

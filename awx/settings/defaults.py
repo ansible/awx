@@ -73,6 +73,9 @@ AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
 # Timeout when waiting for pod to enter running state. If the pod is still in pending state , it will be terminated. Valid time units are "s", "m", "h". Example : "5m" , "10s".
 AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "2h"
 
+# How much capacity controlling a task costs a hybrid or control node
+AWX_CONTROL_NODE_TASK_IMPACT = 1
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 #

@@ -243,7 +243,13 @@ class InstanceGroupManager(models.Manager):
         for t in tasks:
             # TODO: dock capacity for isolated job management tasks running in queue
             impact = t.task_impact
-            if t.status == 'waiting' or not t.execution_node:
+            control_groups = []
+            if t.controller_node:
+                control_groups = instance_ig_mapping.get(t.controller_node, [])
+                if not control_groups:
+                    logger.warn(f"No instance group found for {t.controller_node}, capacity consumed may be innaccurate.")
+
+            if t.status == 'waiting' or (not t.execution_node and not t.is_container_group_task):
                 # Subtract capacity from any peer groups that share instances
                 if not t.instance_group:
                     impacted_groups = []
@@ -260,6 +266,12 @@ class InstanceGroupManager(models.Manager):
                     graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
                     if breakdown:
                         graph[group_name]['committed_capacity'] += impact
+                for group_name in control_groups:
+                    if group_name not in graph:
+                        self.zero_out_group(graph, group_name, breakdown)
+                    graph[group_name][f'consumed_control_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
+                    if breakdown:
+                        graph[group_name]['committed_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
             elif t.status == 'running':
                 # Subtract capacity from all groups that contain the instance
                 if t.execution_node not in instance_ig_mapping:
@@ -271,6 +283,7 @@ class InstanceGroupManager(models.Manager):
                         impacted_groups = []
                 else:
                     impacted_groups = instance_ig_mapping[t.execution_node]
+
                 for group_name in impacted_groups:
                     if group_name not in graph:
                         self.zero_out_group(graph, group_name, breakdown)
@@ -279,6 +292,12 @@ class InstanceGroupManager(models.Manager):
                     graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
                     if breakdown:
                         graph[group_name]['running_capacity'] += impact
+                for group_name in control_groups:
+                    if group_name not in graph:
+                        self.zero_out_group(graph, group_name, breakdown)
+                    graph[group_name][f'consumed_control_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
+                    if breakdown:
+                        graph[group_name]['running_capacity'] += settings.AWX_CONTROL_NODE_TASK_IMPACT
             else:
                 logger.error('Programming error, %s not in ["running", "waiting"]', t.log_format)
         return graph

@@ -127,7 +127,7 @@ class TestApprovalNodes:
         ]
 
     @pytest.mark.django_db
-    def test_approval_node_approve(self, post, admin_user, job_template):
+    def test_approval_node_approve(self, post, admin_user, job_template, controlplane_instance_group):
         # This test ensures that a user (with permissions to do so) can APPROVE
         # workflow approvals.  Also asserts that trying to APPROVE approvals
         # that have already been dealt with will throw an error.
@@ -152,7 +152,7 @@ class TestApprovalNodes:
         post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}), user=admin_user, expect=400)
 
     @pytest.mark.django_db
-    def test_approval_node_deny(self, post, admin_user, job_template):
+    def test_approval_node_deny(self, post, admin_user, job_template, controlplane_instance_group):
         # This test ensures that a user (with permissions to do so) can DENY
         # workflow approvals.  Also asserts that trying to DENY approvals
         # that have already been dealt with will throw an error.

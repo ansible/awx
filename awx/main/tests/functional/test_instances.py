@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 
-from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate, ProjectUpdate
+from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance, InstanceGroup
 from awx.main.tasks.system import apply_cluster_membership_policies
@@ -92,7 +92,9 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
 
 @pytest.mark.django_db
 def test_policy_instance_few_instances(instance_factory, instance_group_factory):
-    i1 = instance_factory("i1")
+    # we need to use node_type=execution because node_type=hybrid will implicitly
+    # create the controlplane execution group if it doesn't already exist
+    i1 = instance_factory("i1", node_type='execution')
     ig_1 = instance_group_factory("ig1", percentage=25)
     ig_2 = instance_group_factory("ig2", percentage=25)
     ig_3 = instance_group_factory("ig3", percentage=25)
@@ -113,7 +115,7 @@ def test_policy_instance_few_instances(instance_factory, instance_group_factory)
     assert len(ig_4.instances.all()) == 1
     assert i1 in ig_4.instances.all()
 
-    i2 = instance_factory("i2")
+    i2 = instance_factory("i2", node_type='execution')
     count += 1
     apply_cluster_membership_policies()
     assert ActivityStream.objects.count() == count
@@ -334,13 +336,14 @@ def test_mixed_group_membership(instance_factory, instance_group_factory):
 
 @pytest.mark.django_db
 def test_instance_group_capacity(instance_factory, instance_group_factory):
-    i1 = instance_factory("i1")
-    i2 = instance_factory("i2")
-    i3 = instance_factory("i3")
+    node_capacity = 100
+    i1 = instance_factory("i1", capacity=node_capacity)
+    i2 = instance_factory("i2", capacity=node_capacity)
+    i3 = instance_factory("i3", capacity=node_capacity)
     ig_all = instance_group_factory("all", instances=[i1, i2, i3])
-    assert ig_all.capacity == 300
+    assert ig_all.capacity == node_capacity * 3
     ig_single = instance_group_factory("single", instances=[i1])
-    assert ig_single.capacity == 100
+    assert ig_single.capacity == node_capacity
 
 
 @pytest.mark.django_db
@@ -384,16 +387,6 @@ class TestInstanceGroupOrdering:
         inventory_source.instance_groups.add(ig_tmp)
         # API does not allow setting IGs on inventory source, so ignore those
         assert iu.preferred_instance_groups == [ig_inv, ig_org]
-
-    def test_project_update_instance_groups(self, instance_group_factory, project, controlplane_instance_group):
-        pu = ProjectUpdate.objects.create(project=project, organization=project.organization)
-        assert pu.preferred_instance_groups == [controlplane_instance_group]
-        ig_org = instance_group_factory("OrgIstGrp", [controlplane_instance_group.instances.first()])
-        ig_tmp = instance_group_factory("TmpIstGrp", [controlplane_instance_group.instances.first()])
-        project.organization.instance_groups.add(ig_org)
-        assert pu.preferred_instance_groups == [ig_org, controlplane_instance_group]
-        project.instance_groups.add(ig_tmp)
-        assert pu.preferred_instance_groups == [ig_tmp, ig_org, controlplane_instance_group]
 
     def test_job_instance_groups(self, instance_group_factory, inventory, project, default_instance_group):
         jt = JobTemplate.objects.create(inventory=inventory, project=project)

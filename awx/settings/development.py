@@ -21,7 +21,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '8888', '--allow-root', '--no-browser']
 
