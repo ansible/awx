@@ -55,6 +55,8 @@ function DataListToolbar({
   pagination,
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
+  handleIsAnsibleFactsSelected,
+  isFilterCleared,
 }) {
   const { search } = useLocation();
   const showExpandCollapse = onCompact && onExpand;
@@ -143,6 +145,8 @@ function DataListToolbar({
               onRemove={onRemove}
               enableNegativeFiltering={enableNegativeFiltering}
               enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
+              handleIsAnsibleFactsSelected={handleIsAnsibleFactsSelected}
+              isFilterCleared={isFilterCleared}
             />
           </ToolbarItem>
           {sortColumns && (
