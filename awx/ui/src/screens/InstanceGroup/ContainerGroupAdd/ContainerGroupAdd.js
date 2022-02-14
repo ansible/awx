@@ -11,7 +11,7 @@ import { jsonToYaml, isJsonString } from 'util/yaml';
 
 import ContainerGroupForm from '../shared/ContainerGroupForm';
 
-function ContainerGroupAdd() {
+function ContainerGroupAdd({ defaultExecution, defaultControlPlane }) {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
 
@@ -93,6 +93,8 @@ function ContainerGroupAdd() {
       <Card>
         <CardBody>
           <ContainerGroupForm
+            defaultControlPlane={defaultControlPlane}
+            defaultExecution={defaultExecution}
             initialPodSpec={initialPodSpec}
             onSubmit={handleSubmit}
             submitError={submitError}
