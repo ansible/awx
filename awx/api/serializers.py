@@ -1643,7 +1643,25 @@ class BaseSerializerWithVariables(BaseSerializer):
         return vars_validate_or_raise(value)
 
 
-class InventorySerializer(BaseSerializerWithVariables):
+class LabelsListMixin(object):
+    def _summary_field_labels(self, obj):
+        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
+        if has_model_field_prefetched(obj, 'labels'):
+            label_ct = len(obj.labels.all())
+        else:
+            if len(label_list) < 10:
+                label_ct = len(label_list)
+            else:
+                label_ct = obj.labels.count()
+        return {'count': label_ct, 'results': label_list}
+
+    def get_summary_fields(self, obj):
+        res = super(LabelsListMixin, self).get_summary_fields(obj)
+        res['labels'] = self._summary_field_labels(obj)
+        return res
+
+
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1684,6 +1702,7 @@ class InventorySerializer(BaseSerializerWithVariables):
                 object_roles=self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
                 instance_groups=self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
                 copy=self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
+                labels=self.reverse('api:inventory_label_list', kwargs={'pk': obj.pk}),
             )
         )
         if obj.organization:
@@ -2751,24 +2770,6 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
     class Meta:
         model = Credential
         fields = ('*', '-user', '-team')
-
-
-class LabelsListMixin(object):
-    def _summary_field_labels(self, obj):
-        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
-        if has_model_field_prefetched(obj, 'labels'):
-            label_ct = len(obj.labels.all())
-        else:
-            if len(label_list) < 10:
-                label_ct = len(label_list)
-            else:
-                label_ct = obj.labels.count()
-        return {'count': label_ct, 'results': label_list}
-
-    def get_summary_fields(self, obj):
-        res = super(LabelsListMixin, self).get_summary_fields(obj)
-        res['labels'] = self._summary_field_labels(obj)
-        return res
 
 
 class JobOptionsSerializer(LabelsListMixin, BaseSerializer):

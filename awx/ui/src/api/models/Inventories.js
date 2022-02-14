@@ -116,6 +116,20 @@ class Inventories extends InstanceGroupsMixin(Base) {
       values
     );
   }
+
+  associateLabel(id, label, orgId) {
+    return this.http.post(`${this.baseUrl}${id}/labels/`, {
+      name: label.name,
+      organization: orgId,
+    });
+  }
+
+  disassociateLabel(id, label) {
+    return this.http.post(`${this.baseUrl}${id}/labels/`, {
+      id: label.id,
+      disassociate: true,
+    });
+  }
 }
 
 export default Inventories;

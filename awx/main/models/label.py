@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from awx.api.versioning import reverse
 from awx.main.models.base import CommonModelNameNotUnique
 from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
+from awx.main.models.inventory import Inventory
 
 __all__ = ('Label',)
 
@@ -35,15 +36,14 @@ class Label(CommonModelNameNotUnique):
 
     @staticmethod
     def get_orphaned_labels():
-        return Label.objects.filter(organization=None, unifiedjobtemplate_labels__isnull=True)
+        return Label.objects.filter(organization=None, unifiedjobtemplate_labels__isnull=True, inventory_labels__isnull=True)
 
     def is_detached(self):
-        return bool(Label.objects.filter(id=self.id, unifiedjob_labels__isnull=True, unifiedjobtemplate_labels__isnull=True).count())
+        return Label.objects.filter(id=self.id, unifiedjob_labels__isnull=True, unifiedjobtemplate_labels__isnull=True, inventory_labels__isnull=True).exists()
 
     def is_candidate_for_detach(self):
+
         c1 = UnifiedJob.objects.filter(labels__in=[self.id]).count()
         c2 = UnifiedJobTemplate.objects.filter(labels__in=[self.id]).count()
-        if (c1 + c2 - 1) == 0:
-            return True
-        else:
-            return False
+        c3 = Inventory.objects.filter(labels__in=[self.id]).count()
+        return (c1 + c2 + c3 - 1) == 0
