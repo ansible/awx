@@ -101,6 +101,25 @@ function InventoryDetail({ inventory }) {
             }
           />
         )}
+        {inventory.summary_fields.labels &&
+          inventory.summary_fields.labels?.results?.length > 0 && (
+            <Detail
+              fullWidth
+              label={t`Labels`}
+              value={
+                <ChipGroup
+                  numChips={5}
+                  totalChips={inventory.summary_fields.labels.results.length}
+                >
+                  {inventory.summary_fields.labels.results.map((l) => (
+                    <Chip key={l.id} isReadOnly>
+                      {l.name}
+                    </Chip>
+                  ))}
+                </ChipGroup>
+              }
+            />
+          )}
         <VariablesDetail
           label={t`Variables`}
           value={inventory.variables}

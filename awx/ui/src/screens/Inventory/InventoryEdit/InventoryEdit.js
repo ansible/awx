@@ -4,6 +4,7 @@ import { object } from 'prop-types';
 
 import { CardBody } from 'components/Card';
 import { InventoriesAPI } from 'api';
+import { getAddedAndRemoved } from 'util/lists';
 import ContentLoading from 'components/ContentLoading';
 import useIsMounted from 'hooks/useIsMounted';
 import InventoryForm from '../shared/InventoryForm';
@@ -58,6 +59,7 @@ function InventoryEdit({ inventory }) {
         instanceGroups,
         associatedInstanceGroups
       );
+      await submitLabels(values.organization.id, values.labels);
 
       const url =
         history.location.pathname.search('smart') > -1
@@ -67,6 +69,26 @@ function InventoryEdit({ inventory }) {
     } catch (err) {
       setError(err);
     }
+  };
+
+  const submitLabels = async (orgId, labels = []) => {
+    const { added, removed } = getAddedAndRemoved(
+      inventory.summary_fields.labels.results,
+      labels
+    );
+
+    const disassociationPromises = removed.map((label) =>
+      InventoriesAPI.disassociateLabel(inventory.id, label)
+    );
+    const associationPromises = added.map((label) =>
+      InventoriesAPI.associateLabel(inventory.id, label, orgId)
+    );
+
+    const results = await Promise.all([
+      ...disassociationPromises,
+      ...associationPromises,
+    ]);
+    return results;
   };
 
   if (contentLoading) {

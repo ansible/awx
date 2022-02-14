@@ -170,6 +170,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         editable=False,
         help_text=_('Flag indicating the inventory is being deleted.'),
     )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='inventory_labels',
+        help_text=_('Labels associated with this inventory.'),
+    )
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)

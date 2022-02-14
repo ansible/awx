@@ -20,6 +20,7 @@ from awx.api.views import (
     InventoryAccessList,
     InventoryObjectRolesList,
     InventoryInstanceGroupsList,
+    InventoryLabelList,
     InventoryCopy,
 )
 
@@ -41,6 +42,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/access_list/$', InventoryAccessList.as_view(), name='inventory_access_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$', InventoryObjectRolesList.as_view(), name='inventory_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/instance_groups/$', InventoryInstanceGroupsList.as_view(), name='inventory_instance_groups_list'),
+    url(r'^(?P<pk>[0-9]+)/labels/$', InventoryLabelList.as_view(), name='inventory_label_list'),
     url(r'^(?P<pk>[0-9]+)/copy/$', InventoryCopy.as_view(), name='inventory_copy'),
 ]
 
