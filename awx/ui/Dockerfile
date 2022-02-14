@@ -1,4 +1,4 @@
-FROM node:14.18.3
+FROM node:16.14.0
 ARG NPMRC_FILE=.npmrc
 ENV NPMRC_FILE=${NPMRC_FILE}
 ARG TARGET='https://awx:8043'
