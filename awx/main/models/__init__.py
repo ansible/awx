@@ -3,6 +3,7 @@
 
 # Django
 from django.conf import settings  # noqa
+from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
 # AWX
@@ -95,6 +96,93 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('accessible_objects', user_accessible_objects)
+
+
+def convert_jsonfields_to_jsonb():
+    if connection.vendor != 'postgresql':
+        return
+
+    # fmt: off
+    fields = [  # Table name, expensive or not, tuple of column names
+        ('conf_setting', False, (
+            'value',
+        )),
+        ('main_instancegroup', False, (
+            'policy_instance_list',
+        )),
+        ('main_jobtemplate', False, (
+            'survey_spec',
+        )),
+        ('main_notificationtemplate', False, (
+            'notification_configuration',
+            'messages',
+        )),
+        ('main_project', False, (
+            'playbook_files',
+            'inventory_files',
+        )),
+        ('main_schedule', False, (
+            'extra_data',
+            'char_prompts',
+            'survey_passwords',
+        )),
+        ('main_workflowjobtemplate', False, (
+            'survey_spec',
+            'char_prompts',
+        )),
+        ('main_workflowjobtemplatenode', False, (
+            'char_prompts',
+            'extra_data',
+            'survey_passwords',
+        )),
+        ('main_activitystream', True, (
+            'setting',  # NN = NOT NULL
+            'deleted_actor',
+        )),
+        ('main_job', True, (
+            'survey_passwords',  # NN
+            'artifacts',  # NN
+        )),
+        ('main_joblaunchconfig', True, (
+            'extra_data',  # NN
+            'survey_passwords',  # NN
+            'char_prompts',  # NN
+        )),
+        ('main_notification', True, (
+            'body',  # NN
+        )),
+        ('main_unifiedjob', True, (
+            'job_env',  # NN
+        )),
+        ('main_workflowjob', True, (
+            'survey_passwords',  # NN
+            'char_prompts',  # NN
+        )),
+        ('main_workflowjobnode', True, (
+            'char_prompts',  # NN
+            'ancestor_artifacts',  # NN
+            'extra_data',  # NN
+            'survey_passwords',  # NN
+        )),
+    ]
+    # fmt: on
+
+    with connection.cursor() as cursor:
+        for table, expensive, columns in fields:
+            cursor.execute(
+                """
+                select count(1) from information_schema.columns
+                where
+                  table_name = %s and
+                  column_name in %s and
+                  data_type != 'jsonb';
+                """,
+                (table, columns),
+            )
+            if cursor.fetchone()[0]:
+                from awx.main.tasks.system import migrate_json_fields
+
+                migrate_json_fields.apply_async([table, expensive, columns])
 
 
 def cleanup_created_modified_by(sender, **kwargs):
