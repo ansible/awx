@@ -26,6 +26,8 @@
     mode: '0600'
   when: not lookup('vars', item.item, default='') and not item.stat.exists
   loop: "{{ secrets.results }}"
+  loop_control:
+    label: '{{ item.stat.path }}'
 
 - name: Include generated secrets unless they are explicitly passed in
   include_vars: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
