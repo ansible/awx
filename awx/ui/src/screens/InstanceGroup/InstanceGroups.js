@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { t } from '@lingui/macro';
 import { Route, Switch, useLocation } from 'react-router-dom';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
-
 import ScreenHeader from 'components/ScreenHeader';
+import ContentLoading from 'components/ContentLoading';
 import InstanceGroupAdd from './InstanceGroupAdd';
 import InstanceGroupList from './InstanceGroupList';
 import InstanceGroup from './InstanceGroup';
@@ -81,35 +82,43 @@ function InstanceGroups() {
         streamType={streamType}
         breadcrumbConfig={breadcrumbConfig}
       />
-      <Switch>
-        <Route path="/instance_groups/container_group/add">
-          <ContainerGroupAdd
-            defaultControlPlane={defaultControlPlane}
-            defaultExecution={defaultExecution}
-          />
-        </Route>
-        <Route path="/instance_groups/container_group/:id">
-          <ContainerGroup setBreadcrumb={buildBreadcrumbConfig} />
-        </Route>
-        {!isSettingsRequestLoading && !isKubernetes && (
-          <Route path="/instance_groups/add">
-            <InstanceGroupAdd
+      {isSettingsRequestLoading ? (
+        <PageSection>
+          <Card>
+            <ContentLoading />
+          </Card>
+        </PageSection>
+      ) : (
+        <Switch>
+          <Route path="/instance_groups/container_group/add">
+            <ContainerGroupAdd
               defaultControlPlane={defaultControlPlane}
               defaultExecution={defaultExecution}
             />
           </Route>
-        )}
-        <Route path="/instance_groups/:id">
-          <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
-        </Route>
-        <Route path="/instance_groups">
-          <InstanceGroupList
-            isKubernetes={isKubernetes}
-            isSettingsRequestLoading={isSettingsRequestLoading}
-            settingsRequestError={settingsRequestError}
-          />
-        </Route>
-      </Switch>
+          <Route path="/instance_groups/container_group/:id">
+            <ContainerGroup setBreadcrumb={buildBreadcrumbConfig} />
+          </Route>
+          {!isKubernetes && (
+            <Route path="/instance_groups/add">
+              <InstanceGroupAdd
+                defaultControlPlane={defaultControlPlane}
+                defaultExecution={defaultExecution}
+              />
+            </Route>
+          )}
+          <Route path="/instance_groups/:id">
+            <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
+          </Route>
+          <Route path="/instance_groups">
+            <InstanceGroupList
+              isKubernetes={isKubernetes}
+              isSettingsRequestLoading={isSettingsRequestLoading}
+              settingsRequestError={settingsRequestError}
+            />
+          </Route>
+        </Switch>
+      )}
     </>
   );
 }
