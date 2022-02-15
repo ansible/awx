@@ -211,7 +211,7 @@ def projects_by_scm_type(since, **kwargs):
     return counts
 
 
-@register('instance_info', '1.1', description=_('Cluster topology and capacity'))
+@register('instance_info', '1.2', description=_('Cluster topology and capacity'))
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(

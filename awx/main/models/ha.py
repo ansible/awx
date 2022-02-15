@@ -82,8 +82,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     modified = models.DateTimeField(auto_now=True)
     # Fields defined in health check or heartbeat
     version = models.CharField(max_length=120, blank=True)
-    cpu = models.IntegerField(
-        default=0,
+    cpu = models.DecimalField(
+        default=Decimal(0.0),
+        max_digits=4,
+        decimal_places=1,
         editable=False,
     )
     memory = models.BigIntegerField(

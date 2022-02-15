@@ -90,7 +90,7 @@ def package(target, data, timestamp):
                     if isinstance(item, str):
                         f.add(item, arcname=f'./{name}')
                     else:
-                        buf = json.dumps(item).encode('utf-8')
+                        buf = json.dumps(item, cls=DjangoJSONEncoder).encode('utf-8')
                         info = tarfile.TarInfo(f'./{name}')
                         info.size = len(buf)
                         info.mtime = timestamp.timestamp()
@@ -230,7 +230,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             try:
                 last_entry = max(last_entries.get(key) or last_gather, until - timedelta(weeks=4))
                 results = (func(since or last_entry, collection_type=collection_type, until=until), func.__awx_analytics_version__)
-                json.dumps(results)  # throwaway check to see if the data is json-serializable
+                json.dumps(results, cls=DjangoJSONEncoder)  # throwaway check to see if the data is json-serializable
                 data[filename] = results
             except Exception:
                 logger.exception("Could not generate metric {}".format(filename))
