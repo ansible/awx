@@ -105,7 +105,7 @@ function MeshGraph({ data, showLegend, zoom }) {
       .enter()
       .append('line')
       .attr('class', (_, i) => `link-${i}`)
-      .attr('data-cy', (d) => `${d.source}-${d.target}`)
+      .attr('data-cy', (d) => `${d.source.hostname}-${d.target.hostname}`)
       .style('fill', 'none')
       .style('stroke', '#ccc')
       .style('stroke-width', '2px')
