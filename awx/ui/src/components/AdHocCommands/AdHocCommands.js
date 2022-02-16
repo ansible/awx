@@ -59,6 +59,7 @@ function AdHocCommands({
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
   const {
     isLoading: isLaunchLoading,
     error: launchError,
@@ -172,6 +173,8 @@ function AdHocCommands({
 AdHocCommands.propTypes = {
   adHocItems: PropTypes.arrayOf(PropTypes.object).isRequired,
   hasListItems: PropTypes.bool.isRequired,
+  onLaunchLoading: PropTypes.func.isRequired,
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
 };
 
 export default AdHocCommands;
