@@ -127,7 +127,7 @@ function InstanceList() {
       async (instancesToAssociate) => {
         await Promise.all(
           instancesToAssociate
-            .filter((i) => i.node_type !== 'control')
+            .filter((i) => i.node_type !== 'control' || i.node_type !== 'hop')
             .map((instance) =>
               InstanceGroupsAPI.associateInstance(instanceGroupId, instance.id)
             )
@@ -155,8 +155,7 @@ function InstanceList() {
       InstancesAPI.read(
         mergeParams(params, {
           ...{ not__rampart_groups__id: instanceGroupId },
-          ...{ not__node_type: 'control' },
-          ...{ not__node_type: 'hop' },
+          ...{ not__node_type: ['hop', 'control'] },
         })
       ),
     [instanceGroupId]
