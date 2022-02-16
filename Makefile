@@ -20,6 +20,7 @@ DEV_DOCKER_TAG_BASE ?= quay.io/awx
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
+CUSTOM_RUNNER ?= 
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
@@ -487,7 +488,7 @@ docker-compose-container-group-clean:
 
 # Base development image build
 docker-compose-build:
-	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
+	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE) -e custom_runner='${CUSTOM_RUNNER}'
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .

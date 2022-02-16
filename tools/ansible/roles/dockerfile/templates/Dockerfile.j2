@@ -278,6 +278,11 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 {% endif %}
 
+{% if custom_runner %}
+RUN /var/lib/awx/venv/awx/bin/pip uninstall -y ansible-runner
+RUN /var/lib/awx/venv/awx/bin/pip install {{ custom_runner }}
+{% endif %}
+
 ENV HOME="/var/lib/awx"
 ENV PATH="/usr/pgsql-12/bin:${PATH}"
 

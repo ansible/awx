@@ -17,3 +17,13 @@ The callbacks and handlers are:
 If you want to debug `ansible-runner`, then set `AWX_CLEANUP_PATHS=False`, run a job, observe the job's `AWX_PRIVATE_DATA_DIR` property, and go the node where the job was executed and inspect that directory.
 
 If you want to debug the process that `ansible-runner` invoked (_i.e._, Ansible or `ansible-playbook`), then observe the Job's `job_env`, `job_cwd`, and `job_args` parameters.
+
+### Changing
+
+If you want to change the version of ansible-runner built into the awx_tools_1 container you can add a variable to the `make docker-compose-build` command like:
+```
+CUSTOM_RUNNER=git+https://github.com/<your fork>/ansible-runner.git@<your branch>#egg=ansible-runner make docker-compose-build
+```
+This will pull down that version of ansible-runner at the container build time.
+
+Note: This will only apply to the version of running within the container. If you run a job on a remote receptor node the version there will not be changed by making this modification.
