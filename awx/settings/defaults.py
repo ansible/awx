@@ -41,6 +41,11 @@ else:
 DEBUG = True
 SQL_DEBUG = DEBUG
 
+# FIXME: it would be nice to cycle back around and allow this to be
+# BigAutoField going forward, but we'd have to be explicit about our
+# existing models.
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
