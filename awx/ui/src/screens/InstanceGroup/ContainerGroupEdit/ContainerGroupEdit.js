@@ -68,13 +68,9 @@ function ContainerGroupEdit({
 
   if (isLoading) {
     return (
-      <PageSection>
-        <Card>
-          <CardBody>
-            <ContentLoading />
-          </CardBody>
-        </Card>
-      </PageSection>
+      <CardBody>
+        <ContentLoading />
+      </CardBody>
     );
   }
 

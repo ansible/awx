@@ -24,8 +24,8 @@ function InstanceGroupFormFields({ defaultControlPlane, defaultExecution }) {
   const validators = combine([
     required(null),
     protectedResourceName(
-      [defaultControlPlane, defaultExecution],
-      t`This is a protected name for Instance Groups. Please use a different name.`
+      t`This is a protected name for Instance Groups. Please use a different name.`,
+      [defaultControlPlane, defaultExecution]
     ),
   ]);
 
