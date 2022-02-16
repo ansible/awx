@@ -86,7 +86,7 @@ dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
-django==3.1.14
+django==3.2.12
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -96,6 +96,7 @@ django==3.1.14
     #   django-guid
     #   django-oauth-toolkit
     #   django-polymorphic
+    #   django-solo
     #   django-taggit
     #   djangorestframework
 django-auth-ldap==4.0.0
@@ -106,7 +107,7 @@ django-crum==0.7.9
     # via -r /awx_devel/requirements/requirements.in
 django-extensions==2.2.9
     # via -r /awx_devel/requirements/requirements.in
-django-guid==2.2.1
+django-guid==3.2.1
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.4.1
     # via -r /awx_devel/requirements/requirements.in
@@ -116,15 +117,14 @@ django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-qsstats-magic==1.1.0
     # via -r /awx_devel/requirements/requirements.in
-django-radius==1.3.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements_git.txt
 django-redis==4.5.0
     # via -r /awx_devel/requirements/requirements.in
-django-solo==1.1.3
+django-solo==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0
     # via -r /awx_devel/requirements/requirements.in
-django-taggit==1.2.0
+django-taggit==2.1.0
     # via -r /awx_devel/requirements/requirements.in
 djangorestframework==3.13.1
     # via -r /awx_devel/requirements/requirements.in
@@ -132,8 +132,9 @@ djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.16
     # via python-daemon
-future==0.16.0
-    # via django-radius
+    # via
+    #   -r /awx_devel/requirements/requirements_git.txt
+    #   django-radius
 gitdb==4.0.2
     # via gitpython
 gitpython==3.1.7
@@ -214,9 +215,9 @@ multidict==4.7.5
     # via
     #   aiohttp
     #   yarl
-netaddr==0.7.19
+netaddr==0.8.0
     # via pyrad
-oauthlib==3.1.0
+oauthlib==3.2.0
     # via
     #   django-oauth-toolkit
     #   requests-oauthlib
@@ -267,7 +268,7 @@ pyparsing==2.4.6
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   packaging
-pyrad==2.3
+pyrad==2.4
     # via django-radius
 pyrsistent==0.15.7
     # via jsonschema
@@ -292,7 +293,7 @@ python3-openid==3.1.0
     # via social-auth-core
 python3-saml==1.13.0
     # via -r /awx_devel/requirements/requirements.in
-pytz==2019.3
+pytz==2021.3
     # via
     #   django
     #   djangorestframework
@@ -325,7 +326,7 @@ requests==2.26.0
     #   requests-oauthlib
     #   social-auth-core
     #   twilio
-requests-oauthlib==1.3.0
+requests-oauthlib==1.3.1
     # via
     #   kubernetes
     #   msrest
