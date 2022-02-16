@@ -7,3 +7,4 @@ export { default as ToolbarAddButton } from './ToolbarAddButton';
 export { default as ToolbarSyncSourceButton } from './ToolbarSyncSourceButton';
 export { default as getSearchableKeys } from './getSearchableKeys';
 export { default as TdBreakWord } from './TdBreakWord';
+export { default as TableDatum } from './TableDatum';
