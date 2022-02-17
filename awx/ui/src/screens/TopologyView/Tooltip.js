@@ -1,9 +1,5 @@
-/* eslint-disable i18next/no-literal-string,
-jsx-a11y/anchor-is-valid,
-jsx-a11y/click-events-have-key-events,
-jsx-a11y/no-static-element-interactions */
-
 import React from 'react';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Button as PFButton,
@@ -57,11 +53,11 @@ function Tooltip({
             component={TextVariants.small}
             style={{ fontWeight: 'bold', color: 'black' }}
           >
-            Details
+            {t`Details`}
           </Text>
           <Divider component="div" />
           <Text component={TextVariants.small}>
-            Click on a node icon to display the details.
+            {t`Click on a node icon to display the details.`}
           </Text>
         </TextContent>
       ) : (
@@ -71,7 +67,7 @@ function Tooltip({
               component={TextVariants.small}
               style={{ fontWeight: 'bold', color: 'black' }}
             >
-              Details
+              {t`Details`}
             </Text>
             <Divider component="div" />
           </TextContent>
@@ -83,17 +79,23 @@ function Tooltip({
                 </Button>
               </DescriptionListTerm>
               <DescriptionListDescription>
-                <a onClick={redirectToDetailsPage}>{nodeDetail.hostname}</a>
+                <PFButton
+                  variant="link"
+                  isInline
+                  onClick={redirectToDetailsPage}
+                >
+                  {nodeDetail.hostname}
+                </PFButton>
               </DescriptionListDescription>
             </DescriptionListGroup>
             <DescriptionListGroup>
-              <DescriptionListTerm>Type</DescriptionListTerm>
+              <DescriptionListTerm>{t`Type`}</DescriptionListTerm>
               <DescriptionListDescription>
-                {nodeDetail.node_type} node
+                {nodeDetail.node_type} {t`node`}
               </DescriptionListDescription>
             </DescriptionListGroup>
             <DescriptionListGroup>
-              <DescriptionListTerm>Status</DescriptionListTerm>
+              <DescriptionListTerm>{t`Status`}</DescriptionListTerm>
               <DescriptionListDescription>
                 <StatusLabel status={nodeDetail.node_state} />
               </DescriptionListDescription>

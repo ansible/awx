@@ -1,5 +1,5 @@
-/* eslint-disable i18next/no-literal-string */
 import React from 'react';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Button as PFButton,
@@ -62,49 +62,49 @@ function Legend() {
           component={TextVariants.small}
           style={{ fontWeight: 'bold', color: 'black' }}
         >
-          Legend
+          {t`Legend`}
         </Text>
         <Divider component="div" />
-        <Text component={TextVariants.small}>Node types</Text>
+        <Text component={TextVariants.small}>{t`Node types`}</Text>
       </TextContent>
       <DescriptionList isHorizontal isFluid>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              C
+              {t`C`}
             </Button>
           </DescriptionListTerm>
-          <DescriptionListDescription>Control node</DescriptionListDescription>
+          <DescriptionListDescription>{t`Control node`}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              Ex
+              {t`Ex`}
             </Button>
           </DescriptionListTerm>
           <DescriptionListDescription>
-            Execution node
+            {t`Execution node`}
           </DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              Hy
+              {t`Hy`}
             </Button>
           </DescriptionListTerm>
-          <DescriptionListDescription>Hybrid node</DescriptionListDescription>
+          <DescriptionListDescription>{t`Hybrid node`}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              h
+              {t`h`}
             </Button>
           </DescriptionListTerm>
-          <DescriptionListDescription>Hop node</DescriptionListDescription>
+          <DescriptionListDescription>{t`Hop node`}</DescriptionListDescription>
         </DescriptionListGroup>
       </DescriptionList>
       <TextContent>
-        <Text component={TextVariants.small}>Status types</Text>
+        <Text component={TextVariants.small}>{t`Status types`}</Text>
       </TextContent>
       <DescriptionList isHorizontal isFluid>
         <DescriptionListGroup>
@@ -115,13 +115,13 @@ function Legend() {
               style={{ border: '1px solid gray', backgroundColor: '#3E8635' }}
             />
           </DescriptionListTerm>
-          <DescriptionListDescription>Healthy</DescriptionListDescription>
+          <DescriptionListDescription>{t`Healthy`}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="danger" icon={<ExclamationIcon />} isSmall />
           </DescriptionListTerm>
-          <DescriptionListDescription>Error</DescriptionListDescription>
+          <DescriptionListDescription>{t`Error`}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
@@ -130,7 +130,7 @@ function Legend() {
               style={{ border: '1px solid gray', backgroundColor: '#e6e6e6' }}
             />
           </DescriptionListTerm>
-          <DescriptionListDescription>Disabled</DescriptionListDescription>
+          <DescriptionListDescription>{t`Disabled`}</DescriptionListDescription>
         </DescriptionListGroup>
       </DescriptionList>
     </Wrapper>
