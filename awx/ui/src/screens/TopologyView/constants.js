@@ -1,4 +1,3 @@
-/* eslint-disable-next-line import/prefer-default-export */
 export const SELECTOR = '#chart';
 export const MESH_FORCE_LAYOUT = {
   defaultCollisionFactor: 80,
