@@ -13,6 +13,8 @@ import {
   renderNodeType,
   renderNodeIcon,
   redirectToDetailsPage,
+  getHeight,
+  getWidth,
   // generateRandomNodes,
   // getRandomInt,
 } from './utils/helpers';
@@ -23,9 +25,7 @@ import {
   DEFAULT_NODE_HIGHLIGHT_COLOR,
   DEFAULT_NODE_LABEL_TEXT_COLOR,
   DEFAULT_FONT_SIZE,
-  MARGIN,
-  HEIGHT,
-  FALLBACK_WIDTH,
+  SELECTOR,
 } from './constants';
 
 const Loader = styled(ContentLoading)`
@@ -43,22 +43,8 @@ function MeshGraph({ data, showLegend, zoom }) {
 
   // const data = generateRandomNodes(getRandomInt(4, 50));
   const draw = () => {
-    const getWidth = () => {
-      let width;
-      // This is in an a try/catch due to an error from jest.
-      // Even though the d3.select returns a valid selector with
-      // style function, it says it is null in the test
-      try {
-        width =
-          parseInt(d3.select(`#chart`).style('width'), 10) - MARGIN ||
-          FALLBACK_WIDTH;
-      } catch (error) {
-        width = FALLBACK_WIDTH;
-      }
-
-      return width;
-    };
-    const width = getWidth();
+    const width = getWidth(SELECTOR);
+    const height = getHeight(SELECTOR);
 
     /* Add SVG */
     d3.selectAll(`#chart > svg`).remove();
@@ -66,13 +52,9 @@ function MeshGraph({ data, showLegend, zoom }) {
       .select('#chart')
       .append('svg')
       .attr('class', 'mesh-svg')
-      .attr('width', `${width + MARGIN}px`)
-      .attr('height', `${HEIGHT + MARGIN}px`)
-      .attr('viewBox', [0, 0, width, HEIGHT]);
-    const mesh = svg
-      .append('g')
-      .attr('class', 'mesh')
-      .attr('transform', `translate(${MARGIN}, ${MARGIN})`);
+      .attr('width', `${width}px`)
+      .attr('height', `100%`);
+    const mesh = svg.append('g').attr('class', 'mesh');
 
     const graph = data;
 
@@ -94,7 +76,7 @@ function MeshGraph({ data, showLegend, zoom }) {
       )
       .force('forceX', d3.forceX(MESH_FORCE_LAYOUT.defaultForceX))
       .force('forceY', d3.forceY(MESH_FORCE_LAYOUT.defaultForceY))
-      .force('center', d3.forceCenter(width / 2, HEIGHT / 2));
+      .force('center', d3.forceCenter(width / 2, height / 2));
 
     const link = mesh
       .append('g')
@@ -274,7 +256,7 @@ function MeshGraph({ data, showLegend, zoom }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div id="chart" style={{ position: 'relative' }}>
+    <div id="chart" style={{ position: 'relative', height: '100%' }}>
       {showLegend && <Legend />}
       <Tooltip
         isNodeSelected={isNodeSelected}
