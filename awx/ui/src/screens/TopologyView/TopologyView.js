@@ -37,9 +37,9 @@ function TopologyView() {
     d3.select('.mesh-svg').transition().call(zoom.scaleBy, 0.5);
   };
   const resetZoom = () => {
-    const margin = 15;
-    const height = 600;
-    const width = parseInt(d3.select(`#chart`).style('width'), 10) - margin;
+    const parent = d3.select('.mesh').node().parentElement;
+    const width = parent.clientWidth;
+    const height = parent.clientHeight;
     d3.select('.mesh-svg')
       .transition()
       .duration(750)
@@ -85,7 +85,7 @@ function TopologyView() {
         resetZoom={resetZoom}
       />
       <PageSection>
-        <Card>
+        <Card style={{ height: '100%' }}>
           <CardBody>
             {!isLoading && (
               <MeshGraph data={meshData} showLegend={showLegend} zoom={zoom} />

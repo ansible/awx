@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import { InstancesAPI } from 'api';
 import { truncateString } from '../../../util/strings';
 
@@ -84,3 +85,11 @@ export const generateRandomNodes = (n) => {
   }
   return generateRandomLinks(nodes, getRandomInt(1, n - 1));
 };
+
+export function getWidth(selector) {
+  return selector ? d3.select(selector).node().clientWidth : 700;
+}
+
+export function getHeight(selector) {
+  return selector !== null ? d3.select(selector).node().clientHeight : 600;
+}

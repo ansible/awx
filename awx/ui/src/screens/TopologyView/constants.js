@@ -1,4 +1,5 @@
 /* eslint-disable-next-line import/prefer-default-export */
+export const SELECTOR = '#chart';
 export const MESH_FORCE_LAYOUT = {
   defaultCollisionFactor: 80,
   defaultForceStrength: -100,
@@ -15,7 +16,6 @@ export const DEFAULT_FONT_SIZE = '12px';
 export const LABEL_TEXT_MAX_LENGTH = 15;
 
 export const MARGIN = 15;
-export const HEIGHT = 600;
 export const FALLBACK_WIDTH = 700;
 
 export const NODE_STATE_COLOR_KEY = {
