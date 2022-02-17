@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import { InstancesAPI } from 'api';
 import { truncateString } from '../../../util/strings';
 
 import {
@@ -34,13 +33,8 @@ export function renderNodeIcon(selectedNode) {
 }
 
 export async function redirectToDetailsPage(selectedNode, history) {
-  // TODO: redirect to top-level instances details page
   const { id: nodeId } = selectedNode;
-  const {
-    data: { results },
-  } = await InstancesAPI.readInstanceGroup(nodeId);
-  const { id: instanceGroupId } = results[0];
-  const constructedURL = `/instance_groups/${instanceGroupId}/instances/${nodeId}/details`;
+  const constructedURL = `/instances/${nodeId}/details`;
   history.push(constructedURL);
 }
 
