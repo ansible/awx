@@ -15,8 +15,8 @@ from django.apps import apps
 from django.db import models
 from django.conf import settings
 
+from django_guid import get_guid
 from django_guid.log_filters import CorrelationId
-from django_guid.middleware import GuidMiddleware
 
 from awx import MODE
 from awx.main.constants import LOGGER_BLOCKLIST
@@ -366,7 +366,7 @@ class SmartFilter(object):
 
 class DefaultCorrelationId(CorrelationId):
     def filter(self, record):
-        guid = GuidMiddleware.get_guid() or '-'
+        guid = get_guid() or '-'
         if MODE == 'development':
             guid = guid[:8]
         record.guid = guid

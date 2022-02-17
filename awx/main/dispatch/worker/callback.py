@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils.timezone import now as tz_now
 from django.db import DatabaseError, OperationalError, connection as django_connection
 from django.db.utils import InterfaceError, InternalError
-from django_guid.middleware import GuidMiddleware
+from django_guid import set_guid
 
 import psutil
 
@@ -184,7 +184,7 @@ class CallbackBrokerWorker(BaseWorker):
                 if body.get('event') == 'EOF':
                     try:
                         if 'guid' in body:
-                            GuidMiddleware.set_guid(body['guid'])
+                            set_guid(body['guid'])
                         final_counter = body.get('final_counter', 0)
                         logger.info('Event processing is finished for Job {}, sending notifications'.format(job_identifier))
                         # EOF events are sent when stdout for the running task is
@@ -208,7 +208,7 @@ class CallbackBrokerWorker(BaseWorker):
                         logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     finally:
                         self.subsystem_metrics.inc('callback_receiver_events_in_memory', -1)
-                        GuidMiddleware.set_guid('')
+                        set_guid('')
                     return
 
                 skip_websocket_message = body.pop('skip_websocket_message', False)

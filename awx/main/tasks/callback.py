@@ -8,7 +8,7 @@ import stat
 # Django
 from django.utils.timezone import now
 from django.conf import settings
-from django_guid.middleware import GuidMiddleware
+from django_guid import get_guid
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -25,7 +25,7 @@ class RunnerCallback:
     def __init__(self, model=None):
         self.parent_workflow_job_id = None
         self.host_map = {}
-        self.guid = GuidMiddleware.get_guid()
+        self.guid = get_guid()
         self.job_created = None
         self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
         self.dispatcher = CallbackQueueDispatcher()

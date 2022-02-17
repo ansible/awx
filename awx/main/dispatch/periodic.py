@@ -6,7 +6,8 @@ from multiprocessing import Process
 from django.conf import settings
 from django.db import connections
 from schedule import Scheduler
-from django_guid.middleware import GuidMiddleware
+from django_guid import set_guid
+from django_guid.utils import generate_guid
 
 from awx.main.dispatch.worker import TaskWorker
 
@@ -32,7 +33,7 @@ class Scheduler(Scheduler):
                         # If the database connection has a hiccup, re-establish a new
                         # connection
                         conn.close_if_unusable_or_obsolete()
-                    GuidMiddleware.set_guid(GuidMiddleware._generate_guid())
+                    set_guid(generate_guid())
                     self.run_pending()
                 except Exception:
                     logger.exception('encountered an error while scheduling periodic tasks')
