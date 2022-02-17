@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import * as d3 from 'd3';
 import { t } from '@lingui/macro';
 import { PageSection, Card, CardBody } from '@patternfly/react-core';
+import ContentError from 'components/ContentError';
 import useRequest from 'hooks/useRequest';
 import { MeshAPI } from 'api';
 import Header from './Header';
@@ -12,7 +13,7 @@ function TopologyView() {
   const {
     isLoading,
     result: { meshData },
-    // error: fetchInitialError,
+    error: fetchInitialError,
     request: fetchMeshVisualizer,
   } = useRequest(
     useCallback(async () => {
@@ -72,7 +73,6 @@ function TopologyView() {
       .duration(750)
       .call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
   };
-
   return (
     <>
       <Header
@@ -84,15 +84,29 @@ function TopologyView() {
         zoomFit={zoomFit}
         resetZoom={resetZoom}
       />
-      <PageSection>
-        <Card style={{ height: '100%' }}>
-          <CardBody>
-            {!isLoading && (
-              <MeshGraph data={meshData} showLegend={showLegend} zoom={zoom} />
-            )}
-          </CardBody>
-        </Card>
-      </PageSection>
+      {fetchInitialError ? (
+        <PageSection>
+          <Card>
+            <CardBody>
+              <ContentError error={fetchInitialError} />
+            </CardBody>
+          </Card>
+        </PageSection>
+      ) : (
+        <PageSection>
+          <Card style={{ height: '100%' }}>
+            <CardBody>
+              {!isLoading && (
+                <MeshGraph
+                  data={meshData}
+                  showLegend={showLegend}
+                  zoom={zoom}
+                />
+              )}
+            </CardBody>
+          </Card>
+        </PageSection>
+      )}
     </>
   );
 }
