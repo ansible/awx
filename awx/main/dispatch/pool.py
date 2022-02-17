@@ -16,7 +16,7 @@ from queue import Full as QueueFull, Empty as QueueEmpty
 from django.conf import settings
 from django.db import connection as django_connection, connections
 from django.core.cache import cache as django_cache
-from django_guid.middleware import GuidMiddleware
+from django_guid import set_guid
 from jinja2 import Template
 import psutil
 
@@ -436,7 +436,7 @@ class AutoscalePool(WorkerPool):
 
     def write(self, preferred_queue, body):
         if 'guid' in body:
-            GuidMiddleware.set_guid(body['guid'])
+            set_guid(body['guid'])
         try:
             # when the cluster heartbeat occurs, clean up internally
             if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:

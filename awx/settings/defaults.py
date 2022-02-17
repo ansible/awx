@@ -935,7 +935,7 @@ AWX_CLEANUP_PATHS = True
 RECEPTOR_RELEASE_WORK = True
 
 MIDDLEWARE = [
-    'django_guid.middleware.GuidMiddleware',
+    'django_guid.middleware.guid_middleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
