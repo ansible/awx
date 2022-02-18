@@ -270,7 +270,7 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
                 playbook_integrity_error = returned_facts['playbook_integrity_error']
                 checked_playbooks = []
                 for p in returned_facts['playbook_integrity_existence']:
-                    if p['rc'] == 0:
+                    if p.get('rc', -1) == 0:
                         checked_playbooks.append(p["item"])
                 self.playbook_new_integrity_result = {
                     "verified": playbook_integrity_verified,
