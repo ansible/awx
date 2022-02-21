@@ -130,7 +130,7 @@ function MeshGraph({ data, showLegend, zoom }) {
       .append('text')
       .text((d) => renderNodeType(d.node_type))
       .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'central')
+      .attr('dominant-baseline', 'central')
       .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR);
 
     // node hostname labels
