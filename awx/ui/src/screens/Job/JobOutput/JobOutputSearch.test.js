@@ -23,6 +23,7 @@ describe('JobOutputSearch', () => {
       <JobOutputSearch
         job={{
           status: 'successful',
+          type: 'project',
         }}
         qsConfig={{
           defaultParams: { page: 1 },
@@ -42,7 +43,59 @@ describe('JobOutputSearch', () => {
     await act(async () => {
       wrapper.find(searchBtn).simulate('click');
     });
-
+    expect(wrapper.find('Search').prop('columns')).toHaveLength(3);
+    expect(wrapper.find('Search').prop('columns').at(0).name).toBe('Stdout');
+    expect(wrapper.find('Search').prop('columns').at(1).name).toBe('Event');
+    expect(wrapper.find('Search').prop('columns').at(2).name).toBe('Advanced');
     expect(history.location.search).toEqual('?stdout__icontains=99');
+  });
+  test('Should not have Event key in search drop down for system job', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/playbook/1/output'],
+    });
+
+    const wrapper = mountWithContexts(
+      <JobOutputSearch
+        job={{
+          status: 'successful',
+          type: 'system_job',
+        }}
+        qsConfig={{
+          defaultParams: { page: 1 },
+          integerFields: ['page', 'page_size'],
+        }}
+      />,
+      {
+        context: { router: { history } },
+      }
+    );
+    expect(wrapper.find('Search').prop('columns')).toHaveLength(2);
+    expect(wrapper.find('Search').prop('columns').at(0).name).toBe('Stdout');
+    expect(wrapper.find('Search').prop('columns').at(1).name).toBe('Advanced');
+  });
+
+  test('Should not have Event key in search drop down for inventory update job', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/playbook/1/output'],
+    });
+
+    const wrapper = mountWithContexts(
+      <JobOutputSearch
+        job={{
+          status: 'successful',
+          type: 'inventory_update',
+        }}
+        qsConfig={{
+          defaultParams: { page: 1 },
+          integerFields: ['page', 'page_size'],
+        }}
+      />,
+      {
+        context: { router: { history } },
+      }
+    );
+    expect(wrapper.find('Search').prop('columns')).toHaveLength(2);
+    expect(wrapper.find('Search').prop('columns').at(0).name).toBe('Stdout');
+    expect(wrapper.find('Search').prop('columns').at(1).name).toBe('Advanced');
   });
 });
