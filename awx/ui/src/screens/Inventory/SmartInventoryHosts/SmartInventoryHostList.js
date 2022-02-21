@@ -25,25 +25,33 @@ function SmartInventoryHostList({ inventory }) {
   const location = useLocation();
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const {
-    result: { hosts, count },
+    result: { hosts, count, moduleOptions },
     error: contentError,
     isLoading,
     request: fetchHosts,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const {
-        data: { results, count: hostCount },
-      } = await InventoriesAPI.readHosts(inventory.id, params);
+      const [
+        {
+          data: { results, count: hostCount },
+        },
+        adHocOptions,
+      ] = await Promise.all([
+        InventoriesAPI.readHosts(inventory.id, params),
+        InventoriesAPI.readAdHocOptions(inventory.id),
+      ]);
 
       return {
         hosts: results,
         count: hostCount,
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
       };
     }, [location.search, inventory.id]),
     {
       hosts: [],
       count: 0,
+      moduleOptions: [],
     }
   );
 
@@ -91,6 +99,7 @@ function SmartInventoryHostList({ inventory }) {
                     adHocItems={selected}
                     hasListItems={count > 0}
                     onLaunchLoading={setIsAdHocLaunchLoading}
+                    moduleOptions={moduleOptions}
                   />,
                 ]
               : []
