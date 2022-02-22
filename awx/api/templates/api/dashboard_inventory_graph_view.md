@@ -3,7 +3,7 @@ Make a GET request to this resource to retrieve aggregate statistics about inven
 Including fetching the number of total hosts tracked by Tower over an amount of time and the current success or
 failed status of hosts which have run jobs within an Inventory.
 
-## Parmeters and Filtering
+## Parameters and Filtering
 
 The `period` of the data can be adjusted with:
 
@@ -24,7 +24,7 @@ Data about the number of hosts will be returned in the following format:
 Each element contains an epoch timestamp represented in seconds and a numerical value indicating
 the number of hosts that exist at a given moment
 
-Data about failed and successfull hosts by inventory will be given as:
+Data about failed and successful hosts by inventory will be given as:
 
     {
             "sources": [

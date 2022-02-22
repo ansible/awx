@@ -158,7 +158,7 @@ Now that your model is a resource and has a `Role` defined, you can begin to acc
     >>> user = User.objects.first()
     >>> user in document.read_role
     False  # not accessible by default
-    >>> document.readonly_role.memebers.add(user)
+    >>> document.readonly_role.members.add(user)
     >>> user in document.read_role
     True   # now it is accessible
     >>> user in document.admin_role

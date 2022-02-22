@@ -7,7 +7,7 @@ provisioned on-demand as a Pod that exists only for the duration of
 the playbook run. This is known as the ephemeral execution model and
 ensures a clean environment for every job run.
 
-In some cases it is desireable to have the execution environment be "always-on",
+In some cases it is desirable to have the execution environment be "always-on",
 this is is done by manually creating an instance through the AWX API or UI. 
 
 

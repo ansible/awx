@@ -140,4 +140,4 @@ interval (by default, every 30 seconds).  When this task starts, it queries the
 database for Schedules where `Schedule.next_run` is between
 `scheduler_last_runtime()` and `utcnow()`.  For each of these, a new job is
 launched, and `Schedule.next_run` is changed to the next chronological datetime
-in the list of all occurences.
+in the list of all occurrences.

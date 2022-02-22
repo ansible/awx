@@ -18,7 +18,7 @@ inventory sources:
 * `inventory_update`: ID of the inventory update job that was started.
   (integer, read-only)
 * `project_update`: ID of the project update job that was started if this inventory source is an SCM source.
-  (interger, read-only, optional)
+  (integer, read-only, optional)
 
 Note: All manual inventory sources (source="") will be ignored by the update_inventory_sources endpoint.  This endpoint will not update inventory sources for Smart Inventories.  
 
