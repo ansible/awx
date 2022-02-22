@@ -34,7 +34,7 @@ const Loader = styled(ContentLoading)`
   width: 100%;
   background: white;
 `;
-function MeshGraph({ data, showLegend, zoom }) {
+function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   // function MeshGraph({ showLegend, zoom }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -236,9 +236,11 @@ function MeshGraph({ data, showLegend, zoom }) {
     }
 
     function calculateAlphaDecay(a, aMin, x) {
+      setShowZoomControls(false);
       const decayPercentage = Math.min((aMin / a) * 100);
       if (decayPercentage >= x) {
         d3.select('.simulation-loader').style('visibility', 'hidden');
+        setShowZoomControls(true);
       }
     }
   };
