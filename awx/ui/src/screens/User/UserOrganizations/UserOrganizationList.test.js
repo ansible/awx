@@ -72,6 +72,6 @@ describe('<UserOrganizationlist />', () => {
       page_size: 20,
       type: 'organization',
     });
-    expect(UsersAPI.readOrganizationOptions).toBeCalled();
+    expect(UsersAPI.readOrganizationOptions).toBeCalledWith('1');
   });
 });
