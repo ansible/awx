@@ -1,4 +1,6 @@
 export const SELECTOR = '#chart';
+export const PARENTSELECTOR = '.mesh-svg';
+export const CHILDSELECTOR = '.mesh';
 export const MESH_FORCE_LAYOUT = {
   defaultCollisionFactor: 80,
   defaultForceStrength: -100,
