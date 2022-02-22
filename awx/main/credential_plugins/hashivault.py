@@ -168,19 +168,14 @@ def handle_auth(**kwargs):
 
 
 def approle_auth(**kwargs):
-    role_id = kwargs['role_id']
-    secret_id = kwargs['secret_id']
-    # AppRole Login
-    return {'role_id': role_id, 'secret_id': secret_id}
+    return {'role_id': kwargs['role_id'], 'secret_id': kwargs['secret_id']}
 
 
 def kubernetes_auth(**kwargs):
-    role = kwargs['kubernetes_role']
     jwt_file = pathlib.Path('/var/run/secrets/kubernetes.io/serviceaccount/token')
     with jwt_file.open('r') as jwt_fo:
         jwt = jwt_fo.read().rstrip()
-    # Kubernetes Login
-    return {'role': role, 'jwt': jwt}
+    return {'role': kwargs['kubernetes_role'], 'jwt': jwt}
 
 
 def method_auth(**kwargs):
