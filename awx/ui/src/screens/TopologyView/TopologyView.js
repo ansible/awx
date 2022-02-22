@@ -11,6 +11,7 @@ import { CHILDSELECTOR, PARENTSELECTOR } from './constants';
 
 function TopologyView() {
   const [showLegend, setShowLegend] = useState(true);
+  const [showZoomControls, setShowZoomControls] = useState(false);
   const {
     isLoading,
     result: { meshData },
@@ -43,6 +44,7 @@ function TopologyView() {
         zoomOut={zoomOut}
         zoomFit={zoomFit}
         resetZoom={resetZoom}
+        showZoomControls={showZoomControls}
       />
       {fetchInitialError ? (
         <PageSection>
@@ -61,6 +63,7 @@ function TopologyView() {
                   data={meshData}
                   showLegend={showLegend}
                   zoom={zoom}
+                  setShowZoomControls={setShowZoomControls}
                 />
               )}
             </CardBody>

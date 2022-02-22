@@ -26,6 +26,7 @@ const Header = ({
   zoomOut,
   resetZoom,
   zoomFit,
+  showZoomControls,
 }) => {
   const { light } = PageSectionVariants;
   return (
@@ -54,6 +55,7 @@ const Header = ({
               variant="plain"
               icon={<SearchPlusIcon />}
               onClick={zoomIn}
+              isDisabled={!showZoomControls}
             >
               <SearchPlusIcon />
             </Button>
@@ -65,6 +67,7 @@ const Header = ({
               variant="plain"
               icon={<SearchMinusIcon />}
               onClick={zoomOut}
+              isDisabled={!showZoomControls}
             >
               <SearchMinusIcon />
             </Button>
@@ -76,6 +79,7 @@ const Header = ({
               variant="plain"
               icon={<ExpandArrowsAltIcon />}
               onClick={zoomFit}
+              isDisabled={!showZoomControls}
             >
               <ExpandArrowsAltIcon />
             </Button>
@@ -87,6 +91,7 @@ const Header = ({
               variant="plain"
               icon={<ExpandIcon />}
               onClick={resetZoom}
+              isDisabled={!showZoomControls}
             >
               <ExpandIcon />
             </Button>
