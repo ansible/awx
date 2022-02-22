@@ -8,6 +8,7 @@ import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { formatDateString } from 'util/dates';
 import { isJobRunning } from 'util/jobs';
+import getScheduleUrl from 'util/getScheduleUrl';
 import { ActionsTd, ActionItem, TdBreakWord } from '../PaginatedTable';
 import { LaunchButton, ReLaunchDropDown } from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
@@ -167,6 +168,17 @@ function JobListItem({
                   />
                 )}
               <LaunchedByDetail job={job} />
+              {job.launch_type === 'scheduled' && (
+                <Detail
+                  dataCy="job-schedule"
+                  label={t`Schedule`}
+                  value={
+                    <Link to={getScheduleUrl(job)}>
+                      {job.summary_fields.schedule.name}
+                    </Link>
+                  }
+                />
+              )}
               {job_template && (
                 <Detail
                   label={t`Job Template`}

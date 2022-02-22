@@ -14,11 +14,20 @@ const mockJob = {
       delete: true,
       start: true,
     },
+    schedule: {
+      name: 'mock schedule',
+      id: 999,
+    },
+    unified_job_template: {
+      unified_job_type: 'job',
+      id: 1,
+    },
   },
   created: '2019-08-08T19:24:05.344276Z',
   modified: '2019-08-08T19:24:18.162949Z',
   name: 'Demo Job Template',
   job_type: 'run',
+  launch_type: 'scheduled',
   started: '2019-08-08T19:24:18.329589Z',
   finished: '2019-08-08T19:24:50.119995Z',
   status: 'successful',
@@ -51,7 +60,11 @@ describe('<JobListItem />', () => {
 
   test('initially renders successfully', () => {
     expect(wrapper.find('JobListItem').length).toBe(1);
+  });
+
+  test('should display expected details', () => {
     assertDetail('Job Slice', '1/3');
+    assertDetail('Schedule', 'mock schedule');
   });
 
   test('launch button shown to users with launch capabilities', () => {
