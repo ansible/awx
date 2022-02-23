@@ -263,9 +263,14 @@ def _check_flag(user, flag, attributes, user_flags_settings):
         if user_flags_settings.get(is_value_key, None):
             # If so, check and see if the value of the attr matches the required value
             attribute_value = attributes.get(attr_setting, None)
+            attribute_matches = False
             if isinstance(attribute_value, (list, tuple)):
-                attribute_value = attribute_value[0]
-            if attribute_value == user_flags_settings.get(is_value_key):
+                if user_flags_settings.get(is_value_key) in attribute_value:
+                    attribute_matches = True
+            elif attribute_value == user_flags_settings.get(is_value_key):
+                attribute_matches = True
+
+            if attribute_matches:
                 logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
                 new_flag = True
             # if they don't match make sure that new_flag is false
