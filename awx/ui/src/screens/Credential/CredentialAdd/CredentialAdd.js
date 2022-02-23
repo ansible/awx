@@ -87,7 +87,7 @@ function CredentialAdd({ me }) {
       const credTypes = data.results;
       if (data.next && data.next.includes('page=2')) {
         let pageNo = 2;
-         /* eslint-disable no-await-in-loop */
+        /* eslint-disable no-await-in-loop */
         do {
           const {
             data: { results },
@@ -98,7 +98,7 @@ function CredentialAdd({ me }) {
           credTypes.push(...results);
           pageNo++;
         } while (data.count !== credTypes.length);
-      }  /* eslint-enable no-await-in-loop */
+      } /* eslint-enable no-await-in-loop */
 
       const creds = credTypes.reduce((credentialTypesMap, credentialType) => {
         credentialTypesMap[credentialType.id] = credentialType;
