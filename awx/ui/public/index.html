@@ -21,10 +21,13 @@
     <% if (process.env.NODE_ENV === 'production') { %>
       <script nonce="{{ csp_nonce }}" type="text/javascript">
         window.NONCE_ID = '{{ csp_nonce }}';
+        __webpack_nonce__ = window.NONCE_ID;
       </script>
+      <script src="../build/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+      <style nonce="{{ csp_nonce }}"></style>
       <meta
         http-equiv="Content-Security-Policy"
-        content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
+        content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'nonce-{{ csp_nonce }}'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
       />
       <link rel="shortcut icon" href="{% static 'media/favicon.ico' %}" />
     <% } else { %>
