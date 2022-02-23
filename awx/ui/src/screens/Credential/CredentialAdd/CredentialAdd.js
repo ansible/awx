@@ -86,14 +86,19 @@ function CredentialAdd({ me }) {
       const { data } = await CredentialTypesAPI.read({ page_size: 200 });
       const credTypes = data.results;
       if (data.next && data.next.includes('page=2')) {
-        const {
-          data: { results },
-        } = await CredentialTypesAPI.read({
-          page_size: 200,
-          page: 2,
-        });
-        credTypes.concat(results);
-      }
+        let pageNo = 2;
+         /* eslint-disable no-await-in-loop */
+        do {
+          const {
+            data: { results },
+          } = await CredentialTypesAPI.read({
+            page_size: 200,
+            page: pageNo,
+          });
+          credTypes.push(...results);
+          pageNo++;
+        } while (data.count !== credTypes.length);
+      }  /* eslint-enable no-await-in-loop */
 
       const creds = credTypes.reduce((credentialTypesMap, credentialType) => {
         credentialTypesMap[credentialType.id] = credentialType;
