@@ -82,6 +82,41 @@ const mockUsers = [
     external_account: null,
     auth: [],
   },
+  {
+    id: 10,
+    type: 'user',
+    url: '/api/v2/users/10/',
+    related: {
+      teams: '/api/v2/users/10/teams/',
+      organizations: '/api/v2/users/10/organizations/',
+      admin_of_organizations: '/api/v2/users/10/admin_of_organizations/',
+      projects: '/api/v2/users/10/projects/',
+      credentials: '/api/v2/users/10/credentials/',
+      roles: '/api/v2/users/10/roles/',
+      activity_stream: '/api/v2/users/10/activity_stream/',
+      access_list: '/api/v2/users/10/access_list/',
+      tokens: '/api/v2/users/10/tokens/',
+      authorized_tokens: '/api/v2/users/10/authorized_tokens/',
+      personal_tokens: '/api/v2/users/10/personal_tokens/',
+    },
+    summary_fields: {
+      user_capabilities: {
+        edit: true,
+        delete: false,
+      },
+    },
+    created: '2019-11-04T18:52:13.565525Z',
+    username: 'nobody',
+    first_name: '',
+    last_name: '',
+    email: 'systemauditor@ansible.com',
+    is_superuser: false,
+    is_system_auditor: true,
+    ldap_dn: '',
+    last_login: null,
+    external_account: null,
+    auth: [],
+  },
 ];
 
 afterEach(() => {
@@ -124,6 +159,15 @@ describe('UsersList with full permissions', () => {
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
   });
 
+  test('Last user should have no first name or last name and the row items should render properly', async () => {
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    expect(UsersAPI.read).toHaveBeenCalled();
+    expect(wrapper.find('Td[dataLabel="First Name"]').at(2)).toHaveLength(1);
+    expect(wrapper.find('Td[dataLabel="First Name"]').at(2).text()).toBe('');
+    expect(wrapper.find('Td[dataLabel="Last Name"]').at(2)).toHaveLength(1);
+    expect(wrapper.find('Td[dataLabel="Last Name"]').at(2).text()).toBe('');
+  });
+
   test('should check and uncheck the row item', async () => {
     expect(
       wrapper.find('.pf-c-table__check input').first().props().checked
@@ -147,7 +191,7 @@ describe('UsersList with full permissions', () => {
   });
 
   test('should check all row items when select all is checked', async () => {
-    expect(wrapper.find('.pf-c-table__check input')).toHaveLength(2);
+    expect(wrapper.find('.pf-c-table__check input')).toHaveLength(3);
     wrapper.find('.pf-c-table__check input').forEach((el) => {
       expect(el.props().checked).toBe(false);
     });
