@@ -67,7 +67,7 @@ function TemplateListItem({
       onCopy(response.data.id);
     }
     await fetchTemplates();
-  }, [fetchTemplates, template.id, template.name, template.type]);
+  }, [fetchTemplates, template.id, template.name, template.type, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);
