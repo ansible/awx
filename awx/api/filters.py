@@ -9,8 +9,9 @@ from functools import reduce
 # Django
 from django.core.exceptions import FieldError, ValidationError, FieldDoesNotExist
 from django.db import models
-from django.db.models import Q, CharField, IntegerField, BooleanField
+from django.db.models import Q, CharField, IntegerField, BooleanField, TextField, JSONField
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField, ForeignKey
+from django.db.models.functions import Cast
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.encoding import force_str
@@ -241,6 +242,8 @@ class FieldLookupBackend(BaseFilterBackend):
                     new_lookups.append('{}__{}__icontains'.format(new_lookup[:-8], rm_field.name))
             return value, new_lookups, needs_distinct
         else:
+            if isinstance(field, JSONField):
+                new_lookup = new_lookup.replace(field.name, f'{field.name}_as_txt')
             value = self.value_to_python_for_field(field, value)
         return value, new_lookup, needs_distinct
 
@@ -322,6 +325,9 @@ class FieldLookupBackend(BaseFilterBackend):
                     value, new_key, distinct = self.value_to_python(queryset.model, key, value)
                     if distinct:
                         needs_distinct = True
+                    if '_as_txt' in new_key:
+                        fname = next(item for item in new_key.split('__') if item.endswith('_as_txt'))
+                        queryset = queryset.annotate(**{fname: Cast(fname[:-7], output_field=TextField())})
                     if q_chain:
                         chain_filters.append((q_not, new_key, value))
                     elif q_or:
