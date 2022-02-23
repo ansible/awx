@@ -493,6 +493,8 @@ class TaskManager:
                 control_instance.jobs_running += 1
                 self.dependency_graph.add_job(task)
                 execution_instance = self.real_instances[control_instance.hostname]
+                task.log_lifecycle("controller_node_chosen")
+                task.log_lifecycle("execution_node_chosen")
                 self.start_task(task, self.controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
                 found_acceptable_queue = True
                 continue
