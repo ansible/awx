@@ -447,6 +447,16 @@ class TestSAMLUserFlags:
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
                 (True, True),
             ),
+            # In this test case we will validate that a single attribute (instead of a list) still works
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'test_id'},
+                (True, True),
+            ),
+            # This will be a negative test for a single atrribute
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk'},
+                (False, False),
+            ),
         ],
     )
     def test__check_flag(self, user_flags_settings, expected):
@@ -457,10 +467,10 @@ class TestSAMLUserFlags:
         attributes = {
             'email': ['noone@nowhere.com'],
             'last_name': ['Westcott'],
-            'is_superuser': ['true'],
+            'is_superuser': ['something', 'else', 'true'],
             'username': ['test_id'],
             'first_name': ['John'],
-            'Role': ['test-role-1'],
+            'Role': ['test-role-1', 'something', 'different'],
             'name_id': 'test_id',
         }
 
