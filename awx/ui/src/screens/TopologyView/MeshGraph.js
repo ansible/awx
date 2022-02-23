@@ -59,12 +59,11 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     const graph = data;
 
     const simulation = d3
-      .forceSimulation(graph.nodes)
+      .forceSimulation()
+      .nodes(graph.nodes)
       .force(
         'charge',
-        d3
-          .forceManyBody(MESH_FORCE_LAYOUT.defaultForceBody)
-          .strength(MESH_FORCE_LAYOUT.defaultForceStrength)
+        d3.forceManyBody().strength(MESH_FORCE_LAYOUT.defaultForceStrength)
       )
       .force(
         'link',
