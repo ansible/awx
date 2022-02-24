@@ -4,11 +4,11 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   EmptyState as PFEmptyState,
-  EmptyStateIcon,
+  Progress,
+  ProgressMeasureLocation,
   Text,
   TextContent,
   TextVariants,
-  Spinner,
 } from '@patternfly/react-core';
 
 import { TopologyIcon as PFTopologyIcon } from '@patternfly/react-icons';
@@ -23,10 +23,16 @@ const TopologyIcon = styled(PFTopologyIcon)`
   fill: #6a6e73;
 `;
 
-const ContentLoading = ({ className }) => (
+const ContentLoading = ({ className, progress }) => (
   <EmptyState variant="full" className={className}>
     <TopologyIcon />
-    <TextContent>
+    <Progress
+      value={progress}
+      measureLocation={ProgressMeasureLocation.inside}
+      aria-label={t`content-loading-in-progress`}
+      style={{ margin: '20px' }}
+    />
+    <TextContent style={{ margin: '20px' }}>
       <Text
         component={TextVariants.small}
         style={{ fontWeight: 'bold', color: 'black' }}
@@ -34,7 +40,6 @@ const ContentLoading = ({ className }) => (
         {t`Please wait until the topology view is populated...`}
       </Text>
     </TextContent>
-    <EmptyStateIcon variant="container" component={Spinner} />
   </EmptyState>
 );
 
