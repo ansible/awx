@@ -3,8 +3,9 @@ export const PARENTSELECTOR = '.mesh-svg';
 export const CHILDSELECTOR = '.mesh';
 export const DEFAULT_RADIUS = 16;
 export const MESH_FORCE_LAYOUT = {
-  defaultCollisionFactor: DEFAULT_RADIUS * 2 + 20,
-  defaultForceStrength: -30,
+  defaultCollisionFactor: DEFAULT_RADIUS * 2 + 30,
+  defaultForceStrength: -50,
+  defaultForceBody: 15,
   defaultForceX: 0,
   defaultForceY: 0,
 };
