@@ -1001,3 +1001,8 @@ DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
 # For example, to disable SELinux in containers for podman
 # DEFAULT_CONTAINER_RUN_OPTIONS = ['--security-opt', 'label=disable']
 DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
+
+# List of default exposed container volume mounts
+# This is useful when the EE container needs to access host/node information
+# like /etc/pki/ca-trust/source/anchors
+DEFAULT_CONTAINER_VOLUME_MOUNTS = ['/etc/pki/ca-trust:/etc/pki/ca-trust:O', '/usr/share/pki:/usr/share/pki:O']

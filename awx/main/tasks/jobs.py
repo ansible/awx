@@ -156,8 +156,12 @@ class BaseTask(object):
         if pull:
             params['container_options'].append(f'--pull={pull}')
 
+        params['container_volume_mounts'] = []
+        if settings.DEFAULT_CONTAINER_VOLUME_MOUNTS:
+            for this_path in settings.DEFAULT_CONTAINER_VOLUME_MOUNTS:
+                params['container_volume_mounts'].append(this_path)
+
         if settings.AWX_ISOLATION_SHOW_PATHS:
-            params['container_volume_mounts'] = []
             for this_path in settings.AWX_ISOLATION_SHOW_PATHS:
                 # Verify if a mount path and SELinux context has been passed
                 # Using z allows the dir to be mounted by multiple containers
