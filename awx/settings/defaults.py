@@ -1001,7 +1001,4 @@ DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
 # List of default exposed container volume mounts
 # This is useful when the EE container needs to access host/node information
 # like /etc/pki/ca-trust/source/anchors
-DEFAULT_CONTAINER_VOLUME_MOUNTS = [
-    '/etc/pki/ca-trust:/etc/pki/ca-trust:ro',
-    '/usr/share/pki:/usr/share/pki:ro',
-]
+DEFAULT_CONTAINER_VOLUME_MOUNTS = []
