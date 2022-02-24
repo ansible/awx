@@ -25,6 +25,7 @@ from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
 from awx.conf.fields import PrimaryKeyRelatedField
 from awx.conf.models import Setting
+from awx.conf.disablement import _conf_settings
 
 # FIXME: Gracefully handle when settings are accessed before the database is
 # ready (or during migrations).
@@ -399,6 +400,9 @@ class SettingsWrapper(UserSettingsHolder):
 
     @cachetools.cached(cache=cachetools.TTLCache(maxsize=2048, ttl=SETTING_MEMORY_TTL))
     def __getattr__(self, name):
+        if getattr(_conf_settings, 'db_settings_disabled', False):
+            # temporarily disabled database settings
+            return self._get_default(name)
         value = empty
         if name in self.all_supported_settings:
             with _ctit_db_wrapper(trans_safe=True):
