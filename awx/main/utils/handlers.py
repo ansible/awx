@@ -42,7 +42,7 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
             msg += exc.splitlines()[-1]
         except Exception:
             msg += exc
-        msg = '\n'.join([msg, record.msg, ''])
+        msg = '\n'.join([msg, str(record.msg), ''])  # str used in case of translated strings
         sys.stderr.write(msg)
 
     def emit(self, msg):
