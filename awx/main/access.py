@@ -465,7 +465,7 @@ class BaseAccess(object):
             if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment)):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment, InstanceGroup)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
@@ -573,6 +573,11 @@ class InstanceGroupAccess(BaseAccess):
         return self.user.is_superuser
 
     def can_change(self, obj, data):
+        return self.user.is_superuser
+
+    def can_delete(self, obj):
+        if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            return False
         return self.user.is_superuser
 
 

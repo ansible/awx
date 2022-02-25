@@ -105,7 +105,6 @@ from awx.api.permissions import (
     ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission,
     UserPermission,
-    InstanceGroupTowerPermission,
     VariableDataPermission,
     WorkflowApprovalPermission,
     IsSystemAdminOrAuditor,
@@ -480,7 +479,6 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     name = _("Instance Group Detail")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
-    permission_classes = (InstanceGroupTowerPermission,)
 
     def update_raw_data(self, data):
         if self.get_object().is_container_group:

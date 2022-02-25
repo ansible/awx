@@ -11,7 +11,7 @@ import FormField, {
   CheckboxField,
 } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
-import { combine, required, protectedResourceName } from 'util/validators';
+import { required } from 'util/validators';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
@@ -21,20 +21,10 @@ import {
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import { VariablesField } from 'components/CodeEditor';
 
-function ContainerGroupFormFields({
-  instanceGroup,
-  defaultControlPlane,
-  defaultExecution,
-}) {
+function ContainerGroupFormFields({ instanceGroup }) {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
-
-  const [, { initialValue }] = useField('name');
-
-  const isProtected =
-    initialValue === `${defaultControlPlane}` ||
-    initialValue === `${defaultExecution}`;
 
   const [overrideField] = useField('override');
 
@@ -50,21 +40,10 @@ function ContainerGroupFormFields({
     <>
       <FormField
         name="name"
-        helperText={
-          isProtected
-            ? t`This is a protected Instance Group. The name cannot be changed.`
-            : ''
-        }
         id="container-group-name"
         label={t`Name`}
         type="text"
-        validate={combine([
-          required(null),
-          protectedResourceName(
-            t`This is a protected name for Container Groups. Please use a different name.`,
-            [defaultControlPlane, defaultExecution]
-          ),
-        ])}
+        validate={required(null)}
         isRequired
       />
       <CredentialLookup

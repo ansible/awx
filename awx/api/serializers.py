@@ -4947,6 +4947,9 @@ class InstanceGroupSerializer(BaseSerializer):
         return res
 
     def validate_policy_instance_list(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if self.instance.policy_instance_list != value:
+                raise serializers.ValidationError(_('%s instance group policy_instance_list may not be changed.' % self.instance.name))
         for instance_name in value:
             if value.count(instance_name) > 1:
                 raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
@@ -4957,6 +4960,11 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_policy_instance_percentage(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if value != self.instance.policy_instance_percentage:
+                raise serializers.ValidationError(
+                    _('%s instance group policy_instance_percentage may not be changed from the initial value set by the installer.' % self.instance.name)
+                )
         if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
@@ -4972,6 +4980,13 @@ class InstanceGroupSerializer(BaseSerializer):
 
         if self.instance and self.instance.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and value != settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
             raise serializers.ValidationError(_('%s instance group name may not be changed.' % settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME))
+
+        return value
+
+    def validate_is_container_group(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if value != self.instance.is_container_group:
+                raise serializers.ValidationError(_('%s instance group is_container_group may not be changed.' % self.instance.name))
 
         return value
 
