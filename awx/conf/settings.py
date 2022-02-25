@@ -286,7 +286,7 @@ class SettingsWrapper(UserSettingsHolder):
                     self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.
-        if self.cache.get('_awx_conf_preload_expires', default=empty) is not empty:
+        if (self.cache.get('_awx_conf_preload_expires', default=empty) is not empty) or getattr(_conf_settings, 'db_settings_disabled', False):
             return
         # Initialize all database-configurable settings with a marker value so
         # to indicate from the cache that the setting is not configured without
@@ -325,6 +325,7 @@ class SettingsWrapper(UserSettingsHolder):
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name, validate=True):
+        self._preload_cache()
 
         field = self.registry.get_setting_field(name)
         if getattr(_conf_settings, 'db_settings_disabled', False):
@@ -334,7 +335,6 @@ class SettingsWrapper(UserSettingsHolder):
             except AttributeError:
                 return field.default
 
-        self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:
             cache_value = self.cache.get(cache_key, default=empty)
