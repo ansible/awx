@@ -325,6 +325,15 @@ class SettingsWrapper(UserSettingsHolder):
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name, validate=True):
+
+        field = self.registry.get_setting_field(name)
+        if getattr(_conf_settings, 'db_settings_disabled', False):
+            # temporarily disabled database settings
+            try:
+                return self._get_default(name)
+            except AttributeError:
+                return field.default
+
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:
@@ -341,7 +350,7 @@ class SettingsWrapper(UserSettingsHolder):
             value = {}
         else:
             value = cache_value
-        field = self.registry.get_setting_field(name)
+
         if value is empty:
             setting = None
             setting_id = None
@@ -400,9 +409,6 @@ class SettingsWrapper(UserSettingsHolder):
 
     @cachetools.cached(cache=cachetools.TTLCache(maxsize=2048, ttl=SETTING_MEMORY_TTL))
     def __getattr__(self, name):
-        if getattr(_conf_settings, 'db_settings_disabled', False):
-            # temporarily disabled database settings
-            return self._get_default(name)
         value = empty
         if name in self.all_supported_settings:
             with _ctit_db_wrapper(trans_safe=True):
