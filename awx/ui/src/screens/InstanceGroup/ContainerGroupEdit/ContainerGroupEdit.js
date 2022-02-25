@@ -9,11 +9,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ContainerGroupForm from '../shared/ContainerGroupForm';
 
-function ContainerGroupEdit({
-  instanceGroup,
-  defaultControlPlane,
-  defaultExecution,
-}) {
+function ContainerGroupEdit({ instanceGroup }) {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
   const detailsIUrl = `/instance_groups/container_group/${instanceGroup.id}/details`;
@@ -77,8 +73,6 @@ function ContainerGroupEdit({
   return (
     <CardBody>
       <ContainerGroupForm
-        defaultControlPlane={defaultControlPlane}
-        defaultExecution={defaultExecution}
         instanceGroup={instanceGroup}
         initialPodSpec={initialPodSpec}
         onSubmit={handleSubmit}

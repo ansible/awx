@@ -6,7 +6,7 @@ import { CardBody } from 'components/Card';
 import { InstanceGroupsAPI } from 'api';
 import InstanceGroupForm from '../shared/InstanceGroupForm';
 
-function InstanceGroupAdd({ defaultExecution, defaultControlPlane }) {
+function InstanceGroupAdd() {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
 
@@ -28,8 +28,6 @@ function InstanceGroupAdd({ defaultExecution, defaultControlPlane }) {
       <Card>
         <CardBody>
           <InstanceGroupForm
-            defaultControlPlane={defaultControlPlane}
-            defaultExecution={defaultExecution}
             onSubmit={handleSubmit}
             submitError={submitError}
             onCancel={handleCancel}

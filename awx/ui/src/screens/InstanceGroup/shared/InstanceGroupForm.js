@@ -1,49 +1,25 @@
 import React from 'react';
 import { func, shape } from 'prop-types';
-import { Formik, useField } from 'formik';
+import { Formik } from 'formik';
 
 import { t } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
 import FormField, { FormSubmitError } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
-import {
-  combine,
-  required,
-  protectedResourceName,
-  minMaxValue,
-} from 'util/validators';
+import { required, minMaxValue } from 'util/validators';
 import { FormColumnLayout } from 'components/FormLayout';
 
-function InstanceGroupFormFields({ defaultControlPlane, defaultExecution }) {
-  const [, { initialValue }] = useField('name');
-  const isProtected =
-    initialValue === `${defaultControlPlane}` ||
-    initialValue === `${defaultExecution}`;
-
-  const validators = combine([
-    required(null),
-    protectedResourceName(
-      t`This is a protected name for Instance Groups. Please use a different name.`,
-      [defaultControlPlane, defaultExecution]
-    ),
-  ]);
-
+function InstanceGroupFormFields() {
   return (
     <>
       <FormField
         name="name"
-        helperText={
-          isProtected
-            ? t`This is a protected Instance Group. The name cannot be changed.`
-            : ''
-        }
         id="instance-group-name"
         label={t`Name`}
         type="text"
-        validate={validators}
+        validate={required(null)}
         isRequired
-        isDisabled={isProtected}
       />
       <FormField
         id="instance-group-policy-instance-minimum"

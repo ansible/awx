@@ -15,7 +15,7 @@ import { jsonToYaml, isJsonString } from 'util/yaml';
 import { InstanceGroupsAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
-function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
+function ContainerGroupDetails({ instanceGroup }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -99,8 +99,7 @@ function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
               {t`Edit`}
             </Button>
           )}
-        {name !== defaultExecution &&
-          instanceGroup.summary_fields.user_capabilities &&
+        {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
               ouiaId="container-group-detail-delete-button"
