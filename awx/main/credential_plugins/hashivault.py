@@ -60,9 +60,7 @@ base_inputs = {
             'type': 'string',
             'multiline': False,
             'default': 'approle',
-            'help_text': _(
-                'The Authentication path to use if one isn\'t provided in the metadata when linking to an input field. Defaults to \'approle\''
-            ),
+            'help_text': _('The Authentication path to use if one isn\'t provided in the metadata when linking to an input field. Defaults to \'approle\''),
         },
     ],
     'metadata': [

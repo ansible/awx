@@ -14,12 +14,12 @@ def test_imported_azure_cloud_sdk_vars():
 
 def test_hashivault_approle_auth():
     kwargs = {
-      'role_id': 'the_role_id',
-      'secret_id': 'the_secret_id',
+        'role_id': 'the_role_id',
+        'secret_id': 'the_secret_id',
     }
     expected_res = {
-      'role_id': 'the_role_id',
-      'secret_id': 'the_secret_id',
+        'role_id': 'the_role_id',
+        'secret_id': 'the_secret_id',
     }
     res = hashivault.approle_auth(**kwargs)
     assert res == expected_res
@@ -27,7 +27,7 @@ def test_hashivault_approle_auth():
 
 def test_hashivault_kubernetes_auth():
     kwargs = {
-      'kubernetes_role': 'the_kubernetes_role',
+        'kubernetes_role': 'the_kubernetes_role',
     }
     expected_res = {
         'role': 'the_kubernetes_role',
@@ -42,7 +42,7 @@ def test_hashivault_kubernetes_auth():
 
 def test_hashivault_handle_auth_token():
     kwargs = {
-      'token': 'the_token',
+        'token': 'the_token',
     }
     token = hashivault.handle_auth(**kwargs)
     assert token == kwargs['token']
