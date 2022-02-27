@@ -46,6 +46,7 @@ class CompleteView(BaseRedirectView):
             current_user = smart_text(JSONRenderer().render(current_user.data))
             current_user = urllib.parse.quote('%s' % current_user, '')
             response.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
+            response.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
         return response
 
 

@@ -95,12 +95,12 @@ def as_user(v, username, password=None):
             # requests doesn't provide interface for retrieving
             # domain segregated cookies other than iterating.
             for cookie in connection.session.cookies:
-                if cookie.name == 'sessionid':
+                if cookie.name == connection.session_cookie_name:
                     session_id = cookie.value
                     domain = cookie.domain
                     break
             if session_id:
-                del connection.session.cookies['sessionid']
+                del connection.session.cookies[connection.session_cookie_name]
             if access_token:
                 kwargs = dict(token=access_token)
             else:
@@ -114,9 +114,9 @@ def as_user(v, username, password=None):
         if config.use_sessions:
             if access_token:
                 connection.session.auth = None
-            del connection.session.cookies['sessionid']
+            del connection.session.cookies[connection.session_cookie_name]
             if session_id:
-                connection.session.cookies.set('sessionid', session_id, domain=domain)
+                connection.session.cookies.set(connection.session_cookie_name, session_id, domain=domain)
         else:
             connection.session.auth = previous_auth
 
