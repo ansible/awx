@@ -252,6 +252,10 @@ SESSION_COOKIE_SECURE = True
 # Note: This setting may be overridden by database settings.
 SESSION_COOKIE_AGE = 1800
 
+# Name of the cookie that contains the session information.
+# Note: Changing this value may require changes to any clients.
+SESSION_COOKIE_NAME = 'awx_sessionid'
+
 # Maximum number of per-user valid, concurrent sessions.
 # -1 is unlimited
 # Note: This setting may be overridden by database settings.
