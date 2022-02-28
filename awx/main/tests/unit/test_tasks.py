@@ -587,7 +587,7 @@ class TestGenericRun:
         settings.PLAYBOOK_INTEGRITY_FEATURE_ENABLED = True
         job.project.playbook_integrity_latest_result = []
 
-        task = tasks.jobs.RunJob()
+        task = jobs.RunJob()
         task.instance = job
         task.update_model = mock.Mock(return_value=job)
         task.model.objects.get = mock.Mock(return_value=job)
