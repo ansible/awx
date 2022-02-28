@@ -142,6 +142,25 @@ describe('<JobListItem />', () => {
     expect(wrapper.find('Td[dataLabel="Type"]').length).toBe(1);
   });
 
+  test('should not show schedule detail in expanded view', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            job={{
+              ...mockJob,
+              summary_fields: {},
+            }}
+            showTypeColumn
+            isSelected
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('Detail[label="Schedule"] dt').length).toBe(1);
+  });
+
   test('should not display EE for canceled jobs', () => {
     wrapper = mountWithContexts(
       <table>
