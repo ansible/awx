@@ -305,13 +305,15 @@ symlink_collection:
 	mkdir -p ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)  # in case it does not exist
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
-build_collection:
+awx_collection_build: $(shell find awx_collection -type f)
 	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
 	  -e collection_version=$(COLLECTION_VERSION) \
 	  -e '{"awx_template_version":false}'
 	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
+
+build_collection: awx_collection_build
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
@@ -567,3 +569,6 @@ messages:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+
+print-%:
+	@echo $($*)
