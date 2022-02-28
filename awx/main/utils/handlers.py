@@ -10,6 +10,7 @@ from datetime import datetime
 # Django
 from django.conf import settings
 from django.utils.timezone import now
+from django.utils.encoding import force_str
 
 # AWX
 from awx.main.exceptions import PostRunError
@@ -42,7 +43,7 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
             msg += exc.splitlines()[-1]
         except Exception:
             msg += exc
-        msg = '\n'.join([msg, record.msg, ''])
+        msg = '\n'.join([msg, force_str(record.msg), ''])  # force_str used in case of translated strings
         sys.stderr.write(msg)
 
     def emit(self, msg):
