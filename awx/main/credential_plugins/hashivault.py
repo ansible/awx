@@ -52,7 +52,11 @@ base_inputs = {
             'label': _('Kubernetes role'),
             'type': 'string',
             'multiline': False,
-            'help_text': _('The Role for Kubernetes Authentication'),
+            'help_text': _(
+                'The Role for Kubernetes Authentication.'
+                ' This is the named role, configured in Vault server, for AWX pod auth policies.'
+                ' see https://www.vaultproject.io/docs/auth/kubernetes#configuration'
+            ),
         },
         {
             'id': 'default_auth_path',
