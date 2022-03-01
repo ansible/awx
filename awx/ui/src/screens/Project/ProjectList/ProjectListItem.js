@@ -39,6 +39,7 @@ function ProjectListItem({
   project,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchProjects,
   rowIndex,
@@ -53,11 +54,14 @@ function ProjectListItem({
   };
 
   const copyProject = useCallback(async () => {
-    await ProjectsAPI.copy(project.id, {
+    const response = await ProjectsAPI.copy(project.id, {
       name: `${project.name} @ ${timeOfDay()}`,
     });
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchProjects();
-  }, [project.id, project.name, fetchProjects]);
+  }, [project.id, project.name, fetchProjects, onCopy]);
 
   const generateLastJobTooltip = (job) => (
     <>

@@ -39,6 +39,7 @@ function TemplateListItem({
   template,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchTemplates,
   rowIndex,
@@ -52,17 +53,21 @@ function TemplateListItem({
   )}/html/upgrade-migration-guide/upgrade_to_ees.html`;
 
   const copyTemplate = useCallback(async () => {
+    let response;
     if (template.type === 'job_template') {
-      await JobTemplatesAPI.copy(template.id, {
+      response = await JobTemplatesAPI.copy(template.id, {
         name: `${template.name} @ ${timeOfDay()}`,
       });
     } else {
-      await WorkflowJobTemplatesAPI.copy(template.id, {
+      response = await WorkflowJobTemplatesAPI.copy(template.id, {
         name: `${template.name} @ ${timeOfDay()}`,
       });
     }
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchTemplates();
-  }, [fetchTemplates, template.id, template.name, template.type]);
+  }, [fetchTemplates, template.id, template.name, template.type, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);
