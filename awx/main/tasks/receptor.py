@@ -24,6 +24,8 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
+from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
+
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -477,6 +479,48 @@ class AWXReceptorJob:
         if self.task and self.task.instance.execution_environment:
             if self.task.instance.execution_environment.pull:
                 pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+
+        # This allows the user to also expose the isolated path list
+        # to EEs running in k8s/ocp environments, i.e. container groups.
+        # This assumes the node and SA supports hostPath volumes
+        # type is not passed due to backward compatibility,
+        # which means that no checks will be performed before mounting the hostPath volume.
+        if settings.AWX_MOUNT_ISOLATED_PATHS_ON_K8S and settings.AWX_ISOLATION_SHOW_PATHS:
+            spec_volume_mounts = []
+            spec_volumes = []
+
+            for idx, this_path in enumerate(settings.AWX_ISOLATION_SHOW_PATHS):
+                mount_option = None
+                if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
+                    src, dest, mount_option = this_path.split(':')
+                elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
+                    src, dest = this_path.split(':')
+                else:
+                    src = dest = this_path
+
+                # Enforce read-only volume if 'ro' has been explicitly passed
+                # We do this so we can use the same configuration for regular scenarios and k8s
+                # Since flags like ':O', ':z' or ':Z' are not valid in the k8s realm
+                # Example: /data:/data:ro
+                read_only = bool('ro' == mount_option)
+
+                # Since type is not being passed, k8s by default will not perform any checks if the
+                # hostPath volume exists on the k8s node itself.
+                spec_volumes.append({'name': f'volume-{idx}', 'hostPath': {'path': src}})
+
+                spec_volume_mounts.append({'name': f'volume-{idx}', 'mountPath': f'{dest}', 'readOnly': read_only})
+
+            # merge any volumes definition already present in the pod_spec
+            if 'volumes' in pod_spec['spec']:
+                pod_spec['spec']['volumes'] += spec_volumes
+            else:
+                pod_spec['spec']['volumes'] = spec_volumes
+
+            # merge any volumesMounts definition already present in the pod_spec
+            if 'volumeMounts' in pod_spec['spec']['containers'][0]:
+                pod_spec['spec']['containers'][0]['volumeMounts'] += spec_volume_mounts
+            else:
+                pod_spec['spec']['containers'][0]['volumeMounts'] = spec_volume_mounts
 
         if self.task and self.task.instance.is_container_group_task:
             # If EE credential is passed, create an imagePullSecret

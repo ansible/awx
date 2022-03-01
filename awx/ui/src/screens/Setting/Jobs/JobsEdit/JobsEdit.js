@@ -212,6 +212,10 @@ function JobsEdit() {
                   name="AWX_ISOLATION_SHOW_PATHS"
                   config={jobs.AWX_ISOLATION_SHOW_PATHS}
                 />
+                <BooleanField
+                  name="AWX_MOUNT_ISOLATED_PATHS_ON_K8S"
+                  config={jobs.AWX_MOUNT_ISOLATED_PATHS_ON_K8S}
+                />
                 <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
