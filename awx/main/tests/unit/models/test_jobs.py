@@ -90,7 +90,7 @@ def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker,
         assert host.ansible_facts == {"a": 1, "b": 2}
         assert host.ansible_facts_modified is None
     assert hosts[1].ansible_facts == ansible_facts_new
-    hosts[1].save.assert_called_once_with()
+    hosts[1].save.assert_called_once_with(update_fields=['ansible_facts', 'ansible_facts_modified'])
 
 
 def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpdir):
