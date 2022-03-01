@@ -376,13 +376,14 @@ def events_table_partitioned_modified(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
 
-@register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
+@register('unified_jobs_table', '1.3', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
 def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
                                  django_content_type.model,
                                  main_unifiedjob.organization_id,
                                  main_organization.name as organization_name,
+                                 main_executionenvironment.image as execution_environment_image,
                                  main_job.inventory_id,
                                  main_inventory.name as inventory_name,
                                  main_unifiedjob.created,
@@ -407,6 +408,7 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                  LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
                                  LEFT JOIN main_inventory ON main_job.inventory_id = main_inventory.id
                                  LEFT JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
+                                 LEFT JOIN main_executionenvironment ON main_executionenvironment.id = main_unifiedjob.execution_environment_id
                                  WHERE ((main_unifiedjob.created > '{0}' AND main_unifiedjob.created <= '{1}')
                                        OR (main_unifiedjob.finished > '{0}' AND main_unifiedjob.finished <= '{1}'))
                                        AND main_unifiedjob.launch_type != 'sync'
