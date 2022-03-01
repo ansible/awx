@@ -424,6 +424,7 @@ def unified_job_template_table(since, full_path, **kwargs):
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id,
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
                                  django_content_type.model,
+                                 main_executionenvironment.image as execution_environment_image,
                                  main_unifiedjobtemplate.created,
                                  main_unifiedjobtemplate.modified,
                                  main_unifiedjobtemplate.created_by_id,
@@ -436,7 +437,8 @@ def unified_job_template_table(since, full_path, **kwargs):
                                  main_unifiedjobtemplate.next_job_run,
                                  main_unifiedjobtemplate.next_schedule_id,
                                  main_unifiedjobtemplate.status
-                                 FROM main_unifiedjobtemplate, django_content_type
+                                 FROM main_unifiedjobtemplate
+                                 LEFT JOIN main_executionenvironment ON main_executionenvironment.id = main_unifiedjobtemplate.execution_environment_id, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
