@@ -38,7 +38,10 @@ def test_jobs_settings(get, put, patch, delete, admin):
     data.pop('AWX_ANSIBLE_CALLBACK_PLUGINS')
     put(url, user=admin, data=data, expect=200)
     response = get(url, user=admin, expect=200)
-    assert response.data['AWX_ISOLATION_SHOW_PATHS'] == []
+    assert response.data['AWX_ISOLATION_SHOW_PATHS'] == [
+        '/etc/pki/ca-trust:/etc/pki/ca-trust:O',
+        '/usr/share/pki:/usr/share/pki:O',
+    ]
     assert response.data['AWX_ANSIBLE_CALLBACK_PLUGINS'] == []
 
 
