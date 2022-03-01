@@ -5,6 +5,7 @@ import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from 'api';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import AlertModal from 'components/AlertModal';
 import DatalistToolbar from 'components/DataListToolbar';
 import ErrorDetail from 'components/ErrorDetail';
@@ -29,6 +30,7 @@ const QS_CONFIG = getQSConfig('inventory', {
 function InventoryList() {
   const location = useLocation();
   const match = useRouteMatch();
+  const { addToast, Toast, toastProps } = useToast();
 
   const {
     result: {
@@ -112,6 +114,18 @@ function InventoryList() {
     clearSelected();
   };
 
+  const handleCopy = useCallback(
+    (newInventoryId) => {
+      addToast({
+        id: newInventoryId,
+        title: t`Inventory copied successfully`,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+    },
+    [addToast]
+  );
+
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
 
@@ -149,130 +163,134 @@ function InventoryList() {
   );
 
   return (
-    <PageSection>
-      <Card>
-        <PaginatedTable
-          contentError={contentError}
-          hasContentLoading={hasContentLoading}
-          items={inventories}
-          itemCount={itemCount}
-          pluralizedItemName={t`Inventories`}
-          qsConfig={QS_CONFIG}
-          toolbarSearchColumns={[
-            {
-              name: t`Name`,
-              key: 'name__icontains',
-              isDefault: true,
-            },
-            {
-              name: t`Inventory Type`,
-              key: 'or__kind',
-              options: [
-                ['', t`Inventory`],
-                ['smart', t`Smart Inventory`],
-              ],
-            },
-            {
-              name: t`Organization`,
-              key: 'organization__name',
-            },
-            {
-              name: t`Description`,
-              key: 'description__icontains',
-            },
-            {
-              name: t`Created By (Username)`,
-              key: 'created_by__username__icontains',
-            },
-            {
-              name: t`Modified By (Username)`,
-              key: 'modified_by__username__icontains',
-            },
-          ]}
-          toolbarSortColumns={[
-            {
-              name: t`Name`,
-              key: 'name',
-            },
-          ]}
-          toolbarSearchableKeys={searchableKeys}
-          toolbarRelatedSearchableKeys={relatedSearchableKeys}
-          clearSelected={clearSelected}
-          headerRow={
-            <HeaderRow qsConfig={QS_CONFIG}>
-              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-              <HeaderCell>{t`Status`}</HeaderCell>
-              <HeaderCell>{t`Type`}</HeaderCell>
-              <HeaderCell>{t`Organization`}</HeaderCell>
-              <HeaderCell>{t`Actions`}</HeaderCell>
-            </HeaderRow>
-          }
-          renderToolbar={(props) => (
-            <DatalistToolbar
-              {...props}
-              isAllSelected={isAllSelected}
-              onSelectAll={selectAll}
-              qsConfig={QS_CONFIG}
-              additionalControls={[
-                ...(canAdd ? [addButton] : []),
-                <ToolbarDeleteButton
-                  key="delete"
-                  onDelete={handleInventoryDelete}
-                  itemsToDelete={selected}
-                  pluralizedItemName={t`Inventories`}
-                  deleteDetailsRequests={deleteDetailsRequests}
-                  deleteMessage={
-                    <Plural
-                      value={selected.length}
-                      one="This inventory is currently being used by some templates. Are you sure you want to delete it?"
-                      other="Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?"
-                    />
-                  }
-                  warningMessage={
-                    <Plural
-                      value={selected.length}
-                      one="The inventory will be in a pending status until the final delete is processed."
-                      other="The inventories will be in a pending status until the final delete is processed."
-                    />
-                  }
-                />,
-              ]}
-            />
-          )}
-          renderRow={(inventory, index) => (
-            <InventoryListItem
-              key={inventory.id}
-              value={inventory.name}
-              inventory={inventory}
-              rowIndex={index}
-              fetchInventories={fetchInventories}
-              detailUrl={
-                inventory.kind === 'smart'
-                  ? `${match.url}/smart_inventory/${inventory.id}/details`
-                  : `${match.url}/inventory/${inventory.id}/details`
-              }
-              onSelect={() => {
-                if (!inventory.pending_deletion) {
-                  handleSelect(inventory);
+    <>
+      <PageSection>
+        <Card>
+          <PaginatedTable
+            contentError={contentError}
+            hasContentLoading={hasContentLoading}
+            items={inventories}
+            itemCount={itemCount}
+            pluralizedItemName={t`Inventories`}
+            qsConfig={QS_CONFIG}
+            toolbarSearchColumns={[
+              {
+                name: t`Name`,
+                key: 'name__icontains',
+                isDefault: true,
+              },
+              {
+                name: t`Inventory Type`,
+                key: 'or__kind',
+                options: [
+                  ['', t`Inventory`],
+                  ['smart', t`Smart Inventory`],
+                ],
+              },
+              {
+                name: t`Organization`,
+                key: 'organization__name',
+              },
+              {
+                name: t`Description`,
+                key: 'description__icontains',
+              },
+              {
+                name: t`Created By (Username)`,
+                key: 'created_by__username__icontains',
+              },
+              {
+                name: t`Modified By (Username)`,
+                key: 'modified_by__username__icontains',
+              },
+            ]}
+            toolbarSortColumns={[
+              {
+                name: t`Name`,
+                key: 'name',
+              },
+            ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            clearSelected={clearSelected}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Status`}</HeaderCell>
+                <HeaderCell>{t`Type`}</HeaderCell>
+                <HeaderCell>{t`Organization`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
+              </HeaderRow>
+            }
+            renderToolbar={(props) => (
+              <DatalistToolbar
+                {...props}
+                isAllSelected={isAllSelected}
+                onSelectAll={selectAll}
+                qsConfig={QS_CONFIG}
+                additionalControls={[
+                  ...(canAdd ? [addButton] : []),
+                  <ToolbarDeleteButton
+                    key="delete"
+                    onDelete={handleInventoryDelete}
+                    itemsToDelete={selected}
+                    pluralizedItemName={t`Inventories`}
+                    deleteDetailsRequests={deleteDetailsRequests}
+                    deleteMessage={
+                      <Plural
+                        value={selected.length}
+                        one="This inventory is currently being used by some templates. Are you sure you want to delete it?"
+                        other="Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?"
+                      />
+                    }
+                    warningMessage={
+                      <Plural
+                        value={selected.length}
+                        one="The inventory will be in a pending status until the final delete is processed."
+                        other="The inventories will be in a pending status until the final delete is processed."
+                      />
+                    }
+                  />,
+                ]}
+              />
+            )}
+            renderRow={(inventory, index) => (
+              <InventoryListItem
+                key={inventory.id}
+                value={inventory.name}
+                inventory={inventory}
+                rowIndex={index}
+                fetchInventories={fetchInventories}
+                detailUrl={
+                  inventory.kind === 'smart'
+                    ? `${match.url}/smart_inventory/${inventory.id}/details`
+                    : `${match.url}/inventory/${inventory.id}/details`
                 }
-              }}
-              isSelected={selected.some((row) => row.id === inventory.id)}
-            />
-          )}
-          emptyStateControls={canAdd && addButton}
-        />
-      </Card>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        aria-label={t`Deletion Error`}
-        title={t`Error!`}
-        onClose={clearDeletionError}
-      >
-        {t`Failed to delete one or more inventories.`}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
-    </PageSection>
+                onSelect={() => {
+                  if (!inventory.pending_deletion) {
+                    handleSelect(inventory);
+                  }
+                }}
+                onCopy={handleCopy}
+                isSelected={selected.some((row) => row.id === inventory.id)}
+              />
+            )}
+            emptyStateControls={canAdd && addButton}
+          />
+        </Card>
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          aria-label={t`Deletion Error`}
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to delete one or more inventories.`}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      </PageSection>
+      <Toast {...toastProps} />
+    </>
   );
 }
 
