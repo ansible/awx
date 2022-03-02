@@ -823,11 +823,12 @@ class RunJob(BaseTask):
         return job.playbook
 
     def build_extra_vars_file(self, job, private_data_dir):
-        # Define special extra_vars for AWX, combine with job.extra_vars.
-        extra_vars = job.awx_meta_vars()
-
+        extra_vars = dict()
+        # load in JT extra vars
         if job.extra_vars_dict:
             extra_vars.update(json.loads(job.decrypted_extra_vars()))
+        # load in meta vars, overriding any variable set in JT extra vars
+        extra_vars.update(job.awx_meta_vars())
 
         # By default, all extra vars disallow Jinja2 template usage for
         # security reasons; top level key-values defined in JT.extra_vars, however,
@@ -1885,14 +1886,6 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
-        extra_vars = ad_hoc_command.awx_meta_vars()
-
-        if ad_hoc_command.extra_vars_dict:
-            redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
-            if removed_vars:
-                raise ValueError(_("{} are prohibited from use in ad hoc commands.").format(", ".join(removed_vars)))
-            extra_vars.update(ad_hoc_command.extra_vars_dict)
-
         if ad_hoc_command.limit:
             args.append(ad_hoc_command.limit)
         else:
@@ -1901,13 +1894,13 @@ class RunAdHocCommand(BaseTask):
         return args
 
     def build_extra_vars_file(self, ad_hoc_command, private_data_dir):
-        extra_vars = ad_hoc_command.awx_meta_vars()
-
+        extra_vars = dict()
         if ad_hoc_command.extra_vars_dict:
             redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
             if removed_vars:
                 raise ValueError(_("{} are prohibited from use in ad hoc commands.").format(", ".join(removed_vars)))
             extra_vars.update(ad_hoc_command.extra_vars_dict)
+        extra_vars.update(ad_hoc_command.awx_meta_vars())
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_module_name(self, ad_hoc_command):
