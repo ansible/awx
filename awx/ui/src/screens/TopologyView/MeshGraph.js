@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import debounce from 'util/debounce';
-// import { t } from '@lingui/macro';
 import * as d3 from 'd3';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
@@ -195,23 +194,20 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
       svg.call(zoom);
 
       function highlightSiblings(n) {
-        setTimeout(() => {
+        svg
+          .select(`circle.id-${n.id}`)
+          .attr('fill', DEFAULT_NODE_HIGHLIGHT_COLOR);
+        const immediate = links.filter(
+          (l) =>
+            n.hostname === l.source.hostname || n.hostname === l.target.hostname
+        );
+        immediate.forEach((s) => {
           svg
-            .select(`circle.id-${n.id}`)
-            .attr('fill', DEFAULT_NODE_HIGHLIGHT_COLOR);
-          const immediate = links.filter(
-            (l) =>
-              n.hostname === l.source.hostname ||
-              n.hostname === l.target.hostname
-          );
-          immediate.forEach((s) => {
-            svg
-              .selectAll(`.link-${s.index}`)
-              .transition()
-              .style('stroke', '#0066CC')
-              .style('stroke-width', '3px');
-          });
-        }, 0);
+            .selectAll(`.link-${s.index}`)
+            .transition()
+            .style('stroke', '#0066CC')
+            .style('stroke-width', '3px');
+        });
       }
 
       function deselectSiblings(n) {
