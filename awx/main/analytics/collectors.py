@@ -419,7 +419,7 @@ def unified_jobs_table(since, full_path, until, **kwargs):
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
-@register('unified_job_template_table', '1.0', format='csv', description=_('Data on job templates'))
+@register('unified_job_template_table', '1.1', format='csv', description=_('Data on job templates'))
 def unified_job_template_table(since, full_path, **kwargs):
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id,
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
