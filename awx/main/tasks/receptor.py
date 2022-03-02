@@ -286,19 +286,18 @@ class AWXReceptorJob:
         # reading.
         sockin, sockout = socket.socketpair()
 
+        # Prepare the submit_work kwargs before creating threads, because references to settings are not thread-safe
+        work_submit_kw = dict(worktype=self.work_type, params=self.receptor_params, signwork=self.sign_work)
+        if self.work_type == 'ansible-runner':
+            work_submit_kw['node'] = self.task.instance.execution_node
+            use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
+            work_submit_kw['tlsclient'] = get_tls_client(use_stream_tls)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             transmitter_future = executor.submit(self.transmit, sockin)
 
-            _kw = {}
-            if self.work_type == 'ansible-runner':
-                _kw['node'] = self.task.instance.execution_node
-                use_stream_tls = get_conn_type(_kw['node'], receptor_ctl).name == "STREAMTLS"
-                _kw['tlsclient'] = get_tls_client(use_stream_tls)
-
             # submit our work, passing in the right side of our socketpair for reading.
-            result = receptor_ctl.submit_work(
-                worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=self.sign_work, **_kw
-            )
+            result = receptor_ctl.submit_work(payload=sockout.makefile('rb'), **work_submit_kw)
 
             sockin.close()
             sockout.close()
