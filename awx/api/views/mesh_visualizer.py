@@ -19,7 +19,7 @@ class MeshVisualizer(APIView):
 
         data = {
             'nodes': InstanceNodeSerializer(Instance.objects.all(), many=True).data,
-            'links': InstanceLinkSerializer(InstanceLink.objects.all(), many=True).data,
+            'links': InstanceLinkSerializer(InstanceLink.objects.select_related('target', 'source'), many=True).data,
         }
 
         return Response(data)
