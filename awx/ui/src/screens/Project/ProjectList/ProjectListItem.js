@@ -172,6 +172,7 @@ function ProjectListItem({
             rowIndex,
             isSelected,
             onSelect,
+            disable: isJobRunning(job?.status),
           }}
           dataLabel={t`Selected`}
         />
