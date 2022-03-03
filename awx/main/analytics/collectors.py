@@ -337,6 +337,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           {tbl}.parent_uuid,
                           {tbl}.event,
                           task_action,
+                          resolved_action,
                           -- '-' operator listed here:
                           -- https://www.postgresql.org/docs/12/functions-json.html
                           -- note that operator is only supported by jsonb objects
@@ -356,7 +357,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           x.duration AS duration,
                           x.res->'warnings' AS warnings,
                           x.res->'deprecations' AS deprecations
-                          FROM {tbl}, jsonb_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
+                          FROM {tbl}, jsonb_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "resolved_action" text, "start" text, "end" text)
                           WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
         return query
 
@@ -366,12 +367,12 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
         return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::jsonb"), path=full_path)
 
 
-@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.4', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table_unpartitioned(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', 'created', **kwargs)
 
 
-@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.4', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table_partitioned_modified(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
