@@ -91,6 +91,10 @@
   args:
     creates: "{{ work_sign_public_keyfile }}"
 
+- name: Include LDAP tasks if enabled
+  include_tasks: ldap.yml
+  when: enable_ldap | bool
+
 - name: Render Docker-Compose
   template:
     src: docker-compose.yml.j2
