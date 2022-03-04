@@ -93,3 +93,5 @@ JOB_FOLDER_PREFIX = 'awx_%s_'
 # /HOST-DIR:/CONTAINER-DIR:OPTIONS
 CONTAINER_VOLUMES_MOUNT_TYPES = ['z', 'O', 'ro', 'rw']
 MAX_ISOLATED_PATH_COLON_DELIMITER = 2
+
+SURVEY_TYPE_MAPPING = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}

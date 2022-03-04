@@ -59,6 +59,38 @@ class SurveyVariableValidation:
         assert accepted == {}
         assert str(errors[0]) == "Value 5 for 'a' expected to be a string."
 
+    def test_job_template_survey_default_variable_validation(self, job_template_factory):
+        objects = job_template_factory(
+            "survey_variable_validation",
+            organization="org1",
+            inventory="inventory1",
+            credential="cred1",
+            persisted=False,
+        )
+        obj = objects.job_template
+        obj.survey_spec = {
+            "description": "",
+            "spec": [
+                {
+                    "required": True,
+                    "min": 0,
+                    "default": "2",
+                    "max": 1024,
+                    "question_description": "",
+                    "choices": "",
+                    "variable": "a",
+                    "question_name": "float_number",
+                    "type": "float",
+                }
+            ],
+            "name": "",
+        }
+
+        obj.survey_enabled = True
+        accepted, _, errors = obj.accept_or_ignore_variables({"a": 2})
+        assert accepted == {{"a": 2.0}}
+        assert not errors
+
 
 @pytest.fixture
 def job(mocker):

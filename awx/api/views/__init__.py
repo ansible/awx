@@ -113,7 +113,7 @@ from awx.api.permissions import (
 from awx.api import renderers
 from awx.api import serializers
 from awx.api.metadata import RoleMetadata
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, SURVEY_TYPE_MAPPING
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
     ControlledByScmMixin,
@@ -2468,8 +2468,6 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = serializers.EmptySerializer
 
-    ALLOWED_TYPES = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': float}
-
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         return Response(obj.display_survey_spec())
@@ -2540,17 +2538,17 @@ class JobTemplateSurveySpec(GenericAPIView):
             # Type-specific validation
             # validate question type <-> default type
             qtype = survey_item["type"]
-            if qtype not in JobTemplateSurveySpec.ALLOWED_TYPES:
+            if qtype not in SURVEY_TYPE_MAPPING:
                 return Response(
                     dict(
                         error=_("'{survey_item[type]}' in survey question {idx} is not one of '{allowed_types}' allowed question types.").format(
-                            allowed_types=', '.join(JobTemplateSurveySpec.ALLOWED_TYPES.keys()), **context
+                            allowed_types=', '.join(SURVEY_TYPE_MAPPING.keys()), **context
                         )
                     ),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if 'default' in survey_item and survey_item['default'] != '':
-                if not isinstance(survey_item['default'], JobTemplateSurveySpec.ALLOWED_TYPES[qtype]):
+                if not isinstance(survey_item['default'], SURVEY_TYPE_MAPPING[qtype]):
                     type_label = 'string'
                     if qtype in ['integer', 'float']:
                         type_label = qtype
