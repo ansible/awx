@@ -8,10 +8,16 @@ import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { formatDateString } from 'util/dates';
 import { isJobRunning } from 'util/jobs';
+import getScheduleUrl from 'util/getScheduleUrl';
 import { ActionsTd, ActionItem, TdBreakWord } from '../PaginatedTable';
 import { LaunchButton, ReLaunchDropDown } from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
-import { DetailList, Detail, LaunchedByDetail } from '../DetailList';
+import {
+  DetailList,
+  Detail,
+  DeletedDetail,
+  LaunchedByDetail,
+} from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
@@ -48,6 +54,7 @@ function JobListItem({
     job_template,
     labels,
     project,
+    schedule,
     source_workflow_job,
     workflow_job_template,
   } = job.summary_fields;
@@ -167,6 +174,18 @@ function JobListItem({
                   />
                 )}
               <LaunchedByDetail job={job} />
+              {job.launch_type === 'scheduled' &&
+                (schedule ? (
+                  <Detail
+                    dataCy="job-schedule"
+                    label={t`Schedule`}
+                    value={
+                      <Link to={getScheduleUrl(job)}>{schedule.name}</Link>
+                    }
+                  />
+                ) : (
+                  <DeletedDetail label={t`Schedule`} />
+                ))}
               {job_template && (
                 <Detail
                   label={t`Job Template`}

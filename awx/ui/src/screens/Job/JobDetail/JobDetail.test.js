@@ -189,6 +189,7 @@ describe('<JobDetail />', () => {
       <JobDetail
         job={{
           ...mockJobData,
+          type: 'workflow_job',
           launch_type: 'scheduled',
           summary_fields: {
             user_capabilities: {},
