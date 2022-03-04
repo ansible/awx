@@ -75,6 +75,8 @@
     "start-instrumented": "ESLINT_NO_DEV_ERRORS=true DEBUG=instrument-cra PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts -r @cypress/instrument-cra start",
     "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
     "test": "TZ='UTC' react-scripts test --watchAll=false",
+    "test-screens": "TZ='UTC' react-scripts test screens --watchAll=false",
+    "test-general": "TZ='UTC' react-scripts test --testPathIgnorePatterns='<rootDir>/src/screens/' --watchAll=false",
     "test-watch": "TZ='UTC' react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .js --ext .jsx .",
