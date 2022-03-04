@@ -26,6 +26,7 @@ function Credentials() {
       [`/credentials/${credential.id}/edit`]: t`Edit Details`,
       [`/credentials/${credential.id}/details`]: t`Details`,
       [`/credentials/${credential.id}/access`]: t`Access`,
+      [`/credentials/${credential.id}/job_templates`]: t`Job Templates`,
     });
   }, []);
 

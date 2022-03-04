@@ -19,10 +19,10 @@ import ContentLoading from 'components/ContentLoading';
 import NotificationList from 'components/NotificationList';
 import { ResourceAccessList } from 'components/ResourceAccessList';
 import { Schedules } from 'components/Schedule';
+import RelatedTemplateList from 'components/RelatedTemplateList';
 import { OrganizationsAPI, ProjectsAPI } from 'api';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
-import ProjectJobTemplatesList from './ProjectJobTemplatesList';
 
 function Project({ setBreadcrumb }) {
   const { me = {} } = useConfig();
@@ -102,6 +102,10 @@ function Project({ setBreadcrumb }) {
     },
     { name: t`Details`, link: `/projects/${id}/details` },
     { name: t`Access`, link: `/projects/${id}/access` },
+    {
+      name: t`Job Templates`,
+      link: `/projects/${id}/job_templates`,
+    },
   ];
 
   if (canSeeNotificationsTab) {
@@ -110,12 +114,6 @@ function Project({ setBreadcrumb }) {
       link: `/projects/${id}/notifications`,
     });
   }
-
-  tabsArray.push({
-    name: t`Job Templates`,
-    link: `/projects/${id}/job_templates`,
-  });
-
   if (project?.scm_type) {
     tabsArray.push({
       name: t`Schedules`,
@@ -176,7 +174,7 @@ function Project({ setBreadcrumb }) {
               </Route>
             )}
             <Route path="/projects/:id/job_templates">
-              <ProjectJobTemplatesList />
+              <RelatedTemplateList searchParams={{ project__id: project.id }} />
             </Route>
             {project?.scm_type && project.scm_type !== '' && (
               <Route path="/projects/:id/schedules">
