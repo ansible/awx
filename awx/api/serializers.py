@@ -4856,6 +4856,11 @@ class InstanceSerializer(BaseSerializer):
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
+    def validate(self, attrs):
+        if self.instance.node_type == 'hop':
+            raise serializers.ValidationError(_('Hop node instances may not be changed.'))
+        return attrs
+
 
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
