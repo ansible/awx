@@ -5,7 +5,7 @@ from django.utils.timezone import now
 
 
 def fill_ldap_group_type_params(apps, schema_editor):
-    group_type = settings.AUTH_LDAP_GROUP_TYPE
+    group_type = getattr(settings, 'AUTH_LDAP_GROUP_TYPE', None)
     Setting = apps.get_model('conf', 'Setting')
 
     group_type_params = {'name_attr': 'cn', 'member_attr': 'member'}

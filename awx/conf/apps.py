@@ -1,3 +1,5 @@
+import sys
+
 # Django
 from django.apps import AppConfig
 
@@ -12,6 +14,9 @@ class ConfConfig(AppConfig):
 
     def ready(self):
         self.module.autodiscover()
-        from .settings import SettingsWrapper
 
-        SettingsWrapper.initialize()
+        if not set(sys.argv) & {'migrate', 'check_migrations'}:
+
+            from .settings import SettingsWrapper
+
+            SettingsWrapper.initialize()
