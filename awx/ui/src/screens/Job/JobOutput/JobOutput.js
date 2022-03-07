@@ -30,6 +30,7 @@ import JobEventSkeleton from './JobEventSkeleton';
 import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
 import JobOutputSearch from './JobOutputSearch';
+import EmptyOutput from './EmptyOutput';
 import { HostStatusBar, OutputToolbar } from './shared';
 import getLineTextHtml from './getLineTextHtml';
 import connectJobSocket, { closeWebSocket } from './connectJobSocket';
@@ -220,6 +221,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       ...Object.values(siblingRequests.current || {}),
       ...Object.values(numEventsRequests.current || {}),
     ];
+    setHasContentLoading(true); // prevents "no content found" screen from flashing
     Promise.all(pendingRequests).then(() => {
       setRemoteRowCount(0);
       clearLoadedEvents();
@@ -509,6 +511,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               onToggleCollapsed={() => {
                 toggleNodeIsCollapsed(event.uuid, !node.isCollapsed);
               }}
+              jobStatus={jobStatus}
             />
           ) : (
             <JobEventSkeleton
@@ -715,36 +718,54 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             rowCount={totalNonCollapsedRows + wsEvents.length}
             minimumBatchSize={50}
           >
-            {({ onRowsRendered, registerChild }) => (
-              <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
-                {({ width, height }) => (
-                  <>
-                    {hasContentLoading ? (
-                      <div style={{ width }}>
-                        <ContentLoading />
-                      </div>
-                    ) : (
-                      <List
-                        ref={(ref) => {
-                          registerChild(ref);
-                          listRef.current = ref;
-                        }}
-                        deferredMeasurementCache={cache}
-                        height={height || 1}
-                        onRowsRendered={onRowsRendered}
-                        rowCount={totalNonCollapsedRows + wsEvents.length}
-                        rowHeight={cache.rowHeight}
-                        rowRenderer={rowRenderer}
-                        scrollToAlignment="start"
-                        width={width || 1}
-                        overscanRowCount={20}
-                        onScroll={handleScroll}
-                      />
-                    )}
-                  </>
-                )}
-              </AutoSizer>
-            )}
+            {({ onRowsRendered, registerChild }) => {
+              if (
+                !hasContentLoading &&
+                remoteRowCount + wsEvents.length === 0
+              ) {
+                return (
+                  <EmptyOutput
+                    hasQueryParams={location.search.length > 1}
+                    isJobRunning={isJobRunning(jobStatus)}
+                    onUnmount={() => {
+                      if (listRef.current?.recomputeRowHeights) {
+                        listRef.current.recomputeRowHeights();
+                      }
+                    }}
+                  />
+                );
+              }
+              return (
+                <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
+                  {({ width, height }) => (
+                    <>
+                      {hasContentLoading ? (
+                        <div style={{ width }}>
+                          <ContentLoading />
+                        </div>
+                      ) : (
+                        <List
+                          ref={(ref) => {
+                            registerChild(ref);
+                            listRef.current = ref;
+                          }}
+                          deferredMeasurementCache={cache}
+                          height={height || 1}
+                          onRowsRendered={onRowsRendered}
+                          rowCount={totalNonCollapsedRows + wsEvents.length}
+                          rowHeight={cache.rowHeight}
+                          rowRenderer={rowRenderer}
+                          scrollToAlignment="start"
+                          width={width || 1}
+                          overscanRowCount={20}
+                          onScroll={handleScroll}
+                        />
+                      )}
+                    </>
+                  )}
+                </AutoSizer>
+              );
+            }}
           </InfiniteLoader>
           <OutputFooter />
         </OutputWrapper>
