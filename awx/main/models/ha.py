@@ -233,8 +233,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def refresh_capacity_fields(self):
         """Update derived capacity fields from cpu and memory (no save)"""
-        self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
-        self.mem_capacity = get_mem_effective_capacity(self.memory)
+        if self.node_type == 'hop':
+            self.cpu_capacity = 0
+            self.mem_capacity = 0  # formula has a non-zero offset, so we make sure it is 0 for hop nodes
+        else:
+            self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
+            self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
     def save_health_data(self, version=None, cpu=0, memory=0, uuid=None, update_last_seen=False, errors=''):

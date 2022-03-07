@@ -364,6 +364,23 @@ def test_health_check_oh_no():
 
 
 @pytest.mark.django_db
+def test_errors_field_alone():
+    instance = Instance.objects.create(hostname='foo-1', enabled=True, node_type='hop')
+
+    instance.save_health_data(errors='Node went missing!')
+    assert instance.errors == 'Node went missing!'
+    assert instance.capacity == 0
+    assert instance.memory == instance.mem_capacity == 0
+    assert instance.cpu == instance.cpu_capacity == 0
+
+    instance.save_health_data(errors='')
+    assert not instance.errors
+    assert instance.capacity == 0
+    assert instance.memory == instance.mem_capacity == 0
+    assert instance.cpu == instance.cpu_capacity == 0
+
+
+@pytest.mark.django_db
 class TestInstanceGroupOrdering:
     def test_ad_hoc_instance_groups(self, instance_group_factory, inventory, default_instance_group):
         ad_hoc = AdHocCommand.objects.create(inventory=inventory)

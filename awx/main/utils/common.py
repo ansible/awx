@@ -797,9 +797,6 @@ def convert_mem_str_to_bytes(mem_str):
 
 
 def get_corrected_memory(memory):
-    if memory == 0:
-        return memory
-
     from django.conf import settings
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
