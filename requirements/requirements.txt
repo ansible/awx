@@ -224,6 +224,8 @@ oauthlib==3.1.0
     #   social-auth-core
 openshift==0.11.0
     # via -r /awx_devel/requirements/requirements.in
+packaging==21.3
+    # via ansible-runner
 pbr==5.6.0
     # via -r /awx_devel/requirements/requirements.in
 pexpect==4.7.0
@@ -265,7 +267,9 @@ pyjwt==1.7.1
 pyopenssl==19.1.0
     # via twisted
 pyparsing==2.4.6
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   packaging
 pyrad==2.3
     # via django-radius
 pyrsistent==0.15.7
