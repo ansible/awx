@@ -91,3 +91,8 @@ except IOError:
 DATABASES.setdefault('default', dict()).setdefault('OPTIONS', dict()).setdefault(
     'application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]
 )  # noqa
+
+AWX_ISOLATION_SHOW_PATHS = [
+    '/etc/pki/ca-trust:/etc/pki/ca-trust:O',
+    '/usr/share/pki:/usr/share/pki:O',
+]
