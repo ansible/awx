@@ -589,10 +589,7 @@ GALAXY_IGNORE_CERTS = False
 
 # Additional paths to show for jobs using process isolation.
 # Note: This setting may be overridden by database settings.
-AWX_ISOLATION_SHOW_PATHS = [
-    '/etc/pki/ca-trust:/etc/pki/ca-trust:O',
-    '/usr/share/pki:/usr/share/pki:O',
-]
+AWX_ISOLATION_SHOW_PATHS = []
 
 # The directory in which the service will create new temporary directories for job
 # execution and isolation (such as credential files and custom
