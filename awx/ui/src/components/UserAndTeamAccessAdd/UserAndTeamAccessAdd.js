@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { t } from '@lingui/macro';
-import { useParams } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import useRequest from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
@@ -27,6 +27,11 @@ function UserAndTeamAccessAdd({
   const [selectedResourceType, setSelectedResourceType] = useState(null);
   const [stepIdReached, setStepIdReached] = useState(1);
   const { id: userId } = useParams();
+  const teamsRouteMatch = useRouteMatch({
+    path: '/teams/:id/roles',
+    exact: true,
+  });
+
   const { selected: resourcesSelected, handleSelect: handleResourceSelect } =
     useSelected([]);
 
@@ -53,6 +58,19 @@ function UserAndTeamAccessAdd({
     }, [onFetchData, rolesSelected, apiModel, userId, resourcesSelected]),
     {}
   );
+
+  // Object roles can be user only, so we remove them when
+  // showing role choices for team access
+  const selectableRoles = {
+    ...resourcesSelected[0]?.summary_fields?.object_roles,
+  };
+  if (teamsRouteMatch && resourcesSelected[0]?.type === 'organization') {
+    Object.keys(selectableRoles).forEach((key) => {
+      if (selectableRoles[key].user_only) {
+        delete selectableRoles[key];
+      }
+    });
+  }
 
   const steps = [
     {
@@ -101,7 +119,7 @@ function UserAndTeamAccessAdd({
       component: resourcesSelected?.length > 0 && (
         <SelectRoleStep
           onRolesClick={handleRoleSelect}
-          roles={resourcesSelected[0].summary_fields.object_roles}
+          roles={selectableRoles}
           selectedListKey={
             selectedResourceType === 'users' ? 'username' : 'name'
           }
