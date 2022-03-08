@@ -47,6 +47,15 @@ function SubscriptionModal({
         subscriptionCreds.username,
         subscriptionCreds.password
       );
+
+      // Ensure unique ids for each subscription
+      // because it is possible to have multiple
+      // subscriptions with the same pool_id
+      let repeatId = 1;
+      data.forEach((i) => {
+        i.id = repeatId++;
+      });
+
       return data;
     }, []), // eslint-disable-line react-hooks/exhaustive-deps
     []
@@ -64,17 +73,9 @@ function SubscriptionModal({
     fetchSubscriptions();
   }, [fetchSubscriptions]);
 
-  const handleSelect = (item) => {
-    if (selected.some((s) => s.pool_id === item.pool_id)) {
-      setSelected(selected.filter((s) => s.pool_id !== item.pool_id));
-    } else {
-      setSelected(selected.concat(item));
-    }
-  };
-
   useEffect(() => {
-    if (selectedSubscription?.pool_id) {
-      handleSelect({ pool_id: selectedSubscription.pool_id });
+    if (selectedSubscription?.id) {
+      setSelected([selectedSubscription]);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -150,19 +151,18 @@ function SubscriptionModal({
           <Tbody>
             {subscriptions.map((subscription) => (
               <Tr
-                key={`row-${subscription.pool_id}`}
-                id={subscription.pool_id}
+                key={`row-${subscription.id}`}
+                id={`row-${subscription.id}`}
                 ouiaId={`subscription-row-${subscription.pool_id}`}
               >
                 <Td
-                  key={`row-${subscription.pool_id}`}
                   select={{
-                    onSelect: () => handleSelect(subscription),
+                    onSelect: () => setSelected([subscription]),
                     isSelected: selected.some(
-                      (row) => row.pool_id === subscription.pool_id
+                      (row) => row.id === subscription.id
                     ),
                     variant: 'radio',
-                    rowIndex: `row-${subscription.pool_id}`,
+                    rowIndex: `row-${subscription.id}`,
                   }}
                 />
                 <Td dataLabel={t`Trial`}>{subscription.subscription_name}</Td>
