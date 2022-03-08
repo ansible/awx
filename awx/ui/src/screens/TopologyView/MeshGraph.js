@@ -14,8 +14,6 @@ import {
   redirectToDetailsPage,
   getHeight,
   getWidth,
-  // generateRandomNodes,
-  // getRandomInt,
 } from './utils/helpers';
 import webWorker from '../../util/webWorker';
 import {
@@ -34,14 +32,12 @@ const Loader = styled(ContentLoading)`
   background: white;
 `;
 function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
-  // function MeshGraph({ showLegend, zoom }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeDetail, setNodeDetail] = useState(null);
   const [simulationProgress, setSimulationProgress] = useState(null);
   const history = useHistory();
 
-  // const data = generateRandomNodes(getRandomInt(4, 50));
   const draw = () => {
     setShowZoomControls(false);
     const width = getWidth(SELECTOR);
