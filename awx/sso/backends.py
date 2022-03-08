@@ -199,7 +199,7 @@ class RADIUSBackend(BaseRADIUSBackend):
         if not user.has_usable_password():
             return user
 
-    def get_django_user(self, username, password=None):
+    def get_django_user(self, username, password=None, groups=[], is_staff=False, is_superuser=False):
         return _get_or_set_enterprise_user(force_str(username), force_str(password), 'radius')
 
 
