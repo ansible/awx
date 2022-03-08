@@ -17,7 +17,7 @@ import {
   // generateRandomNodes,
   // getRandomInt,
 } from './utils/helpers';
-import webWorker from './utils/webWorker';
+import webWorker from '../../util/webWorker';
 import {
   DEFAULT_RADIUS,
   DEFAULT_NODE_COLOR,

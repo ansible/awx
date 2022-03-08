@@ -1,5 +1,5 @@
 import getRouteConfig from './routeConfig';
-jest.mock('screens/TopologyView/utils/WebWorker', () => jest.fn());
+jest.mock('util/webWorker', () => jest.fn());
 
 const userProfile = {
   isSuperUser: false,
