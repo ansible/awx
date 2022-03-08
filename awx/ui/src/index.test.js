@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 
 jest.mock('react-dom', () => ({ render: jest.fn() }));
+jest.mock('screens/TopologyView/utils/WebWorker', () => jest.fn());
 
 describe('index.jsx', () => {
   it('renders ok', () => {

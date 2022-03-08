@@ -17,6 +17,7 @@ import {
   // generateRandomNodes,
   // getRandomInt,
 } from './utils/helpers';
+import webWorker from './utils/webWorker';
 import {
   DEFAULT_RADIUS,
   DEFAULT_NODE_COLOR,
@@ -59,10 +60,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     const graph = data;
 
     /* WEB WORKER */
-    const worker = new Worker(
-      new URL('./utils/workers/simulationWorker.js', import.meta.url)
-    );
-
+    const worker = webWorker();
     worker.postMessage({
       nodes: graph.nodes,
       links: graph.links,
