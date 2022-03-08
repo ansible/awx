@@ -558,6 +558,10 @@ ANSIBLE_INVENTORY_UNPARSED_FAILED = True
 # Additional environment variables to be passed to the ansible subprocesses
 AWX_TASK_ENV = {}
 
+# Additional environment variables to apply when running ansible-galaxy commands
+# to fetch Ansible content - roles and collections
+GALAXY_TASK_ENV = {'ANSIBLE_FORCE_COLOR': 'false', 'GIT_SSH_COMMAND': "ssh -o StrictHostKeyChecking=no"}
+
 # Rebuild Host Smart Inventory memberships.
 AWX_REBUILD_SMART_MEMBERSHIP = False
 

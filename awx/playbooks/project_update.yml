@@ -15,6 +15,7 @@
 # scm_track_submodules: true/false
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
+# galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 
@@ -154,18 +155,27 @@
   gather_facts: false
   connection: local
   name: Install content with ansible-galaxy command if necessary
+  vars:
+    galaxy_task_env:  # configure in settings
+    additional_collections_env:
+      # These environment variables are used for installing collections, in addition to galaxy_task_env
+      # setting the collections paths silences warnings
+      ANSIBLE_COLLECTIONS_PATHS: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections"
+      # Put the local tmp directory in same volume as collection destination
+      # otherwise, files cannot be moved accross volumes and will cause error
+      ANSIBLE_LOCAL_TEMP: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/tmp"
   tasks:
 
     - name: Check content sync settings
-      debug:
-        msg: "Collection and role syncing disabled. Check the AWX_ROLES_ENABLED and AWX_COLLECTIONS_ENABLED settings and Galaxy credentials on the project's organization."
-      when: not roles_enabled|bool and not collections_enabled|bool
-      tags:
-        - install_roles
-        - install_collections
+      block:
+      - debug:
+          msg: >
+            Collection and role syncing disabled. Check the AWX_ROLES_ENABLED and
+            AWX_COLLECTIONS_ENABLED settings and Galaxy credentials on the project's organization.
 
-    - name:
-      meta: end_play
+      - name:
+        meta: end_play
+
       when: not roles_enabled|bool and not collections_enabled|bool
       tags:
         - install_roles
@@ -184,9 +194,7 @@
             - "{{project_path|quote}}/roles/requirements.yaml"
             - "{{project_path|quote}}/roles/requirements.yml"
           changed_when: "'was installed successfully' in galaxy_result.stdout"
-          environment:
-            ANSIBLE_FORCE_COLOR: false
-            GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+          environment: "{{ galaxy_task_env }}"
 
       when: roles_enabled|bool
       tags:
@@ -207,13 +215,7 @@
             - "{{project_path|quote}}/requirements.yaml"
             - "{{project_path|quote}}/requirements.yml"
           changed_when: "'Installing ' in galaxy_collection_result.stdout"
-          environment:
-            ANSIBLE_FORCE_COLOR: false
-            ANSIBLE_COLLECTIONS_PATHS: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections"
-            GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
-            # Put the local tmp directory in same volume as collection destination
-            # otherwise, files cannot be moved accross volumes and will cause error
-            ANSIBLE_LOCAL_TEMP: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/tmp"
+          environment: "{{ additional_collections_env | combine(galaxy_task_env) }}"
 
       when:
         - "ansible_version.full is version_compare('2.9', '>=')"
