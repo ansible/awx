@@ -133,6 +133,8 @@ class ControllerModule(AnsibleModule):
         # Try to parse the hostname as a url
         try:
             self.url = urlparse(self.host)
+            # Store URL prefix for later use in build_url
+            self.url_prefix = self.url.path
         except Exception as e:
             self.fail_json(msg="Unable to parse controller_host as a URL ({1}): {0}".format(self.host, e))
 
@@ -147,8 +149,9 @@ class ControllerModule(AnsibleModule):
         # Make sure we start with /api/vX
         if not endpoint.startswith("/"):
             endpoint = "/{0}".format(endpoint)
-        if not endpoint.startswith("/api/"):
-            endpoint = "/api/v2{0}".format(endpoint)
+        prefix = self.url_prefix.rstrip("/")
+        if not endpoint.startswith(prefix + "/api/"):
+            endpoint = prefix + "/api/v2{0}".format(endpoint)
         if not endpoint.endswith('/') and '?' not in endpoint:
             endpoint = "{0}/".format(endpoint)
 
@@ -589,8 +592,10 @@ class ControllerAPIModule(ControllerModule):
                 "application": None,
                 "scope": "write",
             }
+            # Preserve URL prefix
+            endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/'
             # Post to the tokens endpoint with baisc auth to try and get a token
-            api_token_url = (self.url._replace(path='/api/v2/tokens/')).geturl()
+            api_token_url = (self.url._replace(path=endpoint)).geturl()
 
             try:
                 response = self.session.open(
@@ -954,9 +959,10 @@ class ControllerAPIModule(ControllerModule):
         if self.authenticated and self.oauth_token_id:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
+            endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/{0}/'.format(self.oauth_token_id)
             api_token_url = (
                 self.url._replace(
-                    path='/api/v2/tokens/{0}/'.format(self.oauth_token_id), query=None  # in error cases, fail_json exists before exception handling
+                    path=endpoint, query=None  # in error cases, fail_json exists before exception handling
                 )
             ).geturl()
 
