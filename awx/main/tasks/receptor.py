@@ -326,7 +326,7 @@ class AWXReceptorJob:
         # Artifacts are an output, but sometimes they are an input as well
         # this is the case with fact cache, where clearing facts deletes a file, and this must be captured
         artifact_dir = os.path.join(self.runner_params['private_data_dir'], 'artifacts')
-        if os.path.exists(artifact_dir):
+        if self.work_type != 'local' and os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
