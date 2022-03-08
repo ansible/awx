@@ -168,13 +168,12 @@
 
     - name: Check content sync settings
       block:
-      - debug:
-          msg: >
-            Collection and role syncing disabled. Check the AWX_ROLES_ENABLED and
-            AWX_COLLECTIONS_ENABLED settings and Galaxy credentials on the project's organization.
+        - debug:
+            msg: >
+              Collection and role syncing disabled. Check the AWX_ROLES_ENABLED and
+              AWX_COLLECTIONS_ENABLED settings and Galaxy credentials on the project's organization.
 
-      - name:
-        meta: end_play
+        - meta: end_play
 
       when: not roles_enabled|bool and not collections_enabled|bool
       tags:
