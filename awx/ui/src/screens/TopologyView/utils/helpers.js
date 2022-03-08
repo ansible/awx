@@ -32,7 +32,7 @@ export function renderNodeIcon(selectedNode) {
   return false;
 }
 
-export async function redirectToDetailsPage(selectedNode, history) {
+export function redirectToDetailsPage(selectedNode, history) {
   const { id: nodeId } = selectedNode;
   const constructedURL = `/instances/${nodeId}/details`;
   history.push(constructedURL);

@@ -43,5 +43,4 @@ const ContentLoading = ({ className, progress }) => (
   </EmptyState>
 );
 
-export { ContentLoading as _ContentLoading };
 export default ContentLoading;
