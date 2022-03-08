@@ -7,6 +7,7 @@ import { mountWithContexts } from '../testUtils/enzymeHelpers';
 import App, { ProtectedRoute } from './App';
 
 jest.mock('./api');
+jest.mock('screens/TopologyView/utils/WebWorker', () => jest.fn());
 
 describe('<App />', () => {
   beforeEach(() => {
