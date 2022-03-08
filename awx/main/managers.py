@@ -6,6 +6,7 @@ import logging
 import os
 from django.db import models
 from django.conf import settings
+from django.db.models.functions import Lower
 
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
@@ -35,7 +36,7 @@ class HostManager(models.Manager):
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(inventory_sources__source='controller').values('name').distinct().count()
+        return self.order_by().exclude(inventory_sources__source='controller').values(name_lower=Lower('name')).distinct().count()
 
     def org_active_count(self, org_id):
         """Return count of active, unique hosts used by an organization.
