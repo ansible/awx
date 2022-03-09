@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import {
+  DeletedDetail,
   DetailList,
   Detail,
   UserDateDetail,
@@ -158,7 +159,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           value={jobTypes[job.type]}
         />
         <LaunchedByDetail dataCy="job-launched-by" job={job} />
-        {inventory && (
+        {inventory ? (
           <Detail
             dataCy="job-inventory"
             label={t`Inventory`}
@@ -174,6 +175,8 @@ function JobDetail({ job, inventorySourceLabels }) {
               </Link>
             }
           />
+        ) : (
+          <DeletedDetail label={t`Inventory`} />
         )}
         {inventory_source && (
           <>
@@ -215,7 +218,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             }
           />
         )}
-        {project && (
+        {project ? (
           <>
             <Detail
               dataCy="job-project"
@@ -236,6 +239,8 @@ function JobDetail({ job, inventorySourceLabels }) {
               }
             />
           </>
+        ) : (
+          <DeletedDetail label={t`Project`} />
         )}
         {scmBranch && (
           <Detail
