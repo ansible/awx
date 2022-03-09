@@ -119,7 +119,7 @@ class TestActiveCount:
         assert Host.objects.active_count() == 1
         inv1.hosts.create(name='host2')
         assert Host.objects.active_count() == 2
-        
+
 
 @pytest.mark.django_db
 class TestSCMUpdateFeatures:
