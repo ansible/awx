@@ -457,7 +457,7 @@ def inspect_execution_nodes(instance_list):
 
             # Only execution nodes should be dealt with by execution_node_health_check
             if instance.node_type == 'hop':
-                logger.warn(f'Hop node {hostname}, has rejoined the receptor mesh')
+                logger.warning(f'Hop node {hostname}, has rejoined the receptor mesh')
                 instance.save_health_data(errors='')
                 continue
 
