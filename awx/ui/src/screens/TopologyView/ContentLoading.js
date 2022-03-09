@@ -24,7 +24,7 @@ const TopologyIcon = styled(PFTopologyIcon)`
 `;
 
 const ContentLoading = ({ className, progress }) => (
-  <EmptyState variant="full" className={className}>
+  <EmptyState variant="full" className={className} data-cy={className}>
     <TopologyIcon />
     <Progress
       value={progress}
