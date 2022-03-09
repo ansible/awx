@@ -436,7 +436,6 @@ def inspect_execution_nodes(instance_list):
         workers = mesh_status['Advertisements']
         for ad in workers:
             hostname = ad['NodeID']
-            changed = False
 
             if hostname in node_lookup:
                 instance = node_lookup[hostname]
@@ -458,11 +457,11 @@ def inspect_execution_nodes(instance_list):
 
             # Only execution nodes should be dealt with by execution_node_health_check
             if instance.node_type == 'hop':
+                logger.warning(f'Hop node {hostname}, has rejoined the receptor mesh')
+                instance.save_health_data(errors='')
                 continue
 
-            if changed:
-                execution_node_health_check.apply_async([hostname])
-            elif was_lost:
+            if was_lost:
                 # if the instance *was* lost, but has appeared again,
                 # attempt to re-establish the initial capacity and version
                 # check
@@ -534,20 +533,14 @@ def cluster_node_heartbeat():
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
         try:
-            # Capacity could already be 0 because:
-            #  * It's a new node and it never had a heartbeat
-            #  * It was set to 0 by another tower node running this method
-            #  * It was set to 0 by this node, but auto deprovisioning is off
-            #
-            # If auto deprovisioning is on, don't bother setting the capacity to 0
-            # since we will delete the node anyway.
-            if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
-                other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
-            elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            if settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()
                 logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
+            elif other_inst.capacity != 0 or (not other_inst.errors):
+                other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
+                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
+
         except DatabaseError as e:
             if 'did not affect any rows' in str(e):
                 logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
