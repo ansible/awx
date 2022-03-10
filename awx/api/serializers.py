@@ -865,7 +865,7 @@ class UnifiedJobSerializer(BaseSerializer):
         if 'elapsed' in ret:
             if obj and obj.pk and obj.started and not obj.finished:
                 td = now() - obj.started
-                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
+                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
             ret['elapsed'] = float(ret['elapsed'])
         # Because this string is saved in the db in the source language,
         # it must be marked for translation after it is pulled from the db, not when set
@@ -1261,6 +1261,7 @@ class OAuth2ApplicationSerializer(BaseSerializer):
             dict(
                 tokens=self.reverse('api:o_auth2_application_token_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}),
+                organization=self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk}),
             )
         )
         return res
