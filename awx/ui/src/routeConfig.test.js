@@ -1,4 +1,5 @@
 import getRouteConfig from './routeConfig';
+jest.mock('util/webWorker', () => jest.fn());
 
 const userProfile = {
   isSuperUser: false,
@@ -43,6 +44,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
       '/settings',
     ]);
   });
@@ -71,6 +73,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
       '/settings',
     ]);
   });
@@ -98,6 +101,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 
@@ -233,6 +237,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 
@@ -263,6 +268,7 @@ describe('getRouteConfig', () => {
       '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 });
