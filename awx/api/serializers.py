@@ -1263,6 +1263,12 @@ class OAuth2ApplicationSerializer(BaseSerializer):
                 activity_stream=self.reverse('api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.organization_id:
+            res.update(
+                dict(
+                    organization=self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id}),
+                )
+            )
         return res
 
     def get_modified(self, obj):
