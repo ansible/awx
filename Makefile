@@ -13,6 +13,8 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
 # If set to true docker-compose will also start a keycloak instance
 KEYCLOAK ?= false
+# If set to true docker-compose will also start an ldap instance
+LDAP ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -462,7 +464,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
-	    -e enable_keycloak=$(KEYCLOAK)
+	    -e enable_keycloak=$(KEYCLOAK) \
+	    -e enable_ldap=$(LDAP)
 
 
 docker-compose: awx/projects docker-compose-sources
