@@ -25,6 +25,7 @@ EXPORTABLE_RESOURCES = [
     'job_templates',
     'workflow_job_templates',
     'execution_environments',
+    'applications',
 ]
 
 
