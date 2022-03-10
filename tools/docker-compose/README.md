@@ -244,6 +244,7 @@ $ make docker-compose
 - [Start a Cluster](#start-a-cluster)
 - [Start with Minikube](#start-with-minikube)
 - [Keycloak Integration](#keycloak-integration)
+- [OpenLDAP Integration](#openldap-integration)
 
 ### Start a Shell
 
@@ -390,3 +391,39 @@ Once the playbook is done running SAML should now be setup in your development e
 3. awx_auditor:audit123
 
 The first account is a normal user. The second account has the attribute is_superuser set in Keycloak so will be a super user in AWX. The third account has the is_system_auditor attribute in Keycloak so it will be a system auditor in AWX. To log in with one of these Keycloak users go to the AWX login screen and click the small "Sign In With SAML Keycloak" button at the bottom of the login box.
+
+### OpenLDAP Integration
+
+OpenLDAP is an LDAP provider that can be used to test AWX with LDAP integration. This section describes how to build a reference OpenLDAP instance and plumb it with your AWX for testing purposes.
+
+First, be sure that you have the awx.awx collection installed by running `make install_collection`.
+
+Anytime you want to run an OpenLDAP instance alongside AWX we can start docker-compose with the LDAP option to get an LDAP instance with the command:
+```bash
+LDAP=true make docker-compose
+```
+
+Once the containers come up two new ports (389, 636) should be exposed and the LDAP server should be running on those ports. The first port (389) is non-SSL and the second port (636) is SSL enabled. 
+
+Now we are ready to configure and plumb OpenLDAP with AWX. To do this we have provided a playbook which will:
+* Backup and configure the LDAP adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backuped through the API, you need a DB backup to recover this.
+
+Note: The default configuration will utilize the non-tls connection. If you want to use the tls configuration you will need to work through TLS negotiation issues because the LDAP server is using a self signed certificate.
+
+Before we can run the playbook we need to understand that LDAP will be communicated to from within the AWX container. Because of this, we have to tell AWX how to route traffic to the LDAP container through the `LDAP Server URI` settings. The playbook requires a variable called container_reference to be set. The container_reference variable needs to be how your AWX container will be able to talk to the LDAP container. See the SAML section for some examples for how to select a `container_reference`.
+
+Once you have your container reference you can run the playbook like:
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml -e container_reference=<your container_reference here>
+```
+
+
+Once the playbook is done running LDAP should now be setup in your development environment. This realm has four users with the following username/passwords:
+1. awx_ldap_unpriv:unpriv123
+2. awx_ldap_admin:admin123
+3. awx_ldap_auditor:audit123
+4. awx_ldap_org_admin:orgadmin123
+
+The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users go to the AWX login screen enter the username/password. 

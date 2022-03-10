@@ -100,6 +100,29 @@ services:
     depends_on:
       - postgres
 {% endif %}
+{% if enable_ldap|bool %}
+  ldap:
+    image: bitnami/openldap:2
+    container_name: tools_ldap_1
+    hostname: ldap
+    user: "{{ ansible_user_uid }}"
+    ports:
+      - "389:1389"
+      - "636:1636"
+    environment:
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_CUSTOM_LDIF_DIR: /opt/bitnami/openldap/ldiffs
+      LDAP_ENABLE_TLS: "yes"
+      LDAP_LDAPS_PORT_NUMBER: 1636
+      LDAP_TLS_CERT_FILE: /opt/bitnami/openldap/certs/{{ ldap_public_key_file_name }}
+      LDAP_TLS_CA_FILE: /opt/bitnami/openldap/certs/{{ ldap_public_key_file_name }}
+      LDAP_TLS_KEY_FILE: /opt/bitnami/openldap/certs/{{ ldap_private_key_file_name }}
+    volumes:
+      - 'openldap_data:/bitnami/openldap'
+      - '../../docker-compose/_sources/ldap_certs:/opt/bitnami/openldap/certs'
+      - '../../docker-compose/_sources/ldap_diffs:/opt/bitnami/openldap/ldiffs'
+{% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
   # logstash:
@@ -157,6 +180,11 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
+{% if enable_ldap %}
+  openldap_data:
+    name: tools_ldap_1
+    driver: local
+{% endif %}
 {% if minikube_container_group|bool %}
 networks:
   default:

@@ -1,0 +1,86 @@
+dn: dc=example,dc=org
+objectClass: dcObject
+objectClass: organization
+dc: example
+o: example
+
+dn: ou=users,dc=example,dc=org
+ou: users
+objectClass: organizationalUnit
+
+dn: cn=awx_ldap_admin,ou=users,dc=example,dc=org
+mail: admin@example.org
+sn: LdapAdmin
+cn: awx_ldap_admin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+userPassword: admin123
+givenName: awx
+
+dn: cn=awx_ldap_auditor,ou=users,dc=example,dc=org
+mail: auditor@example.org
+sn: LdapAuditor
+cn: awx_ldap_auditor
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+userPassword: audit123
+givenName: awx
+
+dn: cn=awx_ldap_unpriv,ou=users,dc=example,dc=org
+mail: unpriv@example.org
+sn: LdapUnpriv
+cn: awx_ldap_unpriv
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+givenName: awx
+userPassword: unpriv123
+
+dn: ou=groups,dc=example,dc=org
+ou: groups
+objectClass: top
+objectClass: organizationalUnit
+
+dn: cn=awx_users,ou=groups,dc=example,dc=org
+cn: awx_users
+objectClass: top
+objectClass: groupOfNames
+member: cn=awx_ldap_admin,ou=users,dc=example,dc=org
+member: cn=awx_ldap_auditor,ou=users,dc=example,dc=org
+member: cn=awx_ldap_unpriv,ou=users,dc=example,dc=org
+member: cn=awx_ldap_org_admin,ou=users,dc=example,dc=org
+
+dn: cn=awx_admins,ou=groups,dc=example,dc=org
+cn: awx_admins
+objectClass: top
+objectClass: groupOfNames
+member: cn=awx_ldap_admin,ou=users,dc=example,dc=org
+
+dn: cn=awx_auditors,ou=groups,dc=example,dc=org
+cn: awx_auditors
+objectClass: top
+objectClass: groupOfNames
+member: cn=awx_ldap_auditor,ou=users,dc=example,dc=org
+
+dn: cn=awx_ldap_org_admin,ou=users,dc=example,dc=org
+mail: org.admin@example.org
+sn: LdapOrgAdmin
+cn: awx_ldap_org_admin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+givenName: awx
+userPassword: orgadmin123
+
+dn: cn=awx_org_admins,ou=groups,dc=example,dc=org
+cn: awx_org_admins
+objectClass: top
+objectClass: groupOfNames
+member: cn=awx_ldap_org_admin,ou=users,dc=example,dc=org
+
