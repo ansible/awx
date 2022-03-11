@@ -39,8 +39,20 @@ BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
 # Base virtualenv paths and enablement
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
+# Very important that this is editable (not read_only) in the API
+AWX_ISOLATION_SHOW_PATHS = [
+    '/etc/pki/ca-trust:/etc/pki/ca-trust:O',
+    '/usr/share/pki:/usr/share/pki:O',
+]
+
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
+#
+###############################################################################################
+#
+#  Any settings defined after this point will be marked as as a read_only database setting
+#
+################################################################################################
 DEFAULTS_SNAPSHOT = {}
 this_module = sys.modules[__name__]
 for setting in dir(this_module):
@@ -91,8 +103,3 @@ except IOError:
 DATABASES.setdefault('default', dict()).setdefault('OPTIONS', dict()).setdefault(
     'application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]
 )  # noqa
-
-AWX_ISOLATION_SHOW_PATHS = [
-    '/etc/pki/ca-trust:/etc/pki/ca-trust:O',
-    '/usr/share/pki:/usr/share/pki:O',
-]
