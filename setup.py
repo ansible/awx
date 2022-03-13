@@ -154,6 +154,7 @@ setup(
             'centrify_vault_kv = awx.main.credential_plugins.centrify_vault:centrify_plugin',
             'thycotic_dsv = awx.main.credential_plugins.dsv:dsv_plugin',
             'thycotic_tss = awx.main.credential_plugins.tss:tss_plugin',
+            'aws_sm = awx.main.credential_plugins.aws_sm:aws_secretsmanager_plugin', 
         ],
     },
     data_files=proc_data_files(
