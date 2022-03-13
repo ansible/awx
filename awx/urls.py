@@ -4,6 +4,7 @@
 from django.conf.urls import url, include
 from django.conf import settings
 from awx.main.views import handle_400, handle_403, handle_404, handle_500, handle_csp_violation, handle_login_redirect
+from awx.api.views.cloud_metrics import MetricsView
 
 
 urlpatterns = [
@@ -11,6 +12,7 @@ urlpatterns = [
     url(r'^api/', include('awx.api.urls', namespace='api')),
     url(r'^sso/', include('awx.sso.urls', namespace='sso')),
     url(r'^sso/', include('social_django.urls', namespace='social')),
+    url(r'^metrics/$', MetricsView.as_view(), name='cloud_metrics_view'),
     url(r'^(?:api/)?400.html$', handle_400),
     url(r'^(?:api/)?403.html$', handle_403),
     url(r'^(?:api/)?404.html$', handle_404),
