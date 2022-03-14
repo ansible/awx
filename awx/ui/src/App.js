@@ -101,9 +101,9 @@ const AuthorizedRoutes = ({ routeConfig }) => {
 export function ProtectedRoute({ children, ...rest }) {
   const {
     authRedirectTo,
-    setAuthRedirectTo,
-    loginRedirectOverride,
     isUserBeingLoggedOut,
+    loginRedirectOverride,
+    setAuthRedirectTo,
   } = useSession();
   const location = useLocation();
 
