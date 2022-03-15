@@ -32,6 +32,12 @@ options:
     - If value not set, will try environment variable C(CONTROLLER_PASSWORD) and then config files
     type: str
     aliases: [ tower_password ]
+  controller_force_basic_auth:
+    description:
+    - Force the sending of the Basic authentication header.
+    - This can be used only if C(controller_oauthtoken) is not set, otherwise it will be ignored.
+    type: bool
+    aliases: [ tower_force_basic_auth ]
   controller_oauthtoken:
     description:
     - The OAuth token to use.

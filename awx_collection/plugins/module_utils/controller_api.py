@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
-from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
+from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError, basic_auth_header
 from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six import raise_from, string_types
@@ -60,6 +60,11 @@ class ControllerModule(AnsibleModule):
             aliases=['tower_password'],
             required=False,
             fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
+        controller_force_basic_auth=dict(
+            type='bool',
+            aliases=['tower_force_basic_auth'],
+            required=False,
+            fallback=(env_fallback, ['CONTROLLER_FORCE_BASIC_AUTH', 'TOWER_FORCE_BASIC_AUTH'])),
         validate_certs=dict(
             type='bool',
             aliases=['tower_verify_ssl'],
@@ -83,10 +88,12 @@ class ControllerModule(AnsibleModule):
         'password': 'controller_password',
         'verify_ssl': 'validate_certs',
         'oauth_token': 'controller_oauthtoken',
+        'force_basic_auth': 'controller_force_basic_auth',
     }
     host = '127.0.0.1'
     username = None
     password = None
+    force_basic_auth = False
     verify_ssl = True
     oauth_token = None
     oauth_token_id = None
@@ -487,6 +494,8 @@ class ControllerAPIModule(ControllerModule):
         if self.oauth_token:
             # If we have a oauth token, we just use a bearer header
             headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
+        elif self.force_basic_auth:
+            headers['Authorization'] = basic_auth_header(self.username, self.password)
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -597,7 +606,7 @@ class ControllerAPIModule(ControllerModule):
         return {'status_code': status_code, 'json': response_json}
 
     def authenticate(self, **kwargs):
-        if self.username and self.password:
+        if self.username and self.password and not self.force_basic_auth:
             # Attempt to get a token from /api/v2/tokens/ by giving it our username/password combo
             # If we have a username and password, we need to get a session cookie
             login_data = {
@@ -641,7 +650,7 @@ class ControllerAPIModule(ControllerModule):
             except (Exception) as e:
                 self.fail_json(msg="Failed to extract token information from login response: {0}".format(e), **{'response': token_response})
 
-        # If we have neither of these, then we can try un-authenticated access
+        # If we have neither of these, then we can try un-authenticated access or a basic authentication (if controller_force_basic_auth is enabled)
         self.authenticated = True
 
     def delete_if_needed(self, existing_item, on_delete=None, auto_exit=True):
