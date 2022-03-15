@@ -55,10 +55,7 @@ describe('<InstanceGroupEdit>', () => {
     history = createMemoryHistory();
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupEdit
-          defaultControlPlane="controlplane"
-          instanceGroup={instanceGroupData}
-        />,
+        <InstanceGroupEdit instanceGroup={instanceGroupData} />,
         {
           context: { router: { history } },
         }
@@ -68,27 +65,6 @@ describe('<InstanceGroupEdit>', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-  });
-
-  test('controlplane instance group name can not be updated', async () => {
-    let towerWrapper;
-    await act(async () => {
-      towerWrapper = mountWithContexts(
-        <InstanceGroupEdit
-          defaultControlPlane="controlplane"
-          instanceGroup={{ ...instanceGroupData, name: 'controlplane' }}
-        />,
-        {
-          context: { router: { history } },
-        }
-      );
-    });
-    expect(
-      towerWrapper.find('input#instance-group-name').prop('disabled')
-    ).toBeTruthy();
-    expect(
-      towerWrapper.find('input#instance-group-name').prop('value')
-    ).toEqual('controlplane');
   });
 
   test('handleSubmit should call the api and redirect to details page', async () => {

@@ -117,44 +117,4 @@ describe('<InstanceGroupForm/>', () => {
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(onCancel).toBeCalled();
   });
-
-  test('Name field should be disabled, default', async () => {
-    let defaultInstanceGroupWrapper;
-    await act(async () => {
-      defaultInstanceGroupWrapper = mountWithContexts(
-        <InstanceGroupForm
-          onCancel={onCancel}
-          onSubmit={onSubmit}
-          defaultControlPlane="controlplane"
-          defaultExecution="default"
-          instanceGroup={{ ...instanceGroup, name: 'default' }}
-        />
-      );
-    });
-    expect(
-      defaultInstanceGroupWrapper
-        .find('TextInput[name="name"]')
-        .prop('isDisabled')
-    ).toBe(true);
-  });
-
-  test('Name field should be disabled, controlplane', async () => {
-    let defaultInstanceGroupWrapper;
-    await act(async () => {
-      defaultInstanceGroupWrapper = mountWithContexts(
-        <InstanceGroupForm
-          onCancel={onCancel}
-          onSubmit={onSubmit}
-          defaultControlPlane="controlplane"
-          defaultExecution="default"
-          instanceGroup={{ ...instanceGroup, name: 'controlplane' }}
-        />
-      );
-    });
-    expect(
-      defaultInstanceGroupWrapper
-        .find('TextInput[name="name"]')
-        .prop('isDisabled')
-    ).toBe(true);
-  });
 });

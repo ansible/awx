@@ -4,7 +4,7 @@ import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 
-import { InstanceGroupsAPI, SettingsAPI } from 'api';
+import { InstanceGroupsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
@@ -27,28 +27,6 @@ const QS_CONFIG = getQSConfig('instance-group', {
   page_size: 20,
 });
 
-function modifyInstanceGroups(
-  defaultControlPlane,
-  defaultExecution,
-  items = []
-) {
-  return items.map((item) => {
-    const clonedItem = {
-      ...item,
-      summary_fields: {
-        ...item.summary_fields,
-        user_capabilities: {
-          ...item.summary_fields.user_capabilities,
-        },
-      },
-    };
-    if (clonedItem.name === (defaultControlPlane || defaultExecution)) {
-      clonedItem.summary_fields.user_capabilities.delete = false;
-    }
-    return clonedItem;
-  });
-}
-
 function InstanceGroupList({
   isKubernetes,
   isSettingsRequestLoading,
@@ -56,30 +34,6 @@ function InstanceGroupList({
 }) {
   const location = useLocation();
   const match = useRouteMatch();
-  const {
-    error: protectedItemsError,
-    isLoading: isLoadingProtectedItems,
-    request: fetchProtectedItems,
-    result: { defaultControlPlane, defaultExecution },
-  } = useRequest(
-    useCallback(async () => {
-      const {
-        data: {
-          DEFAULT_CONTROL_PLANE_QUEUE_NAME,
-          DEFAULT_EXECUTION_QUEUE_NAME,
-        },
-      } = await SettingsAPI.readAll();
-      return {
-        defaultControlPlane: DEFAULT_CONTROL_PLANE_QUEUE_NAME,
-        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
-      };
-    }, []),
-    { defaultControlPlane: '', defaultExecution: '' }
-  );
-
-  useEffect(() => {
-    fetchProtectedItems();
-  }, [fetchProtectedItems]);
 
   const {
     error: contentError,
@@ -127,12 +81,6 @@ function InstanceGroupList({
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
     useSelected(instanceGroups);
 
-  const modifiedSelected = modifyInstanceGroups(
-    defaultControlPlane,
-    defaultExecution,
-    selected
-  );
-
   const {
     isLoading: deleteLoading,
     deletionError,
@@ -158,27 +106,9 @@ function InstanceGroupList({
 
   const canAdd = actions && actions.POST;
 
-  const cannotDelete = (item) =>
-    !item.summary_fields.user_capabilities.delete ||
-    item.name === defaultExecution ||
-    item.name === defaultControlPlane;
+  const cannotDelete = (item) => !item.summary_fields.user_capabilities.delete;
 
   const pluralizedItemName = t`Instance Groups`;
-
-  let errorMessageDelete = '';
-  const notdeletedable = selected.filter(
-    (i) => i.name === defaultControlPlane || i.name === defaultExecution
-  );
-
-  if (notdeletedable.length) {
-    errorMessageDelete = (
-      <Plural
-        value={notdeletedable.length}
-        one="The following Instance Group cannot be deleted"
-        other="The following Instance Groups cannot be deleted"
-      />
-    );
-  }
 
   const addContainerGroup = t`Add container group`;
   const addInstanceGroup = t`Add instance group`;
@@ -229,14 +159,9 @@ function InstanceGroupList({
       <PageSection>
         <Card>
           <PaginatedTable
-            contentError={
-              contentError || settingsRequestError || protectedItemsError
-            }
+            contentError={contentError || settingsRequestError}
             hasContentLoading={
-              isLoading ||
-              deleteLoading ||
-              isSettingsRequestLoading ||
-              isLoadingProtectedItems
+              isLoading || deleteLoading || isSettingsRequestLoading
             }
             items={instanceGroups}
             itemCount={instanceGroupsCount}
@@ -264,9 +189,8 @@ function InstanceGroupList({
                     key="delete"
                     onDelete={handleDelete}
                     cannotDelete={cannotDelete}
-                    itemsToDelete={modifiedSelected}
+                    itemsToDelete={selected}
                     pluralizedItemName={t`Instance Groups`}
-                    errorMessage={errorMessageDelete}
                     deleteDetailsRequests={deleteDetailsRequests}
                     deleteMessage={
                       <Plural

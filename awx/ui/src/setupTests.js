@@ -93,6 +93,7 @@ jest.doMock('./contexts/Config', () => ({
   Config: MockConfigContext.Consumer,
   useConfig: () => React.useContext(MockConfigContext),
   useAuthorizedPath: jest.fn(),
+  useUserProfile: jest.fn(),
 }));
 
 // ?
