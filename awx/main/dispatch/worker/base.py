@@ -134,6 +134,11 @@ class AWXConsumerRedis(AWXConsumerBase):
 
 
 class AWXConsumerPG(AWXConsumerBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pg_down_time = 0.0
+        self.pg_is_down = False
+
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
 
@@ -152,9 +157,18 @@ class AWXConsumerPG(AWXConsumerBase):
                         self.process_task(json.loads(e.payload))
                     if self.should_stop:
                         return
+                    self.pg_is_down = False
             except psycopg2.InterfaceError:
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
+            except (db.DatabaseError, psycopg2.OperationalError):
+                if not self.pg_is_down:
+                    logger.exception("Postgres error processing tasks")
+                    self.pg_down_time = time.time()
+                    self.pg_is_down = True
+                if time.time() - self.pg_down_time > 60.0:
+                    logger.warning("Postgres is still down, exiting")
+                    return
 
 
 class BaseWorker(object):
