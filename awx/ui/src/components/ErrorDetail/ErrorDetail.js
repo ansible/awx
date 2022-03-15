@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -68,7 +69,11 @@ function ErrorDetail({ error }) {
     );
   };
 
-  const renderStack = () => <CardBody>{error.stack}</CardBody>;
+  const renderStack = () => (
+    <CardBody css="white-space: pre; font-family: var(--pf-global--FontFamily--monospace)">
+      {error.stack}
+    </CardBody>
+  );
 
   return (
     <Expandable
