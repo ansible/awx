@@ -365,6 +365,7 @@ class InstanceList(ListAPIView):
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
+    ordering = ('id',)
 
 
 class InstanceDetail(RetrieveUpdateAPIView):
