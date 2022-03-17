@@ -116,6 +116,13 @@ function SurveyReorderModal({
   const defaultAnswer = (q) => {
     let component = null;
     switch (q.type) {
+      case 'password':
+        component = (
+          <span id="survey-preview-encrypted">
+            {t`encrypted`.toUpperCase()}
+          </span>
+        );
+        break;
       case 'textarea':
         component = (
           <TextArea
