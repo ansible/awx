@@ -15,9 +15,9 @@ from jinja2 import sandbox
 
 # Django
 from django.db import models
-from django.utils.translation import ugettext_lazy as _, ugettext_noop
+from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.core.exceptions import ValidationError
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 
@@ -230,7 +230,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def display_inputs(self):
         field_val = self.inputs.copy()
         for k, v in field_val.items():
-            if force_text(v).startswith('$encrypted$'):
+            if force_str(v).startswith('$encrypted$'):
                 field_val[k] = '$encrypted$'
         return field_val
 
@@ -579,34 +579,34 @@ class ManagedCredentialType(SimpleNamespace):
 ManagedCredentialType(
     namespace='ssh',
     kind='ssh',
-    name=ugettext_noop('Machine'),
+    name=gettext_noop('Machine'),
     inputs={
         'fields': [
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
-            {'id': 'password', 'label': ugettext_noop('Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
-            {'id': 'ssh_key_data', 'label': ugettext_noop('SSH Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
+            {'id': 'password', 'label': gettext_noop('Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
+            {'id': 'ssh_key_data', 'label': gettext_noop('SSH Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
             {
                 'id': 'ssh_public_key_data',
-                'label': ugettext_noop('Signed SSH Certificate'),
+                'label': gettext_noop('Signed SSH Certificate'),
                 'type': 'string',
                 'multiline': True,
                 'secret': True,
             },
-            {'id': 'ssh_key_unlock', 'label': ugettext_noop('Private Key Passphrase'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
+            {'id': 'ssh_key_unlock', 'label': gettext_noop('Private Key Passphrase'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
             {
                 'id': 'become_method',
-                'label': ugettext_noop('Privilege Escalation Method'),
+                'label': gettext_noop('Privilege Escalation Method'),
                 'type': 'string',
-                'help_text': ugettext_noop(
+                'help_text': gettext_noop(
                     'Specify a method for "become" operations. This is ' 'equivalent to specifying the --become-method ' 'Ansible parameter.'
                 ),
             },
             {
                 'id': 'become_username',
-                'label': ugettext_noop('Privilege Escalation Username'),
+                'label': gettext_noop('Privilege Escalation Username'),
                 'type': 'string',
             },
-            {'id': 'become_password', 'label': ugettext_noop('Privilege Escalation Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
+            {'id': 'become_password', 'label': gettext_noop('Privilege Escalation Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
         ],
     },
 )
@@ -614,14 +614,14 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='scm',
     kind='scm',
-    name=ugettext_noop('Source Control'),
+    name=gettext_noop('Source Control'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
-            {'id': 'password', 'label': ugettext_noop('Password'), 'type': 'string', 'secret': True},
-            {'id': 'ssh_key_data', 'label': ugettext_noop('SCM Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
-            {'id': 'ssh_key_unlock', 'label': ugettext_noop('Private Key Passphrase'), 'type': 'string', 'secret': True},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
+            {'id': 'password', 'label': gettext_noop('Password'), 'type': 'string', 'secret': True},
+            {'id': 'ssh_key_data', 'label': gettext_noop('SCM Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
+            {'id': 'ssh_key_unlock', 'label': gettext_noop('Private Key Passphrase'), 'type': 'string', 'secret': True},
         ],
     },
 )
@@ -629,17 +629,17 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='vault',
     kind='vault',
-    name=ugettext_noop('Vault'),
+    name=gettext_noop('Vault'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'vault_password', 'label': ugettext_noop('Vault Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
+            {'id': 'vault_password', 'label': gettext_noop('Vault Password'), 'type': 'string', 'secret': True, 'ask_at_runtime': True},
             {
                 'id': 'vault_id',
-                'label': ugettext_noop('Vault Identifier'),
+                'label': gettext_noop('Vault Identifier'),
                 'type': 'string',
                 'format': 'vault_id',
-                'help_text': ugettext_noop(
+                'help_text': gettext_noop(
                     'Specify an (optional) Vault ID. This is '
                     'equivalent to specifying the --vault-id '
                     'Ansible parameter for providing multiple Vault '
@@ -655,32 +655,32 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='net',
     kind='net',
-    name=ugettext_noop('Network'),
+    name=gettext_noop('Network'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Password'),
+                'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
-            {'id': 'ssh_key_data', 'label': ugettext_noop('SSH Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
+            {'id': 'ssh_key_data', 'label': gettext_noop('SSH Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
             {
                 'id': 'ssh_key_unlock',
-                'label': ugettext_noop('Private Key Passphrase'),
+                'label': gettext_noop('Private Key Passphrase'),
                 'type': 'string',
                 'secret': True,
             },
             {
                 'id': 'authorize',
-                'label': ugettext_noop('Authorize'),
+                'label': gettext_noop('Authorize'),
                 'type': 'boolean',
             },
             {
                 'id': 'authorize_password',
-                'label': ugettext_noop('Authorize Password'),
+                'label': gettext_noop('Authorize Password'),
                 'type': 'string',
                 'secret': True,
             },
@@ -695,23 +695,23 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='aws',
     kind='cloud',
-    name=ugettext_noop('Amazon Web Services'),
+    name=gettext_noop('Amazon Web Services'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'username', 'label': ugettext_noop('Access Key'), 'type': 'string'},
+            {'id': 'username', 'label': gettext_noop('Access Key'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Secret Key'),
+                'label': gettext_noop('Secret Key'),
                 'type': 'string',
                 'secret': True,
             },
             {
                 'id': 'security_token',
-                'label': ugettext_noop('STS Token'),
+                'label': gettext_noop('STS Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop(
+                'help_text': gettext_noop(
                     'Security Token Service (STS) is a web service '
                     'that enables you to request temporary, '
                     'limited-privilege credentials for AWS Identity '
@@ -726,38 +726,38 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='openstack',
     kind='cloud',
-    name=ugettext_noop('OpenStack'),
+    name=gettext_noop('OpenStack'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Password (API Key)'),
+                'label': gettext_noop('Password (API Key)'),
                 'type': 'string',
                 'secret': True,
             },
             {
                 'id': 'host',
-                'label': ugettext_noop('Host (Authentication URL)'),
+                'label': gettext_noop('Host (Authentication URL)'),
                 'type': 'string',
-                'help_text': ugettext_noop('The host to authenticate with.  For example, ' 'https://openstack.business.com/v2.0/'),
+                'help_text': gettext_noop('The host to authenticate with.  For example, ' 'https://openstack.business.com/v2.0/'),
             },
             {
                 'id': 'project',
-                'label': ugettext_noop('Project (Tenant Name)'),
+                'label': gettext_noop('Project (Tenant Name)'),
                 'type': 'string',
             },
             {
                 'id': 'project_domain_name',
-                'label': ugettext_noop('Project (Domain Name)'),
+                'label': gettext_noop('Project (Domain Name)'),
                 'type': 'string',
             },
             {
                 'id': 'domain',
-                'label': ugettext_noop('Domain Name'),
+                'label': gettext_noop('Domain Name'),
                 'type': 'string',
-                'help_text': ugettext_noop(
+                'help_text': gettext_noop(
                     'OpenStack domains define administrative boundaries. '
                     'It is only needed for Keystone v3 authentication '
                     'URLs. Refer to the documentation for '
@@ -766,13 +766,13 @@ ManagedCredentialType(
             },
             {
                 'id': 'region',
-                'label': ugettext_noop('Region Name'),
+                'label': gettext_noop('Region Name'),
                 'type': 'string',
-                'help_text': ugettext_noop('For some cloud providers, like OVH, region must be specified'),
+                'help_text': gettext_noop('For some cloud providers, like OVH, region must be specified'),
             },
             {
                 'id': 'verify_ssl',
-                'label': ugettext_noop('Verify SSL'),
+                'label': gettext_noop('Verify SSL'),
                 'type': 'boolean',
                 'default': True,
             },
@@ -784,20 +784,20 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='vmware',
     kind='cloud',
-    name=ugettext_noop('VMware vCenter'),
+    name=gettext_noop('VMware vCenter'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('VCenter Host'),
+                'label': gettext_noop('VCenter Host'),
                 'type': 'string',
-                'help_text': ugettext_noop('Enter the hostname or IP address that corresponds ' 'to your VMware vCenter.'),
+                'help_text': gettext_noop('Enter the hostname or IP address that corresponds ' 'to your VMware vCenter.'),
             },
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Password'),
+                'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
@@ -809,20 +809,20 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='satellite6',
     kind='cloud',
-    name=ugettext_noop('Red Hat Satellite 6'),
+    name=gettext_noop('Red Hat Satellite 6'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('Satellite 6 URL'),
+                'label': gettext_noop('Satellite 6 URL'),
                 'type': 'string',
-                'help_text': ugettext_noop('Enter the URL that corresponds to your Red Hat ' 'Satellite 6 server. For example, https://satellite.example.org'),
+                'help_text': gettext_noop('Enter the URL that corresponds to your Red Hat ' 'Satellite 6 server. For example, https://satellite.example.org'),
             },
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Password'),
+                'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
@@ -834,21 +834,21 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='gce',
     kind='cloud',
-    name=ugettext_noop('Google Compute Engine'),
+    name=gettext_noop('Google Compute Engine'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'username',
-                'label': ugettext_noop('Service Account Email Address'),
+                'label': gettext_noop('Service Account Email Address'),
                 'type': 'string',
-                'help_text': ugettext_noop('The email address assigned to the Google Compute ' 'Engine service account.'),
+                'help_text': gettext_noop('The email address assigned to the Google Compute ' 'Engine service account.'),
             },
             {
                 'id': 'project',
                 'label': 'Project',
                 'type': 'string',
-                'help_text': ugettext_noop(
+                'help_text': gettext_noop(
                     'The Project ID is the GCE assigned identification. '
                     'It is often constructed as three words or two words '
                     'followed by a three-digit number. Examples: project-id-000 '
@@ -857,12 +857,12 @@ ManagedCredentialType(
             },
             {
                 'id': 'ssh_key_data',
-                'label': ugettext_noop('RSA Private Key'),
+                'label': gettext_noop('RSA Private Key'),
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True,
-                'help_text': ugettext_noop('Paste the contents of the PEM file associated ' 'with the service account email.'),
+                'help_text': gettext_noop('Paste the contents of the PEM file associated ' 'with the service account email.'),
             },
         ],
         'required': ['username', 'ssh_key_data'],
@@ -872,36 +872,36 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='azure_rm',
     kind='cloud',
-    name=ugettext_noop('Microsoft Azure Resource Manager'),
+    name=gettext_noop('Microsoft Azure Resource Manager'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'subscription',
-                'label': ugettext_noop('Subscription ID'),
+                'label': gettext_noop('Subscription ID'),
                 'type': 'string',
-                'help_text': ugettext_noop('Subscription ID is an Azure construct, which is ' 'mapped to a username.'),
+                'help_text': gettext_noop('Subscription ID is an Azure construct, which is ' 'mapped to a username.'),
             },
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Password'),
+                'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
-            {'id': 'client', 'label': ugettext_noop('Client ID'), 'type': 'string'},
+            {'id': 'client', 'label': gettext_noop('Client ID'), 'type': 'string'},
             {
                 'id': 'secret',
-                'label': ugettext_noop('Client Secret'),
+                'label': gettext_noop('Client Secret'),
                 'type': 'string',
                 'secret': True,
             },
-            {'id': 'tenant', 'label': ugettext_noop('Tenant ID'), 'type': 'string'},
+            {'id': 'tenant', 'label': gettext_noop('Tenant ID'), 'type': 'string'},
             {
                 'id': 'cloud_environment',
-                'label': ugettext_noop('Azure Cloud Environment'),
+                'label': gettext_noop('Azure Cloud Environment'),
                 'type': 'string',
-                'help_text': ugettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when' ' using Azure GovCloud or Azure stack.'),
+                'help_text': gettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when' ' using Azure GovCloud or Azure stack.'),
             },
         ],
         'required': ['subscription'],
@@ -911,16 +911,16 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='github_token',
     kind='token',
-    name=ugettext_noop('GitHub Personal Access Token'),
+    name=gettext_noop('GitHub Personal Access Token'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'token',
-                'label': ugettext_noop('Token'),
+                'label': gettext_noop('Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop('This token needs to come from your profile settings in GitHub'),
+                'help_text': gettext_noop('This token needs to come from your profile settings in GitHub'),
             }
         ],
         'required': ['token'],
@@ -930,16 +930,16 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='gitlab_token',
     kind='token',
-    name=ugettext_noop('GitLab Personal Access Token'),
+    name=gettext_noop('GitLab Personal Access Token'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'token',
-                'label': ugettext_noop('Token'),
+                'label': gettext_noop('Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop('This token needs to come from your profile settings in GitLab'),
+                'help_text': gettext_noop('This token needs to come from your profile settings in GitLab'),
             }
         ],
         'required': ['token'],
@@ -949,12 +949,12 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='insights',
     kind='insights',
-    name=ugettext_noop('Insights'),
+    name=gettext_noop('Insights'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
-            {'id': 'password', 'label': ugettext_noop('Password'), 'type': 'string', 'secret': True},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
+            {'id': 'password', 'label': gettext_noop('Password'), 'type': 'string', 'secret': True},
         ],
         'required': ['username', 'password'],
     },
@@ -973,23 +973,23 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='rhv',
     kind='cloud',
-    name=ugettext_noop('Red Hat Virtualization'),
+    name=gettext_noop('Red Hat Virtualization'),
     managed=True,
     inputs={
         'fields': [
-            {'id': 'host', 'label': ugettext_noop('Host (Authentication URL)'), 'type': 'string', 'help_text': ugettext_noop('The host to authenticate with.')},
-            {'id': 'username', 'label': ugettext_noop('Username'), 'type': 'string'},
+            {'id': 'host', 'label': gettext_noop('Host (Authentication URL)'), 'type': 'string', 'help_text': gettext_noop('The host to authenticate with.')},
+            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
                 'id': 'password',
-                'label': ugettext_noop('Password'),
+                'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
             {
                 'id': 'ca_file',
-                'label': ugettext_noop('CA File'),
+                'label': gettext_noop('CA File'),
                 'type': 'string',
-                'help_text': ugettext_noop('Absolute file path to the CA file to use (optional)'),
+                'help_text': gettext_noop('Absolute file path to the CA file to use (optional)'),
             },
         ],
         'required': ['host', 'username', 'password'],
@@ -1017,38 +1017,38 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='controller',
     kind='cloud',
-    name=ugettext_noop('Red Hat Ansible Automation Platform'),
+    name=gettext_noop('Red Hat Ansible Automation Platform'),
     managed=True,
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('Red Hat Ansible Automation Platform'),
+                'label': gettext_noop('Red Hat Ansible Automation Platform'),
                 'type': 'string',
-                'help_text': ugettext_noop('Red Hat Ansible Automation Platform base URL to authenticate with.'),
+                'help_text': gettext_noop('Red Hat Ansible Automation Platform base URL to authenticate with.'),
             },
             {
                 'id': 'username',
-                'label': ugettext_noop('Username'),
+                'label': gettext_noop('Username'),
                 'type': 'string',
-                'help_text': ugettext_noop(
+                'help_text': gettext_noop(
                     'Red Hat Ansible Automation Platform username id to authenticate as.' 'This should not be set if an OAuth token is being used.'
                 ),
             },
             {
                 'id': 'password',
-                'label': ugettext_noop('Password'),
+                'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
             {
                 'id': 'oauth_token',
-                'label': ugettext_noop('OAuth Token'),
+                'label': gettext_noop('OAuth Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop('An OAuth token to use to authenticate with.' 'This should not be set if username/password are being used.'),
+                'help_text': gettext_noop('An OAuth token to use to authenticate with.' 'This should not be set if username/password are being used.'),
             },
-            {'id': 'verify_ssl', 'label': ugettext_noop('Verify SSL'), 'type': 'boolean', 'secret': False},
+            {'id': 'verify_ssl', 'label': gettext_noop('Verify SSL'), 'type': 'boolean', 'secret': False},
         ],
         'required': ['host'],
     },
@@ -1071,30 +1071,30 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='kubernetes_bearer_token',
     kind='kubernetes',
-    name=ugettext_noop('OpenShift or Kubernetes API Bearer Token'),
+    name=gettext_noop('OpenShift or Kubernetes API Bearer Token'),
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('OpenShift or Kubernetes API Endpoint'),
+                'label': gettext_noop('OpenShift or Kubernetes API Endpoint'),
                 'type': 'string',
-                'help_text': ugettext_noop('The OpenShift or Kubernetes API Endpoint to authenticate with.'),
+                'help_text': gettext_noop('The OpenShift or Kubernetes API Endpoint to authenticate with.'),
             },
             {
                 'id': 'bearer_token',
-                'label': ugettext_noop('API authentication bearer token'),
+                'label': gettext_noop('API authentication bearer token'),
                 'type': 'string',
                 'secret': True,
             },
             {
                 'id': 'verify_ssl',
-                'label': ugettext_noop('Verify SSL'),
+                'label': gettext_noop('Verify SSL'),
                 'type': 'boolean',
                 'default': True,
             },
             {
                 'id': 'ssl_ca_cert',
-                'label': ugettext_noop('Certificate Authority data'),
+                'label': gettext_noop('Certificate Authority data'),
                 'type': 'string',
                 'secret': True,
                 'multiline': True,
@@ -1107,31 +1107,31 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='registry',
     kind='registry',
-    name=ugettext_noop('Container Registry'),
+    name=gettext_noop('Container Registry'),
     inputs={
         'fields': [
             {
                 'id': 'host',
-                'label': ugettext_noop('Authentication URL'),
+                'label': gettext_noop('Authentication URL'),
                 'type': 'string',
-                'help_text': ugettext_noop('Authentication endpoint for the container registry.'),
+                'help_text': gettext_noop('Authentication endpoint for the container registry.'),
                 'default': 'quay.io',
             },
             {
                 'id': 'username',
-                'label': ugettext_noop('Username'),
+                'label': gettext_noop('Username'),
                 'type': 'string',
             },
             {
                 'id': 'password',
-                'label': ugettext_noop('Password or Token'),
+                'label': gettext_noop('Password or Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop('A password or token used to authenticate with'),
+                'help_text': gettext_noop('A password or token used to authenticate with'),
             },
             {
                 'id': 'verify_ssl',
-                'label': ugettext_noop('Verify SSL'),
+                'label': gettext_noop('Verify SSL'),
                 'type': 'boolean',
                 'default': True,
             },
@@ -1144,27 +1144,27 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='galaxy_api_token',
     kind='galaxy',
-    name=ugettext_noop('Ansible Galaxy/Automation Hub API Token'),
+    name=gettext_noop('Ansible Galaxy/Automation Hub API Token'),
     inputs={
         'fields': [
             {
                 'id': 'url',
-                'label': ugettext_noop('Galaxy Server URL'),
+                'label': gettext_noop('Galaxy Server URL'),
                 'type': 'string',
-                'help_text': ugettext_noop('The URL of the Galaxy instance to connect to.'),
+                'help_text': gettext_noop('The URL of the Galaxy instance to connect to.'),
             },
             {
                 'id': 'auth_url',
-                'label': ugettext_noop('Auth Server URL'),
+                'label': gettext_noop('Auth Server URL'),
                 'type': 'string',
-                'help_text': ugettext_noop('The URL of a Keycloak server token_endpoint, if using ' 'SSO auth.'),
+                'help_text': gettext_noop('The URL of a Keycloak server token_endpoint, if using ' 'SSO auth.'),
             },
             {
                 'id': 'token',
-                'label': ugettext_noop('API Token'),
+                'label': gettext_noop('API Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop('A token to use for authentication against the Galaxy instance.'),
+                'help_text': gettext_noop('A token to use for authentication against the Galaxy instance.'),
             },
         ],
         'required': ['url'],

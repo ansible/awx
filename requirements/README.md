@@ -58,7 +58,7 @@ Make sure to delete the old tarball if it is an upgrade.
 Anything pinned in `*.in` files involves additional manual work in
 order to upgrade. Some information related to that work is outlined here.
 
-### django
+### Django
 
 For any upgrade of Django, it must be confirmed that
 we don't regress on FIPS support before merging.
@@ -90,13 +90,10 @@ that we have the latest version
 
 ### django-oauth-toolkit
 
-Version 1.2.0 of this project has a bug that error when revoking tokens.
-This is fixed in the master branch but is not yet released.
-
-When upgrading past 1.2.0 in the future, the `0025` migration needs to be
-edited, just like the old migration was edited in the project:
-https://github.com/jazzband/django-oauth-toolkit/commit/96538876d0d7ea0319ba5286f9bde842a906e1c5
-The field can simply have the validator method `validate_uris` removed.
+Versions later than 1.4.1 throw an error about id_token_id, due to the
+OpenID Connect work that was done in
+https://github.com/jazzband/django-oauth-toolkit/pull/915.  This may
+be fixable by creating a migration on our end?
 
 ### azure-keyvault
 
@@ -107,17 +104,6 @@ Upgrading to 4.0.0 causes error because imports changed.
   from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 ImportError: cannot import name 'KeyVaultClient'
 ```
-
-### django-jsonfield
-
-Instead of calling a `loads()` operation, the returned value is casted into
-a string in some cases, introduced in the change:
-
-https://github.com/adamchainz/django-jsonfield/pull/14
-
-This breaks a very large amount of AWX code that assumes these fields
-are returned as dicts. Upgrading this library will require a refactor
-to accomidate this change.
 
 ### pip and setuptools
 

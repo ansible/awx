@@ -42,7 +42,7 @@ class Control(object):
         return f"reply_to_{str(uuid.uuid4()).replace('-','_')}"
 
     def control_with_reply(self, command, timeout=5):
-        logger.warn('checking {} {} for {}'.format(self.service, command, self.queuename))
+        logger.warning('checking {} {} for {}'.format(self.service, command, self.queuename))
         reply_queue = Control.generate_reply_queue_name()
         self.result = None
 

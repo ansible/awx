@@ -32,7 +32,7 @@ class ActivityStreamRegistrar(object):
             post_save.disconnect(dispatch_uid=str(self.__class__) + str(model) + "_create")
             pre_save.disconnect(dispatch_uid=str(self.__class__) + str(model) + "_update")
             pre_delete.disconnect(dispatch_uid=str(self.__class__) + str(model) + "_delete")
-            self.models.pop(model)
+            self.models.remove(model)
 
             for m2mfield in model._meta.many_to_many:
                 m2m_attr = getattr(model, m2mfield.name)

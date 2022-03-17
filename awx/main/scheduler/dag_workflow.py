@@ -1,5 +1,5 @@
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str
 
 # Python
 from awx.main.models import (
@@ -171,7 +171,7 @@ class WorkflowDAG(SimpleDAG):
                 parms['node_status'] = ",".join(["({},{})".format(id, status) for id, status in failed_path_nodes_id_status])
             if len(failed_unified_job_template_node_ids) > 0:
                 parms['no_ufjt'] = ",".join(failed_unified_job_template_node_ids)
-            return True, smart_text(s.format(**parms))
+            return True, smart_str(s.format(**parms))
         return False, None
 
     r'''

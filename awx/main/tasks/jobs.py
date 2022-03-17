@@ -81,7 +81,7 @@ from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.tasks.system import handle_success_and_failure_notifications, update_smart_memberships_for_inventory, update_inventory_computed_fields
 from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -169,7 +169,7 @@ class BaseTask(object):
                     # mount_option validation via performed via API, but since this can be overriden via settings.py
                     if mount_option not in CONTAINER_VOLUMES_MOUNT_TYPES:
                         mount_option = 'z'
-                        logger.warn(f'The path {this_path} has volume mount type {mount_option} which is not supported. Using "z" instead.')
+                        logger.warning(f'The path {this_path} has volume mount type {mount_option} which is not supported. Using "z" instead.')
 
                     params['container_volume_mounts'].append(f'{src}:{dest}:{mount_option}')
                 elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:

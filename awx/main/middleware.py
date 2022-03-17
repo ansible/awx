@@ -14,7 +14,7 @@ from django.db import connection
 from django.shortcuts import redirect
 from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, resolve
 
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
@@ -103,7 +103,7 @@ def _customize_graph():
 
 
 class URLModificationMiddleware(MiddlewareMixin):
-    def __init__(self, get_response=None):
+    def __init__(self, get_response):
         models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
         generate_graph(models)
         _customize_graph()

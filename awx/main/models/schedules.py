@@ -14,7 +14,7 @@ from dateutil.zoneinfo import get_zonefile_instance
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.api.versioning import reverse
@@ -103,7 +103,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                     for zone in all_zones:
                         if fname.endswith(zone):
                             return zone
-        logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
+        logger.warning('Could not detect valid zoneinfo for {}'.format(self.rrule))
         return ''
 
     @property

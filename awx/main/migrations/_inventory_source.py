@@ -1,6 +1,6 @@
 import logging
 
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from awx.main.utils.common import set_current_apps
 from awx.main.utils.common import parse_yaml_or_json
@@ -19,7 +19,7 @@ def _get_instance_id(from_dict, new_id, default=''):
             break
         instance_id = from_dict.get(key, default)
         from_dict = instance_id
-    return smart_text(instance_id)
+    return smart_str(instance_id)
 
 
 def _get_instance_id_for_upgrade(host, new_id):
@@ -35,7 +35,7 @@ def _get_instance_id_for_upgrade(host, new_id):
         return None
     if len(new_id) > 255:
         # this should never happen
-        logger.warn('Computed instance id "{}"" for host {}-{} is too long'.format(new_id_value, host.name, host.pk))
+        logger.warning('Computed instance id "{}"" for host {}-{} is too long'.format(new_id_value, host.name, host.pk))
         return None
     return new_id_value
 
@@ -47,7 +47,7 @@ def set_new_instance_id(apps, source, new_id):
     id_from_settings = getattr(settings, '{}_INSTANCE_ID_VAR'.format(source.upper()))
     if id_from_settings != new_id:
         # User applied an instance ID themselves, so nope on out of there
-        logger.warn('You have an instance ID set for {}, not migrating'.format(source))
+        logger.warning('You have an instance ID set for {}, not migrating'.format(source))
         return
     logger.debug('Migrating inventory instance_id for {} to {}'.format(source, new_id))
     Host = apps.get_model('main', 'Host')

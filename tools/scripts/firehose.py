@@ -318,8 +318,9 @@ if __name__ == '__main__':
             for j_hour in range(24):
                 time_delta = datetime.timedelta(days=i_day, hours=j_hour, seconds=0)
                 created_job_ids = generate_jobs(jobs, batch_size=batch_size, time_delta=time_delta)
-                for k_id in created_job_ids:
-                    generate_events(events, str(k_id), time_delta)
+                if events > 0:
+                    for k_id in created_job_ids:
+                        generate_events(events, str(k_id), time_delta)
                 print(datetime.datetime.utcnow().isoformat())
         conn.close()
 

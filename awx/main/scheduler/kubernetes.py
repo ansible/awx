@@ -7,7 +7,7 @@ from urllib import parse as urlparse
 from django.conf import settings
 from kubernetes import client, config
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from awx.main.utils.common import parse_yaml_or_json, deepmerge
 from awx.main.utils.execution_environments import get_default_pod_spec

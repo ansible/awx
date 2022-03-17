@@ -7,14 +7,6 @@ import re  # noqa
 import sys
 from datetime import timedelta
 
-# global settings
-from django.conf import global_settings
-
-# Update this module's local settings from the global settings module.
-this_module = sys.modules[__name__]
-for setting in dir(global_settings):
-    if setting == setting.upper():
-        setattr(this_module, setting, getattr(global_settings, setting))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -48,6 +40,11 @@ else:
 
 DEBUG = True
 SQL_DEBUG = DEBUG
+
+# FIXME: it would be nice to cycle back around and allow this to be
+# BigAutoField going forward, but we'd have to be explicit about our
+# existing models.
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 DATABASES = {
     'default': {
@@ -152,7 +149,8 @@ SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
 if os.path.exists('/etc/tower/SECRET_KEY'):
-    SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
+    with open('/etc/tower/SECRET_KEY', 'rb') as f:
+        SECRET_KEY = f.read().strip()
 else:
     SECRET_KEY = base64.encodebytes(os.urandom(32)).decode().rstrip()
 
@@ -273,8 +271,8 @@ TEMPLATES = [
     {
         'NAME': 'default',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
         'OPTIONS': {
-            'debug': DEBUG,
             'context_processors': [  # NOQA
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
@@ -289,13 +287,10 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
-            'loaders': [
-                ('django.template.loaders.cached.Loader', ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader'))
-            ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
         'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
-    }
+    },
 ]
 
 ROOT_URLCONF = 'awx.urls'
@@ -453,7 +448,7 @@ CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'u
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
-SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL  # noqa
+SOCIAL_AUTH_USER_MODEL = 'auth.User'
 
 _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
@@ -945,7 +940,7 @@ AWX_CLEANUP_PATHS = True
 RECEPTOR_RELEASE_WORK = True
 
 MIDDLEWARE = [
-    'django_guid.middleware.GuidMiddleware',
+    'django_guid.middleware.guid_middleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
