@@ -583,7 +583,7 @@ class WebhookMixin(models.Model):
         if not self.webhook_credential:
             return
 
-        status_api = self.extra_vars_dict.get('tower_webhook_status_api')
+        status_api = self.extra_vars_dict.get('awx_webhook_status_api')
         if not status_api:
             logger.debug("Webhook event did not have a status API endpoint associated, skipping.")
             return
