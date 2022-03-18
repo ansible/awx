@@ -6,3 +6,11 @@ if [ -z $AWX_IGNORE_BLACK ] ; then
         	exit 1)
 	fi
 fi
+
+if [ -z $AWX_IGNORE_USER ] ; then
+	if [ -d ./pre-commit-user ] ; then
+		for SCRIPT in `find ./pre-commit-user -name "*.sh" -executable` ; do
+			$SCRIPT || exit 1
+		done
+	fi
+fi
