@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-import { t } from '@lingui/macro';
+import { t, Plural } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
 import { JobTemplatesAPI } from 'api';
 import AlertModal from 'components/AlertModal';
@@ -14,10 +14,14 @@ import PaginatedTable, {
   ToolbarDeleteButton,
   getSearchableKeys,
 } from 'components/PaginatedTable';
-import { getQSConfig, parseQueryString } from 'util/qs';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import useWsTemplates from 'hooks/useWsTemplates';
 import useSelected from 'hooks/useSelected';
+import useExpanded from 'hooks/useExpanded';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
-import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
+import { TemplateListItem } from 'components/TemplateList';
+import useToast, { AlertVariant } from 'hooks/useToast';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('template', {
   page: 1,
@@ -25,13 +29,13 @@ const QS_CONFIG = getQSConfig('template', {
   order_by: 'name',
 });
 
-function ProjectJobTemplatesList() {
-  const { id: projectId } = useParams();
+function RelatedTemplateList({ searchParams }) {
   const location = useLocation();
+  const { addToast, Toast, toastProps } = useToast();
 
   const {
     result: {
-      jobTemplates,
+      results,
       itemCount,
       actions,
       relatedSearchableKeys,
@@ -43,13 +47,12 @@ function ProjectJobTemplatesList() {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      params.project = projectId;
       const [response, actionsResponse] = await Promise.all([
-        JobTemplatesAPI.read(params),
+        JobTemplatesAPI.read(mergeParams(params, searchParams)),
         JobTemplatesAPI.readOptions(),
       ]);
       return {
-        jobTemplates: response.data.results,
+        results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
         relatedSearchableKeys: (
@@ -57,9 +60,9 @@ function ProjectJobTemplatesList() {
         ).map((val) => val.slice(0, -8)),
         searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
-    }, [location, projectId]),
+    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
     {
-      jobTemplates: [],
+      results: [],
       itemCount: 0,
       actions: {},
       relatedSearchableKeys: [],
@@ -71,8 +74,13 @@ function ProjectJobTemplatesList() {
     fetchTemplates();
   }, [fetchTemplates]);
 
+  const jobTemplates = useWsTemplates(results);
+
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
     useSelected(jobTemplates);
+
+  const { expanded, isAllExpanded, handleExpand, expandAll } =
+    useExpanded(jobTemplates);
 
   const {
     isLoading: isDeleteLoading,
@@ -94,6 +102,18 @@ function ProjectJobTemplatesList() {
     }
   );
 
+  const handleCopy = useCallback(
+    (newTemplateId) => {
+      addToast({
+        id: newTemplateId,
+        title: t`Template copied successfully`,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+    },
+    [addToast]
+  );
+
   const handleTemplateDelete = async () => {
     await deleteTemplates();
     clearSelected();
@@ -104,6 +124,10 @@ function ProjectJobTemplatesList() {
 
   const addButton = (
     <ToolbarAddButton key="add" linkTo="/templates/job_template/add/" />
+  );
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.template(
+    selected[0]
   );
 
   return (
@@ -131,14 +155,32 @@ function ProjectJobTemplatesList() {
               name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
+            {
+              name: t`Playbook name`,
+              key: 'job_template__playbook__icontains',
+            },
+            {
+              name: t`Label`,
+              key: 'labels__name__icontains',
+            },
           ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG} isExpandable>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="type">{t`Type`}</HeaderCell>
+              <HeaderCell>{t`Recent jobs`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
+            </HeaderRow>
+          }
           renderToolbar={(props) => (
             <DatalistToolbar
               {...props}
               isAllSelected={isAllSelected}
               onSelectAll={selectAll}
+              isAllExpanded={isAllExpanded}
+              onExpandAll={expandAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAddJT ? [addButton] : []),
@@ -147,32 +189,37 @@ function ProjectJobTemplatesList() {
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
                   pluralizedItemName={t`Job templates`}
+                  deleteDetailsRequests={deleteDetailsRequests}
+                  deleteMessage={
+                    <Plural
+                      value={selected.length}
+                      one="This template is currently being used by some workflow nodes. Are you sure you want to delete it?"
+                      other="Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?"
+                    />
+                  }
                 />,
               ]}
             />
           )}
-          headerRow={
-            <HeaderRow qsConfig={QS_CONFIG}>
-              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-              <HeaderCell sortKey="type">{t`Type`}</HeaderCell>
-              <HeaderCell>{t`Recent jobs`}</HeaderCell>
-              <HeaderCell>{t`Actions`}</HeaderCell>
-            </HeaderRow>
-          }
           renderRow={(template, index) => (
-            <ProjectTemplatesListItem
+            <TemplateListItem
               key={template.id}
               value={template.name}
               template={template}
-              detailUrl={`/templates/${template.type}/${template.id}/details`}
+              detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
+              isExpanded={expanded.some((row) => row.id === template.id)}
+              onExpand={() => handleExpand(template)}
+              onCopy={handleCopy}
               isSelected={selected.some((row) => row.id === template.id)}
+              fetchTemplates={fetchTemplates}
               rowIndex={index}
             />
           )}
           emptyStateControls={canAddJT && addButton}
         />
       </Card>
+      <Toast {...toastProps} />
       <AlertModal
         isOpen={deletionError}
         variant="danger"
@@ -186,4 +233,4 @@ function ProjectJobTemplatesList() {
   );
 }
 
-export default ProjectJobTemplatesList;
+export default RelatedTemplateList;
