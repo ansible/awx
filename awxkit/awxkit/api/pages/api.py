@@ -100,7 +100,13 @@ class ApiV2(base.Base):
             else:
                 if post_fields[key]['type'] == 'id' and _page.json.get(key) is not None:
                     log.warning("Related link %r missing from %s, attempting to reconstruct endpoint.", key, _page.endpoint)
-                    resource = getattr(self, key, None)
+                    res_pattern, resource = getattr(resources, key, None), None
+                    if res_pattern:
+                        try:
+                            top_level = res_pattern.split('/')[3]
+                            resource = getattr(self, top_level, None)
+                        except IndexError:
+                            pass
                     if resource is None:
                         log.error("Unable to infer endpoint for %r on %s.", key, _page.endpoint)
                         continue
