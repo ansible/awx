@@ -1,1 +1,1 @@
-from .core import all_collectors, register, gather, ship  # noqa
+from .analytics_collector import AnalyticsCollector

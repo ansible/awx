@@ -64,7 +64,7 @@ from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper
 from awx.main.consumers import emit_channel_notification
-from awx.main import analytics
+from awx.main.analytics import AnalyticsCollector
 from awx.conf import settings_registry
 from awx.main.analytics.subsystem_metrics import Metrics
 
@@ -439,7 +439,7 @@ def gather_analytics():
     gather_time = now()
 
     if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
-        analytics.gather()
+        AnalyticsCollector(collection_type=AnalyticsCollector.SCHEDULED_COLLECTION).gather()
 
 
 @task(queue=get_local_queuename)
