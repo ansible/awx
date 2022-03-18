@@ -5,7 +5,7 @@ import json
 from uuid import uuid4
 
 from django.conf import settings
-from django_guid.middleware import GuidMiddleware
+from django_guid import get_guid
 
 from . import pg_bus_conn
 
@@ -76,7 +76,7 @@ class task:
                     logger.error(msg)
                     raise ValueError(msg)
                 obj = {'uuid': task_id, 'args': args, 'kwargs': kwargs, 'task': cls.name}
-                guid = GuidMiddleware.get_guid()
+                guid = get_guid()
                 if guid:
                     obj['guid'] = guid
                 obj.update(**kw)

@@ -61,6 +61,7 @@ jest.mock('axios', () => ({
     },
   }),
 }));
+jest.mock('hooks/useTitle');
 
 afterEach(() => {
   if (networkRequestUrl) {

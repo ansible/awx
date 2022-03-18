@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 
@@ -19,7 +19,6 @@ from solo.models import SingletonModel
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
-from awx.main.fields import JSONField
 from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
@@ -253,7 +252,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
         if uuid is not None and self.uuid != uuid:
             if self.uuid is not None:
-                logger.warn(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
+                logger.warning(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
             self.uuid = uuid
             update_fields.append('uuid')
 
@@ -328,8 +327,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     )
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
-    policy_instance_list = JSONField(
-        default=[], blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
+    policy_instance_list = models.JSONField(
+        default=list, blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 
     POLICY_FIELDS = frozenset(('policy_instance_list', 'policy_instance_minimum', 'policy_instance_percentage'))

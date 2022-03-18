@@ -2,7 +2,7 @@ import json
 import re
 import logging
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import iri_to_uri
 
 

@@ -15,8 +15,8 @@ from django.apps import apps
 from django.db import models
 from django.conf import settings
 
+from django_guid import get_guid
 from django_guid.log_filters import CorrelationId
-from django_guid.middleware import GuidMiddleware
 
 from awx import MODE
 from awx.main.constants import LOGGER_BLOCKLIST
@@ -188,13 +188,11 @@ class SmartFilter(object):
         '''
 
         def _json_path_to_contains(self, k, v):
-            from awx.main.fields import JSONBField  # avoid a circular import
-
             if not k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP):
                 v = self.strip_quotes_traditional_logic(v)
                 return (k, v)
 
-            for match in JSONBField.get_lookups().keys():
+            for match in models.JSONField.get_lookups().keys():
                 match = '__{}'.format(match)
                 if k.endswith(match):
                     if match == '__exact':
@@ -368,7 +366,7 @@ class SmartFilter(object):
 
 class DefaultCorrelationId(CorrelationId):
     def filter(self, record):
-        guid = GuidMiddleware.get_guid() or '-'
+        guid = get_guid() or '-'
         if MODE == 'development':
             guid = guid[:8]
         record.guid = guid

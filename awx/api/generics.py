@@ -10,18 +10,18 @@ import urllib.parse
 
 # Django
 from django.conf import settings
+from django.contrib.auth import views as auth_views
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.core.exceptions import FieldDoesNotExist
 from django.db import connection
-from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth import views as auth_views
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable, UnsupportedMediaType
@@ -93,10 +93,10 @@ class LoggedLoginView(auth_views.LoginView):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
         if request.user.is_authenticated:
-            logger.info(smart_text(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
+            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
             ret.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
-            current_user = smart_text(JSONRenderer().render(current_user.data))
+            current_user = smart_str(JSONRenderer().render(current_user.data))
             current_user = urllib.parse.quote('%s' % current_user, '')
             ret.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
             ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
@@ -104,7 +104,7 @@ class LoggedLoginView(auth_views.LoginView):
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warn(smart_text(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
+                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
             ret.status_code = 401
             return ret
 
@@ -392,8 +392,8 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             if hasattr(self.model._meta, "verbose_name"):
                 d.update(
                     {
-                        'model_verbose_name': smart_text(self.model._meta.verbose_name),
-                        'model_verbose_name_plural': smart_text(self.model._meta.verbose_name_plural),
+                        'model_verbose_name': smart_str(self.model._meta.verbose_name),
+                        'model_verbose_name_plural': smart_str(self.model._meta.verbose_name_plural),
                     }
                 )
             serializer = self.get_serializer()
@@ -524,8 +524,8 @@ class SubListAPIView(ParentMixin, ListAPIView):
         d = super(SubListAPIView, self).get_description_context()
         d.update(
             {
-                'parent_model_verbose_name': smart_text(self.parent_model._meta.verbose_name),
-                'parent_model_verbose_name_plural': smart_text(self.parent_model._meta.verbose_name_plural),
+                'parent_model_verbose_name': smart_str(self.parent_model._meta.verbose_name),
+                'parent_model_verbose_name_plural': smart_str(self.parent_model._meta.verbose_name_plural),
             }
         )
         return d

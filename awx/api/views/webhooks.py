@@ -4,7 +4,7 @@ import logging
 import urllib.parse
 
 from django.utils.encoding import force_bytes
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status

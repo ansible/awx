@@ -9,8 +9,8 @@ import urllib.parse as urlparse
 # Django
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str, smart_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
@@ -38,7 +38,6 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.fields import JSONField
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -214,7 +213,7 @@ class ProjectOptions(models.Model):
                 for filename in filenames:
                     playbook = could_be_playbook(project_path, dirpath, filename)
                     if playbook is not None:
-                        results.append(smart_text(playbook))
+                        results.append(smart_str(playbook))
         return sorted(results, key=lambda x: smart_str(x).lower())
 
     @property
@@ -230,7 +229,7 @@ class ProjectOptions(models.Model):
                 for filename in filenames:
                     inv_path = could_be_inventory(project_path, dirpath, filename)
                     if inv_path is not None:
-                        results.append(smart_text(inv_path))
+                        results.append(smart_str(inv_path))
                         if len(results) > max_inventory_listing:
                             break
                 if len(results) > max_inventory_listing:
@@ -294,17 +293,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('The last revision fetched by a project update'),
     )
 
-    playbook_files = JSONField(
+    playbook_files = models.JSONField(
+        default=list,
         blank=True,
-        default=[],
         editable=False,
         verbose_name=_('Playbook Files'),
         help_text=_('List of playbooks found in the project'),
     )
 
-    inventory_files = JSONField(
+    inventory_files = models.JSONField(
+        default=list,
         blank=True,
-        default=[],
         editable=False,
         verbose_name=_('Inventory Files'),
         help_text=_('Suggested list of content that could be Ansible inventory in the project'),

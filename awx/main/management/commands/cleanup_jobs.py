@@ -11,13 +11,12 @@ import re
 # Django
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction, connection
+from django.db.models import Min, Max
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
 from django.utils.timezone import now
 
 # AWX
 from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob, Notification
-from awx.main.signals import disable_activity_stream, disable_computed_fields
-
-from awx.main.utils.deletion import AWXCollector, pre_delete
 
 
 def unified_job_class_to_event_table_name(job_class):
@@ -80,7 +79,6 @@ class DeleteMeta:
         ).count()
 
     def identify_excluded_partitions(self):
-
         part_drop = {}
 
         for pk, status, created in self.jobs_qs:
@@ -94,7 +92,7 @@ class DeleteMeta:
         # Note that parts_no_drop _may_ contain the names of partitions that don't exist
         # This can happen when the cleanup of _unpartitioned_* logic leaves behind jobs with status pending, waiting, running. The find_jobs_to_delete() will
         # pick these jobs up.
-        self.parts_no_drop = set([k for k, v in part_drop.items() if v is False])
+        self.parts_no_drop = {k for k, v in part_drop.items() if v is False}
 
     def delete_jobs(self):
         if not self.dry_run:
@@ -116,7 +114,7 @@ class DeleteMeta:
         partitions_dt = [p for p in partitions_dt if not None]
 
         # convert datetime partition back to string partition
-        partitions_maybe_drop = set([dt_to_partition_name(tbl_name, dt) for dt in partitions_dt])
+        partitions_maybe_drop = {dt_to_partition_name(tbl_name, dt) for dt in partitions_dt}
 
         # Do not drop partition if there is a job that will not be deleted pointing at it
         self.parts_to_drop = partitions_maybe_drop - self.parts_no_drop
@@ -164,6 +162,15 @@ class Command(BaseCommand):
         parser.add_argument('--notifications', dest='only_notifications', action='store_true', default=False, help='Remove notifications')
         parser.add_argument('--workflow-jobs', default=False, action='store_true', dest='only_workflow_jobs', help='Remove workflow jobs')
 
+    def init_logging(self):
+        log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
+        self.logger = logging.getLogger('awx.main.commands.cleanup_jobs')
+        self.logger.setLevel(log_levels.get(self.verbosity, 0))
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter('%(message)s'))
+        self.logger.addHandler(handler)
+        self.logger.propagate = False
+
     def cleanup(self, job_class):
         delete_meta = DeleteMeta(self.logger, job_class, self.cutoff, self.dry_run)
         skipped, deleted = delete_meta.delete()
@@ -193,7 +200,7 @@ class Command(BaseCommand):
         return (delete_meta.jobs_no_delete_count, delete_meta.jobs_to_delete_count)
 
     def _cascade_delete_job_events(self, model, pk_list):
-        if len(pk_list) > 0:
+        if pk_list:
             with connection.cursor() as cursor:
                 tblname = unified_job_class_to_event_table_name(model)
 
@@ -202,37 +209,30 @@ class Command(BaseCommand):
                 cursor.execute(f"DELETE FROM _unpartitioned_{tblname} WHERE {rel_name} IN ({pk_list_csv})")
 
     def cleanup_jobs(self):
-        skipped, deleted = 0, 0
+        batch_size = 100000
 
-        batch_size = 1000000
+        # Hack to avoid doing N+1 queries as each item in the Job query set does
+        # an individual query to get the underlying UnifiedJob.
+        Job.polymorphic_super_sub_accessors_replaced = True
 
-        while True:
-            # get queryset for available jobs to remove
-            qs = Job.objects.filter(created__lt=self.cutoff).exclude(status__in=['pending', 'waiting', 'running'])
-            # get pk list for the first N (batch_size) objects
-            pk_list = qs[0:batch_size].values_list('pk', flat=True)
-            # You cannot delete queries with sql LIMIT set, so we must
-            # create a new query from this pk_list
-            qs_batch = Job.objects.filter(pk__in=pk_list)
-            just_deleted = 0
-            if not self.dry_run:
+        skipped = (Job.objects.filter(created__gte=self.cutoff) | Job.objects.filter(status__in=['pending', 'waiting', 'running'])).count()
+
+        qs = Job.objects.select_related('unifiedjob_ptr').filter(created__lt=self.cutoff).exclude(status__in=['pending', 'waiting', 'running'])
+        if self.dry_run:
+            deleted = qs.count()
+            return skipped, deleted
+
+        deleted = 0
+        info = qs.aggregate(min=Min('id'), max=Max('id'))
+        if info['min'] is not None:
+            for start in range(info['min'], info['max'] + 1, batch_size):
+                qs_batch = qs.filter(id__gte=start, id__lte=start + batch_size)
+                pk_list = qs_batch.values_list('id', flat=True)
+
+                _, results = qs_batch.delete()
+                deleted += results['main.Job']
                 self._cascade_delete_job_events(Job, pk_list)
 
-                del_query = pre_delete(qs_batch)
-                collector = AWXCollector(del_query.db)
-                collector.collect(del_query)
-                _, models_deleted = collector.delete()
-                if models_deleted:
-                    just_deleted = models_deleted['main.Job']
-                deleted += just_deleted
-            else:
-                just_deleted = 0  # break from loop, this is dry run
-                deleted = qs.count()
-
-            if just_deleted == 0:
-                break
-
-        skipped += (Job.objects.filter(created__gte=self.cutoff) | Job.objects.filter(status__in=['pending', 'waiting', 'running'])).count()
         return skipped, deleted
 
     def cleanup_ad_hoc_commands(self):
@@ -339,15 +339,6 @@ class Command(BaseCommand):
         skipped += SystemJob.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
-    def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
-        self.logger = logging.getLogger('awx.main.commands.cleanup_jobs')
-        self.logger.setLevel(log_levels.get(self.verbosity, 0))
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
     def cleanup_workflow_jobs(self):
         skipped, deleted = 0, 0
         workflow_jobs = WorkflowJob.objects.filter(created__lt=self.cutoff)
@@ -398,6 +389,7 @@ class Command(BaseCommand):
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
             raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
+
         model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs', 'workflow_jobs', 'notifications')
         models_to_cleanup = set()
         for m in model_names:
@@ -405,18 +397,28 @@ class Command(BaseCommand):
                 models_to_cleanup.add(m)
         if not models_to_cleanup:
             models_to_cleanup.update(model_names)
-        with disable_activity_stream(), disable_computed_fields():
-            for m in model_names:
-                if m in models_to_cleanup:
-                    skipped, deleted = getattr(self, 'cleanup_%s' % m)()
 
-                    func = getattr(self, 'cleanup_%s_partition' % m, None)
-                    if func:
-                        skipped_partition, deleted_partition = func()
-                        skipped += skipped_partition
-                        deleted += deleted_partition
+        # Completely disconnect all signal handlers.  This is very aggressive,
+        # but it will be ok since this command is run in its own process.  The
+        # core of the logic is borrowed from Signal.disconnect().
+        for s in (pre_save, post_save, pre_delete, post_delete, m2m_changed):
+            with s.lock:
+                del s.receivers[:]
+                s.sender_receivers_cache.clear()
 
-                    if self.dry_run:
-                        self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
-                    else:
-                        self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)
+        for m in model_names:
+            if m not in models_to_cleanup:
+                continue
+
+            skipped, deleted = getattr(self, 'cleanup_%s' % m)()
+
+            func = getattr(self, 'cleanup_%s_partition' % m, None)
+            if func:
+                skipped_partition, deleted_partition = func()
+                skipped += skipped_partition
+                deleted += deleted_partition
+
+            if self.dry_run:
+                self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
+            else:
+                self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)

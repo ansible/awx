@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import sys
 import logging
 import os
 from django.db import models
@@ -104,10 +103,6 @@ class InstanceManager(models.Manager):
 
     def me(self):
         """Return the currently active instance."""
-        # If we are running unit tests, return a stub record.
-        if settings.IS_TESTING(sys.argv) or hasattr(sys, '_called_from_test'):
-            return self.model(id=1, hostname=settings.CLUSTER_HOST_ID, uuid=UUID_DEFAULT)
-
         node = self.filter(hostname=settings.CLUSTER_HOST_ID)
         if node.exists():
             return node[0]
@@ -247,7 +242,7 @@ class InstanceGroupManager(models.Manager):
             if t.controller_node:
                 control_groups = instance_ig_mapping.get(t.controller_node, [])
                 if not control_groups:
-                    logger.warn(f"No instance group found for {t.controller_node}, capacity consumed may be innaccurate.")
+                    logger.warning(f"No instance group found for {t.controller_node}, capacity consumed may be innaccurate.")
 
             if t.status == 'waiting' or (not t.execution_node and not t.is_container_group_task):
                 # Subtract capacity from any peer groups that share instances

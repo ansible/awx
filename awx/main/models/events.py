@@ -10,13 +10,13 @@ from django.db import models, DatabaseError, connection
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import force_str
 
 from awx.api.versioning import reverse
 from awx.main import consumers
+from awx.main.fields import JSONBlob
 from awx.main.managers import DeferJobCreatedManager
-from awx.main.fields import JSONField
 from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
@@ -209,10 +209,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         max_length=100,
         choices=EVENT_CHOICES,
     )
-    event_data = JSONField(
-        blank=True,
-        default=dict,
-    )
+    event_data = JSONBlob(default=dict, blank=True)
     failed = models.BooleanField(
         default=False,
         editable=False,
@@ -396,7 +393,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
                     connection.on_commit(_send_notifications)
 
         for field in ('playbook', 'play', 'task', 'role'):
-            value = force_text(event_data.get(field, '')).strip()
+            value = force_str(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
         if settings.LOG_AGGREGATOR_ENABLED:
@@ -648,10 +645,7 @@ class BaseCommandEvent(CreatedModifiedModel):
     class Meta:
         abstract = True
 
-    event_data = JSONField(
-        blank=True,
-        default=dict,
-    )
+    event_data = JSONBlob(default=dict, blank=True)
     uuid = models.CharField(
         max_length=1024,
         default='',

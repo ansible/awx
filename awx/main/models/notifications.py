@@ -10,8 +10,8 @@ from django.db import models
 from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.db import connection
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str, force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str, force_str
 from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
@@ -28,7 +28,6 @@ from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.grafana_backend import GrafanaBackend
 from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
-from awx.main.fields import JSONField
 
 
 logger = logging.getLogger('awx.main.models.notifications')
@@ -70,12 +69,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = prevent_search(JSONField(blank=False))
+    notification_configuration = prevent_search(models.JSONField(default=dict))
 
     def default_messages():
         return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
-    messages = JSONField(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
+    messages = models.JSONField(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
 
     def has_message(self, condition):
         potential_template = self.messages.get(condition, {})
@@ -187,7 +186,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def display_notification_configuration(self):
         field_val = self.notification_configuration.copy()
         for field in self.notification_class.init_parameters:
-            if field in field_val and force_text(field_val[field]).startswith('$encrypted$'):
+            if field in field_val and force_str(field_val[field]).startswith('$encrypted$'):
                 field_val[field] = '$encrypted$'
         return field_val
 
@@ -237,7 +236,7 @@ class Notification(CreatedModifiedModel):
         default='',
         editable=False,
     )
-    body = JSONField(blank=True)
+    body = models.JSONField(default=dict, null=True, blank=True)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)
@@ -515,7 +514,7 @@ class JobNotificationMixin(object):
         try:
             notification_templates = self.get_notification_templates()
         except Exception:
-            logger.warn("No notification template defined for emitting notification")
+            logger.warning("No notification template defined for emitting notification")
             return
 
         if not notification_templates:

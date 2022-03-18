@@ -27,7 +27,7 @@ import { isAuthenticated } from 'util/auth';
 import { getLanguageWithoutRegionCode } from 'util/language';
 import Metrics from 'screens/Metrics';
 import SubscriptionEdit from 'screens/Setting/Subscription/SubscriptionEdit';
-import { RootAPI } from 'api';
+import useTitle from 'hooks/useTitle';
 import { dynamicActivate, locales } from './i18nLoader';
 import getRouteConfig from './routeConfig';
 import { SESSION_REDIRECT_URL } from './constants';
@@ -150,16 +150,7 @@ function App() {
     dynamicActivate(language);
   }, [language]);
 
-  useEffect(() => {
-    async function fetchBrandName() {
-      const {
-        data: { BRAND_NAME },
-      } = await RootAPI.readAssetVariables();
-
-      document.title = BRAND_NAME;
-    }
-    fetchBrandName();
-  }, []);
+  useTitle();
 
   const redirectURL = window.sessionStorage.getItem(SESSION_REDIRECT_URL);
   if (redirectURL) {

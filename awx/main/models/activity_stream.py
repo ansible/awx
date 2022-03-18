@@ -3,14 +3,13 @@
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import JSONField
 from awx.main.models.base import accepts_json
 
 # Django
 from django.db import models
 from django.conf import settings
 from django.utils.encoding import smart_str
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 __all__ = ['ActivityStream']
 
@@ -36,7 +35,7 @@ class ActivityStream(models.Model):
     operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     changes = accepts_json(models.TextField(blank=True))
-    deleted_actor = JSONField(null=True)
+    deleted_actor = models.JSONField(null=True)
     action_node = models.CharField(
         blank=True,
         default='',
@@ -84,7 +83,7 @@ class ActivityStream(models.Model):
     o_auth2_application = models.ManyToManyField("OAuth2Application", blank=True)
     o_auth2_access_token = models.ManyToManyField("OAuth2AccessToken", blank=True)
 
-    setting = JSONField(blank=True)
+    setting = models.JSONField(default=dict, null=True, blank=True)
 
     def __str__(self):
         operation = self.operation if 'operation' in self.__dict__ else '_delayed_'

@@ -11,7 +11,7 @@ import time
 from django.conf import LazySettings
 from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import pytest
 
 from awx.conf import models, fields

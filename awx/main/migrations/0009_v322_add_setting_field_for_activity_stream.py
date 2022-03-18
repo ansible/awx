@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations
-import awx.main.fields
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activitystream',
             name='setting',
-            field=awx.main.fields.JSONField(default=dict, blank=True),
+            field=models.JSONField(default=dict, null=True, blank=True),
         ),
     ]

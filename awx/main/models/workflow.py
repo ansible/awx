@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 # Django
 from django.db import connection, models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 # from django import settings as tower_settings
@@ -40,7 +40,6 @@ from awx.main.models.mixins import (
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
-from awx.main.fields import JSONField
 from awx.main.utils import schedule_task_manager
 
 
@@ -232,9 +231,10 @@ class WorkflowJobNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
-    ancestor_artifacts = JSONField(
-        blank=True,
+    ancestor_artifacts = models.JSONField(
         default=dict,
+        null=True,
+        blank=True,
         editable=False,
     )
     do_not_run = models.BooleanField(

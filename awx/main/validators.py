@@ -6,7 +6,7 @@ import base64
 import re
 
 # Django
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
 # REST framework
@@ -198,7 +198,7 @@ def vars_validate_or_raise(vars_str):
 
 
 def validate_container_image_name(value):
-    """
+    r"""
     from https://github.com/distribution/distribution/blob/af8ac809336c2316c81b08605d92d94f8670ad15/reference/reference.go#L4
 
     Grammar

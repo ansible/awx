@@ -36,7 +36,6 @@ else:
     from django.db.backends.utils import names_digest
     from django.db import connection
 
-
 if HAS_DJANGO is True:
 
     # See upgrade blocker note in requirements/README.md

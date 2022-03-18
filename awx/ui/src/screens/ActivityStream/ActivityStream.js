@@ -20,6 +20,7 @@ import PaginatedTable, {
   getSearchableKeys,
 } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
+import useTitle from 'hooks/useTitle';
 import { getQSConfig, parseQueryString, updateQueryString } from 'util/qs';
 import { ActivityStreamAPI } from 'api';
 
@@ -31,6 +32,7 @@ function ActivityStream() {
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const location = useLocation();
   const history = useHistory();
+  useTitle(t`Activity Stream`);
   const urlParams = new URLSearchParams(location.search);
 
   const activityStreamType = urlParams.get('type') || 'all';

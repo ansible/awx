@@ -14,7 +14,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models, connection
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
@@ -29,7 +29,6 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
-    JSONBField,
     SmartFilterField,
     OrderedManyToManyField,
 )
@@ -488,7 +487,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this host.'),
     )
-    ansible_facts = JSONBField(
+    ansible_facts = models.JSONField(
         blank=True,
         default=dict,
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),

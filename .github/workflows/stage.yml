@@ -83,7 +83,8 @@ jobs:
       - name: Build and stage awx-operator
         working-directory: awx-operator
         run: |
-          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }}" \
+          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }} \
+                      --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
           IMAGE_TAG_BASE=ghcr.io/${{ github.repository_owner }}/awx-operator \
           VERSION=${{ github.event.inputs.operator_version }} make docker-build docker-push
 

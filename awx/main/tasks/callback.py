@@ -8,7 +8,7 @@ import stat
 # Django
 from django.utils.timezone import now
 from django.conf import settings
-from django_guid.middleware import GuidMiddleware
+from django_guid import get_guid
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -25,7 +25,7 @@ class RunnerCallback:
     def __init__(self, model=None):
         self.parent_workflow_job_id = None
         self.host_map = {}
-        self.guid = GuidMiddleware.get_guid()
+        self.guid = get_guid()
         self.job_created = None
         self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
         self.dispatcher = CallbackQueueDispatcher()
@@ -154,7 +154,7 @@ class RunnerCallback:
         if self.instance.cancel_flag or self.instance.status == 'canceled':
             cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
             if cancel_wait > 5:
-                logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
+                logger.warning('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
             return True
         return False
 
