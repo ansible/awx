@@ -54,6 +54,7 @@ DEPENDENT_EXPORT = [
     ('InventorySource', 'schedules'),
     ('Inventory', 'groups'),
     ('Inventory', 'hosts'),
+    ('Inventory', 'labels'),
 ]
 
 
