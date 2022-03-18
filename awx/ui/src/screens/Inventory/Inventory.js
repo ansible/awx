@@ -16,6 +16,7 @@ import ContentLoading from 'components/ContentLoading';
 import JobList from 'components/JobList';
 import RoutedTabs from 'components/RoutedTabs';
 import { ResourceAccessList } from 'components/ResourceAccessList';
+import RelatedTemplateList from 'components/RelatedTemplateList';
 import { InventoriesAPI } from 'api';
 import InventoryDetail from './InventoryDetail';
 import InventoryEdit from './InventoryEdit';
@@ -69,6 +70,7 @@ function Inventory({ setBreadcrumb }) {
       link: `${match.url}/jobs`,
       id: 5,
     },
+    { name: t`Job Templates`, link: `${match.url}/job_templates`, id: 6 },
   ];
 
   if (hasContentLoading) {
@@ -170,6 +172,14 @@ function Inventory({ setBreadcrumb }) {
                 additionalRelatedSearchableKeys={[
                   'inventoryupdate__inventory_source__inventory',
                 ]}
+              />
+            </Route>,
+            <Route
+              path="/inventories/inventory/:id/job_templates"
+              key="job_templates"
+            >
+              <RelatedTemplateList
+                searchParams={{ inventory__id: inventory.id }}
               />
             </Route>,
             <Route path="*" key="not-found">
