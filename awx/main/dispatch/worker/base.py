@@ -138,6 +138,7 @@ class AWXConsumerPG(AWXConsumerBase):
         super().__init__(*args, **kwargs)
         self.pg_down_time = 0.0
         self.pg_is_down = False
+        self.pg_max_wait = 60.0
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
@@ -163,12 +164,17 @@ class AWXConsumerPG(AWXConsumerBase):
                 continue
             except (db.DatabaseError, psycopg2.OperationalError):
                 if not self.pg_is_down:
-                    logger.exception("Postgres error processing tasks")
+                    logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")
                     self.pg_down_time = time.time()
                     self.pg_is_down = True
-                if time.time() - self.pg_down_time > 60.0:
-                    logger.warning("Postgres is still down, exiting")
+                if time.time() - self.pg_down_time > self.pg_max_wait:
+                    logger.warning(f"Postgres event consumer has not recovered in {self.pg_max_wait} s, exiting")
                     return
+                # Wait for a second before next attempt, but still listen for any shutdown signals
+                for i in range(10):
+                    if self.should_stop:
+                        return
+                    time.sleep(0.1)
 
 
 class BaseWorker(object):
