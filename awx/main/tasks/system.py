@@ -138,6 +138,11 @@ def migrate_json_fields_expensive(table, columns):
         # See: https://docs.djangoproject.com/en/3.1/ref/schema-editor/
 
         for colname in columns:
+            # Avoid duplicate trigger if re-running
+            schema_editor.execute(f"drop trigger if exists {table}_{colname}_trigger on {table};")
+            # Avoid duplicate column if re-running
+            schema_editor.execute(f"alter table {table} drop column if exists _{colname};")
+
             f = model._meta.get_field(colname)
             _, _, args, kwargs = f.deconstruct()
             kwargs['null'] = True
@@ -155,9 +160,9 @@ def migrate_json_fields_expensive(table, columns):
                     create or replace function update_{table}_{colname}()
                       returns trigger as $body$
                       begin
-                        new._{colname} = new.{colname}::jsonb
+                        new._{colname} = new.{colname}::jsonb;
                         return new;
-                      end
+                      end;
                       $body$ language plpgsql;
                     """
                 )
@@ -167,15 +172,27 @@ def migrate_json_fields_expensive(table, columns):
                       before insert or update
                       on {table}
                       for each row
-                      execute procedure update_{table}_{colname};
+                      execute function update_{table}_{colname}();
                     """
                 )
 
     # Phase 2: copy over the data
     with connection.cursor() as cursor:
         rows = 0
+        cursor.execute(
+            f"""
+            SELECT a.attname
+            FROM   pg_index i
+            JOIN   pg_attribute a ON a.attrelid = i.indrelid
+               AND a.attnum = ANY(i.indkey)
+            WHERE  i.indrelid = '{table}'::regclass
+            AND    i.indisprimary;
+            """
+        )
+        table_id = cursor.fetchone()[0]
+
         for i in itertools.count(0, batchsize):
-            cursor.execute(f"select count(1) from {table} where id >= %s;", (i,))
+            cursor.execute(f"select count(1) from {table} where {table_id} >= %s;", (i,))
             if not cursor.fetchone()[0]:
                 break
 
@@ -184,7 +201,7 @@ def migrate_json_fields_expensive(table, columns):
                 f"""
                 update {table}
                   set {column_expr}
-                  where id >= %s and id < %s;
+                  where {table_id} >= %s and {table_id} < %s;
                 """,
                 (i, i + batchsize),
             )
@@ -199,7 +216,7 @@ def migrate_json_fields_expensive(table, columns):
         # FIXME: Grab a lock explicitly here?
         for colname in columns:
             with connection.cursor() as cursor:
-                cursor.execute(f"drop trigger {table}_{colname}_trigger;")
+                cursor.execute(f"drop trigger {table}_{colname}_trigger on {table};")
                 cursor.execute(f"drop function update_{table}_{colname};")
 
             f = model._meta.get_field(colname)
@@ -238,7 +255,7 @@ def migrate_json_fields(table, expensive, columns):
             migrate_json_fields_expensive(table, columns)
         else:
             with connection.cursor() as cursor:
-                column_expr = " ".join(f"ALTER {colname} TYPE jsonb" for colname in columns)
+                column_expr = ", ".join(f"ALTER {colname} TYPE jsonb USING {colname}::jsonb" for colname in columns)
                 cursor.execute(f"ALTER TABLE {table} {column_expr};")
 
     logger.warning(f"Migration of {table} to jsonb is finished")
