@@ -7,7 +7,7 @@ import time
 logger = logging.getLogger('awx.main.tasks.utils')
 
 
-def update_model(model, pk, _attempt=0, **updates):
+def update_model(model, pk, _attempt=0, _max_attempts=5, **updates):
     """Reload the model instance from the database and update the
     given fields.
     """
@@ -33,8 +33,8 @@ def update_model(model, pk, _attempt=0, **updates):
 
         # Attempt to retry the update, assuming we haven't already
         # tried too many times.
-        if _attempt < 5:
+        if _attempt < _max_attempts:
             time.sleep(5)
-            return update_model(model, pk, _attempt=_attempt + 1, **updates)
+            return update_model(model, pk, _attempt=_attempt + 1, _max_attempts=_max_attempts, **updates)
         else:
             logger.error('Failed to update %s after %d retries.', model._meta.object_name, _attempt)

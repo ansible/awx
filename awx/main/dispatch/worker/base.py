@@ -138,7 +138,7 @@ class AWXConsumerPG(AWXConsumerBase):
         super().__init__(*args, **kwargs)
         self.pg_down_time = 0.0
         self.pg_is_down = False
-        self.pg_max_wait = 60.0
+        self.pg_max_wait = settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
@@ -156,9 +156,9 @@ class AWXConsumerPG(AWXConsumerBase):
                         init = True
                     for e in conn.events():
                         self.process_task(json.loads(e.payload))
+                        self.pg_is_down = False
                     if self.should_stop:
                         return
-                    self.pg_is_down = False
             except psycopg2.InterfaceError:
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
@@ -175,6 +175,8 @@ class AWXConsumerPG(AWXConsumerBase):
                     if self.should_stop:
                         return
                     time.sleep(0.1)
+                for conn in db.connections.all():
+                    conn.close_if_unusable_or_obsolete()
 
 
 class BaseWorker(object):
