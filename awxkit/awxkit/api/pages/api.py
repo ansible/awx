@@ -245,6 +245,10 @@ class ApiV2(base.Base):
                         # JTs have valid options for playbook names
                         _page.wait_until_completed()
                 else:
+                    # If we are an existing project and our scm_tpye is not changing don't try and import the local_path setting
+                    if asset['natural_key']['type'] == 'project' and 'local_path' in post_data and _page['scm_type'] == post_data['scm_type']:
+                        del post_data['local_path']
+
                     _page = _page.put(post_data)
                     changed = True
             except (exc.Common, AssertionError) as e:
