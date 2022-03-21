@@ -31,7 +31,7 @@ const QS_CONFIG = getQSConfig('instance', {
   order_by: 'hostname',
 });
 
-function InstanceList() {
+function InstanceList({ instanceGroup }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
   const { id: instanceGroupId } = useParams();
@@ -224,13 +224,15 @@ function InstanceList() {
                   ]
                 : []),
               <DisassociateButton
-                verifyCannotDisassociate={selected.some(
-                  (s) => s.node_type === 'control'
-                )}
+                verifyCannotDisassociate={
+                  selected.some((s) => s.node_type === 'control') ||
+                  instanceGroup.name === 'controlplane'
+                }
                 key="disassociate"
                 onDisassociate={handleDisassociate}
                 itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from instance group?`}
+                isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               />,
               <HealthCheckButton
                 isDisabled={!canAdd}

@@ -301,3 +301,17 @@ def test_instance_group_unattach_from_instance(post, instance_group, node_type_i
         assert new_activity.instance_group.first() == instance_group
     else:
         assert not new_activity
+
+
+@pytest.mark.django_db
+def test_cannot_remove_controlplane_hybrid_instances(post, controlplane_instance_group, node_type_instance, admin_user):
+    instance = node_type_instance(hostname='hybrid_node', node_type='hybrid')
+    controlplane_instance_group.instances.add(instance)
+
+    url = reverse('api:instance_group_instance_list', kwargs={'pk': controlplane_instance_group.pk})
+    r = post(url, {'disassociate': True, 'id': instance.id}, admin_user, expect=400)
+    assert 'Cannot disassociate hybrid node' in str(r.data)
+
+    url = reverse('api:instance_instance_groups_list', kwargs={'pk': instance.pk})
+    r = post(url, {'disassociate': True, 'id': controlplane_instance_group.id}, admin_user, expect=400)
+    assert f'Cannot disassociate hybrid instance' in str(r.data)

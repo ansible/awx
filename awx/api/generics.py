@@ -638,6 +638,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # attaching/detaching them from the parent.
 
     def is_valid_relation(self, parent, sub, created=False):
+        "Override in subclasses to do efficient validation of attaching"
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        "Same as is_valid_relation but called on disassociation"
         return None
 
     def get_description_context(self):
@@ -721,6 +726,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         if not request.user.can_access(self.parent_model, 'unattach', parent, sub, self.relationship, request.data):
             raise PermissionDenied()
+
+        # Verify that removing the relationship is valid.
+        unattach_errors = self.is_valid_removal(parent, sub)
+        if unattach_errors is not None:
+            return Response(unattach_errors, status=status.HTTP_400_BAD_REQUEST)
 
         if parent_key:
             sub.delete()
