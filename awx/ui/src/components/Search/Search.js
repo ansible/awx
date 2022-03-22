@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -65,6 +65,26 @@ function Search({
   const [searchValue, setSearchValue] = useState('');
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
+  const params = parseQueryString(qsConfig, location.search);
+  if (params?.host_filter) {
+    params.ansible_facts = params.host_filter.substring(
+      'ansible_facts__'.length
+    );
+    delete params.host_filter;
+  }
+
+  const searchChips = getChipsByKey(params, columns, qsConfig);
+  const [chipsByKey, setChipsByKey] = useState(
+    JSON.parse(JSON.stringify(searchChips))
+  );
+
+  useEffect(() => {
+    Object.keys(chipsByKey).forEach((el) => {
+      chipsByKey[el].chips = [];
+    });
+    setChipsByKey({ ...chipsByKey, ...searchChips });
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleDropdownSelect = ({ target }) => {
     const { key: actualSearchKey } = columns.find(
       ({ name }) => name === target.innerText
@@ -97,15 +117,6 @@ function Search({
       onRemove(key, actualValue);
     }
   };
-
-  const params = parseQueryString(qsConfig, location.search);
-  if (params?.host_filter) {
-    params.ansible_facts = params.host_filter.substring(
-      'ansible_facts__'.length
-    );
-    delete params.host_filter;
-  }
-  const chipsByKey = getChipsByKey(params, columns, qsConfig);
 
   const { name: searchColumnName } = columns.find(
     ({ key }) => key === searchKey
@@ -179,7 +190,7 @@ function Search({
                 onSelect={(event, selection) =>
                   handleFilterDropdownSelect(key, event, selection)
                 }
-                selections={chipsByKey[key].chips.map((chip) => {
+                selections={chipsByKey[key]?.chips.map((chip) => {
                   const [, ...value] = chip.key.split(':');
                   return value.join(':');
                 })}
@@ -258,7 +269,6 @@ function Search({
       {/* Add a ToolbarFilter for any key that doesn't have it's own
       search column so the chips show up */}
       {Object.keys(chipsByKey)
-        .filter((val) => chipsByKey[val].chips.length > 0)
         .filter((val) => columns.map((val2) => val2.key).indexOf(val) === -1)
         .map((leftoverKey) => (
           <ToolbarFilter
