@@ -13,11 +13,13 @@ if [ -z $AWX_IGNORE_USER ] ; then
 	if [ -d ./pre-commit-user ] ; then
 		for SCRIPT in `find ./pre-commit-user -name "*.sh" -executable` ; do
 			echo "Running user pre-commit hook $SCRIPT"
-			$SCRIPT || (echo "User test $SCRIPT failed" && FAIL=1)
-			echo "fail is $FAIL"
+			$SCRIPT
+			if [ $? != 0 ] ; then
+				echo "User test $SCRIPT failed"
+			       	FAIL=1
+			fi
 		done
 	fi
-	echo "Final fail $FAIL"
 	if [ $FAIL == 1 ] ; then
 		echo "One or more user tests failed, see messages above"
 		exit 1
