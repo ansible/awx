@@ -307,12 +307,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='artifacts',
-            field=models.JSONField(default=dict, editable=False, null=True, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, null=True, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
             name='ancestor_artifacts',
-            field=models.JSONField(default=dict, editable=False, null=True, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, null=True, blank=True),
         ),
         # Job timeout settings
         migrations.AddField(
@@ -557,7 +557,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='job',
             name='artifacts',
-            field=models.JSONField(default=dict, editable=False, null=True, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='job',
@@ -607,7 +607,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='workflowjobnode',
             name='ancestor_artifacts',
-            field=models.JSONField(default=dict, editable=False, null=True, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='workflowjobnode',

@@ -141,7 +141,6 @@ def convert_jsonfields_to_jsonb():
         )),
         ('main_job', True, (
             'survey_passwords',  # NN
-            'artifacts',  # NN
         )),
         ('main_joblaunchconfig', True, (
             'extra_data',  # NN
@@ -160,7 +159,6 @@ def convert_jsonfields_to_jsonb():
         )),
         ('main_workflowjobnode', True, (
             'char_prompts',  # NN
-            'ancestor_artifacts',  # NN
             'extra_data',  # NN
             'survey_passwords',  # NN
         )),
