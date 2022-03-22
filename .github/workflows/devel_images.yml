@@ -1,9 +1,10 @@
 ---
-name: Push Development Image
+name: Build/Push Development Images
 on:
   push:
     branches:
       - devel
+      - release_*
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -28,11 +29,14 @@ jobs:
       - name: Pre-pull image to warm build cache
         run: |
           docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_kube_devel:${GITHUB_REF##*/}
 
-      - name: Build image
+      - name: Build images
         run: |
           DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-dev-build
 
       - name: Push image
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
+          docker push ghcr.io/${{ github.repository_owner }}/awx_kube_devel:${GITHUB_REF##*/}
