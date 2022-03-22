@@ -111,7 +111,7 @@ When you attempt to perform a `git commit` there will be a pre-commit hook that 
 
 While you can use environment variables to skip the pre-commit hooks GitHub will run similar tests and prevent merging of PRs if the tests do not pass.
 
- If you would like to add additional commit hooks for your own usage you can create a directory in the root of the repository called `pre-commit-user`. Any executable "*.sh" file in that directory will be executed as part of the pre-commit hooks. If any of the pre-commit checks fail the commit will be halted. For your convenience in user scripts, a variable called `CHANGED_FILES` will be set with any changed files present in the commit.
+ If you would like to add additional commit hooks for your own usage you can create a directory in the root of the repository called `pre-commit-user`. Any executable file in that directory will be executed as part of the pre-commit hooks. If any of the pre-commit checks fail the commit will be halted. For your convenience in user scripts, a variable called `CHANGED_FILES` will be set with any changed files present in the commit.
 
 ## What should I work on?
 

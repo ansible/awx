@@ -11,7 +11,7 @@ if [ -z $AWX_IGNORE_USER ] ; then
 	FAIL=0
 	export CHANGED_FILES=$(git diff --cached --name-only --diff-filter=AM)
 	if [ -d ./pre-commit-user ] ; then
-		for SCRIPT in `find ./pre-commit-user -name "*.sh" -executable` ; do
+		for SCRIPT in `find ./pre-commit-user -executable -type f` ; do
 			echo "Running user pre-commit hook $SCRIPT"
 			$SCRIPT
 			if [ $? != 0 ] ; then
