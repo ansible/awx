@@ -211,7 +211,7 @@ function ProjectFormFields({
         validated={
           !scmTypeMeta.touched || !scmTypeMeta.error ? 'default' : 'error'
         }
-        label={t`Source Control Credential Type`}
+        label={t`Source Control Type`}
       >
         <AnsibleSelect
           {...scmTypeField}

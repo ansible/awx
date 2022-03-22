@@ -121,9 +121,9 @@ describe('<ProjectForm />', () => {
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
-    expect(
-      wrapper.find('FormGroup[label="Source Control Credential Type"]').length
-    ).toBe(1);
+    expect(wrapper.find('FormGroup[label="Source Control Type"]').length).toBe(
+      1
+    );
     expect(wrapper.find('FormGroup[label="Ansible Environment"]').length).toBe(
       0
     );
@@ -291,7 +291,7 @@ describe('<ProjectForm />', () => {
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
     const scmTypeSelect = wrapper.find(
-      'FormGroup[label="Source Control Credential Type"] FormSelect'
+      'FormGroup[label="Source Control Type"] FormSelect'
     );
     await act(async () => {
       scmTypeSelect.invoke('onChange')('svn', {
