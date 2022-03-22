@@ -8,9 +8,18 @@ if [ -z $AWX_IGNORE_BLACK ] ; then
 fi
 
 if [ -z $AWX_IGNORE_USER ] ; then
+	FAIL=0
+	export CHANGED_FILES=$(git diff --cached --name-only --diff-filter=AM)
 	if [ -d ./pre-commit-user ] ; then
 		for SCRIPT in `find ./pre-commit-user -name "*.sh" -executable` ; do
-			$SCRIPT || exit 1
+			echo "Running user pre-commit hook $SCRIPT"
+			$SCRIPT || (echo "User test $SCRIPT failed" && FAIL=1)
+			echo "fail is $FAIL"
 		done
+	fi
+	echo "Final fail $FAIL"
+	if [ $FAIL == 1 ] ; then
+		echo "One or more user tests failed, see messages above"
+		exit 1
 	fi
 fi
