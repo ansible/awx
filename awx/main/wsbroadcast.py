@@ -71,7 +71,7 @@ class WebsocketTask:
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
-        self.subsystem_metrics = s_metrics.Metrics()
+        self.subsystem_metrics = s_metrics.Metrics(instance_name=name)
 
     async def run_loop(self, websocket: aiohttp.ClientWebSocketResponse):
         raise RuntimeError("Implement me")

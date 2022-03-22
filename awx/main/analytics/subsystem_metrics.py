@@ -136,7 +136,7 @@ class HistogramM(BaseM):
 
 
 class Metrics:
-    def __init__(self, auto_pipe_execute=True):
+    def __init__(self, auto_pipe_execute=True, instance_name=None):
         self.pipe = redis.Redis.from_url(settings.BROKER_URL).pipeline()
         self.conn = redis.Redis.from_url(settings.BROKER_URL)
         self.last_pipe_execute = time.time()
@@ -150,7 +150,10 @@ class Metrics:
         # the calling function should call .pipe_execute() explicitly
         self.auto_pipe_execute = auto_pipe_execute
         Instance = apps.get_model('main', 'Instance')
-        self.instance_name = Instance.objects.me().hostname
+        if instance_name:
+            self.instance_name = instance_name
+        else:
+            self.instance_name = Instance.objects.me().hostname
 
         # metric name, help_text
         METRICSLIST = [
