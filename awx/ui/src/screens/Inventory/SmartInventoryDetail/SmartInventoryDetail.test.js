@@ -41,7 +41,7 @@ describe('<SmartInventoryDetail />', () => {
       await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
-    afterAll(() => {
+    afterEach(() => {
       jest.clearAllMocks();
     });
 

@@ -43,7 +43,7 @@ describe('<SmartInventoryForm />', () => {
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -182,22 +182,28 @@ describe('<SmartInventoryForm />', () => {
   });
 
   test('should throw content error when option request fails', async () => {
-    let newWrapper;
-    InventoriesAPI.readOptions.mockImplementationOnce(() =>
-      Promise.reject(new Error())
+    InventoriesAPI.readOptions.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'options',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
     );
     await act(async () => {
-      newWrapper = mountWithContexts(
+      wrapper = mountWithContexts(
         <SmartInventoryForm onCancel={() => {}} onSubmit={() => {}} />
       );
     });
-    expect(newWrapper.find('ContentError').length).toBe(0);
-    newWrapper.update();
-    expect(newWrapper.find('ContentError').length).toBe(1);
-    jest.clearAllMocks();
+
+    wrapper.update();
+    expect(wrapper.find('ContentError').length).toBe(1);
   });
 
-  test('should throw content error when option request fails', async () => {
+  test('should show form error when API returns a submission error', async () => {
     let newWrapper;
     const error = {
       response: {

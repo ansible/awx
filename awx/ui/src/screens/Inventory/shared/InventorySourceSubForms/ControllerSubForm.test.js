@@ -37,7 +37,7 @@ describe('<ControllerSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

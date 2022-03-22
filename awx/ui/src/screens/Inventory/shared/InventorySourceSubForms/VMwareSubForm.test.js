@@ -43,7 +43,7 @@ describe('<VMwareSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

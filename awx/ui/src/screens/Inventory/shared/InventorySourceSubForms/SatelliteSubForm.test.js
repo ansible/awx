@@ -37,7 +37,7 @@ describe('<SatelliteSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

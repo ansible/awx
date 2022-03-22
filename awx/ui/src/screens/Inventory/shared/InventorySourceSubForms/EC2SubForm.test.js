@@ -44,7 +44,7 @@ describe('<EC2SubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

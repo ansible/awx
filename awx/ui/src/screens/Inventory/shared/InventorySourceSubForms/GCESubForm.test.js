@@ -43,7 +43,7 @@ describe('<GCESubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

@@ -37,7 +37,7 @@ describe('<OpenStackSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

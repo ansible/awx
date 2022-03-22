@@ -37,7 +37,7 @@ describe('<InsightsSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

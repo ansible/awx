@@ -64,8 +64,7 @@ describe('<SmartInventoryAdd />', () => {
       await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     });
 
-    afterAll(() => {
-      global.console.error = consoleError;
+    afterEach(() => {
       jest.clearAllMocks();
     });
 

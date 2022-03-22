@@ -38,8 +38,10 @@
     "@babel/eslint-parser": "^7.16.5",
     "@babel/eslint-plugin": "^7.16.5",
     "@babel/plugin-syntax-jsx": "7.16.7",
+    "@babel/plugin-transform-runtime": "^7.17.0",
     "@babel/polyfill": "^7.8.7",
-    "@babel/preset-react": "7.16.7",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
     "@cypress/instrument-cra": "^1.4.0",
     "@lingui/cli": "^3.7.1",
     "@lingui/loader": "^3.8.3",
@@ -48,7 +50,8 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.5",
-    "babel-plugin-macros": "3.1.0",
+    "babel-jest": "^27.5.1",
+    "babel-plugin-macros": "^3.1.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",
@@ -62,6 +65,7 @@
     "eslint-plugin-react": "7.28.0",
     "eslint-plugin-react-hooks": "4.3.0",
     "http-proxy-middleware": "^1.0.3",
+    "jest": "^27.5.1",
     "jest-websocket-mock": "^2.0.2",
     "mock-socket": "^9.0.3",
     "prettier": "2.3.2",
@@ -76,7 +80,7 @@
     "start": "GENERATE_SOURCEMAP=false ESLINT_NO_DEV_ERRORS=true PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
     "start-instrumented": "ESLINT_NO_DEV_ERRORS=true DEBUG=instrument-cra PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts -r @cypress/instrument-cra start",
     "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
-    "test": "TZ='UTC' react-scripts test --watchAll=false",
+    "test": "TZ='UTC' jest --watchAll=false",
     "test-screens": "TZ='UTC' react-scripts test screens --watchAll=false",
     "test-general": "TZ='UTC' react-scripts test --testPathIgnorePatterns='<rootDir>/src/screens/' --watchAll=false",
     "test-watch": "TZ='UTC' react-scripts test",
@@ -101,6 +105,23 @@
     ]
   },
   "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "./src/setupTests.js"
+    ],
+    "roots": [
+      "<rootDir>"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|styl|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js"
+    },
+    "modulePaths": [
+      "<rootDir>"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
     "snapshotSerializers": [
       "enzyme-to-json/serializer"
     ],

@@ -43,7 +43,7 @@ describe('<AzureSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

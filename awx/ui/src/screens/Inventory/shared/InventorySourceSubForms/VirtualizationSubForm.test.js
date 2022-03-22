@@ -38,7 +38,7 @@ describe('<VirtualizationSubForm />', () => {
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

@@ -123,7 +123,7 @@ class TestAsyncComponent extends Component {
 }
 
 describe('waitForElement', () => {
-  it('waits for the element and returns it', async done => {
+  it('waits for the element and returns it', async () => {
     const selector = '#test-async-component';
     const wrapper = mountWithContexts(<TestAsyncComponent />);
     expect(wrapper.exists(selector)).toEqual(false);
@@ -131,10 +131,9 @@ describe('waitForElement', () => {
     const elem = await waitForElement(wrapper, selector);
     expect(elem.props().id).toEqual('test-async-component');
     expect(wrapper.exists(selector)).toEqual(true);
-    done();
   });
 
-  it("eventually throws an error for elements that don't exist", async done => {
+  it("eventually throws an error for elements that don't exist", async () => {
     const wrapper = mountWithContexts(<div />);
 
     let error;
@@ -147,7 +146,6 @@ describe('waitForElement', () => {
         'Expected condition for <#does-not-exist> not met'
       );
       expect(error.message).toContain('el.length === 1');
-      done();
     }
   });
 });
