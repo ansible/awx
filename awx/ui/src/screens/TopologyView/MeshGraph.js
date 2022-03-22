@@ -39,15 +39,23 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   const history = useHistory();
 
   const draw = () => {
+    let width;
+    let height;
     setShowZoomControls(false);
-    const width = getWidth(SELECTOR);
-    const height = getHeight(SELECTOR);
+    try {
+      width = getWidth(SELECTOR);
+      height = getHeight(SELECTOR);
+    } catch (error) {
+      width = 700;
+      height = 600;
+    }
 
     /* Add SVG */
     d3.selectAll(`#chart > svg`).remove();
     const svg = d3
       .select('#chart')
       .append('svg')
+      .attr('aria-label', 'mesh-svg')
       .attr('class', 'mesh-svg')
       .attr('width', `${width}px`)
       .attr('height', `100%`);

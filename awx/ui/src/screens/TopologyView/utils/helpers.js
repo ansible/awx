@@ -8,34 +8,49 @@ import {
   LABEL_TEXT_MAX_LENGTH,
 } from '../constants';
 
+export function getWidth(selector) {
+  return selector ? d3.select(selector).node().clientWidth : 700;
+}
+
+export function getHeight(selector) {
+  return selector ? d3.select(selector).node().clientHeight : 600;
+}
+
 export function renderStateColor(nodeState) {
-  return NODE_STATE_COLOR_KEY[nodeState];
+  return NODE_STATE_COLOR_KEY[nodeState] ? NODE_STATE_COLOR_KEY[nodeState] : '';
 }
 
 export function renderLabelText(nodeState, name) {
-  return `${NODE_STATE_HTML_ENTITY_KEY[nodeState]}  ${truncateString(
-    name,
-    LABEL_TEXT_MAX_LENGTH
-  )}`;
+  if (typeof nodeState === 'string' && typeof name === 'string') {
+    return NODE_STATE_HTML_ENTITY_KEY[nodeState]
+      ? `${NODE_STATE_HTML_ENTITY_KEY[nodeState]} ${truncateString(
+          name,
+          LABEL_TEXT_MAX_LENGTH
+        )}`
+      : ` ${truncateString(name, LABEL_TEXT_MAX_LENGTH)}`;
+  }
+  return ``;
 }
 
 export function renderNodeType(nodeType) {
-  return NODE_TYPE_SYMBOL_KEY[nodeType];
+  return NODE_TYPE_SYMBOL_KEY[nodeType] ? NODE_TYPE_SYMBOL_KEY[nodeType] : ``;
 }
 
 export function renderNodeIcon(selectedNode) {
   if (selectedNode) {
     const { node_type: nodeType } = selectedNode;
-    return NODE_TYPE_SYMBOL_KEY[nodeType];
+    return NODE_TYPE_SYMBOL_KEY[nodeType] ? NODE_TYPE_SYMBOL_KEY[nodeType] : ``;
   }
-
   return false;
 }
 
 export function redirectToDetailsPage(selectedNode, history) {
-  const { id: nodeId } = selectedNode;
-  const constructedURL = `/instances/${nodeId}/details`;
-  history.push(constructedURL);
+  if (selectedNode && history) {
+    const { id: nodeId } = selectedNode;
+    const constructedURL = `/instances/${nodeId}/details`;
+    history.push(constructedURL);
+  }
+  return false;
 }
 
 // DEBUG TOOLS
@@ -79,11 +94,3 @@ export const generateRandomNodes = (n) => {
   }
   return generateRandomLinks(nodes, getRandomInt(1, n - 1));
 };
-
-export function getWidth(selector) {
-  return selector ? d3.select(selector).node().clientWidth : 700;
-}
-
-export function getHeight(selector) {
-  return selector !== null ? d3.select(selector).node().clientHeight : 600;
-}
