@@ -40,6 +40,7 @@ from awx.main.constants import (
     STANDARD_INVENTORY_UPDATE_ENV,
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
+    CONTAINER_VOLUMES_MOUNT_TYPES,
 )
 from awx.main.models import (
     Instance,
@@ -80,7 +81,7 @@ from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.tasks.system import handle_success_and_failure_notifications, update_smart_memberships_for_inventory, update_inventory_computed_fields
 from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -163,8 +164,14 @@ class BaseTask(object):
                 # Using z allows the dir to be mounted by multiple containers
                 # Uppercase Z restricts access (in weird ways) to 1 container at a time
                 if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
-                    src, dest, scontext = this_path.split(':')
-                    params['container_volume_mounts'].append(f'{src}:{dest}:{scontext}')
+                    src, dest, mount_option = this_path.split(':')
+
+                    # mount_option validation via performed via API, but since this can be overriden via settings.py
+                    if mount_option not in CONTAINER_VOLUMES_MOUNT_TYPES:
+                        mount_option = 'z'
+                        logger.warning(f'The path {this_path} has volume mount type {mount_option} which is not supported. Using "z" instead.')
+
+                    params['container_volume_mounts'].append(f'{src}:{dest}:{mount_option}')
                 elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
                     src, dest = this_path.split(':')
                     params['container_volume_mounts'].append(f'{src}:{dest}:z')
@@ -816,11 +823,12 @@ class RunJob(BaseTask):
         return job.playbook
 
     def build_extra_vars_file(self, job, private_data_dir):
-        # Define special extra_vars for AWX, combine with job.extra_vars.
-        extra_vars = job.awx_meta_vars()
-
+        extra_vars = dict()
+        # load in JT extra vars
         if job.extra_vars_dict:
             extra_vars.update(json.loads(job.decrypted_extra_vars()))
+        # load in meta vars, overriding any variable set in JT extra vars
+        extra_vars.update(job.awx_meta_vars())
 
         # By default, all extra vars disallow Jinja2 template usage for
         # security reasons; top level key-values defined in JT.extra_vars, however,
@@ -853,24 +861,6 @@ class RunJob(BaseTask):
                 vault_id = k.split('.', 1)[1]
                 d[r'Vault password \({}\):\s*?$'.format(vault_id)] = k
         return d
-
-    def build_execution_environment_params(self, instance, private_data_dir):
-        if settings.IS_K8S:
-            return {}
-
-        params = super(RunJob, self).build_execution_environment_params(instance, private_data_dir)
-        # If this has an insights agent and it is not already mounted then show it
-        insights_dir = os.path.dirname(settings.INSIGHTS_SYSTEM_ID_FILE)
-        if instance.use_fact_cache and os.path.exists(insights_dir):
-            logger.info('not parent of others')
-            params.setdefault('container_volume_mounts', [])
-            params['container_volume_mounts'].extend(
-                [
-                    f"{insights_dir}:{insights_dir}:Z",
-                ]
-            )
-
-        return params
 
     def pre_run_hook(self, job, private_data_dir):
         super(RunJob, self).pre_run_hook(job, private_data_dir)
@@ -1896,14 +1886,6 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
-        extra_vars = ad_hoc_command.awx_meta_vars()
-
-        if ad_hoc_command.extra_vars_dict:
-            redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
-            if removed_vars:
-                raise ValueError(_("{} are prohibited from use in ad hoc commands.").format(", ".join(removed_vars)))
-            extra_vars.update(ad_hoc_command.extra_vars_dict)
-
         if ad_hoc_command.limit:
             args.append(ad_hoc_command.limit)
         else:
@@ -1912,13 +1894,13 @@ class RunAdHocCommand(BaseTask):
         return args
 
     def build_extra_vars_file(self, ad_hoc_command, private_data_dir):
-        extra_vars = ad_hoc_command.awx_meta_vars()
-
+        extra_vars = dict()
         if ad_hoc_command.extra_vars_dict:
             redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
             if removed_vars:
                 raise ValueError(_("{} are prohibited from use in ad hoc commands.").format(", ".join(removed_vars)))
             extra_vars.update(ad_hoc_command.extra_vars_dict)
+        extra_vars.update(ad_hoc_command.awx_meta_vars())
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_module_name(self, ad_hoc_command):

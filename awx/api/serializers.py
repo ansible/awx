@@ -25,8 +25,8 @@ from django.contrib.auth.password_validation import validate_password as django_
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import force_str
 from django.utils.text import capfirst
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -97,7 +97,7 @@ from awx.main.models import (
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import get_roles_on_resource, role_summary_fields_generator
-from awx.main.fields import ImplicitRoleField, JSONBField
+from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model,
     get_model_for_type,
@@ -357,7 +357,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         }
         choices = []
         for t in self.get_types():
-            name = _(type_name_map.get(t, force_text(get_model_for_type(t)._meta.verbose_name).title()))
+            name = _(type_name_map.get(t, force_str(get_model_for_type(t)._meta.verbose_name).title()))
             choices.append((t, name))
         return choices
 
@@ -645,7 +645,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                         v2.extend(e)
                     else:
                         v2.append(e)
-                d[k] = list(map(force_text, v2))
+                d[k] = list(map(force_str, v2))
             raise ValidationError(d)
         return attrs
 
@@ -1263,6 +1263,12 @@ class OAuth2ApplicationSerializer(BaseSerializer):
                 activity_stream=self.reverse('api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.organization_id:
+            res.update(
+                dict(
+                    organization=self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id}),
+                )
+            )
         return res
 
     def get_modified(self, obj):
@@ -1718,7 +1724,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
     def validate_host_filter(self, host_filter):
         if host_filter:
             try:
-                for match in JSONBField.get_lookups().keys():
+                for match in models.JSONField.get_lookups().keys():
                     if match == 'exact':
                         # __exact is allowed
                         continue
@@ -1847,11 +1853,11 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_text(port))
+                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_str(port))
         return name, port
 
     def validate_name(self, value):
-        name = force_text(value or '')
+        name = force_str(value or '')
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
         return value
@@ -1865,13 +1871,13 @@ class HostSerializer(BaseSerializerWithVariables):
         return vars_validate_or_raise(value)
 
     def validate(self, attrs):
-        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         host, port = self._get_host_port_from_name(name)
 
         if port:
             attrs['name'] = host
-            variables = force_text(attrs.get('variables', self.instance and self.instance.variables or ''))
+            variables = force_str(attrs.get('variables', self.instance and self.instance.variables or ''))
             vars_dict = parse_yaml_or_json(variables)
             vars_dict['ansible_ssh_port'] = port
             attrs['variables'] = json.dumps(vars_dict)
@@ -1944,7 +1950,7 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
-        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Host with that name already exists.'))
@@ -2838,8 +2844,8 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
             playbook_not_found = bool(
-                (project and project.scm_type and (not project.allow_override) and playbook and force_text(playbook) not in project.playbook_files)
-                or (project and not project.scm_type and playbook and force_text(playbook) not in project.playbooks)  # manual
+                (project and project.scm_type and (not project.allow_override) and playbook and force_str(playbook) not in project.playbook_files)
+                or (project and not project.scm_type and playbook and force_str(playbook) not in project.playbooks)  # manual
             )
             if playbook_not_found:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
@@ -3628,7 +3634,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
-    diff_mode = serializers.NullBooleanField(required=False, default=None)
+    diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
     exclude_errors = ()
 
@@ -4850,6 +4856,11 @@ class InstanceSerializer(BaseSerializer):
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
+    def validate(self, attrs):
+        if self.instance.node_type == 'hop':
+            raise serializers.ValidationError(_('Hop node instances may not be changed.'))
+        return attrs
+
 
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
@@ -4936,6 +4947,9 @@ class InstanceGroupSerializer(BaseSerializer):
         return res
 
     def validate_policy_instance_list(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if self.instance.policy_instance_list != value:
+                raise serializers.ValidationError(_('%s instance group policy_instance_list may not be changed.' % self.instance.name))
         for instance_name in value:
             if value.count(instance_name) > 1:
                 raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
@@ -4946,6 +4960,11 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_policy_instance_percentage(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if value != self.instance.policy_instance_percentage:
+                raise serializers.ValidationError(
+                    _('%s instance group policy_instance_percentage may not be changed from the initial value set by the installer.' % self.instance.name)
+                )
         if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
@@ -4961,6 +4980,13 @@ class InstanceGroupSerializer(BaseSerializer):
 
         if self.instance and self.instance.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and value != settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
             raise serializers.ValidationError(_('%s instance group name may not be changed.' % settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME))
+
+        return value
+
+    def validate_is_container_group(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if value != self.instance.is_container_group:
+                raise serializers.ValidationError(_('%s instance group is_container_group may not be changed.' % self.instance.name))
 
         return value
 
@@ -5078,7 +5104,7 @@ class ActivityStreamSerializer(BaseSerializer):
         try:
             return json.loads(obj.changes)
         except Exception:
-            logger.warn("Error deserializing activity stream json changes")
+            logger.warning("Error deserializing activity stream json changes")
         return {}
 
     def get_object_association(self, obj):

@@ -73,6 +73,10 @@ describe('<AdHocCommands />', () => {
           adHocItems={adHocItems}
           hasListItems
           onLaunchLoading={() => jest.fn()}
+          moduleOptions={[
+            ['command', 'command'],
+            ['shell', 'shell'],
+          ]}
         />
       );
     });

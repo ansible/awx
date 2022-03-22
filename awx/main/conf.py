@@ -2,7 +2,7 @@
 import logging
 
 # Django
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework import serializers
@@ -329,6 +329,19 @@ register(
     help_text=_(
         'Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead '
         'to infinite recursion if a link points to a parent directory of itself.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_MOUNT_ISOLATED_PATHS_ON_K8S',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Expose host paths for Container Groups'),
+    help_text=_(
+        'Expose paths via hostPath for the Pods created by a Container Group. '
+        'HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. '
     ),
     category=_('Jobs'),
     category_slug='jobs',

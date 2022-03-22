@@ -5,7 +5,7 @@ import re
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.functional import Promise
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from openapi_codec.encode import generate_swagger_object
 import pytest
@@ -16,9 +16,9 @@ from awx.api.versioning import drf_reverse
 class i18nEncoder(DjangoJSONEncoder):
     def default(self, obj):
         if isinstance(obj, Promise):
-            return force_text(obj)
+            return force_str(obj)
         if type(obj) == bytes:
-            return force_text(obj)
+            return force_str(obj)
         return super(i18nEncoder, self).default(obj)
 
 

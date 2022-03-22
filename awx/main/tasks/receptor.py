@@ -7,8 +7,6 @@ import logging
 import os
 import shutil
 import socket
-import sys
-import threading
 import time
 import yaml
 
@@ -26,6 +24,8 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
+from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
+
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -164,7 +164,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
         if settings.RECEPTOR_RELEASE_WORK:
             res = receptor_ctl.simple_command(f"work release {unit_id}")
             if res != {'released': unit_id}:
-                logger.warn(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
+                logger.warning(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
 
         receptor_ctl.close()
 
@@ -247,16 +247,6 @@ def worker_cleanup(node_name, vargs, timeout=300.0):
     return stdout
 
 
-class TransmitterThread(threading.Thread):
-    def run(self):
-        self.exc = None
-
-        try:
-            super().run()
-        except Exception:
-            self.exc = sys.exc_info()
-
-
 class AWXReceptorJob:
     def __init__(self, task, runner_params=None):
         self.task = task
@@ -296,46 +286,47 @@ class AWXReceptorJob:
         # reading.
         sockin, sockout = socket.socketpair()
 
-        transmitter_thread = TransmitterThread(target=self.transmit, args=[sockin])
-        transmitter_thread.start()
-
-        # submit our work, passing
-        # in the right side of our socketpair for reading.
-        _kw = {}
+        # Prepare the submit_work kwargs before creating threads, because references to settings are not thread-safe
+        work_submit_kw = dict(worktype=self.work_type, params=self.receptor_params, signwork=self.sign_work)
         if self.work_type == 'ansible-runner':
-            _kw['node'] = self.task.instance.execution_node
-            use_stream_tls = get_conn_type(_kw['node'], receptor_ctl).name == "STREAMTLS"
-            _kw['tlsclient'] = get_tls_client(use_stream_tls)
-        result = receptor_ctl.submit_work(worktype=self.work_type, payload=sockout.makefile('rb'), params=self.receptor_params, signwork=self.sign_work, **_kw)
-        self.unit_id = result['unitid']
-        # Update the job with the work unit in-memory so that the log_lifecycle
-        # will print out the work unit that is to be associated with the job in the database
-        # via the update_model() call.
-        # We want to log the work_unit_id as early as possible. A failure can happen in between
-        # when we start the job in receptor and when we associate the job <-> work_unit_id.
-        # In that case, there will be work running in receptor and Controller will not know
-        # which Job it is associated with.
-        # We do not programatically handle this case. Ideally, we would handle this with a reaper case.
-        # The two distinct job lifecycle log events below allow for us to at least detect when this
-        # edge case occurs. If the lifecycle event work_unit_id_received occurs without the
-        # work_unit_id_assigned event then this case may have occured.
-        self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
-        self.task.instance.log_lifecycle("work_unit_id_received")
-        self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
-        self.task.instance.log_lifecycle("work_unit_id_assigned")
+            work_submit_kw['node'] = self.task.instance.execution_node
+            use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
+            work_submit_kw['tlsclient'] = get_tls_client(use_stream_tls)
 
-        sockin.close()
-        sockout.close()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            transmitter_future = executor.submit(self.transmit, sockin)
 
-        if transmitter_thread.exc:
-            raise transmitter_thread.exc[1].with_traceback(transmitter_thread.exc[2])
+            # submit our work, passing in the right side of our socketpair for reading.
+            result = receptor_ctl.submit_work(payload=sockout.makefile('rb'), **work_submit_kw)
 
-        transmitter_thread.join()
+            sockin.close()
+            sockout.close()
+
+            self.unit_id = result['unitid']
+            # Update the job with the work unit in-memory so that the log_lifecycle
+            # will print out the work unit that is to be associated with the job in the database
+            # via the update_model() call.
+            # We want to log the work_unit_id as early as possible. A failure can happen in between
+            # when we start the job in receptor and when we associate the job <-> work_unit_id.
+            # In that case, there will be work running in receptor and Controller will not know
+            # which Job it is associated with.
+            # We do not programatically handle this case. Ideally, we would handle this with a reaper case.
+            # The two distinct job lifecycle log events below allow for us to at least detect when this
+            # edge case occurs. If the lifecycle event work_unit_id_received occurs without the
+            # work_unit_id_assigned event then this case may have occured.
+            self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
+            self.task.instance.log_lifecycle("work_unit_id_received")
+            self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
+            self.task.instance.log_lifecycle("work_unit_id_assigned")
+
+        # Throws an exception if the transmit failed.
+        # Will be caught by the try/except in BaseTask#run.
+        transmitter_future.result()
 
         # Artifacts are an output, but sometimes they are an input as well
         # this is the case with fact cache, where clearing facts deletes a file, and this must be captured
         artifact_dir = os.path.join(self.runner_params['private_data_dir'], 'artifacts')
-        if os.path.exists(artifact_dir):
+        if self.work_type != 'local' and os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
@@ -367,9 +358,9 @@ class AWXReceptorJob:
                     logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
-                    logger.warn(detail)
+                    logger.warning(detail)
                     log_name = self.task.instance.log_format
-                    logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
+                    logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
                 # If ansible-runner ran, but an error occured at runtime, the traceback information
@@ -389,7 +380,7 @@ class AWXReceptorJob:
                             self.task.instance.result_traceback = detail
                             self.task.instance.save(update_fields=['result_traceback'])
                         else:
-                            logger.warn(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
+                            logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
                     except Exception:
                         raise RuntimeError(detail)
 
@@ -487,6 +478,48 @@ class AWXReceptorJob:
         if self.task and self.task.instance.execution_environment:
             if self.task.instance.execution_environment.pull:
                 pod_spec['spec']['containers'][0]['imagePullPolicy'] = pull_options[self.task.instance.execution_environment.pull]
+
+        # This allows the user to also expose the isolated path list
+        # to EEs running in k8s/ocp environments, i.e. container groups.
+        # This assumes the node and SA supports hostPath volumes
+        # type is not passed due to backward compatibility,
+        # which means that no checks will be performed before mounting the hostPath volume.
+        if settings.AWX_MOUNT_ISOLATED_PATHS_ON_K8S and settings.AWX_ISOLATION_SHOW_PATHS:
+            spec_volume_mounts = []
+            spec_volumes = []
+
+            for idx, this_path in enumerate(settings.AWX_ISOLATION_SHOW_PATHS):
+                mount_option = None
+                if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
+                    src, dest, mount_option = this_path.split(':')
+                elif this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER - 1:
+                    src, dest = this_path.split(':')
+                else:
+                    src = dest = this_path
+
+                # Enforce read-only volume if 'ro' has been explicitly passed
+                # We do this so we can use the same configuration for regular scenarios and k8s
+                # Since flags like ':O', ':z' or ':Z' are not valid in the k8s realm
+                # Example: /data:/data:ro
+                read_only = bool('ro' == mount_option)
+
+                # Since type is not being passed, k8s by default will not perform any checks if the
+                # hostPath volume exists on the k8s node itself.
+                spec_volumes.append({'name': f'volume-{idx}', 'hostPath': {'path': src}})
+
+                spec_volume_mounts.append({'name': f'volume-{idx}', 'mountPath': f'{dest}', 'readOnly': read_only})
+
+            # merge any volumes definition already present in the pod_spec
+            if 'volumes' in pod_spec['spec']:
+                pod_spec['spec']['volumes'] += spec_volumes
+            else:
+                pod_spec['spec']['volumes'] = spec_volumes
+
+            # merge any volumesMounts definition already present in the pod_spec
+            if 'volumeMounts' in pod_spec['spec']['containers'][0]:
+                pod_spec['spec']['containers'][0]['volumeMounts'] += spec_volume_mounts
+            else:
+                pod_spec['spec']['containers'][0]['volumeMounts'] = spec_volume_mounts
 
         if self.task and self.task.instance.is_container_group_task:
             # If EE credential is passed, create an imagePullSecret

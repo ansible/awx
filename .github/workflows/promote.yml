@@ -8,6 +8,53 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout awx
+        uses: actions/checkout@v2
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
+
+      - name: Install dependencies
+        run: |
+          python${{ env.py_version }} -m pip install wheel twine
+
+      - name: Set official collection namespace
+        run: echo collection_namespace=awx >> $GITHUB_ENV
+        if: ${{ github.repository_owner == 'ansible' }}
+
+      - name: Set unofficial collection namespace
+        run: echo collection_namespace=${{ github.repository_owner }} >> $GITHUB_ENV
+        if: ${{ github.repository_owner != 'ansible' }}
+
+      - name: Build collection and publish to galaxy
+        run: |
+          COLLECTION_NAMESPACE=${{ env.collection_namespace }} make build_collection
+          ansible-galaxy collection publish \
+            --token=${{ secrets.GALAXY_TOKEN }} \
+            awx_collection_build/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz
+
+      - name: Set official pypi info
+        run: echo pypi_repo=pypi >> $GITHUB_ENV
+        if: ${{ github.repository_owner == 'ansible' }}
+
+      - name: Set unofficial pypi info
+        run: echo pypi_repo=testpypi >> $GITHUB_ENV
+        if: ${{ github.repository_owner != 'ansible' }}
+
+      - name: Build awxkit and upload to pypi
+        run: |
+          cd awxkit && python3 setup.py bdist_wheel
+          twine upload \
+            -r ${{ env.pypi_repo }} \
+            -u ${{ secrets.PYPI_USERNAME }} \
+            -p ${{ secrets.PYPI_PASSWORD }} \
+            dist/*
+
       - name: Log in to GHCR
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin

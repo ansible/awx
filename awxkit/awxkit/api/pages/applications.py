@@ -10,6 +10,7 @@ from . import base
 class OAuth2Application(HasCreate, base.Base):
 
     dependencies = [Organization]
+    NATURAL_KEY = ('organization', 'name')
 
     def payload(self, **kwargs):
         payload = PseudoNamespace(

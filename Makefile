@@ -13,6 +13,8 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
 # If set to true docker-compose will also start a keycloak instance
 KEYCLOAK ?= false
+# If set to true docker-compose will also start an ldap instance
+LDAP ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -305,13 +307,15 @@ symlink_collection:
 	mkdir -p ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)  # in case it does not exist
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
-build_collection:
+awx_collection_build: $(shell find awx_collection -type f)
 	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
 	  -e collection_version=$(COLLECTION_VERSION) \
 	  -e '{"awx_template_version":false}'
 	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
+
+build_collection: awx_collection_build
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
@@ -400,9 +404,18 @@ ui-lint:
 
 ui-test:
 	$(NPM_BIN) --prefix awx/ui install
-	$(NPM_BIN) run --prefix awx/ui test 
+	$(NPM_BIN) run --prefix awx/ui test
 
+ui-test-screens:
+	$(NPM_BIN) --prefix awx/ui install
+	$(NPM_BIN) run --prefix awx/ui pretest
+	$(NPM_BIN) run --prefix awx/ui test-screens --runInBand
 
+ui-test-general:
+	$(NPM_BIN) --prefix awx/ui install
+	$(NPM_BIN) run --prefix awx/ui pretest
+	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
+	
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
 	$(PYTHON) setup.py dev_build
@@ -451,7 +464,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
-	    -e enable_keycloak=$(KEYCLOAK)
+	    -e enable_keycloak=$(KEYCLOAK) \
+	    -e enable_ldap=$(LDAP)
 
 
 docker-compose: awx/projects docker-compose-sources
@@ -567,3 +581,6 @@ messages:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+
+print-%:
+	@echo $($*)

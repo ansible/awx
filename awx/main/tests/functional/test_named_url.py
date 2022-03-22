@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from unittest import mock
+
 import pytest
 
 from django.core.exceptions import ImproperlyConfigured
@@ -31,7 +33,7 @@ def setup_module(module):
     # in unit test environment. So it is wrapped by try-except block to mute any
     # unwanted exceptions.
     try:
-        URLModificationMiddleware()
+        URLModificationMiddleware(mock.Mock())
     except ImproperlyConfigured:
         pass
 

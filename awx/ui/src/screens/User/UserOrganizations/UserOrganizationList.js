@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('organizations', {
 
 function UserOrganizationList() {
   const location = useLocation();
-  const { id: userId } = useParams();
+  const { id } = useParams();
 
   const {
     result: { organizations, count, searchableKeys, relatedSearchableKeys },
@@ -36,8 +36,8 @@ function UserOrganizationList() {
         },
         actions,
       ] = await Promise.all([
-        UsersAPI.readOrganizations(userId, params),
-        UsersAPI.readOrganizationOptions(),
+        UsersAPI.readOrganizations(id, params),
+        UsersAPI.readOrganizationOptions(id),
       ]);
       return {
         searchableKeys: Object.keys(actions.data.actions?.GET || {}).filter(
@@ -49,7 +49,7 @@ function UserOrganizationList() {
         organizations: results,
         count: orgCount,
       };
-    }, [userId, location.search]),
+    }, [id, location.search]),
     {
       organizations: [],
       count: 0,

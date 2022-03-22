@@ -2,7 +2,11 @@
 
 import pytest
 
+# Django
+from django.core.exceptions import FieldDoesNotExist
+
 from rest_framework.exceptions import PermissionDenied, ParseError
+
 from awx.api.filters import FieldLookupBackend, OrderByBackend, get_field_from_path
 from awx.main.models import (
     AdHocCommand,
@@ -21,9 +25,6 @@ from awx.main.models import (
 )
 from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
-
-# Django
-from django.db.models.fields import FieldDoesNotExist
 
 
 def test_related():

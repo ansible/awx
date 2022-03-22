@@ -19,6 +19,7 @@ import ContentLoading from 'components/ContentLoading';
 import JobList from 'components/JobList';
 import { ResourceAccessList } from 'components/ResourceAccessList';
 import RoutedTabs from 'components/RoutedTabs';
+import RelatedTemplateList from 'components/RelatedTemplateList';
 import SmartInventoryDetail from './SmartInventoryDetail';
 import SmartInventoryEdit from './SmartInventoryEdit';
 import SmartInventoryHosts from './SmartInventoryHosts';
@@ -70,6 +71,7 @@ function SmartInventory({ setBreadcrumb }) {
       link: `${match.url}/jobs`,
       id: 3,
     },
+    { name: t`Job Templates`, link: `${match.url}/job_templates`, id: 4 },
   ];
 
   if (hasContentLoading) {
@@ -153,6 +155,14 @@ function SmartInventory({ setBreadcrumb }) {
                     inventory.id,
                   or__workflowjob__inventory: inventory.id,
                 }}
+              />
+            </Route>,
+            <Route
+              key="job_templates"
+              path="/inventories/smart_inventory/:id/job_templates"
+            >
+              <RelatedTemplateList
+                searchParams={{ inventory__id: inventory.id }}
               />
             </Route>,
             <Route key="not-found" path="*">

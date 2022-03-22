@@ -61,6 +61,7 @@ jest.mock('axios', () => ({
     },
   }),
 }));
+jest.mock('hooks/useTitle');
 
 afterEach(() => {
   if (networkRequestUrl) {
@@ -93,6 +94,7 @@ jest.doMock('./contexts/Config', () => ({
   Config: MockConfigContext.Consumer,
   useConfig: () => React.useContext(MockConfigContext),
   useAuthorizedPath: jest.fn(),
+  useUserProfile: jest.fn(),
 }));
 
 // ?

@@ -19,7 +19,7 @@ from django.db import models
 # from django.core.cache import cache
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import FieldDoesNotExist
 
 # REST Framework
@@ -44,7 +44,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
-from awx.main.fields import ImplicitRoleField, JSONField, AskForField
+from awx.main.fields import ImplicitRoleField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -546,9 +546,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         editable=False,
         through='JobHostSummary',
     )
-    artifacts = JSONField(
-        blank=True,
+    artifacts = models.JSONField(
         default=dict,
+        null=True,
+        blank=True,
         editable=False,
     )
     scm_revision = models.CharField(
@@ -885,7 +886,7 @@ class LaunchTimeConfigBase(BaseModel):
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
-    char_prompts = JSONField(blank=True, default=dict)
+    char_prompts = models.JSONField(default=dict, null=True, blank=True)
 
     def prompts_dict(self, display=False):
         data = {}
@@ -938,12 +939,13 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
         abstract = True
 
     # Special case prompting fields, even more special than the other ones
-    extra_data = JSONField(blank=True, default=dict)
+    extra_data = models.JSONField(default=dict, null=True, blank=True)
     survey_passwords = prevent_search(
-        JSONField(
-            blank=True,
+        models.JSONField(
             default=dict,
             editable=False,
+            null=True,
+            blank=True,
         )
     )
     # Credentials needed for non-unified job / unified JT models

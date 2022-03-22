@@ -59,6 +59,7 @@ class Resources(object):
     _inventory = r'inventories/\d+/'
     _inventory_access_list = r'inventories/\d+/access_list/'
     _inventory_copy = r'inventories/\d+/copy/'
+    _inventory_labels = r'inventories/\d+/labels/'
     _inventory_related_ad_hoc_commands = r'inventories/\d+/ad_hoc_commands/'
     _inventory_related_groups = r'inventories/\d+/groups/'
     _inventory_related_hosts = r'inventories/\d+/hosts/'

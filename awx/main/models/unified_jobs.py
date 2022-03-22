@@ -19,9 +19,9 @@ from collections import OrderedDict
 from django.conf import settings
 from django.db import models, connection
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
 
 # REST Framework
@@ -54,7 +54,7 @@ from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import JSONField, JSONBField, AskForField, OrderedManyToManyField
+from awx.main.fields import AskForField, OrderedManyToManyField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -357,7 +357,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         validated_kwargs = kwargs.copy()
         if unallowed_fields:
             if parent_field_name is None:
-                logger.warn('Fields {} are not allowed as overrides to spawn from {}.'.format(', '.join(unallowed_fields), self))
+                logger.warning('Fields {} are not allowed as overrides to spawn from {}.'.format(', '.join(unallowed_fields), self))
             for f in unallowed_fields:
                 validated_kwargs.pop(f)
 
@@ -653,9 +653,10 @@ class UnifiedJob(
         editable=False,
     )
     job_env = prevent_search(
-        JSONField(
-            blank=True,
+        models.JSONField(
             default=dict,
+            null=True,
+            blank=True,
             editable=False,
         )
     )
@@ -704,7 +705,7 @@ class UnifiedJob(
         'Credential',
         related_name='%(class)ss',
     )
-    installed_collections = JSONBField(
+    installed_collections = models.JSONField(
         blank=True,
         default=dict,
         editable=False,
@@ -1090,7 +1091,7 @@ class UnifiedJob(
                 # function assume a str-based fd will be returned; decode
                 # .write() calls on the fly to maintain this interface
                 _write = fd.write
-                fd.write = lambda s: _write(smart_text(s))
+                fd.write = lambda s: _write(smart_str(s))
                 tbl = self._meta.db_table + 'event'
                 created_by_cond = ''
                 if self.has_unpartitioned_events:
@@ -1205,7 +1206,7 @@ class UnifiedJob(
             try:
                 extra_data_dict = parse_yaml_or_json(extra_data, silent_failure=False)
             except Exception as e:
-                logger.warn("Exception deserializing extra vars: " + str(e))
+                logger.warning("Exception deserializing extra vars: " + str(e))
             evars = self.extra_vars_dict
             evars.update(extra_data_dict)
             self.update_fields(extra_vars=json.dumps(evars))
@@ -1273,7 +1274,7 @@ class UnifiedJob(
             id=self.id,
             name=self.name,
             url=self.get_ui_url(),
-            created_by=smart_text(self.created_by),
+            created_by=smart_str(self.created_by),
             started=self.started.isoformat() if self.started is not None else None,
             finished=self.finished.isoformat() if self.finished is not None else None,
             status=self.status,

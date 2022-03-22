@@ -18,6 +18,7 @@ function InventoryListItem({
   rowIndex,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchInventories,
 }) {
@@ -30,11 +31,14 @@ function InventoryListItem({
   const [isCopying, setIsCopying] = useState(false);
 
   const copyInventory = useCallback(async () => {
-    await InventoriesAPI.copy(inventory.id, {
+    const response = await InventoriesAPI.copy(inventory.id, {
       name: `${inventory.name} @ ${timeOfDay()}`,
     });
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchInventories();
-  }, [inventory.id, inventory.name, fetchInventories]);
+  }, [inventory.id, inventory.name, fetchInventories, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsCopying(true);

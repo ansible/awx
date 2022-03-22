@@ -45,10 +45,6 @@ SESSION_COOKIE_SECURE = False
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = False
 
-# Override django.template.loaders.cached.Loader in defaults.py
-template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None)  # noqa
-template['OPTIONS']['loaders'] = ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
-
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"

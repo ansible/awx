@@ -13,6 +13,7 @@ import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import { formatDateString } from 'util/dates';
+import { isJobRunning } from 'util/jobs';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 
 const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
@@ -64,6 +65,7 @@ function InventorySourceListItem({
           rowIndex,
           isSelected,
           onSelect,
+          disable: isJobRunning(source.status),
         }}
       />
       <TdBreakWord dataLabel={t`Name`}>

@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
 import requests
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 base_inputs = {
     'fields': [

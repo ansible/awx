@@ -52,12 +52,12 @@ of the awx-operator repo. If not, continue to the next section.
 ### Building and Deploying a Custom AWX Operator Image
 
 ```
-$ operator-sdk build quay.io/<username>/awx-operator
-$ docker push quay.io/<username>/awx-operator
-$ ansible-playbook ansible/deploy-operator.yml \
-    -e pull_policy=Always \
-    -e operator_image=quay.io/<username>/awx-operator \
-    -e operator_version=latest
+# in awx-operator repo on the branch you want to use
+$ export IMAGE_TAG_BASE=quay.io/<username>/awx-operator
+$ export VERSION=<cusom-tag>
+$ make docker-build
+$ docker push ${IMAGE_TAG_BASE}:${VERSION}
+$ make deploy
 ```
 
 ## Deploy AWX into Minikube using the AWX Operator

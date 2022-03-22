@@ -60,7 +60,7 @@ class AWXConsumerBase(object):
         return f'listening on {self.queues}'
 
     def control(self, body):
-        logger.warn(f'Received control signal:\n{body}')
+        logger.warning(f'Received control signal:\n{body}')
         control = body.get('control')
         if control in ('status', 'running'):
             reply_queue = body['reply_to']
@@ -118,7 +118,7 @@ class AWXConsumerBase(object):
 
     def stop(self, signum, frame):
         self.should_stop = True
-        logger.warn('received {}, stopping'.format(signame(signum)))
+        logger.warning('received {}, stopping'.format(signame(signum)))
         self.worker.on_stop()
         raise SystemExit()
 
@@ -153,7 +153,7 @@ class AWXConsumerPG(AWXConsumerBase):
                     if self.should_stop:
                         return
             except psycopg2.InterfaceError:
-                logger.warn("Stale Postgres message bus connection, reconnecting")
+                logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
 
 

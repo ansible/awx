@@ -16,13 +16,13 @@ from queue import Full as QueueFull, Empty as QueueEmpty
 from django.conf import settings
 from django.db import connection as django_connection, connections
 from django.core.cache import cache as django_cache
-from django_guid.middleware import GuidMiddleware
+from django_guid import set_guid
 from jinja2 import Template
 import psutil
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes
+from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -142,7 +142,7 @@ class PoolWorker(object):
                 # when this occurs, it's _fine_ to ignore this KeyError because
                 # the purpose of self.managed_tasks is to just track internal
                 # state of which events are *currently* being processed.
-                logger.warn('Event UUID {} appears to be have been duplicated.'.format(uuid))
+                logger.warning('Event UUID {} appears to be have been duplicated.'.format(uuid))
 
     @property
     def current_task(self):
@@ -291,8 +291,8 @@ class WorkerPool(object):
                 pass
             except Exception:
                 tb = traceback.format_exc()
-                logger.warn("could not write to queue %s" % preferred_queue)
-                logger.warn("detail: {}".format(tb))
+                logger.warning("could not write to queue %s" % preferred_queue)
+                logger.warning("detail: {}".format(tb))
             write_attempt_order.append(preferred_queue)
         logger.error("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
         return None
@@ -324,8 +324,9 @@ class AutoscalePool(WorkerPool):
                 total_memory_gb = convert_mem_str_to_bytes(settings_absmem) // 2**30
             else:
                 total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
-            # 5 workers per GB of total memory
-            self.max_workers = total_memory_gb * 5
+
+            # Get same number as max forks based on memory, this function takes memory as bytes
+            self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
@@ -435,7 +436,7 @@ class AutoscalePool(WorkerPool):
 
     def write(self, preferred_queue, body):
         if 'guid' in body:
-            GuidMiddleware.set_guid(body['guid'])
+            set_guid(body['guid'])
         try:
             # when the cluster heartbeat occurs, clean up internally
             if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:

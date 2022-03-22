@@ -56,31 +56,29 @@ function ResourceAccessList({ apiModel, resource }) {
 
       let orgRoles;
       if (location.pathname.includes('/organizations')) {
-        const {
-          data: { results: roles },
-        } = await RolesAPI.read({ content_type__isnull: true });
-        const sysAdmin = roles.filter(
-          (role) => role.name === 'System Administrator'
-        );
-        const sysAud = roles.filter((role) => {
-          let auditor;
-          if (role.name === 'System Auditor') {
-            auditor = role.id;
-          }
-          return auditor;
-        });
+        const [
+          {
+            data: { results: systemAdmin },
+          },
+          {
+            data: { results: systemAuditor },
+          },
+        ] = await Promise.all([
+          RolesAPI.read({ singleton_name: 'system_administrator' }),
+          RolesAPI.read({ singleton_name: 'system_auditor' }),
+        ]);
 
-        orgRoles = Object.values(resource.summary_fields.object_roles).map(
-          (opt) => {
-            let item;
-            if (opt.name === 'Admin') {
-              item = [`${opt.id}, ${sysAdmin[0].id}`, opt.name];
-            } else if (sysAud[0].id && opt.name === 'Auditor') {
-              item = [`${sysAud[0].id}, ${opt.id}`, opt.name];
-            } else {
-              item = [`${opt.id}`, opt.name];
+        orgRoles = Object.entries(resource.summary_fields.object_roles).map(
+          ([key, value]) => {
+            if (key === 'admin_role') {
+              return [`${value.id}, ${systemAdmin[0].id}`, value.name];
             }
-            return item;
+
+            if (key === 'auditor_role') {
+              return [`${value.id}, ${systemAuditor[0].id}`, value.name];
+            }
+
+            return [`${value.id}`, value.name];
           }
         );
       }

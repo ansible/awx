@@ -7,6 +7,7 @@ import { ExecutionEnvironmentsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
@@ -29,6 +30,7 @@ const QS_CONFIG = getQSConfig('execution_environments', {
 function ExecutionEnvironmentList() {
   const location = useLocation();
   const match = useRouteMatch();
+  const { addToast, Toast, toastProps } = useToast();
 
   const {
     error: contentError,
@@ -92,6 +94,18 @@ function ExecutionEnvironmentList() {
       allItemsSelected: isAllSelected,
       fetchItems: fetchExecutionEnvironments,
     }
+  );
+
+  const handleCopy = useCallback(
+    (newId) => {
+      addToast({
+        id: newId,
+        title: t`Execution environment copied successfully`,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+    },
+    [addToast]
   );
 
   const handleDelete = async () => {
@@ -194,6 +208,7 @@ function ExecutionEnvironmentList() {
                 executionEnvironment={executionEnvironment}
                 detailUrl={`${match.url}/${executionEnvironment.id}/details`}
                 onSelect={() => handleSelect(executionEnvironment)}
+                onCopy={handleCopy}
                 isSelected={selected.some(
                   (row) => row.id === executionEnvironment.id
                 )}
@@ -218,6 +233,7 @@ function ExecutionEnvironmentList() {
         {t`Failed to delete one or more execution environments`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
+      <Toast {...toastProps} />
     </>
   );
 }

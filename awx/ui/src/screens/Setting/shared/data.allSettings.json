@@ -297,5 +297,6 @@
     "users":{"fields":["username"],"adj_list":[]},
     "instances":{"fields":["hostname"],"adj_list":[]}
   },
-  "DEFAULT_EXECUTION_ENVIRONMENT": 1
+  "DEFAULT_EXECUTION_ENVIRONMENT": 1,
+  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false
 }

@@ -58,6 +58,7 @@ function Inventories() {
         [`${inventoryPath}/access`]: t`Access`,
         [`${inventoryPath}/jobs`]: t`Jobs`,
         [`${inventoryPath}/details`]: t`Details`,
+        [`${inventoryPath}/job_templates`]: t`Job Templates`,
         [`${inventoryPath}/edit`]: t`Edit details`,
 
         [inventoryHostsPath]: t`Hosts`,

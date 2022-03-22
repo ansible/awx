@@ -4,6 +4,7 @@ import asyncio
 
 import aiohttp
 from aiohttp import client_exceptions
+from asgiref.sync import sync_to_async
 
 from channels.layers import get_channel_layer
 
@@ -30,6 +31,7 @@ def unwrap_broadcast_msg(payload: dict):
     return (payload['group'], payload['message'])
 
 
+@sync_to_async
 def get_broadcast_hosts():
     Instance = apps.get_model('main', 'Instance')
     instances = (
@@ -90,7 +92,7 @@ class WebsocketTask:
             if attempt > 0:
                 await asyncio.sleep(settings.BROADCAST_WEBSOCKET_RECONNECT_RETRY_RATE_SECONDS)
         except asyncio.CancelledError:
-            logger.warn(f"Connection from {self.name} to {self.remote_host} cancelled")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} cancelled")
             raise
 
         uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/{self.endpoint}/"
@@ -107,18 +109,18 @@ class WebsocketTask:
         except asyncio.CancelledError:
             # TODO: Check if connected and disconnect
             # Possibly use run_until_complete() if disconnect is async
-            logger.warn(f"Connection from {self.name} to {self.remote_host} cancelled.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} cancelled.")
             self.stats.record_connection_lost()
             raise
         except client_exceptions.ClientConnectorError as e:
-            logger.warn(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.")
         except asyncio.TimeoutError:
-            logger.warn(f"Connection from {self.name} to {self.remote_host} timed out.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} timed out.")
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
-            logger.warn(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.")
         else:
-            logger.warn(f"Connection from {self.name} to {self.remote_host} list.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} list.")
 
         self.stats.record_connection_lost()
         self.start(attempt=attempt + 1)
@@ -144,7 +146,7 @@ class BroadcastWebsocketTask(WebsocketTask):
                     logmsg = "Failed to decode broadcast message"
                     if logger.isEnabledFor(logging.DEBUG):
                         logmsg = "{} {}".format(logmsg, payload)
-                    logger.warn(logmsg)
+                    logger.warning(logmsg)
                     continue
                 (group, message) = unwrap_broadcast_msg(payload)
                 if group == "metrics":
@@ -170,7 +172,7 @@ class BroadcastWebsocketManager(object):
     async def run_per_host_websocket(self):
 
         while True:
-            known_hosts = get_broadcast_hosts()
+            known_hosts = await get_broadcast_hosts()
             future_remote_hosts = known_hosts.keys()
             current_remote_hosts = self.broadcast_tasks.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
@@ -183,9 +185,9 @@ class BroadcastWebsocketManager(object):
                     new_remote_hosts.add(hostname)
 
             if deleted_remote_hosts:
-                logger.warn(f"Removing {deleted_remote_hosts} from websocket broadcast list")
+                logger.warning(f"Removing {deleted_remote_hosts} from websocket broadcast list")
             if new_remote_hosts:
-                logger.warn(f"Adding {new_remote_hosts} to websocket broadcast list")
+                logger.warning(f"Adding {new_remote_hosts} to websocket broadcast list")
 
             for h in deleted_remote_hosts:
                 self.broadcast_tasks[h].cancel()
