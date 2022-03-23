@@ -18,7 +18,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ErrorDetail from 'components/ErrorDetail';
 import StatusLabel from 'components/StatusLabel';
-import { JobEventsAPI } from 'api';
+import { JobsAPI } from 'api';
 
 import { getJobModel, isJobRunning } from 'util/jobs';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
@@ -113,56 +113,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     return data.results[0] || null;
   };
 
-  const fetchNextSibling = async (parentEventId, counter) => {
-    const key = `${parentEventId}-${counter}`;
-    let promise = siblingRequests.current[key];
-    if (!promise) {
-      promise = JobEventsAPI.readChildren(parentEventId, {
-        page_size: 1,
-        order_by: 'counter',
-        counter__gt: counter,
-      });
-      siblingRequests.current[key] = promise;
-    }
-
-    const { data } = await promise;
-    siblingRequests.current[key] = null;
-    return data.results[0] || null;
-  };
-
-  const fetchNextRootNode = async (counter) => {
-    const { data } = await getJobModel(job.type).readEvents(job.id, {
-      page_size: 1,
-      order_by: 'counter',
-      counter__gt: counter,
-      parent_uuid: '',
-    });
-    return data.results[0] || null;
-  };
-
-  const fetchNumEvents = async (startCounter, endCounter) => {
-    if (endCounter <= startCounter + 1) {
-      return 0;
-    }
-    const key = `${startCounter}-${endCounter}`;
-    let promise = numEventsRequests.current[key];
-    if (!promise) {
-      const params = {
-        page_size: 1,
-        order_by: 'counter',
-        counter__gt: startCounter,
-      };
-      if (endCounter) {
-        params.counter__lt = endCounter;
-      }
-      promise = getJobModel(job.type).readEvents(job.id, params);
-      numEventsRequests.current[key] = promise;
-    }
-
-    const { data } = await promise;
-    numEventsRequests.current[key] = null;
-    return data.count || 0;
-  };
+  const fetchChildrenSummary = () => JobsAPI.readChildrenSummary(job.id);
 
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
   const isFlatMode = isJobRunning(jobStatus) || location.search.length > 1;
@@ -181,10 +132,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   } = useJobEvents(
     {
       fetchEventByUuid,
-      fetchNextSibling,
-      fetchNextRootNode,
-      fetchNumEvents,
+      fetchChildrenSummary,
     },
+    job.id,
     isFlatMode
   );
   const [wsEvents, setWsEvents] = useState([]);

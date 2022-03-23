@@ -19,6 +19,10 @@ class Jobs extends RunnableMixin(Base) {
   readDetail(id) {
     return this.http.get(`${this.baseUrl}${id}/`);
   }
+
+  readChildrenSummary(id) {
+    return this.http.get(`${this.baseUrl}${id}/job_events/children_summary/`);
+  }
 }
 
 export default Jobs;
