@@ -93,9 +93,12 @@ function JobOutputSearch({
       key: 'stdout__icontains',
       isDefault: true,
     },
-    {
+  ];
+
+  if (job.type !== 'system_job' && job.type !== 'inventory_update') {
+    columns.push({
       name: t`Event`,
-      key: 'event',
+      key: 'or__event',
       options: [
         ['runner_on_failed', t`Host Failed`],
         ['runner_on_start', t`Host Started`],
@@ -129,9 +132,9 @@ function JobOutputSearch({
         ['system_warning', t`System Warning`],
         ['error', t`Error`],
       ],
-    },
-    { name: t`Advanced`, key: 'advanced' },
-  ];
+    });
+  }
+  columns.push({ name: t`Advanced`, key: 'advanced' });
   const isDisabled = isJobRunning(job.status);
 
   return (
