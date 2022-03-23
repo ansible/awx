@@ -155,6 +155,10 @@ function CredentialList() {
                 name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
+              {
+                name: t`Credential Type`,
+                key: 'credential_type__search',
+              },
             ]}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
