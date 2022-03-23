@@ -612,10 +612,6 @@ def cluster_node_heartbeat():
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
             break
-    else:
-        (changed, this_inst) = Instance.objects.get_or_register()
-        if changed:
-            logger.info("Registered tower control node '{}'".format(this_inst.hostname))
 
     inspect_execution_nodes(instance_list)
 
