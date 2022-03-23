@@ -1,7 +1,7 @@
 ---
 sources_dest: '../_sources'
 compose_name: 'docker-compose.yml'
-awx_image: 'quay.io/ansible/awx_devel'
+awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
 pg_username: 'awx'
 pg_database: 'awx'
