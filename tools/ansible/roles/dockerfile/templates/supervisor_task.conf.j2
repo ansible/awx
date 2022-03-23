@@ -45,7 +45,13 @@ stderr_logfile_maxbytes=0
 programs=dispatcher,callback-receiver
 priority=5
 
-# TODO: Exit Handler
+[eventlistener:superwatcher]
+command=stop-supervisor
+events=PROCESS_STATE_FATAL,PROCESS_STATE_EXITED
+stderr_logfile=/dev/stdout
+stderr_logfile_maxbytes=0
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
 
 [unix_http_server]
 file=/var/run/supervisor/supervisor.sock
