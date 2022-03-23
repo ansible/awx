@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+import awx.main.fields
 import awx.main.models.notifications
 
 
@@ -17,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notificationtemplate',
             name='messages',
-            field=models.JSONField(
+            field=awx.main.fields.JSONBlob(
                 default=awx.main.models.notifications.NotificationTemplate.default_messages,
                 help_text='Optional custom messages for notification template.',
                 null=True,

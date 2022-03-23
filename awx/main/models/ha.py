@@ -18,6 +18,7 @@ from solo.models import SingletonModel
 
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
+from awx.main.fields import JSONBlob
 from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
 from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
@@ -327,7 +328,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     )
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
-    policy_instance_list = models.JSONField(
+    policy_instance_list = JSONBlob(
         default=list, blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 

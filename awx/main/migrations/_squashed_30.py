@@ -29,7 +29,7 @@ SQUASHED_30 = {
         migrations.AddField(
             model_name='job',
             name='survey_passwords',
-            field=models.JSONField(default=dict, editable=False, null=True, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, blank=True),
         ),
     ],
     '0031_v302_migrate_survey_passwords': [

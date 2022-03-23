@@ -43,7 +43,6 @@ from rest_framework import serializers
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
-from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.constants import ENV_BLOCKLIST
 from awx.main import utils
 
@@ -130,6 +129,9 @@ def is_implicit_parent(parent_role, child_role):
     the model definition. This does not include any role parents that
     might have been set by the user.
     """
+    # Avoid circular import
+    from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
+
     if child_role.content_object is None:
         # The only singleton implicit parent is the system admin being
         # a parent of the system auditor role
@@ -286,6 +288,9 @@ class ImplicitRoleField(models.ForeignKey):
         Model = utils.get_current_apps().get_model('main', instance.__class__.__name__)
         latest_instance = Model.objects.get(pk=instance.pk)
 
+        # Avoid circular import
+        from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+
         with batch_role_ancestor_rebuilding():
             # Create any missing role objects
             missing_roles = []
@@ -340,6 +345,10 @@ class ImplicitRoleField(models.ForeignKey):
         Role_ = utils.get_current_apps().get_model('main', 'Role')
         child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
         Role_.objects.filter(id__in=role_ids).delete()
+
+        # Avoid circular import
+        from awx.main.models.rbac import Role
+
         Role.rebuild_role_ancestor_list([], child_ids)
 
 
