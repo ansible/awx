@@ -47,17 +47,6 @@ priority=5
 
 # TODO: Exit Handler
 
-{% if kube_dev | bool %}
-[eventlistener:awx-config-watcher]
-command=/usr/bin/config-watcher
-stderr_logfile=/dev/stdout
-stderr_logfile_maxbytes=0
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-events=TICK_60
-priority=0
-{% endif %}
-
 [unix_http_server]
 file=/var/run/supervisor/supervisor.sock
 
