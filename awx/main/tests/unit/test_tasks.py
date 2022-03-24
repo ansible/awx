@@ -39,6 +39,7 @@ from awx.main.utils.safe_yaml import SafeLoader
 from awx.main.utils.execution_environments import CONTAINER_ROOT, to_host_path
 
 from awx.main.utils.licensing import Licenser
+from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 class TestJobExecution(object):
@@ -363,32 +364,14 @@ class TestExtraVarSanitation(TestJobExecution):
         extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
-        for unsafe in [
-            'awx_job_template_name',
-            'tower_job_template_name',
-            'awx_user_name',
-            'tower_job_launch_type',
-            'awx_project_revision',
-            'tower_project_revision',
-            'tower_user_name',
-            'awx_job_launch_type',
-            'awx_inventory_name',
-            'tower_inventory_name',
-        ]:
-            assert hasattr(extra_vars[unsafe], '__UNSAFE__')
+        for name in JOB_VARIABLE_PREFIXES:
+            for variable_name in ['_job_template_name', '_user_name', '_job_launch_type', '_project_revision', '_inventory_name']:
+                assert hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
         # ensure that non-strings are marked as safe
-        for safe in [
-            'awx_job_template_id',
-            'awx_job_id',
-            'awx_user_id',
-            'tower_user_id',
-            'tower_job_template_id',
-            'tower_job_id',
-            'awx_inventory_id',
-            'tower_inventory_id',
-        ]:
-            assert not hasattr(extra_vars[safe], '__UNSAFE__')
+        for name in JOB_VARIABLE_PREFIXES:
+            for variable_name in ['_job_template_id', '_job_id', '_user_id', '_inventory_id']:
+                assert not hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
     def test_launchtime_vars_unsafe(self, job, private_data_dir, mock_me):
         job.extra_vars = json.dumps({'msg': self.UNSAFE})
@@ -552,10 +535,9 @@ class TestGenericRun:
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars, safe_dict = call_args
-        assert extra_vars['tower_user_id'] == 123
-        assert extra_vars['tower_user_name'] == "angry-spud"
-        assert extra_vars['awx_user_id'] == 123
-        assert extra_vars['awx_user_name'] == "angry-spud"
+        for name in JOB_VARIABLE_PREFIXES:
+            assert extra_vars['{}_user_id'.format(name)] == 123
+            assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
     def test_survey_extra_vars(self, mock_me):
         job = Job()
@@ -640,10 +622,9 @@ class TestAdhocRun(TestJobExecution):
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars = call_args
-        assert extra_vars['tower_user_id'] == 123
-        assert extra_vars['tower_user_name'] == "angry-spud"
-        assert extra_vars['awx_user_id'] == 123
-        assert extra_vars['awx_user_name'] == "angry-spud"
+        for name in JOB_VARIABLE_PREFIXES:
+            assert extra_vars['{}_user_id'.format(name)] == 123
+            assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
 
 class TestJobCredentials(TestJobExecution):

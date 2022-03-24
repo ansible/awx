@@ -55,6 +55,7 @@ from awx.main.models.mixins import (
     WebhookMixin,
     WebhookTemplateMixin,
 )
+from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -770,14 +771,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def awx_meta_vars(self):
         r = super(Job, self).awx_meta_vars()
         if self.project:
-            for name in ('awx', 'tower'):
+            for name in JOB_VARIABLE_PREFIXES:
                 r['{}_project_revision'.format(name)] = self.project.scm_revision
                 r['{}_project_scm_branch'.format(name)] = self.project.scm_branch
         if self.scm_branch:
-            for name in ('awx', 'tower'):
+            for name in JOB_VARIABLE_PREFIXES:
                 r['{}_job_scm_branch'.format(name)] = self.scm_branch
         if self.job_template:
-            for name in ('awx', 'tower'):
+            for name in JOB_VARIABLE_PREFIXES:
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
                 r['{}_job_template_name'.format(name)] = self.job_template.name
         return r
