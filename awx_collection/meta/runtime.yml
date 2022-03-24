@@ -2,11 +2,20 @@
 requires_ansible: '>=2.9.10'
 action_groups:
   controller:
+    - ad_hoc_command
+    - ad_hoc_command_cancel
+    - ad_hoc_command_wait
+    - application
+    - controller_meta
     - credential_input_source
     - credential
     - credential_type
+    - execution_environment
+    - export
     - group
     - host
+    - import
+    - instance_group
     - inventory
     - inventory_source
     - inventory_source_update
@@ -27,9 +36,11 @@ action_groups:
     - team
     - token
     - user
+    - workflow_approval
     - workflow_job_template_node
     - workflow_job_template
     - workflow_launch
+    - workflow_node_wait
 plugin_routing:
   inventory:
     tower:
