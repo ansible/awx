@@ -7,6 +7,9 @@ reference-schema.json
 .tags
 .tags1
 
+# User level pre-commit hooks
+pre-commit-user
+
 # Tower
 awx-dev
 awx/settings/local_*.py*
