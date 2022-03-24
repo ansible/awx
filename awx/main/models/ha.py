@@ -187,7 +187,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         """
         vargs = dict()
         if settings.AWX_CLEANUP_PATHS:
-            vargs['file_pattern'] = '/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*')
+            vargs['file_pattern'] = '{}/{}*'.format(settings.AWX_ISOLATION_BASE_PATH, JOB_FOLDER_PREFIX % '*')
         vargs.update(kwargs)
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
             active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')).values_list('pk', flat=True))
