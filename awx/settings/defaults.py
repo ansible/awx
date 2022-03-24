@@ -983,6 +983,9 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
+# Number of times to retry sending a notification when waiting on a job to finish.
+AWX_NOTIFICATION_JOB_FINISH_MAX_RETRY = 5
+
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
