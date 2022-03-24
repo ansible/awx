@@ -172,6 +172,7 @@ from awx.api.views.root import (  # noqa
 )
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
 from awx.api.pagination import UnifiedJobEventPagination
+from awx.main.utils import set_environ
 
 
 logger = logging.getLogger('awx.api.views')
@@ -1555,8 +1556,9 @@ class CredentialExternalTest(SubDetailAPIView):
                 backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.credential_type.plugin.backend(**backend_kwargs)
-            return Response({}, status=status.HTTP_202_ACCEPTED)
+            with set_environ(**settings.AWX_TASK_ENV):
+                obj.credential_type.plugin.backend(**backend_kwargs)
+                return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
             message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
