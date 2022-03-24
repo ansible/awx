@@ -12,9 +12,10 @@ directory = /awx_devel
 {% else %}
 command = nginx -g "daemon off;"
 {% endif %}
-autostart = true
 autorestart = true
-stopwaitsecs = 5
+startsecs = 30
+stopasgroup=true
+killasgroup=true
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
@@ -31,12 +32,10 @@ environment =
 command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
 directory = /var/lib/awx
 {% endif %}
-autostart = true
 autorestart = true
-stopwaitsecs = 15
+startsecs = 30
 stopasgroup=true
 killasgroup=true
-stopsignal=KILL
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
@@ -50,10 +49,8 @@ directory = /awx_devel
 command = /var/lib/awx/venv/awx/bin/daphne -b 127.0.0.1 -p 8051 --websocket_timeout -1 awx.asgi:channel_layer
 directory = /var/lib/awx
 {% endif %}
-autostart = true
-stopsignal=KILL
 autorestart = true
-stopwaitsecs = 5
+startsecs = 30
 stopasgroup=true
 killasgroup=true
 stdout_logfile=/dev/stdout
@@ -69,9 +66,8 @@ directory = /awx_devel
 command = awx-manage run_wsbroadcast
 directory = /var/lib/awx
 {% endif %}
-autostart = true
 autorestart = true
-stopwaitsecs = 5
+startsecs = 30
 stopasgroup=true
 killasgroup=true
 stdout_logfile=/dev/stdout
@@ -81,16 +77,14 @@ stderr_logfile_maxbytes=0
 
 [program:awx-rsyslogd]
 command = rsyslogd -n -i /var/run/awx-rsyslog/rsyslog.pid -f /var/lib/awx/rsyslog/rsyslog.conf
-autostart = true
 autorestart = true
-startretries = 10
-stopwaitsecs = 5
-stopsignal=TERM
+startsecs = 30
 stopasgroup=true
 killasgroup=true
-redirect_stderr=true
-stdout_logfile=/dev/stderr
+stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 
 [group:tower-processes]
 programs=nginx,uwsgi,daphne,wsbroadcast,awx-rsyslogd
@@ -98,11 +92,11 @@ priority=5
 
 [eventlistener:superwatcher]
 command=stop-supervisor
-events=PROCESS_STATE_FATAL,PROCESS_STATE_EXITED
-stderr_logfile=/dev/stdout
-stderr_logfile_maxbytes=0
+events=PROCESS_STATE_FATAL
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 
 [unix_http_server]
 file=/var/run/supervisor/supervisor.web.sock

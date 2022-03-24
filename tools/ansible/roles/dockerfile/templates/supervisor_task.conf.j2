@@ -13,9 +13,8 @@ directory = /awx_devel
 command = awx-manage run_dispatcher
 directory = /var/lib/awx
 {% endif %}
-autostart = true
 autorestart = true
-stopwaitsecs = 5
+startsecs = 30
 stopasgroup=true
 killasgroup=true
 stdout_logfile=/dev/stdout
@@ -31,9 +30,8 @@ directory = /awx_devel
 command = awx-manage run_callback_receiver
 directory = /var/lib/awx
 {% endif %}
-autostart = true
 autorestart = true
-stopwaitsecs = 5
+startsecs = 30
 stopasgroup=true
 killasgroup=true
 stdout_logfile=/dev/stdout
@@ -47,11 +45,12 @@ priority=5
 
 [eventlistener:superwatcher]
 command=stop-supervisor
-events=PROCESS_STATE_FATAL,PROCESS_STATE_EXITED
-stderr_logfile=/dev/stdout
-stderr_logfile_maxbytes=0
+events=PROCESS_STATE_FATAL
+autorestart = true
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 
 [unix_http_server]
 file=/var/run/supervisor/supervisor.sock
