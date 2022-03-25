@@ -192,6 +192,7 @@ lockfile==0.12.2
     # via python-daemon
 lxml==4.7.0
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   python3-saml
     #   xmlsec
 markdown==3.2.1
@@ -225,13 +226,17 @@ oauthlib==3.2.0
 openshift==0.11.0
     # via -r /awx_devel/requirements/requirements.in
 packaging==21.3
-    # via ansible-runner
+    # via
+    #   ansible-runner
+    #   setuptools-scm
 pbr==5.6.0
     # via -r /awx_devel/requirements/requirements.in
 pexpect==4.7.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
+pkgconfig==1.5.5
+    # via -r /awx_devel/requirements/requirements.in
 prometheus-client==0.7.1
     # via -r /awx_devel/requirements/requirements.in
 psutil==5.8.0
@@ -339,6 +344,8 @@ schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
 service-identity==18.1.0
     # via twisted
+setuptools-scm[toml]==6.4.2
+    # via -r /awx_devel/requirements/requirements.in
 six==1.14.0
     # via
     #   ansible-runner
@@ -380,6 +387,8 @@ tempora==2.1.0
     # via
     #   irc
     #   jaraco-logging
+tomli==2.0.1
+    # via setuptools-scm
 twilio==6.37.0
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==20.3.0
@@ -421,4 +430,5 @@ setuptools==58.2.0
     #   kubernetes
     #   markdown
     #   python-daemon
+    #   setuptools-scm
     #   zope-interface

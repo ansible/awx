@@ -105,7 +105,7 @@ Upgrading to 4.0.0 causes error because imports changed.
 ImportError: cannot import name 'KeyVaultClient'
 ```
 
-### pip and setuptools
+### pip, setuptools and setuptools_scm
 
 The offline installer needs to have functionality confirmed before upgrading these.
 Versions need to match the versions used in the pip bootstrapping step
