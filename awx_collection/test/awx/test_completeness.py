@@ -101,13 +101,13 @@ def test_meta_runtime():
 
     print("\nMeta check:")
 
-    with open('{1}/{2}'.format(base_dir, meta_filename), 'r') as f:
+    with open('{0}/{1}'.format(base_dir, meta_filename), 'r') as f:
         meta_data_string = f.read()
 
     meta_data = yaml.load(meta_data_string, Loader=yaml.Loader)
 
     needs_grouping = []
-    for file_name in glob.glob('{1}/{2}/*'.format(base_dir, module_dir)):
+    for file_name in glob.glob('{0}/{1}/*'.format(base_dir, module_dir)):
         if not os.path.isfile(file_name) or os.path.islink(file_name):
             continue
         with open(file_name, 'r') as f:
@@ -122,10 +122,10 @@ def test_meta_runtime():
 
     group = 'action-groups.controller'
     if needs_to_be_removed:
-        print(cause_error("The following items should be removed from the {1} {2}:\n    {3}".format(meta_filename, group, '\n    '.join(needs_to_be_removed))))
+        print(cause_error("The following items should be removed from the {0} {1}:\n    {2}".format(meta_filename, group, '\n    '.join(needs_to_be_removed))))
 
     if needs_to_be_added:
-        print(cause_error("The following items should be added to the {1} {2}:\n    {3}".format(meta_filename, group, '\n    '.join(needs_to_be_added))))
+        print(cause_error("The following items should be added to the {0} {1}:\n    {2}".format(meta_filename, group, '\n    '.join(needs_to_be_added))))
 
 
 def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
