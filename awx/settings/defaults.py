@@ -5,6 +5,7 @@ import base64
 import os
 import re  # noqa
 import sys
+import tempfile
 from datetime import timedelta
 
 
@@ -590,7 +591,7 @@ AWX_ISOLATION_SHOW_PATHS = []
 # execution and isolation (such as credential files and custom
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
-AWX_ISOLATION_BASE_PATH = "/tmp"
+AWX_ISOLATION_BASE_PATH = tempfile.gettempdir()
 
 # User definable ansible callback plugins
 # Note: This setting may be overridden by database settings.
