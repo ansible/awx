@@ -136,9 +136,10 @@ class AWXConsumerRedis(AWXConsumerBase):
 class AWXConsumerPG(AWXConsumerBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pg_down_time = 0.0
-        self.pg_is_down = False
         self.pg_max_wait = settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE
+        # if no successful loops have ran since startup, then we should fail right away
+        self.pg_is_down = True  # set so that we fail if we get database errors on startup
+        self.pg_down_time = time.time() - self.pg_max_wait  # allow no grace period
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
@@ -163,6 +164,7 @@ class AWXConsumerPG(AWXConsumerBase):
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
             except (db.DatabaseError, psycopg2.OperationalError):
+                # If we have attained stady state operation, tolerate short-term database hickups
                 if not self.pg_is_down:
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")
                     self.pg_down_time = time.time()
