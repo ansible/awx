@@ -99,8 +99,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollHeight = useRef(0);
   const history = useHistory();
   const eventByUuidRequests = useRef([]);
-  const siblingRequests = useRef([]);
-  const numEventsRequests = useRef([]);
 
   const fetchEventByUuid = async (uuid) => {
     let promise = eventByUuidRequests.current[uuid];
@@ -166,11 +164,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
 
   useEffect(() => {
-    const pendingRequests = [
-      ...Object.values(eventByUuidRequests.current || {}),
-      ...Object.values(siblingRequests.current || {}),
-      ...Object.values(numEventsRequests.current || {}),
-    ];
+    const pendingRequests = Object.values(eventByUuidRequests.current || {});
     setHasContentLoading(true); // prevents "no content found" screen from flashing
     Promise.all(pendingRequests).then(() => {
       setRemoteRowCount(0);

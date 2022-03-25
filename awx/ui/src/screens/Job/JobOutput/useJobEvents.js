@@ -54,6 +54,7 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
         childrenSummary: result.data,
       });
     });
+    // TODO: catch error -> force isFlatMode to be true?
   }, [jobId, isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
@@ -142,9 +143,10 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
     Object.keys(parentsToFetch).forEach(async (uuid) => {
       const parent = await callbacks.fetchEventByUuid(uuid);
 
-      if (!state.childrenSummary[parent.counter]) {
+      if (!state.childrenSummary || !state.childrenSummary[parent.counter]) {
         // eslint-disable-next-line no-console
-        console.error('No row number found for ', parent);
+        console.error('No row number found for ', parent.counter);
+        return;
       }
       const [rowNumber] = state.childrenSummary[parent.counter];
       parent.rowNumber = rowNumber;
@@ -358,8 +360,8 @@ function _getNodeForRow(state, rowToFind, nodes) {
 
 function _getNodeInChildren(state, node, rowToFind) {
   const event = state.events[node.eventIndex];
-  const firstChild = state.events[node.children[0].eventIndex];
-  if (rowToFind < firstChild.rowNumber) {
+  const firstChild = state.events[node.children[0]?.eventIndex];
+  if (!firstChild || rowToFind < firstChild.rowNumber) {
     const rowDiff = rowToFind - event.rowNumber;
     return {
       node: null,

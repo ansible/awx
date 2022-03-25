@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { JobsAPI, JobEventsAPI } from 'api';
@@ -26,14 +25,9 @@ const applyJobEventMock = (mockJobEvents) => {
     };
   };
   JobsAPI.readEvents = jest.fn().mockImplementation(mockReadEvents);
-  JobEventsAPI.readChildren = jest.fn().mockResolvedValue({
+  JobsAPI.readChildrenSummary = jest.fn().mockResolvedValue({
     data: {
-      results: [
-        {
-          counter: 20,
-          uuid: 'abc-020',
-        },
-      ],
+      1: [0, 100],
     },
   });
 };
