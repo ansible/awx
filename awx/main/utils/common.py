@@ -21,7 +21,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection
+from django.db import connection, transaction, ProgrammingError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -1141,12 +1141,16 @@ def create_partition(tblname, start=None, end=None, partition_label=None, minute
         else:
             partition_label = start.strftime('%Y%m%d_%H')
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
-            f'PARTITION OF {tblname} '
-            f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
-        )
+    try:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
+                    f'PARTITION OF {tblname} '
+                    f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+                )
+    except ProgrammingError as e:
+        logger.debug(f'Caught known error due to existing partition: {e}')
 
 
 def cleanup_new_process(func):
