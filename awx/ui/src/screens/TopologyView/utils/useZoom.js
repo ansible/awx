@@ -20,6 +20,9 @@ import { getWidth, getHeight } from './helpers';
  */
 
 export default function useZoom(parentSelector, childSelector) {
+  if (typeof parentSelector !== 'string' && typeof childSelector !== 'string') {
+    return false;
+  }
   const zoom = d3.zoom().on('zoom', ({ transform }) => {
     d3.select(childSelector).attr('transform', transform);
   });
