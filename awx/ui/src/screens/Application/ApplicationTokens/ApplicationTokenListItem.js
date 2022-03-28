@@ -26,7 +26,9 @@ function ApplicationTokenListItem({
         dataLabel={t`Selected`}
       />
       <Td dataLabel={t`Name`}>
-        <Link to={detailUrl}>{token.summary_fields.user.username}</Link>
+        <Link to={detailUrl}>
+          <b>{token.summary_fields.user.username}</b>
+        </Link>
       </Td>
       <Td dataLabel={t`Scope`}>{toTitleCase(token.scope)}</Td>
       <Td dataLabel={t`Expires`}>{formatDateString(token.expires)}</Td>

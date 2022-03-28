@@ -14,7 +14,9 @@ function OrganizationExecEnvListItem({ executionEnvironment, detailUrl }) {
       ouiaId={`ee-row-${executionEnvironment.id}`}
     >
       <Td dataLabel={t`Name`}>
-        <Link to={`${detailUrl}`}>{executionEnvironment.name}</Link>
+        <Link to={`${detailUrl}`}>
+          <b>{executionEnvironment.name}</b>
+        </Link>
       </Td>
       <Td dataLabel={t`Image`}>{executionEnvironment.image}</Td>
     </Tr>
