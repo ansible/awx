@@ -171,7 +171,7 @@ class AWXConsumerPG(AWXConsumerBase):
                     self.pg_is_down = True
                 if time.time() - self.pg_down_time > self.pg_max_wait:
                     logger.warning(f"Postgres event consumer has not recovered in {self.pg_max_wait} s, exiting")
-                    return
+                    raise
                 # Wait for a second before next attempt, but still listen for any shutdown signals
                 for i in range(10):
                     if self.should_stop:
