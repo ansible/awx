@@ -175,7 +175,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='inventory_files',
-            field=models.JSONField(
+            field=awx.main.fields.JSONBlob(
                 default=list,
                 help_text='Suggested list of content that could be Ansible inventory in the project',
                 verbose_name='Inventory Files',

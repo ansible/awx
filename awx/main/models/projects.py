@@ -33,7 +33,7 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin,
 from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
-from awx.main.fields import ImplicitRoleField
+from awx.main.fields import ImplicitRoleField, JSONBlob
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -293,7 +293,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('The last revision fetched by a project update'),
     )
 
-    playbook_files = models.JSONField(
+    playbook_files = JSONBlob(
         default=list,
         blank=True,
         editable=False,
@@ -301,7 +301,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('List of playbooks found in the project'),
     )
 
-    inventory_files = models.JSONField(
+    inventory_files = JSONBlob(
         default=list,
         blank=True,
         editable=False,

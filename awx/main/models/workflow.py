@@ -28,7 +28,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, AskForField
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -231,9 +231,8 @@ class WorkflowJobNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
-    ancestor_artifacts = models.JSONField(
+    ancestor_artifacts = JSONBlob(
         default=dict,
-        null=True,
         blank=True,
         editable=False,
     )

@@ -198,7 +198,7 @@ class Migration(migrations.Migration):
                 ),
                 ('recipients', models.TextField(default='', editable=False, blank=True)),
                 ('subject', models.TextField(default='', editable=False, blank=True)),
-                ('body', models.JSONField(default=dict, null=True, blank=True)),
+                ('body', awx.main.fields.JSONBlob(default=dict, blank=True)),
             ],
             options={
                 'ordering': ('pk',),
@@ -229,7 +229,7 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ('notification_configuration', models.JSONField(default=dict)),
+                ('notification_configuration', awx.main.fields.JSONBlob(default=dict)),
                 (
                     'created_by',
                     models.ForeignKey(

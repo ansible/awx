@@ -622,7 +622,7 @@ class Migration(migrations.Migration):
                 ('dtend', models.DateTimeField(default=None, null=True, editable=False)),
                 ('rrule', models.CharField(max_length=255)),
                 ('next_run', models.DateTimeField(default=None, null=True, editable=False)),
-                ('extra_data', models.JSONField(default=dict, null=True, blank=True)),
+                ('extra_data', awx.main.fields.JSONBlob(default=dict, blank=True)),
                 (
                     'created_by',
                     models.ForeignKey(
@@ -750,7 +750,7 @@ class Migration(migrations.Migration):
                 ('elapsed', models.DecimalField(editable=False, max_digits=12, decimal_places=3)),
                 ('job_args', models.TextField(default='', editable=False, blank=True)),
                 ('job_cwd', models.CharField(default='', max_length=1024, editable=False, blank=True)),
-                ('job_env', models.JSONField(default=dict, editable=False, null=True, blank=True)),
+                ('job_env', awx.main.fields.JSONBlob(default=dict, editable=False, blank=True)),
                 ('job_explanation', models.TextField(default='', editable=False, blank=True)),
                 ('start_args', models.TextField(default='', editable=False, blank=True)),
                 ('result_stdout_text', models.TextField(default='', editable=False, blank=True)),
@@ -1034,7 +1034,7 @@ class Migration(migrations.Migration):
                 ('host_config_key', models.CharField(default='', max_length=1024, blank=True)),
                 ('ask_variables_on_launch', models.BooleanField(default=False)),
                 ('survey_enabled', models.BooleanField(default=False)),
-                ('survey_spec', models.JSONField(default=dict, blank=True)),
+                ('survey_spec', awx.main.fields.JSONBlob(default=dict, blank=True)),
             ],
             options={
                 'ordering': ('name',),
