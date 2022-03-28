@@ -48,13 +48,17 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
     if (isFlatMode) {
       return;
     }
-    callbacks.fetchChildrenSummary().then((result) => {
-      enqueueAction({
-        type: SET_CHILDREN_SUMMARY,
-        childrenSummary: result.data,
+    callbacks
+      .fetchChildrenSummary()
+      .then((result) => {
+        enqueueAction({
+          type: SET_CHILDREN_SUMMARY,
+          childrenSummary: result.data,
+        });
+      })
+      .catch(() => {
+        callbacks.setForceFlatMode(true);
       });
-    });
-    // TODO: catch error -> force isFlatMode to be true?
   }, [jobId, isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {

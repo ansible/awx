@@ -114,7 +114,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const fetchChildrenSummary = () => JobsAPI.readChildrenSummary(job.id);
 
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
-  const isFlatMode = isJobRunning(jobStatus) || location.search.length > 1;
+  const [forceFlatMode, setForceFlatMode] = useState(false);
+  const isFlatMode =
+    forceFlatMode || isJobRunning(jobStatus) || location.search.length > 1;
 
   const {
     addEvents,
@@ -131,6 +133,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     {
       fetchEventByUuid,
       fetchChildrenSummary,
+      setForceFlatMode,
     },
     job.id,
     isFlatMode
