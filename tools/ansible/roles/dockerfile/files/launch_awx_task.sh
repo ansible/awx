@@ -19,4 +19,4 @@ wait-for-migrations
 
 awx-manage provision_instance
 
-supervisord -c /etc/supervisord_task.conf
+exec supervisord -c /etc/supervisord_task.conf
