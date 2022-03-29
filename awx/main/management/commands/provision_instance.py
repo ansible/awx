@@ -1,8 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.conf import settings
 
 from awx.main.models import Instance
 
@@ -22,6 +23,8 @@ class Command(BaseCommand):
 
     def _register_hostname(self, hostname, node_type, uuid):
         if not hostname:
+            if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
+                raise CommandError('Registering with values from settings only intended for use in K8s installs')
             (changed, instance) = Instance.objects.get_or_register()
         else:
             (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
