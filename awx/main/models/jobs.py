@@ -797,7 +797,21 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']):
         if not self.inventory:
             return []
-        return self.inventory.hosts.only(*only)
+        hosts = self.inventory.hosts.only(*only)
+
+        if self.limit:
+            import re
+            logger.debug("Host limit passed by AWX: %s", self.limit)
+            # basic regex filtering for host fqdn. does not support hostgroup or any advanced targeting patterns
+            list_limit = re.split(r'[,; \n]+', self.limit)
+            hosts_new = hosts.filter(name__in=list_limit)
+            # we match at least one host
+            if hosts_new.count():
+              logger.debug("Filtered host list: %s", hosts_new)
+              return hosts_new
+            else:
+              logger.debug('Unable to find hosts with given limit provided. Returning facts for entire inventory')
+        return hosts
 
     def start_job_fact_cache(self, destination, modification_times, timeout=None):
         self.log_lifecycle("start_job_fact_cache")
