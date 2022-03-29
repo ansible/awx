@@ -7,6 +7,10 @@
   "AWX_ISOLATION_BASE_PATH": "/tmp",
   "AWX_ISOLATION_SHOW_PATHS": [],
   "AWX_TASK_ENV": {},
+   "GALAXY_TASK_ENV": {
+     "ANSIBLE_FORCE_COLOR": "false",
+      "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+     },
   "PROJECT_UPDATE_VVV": false,
   "AWX_ROLES_ENABLED": true,
   "AWX_COLLECTIONS_ENABLED": true,

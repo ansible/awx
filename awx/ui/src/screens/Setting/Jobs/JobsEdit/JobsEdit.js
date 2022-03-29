@@ -85,6 +85,7 @@ function JobsEdit() {
         form.AWX_ANSIBLE_CALLBACK_PLUGINS
       ),
       AWX_TASK_ENV: formatJson(form.AWX_TASK_ENV),
+      GALAXY_TASK_ENV: formatJson(form.GALAXY_TASK_ENV),
     });
   };
 
@@ -217,6 +218,10 @@ function JobsEdit() {
                   config={jobs.AWX_MOUNT_ISOLATED_PATHS_ON_K8S}
                 />
                 <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
+                <ObjectField
+                  name="GALAXY_TASK_ENV"
+                  config={jobs.GALAXY_TASK_ENV}
+                />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>
