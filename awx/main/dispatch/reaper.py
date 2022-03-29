@@ -35,9 +35,11 @@ def reap(instance=None, status='failed', excluded_uuids=[]):
     """
     me = instance
     if me is None:
-        (changed, me) = Instance.objects.get_or_register()
-        if changed:
-            logger.info("Registered node '{}'".format(me.hostname))
+        try:
+            me = Instance.objects.me()
+        except RuntimeError as e:
+            logger.warning(f'Local instance is not registered, not running reaper: {e}')
+            return
     now = tz_now()
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = UnifiedJob.objects.filter(
