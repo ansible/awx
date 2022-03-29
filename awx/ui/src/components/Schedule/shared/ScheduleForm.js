@@ -11,6 +11,8 @@ import {
   FormGroup,
   Title,
   ActionGroup,
+  // To be removed once UI completes complex schedules
+  Alert,
 } from '@patternfly/react-core';
 import { Config } from 'contexts/Config';
 import { SchedulesAPI } from 'api';
@@ -439,6 +441,50 @@ function ScheduleForm({
 
   if (Object.keys(schedule).length > 0) {
     if (schedule.rrule) {
+      if (schedule.rrule.split(/\s+/).length > 2) {
+        return(
+          <Config>
+            {() => (
+              <Formik>
+                  <Form autoComplete="off">
+                    <FormColumnLayout>
+                      <Alert
+                        variant="danger"
+                        isInline
+                        ouiaId="form-submit-error-alert"
+                        title={t`Complex schedules are not supported in the UI yet, please use the API to manage this schedule.`}
+                      />
+                    </FormColumnLayout>
+                    <FormColumnLayout>
+                      <FormFullWidthLayout>
+                        <b>{t`Schedule Rules`}:</b>
+                        <pre style={{marginLeft: '2em'}}>
+		          { schedule.rrule.replaceAll(/\s+/g, "\n  ") }
+		        </pre>
+		      </FormFullWidthLayout>
+                    </FormColumnLayout>
+                    <FormColumnLayout>
+                      <FormFullWidthLayout>
+                        <ActionGroup>
+                          <Button
+                            ouiaId="schedule-form-cancel-button"
+                            aria-label={t`Cancel`}
+                            variant="secondary"
+                            type="button"
+                            onClick={handleCancel}
+                          >
+                            {t`Cancel`}
+                          </Button>
+                        </ActionGroup>
+                      </FormFullWidthLayout>
+                    </FormColumnLayout>
+                  </Form>
+              </Formik>
+            )}
+          </Config>
+        );
+      }
+
       try {
         const {
           origOptions: {

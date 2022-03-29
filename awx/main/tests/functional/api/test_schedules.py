@@ -111,21 +111,55 @@ def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, su
     [
         ("", "This field may not be blank"),
         ("DTSTART:NONSENSE", "Valid DTSTART required in rrule"),
+        ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
         ("DTSTART:20300308T050000Z DTSTART:20310308T050000", "Multiple DTSTART is not supported"),
-        ("DTSTART:20300308T050000Z", "RRULE required in rrule"),
-        ("DTSTART:20300308T050000Z RRULE:NONSENSE", "INTERVAL required in rrule"),
+        ("DTSTART:20300308T050000Z", "One or more rule required in rrule"),
+        ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1; EXDATE:20220401", "EXDATE not allowed in rrule"),
+        ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1; RDATE:20220401", "RDATE not allowed in rrule"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=SECONDLY;INTERVAL=5;COUNT=6", "SECONDLY is not supported"),
+        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYYEARDAY=100", "BYYEARDAY not supported"),  # noqa
+        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYWEEKNO=20", "BYWEEKNO not supported"),
+        # Individual rule test
+        ("DTSTART:20300308T050000Z RRULE:NONSENSE", "INTERVAL required in rrule"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4", "Multiple BYMONTHDAYs not supported"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1,2", "Multiple BYMONTHs not supported"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO", "BYDAY with numeric prefix not supported"),  # noqa
-        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYYEARDAY=100", "BYYEARDAY not supported"),  # noqa
-        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYWEEKNO=20", "BYWEEKNO not supported"),
+        ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000", "COUNT > 999 is unsupported"),  # noqa
+        # Individual rule test with multiple rules
+        ## Bad Rule:  RRULE:NONSENSE
+        ("DTSTART:20300308T050000Z RRULE:NONSENSE RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU", "INTERVAL required in rrule"),
+        ## Bad Rule:  RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4
+        (
+            "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4 EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU",
+            "Multiple BYMONTHDAYs not supported",
+        ),  # noqa
+        ## Bad Rule:  RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1,2
+        (
+            "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1,2",
+            "Multiple BYMONTHs not supported",
+        ),  # noqa
+        ## Bad Rule:  RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO
+        (
+            "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO",
+            "BYDAY with numeric prefix not supported",
+        ),  # noqa
+        ## Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z
+        (
+            "DTSTART:20030925T104941Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z",
+            "RRULE may not contain both COUNT and UNTIL",
+        ),  # noqa
+        ## Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000
+        (
+            "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000",
+            "COUNT > 999 is unsupported",
+        ),  # noqa
+        # Multiple errors, first condition should be returned
+        ("DTSTART:NONSENSE RRULE:NONSENSE RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4", "Valid DTSTART required in rrule"),
+        # Parsing Tests
         ("DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5", "A valid TZID must be provided"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation: invalid 'FREQ': REGULARLY"),  # noqa
-        ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
         ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
-        ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
     ],
 )
 def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
@@ -378,6 +412,24 @@ def test_dst_rollback_duplicates(post, admin_user):
         '2030-11-03 01:30:00-04:00',
         '2030-11-03 02:30:00-05:00',
         '2030-11-03 03:30:00-05:00',
+    ]
+
+
+def test_complex_schedule(post, admin_user):
+    # Every day except Sunday, 2022-05-01 is a Sunday
+
+    url = reverse('api:schedule_rrule')
+    rrule = '''
+      DTSTART;TZID=America/New_York:20220429T150000
+      RRULE:INTERVAL=1;FREQ=DAILY;UNTIL=20220503T1500Z
+      EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU
+    '''
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert list(map(str, r.data['local'])) == [
+        '2022-04-29 15:00:00-04:00',
+        '2022-04-30 15:00:00-04:00',
+        '2022-05-02 15:00:00-04:00',
     ]
 
 

@@ -4644,54 +4644,61 @@ class SchedulePreviewSerializer(BaseSerializer):
 
     # We reject rrules if:
     # - DTSTART is not include
-    # - INTERVAL is not included
+    # - Multiple DTSTART
+    # - At least one of RRULE is not included
+    # - EXDATE or RDATE is included
     # - SECONDLY is used
-    # - TZID is used
-    # - BYDAY prefixed with a number (MO is good but not 20MO)
     # - BYYEARDAY
     # - BYWEEKNO
-    # - Multiple DTSTART or RRULE elements
-    # - Can't contain both COUNT and UNTIL
-    # - COUNT > 999
+    # For any rule in the ruleset:
+    #   - INTERVAL is not included
+    #   - multiple BYMONTH
+    #   - multiple BYMONTHDAY
+    #   - BYDAY prefixed with a number (MO is good but not 20MO)
+    #   - Can't contain both COUNT and UNTIL
+    #   - COUNT > 999
     def validate_rrule(self, value):
         rrule_value = value
         multi_by_month_day = r".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
         multi_by_month = r".*?BYMONTH[\:\=][0-9]+,[0-9]+"
         by_day_with_numeric_prefix = r".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
-        match_count = re.match(r".*?(COUNT\=[0-9]+)", rrule_value)
         match_multiple_dtstart = re.findall(r".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)
         match_native_dtstart = re.findall(r".*?(DTSTART:[0-9]+T[0-9]+) ", rrule_value)
-        match_multiple_rrule = re.findall(r".*?(RRULE\:)", rrule_value)
+        match_multiple_rrule = re.findall(r".*?(RULE\:[^\s]*)", rrule_value)
         if not len(match_multiple_dtstart):
             raise serializers.ValidationError(_('Valid DTSTART required in rrule. Value should start with: DTSTART:YYYYMMDDTHHMMSSZ'))
         if len(match_native_dtstart):
             raise serializers.ValidationError(_('DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ.'))
         if len(match_multiple_dtstart) > 1:
             raise serializers.ValidationError(_('Multiple DTSTART is not supported.'))
-        if not len(match_multiple_rrule):
-            raise serializers.ValidationError(_('RRULE required in rrule.'))
-        if len(match_multiple_rrule) > 1:
-            raise serializers.ValidationError(_('Multiple RRULE is not supported.'))
-        if 'interval' not in rrule_value.lower():
-            raise serializers.ValidationError(_('INTERVAL required in rrule.'))
+        if "rrule:" not in rrule_value.lower():
+            raise serializers.ValidationError(_('One or more rule required in rrule.'))
+        if "exdate:" in rrule_value.lower():
+            raise serializers.ValidationError(_('EXDATE not allowed in rrule.'))
+        if "rdate:" in rrule_value.lower():
+            raise serializers.ValidationError(_('RDATE not allowed in rrule.'))
         if 'secondly' in rrule_value.lower():
             raise serializers.ValidationError(_('SECONDLY is not supported.'))
-        if re.match(multi_by_month_day, rrule_value):
-            raise serializers.ValidationError(_('Multiple BYMONTHDAYs not supported.'))
-        if re.match(multi_by_month, rrule_value):
-            raise serializers.ValidationError(_('Multiple BYMONTHs not supported.'))
-        if re.match(by_day_with_numeric_prefix, rrule_value):
-            raise serializers.ValidationError(_("BYDAY with numeric prefix not supported."))
         if 'byyearday' in rrule_value.lower():
             raise serializers.ValidationError(_("BYYEARDAY not supported."))
         if 'byweekno' in rrule_value.lower():
             raise serializers.ValidationError(_("BYWEEKNO not supported."))
-        if 'COUNT' in rrule_value and 'UNTIL' in rrule_value:
-            raise serializers.ValidationError(_("RRULE may not contain both COUNT and UNTIL"))
-        if match_count:
-            count_val = match_count.groups()[0].strip().split("=")
-            if int(count_val[1]) > 999:
-                raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
+        for a_rule in match_multiple_rrule:
+            if 'interval' not in a_rule.lower():
+                raise serializers.ValidationError(_('INTERVAL required in rrule.'))
+            if re.match(multi_by_month_day, a_rule):
+                raise serializers.ValidationError(_('Multiple BYMONTHDAYs not supported.'))
+            if re.match(multi_by_month, a_rule):
+                raise serializers.ValidationError(_('Multiple BYMONTHs not supported.'))
+            if re.match(by_day_with_numeric_prefix, a_rule):
+                raise serializers.ValidationError(_("BYDAY with numeric prefix not supported."))
+            if 'COUNT' in a_rule and 'UNTIL' in a_rule:
+                raise serializers.ValidationError(_("RRULE may not contain both COUNT and UNTIL"))
+            match_count = re.match(r".*?(COUNT\=[0-9]+)", a_rule)
+            if match_count:
+                count_val = match_count.groups()[0].strip().split("=")
+                if int(count_val[1]) > 999:
+                    raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
         try:
             Schedule.rrulestr(rrule_value)
         except Exception as e:
