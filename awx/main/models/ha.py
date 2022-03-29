@@ -186,10 +186,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         returns a dict that is passed to the python interface for the runner method corresponding to that command
         any kwargs will override that key=value combination in the returned dict
         """
-        vargs = dict(grace_period=60)  # grace period of 60 minutes, need to set because CLI default will not take effect
+        vargs = dict()
         if settings.AWX_CLEANUP_PATHS:
             vargs['file_pattern'] = os.path.join(settings.AWX_ISOLATION_BASE_PATH, JOB_FOLDER_PREFIX % '*') + '*'
         vargs.update(kwargs)
+        if not isinstance(vargs.get('grace_period'), int):
+            vargs['grace_period'] = 60  # grace period of 60 minutes, need to set because CLI default will not take effect
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
             active_pks = list(
                 UnifiedJob.objects.filter(

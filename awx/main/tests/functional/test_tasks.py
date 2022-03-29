@@ -1,10 +1,12 @@
 import pytest
 from unittest import mock
 import os
+import tempfile
+import shutil
 
 from awx.main.tasks.jobs import RunProjectUpdate, RunInventoryUpdate
-from awx.main.tasks.system import execution_node_health_check
-from awx.main.models import ProjectUpdate, InventoryUpdate, InventorySource, Instance
+from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files
+from awx.main.models import ProjectUpdate, InventoryUpdate, InventorySource, Instance, Job
 
 
 @pytest.fixture
@@ -80,3 +82,40 @@ class TestDependentInventoryUpdate:
                 # Verify that it bails after 1st update, detecting a cancel
                 assert is2.inventory_updates.count() == 0
                 iu_run_mock.assert_called_once()
+
+
+@pytest.fixture
+def mock_job_folder(request):
+    pdd_path = tempfile.mkdtemp(prefix='awx_123_')
+
+    def test_folder_cleanup():
+        if os.path.exists(pdd_path):
+            shutil.rmtree(pdd_path)
+
+    request.addfinalizer(test_folder_cleanup)
+
+    return pdd_path
+
+
+@pytest.mark.django_db
+def test_folder_cleanup_stale_file(mock_job_folder, mock_me):
+    _cleanup_images_and_files()
+    assert os.path.exists(mock_job_folder)  # grace period should protect folder from deletion
+
+    _cleanup_images_and_files(grace_period=0)
+    assert not os.path.exists(mock_job_folder)  # should be deleted
+
+
+@pytest.mark.django_db
+def test_folder_cleanup_running_job(mock_job_folder, mock_me):
+    me_inst = Instance.objects.create(hostname='local_node', uuid='00000000-0000-0000-0000-000000000000')
+    with mock.patch.object(Instance.objects, 'me', return_value=me_inst):
+
+        job = Job.objects.create(id=123, controller_node=me_inst.hostname, status='running')
+        _cleanup_images_and_files(grace_period=0)
+        assert os.path.exists(mock_job_folder)  # running job should prevent folder from getting deleted
+
+        job.status = 'failed'
+        job.save(update_fields=['status'])
+        _cleanup_images_and_files(grace_period=0)
+        assert not os.path.exists(mock_job_folder)  # job is finished and no grace period, should delete
