@@ -58,6 +58,9 @@ uwsgitop
 wheel
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools==58.2.0  # see UPGRADE BLOCKERs
+setuptools_scm[toml]>=3.4  # see UPGRADE BLOCKERs, xmlsec build dep
+lxml>=3.8 # xmlsec build dep
+pkgconfig>=1.5.1 # xmlsec build dep
 
 # Temporarily added to use ansible-runner from git branch, to be removed
 # when ansible-runner moves from requirements_git.txt to here
