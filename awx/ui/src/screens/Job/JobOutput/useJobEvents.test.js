@@ -157,6 +157,7 @@ describe('useJobEvents', () => {
       uuidMap: {},
       eventsWithoutParents: {},
       childrenSummary: {},
+      metaEventParentUuid: {},
       eventGaps: [],
       isAllCollapsed: false,
     };
@@ -772,6 +773,51 @@ describe('useJobEvents', () => {
         'abc-009': 9,
       });
     });
+
+    test('should nest "meta" event based on given parent uuid', () => {
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            2: { rowNumber: 1, numChildren: 3 },
+          },
+          metaEventParentUuid: {
+            4: 'abc-002',
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: [...eventsList.slice(0, 3)],
+        }
+      );
+      const state2 = reducer(state, {
+        type: ADD_EVENTS,
+        events: [
+          {
+            counter: 4,
+            rowNumber: 3,
+            parent_uuid: '',
+          },
+        ],
+      });
+
+      expect(state2.tree).toEqual([
+        {
+          eventIndex: 1,
+          isCollapsed: false,
+          children: [
+            {
+              eventIndex: 2,
+              isCollapsed: false,
+              children: [
+                { eventIndex: 3, isCollapsed: false, children: [] },
+                { eventIndex: 4, isCollapsed: false, children: [] },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe('getNodeByUuid', () => {
@@ -1119,9 +1165,12 @@ describe('useJobEvents', () => {
       const fetchChildrenSummary = jest.fn();
       fetchChildrenSummary.mockResolvedValue({
         data: {
-          1: [0, 52],
-          2: [1, 3],
-          6: [5, 47],
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 52 },
+            2: { rowNumber: 1, numChildren: 3 },
+            6: { rowNumber: 5, numChildren: 47 },
+          },
+          meta_event_nested_uuid: {},
         },
       });
 
@@ -1276,9 +1325,9 @@ describe('useJobEvents', () => {
     test('should return estimated counter when node is non-loaded child', async () => {
       callbacks.fetchChildrenSummary.mockResolvedValue({
         data: {
-          1: [0, 28],
-          2: [1, 3],
-          6: [5, 23],
+          1: { rowNumber: 0, numChildren: 28 },
+          2: { rowNumber: 1, numChildren: 3 },
+          6: { rowNumber: 5, numChidren: 23 },
         },
       });
       const wrapper = mount(<HookTest {...callbacks} />);
@@ -1314,9 +1363,12 @@ describe('useJobEvents', () => {
     test('should estimate counter after skipping collapsed subtree', async () => {
       callbacks.fetchChildrenSummary.mockResolvedValue({
         data: {
-          1: [0, 85],
-          2: [1, 66],
-          69: [68, 17],
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 85 },
+            2: { rowNumber: 1, numChildren: 66 },
+            69: { rowNumber: 68, numChildren: 17 },
+          },
+          meta_event_nested_uuid: {},
         },
       });
       const wrapper = mount(<HookTest {...callbacks} />);
@@ -1347,7 +1399,10 @@ describe('useJobEvents', () => {
     test('should estimate counter in gap between loaded events', async () => {
       callbacks.fetchChildrenSummary.mockResolvedValue({
         data: {
-          1: [0, 30],
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 30 },
+          },
+          meta_event_nested_uuid: {},
         },
       });
       const wrapper = mount(<HookTest {...callbacks} />);
@@ -1405,7 +1460,10 @@ describe('useJobEvents', () => {
     test('should estimate counter in gap before loaded sibling events', async () => {
       callbacks.fetchChildrenSummary.mockResolvedValue({
         data: {
-          1: [0, 30],
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 30 },
+          },
+          meta_event_nested_uuid: {},
         },
       });
       const wrapper = mount(<HookTest {...callbacks} />);
@@ -1447,7 +1505,10 @@ describe('useJobEvents', () => {
     test('should get counter for node between unloaded siblings', async () => {
       callbacks.fetchChildrenSummary.mockResolvedValue({
         data: {
-          1: [0, 30],
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 30 },
+          },
+          meta_event_nested_uuid: {},
         },
       });
       const wrapper = mount(<HookTest {...callbacks} />);

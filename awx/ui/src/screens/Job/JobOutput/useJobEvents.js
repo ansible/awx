@@ -11,8 +11,11 @@ const initialState = {
   // events with parent events that aren't yet loaded.
   // arrays indexed by parent uuid
   eventsWithoutParents: {},
-  // tuple arrays in the form [rowNumber, numChildren] for parent nodes, indexed by counter
+  // object in the form { counter: {rowNumber: n, numChildren: m}} for parent nodes
   childrenSummary: {},
+  // parent_uuid's for "meta" events that need to be injected into the tree to
+  // maintain tree integrity
+  metaEventParentUuid: {},
   isAllCollapsed: false,
 };
 export const ADD_EVENTS = 'ADD_EVENTS';
@@ -48,12 +51,14 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
     if (isFlatMode) {
       return;
     }
+    // TODO: ensure this response is back before adding events
     callbacks
       .fetchChildrenSummary()
       .then((result) => {
         enqueueAction({
           type: SET_CHILDREN_SUMMARY,
-          childrenSummary: result.data,
+          childrenSummary: result.data.children_summary,
+          metaEventParentUuid: result.data.meta_event_nested_uuid,
         });
       })
       .catch(() => {
@@ -104,7 +109,8 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       case SET_CHILDREN_SUMMARY:
         return {
           ...state,
-          childrenSummary: action.childrenSummary,
+          childrenSummary: action.childrenSummary || {},
+          metaEventParentUuid: action.metaEventParentUuid || {},
         };
       default:
         throw new Error(`Unrecognized action: ${action.type}`);
@@ -126,6 +132,9 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         throw new Error('Cannot add event; missing rowNumber');
       }
       const eventIndex = event.counter;
+      if (!event.parent_uuid && state.metaEventParentUuid[eventIndex]) {
+        event.parent_uuid = state.metaEventParentUuid[eventIndex];
+      }
       if (state.events[eventIndex]) {
         state.events[eventIndex] = event;
         state = _gatherEventsForNewParent(state, event.uuid);
@@ -152,8 +161,7 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         console.error('No row number found for ', parent.counter);
         return;
       }
-      const [rowNumber] = state.childrenSummary[parent.counter];
-      parent.rowNumber = rowNumber;
+      parent.rowNumber = state.childrenSummary[parent.counter].rowNumber;
 
       enqueueAction({
         type: ADD_EVENTS,
@@ -387,7 +395,7 @@ function _getLastDescendantNode(nodes) {
 
 function getTotalNumChildren(node, childrenSummary) {
   if (childrenSummary[node.eventIndex]) {
-    return childrenSummary[node.eventIndex][1];
+    return childrenSummary[node.eventIndex].numChildren;
   }
 
   let estimatedNumChildren = node.children.length;
