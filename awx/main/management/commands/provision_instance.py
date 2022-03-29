@@ -13,7 +13,7 @@ class Command(BaseCommand):
     Register this instance with the database for HA tracking.
     """
 
-    help = "Add instance to the database. Specify `--hostname` to use this command."
+    help = "Add instance to the database. When no options are provided, the hostname of the current system will be used. Override with `--hostname`."
 
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str, help="Hostname used during provisioning")
