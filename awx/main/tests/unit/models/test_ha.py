@@ -93,7 +93,7 @@ class TestInstanceGroup(object):
 
 def test_cleanup_params_defaults():
     inst = Instance(hostname='foobar')
-    assert inst.get_cleanup_task_kwargs(exclude_strings=['awx_423_']) == {'exclude_strings': ['awx_423_'], 'file_pattern': '/tmp/awx_*_*'}
+    assert inst.get_cleanup_task_kwargs(exclude_strings=['awx_423_']) == {'exclude_strings': ['awx_423_'], 'file_pattern': '/tmp/awx_*_*', 'grace_period': 60}
 
 
 def test_cleanup_params_for_image_cleanup():
@@ -104,4 +104,5 @@ def test_cleanup_params_for_image_cleanup():
         'process_isolation_executable': 'podman',
         'remove_images': ['quay.invalid/foo/bar'],
         'image_prune': True,
+        'grace_period': 60,
     }
