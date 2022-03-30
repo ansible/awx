@@ -1,6 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
+import os
+
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.conf import settings
@@ -14,7 +16,12 @@ class Command(BaseCommand):
     Register this instance with the database for HA tracking.
     """
 
-    help = "Add instance to the database. When no options are provided, the hostname of the current system will be used. Override with `--hostname`."
+    help = (
+        "Add instance to the database. "
+        "When no options are provided, values from Django settings will be used to register the current system, "
+        "as well as the default queues if needed (only used or enabled for Kubernetes installs). "
+        "Override with `--hostname`."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str, help="Hostname used during provisioning")
@@ -25,7 +32,14 @@ class Command(BaseCommand):
         if not hostname:
             if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 raise CommandError('Registering with values from settings only intended for use in K8s installs')
-            (changed, instance) = Instance.objects.get_or_register()
+
+            from awx.main.management.commands.register_queue import RegisterQueue
+
+            (changed, instance) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
+            RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
+            RegisterQueue(
+                settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True, pod_spec_override=settings.DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE
+            ).register()
         else:
             (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
         if changed:

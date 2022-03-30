@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 import logging
-import os
 from django.db import models
 from django.conf import settings
 from django.db.models.functions import Lower
@@ -163,23 +162,6 @@ class InstanceManager(models.Manager):
                 create_defaults['version'] = RECEPTOR_PENDING
             instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults, **uuid_option)
         return (True, instance)
-
-    def get_or_register(self):
-        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            from awx.main.management.commands.register_queue import RegisterQueue
-
-            pod_ip = os.environ.get('MY_POD_IP')
-            if settings.IS_K8S:
-                registered = self.register(ip_address=pod_ip, node_type='control', uuid=settings.SYSTEM_UUID)
-            else:
-                registered = self.register(ip_address=pod_ip, uuid=settings.SYSTEM_UUID)
-            RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
-            RegisterQueue(
-                settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True, pod_spec_override=settings.DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE
-            ).register()
-            return registered
-        else:
-            return (False, self.me())
 
 
 class InstanceGroupManager(models.Manager):
