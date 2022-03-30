@@ -120,11 +120,7 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master
     chmod 700 get_helm.sh && \
     ./get_helm.sh
 
-# Install tini
-RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
-    chmod +x /usr/bin/tini
-
-RUN pip3 install virtualenv supervisor
+RUN pip3 install virtualenv supervisor dumb-init
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -194,6 +190,7 @@ RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-regi
 # Create default awx rsyslog config
 ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
+ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
 
 ## File mappings
 {% if build_dev|bool %}
@@ -264,9 +261,9 @@ RUN for dir in \
     for file in \
       /etc/containers/containers.conf \
       /var/lib/awx/.config/containers/containers.conf \
-      /var/lib/shared/overlay-images/images.lock \ 
+      /var/lib/shared/overlay-images/images.lock \
       /var/lib/shared/overlay-layers/layers.lock \
-      /var/lib/shared/vfs-images/images.lock \ 
+      /var/lib/shared/vfs-images/images.lock \
       /var/lib/shared/vfs-layers/layers.lock \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
@@ -292,7 +289,7 @@ CMD ["/bin/bash"]
 USER 1000
 EXPOSE 8052
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["dumb-init", "--"]
 CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
 VOLUME /var/lib/awx/.local/share/containers

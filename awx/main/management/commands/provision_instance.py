@@ -3,6 +3,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.conf import settings
 
 from awx.main.models import Instance
 
@@ -13,7 +14,7 @@ class Command(BaseCommand):
     Register this instance with the database for HA tracking.
     """
 
-    help = "Add instance to the database. Specify `--hostname` to use this command."
+    help = "Add instance to the database. When no options are provided, the hostname of the current system will be used. Override with `--hostname`."
 
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str, help="Hostname used during provisioning")
@@ -22,8 +23,11 @@ class Command(BaseCommand):
 
     def _register_hostname(self, hostname, node_type, uuid):
         if not hostname:
-            return
-        (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
+            if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
+                raise CommandError('Registering with values from settings only intended for use in K8s installs')
+            (changed, instance) = Instance.objects.get_or_register()
+        else:
+            (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
         if changed:
             print("Successfully registered instance {}".format(hostname))
         else:
@@ -32,8 +36,6 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, **options):
-        if not options.get('hostname'):
-            raise CommandError("Specify `--hostname` to use this command.")
         self.changed = False
         self._register_hostname(options.get('hostname'), options.get('node_type'), options.get('uuid'))
         if self.changed:
