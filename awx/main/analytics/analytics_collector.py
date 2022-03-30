@@ -13,8 +13,8 @@ from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.analytics import collectors
 from awx.main.analytics.package import Package
+from awx.main.analytics.collection_json import CollectionJSON
 from awx.main.utils import datetime_hook
-from awx.main.utils.pglock import advisory_lock
 
 logger = logging.getLogger('awx.main.analytics')
 
@@ -28,6 +28,7 @@ class AnalyticsCollector(insights_analytics_collector.Collector):
                                                  logger=logger)
 
     def _is_valid_license(self):
+        return True
         try:
             if get_license().get('license_type', 'UNLICENSED') == 'open':
                 return False
@@ -61,10 +62,6 @@ class AnalyticsCollector(insights_analytics_collector.Collector):
     @staticmethod
     def db_connection():
         return connection
-
-    @staticmethod
-    def _now():
-        return now()
 
     @classmethod
     def registered_collectors(cls, module=None):
@@ -104,3 +101,7 @@ class AnalyticsCollector(insights_analytics_collector.Collector):
     @staticmethod
     def _package_class():
         return Package
+
+    @staticmethod
+    def _collection_json_class():
+        return CollectionJSON

@@ -224,7 +224,7 @@ def instance_info(since, include_hostnames=False, **kwargs):
             'uuid': instance['uuid'],
             'version': instance['version'],
             'capacity': instance['capacity'],
-            'cpu': instance['cpu'],
+            'cpu': float(instance['cpu']),
             'memory': instance['memory'],
             'managed_by_policy': instance['managed_by_policy'],
             'enabled': instance['enabled'],
