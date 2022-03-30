@@ -32,9 +32,10 @@ class RunnerCallback:
         self.safe_env = {}
         self.event_ct = 0
         self.model = model
+        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
 
     def update_model(self, pk, _attempt=0, **updates):
-        return update_model(self.model, pk, _attempt=0, **updates)
+        return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
 
     def event_handler(self, event_data):
         #
@@ -147,7 +148,7 @@ class RunnerCallback:
         Ansible runner callback to tell the job when/if it is canceled
         """
         unified_job_id = self.instance.pk
-        self.instance.refresh_from_db()
+        self.instance = self.update_model(unified_job_id)
         if not self.instance:
             logger.error('unified job {} was deleted while running, canceling'.format(unified_job_id))
             return True
