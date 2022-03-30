@@ -7,6 +7,7 @@ on:
       - release_*
 jobs:
   push:
+    if: endsWith(github.repository, '/awx') || startsWith(github.ref, 'refs/heads/release_')
     runs-on: ubuntu-latest
     permissions:
       packages: write
