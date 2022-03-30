@@ -61,7 +61,7 @@ click==7.1.2
     # via receptorctl
 constantly==15.1.0
     # via twisted
-cryptography==3.2
+cryptography==36.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
@@ -342,15 +342,18 @@ ruamel-yaml==0.16.10
     # via openshift
 schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
+semantic-version==2.9.0
+    # via setuptools-rust
 service-identity==18.1.0
     # via twisted
+setuptools-rust==1.2.0
+    # via -r /awx_devel/requirements/requirements.in
 setuptools-scm[toml]==6.4.2
     # via -r /awx_devel/requirements/requirements.in
 six==1.14.0
     # via
     #   ansible-runner
     #   automat
-    #   cryptography
     #   django-extensions
     #   django-pglocks
     #   google-auth
@@ -398,7 +401,9 @@ twisted[tls]==20.3.0
 txaio==20.12.1
     # via autobahn
 typing-extensions==3.10.0.2
-    # via aiohttp
+    # via
+    #   aiohttp
+    #   setuptools-rust
 urllib3==1.26.5
     # via
     #   kubernetes
@@ -430,5 +435,6 @@ setuptools==58.2.0
     #   kubernetes
     #   markdown
     #   python-daemon
+    #   setuptools-rust
     #   setuptools-scm
     #   zope-interface
