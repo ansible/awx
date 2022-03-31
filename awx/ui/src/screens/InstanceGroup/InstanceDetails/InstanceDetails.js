@@ -275,10 +275,11 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           </Tooltip>
           {me.is_superuser && instance.node_type !== 'control' && (
             <DisassociateButton
-              verifyCannotDisassociate={!me.is_superuser}
+              verifyCannotDisassociate={instanceGroup.name === 'controlplane'}
               key="disassociate"
               onDisassociate={disassociateInstance}
               itemsToDisassociate={[instance]}
+              isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               modalTitle={t`Disassociate instance from instance group?`}
             />
           )}

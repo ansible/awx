@@ -12,7 +12,6 @@ import {
   regExp,
   requiredEmail,
   validateTime,
-  protectedResourceName,
 } from './validators';
 
 describe('validators', () => {
@@ -187,22 +186,5 @@ describe('validators', () => {
     expect(validateTime()('12:15: PM')).toEqual('Invalid time format');
     expect(validateTime()('12.15 PM')).toEqual('Invalid time format');
     expect(validateTime()('12;15 PM')).toEqual('Invalid time format');
-  });
-  test('protectedResourceName should validate properly', () => {
-    expect(
-      protectedResourceName('failed validation', ['Alex'])('Apollo')
-    ).toBeUndefined();
-    expect(
-      protectedResourceName('failed validation', ['Alex', 'Athena'])('alex')
-    ).toBeUndefined();
-    expect(
-      protectedResourceName('failed validation', ['Alex', 'Athena'])('Alex')
-    ).toEqual('failed validation');
-    expect(
-      protectedResourceName('failed validation', ['Alex'])('Alex')
-    ).toEqual('failed validation');
-    expect(
-      protectedResourceName('failed validation', ['Alex'])('Alex ')
-    ).toEqual('failed validation');
   });
 });

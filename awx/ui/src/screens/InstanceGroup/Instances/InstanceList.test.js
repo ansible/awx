@@ -123,7 +123,7 @@ describe('<InstanceList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Route path="/instance_groups/:id/instances">
-          <InstanceList />
+          <InstanceList instanceGroup={{ name: 'Alex' }} />
         </Route>,
         {
           context: {

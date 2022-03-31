@@ -409,7 +409,15 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
         if parent.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {parent.hostname}.")}
         if parent.node_type == 'hop':
-            return {'msg': _(f"Cannot change instance group membership of hop node: {parent.hostname}.")}
+            return {'msg': _(f"Cannot change instance group membership of hop node : {parent.hostname}.")}
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        res = self.is_valid_relation(parent, sub)
+        if res:
+            return res
+        if sub.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and parent.node_type == 'hybrid':
+            return {'msg': _(f"Cannot disassociate hybrid instance {parent.hostname} from {sub.name}.")}
         return None
 
 
@@ -511,7 +519,15 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
         if sub.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {sub.hostname}.")}
         if sub.node_type == 'hop':
-            return {'msg': _(f"Cannot change instance group membership of hop node: {sub.hostname}.")}
+            return {'msg': _(f"Cannot change instance group membership of hop node : {sub.hostname}.")}
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        res = self.is_valid_relation(parent, sub)
+        if res:
+            return res
+        if sub.node_type == 'hybrid' and parent.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+            return {'msg': _(f"Cannot disassociate hybrid node {sub.hostname} from {parent.name}.")}
         return None
 
 
