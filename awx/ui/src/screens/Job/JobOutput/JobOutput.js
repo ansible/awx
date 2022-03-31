@@ -118,6 +118,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const isFlatMode =
     forceFlatMode || isJobRunning(jobStatus) || location.search.length > 1;
 
+  const [isTreeReady, setIsTreeReady] = useState(false);
+  const [onReadyEvents, setOnReadyEvents] = useState([]);
+
   const {
     addEvents,
     toggleNodeIsCollapsed,
@@ -134,6 +137,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       fetchEventByUuid,
       fetchChildrenSummary,
       setForceFlatMode,
+      setJobTreeReady: () => setIsTreeReady(true),
     },
     job.id,
     isFlatMode
@@ -153,6 +157,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
+
+  useEffect(() => {
+    if (!isTreeReady || !onReadyEvents.length) {
+      return;
+    }
+    addEvents(onReadyEvents);
+    setOnReadyEvents([]);
+  }, [isTreeReady, onReadyEvents]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const totalNonCollapsedRows = Math.max(
     remoteRowCount - getNumCollapsedEvents(),
@@ -359,7 +371,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         ...newCssMap,
       }));
       const lastCounter = events[events.length - 1]?.counter || 50;
-      addEvents(events);
+      if (isTreeReady) {
+        addEvents(events);
+      } else {
+        setOnReadyEvents((prev) => prev.concat(events));
+      }
       setHighestLoadedCounter(lastCounter);
       setRemoteRowCount(count + countOffset);
     } catch (err) {

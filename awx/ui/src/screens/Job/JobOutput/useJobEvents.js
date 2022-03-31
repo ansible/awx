@@ -51,7 +51,7 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
     if (isFlatMode) {
       return;
     }
-    // TODO: ensure this response is back before adding events
+
     callbacks
       .fetchChildrenSummary()
       .then((result) => {
@@ -63,6 +63,7 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
       })
       .catch(() => {
         callbacks.setForceFlatMode(true);
+        callbacks.setJobTreeReady();
       });
   }, [jobId, isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -107,6 +108,7 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       case REBUILD_TREE:
         return rebuildTree(state);
       case SET_CHILDREN_SUMMARY:
+        callbacks.setJobTreeReady();
         return {
           ...state,
           childrenSummary: action.childrenSummary || {},

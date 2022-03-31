@@ -14,12 +14,16 @@ function Child() {
 function HookTest({
   fetchEventByUuid = () => {},
   fetchChildrenSummary = () => {},
+  setForceFlatMode = () => {},
+  setJobTreeReady = () => {},
   isFlatMode = false,
 }) {
   const hookFuncs = useJobEvents(
     {
       fetchEventByUuid,
       fetchChildrenSummary,
+      setForceFlatMode,
+      setJobTreeReady,
     },
     isFlatMode
   );
@@ -148,6 +152,8 @@ describe('useJobEvents', () => {
     callbacks = {
       fetchEventByUuid: jest.fn(),
       fetchChildrenSummary: jest.fn(),
+      setForceFlatMode: jest.fn(),
+      setJobTreeReady: jest.fn(),
     };
     enqueueAction = jest.fn();
     reducer = jobEventsReducer(callbacks, false, enqueueAction);
