@@ -181,6 +181,19 @@ function VisualizerGraph({ readOnly }) {
   };
 
   const zoomRef = d3.zoom().scaleExtent([0.1, 2]).on('zoom', zoom);
+  // This useEffect prevents the Visualizer toolbar from going off the screen
+  // as the user zooms in too much.  It effectively makes the toolbarr a sticky header
+  // The user can still zoom in/out but there are limited to the degree they can do so
+  // by the zoomExtent above.
+
+  useEffect(() => {
+    const cancelWheel = (event) => event.preventDefault();
+    document.body.addEventListener('wheel', cancelWheel, { passive: false });
+
+    return () => {
+      document.body.removeEventListener('wheel', cancelWheel);
+    };
+  }, []);
 
   // Initialize the zoom
   useEffect(() => {
