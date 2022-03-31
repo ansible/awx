@@ -993,6 +993,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     )
     update_on_project_update = models.BooleanField(
         default=False,
+        help_text=_(
+            'This field is deprecated and will be removed in a future release. '
+            'In future release, functionality will be migrated to source project update_on_launch.'
+        ),
     )
     update_on_launch = models.BooleanField(
         default=False,
