@@ -1161,6 +1161,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
+                'galaxy_task_env': settings.GALAXY_TASK_ENV,
             }
         )
         # apply custom refspec from user for PR refs and the like

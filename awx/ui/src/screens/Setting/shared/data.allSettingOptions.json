@@ -231,6 +231,26 @@
           "read_only": false
         }
       },
+      "GALAXY_TASK_ENV": {
+        "type": "nested object",
+         "required": true,
+        "label": "Environment Variables for Galaxy Commands",
+         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+         "category": "Jobs",
+         "category_slug": "jobs",
+         "placeholder": {
+              "HTTP_PROXY": "myproxy.local:8080"
+          },
+         "default": {
+             "ANSIBLE_FORCE_COLOR": "false",
+              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+          "child": {
+            "type": "string",
+              "required": true,
+            "read_only": false
+        }
+       },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "required": false,
@@ -3942,6 +3962,26 @@
           "type": "string"
         }
       },
+      "GALAXY_TASK_ENV": {
+        "type": "nested object",
+         "required": true,
+        "label": "Environment Variables for Galaxy Commands",
+         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+         "category": "Jobs",
+         "category_slug": "jobs",
+         "placeholder": {
+              "HTTP_PROXY": "myproxy.local:8080"
+          },
+         "default": {
+             "ANSIBLE_FORCE_COLOR": "false",
+              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+          "child": {
+            "type": "string",
+              "required": true,
+            "read_only": false
+        }
+       },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "label": "Gather data for Insights for Ansible Automation Platform",

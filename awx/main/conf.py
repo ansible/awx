@@ -283,6 +283,19 @@ register(
 )
 
 register(
+    'GALAXY_TASK_ENV',
+    field_class=fields.KeyValueField,
+    label=_('Environment Variables for Galaxy Commands'),
+    help_text=_(
+        'Additional environment variables set for invocations of ansible-galaxy within project updates. '
+        'Useful if you must use a proxy server for ansible-galaxy but not git.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+    placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
+)
+
+register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
