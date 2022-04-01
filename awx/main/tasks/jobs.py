@@ -1054,7 +1054,7 @@ class RunProjectUpdate(BaseTask):
         env['TMP'] = settings.AWX_ISOLATION_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         if settings.GALAXY_IGNORE_CERTS:
-            env['ANSIBLE_GALAXY_IGNORE'] = True
+            env['ANSIBLE_GALAXY_IGNORE'] = str(True)
 
         # build out env vars for Galaxy credentials (in order)
         galaxy_server_list = []
