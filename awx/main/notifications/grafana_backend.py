@@ -54,8 +54,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     ):
         super(GrafanaBackend, self).__init__(fail_silently=fail_silently)
         self.grafana_key = grafana_key
-        self.dashboardId = dashboardId
-        self.panelId = panelId
+        self.dashboardId = int(dashboardId) if dashboardId is not None else None
+        self.panelId = int(panelId) if panelId is not None else None
         self.annotation_tags = annotation_tags if annotation_tags is not None else []
         self.grafana_no_verify_ssl = grafana_no_verify_ssl
         self.isRegion = isRegion
@@ -86,8 +86,10 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
                     if not self.fail_silently:
                         raise Exception(smart_str(_("Error converting time {} and/or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
             grafana_data['isRegion'] = self.isRegion
-            grafana_data['dashboardId'] = self.dashboardId
-            grafana_data['panelId'] = self.panelId
+            if self.dashboardId is not None:
+                grafana_data['dashboardId'] = self.dashboardId
+            if self.panelId is not None:
+                grafana_data['panelId'] = self.panelId
             if self.annotation_tags:
                 grafana_data['tags'] = self.annotation_tags
             grafana_data['text'] = m.subject
