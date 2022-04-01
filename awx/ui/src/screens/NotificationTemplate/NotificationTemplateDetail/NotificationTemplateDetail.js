@@ -447,7 +447,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showMessages && (
         <CodeDetail
           label={t`Start message`}
-          value={messages.started.message || defaults.started.message}
+          value={messages.started?.message || defaults.started?.message}
           mode="jinja2"
           rows="2"
           fullWidth
@@ -456,7 +456,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showBodies && (
         <CodeDetail
           label={t`Start message body`}
-          value={messages.started.body || defaults.started.body}
+          value={messages.started?.body || defaults.started?.body}
           mode="jinja2"
           rows="6"
           fullWidth
@@ -465,7 +465,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showMessages && (
         <CodeDetail
           label={t`Success message`}
-          value={messages.success.message || defaults.success.message}
+          value={messages.success?.message || defaults.success?.message}
           mode="jinja2"
           rows="2"
           fullWidth
@@ -474,7 +474,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showBodies && (
         <CodeDetail
           label={t`Success message body`}
-          value={messages.success.body || defaults.success.body}
+          value={messages.success?.body || defaults.success?.body}
           mode="jinja2"
           rows="6"
           fullWidth
@@ -483,7 +483,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showMessages && (
         <CodeDetail
           label={t`Error message`}
-          value={messages.error.message || defaults.error.message}
+          value={messages.error?.message || defaults.error?.message}
           mode="jinja2"
           rows="2"
           fullWidth
@@ -492,7 +492,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showBodies && (
         <CodeDetail
           label={t`Error message body`}
-          value={messages.error.body || defaults.error.body}
+          value={messages.error?.body || defaults.error?.body}
           mode="jinja2"
           rows="6"
           fullWidth

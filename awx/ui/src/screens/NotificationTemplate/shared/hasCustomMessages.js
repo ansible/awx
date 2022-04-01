@@ -30,10 +30,10 @@ function isCustomized(message, defaultMessage) {
   if (!message) {
     return false;
   }
-  if (message.message && message.message !== defaultMessage.message) {
+  if (message?.message !== defaultMessage?.message) {
     return true;
   }
-  if (message.body && message.body !== defaultMessage.body) {
+  if (message?.body !== defaultMessage?.body) {
     return true;
   }
   return false;
