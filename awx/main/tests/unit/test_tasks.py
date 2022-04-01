@@ -1346,7 +1346,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
         if ignore:
-            assert env['ANSIBLE_GALAXY_IGNORE'] is True
+            assert env['ANSIBLE_GALAXY_IGNORE'] == 'True'
         else:
             assert 'ANSIBLE_GALAXY_IGNORE' not in env
 
