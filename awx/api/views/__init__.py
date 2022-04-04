@@ -3842,6 +3842,84 @@ class JobJobEventsList(BaseJobEventsList):
         return job.get_event_queryset().select_related('host').order_by('start_line')
 
 
+class JobJobEventsChildrenSummary(APIView):
+
+    renderer_classes = [JSONRenderer]
+    meta_events = ('debug', 'verbose', 'warning', 'error', 'system_warning', 'deprecated')
+
+    def get(self, request, **kwargs):
+        resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False)
+        job = get_object_or_404(models.Job, pk=kwargs['pk'])
+        if not job.event_processing_finished:
+            return Response(resp)
+        else:
+            resp["event_processing_finished"] = True
+
+        events = list(job.get_event_queryset().values('counter', 'uuid', 'parent_uuid', 'event').order_by('counter'))
+        if len(events) == 0:
+            return Response(resp)
+
+        # key is counter, value is number of total children (including children of children, etc.)
+        map_counter_children_tally = {i['counter']: {"rowNumber": 0, "numChildren": 0} for i in events}
+        # key is uuid, value is counter
+        map_uuid_counter = {i['uuid']: i['counter'] for i in events}
+        # key is uuid, value is parent uuid. Used as a quick lookup
+        map_uuid_puuid = {i['uuid']: i['parent_uuid'] for i in events}
+        # key is counter of meta events (i.e. verbose), value is uuid of the assigned parent
+        map_meta_counter_nested_uuid = {}
+
+        prev_non_meta_event = events[0]
+        for i, e in enumerate(events):
+            if not e['event'] in JobJobEventsChildrenSummary.meta_events:
+                prev_non_meta_event = e
+            if not e['uuid']:
+                continue
+            puuid = e['parent_uuid']
+
+            # if event is verbose (or debug, etc), we need to "assign" it a
+            # parent. This code looks at the event level of the previous
+            # non-verbose event, and the level of the next (by looking ahead)
+            # non-verbose event. The verbose event is assigned the same parent
+            # uuid of the higher level event.
+            # e.g.
+            # E1
+            #  E2
+            # verbose
+            # verbose <- we are on this event currently
+            #    E4
+            # We'll compare E2 and E4, and the verbose event
+            # will be assigned the parent uuid of E4 (higher event level)
+            if e['event'] in JobJobEventsChildrenSummary.meta_events:
+                event_level_before = models.JobEvent.LEVEL_FOR_EVENT[prev_non_meta_event['event']]
+                # find next non meta event
+                z = i
+                next_non_meta_event = events[-1]
+                while z < len(events):
+                    if events[z]['event'] not in JobJobEventsChildrenSummary.meta_events:
+                        next_non_meta_event = events[z]
+                        break
+                    z += 1
+                event_level_after = models.JobEvent.LEVEL_FOR_EVENT[next_non_meta_event['event']]
+                if event_level_after and event_level_after > event_level_before:
+                    puuid = next_non_meta_event['parent_uuid']
+                else:
+                    puuid = prev_non_meta_event['parent_uuid']
+                if puuid:
+                    map_meta_counter_nested_uuid[e['counter']] = puuid
+            map_counter_children_tally[e['counter']]['rowNumber'] = i
+            if not puuid:
+                continue
+            # now traverse up the parent, grandparent, etc. events and tally those
+            while puuid:
+                map_counter_children_tally[map_uuid_counter[puuid]]['numChildren'] += 1
+                puuid = map_uuid_puuid.get(puuid, None)
+
+        # create new dictionary, dropping events with 0 children
+        resp["children_summary"] = {k: v for k, v in map_counter_children_tally.items() if v['numChildren'] != 0}
+        resp["meta_event_nested_uuid"] = map_meta_counter_nested_uuid
+        return Response(resp)
+
+
 class AdHocCommandList(ListCreateAPIView):
 
     model = models.AdHocCommand
