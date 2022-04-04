@@ -115,8 +115,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
   const [forceFlatMode, setForceFlatMode] = useState(false);
-  const isFlatMode =
-    forceFlatMode || isJobRunning(jobStatus) || location.search.length > 1;
+  const isFlatMode = isJobRunning(jobStatus) || location.search.length > 1;
 
   const [isTreeReady, setIsTreeReady] = useState(false);
   const [onReadyEvents, setOnReadyEvents] = useState([]);
@@ -140,7 +139,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       setJobTreeReady: () => setIsTreeReady(true),
     },
     job.id,
-    isFlatMode
+    isFlatMode || forceFlatMode
   );
   const [wsEvents, setWsEvents] = useState([]);
   const [cssMap, setCssMap] = useState({});
@@ -670,7 +669,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
           toggleExpandCollapseAll={handleExpandCollapseAll}
-          isFlatMode={isFlatMode}
+          isFlatMode={isFlatMode || forceFlatMode}
           isTemplateJob={job.type === 'job'}
           isAllCollapsed={isAllCollapsed}
         />

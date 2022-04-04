@@ -55,6 +55,11 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
     callbacks
       .fetchChildrenSummary()
       .then((result) => {
+        if (result.data.event_processing_finished === false) {
+          callbacks.setForceFlatMode(true);
+          callbacks.setJobTreeReady();
+          return;
+        }
         enqueueAction({
           type: SET_CHILDREN_SUMMARY,
           childrenSummary: result.data.children_summary,
