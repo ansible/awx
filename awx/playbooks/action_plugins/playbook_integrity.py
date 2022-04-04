@@ -136,6 +136,7 @@ class Verifier:
         result = verify_cosign_signature(sigpath, msgpath, self.public_key)
         return result
 
+
 # This will be replaced with the cosign python module once it is ready
 def verify_cosign_signature(sigpath, msgpath, pubkeypath):
     pemlines = None
@@ -276,38 +277,3 @@ def execute_command(cmd="", env_params=None, timeout=None):
     result = result_object_to_dict(result)
     result["command"] = cmd
     return result
-
-
-def get_cosign_path():
-    cmd1 = "command -v cosign"
-    result = execute_command(cmd1)
-    if result["returncode"] == 0:
-        return "cosign"
-
-    if os.path.exists(TMP_COSIGN_PATH):
-        return TMP_COSIGN_PATH
-
-    os_name = platform.system().lower()
-    machine = platform.uname().machine
-    arch = "unknown"
-    if machine == "x86_64":
-        arch = "amd64"
-    elif machine == "aarch64":
-        arch = "arm64"
-    elif machine == "ppc64le":
-        arch = "ppc64le"
-    elif machine == "s390x":
-        arch = "s390x"
-    else:
-        arch = machine
-
-    cmd2 = "curl -sL -o {} https://github.com/sigstore/cosign/releases/download/v1.4.1/cosign-{}-{} && chmod +x {}".format(
-        TMP_COSIGN_PATH, os_name, arch, TMP_COSIGN_PATH
-    )
-    result = execute_command(cmd2)
-    if result["returncode"] == 0:
-        cmd3 = "{} initialize".format(TMP_COSIGN_PATH)
-        execute_command(cmd3)
-        return TMP_COSIGN_PATH
-    else:
-        raise ValueError("failed to install cosign command; {}".format(result["stderr"]))
