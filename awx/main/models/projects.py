@@ -370,7 +370,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('A signer id string for keyless playbook integrity check'),
     )
 
-    playbook_integrity_latest_result = JSONField(
+    playbook_integrity_latest_result = JSONBlob(
         blank=True,
         default=None,
         null=True,
@@ -557,7 +557,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         help_text=_('The SCM Revision discovered by this update for the given project and branch.'),
     )
 
-    playbook_integrity_result = JSONField(
+    playbook_integrity_result = JSONBlob(
         blank=True,
         default=None,
         null=True,

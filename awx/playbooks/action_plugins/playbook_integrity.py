@@ -5,6 +5,11 @@ __metaclass__ = type
 import os
 import platform
 import subprocess
+import base64
+import traceback
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.hazmat.primitives.asymmetric import ec
 from ansible.module_utils.basic import *
 from ansible.plugins.action import ActionBase
 from ansible.utils.display import Display
@@ -126,16 +131,34 @@ class Verifier:
         if not os.path.exists(os.path.join(path, sigfile)):
             raise ValueError("signature file \"{}\" does not exists in path \"{}\"".format(sigfile, path))
 
-        cosign_cmd = get_cosign_path()
-        experimental_option = ""
-        key_option = ""
-        if keyless:
-            experimental_option = "COSIGN_EXPERIMENTAL=1"
-        else:
-            key_option = "--key {}".format(self.public_key)
-        cmd = "cd {}; {} {} verify-blob {} --signature {} {}".format(path, experimental_option, cosign_cmd, key_option, sigfile, msgfile)
-        result = execute_command(cmd)
+        msgpath = os.path.join(path, msgfile)
+        sigpath = os.path.join(path, sigfile)
+        result = verify_cosign_signature(sigpath, msgpath, self.public_key)
         return result
+
+# This will be replaced with the cosign python module once it is ready
+def verify_cosign_signature(sigpath, msgpath, pubkeypath):
+    pemlines = None
+    with open(pubkeypath, 'rb') as pem_in:
+        pemlines = pem_in.read()
+    public_key = load_pem_public_key(pemlines)
+    msgdata = None
+    with open(msgpath, 'rb') as msg_in:
+        msgdata = msg_in.read()
+    sigdata = None
+    with open(sigpath, 'rb') as sig_in:
+        sigdata = sig_in.read()
+        sigdata = base64.b64decode(sigdata)
+    result = {}
+    try:
+        public_key.verify(sigdata, msgdata, ec.ECDSA(hashes.SHA256()))
+        result["returncode"] = 0
+        result["stdout"] = "the signature has been verified by sigstore python codes (dummy code at this moment)"
+    except Exception:
+        result["returncode"] = 1
+        result["stdout"] = "public key type is {}".format(type(public_key))
+        result["stderr"] = traceback.format_exc()
+    return result
 
 
 class Digester:
