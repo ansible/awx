@@ -92,6 +92,31 @@ function JobDetail({ job, inventorySourceLabels }) {
     <Link to={`/instance_groups/container_group/${item.id}`}>{item.name}</Link>
   );
 
+  const renderInventoryDetail = () => {
+    if (job.type !== 'project_update') {
+      return inventory ? (
+        <Detail
+          dataCy="job-inventory"
+          label={t`Inventory`}
+          value={
+            <Link
+              to={
+                inventory.kind === 'smart'
+                  ? `/inventories/smart_inventory/${inventory.id}`
+                  : `/inventories/inventory/${inventory.id}`
+              }
+            >
+              {inventory.name}
+            </Link>
+          }
+        />
+      ) : (
+        <DeletedDetail label={t`Inventory`} />
+      );
+    }
+    return null;
+  };
+
   return (
     <CardBody>
       <DetailList>
@@ -159,25 +184,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           value={jobTypes[job.type]}
         />
         <LaunchedByDetail dataCy="job-launched-by" job={job} />
-        {inventory ? (
-          <Detail
-            dataCy="job-inventory"
-            label={t`Inventory`}
-            value={
-              <Link
-                to={
-                  inventory.kind === 'smart'
-                    ? `/inventories/smart_inventory/${inventory.id}`
-                    : `/inventories/inventory/${inventory.id}`
-                }
-              >
-                {inventory.name}
-              </Link>
-            }
-          />
-        ) : (
-          <DeletedDetail label={t`Inventory`} />
-        )}
+        {renderInventoryDetail()}
         {inventory_source && (
           <>
             <Detail
