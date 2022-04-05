@@ -44,9 +44,9 @@ describe('JobOutputSearch', () => {
       wrapper.find(searchBtn).simulate('click');
     });
     expect(wrapper.find('Search').prop('columns')).toHaveLength(3);
-    expect(wrapper.find('Search').prop('columns').at(0).name).toBe('Stdout');
-    expect(wrapper.find('Search').prop('columns').at(1).name).toBe('Event');
-    expect(wrapper.find('Search').prop('columns').at(2).name).toBe('Advanced');
+    expect(wrapper.find('Search').prop('columns')[0].name).toBe('Stdout');
+    expect(wrapper.find('Search').prop('columns')[1].name).toBe('Event');
+    expect(wrapper.find('Search').prop('columns')[2].name).toBe('Advanced');
     expect(history.location.search).toEqual('?stdout__icontains=99');
   });
   test('Should not have Event key in search drop down for system job', () => {
@@ -70,8 +70,8 @@ describe('JobOutputSearch', () => {
       }
     );
     expect(wrapper.find('Search').prop('columns')).toHaveLength(2);
-    expect(wrapper.find('Search').prop('columns').at(0).name).toBe('Stdout');
-    expect(wrapper.find('Search').prop('columns').at(1).name).toBe('Advanced');
+    expect(wrapper.find('Search').prop('columns')[0].name).toBe('Stdout');
+    expect(wrapper.find('Search').prop('columns')[1].name).toBe('Advanced');
   });
 
   test('Should not have Event key in search drop down for inventory update job', () => {
@@ -94,8 +94,9 @@ describe('JobOutputSearch', () => {
         context: { router: { history } },
       }
     );
+
     expect(wrapper.find('Search').prop('columns')).toHaveLength(2);
-    expect(wrapper.find('Search').prop('columns').at(0).name).toBe('Stdout');
-    expect(wrapper.find('Search').prop('columns').at(1).name).toBe('Advanced');
+    expect(wrapper.find('Search').prop('columns')[0].name).toBe('Stdout');
+    expect(wrapper.find('Search').prop('columns')[1].name).toBe('Advanced');
   });
 });
