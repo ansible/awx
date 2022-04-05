@@ -195,6 +195,11 @@ function AdvancedSearch({
   };
 
   const renderTextInput = () => {
+    let placeholderText;
+    if (keySelection === 'labels' && lookupSelection === 'search') {
+      placeholderText = 'e.g. label_1,label_2';
+    }
+
     if (isTextInputDisabled) {
       return (
         <Tooltip
@@ -222,6 +227,7 @@ function AdvancedSearch({
         value={(!keySelection && t`First, select a key`) || searchValue}
         onChange={setSearchValue}
         onKeyDown={handleAdvancedTextKeyDown}
+        placeholder={placeholderText}
       />
     );
   };
