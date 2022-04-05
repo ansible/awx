@@ -7,9 +7,13 @@ import platform
 import subprocess
 import base64
 import traceback
+import requests
+import hashlib
+import json
+from cryptography import x509
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from ansible.module_utils.basic import *
 from ansible.plugins.action import ActionBase
 from ansible.utils.display import Display
@@ -50,10 +54,10 @@ SCM_TYPE_GIT = "git"
 DIGEST_FILENAME = "sha256sum.txt"
 SIGNATURE_FILENAME_GPG = "sha256sum.txt.sig"
 SIGNATURE_FILENAME_SIGSTORE = "sha256sum.txt.sig"
-
 CHECKSUM_OK_IDENTIFIER = ": OK"
-TMP_GNUPG_HOME_DIR = "/tmp/gpghome"
-TMP_COSIGN_PATH = "/tmp/cosign"
+
+DEFAULT_REKOR_URL = "https://rekor.sigstore.dev"
+REKOR_API_HEADERS = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
 
 class Verifier:
@@ -106,11 +110,8 @@ class Verifier:
         gpghome_option = ""
         keyring_option = ""
         if publickey != "":
-            try:
-                os.makedirs(TMP_GNUPG_HOME_DIR)
-            except Exception:
-                pass
-            gpghome_option = "GNUPGHOME={}".format(TMP_GNUPG_HOME_DIR)
+            tmp_gnupg_home = tempfile.TemporaryDirectory()
+            gpghome_option = "GNUPGHOME={}".format(tmp_gnupg_home.name)
             keyring_option = "--no-default-keyring --keyring {}".format(publickey)
         cmd = "cd {}; {} gpg --verify {} {} {}".format(path, gpghome_option, keyring_option, sigfile, msgfile)
         result = execute_command(cmd)
@@ -133,16 +134,13 @@ class Verifier:
 
         msgpath = os.path.join(path, msgfile)
         sigpath = os.path.join(path, sigfile)
-        result = verify_cosign_signature(sigpath, msgpath, self.public_key)
+        result = verify_cosign_signature(sigpath, msgpath, self.public_key, keyless)
         return result
 
 
-# This will be replaced with the cosign python module once it is ready
-def verify_cosign_signature(sigpath, msgpath, pubkeypath):
-    pemlines = None
-    with open(pubkeypath, 'rb') as pem_in:
-        pemlines = pem_in.read()
-    public_key = load_pem_public_key(pemlines)
+# This should be replaced with cosign python module once it is ready
+def verify_cosign_signature(sigpath, msgpath, pubkeypath, keyless, rekor_url=None):
+    result = {}
     msgdata = None
     with open(msgpath, 'rb') as msg_in:
         msgdata = msg_in.read()
@@ -150,16 +148,61 @@ def verify_cosign_signature(sigpath, msgpath, pubkeypath):
     with open(sigpath, 'rb') as sig_in:
         sigdata = sig_in.read()
         sigdata = base64.b64decode(sigdata)
-    result = {}
+
+    public_key = None
+    if keyless:
+        hash = hashlib.sha256(msgdata).hexdigest()
+        rekord_data = fetch_rekord(rekor_url, hash)
+        b64encoded_sigdata_in_rekord = rekord_data.get("spec", {}).get("signature", {}).get("content", "")
+        sigdata_in_rekord = base64.b64decode(b64encoded_sigdata_in_rekord)
+        if sigdata_in_rekord != sigdata:
+            result["returncode"] = 1
+            result["stderr"] = "the signature is different from the one in rekor server"
+            return result
+        b64encoded_cert_pembytes = rekord_data.get("spec", {}).get("signature", {}).get("publicKey", {}).get("content", "")
+        cert_pembytes = base64.b64decode(b64encoded_cert_pembytes)
+        certificate = x509.load_pem_x509_certificate(cert_pembytes)
+        public_key = certificate.public_key()
+    else:
+        pemlines = None
+        with open(pubkeypath, 'rb') as pem_in:
+            pemlines = pem_in.read()
+        public_key = load_pem_public_key(pemlines)
+
     try:
         public_key.verify(sigdata, msgdata, ec.ECDSA(hashes.SHA256()))
         result["returncode"] = 0
-        result["stdout"] = "the signature has been verified by sigstore python codes (dummy code at this moment)"
+        result["stdout"] = "the signature has been verified by sigstore python module (a sample module is used here at this moment)"
     except Exception:
         result["returncode"] = 1
-        result["stdout"] = "public key type is {}".format(type(public_key))
+        result["stdout"] = "public key type is {}, rekord data: {}".format(type(public_key), json.dumps(rekord_data))
         result["stderr"] = traceback.format_exc()
     return result
+
+
+# This should be replaced with cosign python module once it is ready
+def fetch_rekord(rekor_url, hash):
+    if rekor_url is None:
+        rekor_url = DEFAULT_REKOR_URL
+    rekord_data = None
+    rekord_resp = None
+    rekor_payload_search = {
+        "hash": f"sha256:{hash}",
+    }
+    payload = json.dumps(rekor_payload_search)
+    search_resp = requests.post(f"{rekor_url}/api/v1/index/retrieve", data=payload, headers=REKOR_API_HEADERS)
+    uuids = json.loads(search_resp.content)
+    uuid = None
+    if len(uuids) > 0:
+        uuid = uuids[0]
+    rekord_resp = requests.get(f"{rekor_url}/api/v1/log/entries/{uuid}", headers=REKOR_API_HEADERS)
+    if rekord_resp is None:
+        return None
+
+    rekord_resp_data = json.loads(rekord_resp.content)
+    b64encoded_rekord = rekord_resp_data[uuid]["body"]
+    rekord_data = json.loads(base64.b64decode(b64encoded_rekord))
+    return rekord_data
 
 
 class Digester:
@@ -168,6 +211,7 @@ class Digester:
         if path.startswith("~/"):
             self.path = os.path.expanduser(path)
         self.type = self.get_scm_type(path)
+        self.tmpdir = tempfile.TemporaryDirectory()
 
     # TODO: implement this
     def get_scm_type(self, path):
@@ -193,7 +237,7 @@ class Digester:
         if not os.path.exists(digest_file):
             return dict(returncode=1, stdout="", stderr="No such file or directory: {}".format(digest_file))
 
-        tmp_digest_file = os.path.join("/tmp/", DIGEST_FILENAME)
+        tmp_digest_file = os.path.join(self.tmpdir.name, DIGEST_FILENAME)
         result = self.gen(filename=tmp_digest_file)
         if result["returncode"] != 0:
             result["stderr"] = "failed to get the current file & digest list.\n\n{}".format(result["stderr"])
@@ -222,7 +266,7 @@ class Digester:
         return s
 
     def digest_check(self):
-        tmp_check_out = "/tmp/digest_check_output.txt"
+        tmp_check_out = os.path.join(self.tmpdir.name, "digest_check_output.txt")
         cmd = "cd {}; sha256sum --check {} > {} 2>&1".format(self.path, DIGEST_FILENAME, tmp_check_out)
         result = execute_command(cmd)
         if result["returncode"] != 0:
@@ -249,7 +293,7 @@ class Digester:
             if os.path.islink(fpath):
                 continue
             fname_list = "{}{}\n".format(fname_list, line)
-        tmp_fname_list_file = "/tmp/fname_list.txt"
+        tmp_fname_list_file = os.path.join(self.tmpdir.name, "fname_list.txt")
         with open(tmp_fname_list_file, "w") as f:
             f.write(fname_list)
         cmd2 = "cd {}; cat {} | xargs sha256sum > {}".format(self.path, tmp_fname_list_file, filename)
