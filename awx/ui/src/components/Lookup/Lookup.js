@@ -50,20 +50,24 @@ function Lookup(props) {
     fieldName,
     validate,
     modalDescription,
+    hasCheckedTypedName,
   } = props;
   const history = useHistory();
   const [typedText, setTypedText] = useState('');
   const debounceRequest = useDebounce(onDebounce, 1000);
 
-  // useField({
-  //   name: fieldName,
-  //   validate: (val) => {
-  //     if (!multiple && !val && typedText && typedText !== '') {
-  //       return t`That value was not found. Please enter or select a valid value 2.`;
-  //     }
-  //     return validate(val);
-  //   },
-  // });
+  useField({
+    name: fieldName,
+    validate: (val) => {
+      if (hasCheckedTypedName) {
+        if (!multiple && !val && typedText && typedText !== '') {
+          return t`That value was not found. Please enter or select a valid value.`;
+        }
+        return validate(val);
+      }
+      return null;
+    },
+  });
 
   const [state, dispatch] = useReducer(
     reducer,
@@ -234,6 +238,7 @@ Lookup.propTypes = {
   validate: func,
   onDebounce: func,
   isDisabled: bool,
+  hasCheckedTypedName: bool,
 };
 
 Lookup.defaultProps = {
@@ -256,6 +261,7 @@ Lookup.defaultProps = {
   validate: () => undefined,
   onDebounce: () => undefined,
   isDisabled: false,
+  hasCheckedTypedName: false,
 };
 
 export { Lookup as _Lookup };

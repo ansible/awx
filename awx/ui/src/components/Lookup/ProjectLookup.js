@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { node, string, func, bool } from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { useField } from 'formik';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from 'api';
@@ -37,7 +36,7 @@ function ProjectLookup({
   value,
 }) {
   const history = useHistory();
-  const [isTypedNameVerified, setIsTypedNameVerified] = useState(false);
+  const [hasCheckedTypedName, setHasCheckedTypedName] = useState(false);
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
     result: { projects, count, relatedSearchableKeys, searchableKeys, canEdit },
@@ -75,23 +74,6 @@ function ProjectLookup({
     }
   );
 
-  useField({
-    name: fieldName,
-    validate: (val) => {
-      if (isTypedNameVerified) {
-        setIsTypedNameVerified(false);
-        debugger; 
-        return t`That value was not found. Please enter or select a valid value.`;
-      }
-      debugger;
-      return required
-        ? validationRequired(t`Select a value for this field`)
-        : null;
-    },
-  });
-
-  useEffect(() => {});
-
   const checkProjectName = useCallback(
     async (name) => {
       if (!name) {
@@ -99,11 +81,11 @@ function ProjectLookup({
         return;
       }
 
-      setIsTypedNameVerified(true);
       try {
         const {
           data: { results: nameMatchResults, count: nameMatchCount },
         } = await ProjectsAPI.read({ name });
+        setHasCheckedTypedName(true);
         onChange(nameMatchCount ? nameMatchResults[0] : null);
       } catch {
         onChange(null);
@@ -126,6 +108,7 @@ function ProjectLookup({
       labelIcon={tooltip && <Popover content={tooltip} />}
     >
       <Lookup
+        hasCheckedTypedName={hasCheckedTypedName}
         id={fieldName}
         header={t`Project`}
         name={fieldName}
