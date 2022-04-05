@@ -5,7 +5,7 @@ autobahn>=20.12.3  # CVE-2020-35678
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
-cryptography>=3.2
+cryptography>=35.0.0
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
@@ -61,6 +61,7 @@ setuptools==58.2.0  # see UPGRADE BLOCKERs
 setuptools_scm[toml]>=3.4  # see UPGRADE BLOCKERs, xmlsec build dep
 lxml>=3.8 # xmlsec build dep
 pkgconfig>=1.5.1 # xmlsec build dep
+setuptools-rust >= 0.11.4 # cryptography build dep
 
 # Temporarily added to use ansible-runner from git branch, to be removed
 # when ansible-runner moves from requirements_git.txt to here
