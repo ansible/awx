@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { node, string, func, bool } from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from 'api';
@@ -22,19 +22,20 @@ const QS_CONFIG = getQSConfig('project', {
 });
 
 function ProjectLookup({
-  helperTextInvalid,
   autoPopulate,
+  fieldName,
+  helperTextInvalid,
+  isOverrideDisabled,
   isValid,
+  onBlur,
   onChange,
   required,
   tooltip,
-  value,
-  onBlur,
-  history,
-  isOverrideDisabled,
   validate,
-  fieldName,
+  value,
 }) {
+  const history = useHistory();
+  const [hasCheckedTypedName, setHasCheckedTypedName] = useState(false);
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
     result: { projects, count, relatedSearchableKeys, searchableKeys, canEdit },
@@ -79,6 +80,7 @@ function ProjectLookup({
         return;
       }
 
+      setHasCheckedTypedName(true);
       try {
         const {
           data: { results: nameMatchResults, count: nameMatchCount },
@@ -97,7 +99,7 @@ function ProjectLookup({
 
   return (
     <FormGroup
-      fieldId="project"
+      fieldId={fieldName}
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
@@ -105,13 +107,14 @@ function ProjectLookup({
       labelIcon={tooltip && <Popover content={tooltip} />}
     >
       <Lookup
-        id="project"
+        hasCheckedTypedName={hasCheckedTypedName}
+        id={fieldName}
         header={t`Project`}
-        name="project"
+        name={fieldName}
         value={value}
         onBlur={onBlur}
-        onChange={onChange}
         onDebounce={checkProjectName}
+        onChange={onChange}
         fieldName={fieldName}
         validate={validate}
         required={required}
@@ -163,7 +166,7 @@ function ProjectLookup({
             optionCount={count}
             multiple={state.multiple}
             header={t`Project`}
-            name="project"
+            name={fieldName}
             qsConfig={QS_CONFIG}
             readOnly={!canDelete}
             selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
@@ -204,4 +207,4 @@ ProjectLookup.defaultProps = {
 };
 
 export { ProjectLookup as _ProjectLookup };
-export default withRouter(ProjectLookup);
+export default ProjectLookup;

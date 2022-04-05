@@ -81,15 +81,17 @@ const SCMSubForm = ({ autoPopulateProject }) => {
         onChange={handleCredentialUpdate}
       />
       <ProjectLookup
-        value={projectField.value}
-        isValid={!projectMeta.touched || !projectMeta.error}
+        autoPopulate={autoPopulateProject}
+        fieldName="source_project"
         helperTextInvalid={projectMeta.error}
+        isValid={Boolean(
+          !projectMeta.touched || (!projectMeta.error && projectField.value)
+        )}
         onBlur={() => projectHelpers.setTouched()}
         onChange={handleProjectUpdate}
         required
-        autoPopulate={autoPopulateProject}
-        fieldName="source_project"
         validate={required(t`Select a value for this field`)}
+        value={projectField.value}
       />
       <FormGroup
         fieldId="source_path"

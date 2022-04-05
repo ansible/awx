@@ -81,7 +81,7 @@ const InventorySourceFormFields = ({
       };
       Object.keys(defaults).forEach((label) => {
         setFieldValue(label, defaults[label]);
-        setFieldTouched(label, false);
+        setFieldTouched(label, false, false);
       });
     }
   };

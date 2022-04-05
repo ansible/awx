@@ -9,7 +9,7 @@ import {
   shape,
   node,
 } from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useField } from 'formik';
 import { SearchIcon } from '@patternfly/react-icons';
 import {
@@ -45,22 +45,27 @@ function Lookup(props) {
     qsConfig,
     renderItemChip,
     renderOptionsList,
-    history,
     isDisabled,
     onDebounce,
     fieldName,
     validate,
     modalDescription,
+    hasCheckedTypedName,
   } = props;
+  const history = useHistory();
   const [typedText, setTypedText] = useState('');
   const debounceRequest = useDebounce(onDebounce, 1000);
+
   useField({
     name: fieldName,
     validate: (val) => {
-      if (!multiple && !val && typedText && typedText !== '') {
-        return t`That value was not found. Please enter or select a valid value.`;
+      if (hasCheckedTypedName) {
+        if (!multiple && !val && typedText && typedText !== '') {
+          return t`That value was not found. Please enter or select a valid value.`;
+        }
+        return validate(val);
       }
-      return validate(val);
+      return null;
     },
   });
 
@@ -233,6 +238,7 @@ Lookup.propTypes = {
   validate: func,
   onDebounce: func,
   isDisabled: bool,
+  hasCheckedTypedName: bool,
 };
 
 Lookup.defaultProps = {
@@ -255,7 +261,8 @@ Lookup.defaultProps = {
   validate: () => undefined,
   onDebounce: () => undefined,
   isDisabled: false,
+  hasCheckedTypedName: false,
 };
 
 export { Lookup as _Lookup };
-export default withRouter(Lookup);
+export default Lookup;
