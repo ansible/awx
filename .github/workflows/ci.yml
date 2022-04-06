@@ -33,9 +33,12 @@ jobs:
           - name: ui-lint
             label: Run UI Linters
             command: make ui-lint
-          - name: ui-test
-            label: Run UI Tests
-            command: make ui-test
+          - name: ui-test-screens
+            label: Run UI Screens Tests
+            command: make ui-test-screens
+          - name: ui-test-general
+            label: Run UI General Tests
+            command: make ui-test-general
     steps:
       - uses: actions/checkout@v2
 
