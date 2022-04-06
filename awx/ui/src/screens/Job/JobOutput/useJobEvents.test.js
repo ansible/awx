@@ -8,24 +8,22 @@ import useJobEvents, {
   SET_EVENT_NUM_CHILDREN,
 } from './useJobEvents';
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 function Child() {
   return <div />;
 }
 function HookTest({
   fetchEventByUuid = () => {},
-  fetchNextSibling = () => {},
-  fetchNextRootNode = () => {},
-  fetchNumEvents = () => {},
+  fetchChildrenSummary = () => {},
+  setForceFlatMode = () => {},
+  setJobTreeReady = () => {},
   isFlatMode = false,
 }) {
   const hookFuncs = useJobEvents(
     {
       fetchEventByUuid,
-      fetchNextSibling,
-      fetchNextRootNode,
-      fetchNumEvents,
+      fetchChildrenSummary,
+      setForceFlatMode,
+      setJobTreeReady,
     },
     isFlatMode
   );
@@ -153,19 +151,19 @@ describe('useJobEvents', () => {
   beforeEach(() => {
     callbacks = {
       fetchEventByUuid: jest.fn(),
-      fetchNextSibling: jest.fn(),
-      fetchNextRootNode: jest.fn(),
-      fetchNumEvents: jest.fn(),
+      fetchChildrenSummary: jest.fn(),
+      setForceFlatMode: jest.fn(),
+      setJobTreeReady: jest.fn(),
     };
     enqueueAction = jest.fn();
-    callbacks.fetchNextSibling.mockResolvedValue(eventsList[9]);
-    callbacks.fetchNextRootNode.mockResolvedValue(eventsList[9]);
     reducer = jobEventsReducer(callbacks, false, enqueueAction);
     emptyState = {
       tree: [],
       events: {},
       uuidMap: {},
       eventsWithoutParents: {},
+      childrenSummary: {},
+      metaEventParentUuid: {},
       eventGaps: [],
       isAllCollapsed: false,
     };
@@ -380,10 +378,18 @@ describe('useJobEvents', () => {
       callbacks.fetchEventByUuid.mockResolvedValue({
         counter: 10,
       });
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList,
-      });
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            10: [9, 2],
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: eventsList,
+        }
+      );
 
       const newEvents = [
         {
@@ -404,10 +410,18 @@ describe('useJobEvents', () => {
       callbacks.fetchEventByUuid.mockResolvedValue({
         counter: 10,
       });
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList,
-      });
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            10: [9, 2],
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: eventsList,
+        }
+      );
 
       const newEvents = [
         {
@@ -437,10 +451,18 @@ describe('useJobEvents', () => {
       callbacks.fetchEventByUuid.mockResolvedValue({
         counter: 10,
       });
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList,
-      });
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            10: [9, 1],
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: eventsList,
+        }
+      );
 
       const newEvents = [
         {
@@ -471,10 +493,18 @@ describe('useJobEvents', () => {
       callbacks.fetchEventByUuid.mockResolvedValue({
         counter: 10,
       });
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList,
-      });
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            10: [9, 2],
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: eventsList,
+        }
+      );
 
       const newEvents = [
         {
@@ -561,10 +591,19 @@ describe('useJobEvents', () => {
         event_level: 2,
         parent_uuid: 'abc-002',
       };
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: [event3],
-      });
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            1: [0, 3],
+            2: [1, 2],
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: [event3],
+        }
+      );
       expect(callbacks.fetchEventByUuid).toHaveBeenCalledWith('abc-002');
 
       const event2 = {
@@ -741,152 +780,49 @@ describe('useJobEvents', () => {
       });
     });
 
-    describe('fetchNumChildren', () => {
-      test('should find child count for root node', async () => {
-        callbacks.fetchNextRootNode.mockResolvedValue({
-          id: 121,
-          counter: 21,
-          rowNumber: 20,
-          uuid: 'abc-021',
-          event_level: 0,
-          parent_uuid: '',
-        });
-        callbacks.fetchNumEvents.mockResolvedValue(19);
-        reducer(emptyState, {
-          type: ADD_EVENTS,
-          events: [eventsList[0], eventsList[1]],
-        });
-
-        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(0);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledWith(1);
-        await sleep(0);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(1, 21);
-        expect(enqueueAction).toHaveBeenCalledWith({
-          type: SET_EVENT_NUM_CHILDREN,
-          uuid: 'abc-001',
-          numChildren: 19,
-        });
-      });
-
-      test('should find child count for last root node', async () => {
-        callbacks.fetchNextRootNode.mockResolvedValue(null);
-        callbacks.fetchNumEvents.mockResolvedValue(19);
-        reducer(emptyState, {
-          type: ADD_EVENTS,
-          events: [eventsList[0], eventsList[1]],
-        });
-
-        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(0);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledWith(1);
-        await sleep(0);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(1, undefined);
-        expect(enqueueAction).toHaveBeenCalledWith({
-          type: SET_EVENT_NUM_CHILDREN,
-          uuid: 'abc-001',
-          numChildren: 19,
-        });
-      });
-
-      test('should find child count for nested node', async () => {
-        const state = {
-          events: {
-            1: eventsList[0],
-            2: eventsList[1],
+    test('should nest "meta" event based on given parent uuid', () => {
+      const state = reducer(
+        {
+          ...emptyState,
+          childrenSummary: {
+            2: { rowNumber: 1, numChildren: 3 },
           },
-          tree: [
+          metaEventParentUuid: {
+            4: 'abc-002',
+          },
+        },
+        {
+          type: ADD_EVENTS,
+          events: [...eventsList.slice(0, 3)],
+        }
+      );
+      const state2 = reducer(state, {
+        type: ADD_EVENTS,
+        events: [
+          {
+            counter: 4,
+            rowNumber: 3,
+            parent_uuid: '',
+          },
+        ],
+      });
+
+      expect(state2.tree).toEqual([
+        {
+          eventIndex: 1,
+          isCollapsed: false,
+          children: [
             {
-              children: [{ children: [], eventIndex: 2, isCollapsed: false }],
-              eventIndex: 1,
+              eventIndex: 2,
               isCollapsed: false,
+              children: [
+                { eventIndex: 3, isCollapsed: false, children: [] },
+                { eventIndex: 4, isCollapsed: false, children: [] },
+              ],
             },
           ],
-          uuidMap: {
-            'abc-001': 1,
-            'abc-002': 2,
-          },
-          eventsWithoutParents: {},
-        };
-
-        callbacks.fetchNextSibling.mockResolvedValue({
-          id: 20,
-          counter: 20,
-          rowNumber: 19,
-          uuid: 'abc-020',
-          event_level: 1,
-          parent_uuid: 'abc-001',
-        });
-        callbacks.fetchNumEvents.mockResolvedValue(18);
-        reducer(state, {
-          type: ADD_EVENTS,
-          events: [eventsList[2]],
-        });
-
-        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNextSibling).toHaveBeenCalledWith(101, 2);
-        await sleep(0);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(0);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(2, 20);
-        expect(enqueueAction).toHaveBeenCalledWith({
-          type: SET_EVENT_NUM_CHILDREN,
-          uuid: 'abc-002',
-          numChildren: 18,
-        });
-      });
-
-      test('should find child count for nested node, last sibling', async () => {
-        const state = {
-          events: {
-            1: eventsList[0],
-            2: eventsList[1],
-          },
-          tree: [
-            {
-              children: [{ children: [], eventIndex: 2, isCollapsed: false }],
-              eventIndex: 1,
-              isCollapsed: false,
-            },
-          ],
-          uuidMap: {
-            'abc-001': 1,
-            'abc-002': 2,
-          },
-          eventsWithoutParents: {},
-        };
-
-        callbacks.fetchNextSibling.mockResolvedValue(null);
-        callbacks.fetchNextRootNode.mockResolvedValue({
-          id: 121,
-          counter: 21,
-          rowNumber: 20,
-          uuid: 'abc-021',
-          event_level: 0,
-          parent_uuid: '',
-        });
-        callbacks.fetchNumEvents.mockResolvedValue(19);
-        reducer(state, {
-          type: ADD_EVENTS,
-          events: [eventsList[2]],
-        });
-
-        expect(callbacks.fetchNextSibling).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNextSibling).toHaveBeenCalledWith(101, 2);
-        await sleep(0);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNextRootNode).toHaveBeenCalledWith(1);
-        await sleep(0);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledTimes(1);
-        expect(callbacks.fetchNumEvents).toHaveBeenCalledWith(2, 21);
-        expect(enqueueAction).toHaveBeenCalledWith({
-          type: SET_EVENT_NUM_CHILDREN,
-          uuid: 'abc-002',
-          numChildren: 19,
-        });
-      });
+        },
+      ]);
     });
   });
 
@@ -965,40 +901,6 @@ describe('useJobEvents', () => {
       );
 
       expect(tree).toEqual(basicTree);
-    });
-  });
-
-  describe('setEventNumChildren', () => {
-    test('should set number of children on root node', () => {
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList,
-      });
-      expect(state.tree[0].numChildren).toEqual(undefined);
-
-      const { tree } = reducer(state, {
-        type: SET_EVENT_NUM_CHILDREN,
-        uuid: 'abc-001',
-        numChildren: 8,
-      });
-
-      expect(tree[0].numChildren).toEqual(8);
-    });
-
-    test('should set number of children on nested node', () => {
-      const state = reducer(emptyState, {
-        type: ADD_EVENTS,
-        events: eventsList,
-      });
-      expect(state.tree[0].numChildren).toEqual(undefined);
-
-      const { tree } = reducer(state, {
-        type: SET_EVENT_NUM_CHILDREN,
-        uuid: 'abc-006',
-        numChildren: 3,
-      });
-
-      expect(tree[0].children[1].numChildren).toEqual(3);
     });
   });
 
@@ -1266,16 +1168,19 @@ describe('useJobEvents', () => {
     });
 
     test('should get node after gap in loaded children', async () => {
-      const fetchNumEvents = jest.fn();
-      fetchNumEvents.mockImplementation((index) => {
-        const counts = {
-          1: 52,
-          2: 3,
-          6: 47,
-        };
-        return Promise.resolve(counts[index]);
+      const fetchChildrenSummary = jest.fn();
+      fetchChildrenSummary.mockResolvedValue({
+        data: {
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 52 },
+            2: { rowNumber: 1, numChildren: 3 },
+            6: { rowNumber: 5, numChildren: 47 },
+          },
+          meta_event_nested_uuid: {},
+        },
       });
-      wrapper = mount(<HookTest fetchNumEvents={fetchNumEvents} />);
+
+      wrapper = mount(<HookTest fetchChildrenSummary={fetchChildrenSummary} />);
       const laterEvents = [
         {
           id: 151,
@@ -1424,13 +1329,12 @@ describe('useJobEvents', () => {
     });
 
     test('should return estimated counter when node is non-loaded child', async () => {
-      callbacks.fetchNumEvents.mockImplementation((counter) => {
-        const children = {
-          1: 28,
-          2: 3,
-          6: 23,
-        };
-        return children[counter];
+      callbacks.fetchChildrenSummary.mockResolvedValue({
+        data: {
+          1: { rowNumber: 0, numChildren: 28 },
+          2: { rowNumber: 1, numChildren: 3 },
+          6: { rowNumber: 5, numChidren: 23 },
+        },
       });
       const wrapper = mount(<HookTest {...callbacks} />);
       wrapper.update();
@@ -1463,13 +1367,15 @@ describe('useJobEvents', () => {
     });
 
     test('should estimate counter after skipping collapsed subtree', async () => {
-      callbacks.fetchNumEvents.mockImplementation((counter) => {
-        const children = {
-          1: 85,
-          2: 66,
-          69: 17,
-        };
-        return children[counter];
+      callbacks.fetchChildrenSummary.mockResolvedValue({
+        data: {
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 85 },
+            2: { rowNumber: 1, numChildren: 66 },
+            69: { rowNumber: 68, numChildren: 17 },
+          },
+          meta_event_nested_uuid: {},
+        },
       });
       const wrapper = mount(<HookTest {...callbacks} />);
       await act(async () => {
@@ -1497,12 +1403,14 @@ describe('useJobEvents', () => {
     });
 
     test('should estimate counter in gap between loaded events', async () => {
-      callbacks.fetchNumEvents.mockImplementation(
-        (counter) =>
-          ({
-            1: 30,
-          }[counter])
-      );
+      callbacks.fetchChildrenSummary.mockResolvedValue({
+        data: {
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 30 },
+          },
+          meta_event_nested_uuid: {},
+        },
+      });
       const wrapper = mount(<HookTest {...callbacks} />);
       await act(async () => {
         wrapper.find('#test').prop('addEvents')([
@@ -1556,12 +1464,14 @@ describe('useJobEvents', () => {
     });
 
     test('should estimate counter in gap before loaded sibling events', async () => {
-      callbacks.fetchNumEvents.mockImplementation(
-        (counter) =>
-          ({
-            1: 30,
-          }[counter])
-      );
+      callbacks.fetchChildrenSummary.mockResolvedValue({
+        data: {
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 30 },
+          },
+          meta_event_nested_uuid: {},
+        },
+      });
       const wrapper = mount(<HookTest {...callbacks} />);
       await act(async () => {
         wrapper.find('#test').prop('addEvents')([
@@ -1599,12 +1509,14 @@ describe('useJobEvents', () => {
     });
 
     test('should get counter for node between unloaded siblings', async () => {
-      callbacks.fetchNumEvents.mockImplementation(
-        (counter) =>
-          ({
-            1: 30,
-          }[counter])
-      );
+      callbacks.fetchChildrenSummary.mockResolvedValue({
+        data: {
+          children_summary: {
+            1: { rowNumber: 0, numChildren: 30 },
+          },
+          meta_event_nested_uuid: {},
+        },
+      });
       const wrapper = mount(<HookTest {...callbacks} />);
       await act(async () => {
         wrapper.find('#test').prop('addEvents')([

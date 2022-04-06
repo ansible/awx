@@ -11,16 +11,21 @@ const initialState = {
   // events with parent events that aren't yet loaded.
   // arrays indexed by parent uuid
   eventsWithoutParents: {},
+  // object in the form { counter: {rowNumber: n, numChildren: m}} for parent nodes
+  childrenSummary: {},
+  // parent_uuid's for "meta" events that need to be injected into the tree to
+  // maintain tree integrity
+  metaEventParentUuid: {},
   isAllCollapsed: false,
 };
 export const ADD_EVENTS = 'ADD_EVENTS';
 export const TOGGLE_NODE_COLLAPSED = 'TOGGLE_NODE_COLLAPSED';
-export const SET_EVENT_NUM_CHILDREN = 'SET_EVENT_NUM_CHILDREN';
 export const CLEAR_EVENTS = 'CLEAR_EVENTS';
 export const REBUILD_TREE = 'REBUILD_TREE';
 export const TOGGLE_COLLAPSE_ALL = 'TOGGLE_COLLAPSE_ALL';
+export const SET_CHILDREN_SUMMARY = 'SET_CHILDREN_SUMMARY';
 
-export default function useJobEvents(callbacks, isFlatMode) {
+export default function useJobEvents(callbacks, jobId, isFlatMode) {
   const [actionQueue, setActionQueue] = useState([]);
   const enqueueAction = (action) => {
     setActionQueue((queue) => queue.concat(action));
@@ -42,6 +47,31 @@ export default function useJobEvents(callbacks, isFlatMode) {
     });
   }, [actionQueue]);
 
+  useEffect(() => {
+    if (isFlatMode) {
+      return;
+    }
+
+    callbacks
+      .fetchChildrenSummary()
+      .then((result) => {
+        if (result.data.event_processing_finished === false) {
+          callbacks.setForceFlatMode(true);
+          callbacks.setJobTreeReady();
+          return;
+        }
+        enqueueAction({
+          type: SET_CHILDREN_SUMMARY,
+          childrenSummary: result.data.children_summary,
+          metaEventParentUuid: result.data.meta_event_nested_uuid,
+        });
+      })
+      .catch(() => {
+        callbacks.setForceFlatMode(true);
+        callbacks.setJobTreeReady();
+      });
+  }, [jobId, isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return {
     addEvents: (events) => dispatch({ type: ADD_EVENTS, events }),
     getNodeByUuid: (uuid) => getNodeByUuid(state, uuid),
@@ -53,10 +83,14 @@ export default function useJobEvents(callbacks, isFlatMode) {
     getNodeForRow: (rowIndex) => getNodeForRow(state, rowIndex),
     getTotalNumChildren: (uuid) => {
       const node = getNodeByUuid(state, uuid);
-      return getTotalNumChildren(node);
+      return getTotalNumChildren(node, state.childrenSummary);
     },
     getNumCollapsedEvents: () =>
-      state.tree.reduce((sum, node) => sum + getNumCollapsedChildren(node), 0),
+      state.tree.reduce(
+        (sum, node) =>
+          sum + getNumCollapsedChildren(node, state.childrenSummary),
+        0
+      ),
     getCounterForRow: (rowIndex) => getCounterForRow(state, rowIndex),
     getEvent: (eventIndex) => getEvent(state, eventIndex),
     clearLoadedEvents: () => dispatch({ type: CLEAR_EVENTS }),
@@ -74,12 +108,17 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         return toggleCollapseAll(state, action.isCollapsed);
       case TOGGLE_NODE_COLLAPSED:
         return toggleNodeIsCollapsed(state, action.uuid);
-      case SET_EVENT_NUM_CHILDREN:
-        return setEventNumChildren(state, action.uuid, action.numChildren);
       case CLEAR_EVENTS:
         return initialState;
       case REBUILD_TREE:
         return rebuildTree(state);
+      case SET_CHILDREN_SUMMARY:
+        callbacks.setJobTreeReady();
+        return {
+          ...state,
+          childrenSummary: action.childrenSummary || {},
+          metaEventParentUuid: action.metaEventParentUuid || {},
+        };
       default:
         throw new Error(`Unrecognized action: ${action.type}`);
     }
@@ -100,6 +139,9 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         throw new Error('Cannot add event; missing rowNumber');
       }
       const eventIndex = event.counter;
+      if (!event.parent_uuid && state.metaEventParentUuid[eventIndex]) {
+        event.parent_uuid = state.metaEventParentUuid[eventIndex];
+      }
       if (state.events[eventIndex]) {
         state.events[eventIndex] = event;
         state = _gatherEventsForNewParent(state, event.uuid);
@@ -113,22 +155,21 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       let isParentFound;
       [state, isParentFound] = _addNestedLevelEvent(state, event);
       if (!isParentFound) {
-        parentsToFetch[event.parent_uuid] = {
-          childCounter: event.counter,
-          childRowNumber: event.rowNumber,
-        };
+        parentsToFetch[event.parent_uuid] = true;
         state = _addEventWithoutParent(state, event);
       }
     });
 
     Object.keys(parentsToFetch).forEach(async (uuid) => {
-      const { childCounter, childRowNumber } = parentsToFetch[uuid];
       const parent = await callbacks.fetchEventByUuid(uuid);
-      const numPrevSiblings = await callbacks.fetchNumEvents(
-        parent.counter,
-        childCounter
-      );
-      parent.rowNumber = childRowNumber - numPrevSiblings - 1;
+
+      if (!state.childrenSummary || !state.childrenSummary[parent.counter]) {
+        // eslint-disable-next-line no-console
+        console.error('No row number found for ', parent.counter);
+        return;
+      }
+      parent.rowNumber = state.childrenSummary[parent.counter].rowNumber;
+
       enqueueAction({
         type: ADD_EVENTS,
         events: [parent],
@@ -180,7 +221,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
     const index = parent.children.findIndex(
       (node) => node.eventIndex >= eventIndex
     );
-    const length = parent.children.length + 1;
     if (index === -1) {
       state = updateNodeByUuid(state, event.parent_uuid, (node) => {
         node.children.push(newNode);
@@ -206,9 +246,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
       },
       event.uuid
     );
-    if (length === 1) {
-      _fetchNumChildren(state, parent);
-    }
 
     return [state, true];
   }
@@ -229,45 +266,6 @@ export function jobEventsReducer(callbacks, isFlatMode, enqueueAction) {
         [parentUuid]: eventsList,
       },
     };
-  }
-
-  async function _fetchNumChildren(state, node) {
-    const event = state.events[node.eventIndex];
-    if (!event) {
-      throw new Error(
-        `Cannot fetch numChildren; event ${node.eventIndex} not found`
-      );
-    }
-    const sibling = await _getNextSibling(state, event);
-    const numChildren = await callbacks.fetchNumEvents(
-      event.counter,
-      sibling?.counter
-    );
-    enqueueAction({
-      type: SET_EVENT_NUM_CHILDREN,
-      uuid: event.uuid,
-      numChildren,
-    });
-    if (sibling) {
-      sibling.rowNumber = event.rowNumber + numChildren + 1;
-      enqueueAction({
-        type: ADD_EVENTS,
-        events: [sibling],
-      });
-    }
-  }
-
-  async function _getNextSibling(state, event) {
-    if (!event.parent_uuid) {
-      return callbacks.fetchNextRootNode(event.counter);
-    }
-    const parentNode = getNodeByUuid(state, event.parent_uuid);
-    const parent = state.events[parentNode.eventIndex];
-    const sibling = await callbacks.fetchNextSibling(parent.id, event.counter);
-    if (!sibling) {
-      return _getNextSibling(state, parent);
-    }
-    return sibling;
   }
 
   function _gatherEventsForNewParent(state, parentUuid) {
@@ -303,8 +301,13 @@ function getEventForRow(state, rowIndex) {
   return null;
 }
 
-function getNodeForRow(state, rowToFind) {
-  const { node } = _getNodeForRow(state, rowToFind, state.tree);
+function getNodeForRow(state, rowToFind, childrenSummary) {
+  const { node } = _getNodeForRow(
+    state,
+    rowToFind,
+    state.tree,
+    childrenSummary
+  );
   return node;
 }
 
@@ -329,8 +332,14 @@ function _getNodeForRow(state, rowToFind, nodes) {
     if (event.rowNumber === rowToFind) {
       return { node };
     }
-    const totalNodeDescendants = getTotalNumChildren(node);
-    const numCollapsedChildren = getNumCollapsedChildren(node);
+    const totalNodeDescendants = getTotalNumChildren(
+      node,
+      state.childrenSummary
+    );
+    const numCollapsedChildren = getNumCollapsedChildren(
+      node,
+      state.childrenSummary
+    );
     const nodeChildren = totalNodeDescendants - numCollapsedChildren;
     if (event.rowNumber + nodeChildren >= rowToFind) {
       // requested row is in children/descendants
@@ -370,8 +379,8 @@ function _getNodeForRow(state, rowToFind, nodes) {
 
 function _getNodeInChildren(state, node, rowToFind) {
   const event = state.events[node.eventIndex];
-  const firstChild = state.events[node.children[0].eventIndex];
-  if (rowToFind < firstChild.rowNumber) {
+  const firstChild = state.events[node.children[0]?.eventIndex];
+  if (!firstChild || rowToFind < firstChild.rowNumber) {
     const rowDiff = rowToFind - event.rowNumber;
     return {
       node: null,
@@ -391,25 +400,25 @@ function _getLastDescendantNode(nodes) {
   return lastDescendant;
 }
 
-function getTotalNumChildren(node) {
-  if (typeof node.numChildren !== 'undefined') {
-    return node.numChildren;
+function getTotalNumChildren(node, childrenSummary) {
+  if (childrenSummary[node.eventIndex]) {
+    return childrenSummary[node.eventIndex].numChildren;
   }
 
   let estimatedNumChildren = node.children.length;
   node.children.forEach((child) => {
-    estimatedNumChildren += getTotalNumChildren(child);
+    estimatedNumChildren += getTotalNumChildren(child, childrenSummary);
   });
   return estimatedNumChildren;
 }
 
-function getNumCollapsedChildren(node) {
+function getNumCollapsedChildren(node, childrenSummary) {
   if (node.isCollapsed) {
-    return getTotalNumChildren(node);
+    return getTotalNumChildren(node, childrenSummary);
   }
   let sum = 0;
   node.children.forEach((child) => {
-    sum += getNumCollapsedChildren(child);
+    sum += getNumCollapsedChildren(child, childrenSummary);
   });
   return sum;
 }
@@ -512,16 +521,6 @@ function _getNodeByIndex(arr, index) {
     return null;
   }
   return _getNodeByIndex(arr[i - 1].children, index);
-}
-
-function setEventNumChildren(state, uuid, numChildren) {
-  if (!state.uuidMap[uuid]) {
-    return state;
-  }
-  return updateNodeByUuid(state, uuid, (node) => ({
-    ...node,
-    numChildren,
-  }));
 }
 
 function getEvent(state, eventIndex) {

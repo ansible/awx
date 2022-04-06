@@ -18,7 +18,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import ErrorDetail from 'components/ErrorDetail';
 import StatusLabel from 'components/StatusLabel';
-import { JobEventsAPI } from 'api';
+import { JobsAPI } from 'api';
 
 import { getJobModel, isJobRunning } from 'util/jobs';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
@@ -99,8 +99,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollHeight = useRef(0);
   const history = useHistory();
   const eventByUuidRequests = useRef([]);
-  const siblingRequests = useRef([]);
-  const numEventsRequests = useRef([]);
 
   const fetchEventByUuid = async (uuid) => {
     let promise = eventByUuidRequests.current[uuid];
@@ -113,59 +111,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     return data.results[0] || null;
   };
 
-  const fetchNextSibling = async (parentEventId, counter) => {
-    const key = `${parentEventId}-${counter}`;
-    let promise = siblingRequests.current[key];
-    if (!promise) {
-      promise = JobEventsAPI.readChildren(parentEventId, {
-        page_size: 1,
-        order_by: 'counter',
-        counter__gt: counter,
-      });
-      siblingRequests.current[key] = promise;
-    }
-
-    const { data } = await promise;
-    siblingRequests.current[key] = null;
-    return data.results[0] || null;
-  };
-
-  const fetchNextRootNode = async (counter) => {
-    const { data } = await getJobModel(job.type).readEvents(job.id, {
-      page_size: 1,
-      order_by: 'counter',
-      counter__gt: counter,
-      parent_uuid: '',
-    });
-    return data.results[0] || null;
-  };
-
-  const fetchNumEvents = async (startCounter, endCounter) => {
-    if (endCounter <= startCounter + 1) {
-      return 0;
-    }
-    const key = `${startCounter}-${endCounter}`;
-    let promise = numEventsRequests.current[key];
-    if (!promise) {
-      const params = {
-        page_size: 1,
-        order_by: 'counter',
-        counter__gt: startCounter,
-      };
-      if (endCounter) {
-        params.counter__lt = endCounter;
-      }
-      promise = getJobModel(job.type).readEvents(job.id, params);
-      numEventsRequests.current[key] = promise;
-    }
-
-    const { data } = await promise;
-    numEventsRequests.current[key] = null;
-    return data.count || 0;
-  };
+  const fetchChildrenSummary = () => JobsAPI.readChildrenSummary(job.id);
 
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
+  const [forceFlatMode, setForceFlatMode] = useState(false);
   const isFlatMode = isJobRunning(jobStatus) || location.search.length > 1;
+
+  const [isTreeReady, setIsTreeReady] = useState(false);
+  const [onReadyEvents, setOnReadyEvents] = useState([]);
 
   const {
     addEvents,
@@ -181,11 +134,12 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   } = useJobEvents(
     {
       fetchEventByUuid,
-      fetchNextSibling,
-      fetchNextRootNode,
-      fetchNumEvents,
+      fetchChildrenSummary,
+      setForceFlatMode,
+      setJobTreeReady: () => setIsTreeReady(true),
     },
-    isFlatMode
+    job.id,
+    isFlatMode || forceFlatMode
   );
   const [wsEvents, setWsEvents] = useState([]);
   const [cssMap, setCssMap] = useState({});
@@ -203,6 +157,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
 
+  useEffect(() => {
+    if (!isTreeReady || !onReadyEvents.length) {
+      return;
+    }
+    addEvents(onReadyEvents);
+    setOnReadyEvents([]);
+  }, [isTreeReady, onReadyEvents]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const totalNonCollapsedRows = Math.max(
     remoteRowCount - getNumCollapsedEvents(),
     0
@@ -216,13 +178,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
 
   useEffect(() => {
-    const pendingRequests = [
-      ...Object.values(eventByUuidRequests.current || {}),
-      ...Object.values(siblingRequests.current || {}),
-      ...Object.values(numEventsRequests.current || {}),
-    ];
+    const pendingRequests = Object.values(eventByUuidRequests.current || {});
     setHasContentLoading(true); // prevents "no content found" screen from flashing
-    Promise.all(pendingRequests).then(() => {
+    Promise.allSettled(pendingRequests).then(() => {
       setRemoteRowCount(0);
       clearLoadedEvents();
       loadJobEvents();
@@ -412,7 +370,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         ...newCssMap,
       }));
       const lastCounter = events[events.length - 1]?.counter || 50;
-      addEvents(events);
+      if (isTreeReady) {
+        addEvents(events);
+      } else {
+        setOnReadyEvents((prev) => prev.concat(events));
+      }
       setHighestLoadedCounter(lastCounter);
       setRemoteRowCount(count + countOffset);
     } catch (err) {
@@ -707,7 +669,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           onScrollNext={handleScrollNext}
           onScrollPrevious={handleScrollPrevious}
           toggleExpandCollapseAll={handleExpandCollapseAll}
-          isFlatMode={isFlatMode}
+          isFlatMode={isFlatMode || forceFlatMode}
           isTemplateJob={job.type === 'job'}
           isAllCollapsed={isAllCollapsed}
         />
