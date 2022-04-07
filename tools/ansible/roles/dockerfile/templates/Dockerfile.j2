@@ -67,7 +67,7 @@ RUN cd /tmp && make requirements_awx_dev
 # Use the distro provided npm to bootstrap our required version of node
 
 {% if not headless|bool %}
-RUN npm install -g n && n 14.15.1
+RUN npm install -g n && n 16.13.1
 {% endif %}
 
 # Copy source into builder, build sdist, install it into awx venv
@@ -150,7 +150,7 @@ RUN dnf -y install \
     wget \
     diffutils \
     unzip && \
-    npm install -g n && n 16.14.0 && npm install -g npm@8.5.0 && dnf remove -y nodejs
+    npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
 RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout
 

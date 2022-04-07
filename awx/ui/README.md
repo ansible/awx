@@ -1,7 +1,7 @@
 # AWX-UI
 
 ## Requirements
-- node >= 16.14.0, npm >= 8.x make, git
+- node >= 16.13.1, npm >= 8.x make, git
 
 ## Development
 The API development server will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
