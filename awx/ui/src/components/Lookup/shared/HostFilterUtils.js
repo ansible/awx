@@ -68,11 +68,12 @@ export function toQueryString(config, searchParams = {}) {
 
 /**
  * Escape a string with double quote in case there was a white space
+ * @param {string} key The key of the value to be parsed
  * @param {string} value A string to be parsed
  * @return {string}  string
  */
-const escapeString = (value) => {
-  if (verifySpace(value)) {
+const escapeString = (key, value) => {
+  if (verifySpace(value) || key.includes('regex')) {
     return `"${value}"`;
   }
   return value;
@@ -95,9 +96,11 @@ export function toHostFilter(searchParams = {}) {
     .sort()
     .flatMap((key) => {
       if (Array.isArray(searchParams[key])) {
-        return searchParams[key].map((val) => `${key}=${escapeString(val)}`);
+        return searchParams[key].map(
+          (val) => `${key}=${escapeString(key, val)}`
+        );
       }
-      return `${key}=${escapeString(searchParams[key])}`;
+      return `${key}=${escapeString(key, searchParams[key])}`;
     });
 
   const filteredSearchParams = flattenSearchParams.filter(

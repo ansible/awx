@@ -136,6 +136,17 @@ describe('toHostFilter', () => {
     );
   });
 
+  test('should escape name__regex and name__iregex', () => {
+    const object = {
+      or__name__regex: '(t|e)st',
+      or__name__iregex: '(f|o)',
+      or__name: 'foo',
+    };
+    expect(toHostFilter(object)).toEqual(
+      'name=foo or name__iregex="(f|o)" or name__regex="(t|e)st"'
+    );
+  });
+
   test('should return a host filter with or conditional when value is array', () => {
     const object = {
       or__groups__id: ['1', '2'],
