@@ -398,11 +398,11 @@ class OrderByBackend(BaseFilterBackend):
                         order_by = value.split(',')
                     else:
                         order_by = (value,)
-            if order_by is None:
-                order_by = self.get_default_ordering(view)
+            default_order_by = self.get_default_ordering(view)
+            # glue the order by and default order by together so that the default is the backup option
+            order_by = list(order_by or []) + list(default_order_by or [])
             if order_by:
                 order_by = self._validate_ordering_fields(queryset.model, order_by)
-
                 # Special handling of the type field for ordering. In this
                 # case, we're not sorting exactly on the type field, but
                 # given the limited number of views with multiple types,

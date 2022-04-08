@@ -408,3 +408,46 @@ def test_project_delete(delete, organization, admin_user):
         ),
         admin_user,
     )
+
+
+@pytest.mark.parametrize(
+    'order_by, expected_names, expected_ids',
+    [
+        ('name', ['alice project', 'bob project', 'shared project'], [1, 2, 3]),
+        ('-name', ['shared project', 'bob project', 'alice project'], [3, 2, 1]),
+    ],
+)
+@pytest.mark.django_db
+def test_project_list_ordering_by_name(get, order_by, expected_names, expected_ids, organization_factory):
+    'ensure sorted order of project list is maintained correctly when the requested order is invalid or not applicable'
+    objects = organization_factory(
+        'org1',
+        projects=['alice project', 'bob project', 'shared project'],
+        superusers=['admin'],
+    )
+    project_names = []
+    project_ids = []
+    # TODO: ask for an order by here that doesn't apply
+    results = get(reverse('api:project_list'), objects.superusers.admin, QUERY_STRING='order_by=%s' % order_by).data['results']
+    for x in range(len(results)):
+        project_names.append(results[x]['name'])
+        project_ids.append(results[x]['id'])
+    assert project_names == expected_names and project_ids == expected_ids
+
+
+@pytest.mark.parametrize('order_by', ('name', '-name'))
+@pytest.mark.django_db
+def test_project_list_ordering_with_duplicate_names(get, order_by, organization_factory):
+    # why? because all the '1' mean that all the names are the same, you can't sort based on that,
+    # meaning you have to fall back on the default sort order, which in this case, is ID
+    'ensure sorted order of project list is maintained correctly when the project names the same'
+    objects = organization_factory(
+        'org1',
+        projects=['1', '1', '1', '1', '1'],
+        superusers=['admin'],
+    )
+    project_ids = {}
+    for x in range(3):
+        results = get(reverse('api:project_list'), objects.superusers.admin, QUERY_STRING='order_by=%s' % order_by).data['results']
+        project_ids[x] = [proj['id'] for proj in results]
+    assert project_ids[0] == project_ids[1] == project_ids[2] == [1, 2, 3, 4, 5]
