@@ -79,4 +79,11 @@ describe('StatusLabel', () => {
     expect(wrapper.find('Tooltip')).toHaveLength(1);
     expect(wrapper.find('Tooltip').prop('content')).toEqual('Foo');
   });
+
+  test('should render children', () => {
+    const wrapper = mount(
+      <StatusLabel tooltipContent="Foo" status="success" children="children" />
+    );
+    expect(wrapper.text()).toEqual('children');
+  });
 });

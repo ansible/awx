@@ -7,6 +7,8 @@ import { Label, Tooltip } from '@patternfly/react-core';
 import icons from '../StatusIcon/icons';
 
 const colors = {
+  approved: 'green',
+  denied: 'red',
   success: 'green',
   successful: 'green',
   ok: 'green',
@@ -17,14 +19,17 @@ const colors = {
   running: 'blue',
   pending: 'blue',
   skipped: 'blue',
+  timedOut: 'red',
   waiting: 'grey',
   disabled: 'grey',
   canceled: 'orange',
   changed: 'orange',
 };
 
-export default function StatusLabel({ status, tooltipContent = '' }) {
+export default function StatusLabel({ status, tooltipContent = '', children }) {
   const upperCaseStatus = {
+    approved: t`Approved`,
+    denied: t`Denied`,
     success: t`Success`,
     healthy: t`Healthy`,
     successful: t`Successful`,
@@ -35,6 +40,7 @@ export default function StatusLabel({ status, tooltipContent = '' }) {
     running: t`Running`,
     pending: t`Pending`,
     skipped: t`Skipped'`,
+    timedOut: t`Timed out`,
     waiting: t`Waiting`,
     disabled: t`Disabled`,
     canceled: t`Canceled`,
@@ -46,7 +52,7 @@ export default function StatusLabel({ status, tooltipContent = '' }) {
 
   const renderLabel = () => (
     <Label variant="outline" color={color} icon={Icon ? <Icon /> : null}>
-      {label}
+      {children || label}
     </Label>
   );
 
@@ -65,6 +71,8 @@ export default function StatusLabel({ status, tooltipContent = '' }) {
 
 StatusLabel.propTypes = {
   status: oneOf([
+    'approved',
+    'denied',
     'success',
     'successful',
     'ok',
@@ -75,6 +83,7 @@ StatusLabel.propTypes = {
     'running',
     'pending',
     'skipped',
+    'timedOut',
     'waiting',
     'disabled',
     'canceled',

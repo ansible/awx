@@ -1,21 +1,26 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { t } from '@lingui/macro';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
 import DeleteButton from 'components/DeleteButton';
 import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
 import { formatDateString, secondsToHHMMSS } from 'util/dates';
-import { WorkflowApprovalsAPI } from 'api';
+import { WorkflowApprovalsAPI, WorkflowJobsAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { WorkflowApproval } from 'types';
-import WorkflowApprovalStatus from '../shared/WorkflowApprovalStatus';
+import StatusLabel from 'components/StatusLabel';
+import {
+  getDetailPendingLabel,
+  getStatus,
+} from '../shared/WorkflowApprovalUtils';
+import WorkflowApprovalControls from '../shared/WorkflowApprovalControls';
 
 function WorkflowApprovalDetail({ workflowApproval }) {
   const { id: workflowApprovalId } = useParams();
+  const [isKebabOpen, setIsKebabModalOpen] = useState(false);
   const history = useHistory();
   const {
     request: deleteWorkflowApproval,
@@ -61,13 +66,36 @@ function WorkflowApprovalDetail({ workflowApproval }) {
   const { error: denyError, dismissError: dismissDenyError } =
     useDismissableError(denyApprovalError);
 
+  const {
+    error: cancelApprovalError,
+    isLoading: isCancelLoading,
+    request: cancelWorkflowApprovals,
+  } = useRequest(
+    useCallback(async () => {
+      await WorkflowJobsAPI.cancel(
+        workflowApproval.summary_fields.source_workflow_job.id
+      );
+      history.push(`/workflow_approvals/${workflowApprovalId}`);
+    }, [workflowApproval, workflowApprovalId, history]),
+    {}
+  );
+
+  const handleCancel = async () => {
+    setIsKebabModalOpen(false);
+    await cancelWorkflowApprovals();
+  };
+
+  const { error: cancelError, dismissError: dismissCancelError } =
+    useDismissableError(cancelApprovalError);
+
   const sourceWorkflowJob =
     workflowApproval?.summary_fields?.source_workflow_job;
 
   const sourceWorkflowJobTemplate =
     workflowApproval?.summary_fields?.workflow_job_template;
 
-  const isLoading = isDeleteLoading || isApproveLoading || isDenyLoading;
+  const isLoading =
+    isDeleteLoading || isApproveLoading || isDenyLoading || isCancelLoading;
 
   return (
     <CardBody>
@@ -86,9 +114,9 @@ function WorkflowApprovalDetail({ workflowApproval }) {
           <Detail
             label={t`Expires`}
             value={
-              workflowApproval.approval_expiration
-                ? formatDateString(workflowApproval.approval_expiration)
-                : t`Never`
+              <StatusLabel status={workflowApproval.status}>
+                {getDetailPendingLabel(workflowApproval)}
+              </StatusLabel>
             }
             dataCy="wa-detail-expires"
           />
@@ -96,9 +124,7 @@ function WorkflowApprovalDetail({ workflowApproval }) {
         {workflowApproval.status !== 'pending' && (
           <Detail
             label={t`Status`}
-            value={
-              <WorkflowApprovalStatus workflowApproval={workflowApproval} />
-            }
+            value={<StatusLabel status={getStatus(workflowApproval)} />}
             dataCy="wa-detail-status"
           />
         )}
@@ -169,31 +195,21 @@ function WorkflowApprovalDetail({ workflowApproval }) {
         />
       </DetailList>
       <CardActionsRow>
-        {workflowApproval.can_approve_or_deny && (
-          <>
-            <Button
-              ouiaId={`${workflowApproval.id}-approve-button`}
-              aria-label={t`Approve`}
-              variant="primary"
-              onClick={approveWorkflowApproval}
-              isDisabled={isLoading}
-            >
-              {t`Approve`}
-            </Button>
-            <Button
-              ouiaId={`${workflowApproval.id}-deny-button`}
-              aria-label={t`Deny`}
-              variant="danger"
-              onClick={denyWorkflowApproval}
-              isDisabled={isLoading}
-            >
-              {t`Deny`}
-            </Button>
-          </>
-        )}
+        {workflowApproval.status === 'pending' &&
+          workflowApproval.can_approve_or_deny && (
+            <WorkflowApprovalControls
+              selected={[workflowApproval]}
+              onHandleApprove={approveWorkflowApproval}
+              onHandleDeny={denyWorkflowApproval}
+              onHandleCancel={handleCancel}
+              onHandleToggleToolbarKebab={(isOpen) =>
+                setIsKebabModalOpen(isOpen)
+              }
+              isKebabOpen={isKebabOpen}
+            />
+          )}
         {workflowApproval.status !== 'pending' &&
-          workflowApproval.summary_fields.user_capabilities &&
-          workflowApproval.summary_fields.user_capabilities.delete && (
+          workflowApproval.summary_fields?.user_capabilities?.delete && (
             <DeleteButton
               name={workflowApproval.name}
               modalTitle={t`Delete Workflow Approval`}
@@ -224,6 +240,17 @@ function WorkflowApprovalDetail({ workflowApproval }) {
         >
           {t`Failed to approve workflow approval.`}
           <ErrorDetail error={approveError} />
+        </AlertModal>
+      )}
+      {cancelError && (
+        <AlertModal
+          isOpen={cancelError}
+          variant="error"
+          title={t`Error!`}
+          onClose={dismissCancelError}
+        >
+          {t`Failed to approve workflow approval.`}
+          <ErrorDetail error={cancelError} />
         </AlertModal>
       )}
       {denyError && (

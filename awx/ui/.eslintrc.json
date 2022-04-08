@@ -95,7 +95,8 @@
           "href",
           "modifier",
           "data-cy",
-          "fieldName"
+          "fieldName",
+          "splitButtonVariant"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg", "hh:mm AM/PM", "Twilio"],
         "ignoreComponent": [
