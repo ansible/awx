@@ -79,7 +79,7 @@
         "type": "string",
         "required": false,
         "label": "Red Hat customer username",
-        "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This username is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -88,7 +88,7 @@
         "type": "string",
         "required": false,
         "label": "Red Hat customer password",
-        "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This password is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -114,8 +114,8 @@
       "AUTOMATION_ANALYTICS_URL": {
         "type": "string",
         "required": false,
-        "label": "Insights for Ansible Automation Platform upload URL",
-        "help_text": "This setting is used to to configure the upload URL for data collection for Red Hat Insights.",
+        "label": "Automation Analytics upload URL",
+        "help_text": "This setting is used to to configure the upload URL for data collection for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": "https://example.com"
@@ -254,8 +254,8 @@
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "required": false,
-        "label": "Gather data for Insights for Ansible Automation Platform",
-        "help_text": "Enables the service to gather data on automation and send it to Red Hat Insights.",
+        "label": "Gather data for Automation Analytics",
+        "help_text": "Enables the service to gather data on automation and send it to Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": false
@@ -605,7 +605,7 @@
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
         "required": true,
-        "label": "Last gather date for Insights for Ansible Automation Platform.",
+        "label": "Last gather date for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": null
@@ -613,7 +613,7 @@
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
         "required": false,
-        "label": "Last gathered entries from the data collection service of Insights for Ansible Automation Platform",
+        "label": "Last gathered entries from the data collection service of Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -621,7 +621,7 @@
       "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
         "type": "integer",
         "required": false,
-        "label": "Insights for Ansible Automation Platform Gather Interval",
+        "label": "Automation Analytics Gather Interval",
         "help_text": "Interval (in seconds) between data gathering.",
         "min_value": 1800,
         "category": "System",
@@ -3845,7 +3845,7 @@
       "REDHAT_USERNAME": {
         "type": "string",
         "label": "Red Hat customer username",
-        "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This username is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3853,7 +3853,7 @@
       "REDHAT_PASSWORD": {
         "type": "string",
         "label": "Red Hat customer password",
-        "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This password is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3876,8 +3876,8 @@
       },
       "AUTOMATION_ANALYTICS_URL": {
         "type": "string",
-        "label": "Insights for Ansible Automation Platform upload URL",
-        "help_text": "This setting is used to to configure the upload URL for data collection for Red Hat Insights.",
+        "label": "Automation Analytics upload URL",
+        "help_text": "This setting is used to to configure the upload URL for data collection for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3984,8 +3984,8 @@
        },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
-        "label": "Gather data for Insights for Ansible Automation Platform",
-        "help_text": "Enables the service to gather data on automation and send it to Red Hat Insights.",
+        "label": "Gather data for Automation Analytics",
+        "help_text": "Enables the service to gather data on automation and send it to Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -4298,21 +4298,21 @@
       },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
-        "label": "Last gather date for Insights for Ansible Automation Platform.",
+        "label": "Last gather date for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
-        "label": "Last gathered entries from the data collection service of Insights for Ansible Automation Platform",
+        "label": "Last gathered entries from the data collection service of Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
         "type": "integer",
-        "label": "Insights for Ansible Automation Platform Gather Interval",
+        "label": "Automation Analytics Gather Interval",
         "help_text": "Interval (in seconds) between data gathering.",
         "min_value": 1800,
         "category": "System",

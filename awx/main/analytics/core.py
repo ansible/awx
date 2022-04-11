@@ -177,7 +177,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
     if collection_type != 'dry-run':
         if not settings.INSIGHTS_TRACKING_STATE:
-            logger.log(log_level, "Insights for Ansible Automation Platform not enabled. Use --dry-run to gather locally without sending.")
+            logger.log(log_level, "Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
             return None
 
         if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
@@ -332,10 +332,10 @@ def ship(path):
     Ship gathered metrics to the Insights API
     """
     if not path:
-        logger.error('Insights for Ansible Automation Platform TAR not found')
+        logger.error('Automation Analytics TAR not found')
         return False
     if not os.path.exists(path):
-        logger.error('Insights for Ansible Automation Platform TAR {} not found'.format(path))
+        logger.error('Automation Analytics TAR {} not found'.format(path))
         return False
     if "Error:" in str(path):
         return False
