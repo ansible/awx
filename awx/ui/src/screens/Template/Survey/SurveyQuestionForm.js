@@ -120,8 +120,14 @@ function SurveyQuestionForm({
     new_question: !question,
   };
   if (question?.type === 'multiselect' || question?.type === 'multiplechoice') {
-    const newQuestions = question.choices.split('\n').map((c, i) => {
-      if (question.default.split('\n').includes(c)) {
+    const choices = Array.isArray(question.choices)
+      ? question.choices
+      : question.choices.split('\n');
+    const defaults = Array.isArray(question.default)
+      ? question.default
+      : question.default.split('\n');
+    const formattedChoices = choices.map((c, i) => {
+      if (defaults.includes(c)) {
         return { choice: c, isDefault: true, id: i };
       }
 
@@ -136,7 +142,7 @@ function SurveyQuestionForm({
       variable: question?.variable || '',
       min: question?.min || 0,
       max: question?.max || 1024,
-      formattedChoices: newQuestions,
+      formattedChoices,
       new_question: !question,
     };
   }
