@@ -390,7 +390,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         for i in instances:
             if i.node_type not in (capacity_type, 'hybrid'):
                 continue
-            if i.jobs_running == 0:
+            if (hasattr(i, 'jobs_running') and i.jobs_running == 0) or i.remaining_capacity == i.capacity:
                 if largest_instance is None:
                     largest_instance = i
                 elif i.capacity > largest_instance.capacity:
