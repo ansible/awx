@@ -252,7 +252,8 @@ class ApiV2(base.Base):
                     _page = _page.put(post_data)
                     changed = True
             except (exc.Common, AssertionError) as e:
-                log.error("Object import failed: %s.", e)
+                identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
+                log.error(f"{endpoint} \"{identifier}\": {e}.")
                 log.debug("post_data: %r", post_data)
                 continue
 
