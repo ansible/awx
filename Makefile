@@ -409,12 +409,12 @@ ui-test:
 ui-test-screens:
 	$(NPM_BIN) --prefix awx/ui install
 	$(NPM_BIN) run --prefix awx/ui pretest
-	$(NPM_BIN) run --prefix awx/ui test-screens --maxWorkers=2
+	$(NPM_BIN) run --prefix awx/ui test-screens
 
 ui-test-general:
 	$(NPM_BIN) --prefix awx/ui install
 	$(NPM_BIN) run --prefix awx/ui pretest
-	$(NPM_BIN) run --prefix awx/ui/ test-general --maxWorkers=2
+	$(NPM_BIN) run --prefix awx/ui/ test-general
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
