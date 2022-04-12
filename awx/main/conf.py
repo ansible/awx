@@ -112,7 +112,7 @@ register(
     encrypted=False,
     read_only=False,
     label=_('Red Hat customer username'),
-    help_text=_('This username is used to send data to Insights for Ansible Automation Platform'),
+    help_text=_('This username is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -125,7 +125,7 @@ register(
     encrypted=True,
     read_only=False,
     label=_('Red Hat customer password'),
-    help_text=_('This password is used to send data to Insights for Ansible Automation Platform'),
+    help_text=_('This password is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -162,8 +162,8 @@ register(
     default='https://example.com',
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Insights for Ansible Automation Platform upload URL'),
-    help_text=_('This setting is used to to configure the upload URL for data collection for Red Hat Insights.'),
+    label=_('Automation Analytics upload URL'),
+    help_text=_('This setting is used to to configure the upload URL for data collection for Automation Analytics.'),
     category=_('System'),
     category_slug='system',
 )
@@ -299,8 +299,8 @@ register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Gather data for Insights for Ansible Automation Platform'),
-    help_text=_('Enables the service to gather data on automation and send it to Red Hat Insights.'),
+    label=_('Gather data for Automation Analytics'),
+    help_text=_('Enables the service to gather data on automation and send it to Automation Analytics.'),
     category=_('System'),
     category_slug='system',
 )
@@ -727,7 +727,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_GATHER',
     field_class=fields.DateTimeField,
-    label=_('Last gather date for Insights for Ansible Automation Platform.'),
+    label=_('Last gather date for Automation Analytics.'),
     allow_null=True,
     category=_('System'),
     category_slug='system',
@@ -735,7 +735,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
     field_class=fields.CharField,
-    label=_('Last gathered entries from the data collection service of Insights for Ansible Automation Platform'),
+    label=_('Last gathered entries from the data collection service of Automation Analytics'),
     default='',
     allow_blank=True,
     category=_('System'),
@@ -746,7 +746,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
     field_class=fields.IntegerField,
-    label=_('Insights for Ansible Automation Platform Gather Interval'),
+    label=_('Automation Analytics Gather Interval'),
     help_text=_('Interval (in seconds) between data gathering.'),
     default=14400,  # every 4 hours
     min_value=1800,  # every 30 minutes
