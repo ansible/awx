@@ -64,7 +64,7 @@ class TaskManager:
 
         self.time_delta_job_explanation = timedelta(seconds=30)
 
-    def after_lock_init(self):
+    def after_lock_init(self, all_sorted_tasks):
         """
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         """
@@ -77,7 +77,7 @@ class TaskManager:
             SimpleNamespace(
                 obj=instance,
                 node_type=instance.node_type,
-                remaining_capacity=instance.remaining_capacity,
+                remaining_capacity=instance.capacity,  # Updated with Instance.update_remaining_capacity by looking at all active tasks
                 capacity=instance.capacity,
                 hostname=instance.hostname,
             )
@@ -85,6 +85,9 @@ class TaskManager:
         ]
 
         instances_by_hostname = {i.hostname: i for i in instances_partial}
+
+        # updates remaining capacity value based on currently running and waiting tasks
+        Instance.update_remaining_capacity(instances_by_hostname, all_sorted_tasks)
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             if rampart_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
@@ -603,7 +606,7 @@ class TaskManager:
         finished_wfjs = []
         all_sorted_tasks = self.get_tasks()
 
-        self.after_lock_init()
+        self.after_lock_init(all_sorted_tasks)
 
         if len(all_sorted_tasks) > 0:
             # TODO: Deal with

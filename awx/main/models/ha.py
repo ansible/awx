@@ -161,6 +161,25 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def remaining_capacity(self):
         return self.capacity - self.consumed_capacity
 
+    @staticmethod
+    def update_remaining_capacity(instances, jobs):
+        """Takes mapping of hostname to SimpleNamespace instance like objects and a list of jobs.
+
+        Computes remaining capacity for all the instances based on currently running and waiting jobs.
+
+        No return value, updates the "remaining_capacity" field on the SimpleNamespace instance like object in place.
+        For use in the task manager to avoid refetching jobs from the database.
+        """
+        for job in jobs:
+            if job.status not in ['waiting', 'running']:
+                continue
+            control_instance = instances.get(job.controller_node, '')
+            execution_instance = instances.get(job.execution_node, '')
+            if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
+                instances[job.execution_node].remaining_capacity -= job.task_impact
+            if control_instance and control_instance.node_type in ('hybrid', 'control'):
+                instances[job.controller_node].remaining_capacity -= settings.AWX_CONTROL_NODE_TASK_IMPACT
+
     @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(
