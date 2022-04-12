@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React from 'react';
+import ProjectHelpTextStrings from '../Project.helptext';
 
-import { t } from '@lingui/macro';
 import {
   UrlFormField,
   ScmCredentialFormField,
@@ -12,33 +12,18 @@ const ArchiveSubForm = ({
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
-}) => (
-  <>
-    <UrlFormField
-      tooltip={
-        <span>
-          {t`Example URLs for Remote Archive Source Control include:`}
-          <ul css={{ margin: '10px 0 10px 20px' }}>
-            <li>
-              <code>
-                https://github.com/username/project/archive/v0.0.1.tar.gz
-              </code>
-            </li>
-            <li>
-              <code>
-                https://github.com/username/project/archive/v0.0.2.zip
-              </code>
-            </li>
-          </ul>
-        </span>
-      }
-    />
-    <ScmCredentialFormField
-      credential={credential}
-      onCredentialSelection={onCredentialSelection}
-    />
-    <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
-  </>
-);
+}) => {
+  const projectHelpText = ProjectHelpTextStrings();
+  return (
+    <>
+      <UrlFormField tooltip={projectHelpText.archiveUrl} />
+      <ScmCredentialFormField
+        credential={credential}
+        onCredentialSelection={onCredentialSelection}
+      />
+      <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
+    </>
+  );
+};
 
 export default ArchiveSubForm;

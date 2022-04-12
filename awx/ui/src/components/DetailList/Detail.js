@@ -1,5 +1,6 @@
 import React from 'react';
-import { node, bool, string } from 'prop-types';
+
+import { oneOfType, node, bool, string } from 'prop-types';
 import { TextListItem, TextListItemVariants } from '@patternfly/react-core';
 import styled from 'styled-components';
 import Popover from '../Popover';
@@ -81,7 +82,7 @@ Detail.propTypes = {
   value: node,
   fullWidth: bool,
   alwaysVisible: bool,
-  helpText: string,
+  helpText: oneOfType([string, node]),
 };
 Detail.defaultProps = {
   value: null,

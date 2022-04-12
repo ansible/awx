@@ -7,6 +7,7 @@ import CredentialLookup from 'components/Lookup/CredentialLookup';
 import FormField, { CheckboxField } from 'components/FormField';
 import { required } from 'util/validators';
 import { FormCheckboxLayout, FormFullWidthLayout } from 'components/FormLayout';
+import ProjectHelpTextStrings from '../Project.helptext';
 
 export const UrlFormField = ({ tooltip }) => (
   <FormField
@@ -21,18 +22,18 @@ export const UrlFormField = ({ tooltip }) => (
   />
 );
 
-export const BranchFormField = ({ label }) => (
-  <FormField
-    id="project-scm-branch"
-    name="scm_branch"
-    type="text"
-    label={label}
-    tooltip={t`Branch to checkout. In addition to branches,
-        you can input tags, commit hashes, and arbitrary refs. Some
-        commit hashes and refs may not be available unless you also
-        provide a custom refspec.`}
-  />
-);
+export const BranchFormField = ({ label }) => {
+  const projectHelpStrings = ProjectHelpTextStrings();
+  return (
+    <FormField
+      id="project-scm-branch"
+      name="scm_branch"
+      type="text"
+      label={label}
+      tooltip={projectHelpStrings.branchFormField}
+    />
+  );
+};
 
 export const ScmCredentialFormField = ({
   credential,
@@ -59,74 +60,66 @@ export const ScmCredentialFormField = ({
   );
 };
 
-export const ScmTypeOptions = ({ scmUpdateOnLaunch, hideAllowOverride }) => (
-  <FormFullWidthLayout>
-    <FormGroup fieldId="project-option-checkboxes" label={t`Options`}>
-      <FormCheckboxLayout>
-        <CheckboxField
-          id="option-scm-clean"
-          name="scm_clean"
-          label={t`Clean`}
-          tooltip={t`Remove any local modifications prior to performing an update.`}
-        />
-        <CheckboxField
-          id="option-scm-delete-on-update"
-          name="scm_delete_on_update"
-          label={t`Delete`}
-          tooltip={t`Delete the local repository in its entirety prior to
-                  performing an update. Depending on the size of the
-                  repository this may significantly increase the amount
-                  of time required to complete an update.`}
-        />
-        <CheckboxField
-          id="option-scm-track-submodules"
-          name="scm_track_submodules"
-          label={t`Track submodules`}
-          tooltip={t`Submodules will track the latest commit on
-                  their master branch (or other branch specified in
-                  .gitmodules). If no, submodules will be kept at
-                  the revision specified by the main project.
-                  This is equivalent to specifying the --remote
-                  flag to git submodule update.`}
-        />
-        <CheckboxField
-          id="option-scm-update-on-launch"
-          name="scm_update_on_launch"
-          label={t`Update Revision on Launch`}
-          tooltip={t`Each time a job runs using this project, update the
-                  revision of the project prior to starting the job.`}
-        />
-        {!hideAllowOverride && (
-          <CheckboxField
-            id="option-allow-override"
-            name="allow_override"
-            label={t`Allow Branch Override`}
-            tooltip={t`Allow changing the Source Control branch or revision in a job
-                    template that uses this project.`}
-          />
-        )}
-      </FormCheckboxLayout>
-    </FormGroup>
+export const ScmTypeOptions = ({ scmUpdateOnLaunch, hideAllowOverride }) => {
+  const projectHelpStrings = ProjectHelpTextStrings();
+  const { values } = useFormikContext();
 
-    {scmUpdateOnLaunch && (
-      <>
-        <Title size="md" headingLevel="h4">
-          {t`Option Details`}
-        </Title>
-        <FormField
-          id="project-cache-timeout"
-          name="scm_update_cache_timeout"
-          type="number"
-          min="0"
-          label={t`Cache Timeout`}
-          tooltip={t`Time in seconds to consider a project
-                    to be current. During job runs and callbacks the task
-                    system will evaluate the timestamp of the latest project
-                    update. If it is older than Cache Timeout, it is not
-                    considered current, and a new project update will be
-                    performed.`}
-        />
-      </>
-    )}
-  </FormFullWidthLayout>
-);
+  return (
+    <FormFullWidthLayout>
+      <FormGroup fieldId="project-option-checkboxes" label={t`Options`}>
+        <FormCheckboxLayout>
+          <CheckboxField
+            id="option-scm-clean"
+            name="scm_clean"
+            label={t`Clean`}
+            tooltip={projectHelpStrings.options.clean}
+          />
+          <CheckboxField
+            id="option-scm-delete-on-update"
+            name="scm_delete_on_update"
+            label={t`Delete`}
+            tooltip={projectHelpStrings.options.delete}
+          />
+          {values.scm_type === 'git' ? (
+            <CheckboxField
+              id="option-scm-track-submodules"
+              name="scm_track_submodules"
+              label={t`Track submodules`}
+              tooltip={projectHelpStrings.options.trackSubModules}
+            />
+          ) : null}
+          <CheckboxField
+            id="option-scm-update-on-launch"
+            name="scm_update_on_launch"
+            label={t`Update Revision on Launch`}
+            tooltip={projectHelpStrings.options.updateOnLaunch}
+          />
+          {!hideAllowOverride && (
+            <CheckboxField
+              id="option-allow-override"
+              name="allow_override"
+              label={t`Allow Branch Override`}
+              tooltip={projectHelpStrings.options.allowBranchOverride}
+            />
+          )}
+        </FormCheckboxLayout>
+      </FormGroup>
+
+      {scmUpdateOnLaunch && (
+        <>
+          <Title size="md" headingLevel="h4">
+            {t`Option Details`}
+          </Title>
+          <FormField
+            id="project-cache-timeout"
+            name="scm_update_cache_timeout"
+            type="number"
+            min="0"
+            label={t`Cache Timeout`}
+            tooltip={projectHelpStrings.options.cacheTimeout}
+          />
+        </>
+      )}
+    </FormFullWidthLayout>
+  );
+};
