@@ -117,7 +117,7 @@ function SurveyReorderModal({
     let component = null;
     const choices = Array.isArray(q.choices)
       ? q.choices
-      : q.choices.split('\n');
+      : (q.choices || '').split('\n');
     switch (q.type) {
       case 'password':
         component = (

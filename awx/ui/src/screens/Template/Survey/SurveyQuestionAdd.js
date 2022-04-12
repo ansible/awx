@@ -27,9 +27,6 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
         let defaultAnswers = '';
         formData.formattedChoices.forEach(({ choice, isDefault }, i) => {
           choices.push(choice);
-          // i === formData.formattedChoices.length - 1
-          //   ? choices.concat(`${choice}`)
-          //   : choices.concat(`${choice}\n`);
           if (isDefault) {
             defaultAnswers =
               i === formData.formattedChoices.length - 1
