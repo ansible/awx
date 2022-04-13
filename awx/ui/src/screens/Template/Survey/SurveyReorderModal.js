@@ -115,6 +115,9 @@ function SurveyReorderModal({
 
   const defaultAnswer = (q) => {
     let component = null;
+    const choices = Array.isArray(q.choices)
+      ? q.choices
+      : (q.choices || '').split('\n');
     switch (q.type) {
       case 'password':
         component = (
@@ -162,10 +165,10 @@ function SurveyReorderModal({
             ouiaId={`survey-preview-multiSelect-${q.variable}`}
             noResultsFoundText={t`No results found`}
           >
-            {q.choices.length > 0 &&
-              q.choices
-                .split('\n')
-                .map((option) => <SelectOption key={option} value={option} />)}
+            {choices.length > 0 &&
+              choices.map((option) => (
+                <SelectOption key={option} value={option} />
+              ))}
           </Select>
         );
         break;
