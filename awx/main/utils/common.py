@@ -1113,33 +1113,18 @@ def deepmerge(a, b):
         return b
 
 
-def create_partition(tblname, start=None, end=None, partition_label=None, minutely=False):
-    """Creates new partition table for events.
-    - start defaults to beginning of current hour
-    - end defaults to end of current hour
-    - partition_label defaults to YYYYMMDD_HH
+def create_partition(tblname, start=None):
+    """Creates new partition table for events.  By default it covers the current hour."""
+    if start is None:
+        start = now()
 
-    - minutely will create partitions that span _a single minute_ for testing purposes
-    """
-    current_time = now()
-    if not start:
-        if minutely:
-            start = current_time.replace(microsecond=0, second=0)
-        else:
-            start = current_time.replace(microsecond=0, second=0, minute=0)
-    if not end:
-        if minutely:
-            end = start.replace(microsecond=0, second=0) + timedelta(minutes=1)
-        else:
-            end = start.replace(microsecond=0, second=0, minute=0) + timedelta(hours=1)
+    start = start.replace(microsecond=0, second=0, minute=0)
+    end = start + timedelta(hours=1)
+
     start_timestamp = str(start)
     end_timestamp = str(end)
 
-    if not partition_label:
-        if minutely:
-            partition_label = start.strftime('%Y%m%d_%H%M')
-        else:
-            partition_label = start.strftime('%Y%m%d_%H')
+    partition_label = start.strftime('%Y%m%d_%H')
 
     try:
         with transaction.atomic():
