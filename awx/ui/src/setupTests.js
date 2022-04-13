@@ -105,3 +105,7 @@ jest.doMock('./contexts/Session', () => ({
   SessionProvider: MockSessionContext.Provider,
   useSession: () => React.useContext(MockSessionContext),
 }));
+
+afterEach(() => {
+  if (global.gc) global.gc();
+})
