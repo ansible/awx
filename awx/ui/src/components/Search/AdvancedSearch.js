@@ -260,7 +260,6 @@ function AdvancedSearch({
         selections={keySelection}
         isOpen={isKeyDropdownOpen}
         placeholderText={t`Key`}
-        isCreatable
         isGrouped
         onCreateOption={setKeySelection}
         maxHeight={maxSelectHeight}
