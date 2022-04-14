@@ -93,7 +93,11 @@ function JobDetail({ job, inventorySourceLabels }) {
   );
 
   const renderInventoryDetail = () => {
-    if (job.type !== 'project_update') {
+    if (
+      job.type !== 'project_update' &&
+      job.type !== 'system_job' &&
+      job.type !== 'workflow_job'
+    ) {
       return inventory ? (
         <Detail
           dataCy="job-inventory"
@@ -112,6 +116,60 @@ function JobDetail({ job, inventorySourceLabels }) {
         />
       ) : (
         <DeletedDetail label={t`Inventory`} />
+      );
+    }
+    if (job.type === 'workflow_job') {
+      return inventory ? (
+        <Detail
+          dataCy="job-inventory"
+          label={t`Inventory`}
+          value={
+            <Link
+              to={
+                inventory.kind === 'smart'
+                  ? `/inventories/smart_inventory/${inventory.id}`
+                  : `/inventories/inventory/${inventory.id}`
+              }
+            >
+              {inventory.name}
+            </Link>
+          }
+        />
+      ) : null;
+    }
+    return null;
+  };
+
+  const renderProjectDetail = () => {
+    if (
+      job.type !== 'ad_hoc_command' &&
+      job.type !== 'inventory_update' &&
+      job.type !== 'system_job' &&
+      job.type !== 'workflow_job'
+    ) {
+      return project ? (
+        <>
+          <Detail
+            dataCy="job-project"
+            label={t`Project`}
+            value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
+          />
+          <Detail
+            dataCy="job-project-status"
+            label={t`Project Status`}
+            value={
+              projectUpdate ? (
+                <Link to={`/jobs/project/${projectUpdate.id}`}>
+                  <StatusLabel status={project.status} />
+                </Link>
+              ) : (
+                <StatusLabel status={project.status} />
+              )
+            }
+          />
+        </>
+      ) : (
+        <DeletedDetail label={t`Project`} />
       );
     }
     return null;
@@ -225,30 +283,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             }
           />
         )}
-        {project ? (
-          <>
-            <Detail
-              dataCy="job-project"
-              label={t`Project`}
-              value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
-            />
-            <Detail
-              dataCy="job-project-status"
-              label={t`Project Status`}
-              value={
-                projectUpdate ? (
-                  <Link to={`/jobs/project/${projectUpdate.id}`}>
-                    <StatusLabel status={project.status} />
-                  </Link>
-                ) : (
-                  <StatusLabel status={project.status} />
-                )
-              }
-            />
-          </>
-        ) : (
-          <DeletedDetail label={t`Project`} />
-        )}
+        {renderProjectDetail()}
         {scmBranch && (
           <Detail
             dataCy="source-control-branch"

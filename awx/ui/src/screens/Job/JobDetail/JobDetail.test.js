@@ -63,7 +63,6 @@ describe('<JobDetail />', () => {
       'Instance Group',
       mockJobData.summary_fields.instance_group.name
     );
-    assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
     assertDetail('Source Control Branch', 'main');
@@ -102,6 +101,23 @@ describe('<JobDetail />', () => {
     expect(projectStatusDetail.find('StatusLabel')).toHaveLength(1);
     const projectStatusLabel = statusDetail.find('StatusLabel');
     expect(projectStatusLabel.prop('status')).toEqual('successful');
+  });
+
+  test('should display Deleted for Inventory and Project for job type run', () => {
+    const job = {
+      ...mockJobData,
+      summary_fields: {
+        ...mockJobData.summary_fields,
+        project: null,
+        inventory: null,
+      },
+      project: null,
+      inventory: null,
+    };
+
+    wrapper = mountWithContexts(<JobDetail job={job} />);
+    expect(wrapper.find(`DeletedDetail[label="Project"]`).length).toBe(1);
+    expect(wrapper.find(`DeletedDetail[label="Inventory"]`).length).toBe(1);
   });
 
   test('should not display finished date', () => {
@@ -146,6 +162,7 @@ describe('<JobDetail />', () => {
     assertDetail('Module Name', 'command');
     assertDetail('Module Arguments', 'echo hello_world');
     assertDetail('Job Type', 'Run Command');
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should display source data', () => {
@@ -182,6 +199,7 @@ describe('<JobDetail />', () => {
       />
     );
     assertDetail('Source', 'Sourced from Project');
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should show schedule that launched workflow job', async () => {
@@ -215,7 +233,7 @@ describe('<JobDetail />', () => {
     ).toHaveLength(1);
   });
 
-  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', async () => {
+  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', () => {
     wrapper = mountWithContexts(
       <JobDetail
         job={{
@@ -317,6 +335,7 @@ describe('<JobDetail />', () => {
     expect(
       wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
     ).toHaveLength(0);
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should not show cancel job button, job completed', async () => {
