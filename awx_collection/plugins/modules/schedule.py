@@ -143,6 +143,21 @@ EXAMPLES = '''
     unified_job_template: "Demo Job Template"
     rrule: "{{ query('awx.awx.schedule_rrule', 'week', start_date='2019-12-19 13:05:51') }}"
   register: result
+
+- name: Build a complex schedule for every day except sunday using the rruleset plugin
+  schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    rrule: "{{ query(awx.awx.schedule_rruleset, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'day'
+        every: 1
+        on_days: 'sunday'
+        include: False
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -255,7 +270,8 @@ def main():
             new_fields,
             endpoint='schedules',
             item_type='schedule',
-            associations=association_fields,)
+            associations=association_fields,
+        )
 
 
 if __name__ == '__main__':
