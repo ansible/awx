@@ -158,6 +158,8 @@ RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout
 # It is nice to have in the dev env, but not necessary.
 # Add it back to the list above if the repo ever straighten up.
 RUN dnf --enablerepo=baseos-debug -y install python3-debuginfo || :
+
+RUN dnf install -y epel-next-release && dnf install -y inotify-tools && dnf remove -y epel-next-release
 {% endif %}
 
 # Copy app from builder

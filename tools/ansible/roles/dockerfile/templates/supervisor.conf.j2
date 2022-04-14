@@ -27,7 +27,7 @@ stderr_logfile_maxbytes=0
 command = make uwsgi
 directory = /awx_devel
 environment =
-    UWSGI_DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne tower-processes:wsbroadcast'
+    DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne tower-processes:wsbroadcast'
 {% else %}
 command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
 directory = /var/lib/awx

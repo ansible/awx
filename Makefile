@@ -177,7 +177,7 @@ collectstatic:
 	fi; \
 	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
-UWSGI_DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver
+DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
 
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
@@ -192,12 +192,13 @@ uwsgi: collectstatic
 	    --processes=5 \
 	    --harakiri=120 --master \
 	    --no-orphans \
-	    --py-autoreload 1 \
 	    --max-requests=1000 \
 	    --stats /tmp/stats.socket \
 	    --lazy-apps \
-	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" \
-	    --hook-accepting1="exec: $(UWSGI_DEV_RELOAD_COMMAND)"
+	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)"
+
+awx-autoreload:
+	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel "$(DEV_RELOAD_COMMAND)"
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
