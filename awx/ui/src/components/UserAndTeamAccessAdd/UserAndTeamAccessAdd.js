@@ -13,7 +13,6 @@ import getResourceAccessConfig from './getResourceAccessConfig';
 const Grid = styled.div`
   display: grid;
   grid-gap: 20px;
-  grid-template-columns: 33% 33% 33%;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 `;
 
