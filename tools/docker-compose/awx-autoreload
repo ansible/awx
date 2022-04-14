@@ -1,0 +1,15 @@
+#!/bin/env bash
+
+if [ $# -lt 2 ]; then
+    echo "Usage:"
+    echo "    autoreload directory command"
+    exit 1
+fi
+
+inotifywait -mrq -e create,delete,attrib,close_write,move --exclude '/awx_devel/awx/ui' $1 | while read directory action file; do
+   if [[ "$file" =~ .*py$ ]]; then
+      echo "File changed: $file"
+      echo "Running command: $2"
+      eval $2
+   fi
+done
