@@ -192,7 +192,7 @@ uwsgi: collectstatic
 	    --processes=5 \
 	    --harakiri=120 --master \
 	    --no-orphans \
-	    --py-autoreload 1 \
+	    --py-autoreload 0 \
 	    --max-requests=1000 \
 	    --stats /tmp/stats.socket \
 	    --lazy-apps \
