@@ -99,7 +99,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError || testError);
-  const typeMessageDefaults = defaultMessages[template.notification_type];
+  const typeMessageDefaults = defaultMessages?.[template?.notification_type];
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -384,13 +384,14 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           date={modified}
           user={summary_fields?.modified_by}
         />
-        {hasCustomMessages(messages, typeMessageDefaults) && (
+        {typeMessageDefaults &&
+        hasCustomMessages(messages, typeMessageDefaults) ? (
           <CustomMessageDetails
             messages={messages}
             defaults={typeMessageDefaults}
             type={template.notification_type}
           />
-        )}
+        ) : null}
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities?.edit && (
