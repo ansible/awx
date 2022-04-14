@@ -10,7 +10,6 @@ const Grid = styled.div`
   display: grid;
   grid-auto-rows: 100px;
   grid-gap: 20px;
-  grid-template-columns: 33% 33% 33%;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   margin: 20px 0px;
   width: 100%;
