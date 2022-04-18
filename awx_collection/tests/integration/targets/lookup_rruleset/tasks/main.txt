@@ -1,0 +1,314 @@
+---
+- name: Get our collection package
+  controller_meta:
+  register: controller_meta
+
+- name: Generate the name of our plugin
+  set_fact:
+    ruleset_plugin_name: "{{ controller_meta.prefix }}.schedule_rruleset"
+    rule_plugin_name: "{{ controller_meta.prefix }}.schedule_rrule"
+
+
+- name: Call ruleset with no rules
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45') }}"
+  ignore_errors: True
+  register: results
+
+- assert:
+    that:
+      - results is failed
+      - "'You must include rules to be in the ruleset via the rules parameter' in results.msg"
+
+
+- name: call ruleset with a missing frequency
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - every: 1
+        on_days: 'sunday'
+
+- assert:
+    that:
+      - results is failed
+      - "'Rule 2 is missing a frequency' in results.msg"
+
+
+- name: call ruleset with a missing frequency
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - every: 1
+        on_days: 'sunday'
+
+- assert:
+    that:
+      - results is failed
+      - "'Rule 2 is missing a frequency' in results.msg"
+
+
+- name: call rruleset with an invalid frequency
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'asdf'
+        every: 1
+        on_days: 'sunday'
+
+- assert:
+    that:
+      - results is failed
+      - "'Frequency of rule 2 is invalid asdf' in results.msg"
+
+
+- name: call rruleset with an invalid end_on
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'day'
+        every: 1
+        on_days: 'sunday'
+        end_on: 'a'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]' in results.msg"
+
+
+- name: call rruleset with an invalid on_days
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'day'
+        every: 1
+        on_days: 'junk'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 on_days must only contain values' in results.msg"
+
+
+- name: call rruleset with a montly rule with both month_day_number and on_the defined
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        on_the: 'first'
+        month_day_number: '1'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 a month based frequencies can have month_day_number or on_the but not both' in results.msg"
+
+
+- name: call rruleset with a montly rule with invlaid month_day_number (a)
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        month_day_number: 'a'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 month_day_number must be between 1 and 31' in results.msg"
+
+
+- name: call rruleset with a montly rule with invlaid month_day_number (-1)
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        month_day_number: '-1'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 month_day_number must be between 1 and 31' in results.msg"
+
+
+- name: call rruleset with a montly rule with invlaid month_day_number (32)
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        month_day_number: 32
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 month_day_number must be between 1 and 31' in results.msg"
+
+
+- name: call rruleset with a montly rule with invlaid on_the (junk)
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        on_the: 'junk'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 on_the parameter must be two words separated by a space' in results.msg"
+
+
+- name: call rruleset with a montly rule with invlaid on_the (junk junk)
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        on_the: 'junk junk'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 weekday portion of on_the parameter is not valid' in results.msg"
+
+
+- name: call rruleset with a montly rule with invlaid on_the (junk junk)
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'month'
+        every: 1
+        on_the: 'junk wednesday'
+
+- assert:
+    that:
+      - results is failed
+      - "'In rule 2 the first string of the on_the parameter is not valid' in results.msg"
+
+
+- name: call rruleset with an invalid timezone
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='junk' ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'day'
+        every: 1
+        on_days: 'sunday'
+
+- assert:
+    that:
+      - results is failed
+      - "'Timezone parameter is not valid' in results.msg"
+
+
+- name: call rruleset with only exclude rules
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+        include: False
+      - frequency: 'day'
+        every: 1
+        on_days: 'sunday'
+        include: False
+
+- assert:
+    that:
+      - results is failed
+      - "'A ruleset must contain at least one RRULE' in results.msg"
+
+
+- name: Create a good rule for everyday except Sundays
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        every: 1
+      - frequency: 'day'
+        every: 1
+        on_days: 'sunday'
+        include: False
+
+- debug:
+    msg: "{{ complex_rule }}"
+
+- assert:
+    that:
+      - results is success
+      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;INTERVAL=1 EXRULE:FREQ=DAILY;BYDAY=SU;INTERVAL=1' == complex_rule"
+
+
