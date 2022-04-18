@@ -4873,7 +4873,7 @@ class InstanceGroupSerializer(BaseSerializer):
 
     show_capabilities = ['edit', 'delete']
 
-    committed_capacity = serializers.SerializerMethodField()
+    committed_capacity = serializers.SerializerMethodField(help_text=_('This resource has been deprecated and will be removed in a future release'))
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.IntegerField(
