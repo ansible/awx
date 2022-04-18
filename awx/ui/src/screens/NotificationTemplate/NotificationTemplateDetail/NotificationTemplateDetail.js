@@ -449,7 +449,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
           label={t`Start message`}
           value={messages.started?.message || defaults.started?.message}
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -458,7 +458,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
           label={t`Start message body`}
           value={messages.started?.body || defaults.started?.body}
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -467,7 +467,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
           label={t`Success message`}
           value={messages.success?.message || defaults.success?.message}
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -476,7 +476,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
           label={t`Success message body`}
           value={messages.success?.body || defaults.success?.body}
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -485,7 +485,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
           label={t`Error message`}
           value={messages.error?.message || defaults.error?.message}
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -494,7 +494,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
           label={t`Error message body`}
           value={messages.error?.body || defaults.error?.body}
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -506,7 +506,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.approved.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -518,7 +518,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.approved.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -530,7 +530,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.denied.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -542,7 +542,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.denied.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -554,7 +554,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.running.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -566,7 +566,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.running.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -578,7 +578,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.timed_out.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -590,7 +590,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.timed_out.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
