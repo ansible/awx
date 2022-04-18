@@ -1,8 +1,6 @@
 ## General
 - For the roundup of all the different mailing lists available from AWX, Ansible, and beyond visit: https://docs.ansible.com/ansible/latest/community/communication.html 
-
 - Hello, we think your question is answered in our FAQ. Does this: https://www.ansible.com/products/awx-project/faq cover your question?
-
 - You can find the latest documentation here: https://docs.ansible.com/automation-controller/latest/html/userguide/index.html
 
 ## Visit our mailing list
@@ -20,7 +18,6 @@
 
 ## Ansible Engine not AWX
 - Hello, your question seems to be about Ansible development, not about AWX. Try asking on the Ansible-devel specific mailing list: https://groups.google.com/g/ansible-devel 
-
 - Hello, your question seems to be about using Ansible, not about AWX. https://groups.google.com/g/ansible-project is the best place to visit for user questions about Ansible. Thanks!
 
 ## Ansible Galaxy not AWX
