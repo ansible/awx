@@ -45,7 +45,7 @@ DOCUMENTATION = """
               - month - Run this schedule monthly
             required: True
             choices: ['none', 'minute', 'hour', 'day', 'week', 'month']
-          every:
+          interval:
             description:
               - The repetition in months, weeks, days hours or minutes
               - Used for all types except none
@@ -54,29 +54,50 @@ DOCUMENTATION = """
             description:
               - How to end this schedule
               - If this is not defined, this schedule will never end
-              - If this is a positive integer, this schedule will end after this number of occurences
+              - If this is a positive integer, this schedule will end after this number of occurrences
               - If this is a date in the format YYYY-MM-DD [HH:MM:SS], this schedule ends after this date
               - Used for all types except none
             type: str
-          on_days:
+          bysetpos:
+            description:
+              - Specify an occurrence number, corresponding to the nth occurrence of the rule inside the frequency period.
+              - A comma-separated list of positions (first, second, third, forth or last)
+            type: string
+          bymonth:
+            description:
+              - The months this schedule will run on
+              - A comma-separated list which can contain values 0-12
+            type: string
+          bymonthday:
+            description:
+              - The day of the month this schedule will run on
+              - A comma-separated list which can contain values 0-31
+            type: string
+          byyearday:
+            description:
+              - The year day numbers to run this schedule on
+              - A comma-separated list which can contain values 0-366
+            type: string
+          byweekno:
+            description:
+              - The week numbers to run this schedule on
+              - A comma-separated list which can contain values as described in ISO8601
+            type: string
+          byweekday:
             description:
               - The days to run this schedule on
               - A comma-separated list which can contain values sunday, monday, tuesday, wednesday, thursday, friday
-              - Used for week type schedules
-          month_day_number:
+            type: string
+          byhour:
             description:
-              - The day of the month this schedule will run on (0-31)
-              - Used for month type schedules
-              - Cannot be used with on_the parameter
-            type: int
-          on_the:
+              - The hours to run this schedule on
+              - A comma-separated list which can contain values 0-23
+            type: string
+          byminute:
             description:
-              - A description on when this schedule will run
-              - Two strings separated by a space
-              - First string is one of first, second, third, fourth, last
-              - Second string is one of sunday, monday, tuesday, wednesday, thursday, friday
-              - Used for month type schedules
-              - Cannot be used with month_day_number parameters
+              - The minutes to run this schedule on
+              - A comma-separated list which can contain values 0-59
+            type: string
           include:
             description:
               - If this rule should be included (RRULE) or excluded (EXRULE)
@@ -91,10 +112,10 @@ EXAMPLES = """
       vars:
         rrules:
           - frequency: 'day'
-            every: 1
+            interval: 1
           - frequency: 'day'
-            every: 1
-            on_days: 'sunday'
+            interval: 1
+            byweekday: 'sunday'
             include: False
 """
 
@@ -161,6 +182,42 @@ class LookupModule(LookupBase):
         except ValueError:
             return datetime.strptime(date_string, '%Y-%m-%d')
 
+    def process_integer(self, field_name, rule, min_value, max_value, rule_number):
+        # We are going to tolerate multiple types of input here:
+        # something: 1 - A single integer
+        # something: "1" - A single str
+        # something: "1,2,3" - A comma separated string of ints
+        # something: "1, 2,3" - A comma separated string of ints (with spaces)
+        # something: ["1", "2", "3"] - A list of strings
+        # something: [1,2,3] - A list of ints
+        return_values = []
+        # If they give us a single int, lets make it a list of ints
+        if type(rule[field_name]) == int:
+            rule[field_name] = [rule[field_name]]
+        # If its not a list, we need to split it into a list
+        if type(rule[field_name]) != list:
+            rule[field_name] = rule[field_name].split(',')
+        for value in rule[field_name]:
+            # If they have a list of strs we want to strip the str incase its space delineated
+            if type(value) == str:
+                value = value.strip()
+            # If value happens to be an int (from a list of ints) we need to coerce it into a str for the re.match
+            if not re.match(r"^\d+$", str(value)) or int(value) < min_value or int(value) > max_value:
+                raise AnsibleError('In rule {0} {1} must be between {2} and {3}'.format(rule_number, field_name, min_value, max_value))
+            return_values.append(int(value))
+        return return_values
+
+    def process_list(self, field_name, rule, valid_list, rule_number):
+        return_values = []
+        if type(rule[field_name]) != list:
+            rule[field_name] = rule[field_name].split(',')
+        for value in rule[field_name]:
+            value = value.strip()
+            if value not in valid_list:
+                raise AnsibleError('In rule {0} {1} must only contain values in {2}'.format(rule_number, field_name, ', '.join(valid_list.keys())))
+            return_values.append(valid_list[value])
+        return return_values
+
     def run(self, terms, variables=None, **kwargs):
         if len(terms) != 1:
             raise AnsibleError('You may only pass one schedule type in at a time')
@@ -187,6 +244,23 @@ class LookupModule(LookupBase):
         for rule_index in range(0, len(kwargs['rules'])):
             rule = kwargs['rules'][rule_index]
             rule_number = rule_index + 1
+            valid_options = [
+                "frequency",
+                "interval",
+                "end_on",
+                "bysetpos",
+                "bymonth",
+                "bymonthday",
+                "byyearday",
+                "byweekno",
+                "byweekday",
+                "byhour",
+                "byminute",
+                "include",
+            ]
+            invalid_options = list(set(rule.keys()) - set(valid_options))
+            if invalid_options:
+                raise AnsibleError('Rule {0} has invalid options: {1}'.format(rule_number, ', '.join(invalid_options)))
             frequency = rule.get('frequency', None)
             if not frequency:
                 raise AnsibleError("Rule {0} is missing a frequency".format(rule_number))
@@ -195,7 +269,7 @@ class LookupModule(LookupBase):
 
             rrule_kwargs = {
                 'freq': LookupModule.frequencies[frequency],
-                'interval': rule.get('every', 1),
+                'interval': rule.get('interval', 1),
                 'dtstart': start_date,
             }
 
@@ -216,54 +290,41 @@ class LookupModule(LookupBase):
                                 AnsibleError('In rule {0} end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]'.format(rule_number)), e
                             )
 
-                # A week-based frequency can also take the on_days parameter
-                if 'on_days' in rule:
-                    days = []
-                    for day in rule['on_days'].split(','):
-                        day = day.strip()
-                        if day not in LookupModule.weekdays:
-                            raise AnsibleError('In rule {0} on_days must only contain values {1}'.format(rule_number, ', '.join(LookupModule.weekdays.keys())))
-                        days.append(LookupModule.weekdays[day])
+            if 'bysetpos' in rule:
+                rrule_kwargs['bysetpos'] = self.process_list('bysetpos', rule, LookupModule.set_positions, rule_number)
 
-                    rrule_kwargs['byweekday'] = days
+            if 'bymonth' in rule:
+                rrule_kwargs['bymonth'] = self.process_integer('bymonth', rule, 1, 12, rule_number)
 
-                # A month-based frequency can also deal with month_day_number and on_the options
-                if frequency == 'month':
-                    if 'month_day_number' in rule and 'on_the' in rule:
-                        raise AnsibleError('In rule {0} a month based frequencies can have month_day_number or on_the but not both'.format(rule_number))
+            if 'bymonthday' in rule:
+                rrule_kwargs['bymonthday'] = self.process_integer('bymonthday', rule, 1, 31, rule_number)
 
-                    if 'month_day_number' in rule:
-                        try:
-                            my_month_day = int(rule['month_day_number'])
-                            if my_month_day < 1 or my_month_day > 31:
-                                raise Exception()
-                        except Exception as e:
-                            raise_from(AnsibleError('In rule {0} month_day_number must be between 1 and 31'.format(rule_number)), e)
+            if 'byyearday' in rule:
+                rrule_kwargs['byyearday'] = self.process_integer('byyearday', rule, 1, 366, rule_number)  # 366 for leap years
 
-                        rrule_kwargs['bymonthday'] = my_month_day
+            if 'byweekno' in rule:
+                rrule_kwargs['byweekno'] = self.process_integer('byweekno', rule, 1, 52, rule_number)
 
-                    if 'on_the' in rule:
-                        try:
-                            (occurance, weekday) = rule['on_the'].split(' ')
-                        except Exception as e:
-                            raise_from(AnsibleError('In rule {0} on_the parameter must be two words separated by a space'.format(rule_number)), e)
+            if 'byweekday' in rule:
+                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, LookupModule.weekdays, rule_number)
 
-                        if weekday not in LookupModule.weekdays:
-                            raise AnsibleError('In rule {0} weekday portion of on_the parameter is not valid'.format(rule_number))
-                        if occurance not in LookupModule.set_positions:
-                            raise AnsibleError('In rule {0} the first string of the on_the parameter is not valid'.format(rule_number))
+            if 'byhour' in rule:
+                rrule_kwargs['byhour'] = self.process_integer('byhour', rule, 0, 23, rule_number)
 
-                        rrule_kwargs['byweekday'] = LookupModule.weekdays[weekday]
-                        rrule_kwargs['bysetpos'] = LookupModule.set_positions[occurance]
+            if 'byminute' in rule:
+                rrule_kwargs['byminute'] = self.process_integer('byminute', rule, 0, 59, rule_number)
 
-            generated_rule = str(rrule.rrule(**rrule_kwargs))
+            try:
+                generated_rule = str(rrule.rrule(**rrule_kwargs))
+            except Exception as e:
+                raise_from(AnsibleError('Failed to parse rrule for rule {0} {1}: {2}'.format(rule_number, str(rrule_kwargs), e)), e)
 
             # AWX requires an interval. rrule will not add interval if it's set to 1
-            if rule.get('every', 1) == 1:
+            if rule.get('interval', 1) == 1:
                 generated_rule = "{0};INTERVAL=1".format(generated_rule)
 
             if rule_index == 0:
-                # rrule puts a \n in the rule instad of a space and can't handle timezones
+                # rrule puts a \n in the rule instead of a space and can't handle timezones
                 generated_rule = generated_rule.replace('\n', ' ').replace('DTSTART:', 'DTSTART;TZID={0}:'.format(timezone))
             else:
                 # Only the first rule needs the dtstart in a ruleset so remaining rules we can split at \n
@@ -286,7 +347,7 @@ class LookupModule(LookupBase):
         try:
             rules = rrule.rrulestr(rruleset_str)
         except Exception as e:
-            raise_from("Failed to parse generated rule set via rruleset", e)
+            raise_from(AnsibleError("Failed to parse generated rule set via rruleset {0}".format(e)), e)
 
         # return self.get_rrule(frequency, kwargs)
         return rruleset_str

@@ -110,18 +110,18 @@ local and UTC time:
 
 ## RRULE Limitations
 
-The following aspects of `RFC5545` are _not_ supported by AWX schedules:
+AWX implements the following constraints on top of the `RFC5545` specification:
 
 * The RRULE must start with the `DTSTART` attribute
-* Strings with more than a single `DTSTART:` component
-* At least one RRULE must be in the string
-* The use of `RDATE` or `EXDATE`
+* At least one `RRULE` entry must be in the rrule
+* Strings with more than a single `DTSTART:` component are prohibited
+* The use of `RDATE` or `EXDATE`is prohibited
 * For any of the rules in the rrule:
-    * Interval must be included
-    * The use of `FREQ=SECONDLY` in an `RRULE`
-    * The usage of a `BYDAY` with a prefixed number
-    * The usage of both `COUNT` and `UNTIL` in the same RRULE
-    * The use of `COUNT=` in an `RRULE` with a value over 999
+    * `Interval` must be included
+    * The use of `FREQ=SECONDLY` is prohibited
+    * The usage of a `BYDAY` with a prefixed number is prohibited
+    * The usage of both `COUNT` and `UNTIL` in the same rule is prohibited
+    * The use of `COUNT=` with a value over 999 is prohibited
 
 ## Implementation Details
 
