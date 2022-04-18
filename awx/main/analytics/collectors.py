@@ -368,12 +368,12 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
         return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::jsonb"), path=full_path)
 
 
-@register('events_table', '1.4', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table_unpartitioned(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', 'created', **kwargs)
 
 
-@register('events_table', '1.4', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table_partitioned_modified(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
