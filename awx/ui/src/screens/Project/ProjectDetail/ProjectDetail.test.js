@@ -20,6 +20,12 @@ jest.mock('react-router-dom', () => ({
     url: '/projects/1/details',
   }),
 }));
+jest.mock('hooks/useBrandName', () => ({
+  __esModule: true,
+  default: () => ({
+    current: 'AWX',
+  }),
+}));
 describe('<ProjectDetail />', () => {
   const mockProject = {
     id: 1,
@@ -126,16 +132,18 @@ describe('<ProjectDetail />', () => {
       '2019-10-10T01:15:06.780490Z'
     );
     expect(
-      wrapper
-        .find('Detail[label="Enabled Options"]')
-        .containsAllMatchingElements([
-          <li>Discard local changes before syncing</li>,
-          <li>Delete the project before syncing</li>,
-          <li>Track submodules latest commit on branch</li>,
-          <li>Update revision on job launch</li>,
-          <li>Allow branch override</li>,
-        ])
-    ).toEqual(true);
+      wrapper.find('Detail[label="Enabled Options"]').find('li')
+    ).toHaveLength(5);
+    const options = [
+      'Discard local changes before syncing',
+      'Delete the project before syncing',
+      'Track submodules latest commit on branch',
+      'Update revision on job launch',
+      'Allow branch override',
+    ];
+    wrapper.find('li').map((item, index) => {
+      expect(item.text().includes(options[index]));
+    });
   });
 
   test('should hide options label when all project options return false', () => {
@@ -237,7 +245,7 @@ describe('<ProjectDetail />', () => {
     expect(history.location.pathname).toEqual('/projects/1/edit');
   });
 
-  test('sync button should call api to syn project', async () => {
+  test('sync button should call api to sync project', async () => {
     ProjectsAPI.readSync.mockResolvedValue({ data: { can_update: true } });
     const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />);
     await act(() =>

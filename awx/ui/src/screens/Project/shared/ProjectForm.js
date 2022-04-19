@@ -16,6 +16,7 @@ import ExecutionEnvironmentLookup from 'components/Lookup/ExecutionEnvironmentLo
 import { CredentialTypesAPI, ProjectsAPI } from 'api';
 import { required } from 'util/validators';
 import { FormColumnLayout, SubFormLayout } from 'components/FormLayout';
+import ProjectHelpTextStrings from './Project.helptext';
 import {
   GitSubForm,
   SvnSubForm,
@@ -195,7 +196,7 @@ function ProjectFormFields({
         }
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
-        popoverContent={t`The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level.`}
+        popoverContent={ProjectHelpTextStrings.execution_environment}
         onChange={handleExecutionEnvironmentUpdate}
         tooltip={t`Select an organization before editing the default execution environment.`}
         globallyAvailable
