@@ -17,6 +17,7 @@ const hostEvent = {
       msg: 'This is a debug message: 1',
       stdout:
         '              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023',
+      stderr: 'problems',
       cmd: ['free', '-m'],
       stderr_lines: [],
       stdout_lines: [
@@ -51,6 +52,7 @@ const jsonValue = `{
   \"item\": \"1\",
   \"msg\": \"This is a debug message: 1\",
   \"stdout\": \"              total        used        free      shared  buff/cache   available\\nMem:           7973        3005         960          30        4007        4582\\nSwap:          1023           0        1023\",
+  \"stderr\": \"problems\",
   \"cmd\": [
     \"free\",
     \"-m\"
@@ -169,7 +171,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 1);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=1] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(jsonValue);
@@ -184,7 +186,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(hostEvent.event_data.res.stdout);
@@ -195,7 +197,7 @@ describe('HostEventModal', () => {
       ...hostEvent,
       event_data: {
         res: {
-          stderr: '',
+          stderr: 'error content',
         },
       },
     };
@@ -207,10 +209,10 @@ describe('HostEventModal', () => {
     handleTabClick(null, 3);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
-    expect(codeEditor.prop('value')).toEqual(' ');
+    expect(codeEditor.prop('value')).toEqual('error content');
   });
 
   test('should pass onClose to Modal', () => {
@@ -226,7 +228,7 @@ describe('HostEventModal', () => {
     const debugTaskAction = {
       ...hostEvent,
       event_data: {
-        taskAction: 'debug',
+        task_action: 'debug',
         res: {
           result: {
             stdout: 'foo bar',
@@ -242,7 +244,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('foo bar');
@@ -252,7 +254,7 @@ describe('HostEventModal', () => {
     const yumTaskAction = {
       ...hostEvent,
       event_data: {
-        taskAction: 'yum',
+        task_action: 'yum',
         res: {
           results: ['baz', 'bar'],
         },
@@ -266,9 +268,9 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
-    expect(codeEditor.prop('value')).toEqual('baz');
+    expect(codeEditor.prop('value')).toEqual('baz\nbar');
   });
 });
