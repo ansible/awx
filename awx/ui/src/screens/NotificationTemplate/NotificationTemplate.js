@@ -38,7 +38,7 @@ function NotificationTemplate({ setBreadcrumb }) {
       setBreadcrumb(detail.data);
       return {
         template: detail.data,
-        defaultMessages: options.data.actions.POST.messages,
+        defaultMessages: options.data.actions?.POST?.messages,
       };
     }, [templateId, setBreadcrumb]),
     { template: null, defaultMessages: null }
@@ -53,7 +53,7 @@ function NotificationTemplate({ setBreadcrumb }) {
       <PageSection>
         <Card>
           <ContentError error={error}>
-            {error.response.status === 404 && (
+            {error.response?.status === 404 && (
               <span>
                 {t`Notification Template not found.`}{' '}
                 <Link to="/notification_templates">
