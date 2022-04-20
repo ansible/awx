@@ -980,7 +980,7 @@ class RunJob(BaseTask):
             if not playbook_integrity_result.get('verified', False):
                 playbook_integrity_result["reasoncode"] = 'PlaybookVerificationFailed'
                 integirty_check_failure_result = playbook_integrity_result
-        
+
         if integrity_checked:
             job.integrity_verified = integirty_check_failure_result is None
             job.integrity_result = (
