@@ -15,44 +15,26 @@ logger = logging.getLogger('awx.main.scheduler')
 class TaskManagerInstance:
     """A class representing minimal data the task manager needs to represent an Instance."""
 
-    def __init__(self, obj=None, node_type=None, capacity=None, hostname=None):
+    def __init__(self, obj):
         self.obj = obj
-        self.node_type = node_type
-        self.remaining_capacity = capacity
-        self.capacity = capacity
-        self.hostname = hostname
+        self.node_type = obj.node_type
+        self.remaining_capacity = obj.capacity
+        self.capacity = obj.capacity
+        self.hostname = obj.hostname
 
 
 class TaskManagerInstances:
     def __init__(self, active_tasks, instances=None):
         self.instances_by_hostname = dict()
-        self._remaining_capacity_updated = False
         if instances is None:
             instances = (
                 Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop').only('node_type', 'capacity', 'hostname', 'enabled')
             )
-        instance_list = [
-            TaskManagerInstance(
-                obj=instance,
-                node_type=instance.node_type,
-                capacity=instance.capacity,
-                hostname=instance.hostname,
-            )
-            for instance in instances
-        ]
-        self._update_remaining_capacity(active_tasks)
-        for instance in instance_list:
-            self.instances_by_hostname[instance.hostname] = instance
+        for instance in instances:
+            self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance)
 
-    def _update_remaining_capacity(self, tasks):
-        """Takes a list of tasks and updates the remaining capacity on our TaskManagerInstance list.
-
-        Computes remaining capacity for all the instances based on currently running and waiting tasks.
-        """
-        if self._remaining_capacity_updated:
-            # Only want to do this once
-            return
-        for task in tasks:
+        # initialize remaining capacity based on currently waiting and running tasks
+        for task in active_tasks:
             if task.status not in ['waiting', 'running']:
                 continue
             control_instance = self.instances_by_hostname.get(task.controller_node, '')
