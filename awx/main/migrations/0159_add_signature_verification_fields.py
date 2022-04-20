@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='playbook_integrity_enabled',
-            field=models.BooleanField(blank=True, default=None, help_text='Enable integrity check for playbook and override the global flag', null=True),
+            field=models.BooleanField(blank=True, default=None, help_text='Enable integrity check for playbook', null=True),
         ),
         migrations.AddField(
             model_name='project',

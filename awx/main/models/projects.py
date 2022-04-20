@@ -355,7 +355,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         blank=True,
         choices=PLAYBOOK_SIGNATURE_TYPE_CHOICES,
         default='gpg',
-        editable=True,
         verbose_name=_('signature type for playbook integrity check'),
         help_text=_('A signature type for playbook integrity check'),
     )
