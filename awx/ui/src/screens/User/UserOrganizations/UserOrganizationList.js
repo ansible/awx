@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import { UsersAPI } from 'api';
@@ -40,9 +41,7 @@ function UserOrganizationList() {
         UsersAPI.readOrganizationOptions(id),
       ]);
       return {
-        searchableKeys: Object.keys(actions.data.actions?.GET || {}).filter(
-          (key) => actions.data.actions?.GET[key].filterable
-        ),
+        searchableKeys: getSearchableKeys(actions.data.actions?.GET),
         relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
           (val) => val.slice(0, -8)
         ),

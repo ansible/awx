@@ -14,6 +14,7 @@ import PaginatedTable, {
   ToolbarAddButton,
   ToolbarDeleteButton,
   ToolbarSyncSourceButton,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import useSelected from 'hooks/useSelected';
 import DatalistToolbar from 'components/DataListToolbar';
@@ -57,9 +58,7 @@ function InventorySourceList() {
         sourceCount: results[0].data.count,
         sourceChoices: results[1].data.actions.GET.source.choices,
         sourceChoicesOptions: results[1].data.actions,
-        searchableKeys: Object.keys(results[1].data.actions?.GET || {}).filter(
-          (key) => results[1].data.actions?.GET[key].filterable
-        ),
+        searchableKeys: getSearchableKeys(results[1].data.actions?.GET),
         relatedSearchableKeys: (
           results[1]?.data?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
