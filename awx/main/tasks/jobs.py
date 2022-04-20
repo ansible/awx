@@ -894,7 +894,7 @@ class RunJob(BaseTask):
         if job.project.scm_type and ((not has_cache) or branch_override):
             sync_needs.extend(['install_roles', 'install_collections'])
 
-        if job.project.playbook_integrity_enabled and settings.PLAYBOOK_INTEGRITY_FEATURE_ENABLED:
+        if job.project.playbook_integrity_enabled and settings.SIGNATURE_VERIFY_FEATURE_ENABLED:
             playbook_integrity_sig_type = "gpg"
             if job.project.playbook_integrity_signature_type:
                 playbook_integrity_sig_type = job.project.playbook_integrity_signature_type
@@ -959,21 +959,37 @@ class RunJob(BaseTask):
             # Project update does not copy the folder, so copy here
             RunProjectUpdate.make_local_copy(job.project, private_data_dir, scm_revision=job_revision)
 
-        if job.project.playbook_integrity_enabled and settings.PLAYBOOK_INTEGRITY_FEATURE_ENABLED:
+        integrity_checked = False
+        integirty_check_failure_result = None
+        now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        # Check playbook integrity check result
+        if job.project.playbook_integrity_enabled and settings.SIGNATURE_VERIFY_FEATURE_ENABLED:
+            integrity_checked = True
             playbook_integrity_result = None
             for result in job.project.playbook_integrity_latest_result:
                 if job.playbook == result.get("playbook", ""):
                     playbook_integrity_result = result
                     break
             if playbook_integrity_result is None:
-                playbook_integrity_result = {"playbook": job.playbook, "verified": False, "error": "Failed to find playbook integrity result for this playbook"}
-            job.playbook_integrity_verified = playbook_integrity_result.get("verified", None)
-            job.playbook_integrity_result = playbook_integrity_result
-            job.save(update_fields=['playbook_integrity_verified', 'playbook_integrity_result'])
+                playbook_integrity_result = {
+                    "playbook": job.playbook,
+                    "verified": False,
+                    "error": "Failed to find playbook integrity result for this playbook",
+                    "timestamp": now,
+                }
+            if not playbook_integrity_result.get('verified', False):
+                playbook_integrity_result["reasoncode"] = 'PlaybookVerificationFailed'
+                integirty_check_failure_result = playbook_integrity_result
+        
+        if integrity_checked:
+            job.integrity_verified = integirty_check_failure_result is None
+            job.integrity_result = (
+                {"verified": True, "error": "", "timestamp": now} if integirty_check_failure_result is None else integirty_check_failure_result
+            )
+            job.save(update_fields=['integrity_verified', 'integrity_result'])
 
-            if not job.playbook_integrity_verified:
-                playbook_integrity_error = job.playbook_integrity_result.get("error", "Unknown error occurred in playbook integrity check")
-                msg = 'Playbook Integrity Check Failed: {"verified": "%s", "error": "%s"}' % (job.playbook_integrity_verified, playbook_integrity_error)
+            if not job.integrity_verified:
+                msg = json.dumps(job.integrity_result)
                 job = self.update_model(
                     job.pk,
                     status='failed',
@@ -1177,7 +1193,6 @@ class RunProjectUpdate(BaseTask):
                 'playbook_integrity_files': json.dumps(project_update.project.playbooks),
                 'playbook_integrity_public_key': project_update.project.playbook_integrity_public_key,
                 'playbook_integrity_signature_type': project_update.project.playbook_integrity_signature_type,
-                'playbook_integrity_keyless_signer_id': project_update.project.playbook_integrity_keyless_signer_id,
             }
         )
         # apply custom refspec from user for PR refs and the like
@@ -1417,8 +1432,10 @@ class RunProjectUpdate(BaseTask):
             p.inventory_files = p.inventories
             p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
 
-        integrity_result_list = []
-        if self.runner_callback.playbook_new_integrity_result:
+        p_integrity_updated_fields = []
+        pu_integrity_updated_fields = []
+        if p.playbook_integrity_enabled and settings.SIGNATURE_VERIFY_FEATURE_ENABLED:
+            integrity_result_list = []
             playbook_integrity_verified = self.runner_callback.playbook_new_integrity_result.get("verified", None)
             playbook_integrity_error = self.runner_callback.playbook_new_integrity_result.get("error", "")
             playbook_integrity_checked_playbooks = self.runner_callback.playbook_new_integrity_result.get("checked_playbooks", [])
@@ -1429,10 +1446,14 @@ class RunProjectUpdate(BaseTask):
                     integrity_result["verified"] = False
                     integrity_result["error"] = "playbook \"{}\" is not included in the digest file".format(playbook)
                 integrity_result_list.append(integrity_result)
-        p.playbook_integrity_latest_result = integrity_result_list
-        p.save(update_fields=['playbook_integrity_latest_result'])
-        instance.playbook_integrity_result = integrity_result_list
-        instance.save(update_fields=['playbook_integrity_result'])
+            p_integrity_updated_fields.append('playbook_integrity_latest_result')
+            pu_integrity_updated_fields.append('playbook_integrity_result')
+            p.playbook_integrity_latest_result = integrity_result_list
+            instance.playbook_integrity_result = integrity_result_list
+        if p_integrity_updated_fields:
+            p.save(update_fields=p_integrity_updated_fields)
+        if pu_integrity_updated_fields:
+            instance.save(update_fields=pu_integrity_updated_fields)
 
         # Update any inventories that depend on this project
         dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)

@@ -577,18 +577,19 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=1,
         help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
     )
-    playbook_integrity_verified = models.BooleanField(
+    integrity_verified = models.BooleanField(
         blank=True,
         default=None,
         null=True,
         editable=False,
-        help_text=_('Overall result of playbook integrity verification'),
+        help_text=_('Whether integrity verification passed or not'),
     )
-    playbook_integrity_result = JSONBlob(
+    integrity_result = JSONBlob(
         blank=True,
         default=None,
         null=True,
         editable=False,
+        help_text=_("Overall result of integrity verification"),
     )
 
     def _get_parent_field_name(self):

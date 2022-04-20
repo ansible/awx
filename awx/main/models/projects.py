@@ -339,16 +339,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     playbook_integrity_enabled = models.BooleanField(
         blank=True,
-        default=False,
-        editable=True,
-        help_text=_('If enabled, integrity check for a playbook will be done before execution'),
+        default=None,
+        null=True,
+        help_text=_('Enable integrity check for playbook'),
     )
 
     playbook_integrity_public_key = models.TextField(
         blank=True,
-        default="",
-        editable=True,
-        help_text=_('A base64 encoded public key'),
+        default='',
+        help_text=_("A base64 encoded public key for playbook verification"),
     )
 
     playbook_integrity_signature_type = models.CharField(
@@ -359,15 +358,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         editable=True,
         verbose_name=_('signature type for playbook integrity check'),
         help_text=_('A signature type for playbook integrity check'),
-    )
-
-    playbook_integrity_keyless_signer_id = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        editable=True,
-        verbose_name=_('signer id string for keyless playbook integrity check'),
-        help_text=_('A signer id string for keyless playbook integrity check'),
     )
 
     playbook_integrity_latest_result = JSONBlob(

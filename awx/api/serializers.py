@@ -1471,7 +1471,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             'playbook_integrity_enabled',
             'playbook_integrity_public_key',
             'playbook_integrity_signature_type',
-            'playbook_integrity_keyless_signer_id',
             'playbook_integrity_latest_result',
             'allow_override',
             'custom_virtualenv',
@@ -3046,8 +3045,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
-            'playbook_integrity_verified',
-            'playbook_integrity_result',
+            'integrity_verified',
+            'integrity_result',
         )
 
     def get_related(self, obj):

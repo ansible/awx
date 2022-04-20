@@ -17,9 +17,8 @@
 # collections_enabled: Value of the global setting to enable collections downloading
 # galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
 # playbook_integrity_files: a json list of playbook filenames
-# playbook_integrity_public_key: a base64 encoded public key
+# playbook_integrity_public_key: a base64 encoded public key for playbook verification
 # playbook_integrity_signature_type: signature type for playbook integrity check
-# playbook_integrity_keyless_signer_id: a signer id string for playbook integrity check (only for 'sigstore_keyless' type)
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 
@@ -163,23 +162,28 @@
   name: Playbook SCM Repo Integrity verification
   tasks:
     - block:
+        - name: make tmp dir
+          command: mktemp -d
+          register: tmpdir_cmd
+        - name: set tmpdir
+          set_fact:
+            tmpdir: "{{ tmpdir_cmd.stdout }}"
         - name: set public key filename
           set_fact:
             pubkey_fname: "{{ 'pubring.gpg' if playbook_integrity_signature_type == 'gpg' else 'cosign.pub' if playbook_integrity_signature_type == 'sigstore' else '' }}"
         - name: save public key
-          shell: mkdir -p /tmp/integrity && echo {{ playbook_integrity_public_key }} | base64 -d > /tmp/integrity/{{ pubkey_fname }}
+          shell: mkdir -p {{ tmpdir }}/integrity && echo {{ playbook_integrity_public_key }} | base64 -d > {{ tmpdir }}/integrity/{{ pubkey_fname }}
           when: pubkey_fname != ''
         - name: verify playbook integrity
           playbook_integrity:
             target: "{{ project_path | quote }}"
             signature_type: "{{ playbook_integrity_signature_type }}"
-            public_key: "{{ '/tmp/integrity/' + pubkey_fname if pubkey_fname != '' else '' }}"
-            keyless_signer_id: "{{ playbook_integrity_keyless_signer_id if playbook_integrity_keyless_signer_id != '' else '' }}"
+            public_key: "{{ tmpdir + '/integrity/' + pubkey_fname if pubkey_fname != '' else '' }}"
             action: 'report'
-          register: playbook_integrity
+          register: playbook_integrity_check
         - name: show integrity check result
           debug:
-            var: playbook_integrity
+            var: playbook_integrity_check
         - name: check if each playbook file exists in file digest list
           shell: grep "  {{ item }}" {{ project_path | quote }}/sha256sum.txt > /dev/null 2>&1
           loop: "{{ playbook_integrity_files | from_json | list }}"
@@ -189,11 +193,11 @@
           set_fact:
             # If `playbook_integrity.failed` is True, it means verification exitted with an error
             # If `playbook_integrity.detail.failed` is True, it means playbook integrity check failed
-            integrity_verified: "{{ False if playbook_integrity.failed or playbook_integrity.detail.failed else True }}"
+            integrity_verified: "{{ False if playbook_integrity_check.failed or playbook_integrity_check.detail.failed else True }}"
         - name: set facts
           set_fact:
             playbook_integrity_verified: "{{ integrity_verified }}"
-            playbook_integrity_error: "{{ '' if integrity_verified else playbook_integrity.detail | to_json }}"
+            playbook_integrity_error: "{{ '' if integrity_verified else playbook_integrity_check.detail | to_json }}"
             playbook_integrity_existence: "{{ playbook_existence.results }}"
       tags:
         - playbook_integrity_gpg
