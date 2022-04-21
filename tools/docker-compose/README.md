@@ -358,7 +358,7 @@ Once the containers come up a new port (8443) should be exposed and the Keycloak
 Now we are ready to configure and plumb Keycloak with AWX. To do this we have provided a playbook which will:
 * Create a certificate for data exchange between Keycloak and AWX.
 * Create a realm in Keycloak with a client for AWX and 3 users.
-* Backup and configure the SMAL adapter in AWX. NOTE: the private key of any existing SAML adapters can not be backed up through the API, you need a DB backup to recover this.
+* Backup and configure the SAML adapter in AWX. NOTE: the private key of any existing SAML adapters can not be backed up through the API, you need a DB backup to recover this.
 
 Before we can run the playbook we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration and on the AWX side its done through the SAML settings. The playbook requires a variable called `container_reference` to be set. The container_reference variable needs to be how your browser will be able to talk to the running containers.  Here are some examples of how to choose a proper container_reference.
 * If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The the VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.

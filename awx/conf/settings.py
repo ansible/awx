@@ -1,7 +1,6 @@
 # Python
 import contextlib
 import logging
-import sys
 import threading
 import time
 import os
@@ -31,7 +30,7 @@ from awx.conf.models import Setting
 
 logger = logging.getLogger('awx.conf.settings')
 
-SETTING_MEMORY_TTL = 5 if 'callback_receiver' in ' '.join(sys.argv) else 0
+SETTING_MEMORY_TTL = 5 if 'callback_receiver' in ' '.join(sys.argv) else 5
 
 # Store a special value to indicate when a setting is not set in the database.
 SETTING_CACHE_NOTSET = '___notset___'
