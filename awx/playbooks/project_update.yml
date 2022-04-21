@@ -180,42 +180,38 @@
         - install_roles
         - install_collections
 
-    - block:
-        - name: fetch galaxy roles from requirements.(yml/yaml)
-          command: >
-            ansible-galaxy role install -r {{ item }}
-            --roles-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_roles
-            {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
-          args:
-            chdir: "{{project_path|quote}}"
-          register: galaxy_result
-          with_fileglob:
-            - "{{project_path|quote}}/roles/requirements.yaml"
-            - "{{project_path|quote}}/roles/requirements.yml"
-          changed_when: "'was installed successfully' in galaxy_result.stdout"
-          environment: "{{ galaxy_task_env }}"
-
+    - name: fetch galaxy roles from requirements.(yml/yaml)
+      command: >
+        ansible-galaxy role install -r {{ item }}
+        --roles-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_roles
+        {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+      args:
+        chdir: "{{project_path|quote}}"
+      register: galaxy_result
+      with_fileglob:
+        - "{{project_path|quote}}/roles/requirements.yaml"
+        - "{{project_path|quote}}/roles/requirements.yml"
+      changed_when: "'was installed successfully' in galaxy_result.stdout"
+      environment: "{{ galaxy_task_env }}"
       when: roles_enabled|bool
       tags:
         - install_roles
 
-    - block:
-        - name: fetch galaxy collections from collections/requirements.(yml/yaml)
-          command: >
-            ansible-galaxy collection install -r {{ item }}
-            --collections-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections
-            {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
-          args:
-            chdir: "{{project_path|quote}}"
-          register: galaxy_collection_result
-          with_fileglob:
-            - "{{project_path|quote}}/collections/requirements.yaml"
-            - "{{project_path|quote}}/collections/requirements.yml"
-            - "{{project_path|quote}}/requirements.yaml"
-            - "{{project_path|quote}}/requirements.yml"
-          changed_when: "'Installing ' in galaxy_collection_result.stdout"
-          environment: "{{ additional_collections_env | combine(galaxy_task_env) }}"
-
+    - name: fetch galaxy collections from collections/requirements.(yml/yaml)
+      command: >
+        ansible-galaxy collection install -r {{ item }}
+        --collections-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections
+        {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+      args:
+        chdir: "{{project_path|quote}}"
+      register: galaxy_collection_result
+      with_fileglob:
+        - "{{project_path|quote}}/collections/requirements.yaml"
+        - "{{project_path|quote}}/collections/requirements.yml"
+        - "{{project_path|quote}}/requirements.yaml"
+        - "{{project_path|quote}}/requirements.yml"
+      changed_when: "'Installing ' in galaxy_collection_result.stdout"
+      environment: "{{ additional_collections_env | combine(galaxy_task_env) }}"
       when:
         - "ansible_version.full is version_compare('2.9', '>=')"
         - collections_enabled|bool
