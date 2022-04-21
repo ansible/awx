@@ -84,7 +84,7 @@ def _identify_lower(key, since, until, last_gather):
     return lower, last_entries
 
 
-@register('config', '1.3', description=_('General platform configuration.'))
+@register('config', '1.4', description=_('General platform configuration.'))
 def config(since, **kwargs):
     license_info = get_license()
     install_type = 'traditional'
@@ -104,6 +104,22 @@ def config(since, **kwargs):
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
         'license_type': license_info.get('license_type', 'UNLICENSED'),
+        'license_date': license_info.get('license_date'),
+        'subscription_name': license_info.get('subscription_name'),
+        'sku': license_info.get('sku'),
+        'support_level': license_info.get('support_level'),
+        'product_name': license_info.get('product_name'),
+        'valid_key': license_info.get('valid_key'),
+        'satellite': license_info.get('satellite'),
+        'pool_id': license_info.get('pool_id'),
+        'current_instances': license_info.get('current_instances'),
+        'automated_instances': license_info.get('automated_instances'),
+        'automated_since': license_info.get('automated_since'),
+        'trial': license_info.get('trial'),
+        'grace_period_remaining': license_info.get('grace_period_remaining'),
+        'compliant': license_info.get('compliant'),
+        'date_warning': license_info.get('date_warning'),
+        'date_expired': license_info.get('date_expired'),
         'free_instances': license_info.get('free_instances', 0),
         'total_licensed_instances': license_info.get('instance_count', 0),
         'license_expiry': license_info.get('time_remaining', 0),
