@@ -19,7 +19,7 @@ from solo.models import SingletonModel
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.fields import JSONBlob
-from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
+from awx.main.managers import InstanceManager, UUID_DEFAULT
 from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
@@ -299,8 +299,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
-
-    objects = InstanceGroupManager()
 
     name = models.CharField(max_length=250, unique=True)
     created = models.DateTimeField(auto_now_add=True)

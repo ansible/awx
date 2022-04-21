@@ -70,6 +70,17 @@ class TaskManagerInstanceGroups:
                     ],
                 )
 
+    def get_capacity(self, group_name):
+        instances = self.instance_groups[group_name]['instances']
+        return sum(inst.capacity for inst in instances)
+
+    def get_remaining_capacity(self, group_name):
+        instances = self.instance_groups[group_name]['instances']
+        remaining_capacity = sum(inst.remaining_capacity for inst in instances)
+        if remaining_capacity < 0:
+            return 0
+        return remaining_capacity
+
     def fit_task_to_most_remaining_capacity_instance(self, task, instance_group_name, impact=None, capacity_type=None, add_hybrid_control_cost=False):
         impact = impact if impact else task.task_impact
         capacity_type = capacity_type if capacity_type else task.capacity_type
