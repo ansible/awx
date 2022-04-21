@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 from decimal import Decimal
-import random
 import logging
 import os
 
@@ -161,25 +160,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def remaining_capacity(self):
         return self.capacity - self.consumed_capacity
 
-    @staticmethod
-    def update_remaining_capacity(instances, jobs):
-        """Takes mapping of hostname to SimpleNamespace instance like objects and a list of jobs.
-
-        Computes remaining capacity for all the instances based on currently running and waiting jobs.
-
-        No return value, updates the "remaining_capacity" field on the SimpleNamespace instance like object in place.
-        For use in the task manager to avoid refetching jobs from the database.
-        """
-        for job in jobs:
-            if job.status not in ['waiting', 'running']:
-                continue
-            control_instance = instances.get(job.controller_node, '')
-            execution_instance = instances.get(job.execution_node, '')
-            if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
-                instances[job.execution_node].remaining_capacity -= job.task_impact
-            if control_instance and control_instance.node_type in ('hybrid', 'control'):
-                instances[job.controller_node].remaining_capacity -= settings.AWX_CONTROL_NODE_TASK_IMPACT
-
     @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(
@@ -193,12 +173,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     @property
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
-
-    @staticmethod
-    def choose_online_control_plane_node():
-        return random.choice(
-            Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
-        )
 
     def get_cleanup_task_kwargs(self, **kwargs):
         """
@@ -384,37 +358,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     class Meta:
         app_label = 'main'
-
-    @staticmethod
-    def fit_task_to_most_remaining_capacity_instance(task, instances, impact=None, capacity_type=None, add_hybrid_control_cost=False):
-        impact = impact if impact else task.task_impact
-        capacity_type = capacity_type if capacity_type else task.capacity_type
-        instance_most_capacity = None
-        most_remaining_capacity = -1
-        for i in instances:
-            if i.node_type not in (capacity_type, 'hybrid'):
-                continue
-            would_be_remaining = i.remaining_capacity - impact
-            # hybrid nodes _always_ control their own tasks
-            if add_hybrid_control_cost and i.node_type == 'hybrid':
-                would_be_remaining -= settings.AWX_CONTROL_NODE_TASK_IMPACT
-            if would_be_remaining >= 0 and (instance_most_capacity is None or would_be_remaining > most_remaining_capacity):
-                instance_most_capacity = i
-                most_remaining_capacity = would_be_remaining
-        return instance_most_capacity
-
-    @staticmethod
-    def find_largest_idle_instance(instances, capacity_type='execution'):
-        largest_instance = None
-        for i in instances:
-            if i.node_type not in (capacity_type, 'hybrid'):
-                continue
-            if (hasattr(i, 'jobs_running') and i.jobs_running == 0) or i.remaining_capacity == i.capacity:
-                if largest_instance is None:
-                    largest_instance = i
-                elif i.capacity > largest_instance.capacity:
-                    largest_instance = i
-        return largest_instance
 
     def set_default_policy_fields(self):
         self.policy_instance_list = []
