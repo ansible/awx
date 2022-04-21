@@ -5007,8 +5007,12 @@ class InstanceGroupSerializer(BaseSerializer):
         if 'task_manager_igs' not in self.context:
             jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
 
+            ig_qs = None
+            if self.parent:  # Is ListView:
+                ig_qs = self.parent.instance
+
             instances = TaskManagerInstances(jobs_qs)
-            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances)
+            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, ig_qs=ig_qs)
 
             self.context['task_manager_igs'] = instance_groups
         return self.context['task_manager_igs']
