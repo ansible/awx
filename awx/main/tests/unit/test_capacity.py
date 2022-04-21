@@ -74,15 +74,11 @@ def create_ig_manager():
 
         instance_groups = TaskManagerInstanceGroups(instance_groups=seed_igs)
         return instance_groups
+
     return _rf
 
 
-
-@pytest.mark.parametrize('ig_name,remaining_capacity', [
-    ('default', 200 - 43),
-    ('ig_large', 400 - 43*2),
-    ('ig_small', 200 - 43)
-])
+@pytest.mark.parametrize('ig_name,remaining_capacity', [('default', 200 - 43), ('ig_large', 400 - 43 * 2), ('ig_small', 200 - 43)])
 def test_running_capacity(sample_cluster, ig_name, remaining_capacity, create_ig_manager):
     default, ig_large, ig_small = sample_cluster()
     ig_list = [default, ig_large, ig_small]
