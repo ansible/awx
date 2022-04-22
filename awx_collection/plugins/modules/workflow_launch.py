@@ -57,7 +57,7 @@ options:
       description:
         - The interval to request an update from the controller.
       required: False
-      default: 1
+      default: 2
       type: float
     timeout:
       description:
@@ -104,7 +104,7 @@ def main():
         scm_branch=dict(),
         extra_vars=dict(type='dict'),
         wait=dict(required=False, default=True, type='bool'),
-        interval=dict(required=False, default=1.0, type='float'),
+        interval=dict(required=False, default=2.0, type='float'),
         timeout=dict(required=False, default=None, type='int'),
     )
 

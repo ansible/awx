@@ -167,7 +167,7 @@ options:
         - The interval to request an update from the controller.
         - Requires wait.
       required: False
-      default: 1
+      default: 2
       type: float
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -278,7 +278,7 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
-        interval=dict(default=1.0, type='float'),
+        interval=dict(default=2.0, type='float'),
     )
 
     # Create a module for ourselves

@@ -46,7 +46,7 @@ options:
       description:
         - The interval to request an update from the controller.
       required: False
-      default: 1
+      default: 2
       type: float
     timeout:
       description:
@@ -93,7 +93,7 @@ def main():
         inventory=dict(required=True),
         organization=dict(),
         wait=dict(default=False, type='bool'),
-        interval=dict(default=1.0, type='float'),
+        interval=dict(default=2.0, type='float'),
         timeout=dict(default=None, type='int'),
     )
 

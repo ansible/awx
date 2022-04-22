@@ -994,7 +994,7 @@ class ControllerAPIModule(ControllerModule):
         else:
             return True
 
-    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=10):
+    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=2):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
@@ -1034,7 +1034,7 @@ class ControllerAPIModule(ControllerModule):
         for k in ('id', 'status', 'elapsed', 'started', 'finished'):
             self.json_output[k] = response['json'].get(k)
 
-    def wait_on_workflow_node_url(self, url, object_name, object_type, timeout=30, interval=10, **kwargs):
+    def wait_on_workflow_node_url(self, url, object_name, object_type, timeout=30, interval=2, **kwargs):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url, **kwargs)
