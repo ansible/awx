@@ -988,7 +988,7 @@ class TestJobCredentials(TestJobExecution):
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
-        private_data_files = task.build_private_data_files(job, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(job, private_data_dir)
         env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
@@ -1058,7 +1058,7 @@ class TestJobCredentials(TestJobExecution):
             credential.inputs[field] = encrypt_field(credential, field)
         job.credentials.add(credential)
 
-        private_data_files = task.build_private_data_files(job, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(job, private_data_dir)
         env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
         safe_env = build_safe_env(env)
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
@@ -1510,7 +1510,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         assert 'AWS_ACCESS_KEY_ID' not in env
@@ -1530,7 +1530,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = build_safe_env(env)
@@ -1554,7 +1554,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = {}
@@ -1591,7 +1591,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = build_safe_env(env)
@@ -1621,7 +1621,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = build_safe_env(env)
@@ -1648,7 +1648,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         def run(expected_gce_zone):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+            private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
             env = task.build_env(inventory_update, private_data_dir, private_data_files)
             safe_env = {}
             credentials = task.build_credentials_list(inventory_update)
@@ -1682,7 +1682,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         path = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
@@ -1717,7 +1717,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
         safe_env = build_safe_env(env)
 
@@ -1832,7 +1832,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
 
-        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         assert env['FOO'] == 'BAR'

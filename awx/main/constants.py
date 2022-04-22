@@ -100,3 +100,9 @@ JOB_VARIABLE_PREFIXES = [
     'awx',
     'tower',
 ]
+
+# Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
+# Importing a library just for this message seemed like overkill
+ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
+    '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
+)

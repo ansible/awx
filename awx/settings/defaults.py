@@ -944,6 +944,12 @@ AWX_CALLBACK_PROFILE = False
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
 
+# Allow ansible-runner to store env folder (may contain sensitive information)
+AWX_RUNNER_OMIT_ENV_FILES = True
+
+# Allow ansible-runner to save ansible output (may cause performance issues)
+AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
+
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
 
