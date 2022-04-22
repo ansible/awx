@@ -813,7 +813,8 @@ class UnifiedJob(
 
         # If this job already exists in the database, retrieve a copy of
         # the job in its prior state.
-        if self.pk:
+        # If update_fields are given without status, then that indicates no change
+        if self.pk and ((not update_fields) or ('status' in update_fields)):
             self_before = self.__class__.objects.get(pk=self.pk)
             if self_before.status != self.status:
                 status_before = self_before.status
