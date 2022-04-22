@@ -546,6 +546,11 @@ class BaseTask(object):
             status = res.status
             rc = res.rc
 
+            # We call this to get the current values from the database, in case update_model was called
+            # within the threadpools inside of AWXReceptorJob. We use update_model instead of
+            # refresh_from_db here because it contains retry logic that is resilient to database failures.
+            self.instance = self.update_model(self.instance.pk)
+
             if status in ('timeout', 'error'):
                 job_explanation = f"Job terminated due to {status}"
                 self.instance.job_explanation = self.instance.job_explanation or job_explanation
@@ -580,7 +585,6 @@ class BaseTask(object):
         if 'got an unexpected keyword argument' in extra_update_fields.get('result_traceback', ''):
             extra_update_fields['result_traceback'] = "{}\n\n{}".format(extra_update_fields['result_traceback'], ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
 
-        self.instance = self.update_model(pk)
         self.instance = self.update_model(pk, status=status, emitted_events=self.runner_callback.event_ct, **extra_update_fields)
 
         try:
