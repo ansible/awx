@@ -77,13 +77,13 @@ class InstanceGroupMembershipMixin(object):
             else:
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
             with transaction.atomic():
-                ig_qs = InstanceGroup.objects.select_for_update()
+                instance_groups_queryset = InstanceGroup.objects.select_for_update()
                 if self.parent_model is Instance:
-                    ig_obj = get_object_or_400(ig_qs, pk=sub_id)
+                    ig_obj = get_object_or_400(instance_groups_queryset, pk=sub_id)
                 else:
                     # similar to get_parent_object, but selected for update
                     parent_filter = {self.lookup_field: self.kwargs.get(self.lookup_field, None)}
-                    ig_obj = get_object_or_404(ig_qs, **parent_filter)
+                    ig_obj = get_object_or_404(instance_groups_queryset, **parent_filter)
                 if inst_name not in ig_obj.policy_instance_list:
                     ig_obj.policy_instance_list.append(inst_name)
                     ig_obj.save(update_fields=['policy_instance_list'])
@@ -98,13 +98,13 @@ class InstanceGroupMembershipMixin(object):
             else:
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
             with transaction.atomic():
-                ig_qs = InstanceGroup.objects.select_for_update()
+                instance_groups_queryset = InstanceGroup.objects.select_for_update()
                 if self.parent_model is Instance:
-                    ig_obj = get_object_or_400(ig_qs, pk=sub_id)
+                    ig_obj = get_object_or_400(instance_groups_queryset, pk=sub_id)
                 else:
                     # similar to get_parent_object, but selected for update
                     parent_filter = {self.lookup_field: self.kwargs.get(self.lookup_field, None)}
-                    ig_obj = get_object_or_404(ig_qs, **parent_filter)
+                    ig_obj = get_object_or_404(instance_groups_queryset, **parent_filter)
                 if inst_name in ig_obj.policy_instance_list:
                     ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
                     ig_obj.save(update_fields=['policy_instance_list'])

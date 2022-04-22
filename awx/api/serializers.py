@@ -5005,14 +5005,13 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_ig_mgr(self):
         # Store capacity values (globally computed) in the context
         if 'task_manager_igs' not in self.context:
+            instance_groups_queryset = None
             jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
-
-            ig_qs = None
             if self.parent:  # Is ListView:
-                ig_qs = self.parent.instance
+                instance_groups_queryset = self.parent.instance
 
             instances = TaskManagerInstances(jobs_qs)
-            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, ig_qs=ig_qs)
+            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, instance_groups_queryset=instance_groups_queryset)
 
             self.context['task_manager_igs'] = instance_groups
         return self.context['task_manager_igs']

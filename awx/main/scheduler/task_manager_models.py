@@ -64,16 +64,16 @@ class TaskManagerInstances:
 class TaskManagerInstanceGroups:
     """A class representing minimal data the task manager needs to represent an InstanceGroup."""
 
-    def __init__(self, instances_by_hostname=None, instance_groups=None, ig_qs=None):
+    def __init__(self, instances_by_hostname=None, instance_groups=None, instance_groups_queryset=None):
         self.instance_groups = dict()
         self.controlplane_ig = None
 
         if instance_groups is not None:  # for testing
             self.instance_groups = instance_groups
         else:
-            if ig_qs is None:
-                ig_qs = InstanceGroup.objects.prefetch_related('instances').only('name', 'instances')
-            for instance_group in ig_qs:
+            if instance_groups_queryset is None:
+                instance_groups_queryset = InstanceGroup.objects.prefetch_related('instances').only('name', 'instances')
+            for instance_group in instance_groups_queryset:
                 if instance_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
                     self.controlplane_ig = instance_group
                 self.instance_groups[instance_group.name] = dict(
