@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models import InstanceGroup
+from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
 
 
 class FakeMeta(object):
@@ -52,9 +52,9 @@ def sample_cluster():
         ig_small = InstanceGroup(name='ig_small')
         ig_large = InstanceGroup(name='ig_large')
         default = InstanceGroup(name='default')
-        i1 = Instance(hostname='i1', capacity=200)
-        i2 = Instance(hostname='i2', capacity=200)
-        i3 = Instance(hostname='i3', capacity=200)
+        i1 = Instance(hostname='i1', capacity=200, node_type='hybrid')
+        i2 = Instance(hostname='i2', capacity=200, node_type='hybrid')
+        i3 = Instance(hostname='i3', capacity=200, node_type='hybrid')
         ig_small.instances.add(i1)
         ig_large.instances.add(i2, i3)
         default.instances.add(i2)
@@ -63,59 +63,66 @@ def sample_cluster():
     return stand_up_cluster
 
 
-def test_committed_capacity(sample_cluster):
-    default, ig_large, ig_small = sample_cluster()
-    tasks = [Job(status='waiting', instance_group=default), Job(status='waiting', instance_group=ig_large), Job(status='waiting', instance_group=ig_small)]
-    capacities = InstanceGroup.objects.capacity_values(qs=[default, ig_large, ig_small], tasks=tasks, breakdown=True)
-    # Jobs submitted to either tower or ig_larg must count toward both
-    assert capacities['default']['committed_capacity'] == 43 * 2
-    assert capacities['ig_large']['committed_capacity'] == 43 * 2
-    assert capacities['ig_small']['committed_capacity'] == 43
+@pytest.fixture
+def create_ig_manager():
+    def _rf(ig_list, tasks):
+        instances = TaskManagerInstances(tasks, instances=set(inst for ig in ig_list for inst in ig.instance_list))
+
+        seed_igs = {}
+        for ig in ig_list:
+            seed_igs[ig.name] = {'instances': [instances[inst.hostname] for inst in ig.instance_list]}
+
+        instance_groups = TaskManagerInstanceGroups(instance_groups=seed_igs)
+        return instance_groups
+
+    return _rf
 
 
-def test_running_capacity(sample_cluster):
+@pytest.mark.parametrize('ig_name,consumed_capacity', [('default', 43), ('ig_large', 43 * 2), ('ig_small', 43)])
+def test_running_capacity(sample_cluster, ig_name, consumed_capacity, create_ig_manager):
     default, ig_large, ig_small = sample_cluster()
+    ig_list = [default, ig_large, ig_small]
     tasks = [Job(status='running', execution_node='i1'), Job(status='running', execution_node='i2'), Job(status='running', execution_node='i3')]
-    capacities = InstanceGroup.objects.capacity_values(qs=[default, ig_large, ig_small], tasks=tasks, breakdown=True)
-    # Tower is only given 1 instance
-    assert capacities['default']['running_capacity'] == 43
-    # Large IG has 2 instances
-    assert capacities['ig_large']['running_capacity'] == 43 * 2
-    assert capacities['ig_small']['running_capacity'] == 43
+
+    instance_groups_mgr = create_ig_manager(ig_list, tasks)
+
+    assert instance_groups_mgr.get_consumed_capacity(ig_name) == consumed_capacity
 
 
-def test_offline_node_running(sample_cluster):
+def test_offline_node_running(sample_cluster, create_ig_manager):
     """
     Assure that algorithm doesn't explode if a job is marked running
     in an offline node
     """
     default, ig_large, ig_small = sample_cluster()
     ig_small.instance_list[0].capacity = 0
-    tasks = [Job(status='running', execution_node='i1', instance_group=ig_small)]
-    capacities = InstanceGroup.objects.capacity_values(qs=[default, ig_large, ig_small], tasks=tasks)
-    assert capacities['ig_small']['consumed_execution_capacity'] == 43
+    tasks = [Job(status='running', execution_node='i1')]
+    instance_groups_mgr = create_ig_manager([default, ig_large, ig_small], tasks)
+    assert instance_groups_mgr.get_consumed_capacity('ig_small') == 43
+    assert instance_groups_mgr.get_remaining_capacity('ig_small') == 0
 
 
-def test_offline_node_waiting(sample_cluster):
+def test_offline_node_waiting(sample_cluster, create_ig_manager):
     """
     Same but for a waiting job
     """
     default, ig_large, ig_small = sample_cluster()
     ig_small.instance_list[0].capacity = 0
-    tasks = [Job(status='waiting', instance_group=ig_small)]
-    capacities = InstanceGroup.objects.capacity_values(qs=[default, ig_large, ig_small], tasks=tasks)
-    assert capacities['ig_small']['consumed_execution_capacity'] == 43
+    tasks = [Job(status='waiting', execution_node='i1')]
+    instance_groups_mgr = create_ig_manager([default, ig_large, ig_small], tasks)
+    assert instance_groups_mgr.get_consumed_capacity('ig_small') == 43
+    assert instance_groups_mgr.get_remaining_capacity('ig_small') == 0
 
 
-def test_RBAC_reduced_filter(sample_cluster):
+def test_RBAC_reduced_filter(sample_cluster, create_ig_manager):
     """
     User can see jobs that are running in `ig_small` and `ig_large` IGs,
     but user does not have permission to see those actual instance groups.
     Verify that this does not blow everything up.
     """
     default, ig_large, ig_small = sample_cluster()
-    tasks = [Job(status='waiting', instance_group=default), Job(status='waiting', instance_group=ig_large), Job(status='waiting', instance_group=ig_small)]
-    capacities = InstanceGroup.objects.capacity_values(qs=[default], tasks=tasks, breakdown=True)
+    tasks = [Job(status='waiting', execution_node='i1'), Job(status='waiting', execution_node='i2'), Job(status='waiting', execution_node='i3')]
+    instance_groups_mgr = create_ig_manager([default], tasks)
     # Cross-links between groups not visible to current user,
     # so a naieve accounting of capacities is returned instead
-    assert capacities['default']['committed_capacity'] == 43
+    assert instance_groups_mgr.get_consumed_capacity('default') == 43

@@ -113,6 +113,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.named_url_graph import reset_counters
+from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
 from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
@@ -4873,7 +4874,6 @@ class InstanceGroupSerializer(BaseSerializer):
 
     show_capabilities = ['edit', 'delete']
 
-    committed_capacity = serializers.SerializerMethodField(help_text=_('This resource has been deprecated and will be removed in a future release'))
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.IntegerField(
@@ -4922,7 +4922,6 @@ class InstanceGroupSerializer(BaseSerializer):
             "created",
             "modified",
             "capacity",
-            "committed_capacity",
             "consumed_capacity",
             "percent_capacity_remaining",
             "jobs_running",
@@ -5003,30 +5002,29 @@ class InstanceGroupSerializer(BaseSerializer):
 
         return attrs
 
-    def get_capacity_dict(self):
+    def get_ig_mgr(self):
         # Store capacity values (globally computed) in the context
-        if 'capacity_map' not in self.context:
-            ig_qs = None
+        if 'task_manager_igs' not in self.context:
+            instance_groups_queryset = None
             jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
             if self.parent:  # Is ListView:
-                ig_qs = self.parent.instance
-            self.context['capacity_map'] = InstanceGroup.objects.capacity_values(qs=ig_qs, tasks=jobs_qs, breakdown=True)
-        return self.context['capacity_map']
+                instance_groups_queryset = self.parent.instance
+
+            instances = TaskManagerInstances(jobs_qs)
+            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, instance_groups_queryset=instance_groups_queryset)
+
+            self.context['task_manager_igs'] = instance_groups
+        return self.context['task_manager_igs']
 
     def get_consumed_capacity(self, obj):
-        return self.get_capacity_dict()[obj.name]['running_capacity']
-
-    def get_committed_capacity(self, obj):
-        return self.get_capacity_dict()[obj.name]['committed_capacity']
+        ig_mgr = self.get_ig_mgr()
+        return ig_mgr.get_consumed_capacity(obj.name)
 
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
             return 0.0
-        consumed = self.get_consumed_capacity(obj)
-        if consumed >= obj.capacity:
-            return 0.0
-        else:
-            return float("{0:.2f}".format(((float(obj.capacity) - float(consumed)) / (float(obj.capacity))) * 100))
+        ig_mgr = self.get_ig_mgr()
+        return float("{0:.2f}".format((float(ig_mgr.get_remaining_capacity(obj.name)) / (float(obj.capacity))) * 100))
 
     def get_instances(self, obj):
         return obj.instances.count()
