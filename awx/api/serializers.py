@@ -5019,7 +5019,7 @@ class InstanceGroupSerializer(BaseSerializer):
 
     def get_consumed_capacity(self, obj):
         ig_mgr = self.get_ig_mgr()
-        return ig_mgr.get_capacity(obj.name) - ig_mgr.get_remaining_capacity(obj.name)
+        return ig_mgr.get_consumed_capacity(obj.name)
 
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:

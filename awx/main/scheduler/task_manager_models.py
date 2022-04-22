@@ -18,9 +18,19 @@ class TaskManagerInstance:
     def __init__(self, obj):
         self.obj = obj
         self.node_type = obj.node_type
-        self.remaining_capacity = obj.capacity
+        self.consumed_capacity = 0
         self.capacity = obj.capacity
         self.hostname = obj.hostname
+
+    def consume_capacity(self, impact):
+        self.consumed_capacity += impact
+
+    @property
+    def remaining_capacity(self):
+        remaining = self.capacity - self.consumed_capacity
+        if remaining < 0:
+            return 0
+        return remaining
 
 
 class TaskManagerInstances:
@@ -40,9 +50,9 @@ class TaskManagerInstances:
             control_instance = self.instances_by_hostname.get(task.controller_node, '')
             execution_instance = self.instances_by_hostname.get(task.execution_node, '')
             if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
-                self.instances_by_hostname[task.execution_node].remaining_capacity -= task.task_impact
+                self.instances_by_hostname[task.execution_node].consume_capacity(task.task_impact)
             if control_instance and control_instance.node_type in ('hybrid', 'control'):
-                self.instances_by_hostname[task.controller_node].remaining_capacity -= settings.AWX_CONTROL_NODE_TASK_IMPACT
+                self.instances_by_hostname[task.controller_node].consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
 
     def __getitem__(self, hostname):
         return self.instances_by_hostname.get(hostname)
@@ -72,16 +82,13 @@ class TaskManagerInstanceGroups:
                     ],
                 )
 
-    def get_capacity(self, group_name):
-        instances = self.instance_groups[group_name]['instances']
-        return sum(inst.capacity for inst in instances)
-
     def get_remaining_capacity(self, group_name):
         instances = self.instance_groups[group_name]['instances']
-        remaining_capacity = sum(inst.remaining_capacity for inst in instances)
-        if remaining_capacity < 0:
-            return 0
-        return remaining_capacity
+        return sum(inst.remaining_capacity for inst in instances)
+
+    def get_consumed_capacity(self, group_name):
+        instances = self.instance_groups[group_name]['instances']
+        return sum(inst.consumed_capacity for inst in instances)
 
     def fit_task_to_most_remaining_capacity_instance(self, task, instance_group_name, impact=None, capacity_type=None, add_hybrid_control_cost=False):
         impact = impact if impact else task.task_impact

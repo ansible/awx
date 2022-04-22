@@ -78,15 +78,15 @@ def create_ig_manager():
     return _rf
 
 
-@pytest.mark.parametrize('ig_name,remaining_capacity', [('default', 200 - 43), ('ig_large', 400 - 43 * 2), ('ig_small', 200 - 43)])
-def test_running_capacity(sample_cluster, ig_name, remaining_capacity, create_ig_manager):
+@pytest.mark.parametrize('ig_name,consumed_capacity', [('default', 43), ('ig_large', 43 * 2), ('ig_small', 43)])
+def test_running_capacity(sample_cluster, ig_name, consumed_capacity, create_ig_manager):
     default, ig_large, ig_small = sample_cluster()
     ig_list = [default, ig_large, ig_small]
     tasks = [Job(status='running', execution_node='i1'), Job(status='running', execution_node='i2'), Job(status='running', execution_node='i3')]
 
     instance_groups_mgr = create_ig_manager(ig_list, tasks)
 
-    assert instance_groups_mgr.get_remaining_capacity(ig_name) == remaining_capacity
+    assert instance_groups_mgr.get_consumed_capacity(ig_name) == consumed_capacity
 
 
 def test_offline_node_running(sample_cluster, create_ig_manager):
@@ -96,9 +96,10 @@ def test_offline_node_running(sample_cluster, create_ig_manager):
     """
     default, ig_large, ig_small = sample_cluster()
     ig_small.instance_list[0].capacity = 0
-    tasks = [Job(status='running', execution_node='i1', instance_group=ig_small)]
+    tasks = [Job(status='running', execution_node='i1')]
     instance_groups_mgr = create_ig_manager([default, ig_large, ig_small], tasks)
-    assert instance_groups_mgr.get_remaining_capacity('ig_small') == 200 - 43
+    assert instance_groups_mgr.get_consumed_capacity('ig_small') == 43
+    assert instance_groups_mgr.get_remaining_capacity('ig_small') == 0
 
 
 def test_offline_node_waiting(sample_cluster, create_ig_manager):
@@ -107,9 +108,10 @@ def test_offline_node_waiting(sample_cluster, create_ig_manager):
     """
     default, ig_large, ig_small = sample_cluster()
     ig_small.instance_list[0].capacity = 0
-    tasks = [Job(status='waiting', instance_group=ig_small)]
+    tasks = [Job(status='waiting', execution_node='i1')]
     instance_groups_mgr = create_ig_manager([default, ig_large, ig_small], tasks)
-    assert instance_groups_mgr.get_remaining_capacity('ig_small') == 200 - 43
+    assert instance_groups_mgr.get_consumed_capacity('ig_small') == 43
+    assert instance_groups_mgr.get_remaining_capacity('ig_small') == 0
 
 
 def test_RBAC_reduced_filter(sample_cluster, create_ig_manager):
@@ -119,8 +121,8 @@ def test_RBAC_reduced_filter(sample_cluster, create_ig_manager):
     Verify that this does not blow everything up.
     """
     default, ig_large, ig_small = sample_cluster()
-    tasks = [Job(status='waiting', instance_group=default), Job(status='waiting', instance_group=ig_large), Job(status='waiting', instance_group=ig_small)]
+    tasks = [Job(status='waiting', execution_node='i1'), Job(status='waiting', execution_node='i2'), Job(status='waiting', execution_node='i3')]
     instance_groups_mgr = create_ig_manager([default], tasks)
     # Cross-links between groups not visible to current user,
     # so a naieve accounting of capacities is returned instead
-    assert instance_groups_mgr.get_remaining_capacity('default') == 200 - 43
+    assert instance_groups_mgr.get_consumed_capacity('default') == 43

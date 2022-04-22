@@ -464,7 +464,7 @@ class TaskManager:
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
                 task.execution_node = control_instance.hostname
-                control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - control_impact)
+                control_instance.consume_capacity(control_impact)
                 self.dependency_graph.add_job(task)
                 execution_instance = self.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
@@ -497,9 +497,9 @@ class TaskManager:
                         control_instance = execution_instance
                         task.controller_node = execution_instance.hostname
 
-                    control_instance.remaining_capacity = max(0, control_instance.remaining_capacity - settings.AWX_CONTROL_NODE_TASK_IMPACT)
+                    control_instance.consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
                     task.log_lifecycle("controller_node_chosen")
-                    execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
+                    execution_instance.consume_capacity(task.task_impact)
                     task.log_lifecycle("execution_node_chosen")
                     logger.debug(
                         "Starting {} in group {} instance {} (remaining_capacity={})".format(
