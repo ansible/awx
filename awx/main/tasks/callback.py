@@ -14,6 +14,7 @@ from django_guid import get_guid
 from awx.main.redact import UriCleaner
 from awx.main.constants import MINIMAL_EVENTS
 from awx.main.utils.update_model import update_model
+from awx.main.utils.common import cleanup_new_process
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.main.tasks.callback')
@@ -143,6 +144,7 @@ class RunnerCallback:
 
         return False
 
+    @cleanup_new_process
     def cancel_callback(self):
         """
         Ansible runner callback to tell the job when/if it is canceled
@@ -171,6 +173,7 @@ class RunnerCallback:
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
 
+    @cleanup_new_process
     def status_handler(self, status_data, runner_config):
         """
         Ansible runner callback triggered on status transition
