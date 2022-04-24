@@ -2767,7 +2767,7 @@ msgstr "Ingrese el número asociado con el \"Servicio de mensajería\"\n"
 
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar la fuente de inventario. Para una descripción detallada de cómo configurar este plugin, consulte los plugins de inventario <0> en la documentación y la guía de configuración del plugin Insights </0>."
+msgstr "Introduzca las variables para configurar la fuente de inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1>Insights</1>."
 
 #: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
@@ -6737,7 +6737,7 @@ msgstr "Quitar enlace"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeDeleteModal.js:28
 msgid "Remove Node {nodeName}"
-msgstr "Quitar nodo"
+msgstr "Quitar nodo {nodeName}"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:70
 msgid "Remove any local modifications prior to performing an update."
@@ -8550,7 +8550,7 @@ msgstr "Se produjo un error al guardar el flujo de trabajo."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:68
 msgid "These are the modules that {brandName} supports running commands against."
-msgstr "Estos son los módulos que {brandName}} admite para ejecutar comandos."
+msgstr "Estos son los módulos que {brandName} admite para ejecutar comandos."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:138
 msgid "These are the verbosity levels for standard out of the command run that are supported."
@@ -10159,76 +10159,76 @@ msgstr "clave de Webhook de la plantilla de trabajo del flujo de trabajo"
 
 #: screens/Inventory/InventoryList/InventoryListItem.js:65
 msgid "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
-msgstr "{0, plural, one {# source with sync failures.} otros {# sources with sync failures.}}"
+msgstr "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:115
 msgid "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
-msgstr "{0, plural, one {Are you sure you want delete the group below?} otros {Are you sure you want delete the groups below?}}"
+msgstr "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:86
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
-msgstr "{0, plural, one {Delete Group?} otros {Delete Groups?}}"
+msgstr "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 
 #: util/validators.js:138
 msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
-msgstr "{0, plural, one {Please enter a valid phone number.} otros {Please enter valid phone numbers.}}"
+msgstr "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:247
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
-msgstr "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} otros {The inventories will be in a pending status until the final delete is processed.}}"
+msgstr "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
 
 #: components/JobList/JobList.js:276
 msgid "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
-msgstr "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} otros {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
+msgstr "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:208
 msgid "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
-msgstr "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} otros {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
+msgstr "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
 
 #: screens/Credential/CredentialList/CredentialList.js:195
 msgid "{0, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} otros {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:164
 msgid "{0, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} other {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} otros {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} other {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:194
 msgid "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}"
-msgstr "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} otros {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}"
+msgstr "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:196
 msgid "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} otros {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:240
 msgid "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} otros {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
 
 #: screens/Inventory/InventorySources/InventorySourceList.js:197
 msgid "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
-msgstr "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} otros {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
+msgstr "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
 
 #: screens/Organization/OrganizationList/OrganizationList.js:166
 msgid "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} otros {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
 #: screens/Project/ProjectList/ProjectList.js:252
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} otros {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
 #: components/RelatedTemplateList/RelatedTemplateList.js:194
 #: components/TemplateList/TemplateList.js:265
 msgid "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} otros {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
 
 #: components/JobList/JobListCancelButton.js:72
 msgid "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
-msgstr "{0, plural, one {You cannot cancel the following job because it is not running:} otros {You cannot cancel the following jobs because they are not running:}}"
+msgstr "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
 
 #: components/JobList/JobListCancelButton.js:56
 msgid "{0, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
-msgstr "{0, plural, one {You do not have permission to cancel the following job:} otros {You do not have permission to cancel the following jobs:}}"
+msgstr "{0, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
 
 #: screens/ActivityStream/ActivityStreamListItem.js:28
 msgid "{0} (deleted)"
@@ -10251,31 +10251,31 @@ msgstr "{dateStr} por <0>{username}</0>"
 #: screens/Instances/InstanceDetail/InstanceDetail.js:170
 #: screens/Instances/InstanceList/InstanceListItem.js:158
 msgid "{forks, plural, one {# fork} other {# forks}}"
-msgstr "{forks, plural, one {# fork} otros {# forks}}"
+msgstr "{forks, plural, one {# fork} other {# forks}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {day} other {days}}"
-msgstr "{intervalValue, plural, one {day} otros {days}}"
+msgstr "{intervalValue, plural, one {day} other {days}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {hour} other {hours}}"
-msgstr "{intervalValue, plural, one {hour} otros {hours}}"
+msgstr "{intervalValue, plural, one {hour} other {hours}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
-msgstr "{intervalValue, plural, one {minute} otros {minutes}}"
+msgstr "{intervalValue, plural, one {minute} other {minutes}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {month} other {months}}"
-msgstr "{intervalValue, plural, one {month} otros {months}}"
+msgstr "{intervalValue, plural, one {month} other {months}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {week} other {weeks}}"
-msgstr "{intervalValue, plural, one {week} otros {weeks}}"
+msgstr "{intervalValue, plural, one {week} other {weeks}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:196
 msgid "{intervalValue, plural, one {year} other {years}}"
-msgstr "{intervalValue, plural, one {year} otros {years}}"
+msgstr "{intervalValue, plural, one {year} other {years}}"
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
@@ -10283,15 +10283,15 @@ msgstr "{minutes} min. {seconds} seg"
 
 #: components/JobList/JobListCancelButton.js:106
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
-msgstr "{numJobsToCancel, plural, one {Cancel job} otros {Cancel jobs}}"
+msgstr "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
 
 #: components/JobList/JobListCancelButton.js:168
 msgid "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
-msgstr "{numJobsToCancel, plural, one {This action will cancel the following job:} otros {This action will cancel the following jobs:}}"
+msgstr "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
 
 #: components/JobList/JobListCancelButton.js:91
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
-msgstr "{numJobsToCancel, plural, one {{0}} otros {{1}}}"
+msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 
 #: components/PaginatedTable/PaginatedTable.js:79
 msgid "{pluralizedItemName} List"
@@ -10299,8 +10299,8 @@ msgstr "{pluralizedItemName} Lista"
 
 #: components/HealthCheckButton/HealthCheckButton.js:13
 msgid "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
-msgstr "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} otros {Click to run a health check on the selected instances.}}"
+msgstr "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
 
 #: components/AppContainer/AppContainer.js:154
 msgid "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
-msgstr "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} otros {You will be logged out in # seconds due to inactivity}}"
+msgstr "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
