@@ -1,3 +1,6 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
@@ -8,8 +11,7 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: nl \n"
-"MIME-Version: 1.0\n"
+"Language: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
@@ -21,9 +23,7 @@ msgstr "Niet-actieve tijd voor forceren van afmelding"
 msgid ""
 "Number of seconds that a user is inactive before they will need to login "
 "again."
-msgstr ""
-"Maximumaantal seconden dat een gebruiker niet-actief is voordat deze zich "
-"opnieuw moet aanmelden."
+msgstr "Maximumaantal seconden dat een gebruiker niet-actief is voordat deze zich opnieuw moet aanmelden."
 
 #: awx/api/conf.py:21 awx/api/conf.py:31 awx/api/conf.py:42 awx/api/conf.py:50
 #: awx/api/conf.py:70 awx/api/conf.py:85 awx/api/conf.py:96 awx/sso/conf.py:105
@@ -45,9 +45,7 @@ msgstr "Maximumaantal gelijktijdige aangemelde sessies"
 msgid ""
 "Maximum number of simultaneous logged in sessions a user may have. To "
 "disable enter -1."
-msgstr ""
-"Maximumaantal gelijktijdige aangemelde sessies dat een gebruiker kan hebben. "
-"Voer -1 in om dit uit te schakelen."
+msgstr "Maximumaantal gelijktijdige aangemelde sessies dat een gebruiker kan hebben. Voer -1 in om dit uit te schakelen."
 
 #: awx/api/conf.py:37
 msgid "Disable the built-in authentication system"
@@ -58,10 +56,7 @@ msgid ""
 "Controls whether users are prevented from using the built-in authentication "
 "system. You probably want to do this if you are using an LDAP or SAML "
 "integration."
-msgstr ""
-"Bepaalt of gebruikers het ingebouwde authenticatiesysteem niet mogen "
-"gebruiken. U wilt dit waarschijnlijk doen als u een LDAP- of SAML-integratie "
-"gebruikt."
+msgstr "Bepaalt of gebruikers het ingebouwde authenticatiesysteem niet mogen gebruiken. U wilt dit waarschijnlijk doen als u een LDAP- of SAML-integratie gebruikt."
 
 #: awx/api/conf.py:48
 msgid "Enable HTTP Basic Auth"
@@ -83,13 +78,7 @@ msgid ""
 "authorization codes in the number of seconds, and "
 "`REFRESH_TOKEN_EXPIRE_SECONDS`, the duration of refresh tokens, after "
 "expired access tokens, in the number of seconds."
-msgstr ""
-"Termenlijst voor het aanpassen van OAuth 2-time-outs. Beschikbare items zijn "
-"`ACCESS_TOKEN_EXPIRE_SECONDS`, de duur van de toegangstokens in het aantal "
-"seconden, `AUTHORIZATION_CODE_EXPIRE_SECONDS`, de duur van de "
-"autorisatiecodes in het aantal seconden. en `REFRESH_TOKEN_EXPIRE_SECONDS`, "
-"de duur van de verversingstokens na verlopen toegangstokens, in het aantal "
-"seconden."
+msgstr "Termenlijst voor het aanpassen van OAuth 2-time-outs. Beschikbare items zijn `ACCESS_TOKEN_EXPIRE_SECONDS`, de duur van de toegangstokens in het aantal seconden, `AUTHORIZATION_CODE_EXPIRE_SECONDS`, de duur van de autorisatiecodes in het aantal seconden. en `REFRESH_TOKEN_EXPIRE_SECONDS`, de duur van de verversingstokens na verlopen toegangstokens, in het aantal seconden."
 
 #: awx/api/conf.py:78
 msgid "Allow External Users to Create OAuth2 Tokens"
@@ -476,7 +465,7 @@ msgstr "'ask_at_runtime' wordt niet ondersteund voor aangepaste referenties."
 
 #: awx/api/serializers.py:2547
 msgid "Credential Type"
-msgstr "Type toegangsgegevens"
+msgstr "Soort toegangsgegevens"
 
 #: awx/api/serializers.py:2614
 msgid "Modifications not allowed for managed credentials"
@@ -868,8 +857,7 @@ msgid "Containerized instances may not be managed via the API"
 msgstr "Geclusterde instanties worden mogelijk niet beheerd via de API"
 
 #: awx/api/serializers.py:4919 awx/api/serializers.py:4922
-#, fuzzy, python-format
-#| msgid "tower instance group name may not be changed."
+#, python-format
 msgid "%s instance group name may not be changed."
 msgstr "Naam van de %s-instantiegroep mag niet worden gewijzigd."
 
@@ -1024,8 +1012,6 @@ msgid ""
 msgstr "U kunt een team geen referentietoegang verlenen wanneer het veld Organisatie niet is ingesteld of behoort tot een andere organisatie"
 
 #: awx/api/views/__init__.py:720
-#, fuzzy
-#| msgid "The instance that managed the execution environment."
 msgid "Only the 'pull' field can be edited for managed execution environments."
 msgstr "Alleen het veld \"pull\" kan worden bewerkt voor beheerde uitvoeringsomgevingen."
 
@@ -2062,8 +2048,6 @@ msgid "Unique identifier for an installation"
 msgstr "Unieke identificatiecode voor installatie"
 
 #: awx/main/conf.py:183
-#, fuzzy
-#| msgid "The Instance group the job was run under"
 msgid "The instance group where control plane tasks run"
 msgstr "De instantiegroep waar control plane-taken worden uitgevoerd"
 
@@ -2637,7 +2621,7 @@ msgstr "Vault-URL (DNS-naam)"
 #: awx/main/credential_plugins/dsv.py:23
 #: awx/main/models/credential/__init__.py:895
 msgid "Client ID"
-msgstr "Client-id"
+msgstr "Klant-ID"
 
 #: awx/main/credential_plugins/azure_kv.py:29
 #: awx/main/models/credential/__init__.py:902
@@ -2771,8 +2755,6 @@ msgid "The identifier for the secret e.g., /some/identifier"
 msgstr "De identificatiecode voor het geheim, bijv. /some/identifier"
 
 #: awx/main/credential_plugins/dsv.py:12
-#, fuzzy
-#| msgid "Tenant ID"
 msgid "Tenant"
 msgstr "Tenant"
 
@@ -2791,8 +2773,6 @@ msgid ""
 msgstr "Het TLD van de tenant, bv. \"com\" wanneer de URL https://ex.secretservercloud.com is"
 
 #: awx/main/credential_plugins/dsv.py:34
-#, fuzzy
-#| msgid "Secret Name"
 msgid "Secret Path"
 msgstr "Geheim pad"
 
@@ -2801,8 +2781,6 @@ msgid "The secret path e.g. /test/secret1"
 msgstr "Het geheime pad, bv. /test/secret1"
 
 #: awx/main/credential_plugins/dsv.py:46
-#, fuzzy
-#| msgid "Job Template"
 msgid "URL template"
 msgstr "URL-sjabloon"
 
@@ -2935,8 +2913,6 @@ msgid ""
 msgstr "Geldige principes (gebruikersnamen of hostnamen) waarvoor het certificaat moet worden ondertekend."
 
 #: awx/main/credential_plugins/tss.py:10
-#, fuzzy
-#| msgid "Auth Server URL"
 msgid "Secret Server URL"
 msgstr "Geheime-server-URL"
 
@@ -2947,8 +2923,6 @@ msgid ""
 msgstr "De basis-URL van de geheime server, bv. https://myserver/SecretServer of https://mytenant.secretservercloud.com"
 
 #: awx/main/credential_plugins/tss.py:17
-#, fuzzy
-#| msgid "Red Hat customer username"
 msgid "The (Application) user username"
 msgstr "De gebruikersnaam van de (applicatie) gebruiker"
 
@@ -2970,20 +2944,14 @@ msgid "The corresponding password"
 msgstr "Het bijbehorende wachtwoord"
 
 #: awx/main/credential_plugins/tss.py:31
-#, fuzzy
-#| msgid "Secret Key"
 msgid "Secret ID"
 msgstr "Geheime id"
 
 #: awx/main/credential_plugins/tss.py:32
-#, fuzzy
-#| msgid "The name of the secret to look up."
 msgid "The integer ID of the secret"
 msgstr "De id van het geheim als geheel getal"
 
 #: awx/main/credential_plugins/tss.py:37
-#, fuzzy
-#| msgid "Secret Key"
 msgid "Secret Field"
 msgstr "Geheim veld"
 
@@ -3543,22 +3511,14 @@ msgstr "Absoluut bestandspad naar het CA-bestand om te gebruiken (optioneel)"
 
 #: awx/main/models/credential/__init__.py:1023
 #: awx/main/models/credential/__init__.py:1029 awx/main/models/inventory.py:813
-#, fuzzy
-#| msgid "Gather data for Insights for Ansible Automation Platform"
 msgid "Red Hat Ansible Automation Platform"
 msgstr "Automatiseringsplatform voor Red Hat Ansible"
 
 #: awx/main/models/credential/__init__.py:1031
-#, fuzzy
-#| msgid "The Ansible Tower base URL to authenticate with."
 msgid "Red Hat Ansible Automation Platform base URL to authenticate with."
 msgstr "De basis-URL van het automatiseringsplatform voor Red Hat Ansible voor authenticatie."
 
 #: awx/main/models/credential/__init__.py:1038
-#, fuzzy
-#| msgid ""
-#| "The Ansible Tower user to authenticate as.This should not be set if an "
-#| "OAuth token is being used."
 msgid ""
 "Red Hat Ansible Automation Platform username id to authenticate as.This "
 "should not be set if an OAuth token is being used."
@@ -4463,7 +4423,7 @@ msgstr "Het aantal seconden na uitvoering van de laatste projectupdate waarna ee
 msgid ""
 "Allow changing the SCM branch or revision in a job template that uses this "
 "project."
-msgstr "Wijzigen van de SCM-vertakking of de revisie toelaten in een taaksjabloon die gebruik maakt van dit project."
+msgstr "Maak het mogelijk om de SCM-tak of de revisie te wijzigen in een taaksjabloon die gebruik maakt van dit project."
 
 #: awx/main/models/projects.py:294
 msgid "The last revision fetched by a project update"
@@ -4900,7 +4860,7 @@ msgid "Exception connecting to PagerDuty: {}"
 msgstr "Uitzondering bij het maken van de verbinding met PagerDuty: {}"
 
 #: awx/main/notifications/pagerduty_backend.py:87
-#: awx/main/notifications/slack_backend.py:48
+#: awx/main/notifications/slack_backend.py:49
 #: awx/main/notifications/twilio_backend.py:47
 msgid "Exception sending messages: {}"
 msgstr "Uitzondering bij het verzenden van berichten: {}"
@@ -5170,8 +5130,7 @@ msgid ""
 msgstr "Niet meer dan %(max_certs)d certificaten zijn toegestaan, %(cert_count)d geleverd."
 
 #: awx/main/validators.py:289
-#, fuzzy, python-brace-format
-#| msgid "The container image to be used for execution."
+#, python-brace-format
 msgid "The container image name {value} is not valid"
 msgstr "De naam van de containerafbeelding {value} is ongeldig"
 
@@ -6279,67 +6238,3 @@ msgstr "Er wordt momenteel een upgrade van%s geïnstalleerd."
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "Deze pagina wordt vernieuwd als hij klaar is."
-
-#~ msgid "SSLError while trying to connect to {}"
-#~ msgstr "SSLError tijdens poging om verbinding te maken met {}"
-
-#~ msgid "Request to {} timed out."
-#~ msgstr "Er is een time-out opgetreden voor de aanvraag naar {}"
-
-#~ msgid "Unknown exception {} while trying to GET {}"
-#~ msgstr "Onbekende uitzondering {} tijdens poging tot OPHALEN {}"
-
-#~ msgid ""
-#~ "Unauthorized access. Please check your Insights Credential username and "
-#~ "password."
-#~ msgstr ""
-#~ "Geen toegang. Controleer uw Insights Credential gebruikersnaam en "
-#~ "wachtwoord."
-
-#~ msgid ""
-#~ "Failed to access the Insights API at URL {}. Server responded with {} "
-#~ "status code and message {}"
-#~ msgstr ""
-#~ "Openen van Insights API via URL {} mislukt. Server reageerde met {} "
-#~ "statuscode en de melding {}"
-
-#~ msgid "Expected JSON response from Insights at URL {} but instead got {}"
-#~ msgstr ""
-#~ "Verwachte JSON-reactie van Insights via URL {}, maar in plaats daarvan {} "
-#~ "verkregen."
-
-#~ msgid ""
-#~ "Could not translate Insights system ID {} into an Insights platform ID."
-#~ msgstr ""
-#~ "Omzetten van Insights systeem-ID {} naar een Insights platform-ID mislukt."
-
-#~ msgid "This host is not recognized as an Insights host."
-#~ msgstr "Deze host wordt niet herkend als een Insights-host."
-
-#~ msgid "The Insights Credential for \"{}\" was not found."
-#~ msgstr "De Insights-referentie voor ‘{}‘ is niet gevonden."
-
-#~ msgid ""
-#~ "The path to the secret stored in the secret backend e.g, /some/secret/"
-#~ msgstr ""
-#~ "De pad naar het geheim dat in de geheime back-end is opgeslagen, bijv. /"
-#~ "some/secret/"
-
-#~ msgid "Ansible Tower"
-#~ msgstr "Ansible Tower"
-
-#~ msgid "Ansible Tower Hostname"
-#~ msgstr "Hostnaam Ansible Tower"
-
-#~ msgid ""
-#~ "Credentials to be used by hosts belonging to this inventory when "
-#~ "accessing Red Hat Insights API."
-#~ msgstr ""
-#~ "Referenties die worden gebruikt door hosts die behoren tot deze "
-#~ "inventaris bij toegang tot de Red Hat Insights API."
-
-#~ msgid "Assignment not allowed for Smart Inventory"
-#~ msgstr "Toewijzing niet toegestaan voor Smart-inventaris"
-
-#~ msgid "Red Hat Insights host unique identifier."
-#~ msgstr "Unieke id van Red Hat Insights-host."
