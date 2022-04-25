@@ -153,7 +153,9 @@ function WorkflowNodeHelp({ node }) {
           <dt>
             <b>{t`Resource Name`}</b>
           </dt>
-          <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
+          <dd id="workflow-node-help-name">
+            {unifiedJobTemplate?.name || t`Deleted`}
+          </dd>
           <dt>
             <b>{t`Type`}</b>
           </dt>
@@ -187,7 +189,9 @@ function WorkflowNodeHelp({ node }) {
           <dt>
             <b>{t`Resource Name`}</b>
           </dt>
-          <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
+          <dd id="workflow-node-help-name">
+            {unifiedJobTemplate?.name || t`Deleted`}
+          </dd>
           <dt>
             <b>{t`Type`}</b>
           </dt>
