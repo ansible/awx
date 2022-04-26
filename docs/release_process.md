@@ -116,3 +116,6 @@ This workflow will take the generated images and promote them to quay.io.
 2. Once complete, verify the image is on the [awx-operator Quay repository](https://quay.io/repository/ansible/awx-operator?tab=tags):
 
 ![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
+
+## Notify the AWX mailing list
+Send an email to the [AWX Mailing List](mailto:awx-project@googlegroups.com) with a message format of type "AWX Release" from the [mailing list triage standard replies](../.github/triage_replies.md#awx-release)
