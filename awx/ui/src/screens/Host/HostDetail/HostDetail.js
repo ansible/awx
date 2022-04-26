@@ -74,6 +74,7 @@ function HostDetail({ host }) {
         <Detail
           label={t`Inventory`}
           dataCy="host-inventory"
+          helpText={t`The inventory that this host belongs to.`}
           value={
             <Link to={`/inventories/inventory/${inventory.id}/details`}>
               {inventory.name}
