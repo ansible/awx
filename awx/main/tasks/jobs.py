@@ -583,7 +583,7 @@ class BaseTask(object):
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
-        if self.instance.host_status_counts:
+        if self.instance.host_status_counts or (not self.runner_callback.stats_event_dispatched):
             self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
 
         try:
