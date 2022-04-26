@@ -575,7 +575,8 @@ class UnifiedJob(
     dependent_jobs = models.ManyToManyField(
         'self',
         editable=False,
-        related_name='%(class)s_blocked_jobs+',
+        related_name='%(class)s_blocked_jobs',
+        symmetrical=False,
     )
     execution_node = models.TextField(
         blank=True,

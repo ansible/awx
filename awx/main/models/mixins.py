@@ -415,32 +415,46 @@ class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
 
-    def get_jobs_fail_chain(self):
-        return [self.project_update] if self.project_update else []
-
     def dependent_jobs_finished(self):
-        for j in self.dependent_jobs.all():
-            if j.status in ['pending', 'waiting', 'running']:
-                return False
-        return True
+        # if any dependent jobs are pending, waiting, or running, return False
+        return not any(j.status in ACTIVE_STATES for j in self.dependent_jobs.all())
 
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
 
-    def get_jobs_fail_chain(self):
-        return list(self.dependent_jobs.all())
-
 
 class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
 
+    def get_jobs_fail_chain(self):
+        return list(self.unifiedjob_blocked_jobs.all())
+
 
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
+
+    def get_jobs_fail_chain(self):
+        blocked_jobs = list(self.unifiedjob_blocked_jobs.all())
+        other_updates = []
+        if blocked_jobs:
+            # blocked_jobs[0] is just a reference to a job that depends on this
+            # inventory update.
+            # We can look at the dependencies of this blocked job to find other
+            # inventory sources that are safe to fail.
+            # Since the dependencies could also include project updates,
+            # we need to check for type.
+            for dep in blocked_jobs[0].dependent_jobs.all():
+                if type(dep) is type(self) and dep.id != self.id:
+                    other_updates.append(dep)
+        return blocked_jobs + other_updates
+
+    def dependent_jobs_finished(self):
+        # if any dependent jobs are pending, waiting, or running, return False
+        return not any(j.status in ACTIVE_STATES for j in self.dependent_jobs.all())
 
 
 class ExecutionEnvironmentMixin(models.Model):

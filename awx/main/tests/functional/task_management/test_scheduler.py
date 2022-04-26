@@ -325,6 +325,22 @@ def test_single_job_dependencies_inventory_update_launch(controlplane_instance_g
 
 
 @pytest.mark.django_db
+def test_inventory_update_launches_project_update(controlplane_instance_group, scm_inventory_source):
+    ii = scm_inventory_source
+    project = scm_inventory_source.source_project
+    project.scm_update_on_launch = True
+    project.save()
+    iu = ii.create_inventory_update()
+    iu.status = "pending"
+    iu.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        tm = TaskManager()
+        with mock.patch.object(TaskManager, "create_project_update", wraps=tm.create_project_update) as mock_pu:
+            tm.schedule()
+            mock_pu.assert_called_with(iu, project_id=project.id)
+
+
+@pytest.mark.django_db
 def test_job_dependency_with_already_updated(controlplane_instance_group, job_template_factory, mocker, inventory_source_factory):
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
     instance = controlplane_instance_group.instances.all()[0]
@@ -382,7 +398,7 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         pu = p.project_updates.first()
         iu = ii.inventory_updates.first()
         TaskManager.start_task.assert_has_calls(
-            [mock.call(iu, controlplane_instance_group, [j1, j2, pu], instance), mock.call(pu, controlplane_instance_group, [j1, j2, iu], instance)]
+            [mock.call(iu, controlplane_instance_group, [j1, j2], instance), mock.call(pu, controlplane_instance_group, [j1, j2], instance)]
         )
         pu.status = "successful"
         pu.finished = pu.created + timedelta(seconds=1)
@@ -464,7 +480,6 @@ def test_generate_dependencies_only_once(job_template_factory):
     job.status = "pending"
     job.name = "job_gen_dep"
     job.save()
-
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         # job starts with dependencies_processed as False
         assert not job.dependencies_processed
@@ -478,10 +493,6 @@ def test_generate_dependencies_only_once(job_template_factory):
         # Run ._schedule() again, but make sure .generate_dependencies() is not
         # called with job in the argument list
         tm = TaskManager()
-        tm.generate_dependencies = mock.MagicMock()
+        tm.generate_dependencies = mock.MagicMock(return_value=[])
         tm._schedule()
-
-        # .call_args is tuple, (positional_args, kwargs), [0][0] then is
-        # the first positional arg, i.e. the first argument of
-        # .generate_dependencies()
-        assert tm.generate_dependencies.call_args[0][0] == []
+        tm.generate_dependencies.assert_has_calls([mock.call([]), mock.call([])])

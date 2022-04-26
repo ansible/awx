@@ -281,8 +281,10 @@ class TaskManager:
         for task in running_tasks:
             self.dependency_graph.add_job(task)
 
-    def create_project_update(self, task):
-        project_task = Project.objects.get(id=task.project_id).create_project_update(_eager_fields=dict(launch_type='dependency'))
+    def create_project_update(self, task, project_id=None):
+        if project_id is None:
+            project_id = task.project_id
+        project_task = Project.objects.get(id=project_id).create_project_update(_eager_fields=dict(launch_type='dependency'))
 
         # Project created 1 seconds behind
         project_task.created = task.created - timedelta(seconds=1)
@@ -302,13 +304,9 @@ class TaskManager:
         # self.process_inventory_sources(inventory_sources)
         return inventory_task
 
-    def capture_chain_failure_dependencies(self, task, dependencies):
+    def add_dependencies(self, task, dependencies):
         with disable_activity_stream():
             task.dependent_jobs.add(*dependencies)
-
-            for dep in dependencies:
-                # Add task + all deps except self
-                dep.dependent_jobs.add(*([task] + [d for d in dependencies if d != dep]))
 
     def get_latest_inventory_update(self, inventory_source):
         latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
@@ -335,8 +333,8 @@ class TaskManager:
             return True
         return False
 
-    def get_latest_project_update(self, job):
-        latest_project_update = ProjectUpdate.objects.filter(project=job.project, job_type='check').order_by("-created")
+    def get_latest_project_update(self, project_id):
+        latest_project_update = ProjectUpdate.objects.filter(project=project_id, job_type='check').order_by("-created")
         if not latest_project_update.exists():
             return None
         return latest_project_update.first()
@@ -376,45 +374,71 @@ class TaskManager:
             return True
         return False
 
+    def gen_dep_for_job(self, task):
+        created_dependencies = []
+        dependencies = []
+        # TODO: Can remove task.project None check after scan-job-default-playbook is removed
+        if task.project is not None and task.project.scm_update_on_launch is True:
+            latest_project_update = self.get_latest_project_update(task.project_id)
+            if self.should_update_related_project(task, latest_project_update):
+                project_task = self.create_project_update(task)
+                created_dependencies.append(project_task)
+                dependencies.append(project_task)
+            else:
+                dependencies.append(latest_project_update)
+
+        # Inventory created 2 seconds behind job
+        try:
+            start_args = json.loads(decrypt_field(task, field_name="start_args"))
+        except ValueError:
+            start_args = dict()
+        # generator for inventory sources related to this task
+        task_inv_sources = (invsrc for invsrc in self.all_inventory_sources if invsrc.inventory_id == task.inventory_id)
+        for inventory_source in task_inv_sources:
+            if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
+                continue
+            if not inventory_source.update_on_launch:
+                continue
+            latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+            if self.should_update_inventory_source(task, latest_inventory_update):
+                inventory_task = self.create_inventory_update(task, inventory_source)
+                created_dependencies.append(inventory_task)
+                dependencies.append(inventory_task)
+            else:
+                dependencies.append(latest_inventory_update)
+
+        if dependencies:
+            self.add_dependencies(task, dependencies)
+
+        return created_dependencies
+
+    def gen_dep_for_inventory_update(self, inventory_task):
+        created_dependencies = []
+        if inventory_task.source == "scm":
+            invsrc = inventory_task.inventory_source
+            if not invsrc.source_project.scm_update_on_launch:
+                return created_dependencies
+
+            latest_src_project_update = self.get_latest_project_update(invsrc.source_project_id)
+            if self.should_update_related_project(inventory_task, latest_src_project_update):
+                latest_src_project_update = self.create_project_update(inventory_task, project_id=invsrc.source_project_id)
+                created_dependencies.append(latest_src_project_update)
+            self.add_dependencies(inventory_task, [latest_src_project_update])
+
+        return created_dependencies
+
     def generate_dependencies(self, undeped_tasks):
         created_dependencies = []
         for task in undeped_tasks:
             task.log_lifecycle("acknowledged")
-            dependencies = []
-            if not type(task) is Job:
+            if type(task) is Job:
+                created_dependencies += self.gen_dep_for_job(task)
+            elif type(task) is InventoryUpdate:
+                created_dependencies += self.gen_dep_for_inventory_update(task)
+            else:
                 continue
-            # TODO: Can remove task.project None check after scan-job-default-playbook is removed
-            if task.project is not None and task.project.scm_update_on_launch is True:
-                latest_project_update = self.get_latest_project_update(task)
-                if self.should_update_related_project(task, latest_project_update):
-                    project_task = self.create_project_update(task)
-                    created_dependencies.append(project_task)
-                    dependencies.append(project_task)
-                else:
-                    dependencies.append(latest_project_update)
-
-            # Inventory created 2 seconds behind job
-            try:
-                start_args = json.loads(decrypt_field(task, field_name="start_args"))
-            except ValueError:
-                start_args = dict()
-            for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
-                if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
-                    continue
-                if not inventory_source.update_on_launch:
-                    continue
-                latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-                if self.should_update_inventory_source(task, latest_inventory_update):
-                    inventory_task = self.create_inventory_update(task, inventory_source)
-                    created_dependencies.append(inventory_task)
-                    dependencies.append(inventory_task)
-                else:
-                    dependencies.append(latest_inventory_update)
-
-            if len(dependencies) > 0:
-                self.capture_chain_failure_dependencies(task, dependencies)
-
         UnifiedJob.objects.filter(pk__in=[task.pk for task in undeped_tasks]).update(dependencies_processed=True)
+
         return created_dependencies
 
     def process_pending_tasks(self, pending_tasks):
@@ -572,6 +596,8 @@ class TaskManager:
         pending_tasks = [t for t in all_sorted_tasks if t.status == 'pending']
         undeped_tasks = [t for t in pending_tasks if not t.dependencies_processed]
         dependencies = self.generate_dependencies(undeped_tasks)
+        deps_of_deps = self.generate_dependencies(dependencies)
+        dependencies += deps_of_deps
         self.process_pending_tasks(dependencies)
         self.process_pending_tasks(pending_tasks)
 
