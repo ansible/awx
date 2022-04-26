@@ -195,6 +195,20 @@
         that:
           - result.changed
 
+    - name: Set project to remote archive and test that it updates correctly.
+      project:
+        name: "{{ project_name3 }}"
+        organization: Default
+        scm_type: archive
+        scm_url: https://github.com/ansible/test-playbooks/archive/refs/tags/1.0.0.tar.gz
+        wait: true
+        update_project: true
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
   always:
     - name: Delete the test job_template
       job_template:
