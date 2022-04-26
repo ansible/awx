@@ -147,7 +147,7 @@ class CallbackBrokerWorker(BaseWorker):
                 uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
 
         except Exception:
-            logger.exception('Worker failed to save states or emit notifications: Job {}'.format(job_identifier))
+            logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
 
     def flush(self, force=False):
         now = tz_now()
