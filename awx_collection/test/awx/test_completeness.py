@@ -61,7 +61,7 @@ no_api_parameter_ok = {
     # lookup_organization is for specifiying the organization for the unified job template lookup
     'workflow_job_template_node': ['organization', 'approval_node', 'lookup_organization'],
     # Survey is how we handle associations
-    'workflow_job_template': ['survey_spec', 'destroy_current_schema'],
+    'workflow_job_template': ['survey_spec', 'destroy_current_nodes'],
     # organization is how we lookup unified job templates
     'schedule': ['organization'],
     # ad hoc commands support interval and timeout since its more like job_launch
