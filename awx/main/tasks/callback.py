@@ -9,7 +9,6 @@ import stat
 from django.utils.timezone import now
 from django.conf import settings
 from django_guid import get_guid
-from django.utils.functional import cached_property
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -22,6 +21,7 @@ logger = logging.getLogger('awx.main.tasks.callback')
 
 class RunnerCallback:
     event_data_key = 'job_id'
+    stats_event_type = 'playbook_on_stats'
 
     def __init__(self, model=None):
         self.parent_workflow_job_id = None
@@ -38,10 +38,6 @@ class RunnerCallback:
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
-
-    @cached_property
-    def stats_event_type(self):
-        return self.instance.send_notifications_event()
 
     def event_handler(self, event_data):
         #
@@ -242,6 +238,7 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
 class RunnerCallbackForInventoryUpdate(RunnerCallback):
 
     event_data_key = 'inventory_update_id'
+    stats_event_type = 'EOF'
 
     def __init__(self, *args, **kwargs):
         super(RunnerCallbackForInventoryUpdate, self).__init__(*args, **kwargs)
@@ -265,3 +262,4 @@ class RunnerCallbackForAdHocCommand(RunnerCallback):
 class RunnerCallbackForSystemJob(RunnerCallback):
 
     event_data_key = 'system_job_id'
+    stats_event_type = 'EOF'
