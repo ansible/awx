@@ -9,7 +9,7 @@ cryptography>=35.0.0
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
-django==3.2.12  # see UPGRADE BLOCKERs
+django==3.2.13  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers>=3.5.0
 django-crum

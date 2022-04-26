@@ -86,7 +86,7 @@ dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
-django==3.2.12
+django==3.2.13
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
