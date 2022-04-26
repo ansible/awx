@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, DatabaseError, connection
+from django.db import models, DatabaseError
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
@@ -383,14 +383,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
                     job.get_event_queryset().filter(uuid__in=changed).update(changed=True)
                     job.get_event_queryset().filter(uuid__in=failed).update(failed=True)
-
-                    # send success/failure notifications when we've finished handling the playbook_on_stats event
-                    from awx.main.tasks.system import handle_success_and_failure_notifications  # circular import
-
-                    def _send_notifications():
-                        handle_success_and_failure_notifications.apply_async([job.id])
-
-                    connection.on_commit(_send_notifications)
 
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_str(event_data.get(field, '')).strip()

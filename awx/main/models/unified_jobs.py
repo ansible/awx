@@ -717,6 +717,12 @@ class UnifiedJob(
         editable=False,
         help_text=_("The version of Ansible Core installed in the execution environment."),
     )
+    host_status_counts = models.JSONField(
+        blank=True,
+        default=dict,
+        editable=False,
+        help_text=_("Playbook stats from the Ansible playbook_on_stats event."),
+    )
     work_unit_id = models.CharField(
         max_length=255, blank=True, default=None, editable=False, null=True, help_text=_("The Receptor work unit ID associated with this job.")
     )
@@ -1006,6 +1012,21 @@ class UnifiedJob(
         if not self.has_unpartitioned_events:
             kwargs['job_created'] = self.created
         return self.event_class.objects.filter(**kwargs)
+
+    @classmethod
+    def send_notifications_event(cls):
+        """Returns the event type that triggers success / failure notification processing"""
+        try:
+            event_cls = cls().event_class
+            if event_cls is None:  # defensive because workflows return None
+                return None
+            if any(f.name == 'event' for f in event_cls._meta.fields):
+                # case for playbook events (jobs, project updates) and ad hoc commands
+                return 'playbook_on_stats'
+            else:
+                return 'EOF'
+        except NotImplementedError:
+            return None
 
     @property
     def event_processing_finished(self):

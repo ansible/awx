@@ -7,14 +7,17 @@ import time
 logger = logging.getLogger('awx.main.tasks.utils')
 
 
-def update_model(model, pk, _attempt=0, _max_attempts=5, **updates):
+def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False, **updates):
     """Reload the model instance from the database and update the
     given fields.
     """
     try:
         with transaction.atomic():
             # Retrieve the model instance.
-            instance = model.objects.get(pk=pk)
+            if select_for_update:
+                instance = model.objects.select_for_update().get(pk=pk)
+            else:
+                instance = model.objects.get(pk=pk)
 
             # Update the appropriate fields and save the model
             # instance, then return the new instance.

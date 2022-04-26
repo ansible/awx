@@ -421,19 +421,7 @@ class JobNotificationMixin(object):
         The context will contain allowed content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_ALLOWED_LIST the job's friendly name,
         and a url to the job run."""
-        job_context = {'host_status_counts': {}}
-        summary = None
-        try:
-            has_event_property = any([f for f in self.event_class._meta.fields if f.name == 'event'])
-        except NotImplementedError:
-            has_event_property = False
-        if has_event_property:
-            qs = self.get_event_queryset()
-            if qs:
-                event = qs.only('event_data').filter(event='playbook_on_stats').first()
-                if event:
-                    summary = event.get_host_status_counts()
-        job_context['host_status_counts'] = summary
+        job_context = {'host_status_counts': self.host_status_counts if self.send_notifications_event() == 'playbook_on_stats' else None}
         context = {
             'job': job_context,
             'job_friendly_name': self.get_notification_friendly_name(),

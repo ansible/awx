@@ -717,25 +717,6 @@ def handle_work_error(task_id, *args, **kwargs):
 
 
 @task(queue=get_local_queuename)
-def handle_success_and_failure_notifications(job_id):
-    uj = UnifiedJob.objects.get(pk=job_id)
-    retries = 0
-    while retries < settings.AWX_NOTIFICATION_JOB_FINISH_MAX_RETRY:
-        if uj.finished:
-            uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
-            return
-        else:
-            # wait a few seconds to avoid a race where the
-            # events are persisted _before_ the UJ.status
-            # changes from running -> successful
-            retries += 1
-            time.sleep(1)
-            uj = UnifiedJob.objects.get(pk=job_id)
-
-    logger.warning(f"Failed to even try to send notifications for job '{uj}' due to job not being in finished state.")
-
-
-@task(queue=get_local_queuename)
 def update_inventory_computed_fields(inventory_id):
     """
     Signal handler and wrapper around inventory.update_computed_fields to
