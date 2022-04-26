@@ -9,7 +9,6 @@ import stat
 from django.utils.timezone import now
 from django.conf import settings
 from django_guid import get_guid
-from django.utils.functional import cached_property
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -34,14 +33,9 @@ class RunnerCallback:
         self.event_ct = 0
         self.model = model
         self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
-        self.stats_event_dispatched = False
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
-
-    @cached_property
-    def stats_event_type(self):
-        return self.instance.send_notifications_event()
 
     def event_handler(self, event_data):
         #
@@ -135,9 +129,6 @@ class RunnerCallback:
 
         elif self.recent_event_timings.maxlen:
             self.recent_event_timings.append(time.time())
-
-        if event_data.get('event', '') == self.stats_event_type:
-            self.stats_event_dispatched = True
 
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
