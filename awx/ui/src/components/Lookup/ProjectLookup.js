@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { node, string, func, bool } from 'prop-types';
 import { useHistory } from 'react-router-dom';
+import { useField } from 'formik';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from 'api';
@@ -10,6 +11,7 @@ import useRequest from 'hooks/useRequest';
 import { getSearchableKeys } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import OptionsList from '../OptionsList';
+import { required as validationRequired } from 'util/validators';
 import Popover from '../Popover';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
@@ -35,7 +37,7 @@ function ProjectLookup({
   value,
 }) {
   const history = useHistory();
-  const [hasCheckedTypedName, setHasCheckedTypedName] = useState(false);
+  const [isTypedNameVerified, setIsTypedNameVerified] = useState(false);
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
     result: { projects, count, relatedSearchableKeys, searchableKeys, canEdit },
@@ -73,6 +75,23 @@ function ProjectLookup({
     }
   );
 
+  useField({
+    name: fieldName,
+    validate: (val) => {
+      if (isTypedNameVerified) {
+        setIsTypedNameVerified(false);
+        debugger; 
+        return t`That value was not found. Please enter or select a valid value.`;
+      }
+      debugger;
+      return required
+        ? validationRequired(t`Select a value for this field`)
+        : null;
+    },
+  });
+
+  useEffect(() => {});
+
   const checkProjectName = useCallback(
     async (name) => {
       if (!name) {
@@ -80,7 +99,7 @@ function ProjectLookup({
         return;
       }
 
-      setHasCheckedTypedName(true);
+      setIsTypedNameVerified(true);
       try {
         const {
           data: { results: nameMatchResults, count: nameMatchCount },
@@ -107,7 +126,6 @@ function ProjectLookup({
       labelIcon={tooltip && <Popover content={tooltip} />}
     >
       <Lookup
-        hasCheckedTypedName={hasCheckedTypedName}
         id={fieldName}
         header={t`Project`}
         name={fieldName}
@@ -116,7 +134,6 @@ function ProjectLookup({
         onDebounce={checkProjectName}
         onChange={onChange}
         fieldName={fieldName}
-        validate={validate}
         required={required}
         isLoading={isLoading}
         isDisabled={!canEdit}
