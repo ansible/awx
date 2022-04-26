@@ -20,6 +20,7 @@ from awx.api.versioning import reverse
 from awx.main.fields import JSONBlob
 from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel, prevent_search
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
+from awx.main.constants import NO_STATS_PLACEHOLDER
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
@@ -421,7 +422,7 @@ class JobNotificationMixin(object):
         The context will contain allowed content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_ALLOWED_LIST the job's friendly name,
         and a url to the job run."""
-        job_context = {'host_status_counts': self.host_status_counts if self.send_notifications_event() == 'playbook_on_stats' else None}
+        job_context = {'host_status_counts': self.host_status_counts if self.host_status_counts == NO_STATS_PLACEHOLDER else None}
         context = {
             'job': job_context,
             'job_friendly_name': self.get_notification_friendly_name(),

@@ -17,7 +17,7 @@ import redis
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, NO_STATS_PLACEHOLDER
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 import awx.main.analytics.subsystem_metrics as s_metrics
@@ -131,7 +131,7 @@ class CallbackBrokerWorker(BaseWorker):
             else:
                 # this data is a stub for job types like system jobs
                 # for notification processing, it only matters that it is not an empty dict
-                host_status_counts = {'untracked': 'localhost'}
+                host_status_counts = NO_STATS_PLACEHOLDER
 
             # Update host_status_counts while holding the row lock
             with transaction.atomic():
@@ -216,7 +216,8 @@ class CallbackBrokerWorker(BaseWorker):
 
                 self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa
 
-                notification_trigger_event = bool(cls.send_notifications_event() == body.get('event'))
+                trigger_event_type = 'playbook_on_stats' if cls in (JobEvent, ProjectUpdateEvent, AdHocCommandEvent) else 'EOF'
+                notification_trigger_event = bool(body.get('event') == trigger_event_type)
 
                 if body.get('event') == 'EOF':
                     try:

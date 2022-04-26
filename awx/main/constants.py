@@ -106,3 +106,7 @@ JOB_VARIABLE_PREFIXES = [
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
     '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
 )
+
+# Job types like system jobs and inventory updates do not have a playbook on stats event
+# so once we get the EOF event we save this instead
+NO_STATS_PLACEHOLDER = {'untracked': 'localhost'}
