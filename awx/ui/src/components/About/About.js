@@ -32,9 +32,8 @@ function About({ version, isOpen, onClose }) {
   };
 
   const speechBubble = createSpeechBubble();
-  const copyright = t`Copyright`;
-  const redHatInc = t`Red Hat, Inc.`;
-
+  const copyright = t`Copyright (c), ABLECLOUD.Co.Ltd`;
+  const redHatInc = t`ABLESTACK Cerato (v3.0.0)`;
   return (
     <AboutModal
       isOpen={isOpen}
