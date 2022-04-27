@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "all"
+    reviewers:
+      - "AlexSCorey"
+      - "keitjhgrant"
+      - "kialam"
+      - "mabashian"
+      - "marshmalien"
+      - "nixocio"
+    labels:
+      - "component:ui"
+      - "dependencies"
+    target-branch: "devel"
