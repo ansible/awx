@@ -128,6 +128,8 @@ class CallbackBrokerWorker(BaseWorker):
         try:
             if event:
                 host_status_counts = event.get_host_status_counts()
+                if not host_status_counts:
+                    host_status_counts = {'ok': 0}  # still need non-empty value
             else:
                 # this data is a stub for job types like system jobs
                 # for notification processing, it only matters that it is not an empty dict
@@ -224,7 +226,7 @@ class CallbackBrokerWorker(BaseWorker):
                         if 'guid' in body:
                             set_guid(body['guid'])
                         final_counter = body.get('final_counter', 0)
-                        logger.info('Event processing is finished for Job {}, sending notifications'.format(job_identifier))
+                        logger.info('Starting EOF event processing for Job {}'.format(job_identifier))
                         # EOF events are sent when stdout for the running task is
                         # closed. don't actually persist them to the database; we
                         # just use them to report `summary` websocket events as an
