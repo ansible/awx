@@ -103,7 +103,7 @@ class DeleteMeta:
 
         with connection.cursor() as cursor:
             query = "SELECT inhrelid::regclass::text AS child FROM pg_catalog.pg_inherits"
-            query += f" WHERE inhparent = 'public.{tbl_name}'::regclass"
+            query += f" WHERE inhparent = '{tbl_name}'::regclass"
             query += f" AND TO_TIMESTAMP(LTRIM(inhrelid::regclass::text, '{tbl_name}_'), 'YYYYMMDD_HH24') < '{self.cutoff}'"
             query += " ORDER BY inhrelid::regclass::text"
 
