@@ -719,7 +719,8 @@ class UnifiedJob(
     )
     host_status_counts = models.JSONField(
         blank=True,
-        default=dict,
+        null=True,
+        default=None,
         editable=False,
         help_text=_("Playbook stats from the Ansible playbook_on_stats event."),
     )

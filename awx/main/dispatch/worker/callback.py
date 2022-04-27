@@ -17,7 +17,7 @@ import redis
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
-from awx.main.constants import ACTIVE_STATES, NO_STATS_PLACEHOLDER
+from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 import awx.main.analytics.subsystem_metrics as s_metrics
@@ -126,14 +126,11 @@ class CallbackBrokerWorker(BaseWorker):
     def job_stats_wrapup(cls, job_identifier, event=None):
         """Fill in the unified job host_status_counts, fire off notifications if needed"""
         try:
+            # empty dict (versus default of None) can still indicate that events have been processed
+            # for job types like system jobs, and jobs with no hosts matched
+            host_status_counts = {}
             if event:
                 host_status_counts = event.get_host_status_counts()
-                if not host_status_counts:
-                    host_status_counts = {'ok': 0}  # still need non-empty value
-            else:
-                # this data is a stub for job types like system jobs
-                # for notification processing, it only matters that it is not an empty dict
-                host_status_counts = NO_STATS_PLACEHOLDER
 
             # Update host_status_counts while holding the row lock
             with transaction.atomic():
