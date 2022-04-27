@@ -175,6 +175,8 @@ class RunnerCallback:
         }
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
+        if self.stats_event_type == 'EOF':
+            self.stats_event_dispatched = True
 
     def status_handler(self, status_data, runner_config):
         """
