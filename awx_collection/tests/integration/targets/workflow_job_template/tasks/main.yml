@@ -586,6 +586,10 @@
             name: Default
           name: "{{ jt2_name }}"
           type: job_template
+      - identifier: Cleanup Job
+        unified_job_template:
+          name: Cleanup Activity Stream
+          type: system_job
   register: result
 
 - assert:
@@ -625,6 +629,12 @@
             organization:
               name: Default
           type: inventory_source
+      - identifier: Workflow inception
+        unified_job_template:
+          name: "{{ wfjt_name }}"
+          organization:
+            name: Default
+          type: workflow_job_template
   register: result
 
 - name: Kick off a workflow and wait for it
