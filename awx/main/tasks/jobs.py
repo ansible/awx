@@ -119,12 +119,11 @@ class BaseTask(object):
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
 
-    def write_private_data_file(self, private_data_dir, file_name, data, sub_dir=None, permissions=0o600):
+    def write_private_data_file(self, private_data_dir, file_name, data, sub_dir=None, file_permissions=0o600):
         base_path = private_data_dir
         if sub_dir:
             base_path = os.path.join(private_data_dir, sub_dir)
-            if not os.path.exists(base_path):
-                os.mkdir(base_path, 0o700)
+            os.makedirs(base_path, mode=0o700, exist_ok=True)
 
         # If we got a file name create it, otherwise we want a temp file
         if file_name:
@@ -134,7 +133,7 @@ class BaseTask(object):
             os.close(handle)
 
         file = Path(file_path)
-        file.touch(mode=permissions, exist_ok=True)
+        file.touch(mode=file_permissions, exist_ok=True)
         with open(file_path, 'w') as f:
             f.write(data)
         return file_path
@@ -257,9 +256,9 @@ class BaseTask(object):
                 # Instead, ssh private key file is explicitly passed via an
                 # env variable.
                 else:
-                    private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, 'env')
+                    private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
-                self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, 'artifacts')
+                self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
         return private_data_files, ssh_key_data
 
     def build_passwords(self, instance, runtime_passwords):
@@ -282,7 +281,7 @@ class BaseTask(object):
             content = yaml.safe_dump(vars)
         else:
             content = safe_dump(vars, safe_dict)
-        return self.write_private_data_file(private_data_dir, 'extravars', content, 'env')
+        return self.write_private_data_file(private_data_dir, 'extravars', content, sub_dir='env')
 
     def add_awx_venv(self, env):
         env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
@@ -321,13 +320,13 @@ class BaseTask(object):
         # so we can associate emitted events to Host objects
         self.runner_callback.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
-        return self.write_private_data_file(private_data_dir, 'hosts', file_content, 'inventory', 0o700)
+        return self.write_private_data_file(private_data_dir, 'hosts', file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
 
     def write_args_file(self, private_data_dir, args):
-        return self.write_private_data_file(private_data_dir, 'cmdline', ansible_runner.utils.args2cmdline(*args), 'env')
+        return self.write_private_data_file(private_data_dir, 'cmdline', ansible_runner.utils.args2cmdline(*args), sub_dir='env')
 
     def build_credentials_list(self, instance):
         return []
@@ -523,7 +522,7 @@ class BaseTask(object):
                 runner_settings['idle_timeout'] = idle_timeout
 
             # Write out our own settings file
-            self.write_private_data_file(private_data_dir, 'settings', json.dumps(runner_settings), 'env')
+            self.write_private_data_file(private_data_dir, 'settings', json.dumps(runner_settings), sub_dir='env')
 
             self.instance.log_lifecycle("running_playbook")
             if isinstance(self.instance, SystemJob):
@@ -1609,7 +1608,7 @@ class RunInventoryUpdate(BaseTask):
         if injector is not None:
             content = injector.inventory_contents(inventory_update, private_data_dir)
             # must be a statically named file
-            self.write_private_data_file(private_data_dir, injector.filename, content, 'inventory', 0o700)
+            self.write_private_data_file(private_data_dir, injector.filename, content, sub_dir='inventory', file_permissions=0o700)
             rel_path = os.path.join('inventory', injector.filename)
         elif src == 'scm':
             rel_path = os.path.join('project', inventory_update.source_path)
