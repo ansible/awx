@@ -652,7 +652,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
             isDeleteDisabled={isDeleting}
           />
         </OutputHeader>
-        <HostStatusBar counts={job.host_status_counts} />
+        <HostStatusBar counts={job.host_status_counts || {}} />
         <JobOutputSearch
           qsConfig={QS_CONFIG}
           job={job}
