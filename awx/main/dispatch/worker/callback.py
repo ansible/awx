@@ -201,8 +201,7 @@ class CallbackBrokerWorker(BaseWorker):
 
                 self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa
 
-                trigger_event_type = 'playbook_on_stats' if cls in (JobEvent, ProjectUpdateEvent, AdHocCommandEvent) else 'EOF'
-                notification_trigger_event = bool(body.get('event') == trigger_event_type)
+                notification_trigger_event = bool(body.get('event') == cls.WRAPUP_EVENT)
 
                 if body.get('event') == 'EOF':
                     try:
