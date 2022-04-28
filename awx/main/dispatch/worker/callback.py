@@ -26,15 +26,6 @@ from .base import BaseWorker
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
-EVENT_MAP = {
-    'job_id': JobEvent,
-    'ad_hoc_command_id': AdHocCommandEvent,
-    'project_update_id': ProjectUpdateEvent,
-    'inventory_update_id': InventoryUpdateEvent,
-    'system_job_id': SystemJobEvent,
-}
-
-
 class CallbackBrokerWorker(BaseWorker):
     """
     A worker implementation that deserializes callback event data and persists
@@ -182,12 +173,7 @@ class CallbackBrokerWorker(BaseWorker):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
                     if getattr(e, '_notification_trigger_event', False):
-                        for key, cls in EVENT_MAP.items():
-                            if isinstance(e, cls):
-                                job_key = key
-                                job_cls = cls
-                                break
-                        self.job_stats_wrapup(job_cls, getattr(e, job_key), event=e)
+                        self.job_stats_wrapup(e._meta.concrete_model, getattr(e, e.JOB_REFERENCE), event=e)
             self.buff = {}
             self.last_flush = time.time()
             # only update metrics if we saved events
@@ -208,9 +194,9 @@ class CallbackBrokerWorker(BaseWorker):
                 self.last_event = ''
             if not flush:
                 job_identifier = 'unknown job'
-                for key, cls in EVENT_MAP.items():
-                    if key in body:
-                        job_identifier = body[key]
+                for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
+                    if cls.JOB_REFERENCE in body:
+                        job_identifier = body[cls.JOB_REFERENCE]
                         break
 
                 self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa

@@ -126,6 +126,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         'host_name',
         'verbosity',
     ]
+    WRAPUP_EVENT = 'playbook_on_stats'
 
     class Meta:
         abstract = True
@@ -462,6 +463,7 @@ class JobEvent(BasePlaybookEvent):
     """
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'job_id'
 
     objects = DeferJobCreatedManager()
 
@@ -592,6 +594,7 @@ UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_tab
 class ProjectUpdateEvent(BasePlaybookEvent):
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'project_update_id'
 
     objects = DeferJobCreatedManager()
 
@@ -633,6 +636,7 @@ class BaseCommandEvent(CreatedModifiedModel):
     """
 
     VALID_KEYS = ['event_data', 'created', 'counter', 'uuid', 'stdout', 'start_line', 'end_line', 'verbosity']
+    WRAPUP_EVENT = 'EOF'
 
     class Meta:
         abstract = True
@@ -728,6 +732,8 @@ class BaseCommandEvent(CreatedModifiedModel):
 class AdHocCommandEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
+    WRAPUP_EVENT = 'playbook_on_stats'  # exception to BaseCommandEvent
+    JOB_REFERENCE = 'ad_hoc_command_id'
 
     objects = DeferJobCreatedManager()
 
@@ -828,6 +834,7 @@ UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommand
 class InventoryUpdateEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'inventory_update_id'
 
     objects = DeferJobCreatedManager()
 
@@ -873,6 +880,7 @@ UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + Inventory
 class SystemJobEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
+    JOB_REFERENCE = 'system_job_id'
 
     objects = DeferJobCreatedManager()
 
