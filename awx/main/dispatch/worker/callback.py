@@ -114,7 +114,7 @@ class CallbackBrokerWorker(BaseWorker):
         return super(CallbackBrokerWorker, self).work_loop(*args, **kw)
 
     @staticmethod
-    def job_stats_wrapup(cls, job_identifier, event=None):
+    def job_stats_wrapup(job_identifier, event=None):
         """Fill in the unified job host_status_counts, fire off notifications if needed"""
         try:
             # empty dict (versus default of None) can still indicate that events have been processed
@@ -173,7 +173,7 @@ class CallbackBrokerWorker(BaseWorker):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
                     if getattr(e, '_notification_trigger_event', False):
-                        self.job_stats_wrapup(e._meta.concrete_model, getattr(e, e.JOB_REFERENCE), event=e)
+                        self.job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
             self.buff = {}
             self.last_flush = time.time()
             # only update metrics if we saved events
@@ -216,7 +216,7 @@ class CallbackBrokerWorker(BaseWorker):
                         emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter))
 
                         if notification_trigger_event:
-                            self.job_stats_wrapup(cls, job_identifier)
+                            self.job_stats_wrapup(job_identifier)
                     except Exception:
                         logger.exception('Worker failed to perform EOF tasks: Job {}'.format(job_identifier))
                     finally:
