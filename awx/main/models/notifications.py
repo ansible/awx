@@ -421,9 +421,8 @@ class JobNotificationMixin(object):
         The context will contain allowed content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_ALLOWED_LIST the job's friendly name,
         and a url to the job run."""
-        job_context = {'host_status_counts': self.host_status_counts if self.host_status_counts != {} else None}
         context = {
-            'job': job_context,
+            'job': {'host_status_counts': self.host_status_counts},
             'job_friendly_name': self.get_notification_friendly_name(),
             'url': self.get_ui_url(),
             'job_metadata': json.dumps(self.notification_data(), ensure_ascii=False, indent=4),
