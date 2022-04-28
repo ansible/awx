@@ -20,7 +20,7 @@ short_description: create, update, or destroy Automation Platform Controller wor
 description:
     - Create, update, or destroy Automation Platform Controller workflow job templates.
     - Replaces the deprecated tower_workflow_template module.
-    - Use workflow_job_template_node after this, or use the schema parameter to build the workflow's graph
+    - Use workflow_job_template_node after this, or use the workflow_nodes parameter to build the workflow's graph
 options:
     name:
       description:
@@ -141,11 +141,13 @@ options:
         - list of notifications to send on start
       type: list
       elements: str
-    schema:
+    workflow_nodes:
       description:
         - A json list of nodes and their coresponding options. The following suboptions describe a single node.
       type: list
       elements: dict
+      aliases:
+        - schema
       suboptions:
         extra_data:
           description:
@@ -314,12 +316,14 @@ options:
                   description:
                     - Name Credentials to be applied to job as launch-time prompts.
                   elements: str
-    destroy_current_schema:
+    destroy_current_nodes:
       description:
-        - Set in order to destroy current schema on the workflow.
-        - This option is used for full schema update, if not used, nodes not described in schema will persist and keep current associations and links.
+        - Set in order to destroy current workflow_nodes on the workflow.
+        - This option is used for full workflow update, if not used, nodes not described in workflow will persist and keep current associations and links.
       type: bool
       default: False
+      aliases:
+        - destroy_current_schema
 
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -331,12 +335,12 @@ EXAMPLES = '''
     description: created by Ansible Playbook
     organization: Default
 
-- name: Create a workflow job template with schema in template
+- name: Create a workflow job template with workflow nodes in template
   awx.awx.workflow_job_template:
     name: example-workflow
     inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
-    schema:
+    workflow_nodes:
       - identifier: node101
         unified_job_template:
           name: example-project
@@ -394,12 +398,12 @@ EXAMPLES = '''
     copy_from: example-workflow
     organization: Foo
 
-- name: Create a workflow job template with schema in template
+- name: Create a workflow job template with workflow nodes in template
   awx.awx.workflow_job_template:
     name: example-workflow
     inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
-    schema:
+    workflow_nodes:
       - identifier: node101
         unified_job_template:
           name: example-project
@@ -475,8 +479,8 @@ def update_survey(module, last_request):
             module.fail_json(msg="Failed to update survey: {0}".format(response['json']['error']))
 
 
-def create_schema_nodes(module, response, schema, workflow_id):
-    for workflow_node in schema:
+def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
+    for workflow_node in workflow_nodes:
         workflow_node_fields = {}
         search_fields = {}
         association_fields = {}
@@ -484,7 +488,7 @@ def create_schema_nodes(module, response, schema, workflow_id):
         # Lookup Job Template ID
         if workflow_node['unified_job_template']['name']:
             if workflow_node['unified_job_template']['type'] is None:
-                module.fail_json(msg='Could not find unified job template type in schema {1}'.format(workflow_node))
+                module.fail_json(msg='Could not find unified job template type in workflow_nodes {1}'.format(workflow_node))
             if workflow_node['unified_job_template']['type'] == 'inventory_source':
                 organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
                 search_fields['organization'] = organization_id
@@ -581,8 +585,8 @@ def create_schema_nodes(module, response, schema, workflow_id):
             )
 
 
-def create_schema_nodes_association(module, response, schema, workflow_id):
-    for workflow_node in schema:
+def create_workflow_nodes_association(module, response, workflow_nodes, workflow_id):
+    for workflow_node in workflow_nodes:
         workflow_node_fields = {}
         search_fields = {}
         association_fields = {}
@@ -636,7 +640,7 @@ def create_schema_nodes_association(module, response, schema, workflow_id):
                     )
 
 
-def destroy_schema_nodes(module, response, workflow_id):
+def destroy_workflow_nodes(module, response, workflow_id):
     search_fields = {}
 
     # Search for existing nodes.
@@ -674,8 +678,8 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         notification_templates_approvals=dict(type="list", elements='str'),
-        schema=dict(type='list', elements='dict'),
-        destroy_current_schema=dict(type='bool', default=False),
+        workflow_nodes=dict(type='list', elements='dict', aliases=['schema']),
+        destroy_current_nodes=dict(type='bool', default=False, aliases=['destroy_current_schema']),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -689,10 +693,10 @@ def main():
     state = module.params.get('state')
 
     # Extract schema parameters
-    schema = None
-    if module.params.get('schema'):
-        schema = module.params.get('schema')
-    destroy_current_schema = module.params.get('destroy_current_schema')
+    workflow_nodes = None
+    if module.params.get('workflow_nodes'):
+        workflow_nodes = module.params.get('workflow_nodes')
+    destroy_current_nodes = module.params.get('destroy_current_nodes')
 
     new_fields = {}
     search_fields = {}
@@ -817,16 +821,16 @@ def main():
     existing_item = module.get_one('workflow_job_templates', name_or_id=new_name if new_name else name, **{'data': search_fields})
     workflow_job_template_id = existing_item['id']
     # Destroy current nodes if selected.
-    if destroy_current_schema:
-        destroy_schema_nodes(module, response, workflow_job_template_id)
+    if destroy_current_nodes:
+        destroy_workflow_nodes(module, response, workflow_job_template_id)
 
     # Work thorugh and lookup value for schema fields
-    if schema:
+    if workflow_nodes:
         # Create Schema Nodes
-        create_schema_nodes(module, response, schema, workflow_job_template_id)
+        create_workflow_nodes(module, response, workflow_nodes, workflow_job_template_id)
         # Create Schema Associations
-        create_schema_nodes_association(module, response, schema, workflow_job_template_id)
-        module.json_output['schema_creation_data'] = response
+        create_workflow_nodes_association(module, response, workflow_nodes, workflow_job_template_id)
+        module.json_output['node_creation_data'] = response
 
     module.exit_json(**module.json_output)
 

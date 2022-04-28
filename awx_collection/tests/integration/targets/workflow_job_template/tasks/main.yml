@@ -233,8 +233,7 @@
     that:
       - "result is changed"
 
-# Node actions do what this schema command used to do
-# schema: [{"success": [{"job_template": "{{ jt1_name }}"}], "job_template": "{{ jt2_name }}"}]
+# Node actions do what the schema command used to do
 - name: Create leaf node
   workflow_job_template_node:
     identifier: leaf
@@ -547,7 +546,7 @@
       - "'Non_Existing_Organization' in result.msg"
       - "result.total_results == 0"
 
-- name: Create a workflow job template with schema in template
+- name: Create a workflow job template with workflow nodes in template
   awx.awx.workflow_job_template:
     name: "{{ wfjt_name }}"
     inventory: Demo Inventory
@@ -603,11 +602,11 @@
       - result is not failed
       - "'id' in result['job_info']"
 
-- name: Destroy previous schema for one that fails
+- name: Destroy previous workflow nodes for one that fails
   awx.awx.workflow_job_template:
     name: "{{ wfjt_name }}"
-    destroy_current_schema: true
-    schema:
+    destroy_current_nodes: true
+    workflow_nodes:
       - identifier: node101
         unified_job_template:
           organization:
