@@ -261,7 +261,7 @@ options:
             type:
               description:
                 - Name of unified job template type to run in the workflow.
-                - Can be a job_template, project, inventory_source, workflow_approval.
+                - Can be a job_template, project, inventory_source, system_job, workflow_approval, workflow_job_template.
               type: str
             timeout:
               description:
@@ -490,13 +490,17 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
             if workflow_node['unified_job_template']['type'] is None:
                 module.fail_json(msg='Could not find unified job template type in workflow_nodes {1}'.format(workflow_node))
             if workflow_node['unified_job_template']['type'] == 'inventory_source':
-                organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
-                search_fields['organization'] = organization_id
-            elif workflow_node['unified_job_template']['type'] == 'workflow_approval':
-                pass
-            else:
+                if 'inventory' in workflow_node['unified_job_template']:
+                    if 'organization' in workflow_node['unified_job_template']['inventory']:
+                        organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
+                        search_fields['organization'] = organization_id
+                    else:
+                        pass
+            elif 'organization' in workflow_node['unified_job_template']:
                 organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
                 search_fields['organization'] = organization_id
+            else:
+                pass
             unified_job_template = module.get_one('unified_job_templates', name_or_id=workflow_node['unified_job_template']['name'], **{'data': search_fields})
             if unified_job_template:
                 workflow_node_fields['unified_job_template'] = unified_job_template['id']
