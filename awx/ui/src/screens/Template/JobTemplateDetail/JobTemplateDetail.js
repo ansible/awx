@@ -218,7 +218,9 @@ function JobTemplateDetail({ template }) {
             )}
           />
         ) : (
-          !ask_inventory_on_launch && <DeletedDetail label={t`Inventory`} />
+          !ask_inventory_on_launch && (
+            <DeletedDetail label={t`Inventory`} dataCy="jt-detail-inventory" />
+          )
         )}
         {summary_fields.project ? (
           <Detail
