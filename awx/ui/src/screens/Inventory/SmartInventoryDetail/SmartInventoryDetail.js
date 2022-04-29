@@ -28,6 +28,7 @@ function SmartInventoryDetail({ inventory }) {
     id,
     modified,
     name,
+    total_hosts,
     variables,
     summary_fields: {
       created_by,
@@ -116,6 +117,7 @@ function SmartInventoryDetail({ inventory }) {
             label={t`Smart host filter`}
             value={<Label variant="outline">{host_filter}</Label>}
           />
+          <Detail label={t`Total hosts`} value={total_hosts} />
           {instanceGroups.length > 0 && (
             <Detail
               fullWidth

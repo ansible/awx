@@ -78,6 +78,7 @@ function InventoryDetail({ inventory }) {
             </Link>
           }
         />
+        <Detail label={t`Total hosts`} value={inventory.total_hosts} />
         {instanceGroups && instanceGroups.length > 0 && (
           <Detail
             fullWidth

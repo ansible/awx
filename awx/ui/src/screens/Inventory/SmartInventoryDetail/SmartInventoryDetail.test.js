@@ -57,6 +57,7 @@ describe('<SmartInventoryDetail />', () => {
       assertDetail('Organization', 'Default');
       assertDetail('Smart host filter', 'name__icontains=local');
       assertDetail('Instance groups', 'mock instance group');
+      assertDetail('Total hosts', '2');
       expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(
         1
       );
