@@ -4,7 +4,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { CardBody } from 'components/Card';
 import { TokensAPI, UsersAPI } from 'api';
 import useRequest from 'hooks/useRequest';
-import UserTokenFrom from '../shared/UserTokenForm';
+import UserTokenForm from '../shared/UserTokenForm';
 
 function UserTokenAdd({ onSuccessfulAdd }) {
   const history = useHistory();
@@ -36,7 +36,7 @@ function UserTokenAdd({ onSuccessfulAdd }) {
 
   return (
     <CardBody>
-      <UserTokenFrom
+      <UserTokenForm
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         submitError={submitError}
