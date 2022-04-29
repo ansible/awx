@@ -26,6 +26,32 @@ from .base import BaseWorker
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
+def job_stats_wrapup(job_identifier, event=None):
+    """Fill in the unified job host_status_counts, fire off notifications if needed"""
+    try:
+        # empty dict (versus default of None) can still indicate that events have been processed
+        # for job types like system jobs, and jobs with no hosts matched
+        host_status_counts = {}
+        if event:
+            host_status_counts = event.get_host_status_counts()
+
+        # Update host_status_counts while holding the row lock
+        with transaction.atomic():
+            uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
+            uj.host_status_counts = host_status_counts
+            uj.save(update_fields=['host_status_counts'])
+
+        uj.log_lifecycle("stats_wrapup_finished")
+
+        # If the status was a finished state before this update was made, send notifications
+        # If not, we will send notifications when the status changes
+        if uj.status not in ACTIVE_STATES:
+            uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
+
+    except Exception:
+        logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
+
+
 class CallbackBrokerWorker(BaseWorker):
     """
     A worker implementation that deserializes callback event data and persists
@@ -113,32 +139,6 @@ class CallbackBrokerWorker(BaseWorker):
             signal.signal(signal.SIGUSR1, self.toggle_profiling)
         return super(CallbackBrokerWorker, self).work_loop(*args, **kw)
 
-    @staticmethod
-    def job_stats_wrapup(job_identifier, event=None):
-        """Fill in the unified job host_status_counts, fire off notifications if needed"""
-        try:
-            # empty dict (versus default of None) can still indicate that events have been processed
-            # for job types like system jobs, and jobs with no hosts matched
-            host_status_counts = {}
-            if event:
-                host_status_counts = event.get_host_status_counts()
-
-            # Update host_status_counts while holding the row lock
-            with transaction.atomic():
-                uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
-                uj.host_status_counts = host_status_counts
-                uj.save(update_fields=['host_status_counts'])
-
-            uj.log_lifecycle("stats_wrapup_finished")
-
-            # If the status was a finished state before this update was made, send notifications
-            # If not, we will send notifications when the status changes
-            if uj.status not in ACTIVE_STATES:
-                uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
-
-        except Exception:
-            logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
-
     def flush(self, force=False):
         now = tz_now()
         if force or (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS or any([len(events) >= 1000 for events in self.buff.values()]):
@@ -173,7 +173,7 @@ class CallbackBrokerWorker(BaseWorker):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
                     if getattr(e, '_notification_trigger_event', False):
-                        self.job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
+                        job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
             self.buff = {}
             self.last_flush = time.time()
             # only update metrics if we saved events
@@ -216,7 +216,7 @@ class CallbackBrokerWorker(BaseWorker):
                         emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter))
 
                         if notification_trigger_event:
-                            self.job_stats_wrapup(job_identifier)
+                            job_stats_wrapup(job_identifier)
                     except Exception:
                         logger.exception('Worker failed to perform EOF tasks: Job {}'.format(job_identifier))
                     finally:
