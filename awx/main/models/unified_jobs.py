@@ -717,6 +717,13 @@ class UnifiedJob(
         editable=False,
         help_text=_("The version of Ansible Core installed in the execution environment."),
     )
+    host_status_counts = models.JSONField(
+        blank=True,
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_("Playbook stats from the Ansible playbook_on_stats event."),
+    )
     work_unit_id = models.CharField(
         max_length=255, blank=True, default=None, editable=False, null=True, help_text=_("The Receptor work unit ID associated with this job.")
     )

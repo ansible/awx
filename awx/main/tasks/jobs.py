@@ -78,7 +78,7 @@ from awx.main.utils.common import (
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.tasks.system import handle_success_and_failure_notifications, update_smart_memberships_for_inventory, update_inventory_computed_fields
+from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields
 from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
@@ -552,8 +552,6 @@ class BaseTask(object):
                     status = 'failed'
 
                 extra_update_fields['job_explanation'] = self.instance.job_explanation
-                # ensure failure notification sends even if playbook_on_stats event is not triggered
-                handle_success_and_failure_notifications.apply_async([self.instance.id])
 
         except ReceptorNodeNotFound as exc:
             extra_update_fields['job_explanation'] = str(exc)
@@ -580,7 +578,12 @@ class BaseTask(object):
             extra_update_fields['result_traceback'] = "{}\n\n{}".format(extra_update_fields['result_traceback'], ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
 
         self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, emitted_events=self.runner_callback.event_ct, **extra_update_fields)
+        self.instance = self.update_model(pk, status=status, emitted_events=self.runner_callback.event_ct, select_for_update=True, **extra_update_fields)
+
+        # Field host_status_counts is used as a metric to check if event processing is finished
+        # we send notifications if it is, if not, callback receiver will send them
+        if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
+            self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
 
         try:
             self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)

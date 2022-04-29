@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, DatabaseError, connection
+from django.db import models, DatabaseError
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
@@ -126,6 +126,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         'host_name',
         'verbosity',
     ]
+    WRAPUP_EVENT = 'playbook_on_stats'
 
     class Meta:
         abstract = True
@@ -384,14 +385,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
                     job.get_event_queryset().filter(uuid__in=changed).update(changed=True)
                     job.get_event_queryset().filter(uuid__in=failed).update(failed=True)
 
-                    # send success/failure notifications when we've finished handling the playbook_on_stats event
-                    from awx.main.tasks.system import handle_success_and_failure_notifications  # circular import
-
-                    def _send_notifications():
-                        handle_success_and_failure_notifications.apply_async([job.id])
-
-                    connection.on_commit(_send_notifications)
-
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_str(event_data.get(field, '')).strip()
             if value != getattr(self, field):
@@ -470,6 +463,7 @@ class JobEvent(BasePlaybookEvent):
     """
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'job_id'
 
     objects = DeferJobCreatedManager()
 
@@ -600,6 +594,7 @@ UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_tab
 class ProjectUpdateEvent(BasePlaybookEvent):
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'project_update_id'
 
     objects = DeferJobCreatedManager()
 
@@ -641,6 +636,7 @@ class BaseCommandEvent(CreatedModifiedModel):
     """
 
     VALID_KEYS = ['event_data', 'created', 'counter', 'uuid', 'stdout', 'start_line', 'end_line', 'verbosity']
+    WRAPUP_EVENT = 'EOF'
 
     class Meta:
         abstract = True
@@ -736,6 +732,8 @@ class BaseCommandEvent(CreatedModifiedModel):
 class AdHocCommandEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
+    WRAPUP_EVENT = 'playbook_on_stats'  # exception to BaseCommandEvent
+    JOB_REFERENCE = 'ad_hoc_command_id'
 
     objects = DeferJobCreatedManager()
 
@@ -836,6 +834,7 @@ UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommand
 class InventoryUpdateEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'inventory_update_id'
 
     objects = DeferJobCreatedManager()
 
@@ -881,6 +880,7 @@ UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + Inventory
 class SystemJobEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
+    JOB_REFERENCE = 'system_job_id'
 
     objects = DeferJobCreatedManager()
 

@@ -9,6 +9,7 @@ import stat
 from django.utils.timezone import now
 from django.conf import settings
 from django_guid import get_guid
+from django.utils.functional import cached_property
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -20,8 +21,6 @@ logger = logging.getLogger('awx.main.tasks.callback')
 
 
 class RunnerCallback:
-    event_data_key = 'job_id'
-
     def __init__(self, model=None):
         self.parent_workflow_job_id = None
         self.host_map = {}
@@ -33,9 +32,18 @@ class RunnerCallback:
         self.event_ct = 0
         self.model = model
         self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
+        self.wrapup_event_dispatched = False
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
+
+    @cached_property
+    def wrapup_event_type(self):
+        return self.instance.event_class.WRAPUP_EVENT
+
+    @cached_property
+    def event_data_key(self):
+        return self.instance.event_class.JOB_REFERENCE
 
     def event_handler(self, event_data):
         #
@@ -130,6 +138,9 @@ class RunnerCallback:
         elif self.recent_event_timings.maxlen:
             self.recent_event_timings.append(time.time())
 
+        if event_data.get('event', '') == self.wrapup_event_type:
+            self.wrapup_event_dispatched = True
+
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
         self.event_ct += 1
@@ -170,6 +181,8 @@ class RunnerCallback:
         }
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
+        if self.wrapup_event_type == 'EOF':
+            self.wrapup_event_dispatched = True
 
     def status_handler(self, status_data, runner_config):
         """
@@ -212,9 +225,6 @@ class RunnerCallback:
 
 
 class RunnerCallbackForProjectUpdate(RunnerCallback):
-
-    event_data_key = 'project_update_id'
-
     def __init__(self, *args, **kwargs):
         super(RunnerCallbackForProjectUpdate, self).__init__(*args, **kwargs)
         self.playbook_new_revision = None
@@ -231,9 +241,6 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
 
 
 class RunnerCallbackForInventoryUpdate(RunnerCallback):
-
-    event_data_key = 'inventory_update_id'
-
     def __init__(self, *args, **kwargs):
         super(RunnerCallbackForInventoryUpdate, self).__init__(*args, **kwargs)
         self.end_line = 0
@@ -245,9 +252,6 @@ class RunnerCallbackForInventoryUpdate(RunnerCallback):
 
 
 class RunnerCallbackForAdHocCommand(RunnerCallback):
-
-    event_data_key = 'ad_hoc_command_id'
-
     def __init__(self, *args, **kwargs):
         super(RunnerCallbackForAdHocCommand, self).__init__(*args, **kwargs)
         self.host_map = {}
@@ -255,4 +259,4 @@ class RunnerCallbackForAdHocCommand(RunnerCallback):
 
 class RunnerCallbackForSystemJob(RunnerCallback):
 
-    event_data_key = 'system_job_id'
+    pass

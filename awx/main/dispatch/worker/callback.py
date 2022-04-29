@@ -7,7 +7,7 @@ import traceback
 
 from django.conf import settings
 from django.utils.timezone import now as tz_now
-from django.db import DatabaseError, OperationalError, connection as django_connection
+from django.db import DatabaseError, OperationalError, transaction, connection as django_connection
 from django.db.utils import InterfaceError, InternalError
 from django_guid import set_guid
 
@@ -16,14 +16,40 @@ import psutil
 import redis
 
 from awx.main.consumers import emit_channel_notification
-from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob, Job
-from awx.main.tasks.system import handle_success_and_failure_notifications
+from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
+from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 import awx.main.analytics.subsystem_metrics as s_metrics
 from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+
+
+def job_stats_wrapup(job_identifier, event=None):
+    """Fill in the unified job host_status_counts, fire off notifications if needed"""
+    try:
+        # empty dict (versus default of None) can still indicate that events have been processed
+        # for job types like system jobs, and jobs with no hosts matched
+        host_status_counts = {}
+        if event:
+            host_status_counts = event.get_host_status_counts()
+
+        # Update host_status_counts while holding the row lock
+        with transaction.atomic():
+            uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
+            uj.host_status_counts = host_status_counts
+            uj.save(update_fields=['host_status_counts'])
+
+        uj.log_lifecycle("stats_wrapup_finished")
+
+        # If the status was a finished state before this update was made, send notifications
+        # If not, we will send notifications when the status changes
+        if uj.status not in ACTIVE_STATES:
+            uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
+
+    except Exception:
+        logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
 
 
 class CallbackBrokerWorker(BaseWorker):
@@ -146,6 +172,8 @@ class CallbackBrokerWorker(BaseWorker):
                     if not getattr(e, '_skip_websocket_message', False):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
+                    if getattr(e, '_notification_trigger_event', False):
+                        job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
             self.buff = {}
             self.last_flush = time.time()
             # only update metrics if we saved events
@@ -165,47 +193,32 @@ class CallbackBrokerWorker(BaseWorker):
             if flush:
                 self.last_event = ''
             if not flush:
-                event_map = {
-                    'job_id': JobEvent,
-                    'ad_hoc_command_id': AdHocCommandEvent,
-                    'project_update_id': ProjectUpdateEvent,
-                    'inventory_update_id': InventoryUpdateEvent,
-                    'system_job_id': SystemJobEvent,
-                }
-
                 job_identifier = 'unknown job'
-                for key, cls in event_map.items():
-                    if key in body:
-                        job_identifier = body[key]
+                for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
+                    if cls.JOB_REFERENCE in body:
+                        job_identifier = body[cls.JOB_REFERENCE]
                         break
 
                 self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa
+
+                notification_trigger_event = bool(body.get('event') == cls.WRAPUP_EVENT)
 
                 if body.get('event') == 'EOF':
                     try:
                         if 'guid' in body:
                             set_guid(body['guid'])
                         final_counter = body.get('final_counter', 0)
-                        logger.info('Event processing is finished for Job {}, sending notifications'.format(job_identifier))
+                        logger.info('Starting EOF event processing for Job {}'.format(job_identifier))
                         # EOF events are sent when stdout for the running task is
                         # closed. don't actually persist them to the database; we
                         # just use them to report `summary` websocket events as an
                         # approximation for when a job is "done"
                         emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter))
-                        # Additionally, when we've processed all events, we should
-                        # have all the data we need to send out success/failure
-                        # notification templates
-                        uj = UnifiedJob.objects.get(pk=job_identifier)
 
-                        if isinstance(uj, Job):
-                            # *actual playbooks* send their success/failure
-                            # notifications in response to the playbook_on_stats
-                            # event handling code in main.models.events
-                            pass
-                        elif hasattr(uj, 'send_notification_templates'):
-                            handle_success_and_failure_notifications.apply_async([uj.id])
+                        if notification_trigger_event:
+                            job_stats_wrapup(job_identifier)
                     except Exception:
-                        logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
+                        logger.exception('Worker failed to perform EOF tasks: Job {}'.format(job_identifier))
                     finally:
                         self.subsystem_metrics.inc('callback_receiver_events_in_memory', -1)
                         set_guid('')
@@ -215,8 +228,11 @@ class CallbackBrokerWorker(BaseWorker):
 
                 event = cls.create_from_data(**body)
 
-                if skip_websocket_message:
+                if skip_websocket_message:  # if this event sends websocket messages, fire them off on flush
                     event._skip_websocket_message = True
+
+                if notification_trigger_event:  # if this is an Ansible stats event, ensure notifications on flush
+                    event._notification_trigger_event = True
 
                 self.buff.setdefault(cls, []).append(event)
 
