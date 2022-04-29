@@ -10,6 +10,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
   ToolbarToggleGroup,
+  Tooltip,
   Dropdown,
   DropdownPosition,
   KebabToggle,
@@ -117,13 +118,15 @@ function DataListToolbar({
         {onSelectAll && (
           <ToolbarGroup>
             <ToolbarItem>
-              <Checkbox
-                isChecked={isAllSelected}
-                onChange={onSelectAll}
-                aria-label={t`Select all`}
-                id="select-all"
-                ouiaId="select-all"
-              />
+              <Tooltip content={t`Select all`} position="top">
+                <Checkbox
+                  isChecked={isAllSelected}
+                  onChange={onSelectAll}
+                  aria-label={t`Select all`}
+                  id="select-all"
+                  ouiaId="select-all"
+                />
+              </Tooltip>
             </ToolbarItem>
           </ToolbarGroup>
         )}
