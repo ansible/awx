@@ -397,6 +397,12 @@ class BaseTask(object):
         Run the job/task and capture its output.
         """
         self.instance = self.model.objects.get(pk=pk)
+        if self.instance.status != 'canceled' and self.instance.cancel_flag:
+            self.instance = self.update_model(self.instance.pk, status='canceled')
+        if self.instance.status not in ACTIVE_STATES:
+            # Prevent starting the job if it has been reaped or handled by another process.
+            logger.warning(f'Not starting {self.instance.status} task pk={pk}')
+            return
 
         if self.instance.execution_environment_id is None:
             from awx.main.signals import disable_activity_stream
@@ -423,14 +429,6 @@ class BaseTask(object):
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
-            if self.instance.cancel_flag:
-                self.instance = self.update_model(self.instance.pk, status='canceled')
-            if self.instance.status != 'running':
-                # Stop the task chain and prevent starting the job if it has
-                # already been canceled.
-                self.instance = self.update_model(pk)
-                status = self.instance.status
-                raise RuntimeError('not starting %s task' % self.instance.status)
 
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
