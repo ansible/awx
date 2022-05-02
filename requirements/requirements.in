@@ -43,7 +43,7 @@ python-dsv-sdk
 python-tss-sdk==1.0.0
 python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
-receptorctl==1.1.1
+receptorctl==1.2.3
 schedule==0.6.0
 social-auth-core==4.2.0  # see UPGRADE BLOCKERs
 social-auth-app-django==5.0.0  # see UPGRADE BLOCKERs
