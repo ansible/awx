@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.constants import MINIMAL_EVENTS
+from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
@@ -52,6 +52,8 @@ class RunnerCallback:
             if key in self.extra_update_fields and skip_if_already_set:
                 continue
             elif key in self.extra_update_fields and key in ('job_explanation', 'result_traceback'):
+                if str(value) in self.extra_update_fields.get(key, ''):
+                    continue  # if already set, avoid duplicating messages
                 # In the case of these fields, we do not want to lose any prior information, so combine values
                 self.extra_update_fields[key] = '\n'.join([str(self.extra_update_fields[key]), str(value)])
             else:
@@ -59,6 +61,8 @@ class RunnerCallback:
 
     def get_extra_update_fields(self):
         self.extra_update_fields['emitted_events'] = self.event_ct
+        if 'got an unexpected keyword argument' in self.extra_update_fields.get('result_traceback', ''):
+            self.delay_update(result_traceback=ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
         return self.extra_update_fields
 
     def event_handler(self, event_data):

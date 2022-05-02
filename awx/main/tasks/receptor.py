@@ -24,10 +24,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.constants import (
-    MAX_ISOLATED_PATH_COLON_DELIMITER,
-    ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE,
-)
+from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -377,8 +374,6 @@ class AWXReceptorJob:
                     receptor_output = b"".join(lines).decode()
                     if receptor_output:
                         self.task.runner_callback.delay_update(result_traceback=receptor_output)
-                        if 'got an unexpected keyword argument' in receptor_output:
-                            self.task.runner_callback.delay_update(result_traceback=ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
                     elif detail:
                         self.task.runner_callback.delay_update(result_traceback=detail)
                     else:

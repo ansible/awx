@@ -40,7 +40,6 @@ from awx.main.constants import (
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
-    ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE,
 )
 from awx.main.models import (
     Instance,
@@ -567,12 +566,6 @@ class BaseTask(object):
                     self.runner_callback.delay_update(result_traceback=exc.tb)
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
-
-        # We really shouldn't get into this one but just in case....
-        original_traceback = self.runner_callback.get_extra_update_fields().get('result_traceback', '')
-        if 'got an unexpected keyword argument' in original_traceback:
-            if ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE not in original_traceback:
-                self.runner_callback.delay_update(result_traceback=ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
 
         self.instance = self.update_model(pk)
         self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_extra_update_fields())
