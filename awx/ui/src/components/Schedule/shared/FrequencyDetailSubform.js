@@ -17,6 +17,9 @@ import FormField from '../../FormField';
 import DateTimePicker from './DateTimePicker';
 
 const RunOnRadio = styled(Radio)`
+  display: flex;
+  align-items: center;
+
   label {
     display: block;
     width: 100%;
