@@ -398,7 +398,7 @@ class BaseTask(object):
         """
         self.instance = self.model.objects.get(pk=pk)
         if self.instance.status != 'canceled' and self.instance.cancel_flag:
-            self.instance = self.update_model(self.instance.pk, status='canceled')
+            self.instance = self.update_model(self.instance.pk, start_args='', status='canceled')
         if self.instance.status not in ACTIVE_STATES:
             # Prevent starting the job if it has been reaped or handled by another process.
             raise RuntimeError(f'Not starting {self.instance.status} task pk={pk}')
