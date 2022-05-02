@@ -54,14 +54,16 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   const handleProjectUpdate = useCallback(
     (value) => {
       setFieldValue('source_project', value);
-      setFieldValue('source_path', '');
-      setFieldTouched('source_path', false);
       setFieldTouched('source_project', true, false);
+      if (sourcePathField.value) {
+        setFieldValue('source_path', '');
+        setFieldTouched('source_path', false);
+      }
       if (value) {
         fetchSourcePath(value.id);
       }
     },
-    [fetchSourcePath, setFieldValue, setFieldTouched]
+    [fetchSourcePath, setFieldValue, setFieldTouched, sourcePathField.value]
   );
 
   const handleCredentialUpdate = useCallback(
