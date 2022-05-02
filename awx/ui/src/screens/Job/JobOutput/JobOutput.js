@@ -115,8 +115,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
   const [forceFlatMode, setForceFlatMode] = useState(false);
-  const isFlatMode = isJobRunning(jobStatus) || location.search.length > 1;
-
+  const isFlatMode =
+    isJobRunning(jobStatus) || location.search.length > 1 || job.type !== 'job';
   const [isTreeReady, setIsTreeReady] = useState(false);
   const [onReadyEvents, setOnReadyEvents] = useState([]);
 

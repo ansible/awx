@@ -49,6 +49,7 @@ export default function useJobEvents(callbacks, jobId, isFlatMode) {
 
   useEffect(() => {
     if (isFlatMode) {
+      callbacks.setJobTreeReady();
       return;
     }
 

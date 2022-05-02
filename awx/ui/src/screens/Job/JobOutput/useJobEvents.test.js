@@ -5,7 +5,6 @@ import useJobEvents, {
   jobEventsReducer,
   ADD_EVENTS,
   TOGGLE_NODE_COLLAPSED,
-  SET_EVENT_NUM_CHILDREN,
 } from './useJobEvents';
 
 function Child() {
@@ -16,6 +15,7 @@ function HookTest({
   fetchChildrenSummary = () => {},
   setForceFlatMode = () => {},
   setJobTreeReady = () => {},
+  jobId = 1,
   isFlatMode = false,
 }) {
   const hookFuncs = useJobEvents(
@@ -25,6 +25,7 @@ function HookTest({
       setForceFlatMode,
       setJobTreeReady,
     },
+    jobId,
     isFlatMode
   );
   return <Child id="test" {...hookFuncs} />;
@@ -1295,18 +1296,24 @@ describe('useJobEvents', () => {
 
   describe('getTotalNumChildren', () => {
     let wrapper;
-    beforeEach(() => {
+
+    test('should not make call to get child events, because there are none for this job type', () => {
       wrapper = shallow(<HookTest />);
       wrapper.find('#test').prop('addEvents')(eventsList);
+      expect(callbacks.fetchChildrenSummary).not.toBeCalled();
     });
 
     test('should get basic number of children', () => {
+      wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
       expect(
         wrapper.find('#test').prop('getTotalNumChildren')('abc-002')
       ).toEqual(3);
     });
 
     test('should get total number of nested children', () => {
+      wrapper = shallow(<HookTest />);
+      wrapper.find('#test').prop('addEvents')(eventsList);
       expect(
         wrapper.find('#test').prop('getTotalNumChildren')('abc-001')
       ).toEqual(8);
