@@ -7,7 +7,7 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 5
     allow:
-      - dependency-type: "all"
+      - dependency-type: "direct"
     reviewers:
       - "AlexSCorey"
       - "keithjgrant"
