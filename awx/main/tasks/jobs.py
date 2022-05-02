@@ -401,8 +401,7 @@ class BaseTask(object):
             self.instance = self.update_model(self.instance.pk, status='canceled')
         if self.instance.status not in ACTIVE_STATES:
             # Prevent starting the job if it has been reaped or handled by another process.
-            logger.warning(f'Not starting {self.instance.status} task pk={pk}')
-            return
+            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk}')
 
         if self.instance.execution_environment_id is None:
             from awx.main.signals import disable_activity_stream
