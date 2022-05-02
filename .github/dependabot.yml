@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
+    directory: "/awx/ui"
     schedule:
       interval: "weekly"
       day: "sunday"
