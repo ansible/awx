@@ -27,7 +27,7 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
   const onDateChange = (inputDate, newDate) => {
     dateHelpers.setTouched();
     if (isValidDate(newDate) && inputDate === yyyyMMddFormat(newDate)) {
-      dateHelpers.setValue(new Date(newDate).toISOString().split('T')[0]);
+      dateHelpers.setValue(inputDate);
     }
   };
 
