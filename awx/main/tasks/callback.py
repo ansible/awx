@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 
 # AWX
 from awx.main.redact import UriCleaner
-from awx.main.constants import MINIMAL_EVENTS
+from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
@@ -33,6 +33,7 @@ class RunnerCallback:
         self.model = model
         self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
         self.wrapup_event_dispatched = False
+        self.extra_update_fields = {}
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -44,6 +45,26 @@ class RunnerCallback:
     @cached_property
     def event_data_key(self):
         return self.instance.event_class.JOB_REFERENCE
+
+    def delay_update(self, skip_if_already_set=False, **kwargs):
+        """Stash fields that should be saved along with the job status change"""
+        for key, value in kwargs.items():
+            if key in self.extra_update_fields and skip_if_already_set:
+                continue
+            elif key in self.extra_update_fields and key in ('job_explanation', 'result_traceback'):
+                if str(value) in self.extra_update_fields.get(key, ''):
+                    continue  # if already set, avoid duplicating messages
+                # In the case of these fields, we do not want to lose any prior information, so combine values
+                self.extra_update_fields[key] = '\n'.join([str(self.extra_update_fields[key]), str(value)])
+            else:
+                self.extra_update_fields[key] = value
+
+    def get_delayed_update_fields(self):
+        """Return finalized dict of all fields that should be saved along with the job status change"""
+        self.extra_update_fields['emitted_events'] = self.event_ct
+        if 'got an unexpected keyword argument' in self.extra_update_fields.get('result_traceback', ''):
+            self.delay_update(result_traceback=ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
+        return self.extra_update_fields
 
     def event_handler(self, event_data):
         #
@@ -149,8 +170,7 @@ class RunnerCallback:
         Handle artifacts
         '''
         if event_data.get('event_data', {}).get('artifact_data', {}):
-            self.instance.artifacts = event_data['event_data']['artifact_data']
-            self.instance.save(update_fields=['artifacts'])
+            self.delay_update(artifacts=event_data['event_data']['artifact_data'])
 
         return False
 
@@ -218,10 +238,7 @@ class RunnerCallback:
         elif status_data['status'] == 'error':
             result_traceback = status_data.get('result_traceback', None)
             if result_traceback:
-                from awx.main.signals import disable_activity_stream  # Circular import
-
-                with disable_activity_stream():
-                    self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
+                self.delay_update(result_traceback=result_traceback)
 
 
 class RunnerCallbackForProjectUpdate(RunnerCallback):

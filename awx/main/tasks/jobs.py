@@ -40,7 +40,6 @@ from awx.main.constants import (
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
-    ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE,
 )
 from awx.main.models import (
     Instance,
@@ -411,7 +410,6 @@ class BaseTask(object):
         self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
-        extra_update_fields = {}
         fact_modification_times = {}
         self.runner_callback.event_ct = 0
 
@@ -546,18 +544,14 @@ class BaseTask(object):
             rc = res.rc
 
             if status in ('timeout', 'error'):
-                job_explanation = f"Job terminated due to {status}"
-                self.instance.job_explanation = self.instance.job_explanation or job_explanation
+                self.runner_callback.delay_update(skip_if_already_set=True, job_explanation=f"Job terminated due to {status}")
                 if status == 'timeout':
                     status = 'failed'
-
-                extra_update_fields['job_explanation'] = self.instance.job_explanation
-
         except ReceptorNodeNotFound as exc:
-            extra_update_fields['job_explanation'] = str(exc)
+            self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
             # this could catch programming or file system errors
-            extra_update_fields['result_traceback'] = traceback.format_exc()
+            self.runner_callback.delay_update(result_traceback=traceback.format_exc())
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
         finally:
             logger.debug('%s finished running, producing %s events.', self.instance.log_format, self.runner_callback.event_ct)
@@ -567,18 +561,14 @@ class BaseTask(object):
         except PostRunError as exc:
             if status == 'successful':
                 status = exc.status
-                extra_update_fields['job_explanation'] = exc.args[0]
+                self.runner_callback.delay_update(job_explanation=exc.args[0])
                 if exc.tb:
-                    extra_update_fields['result_traceback'] = exc.tb
+                    self.runner_callback.delay_update(result_traceback=exc.tb)
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
-        # We really shouldn't get into this one but just in case....
-        if 'got an unexpected keyword argument' in extra_update_fields.get('result_traceback', ''):
-            extra_update_fields['result_traceback'] = "{}\n\n{}".format(extra_update_fields['result_traceback'], ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
-
         self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, emitted_events=self.runner_callback.event_ct, select_for_update=True, **extra_update_fields)
+        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them

@@ -24,10 +24,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.constants import (
-    MAX_ISOLATED_PATH_COLON_DELIMITER,
-    ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE,
-)
+from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -350,6 +347,11 @@ class AWXReceptorJob:
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
             elif res.status == 'error':
+                # If ansible-runner ran, but an error occured at runtime, the traceback information
+                # is saved via the status_handler passed in to the processor.
+                if 'result_traceback' in self.task.runner_callback.extra_update_fields:
+                    return res
+
                 try:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
@@ -365,28 +367,19 @@ class AWXReceptorJob:
                     logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
-                # If ansible-runner ran, but an error occured at runtime, the traceback information
-                # is saved via the status_handler passed in to the processor.
-                if state_name == 'Succeeded':
-                    return res
 
-                if not self.task.instance.result_traceback:
-                    try:
-                        resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
-                        lines = resultsock.readlines()
-                        receptor_output = b"".join(lines).decode()
-                        if receptor_output:
-                            self.task.instance.result_traceback = receptor_output
-                            if 'got an unexpected keyword argument' in receptor_output:
-                                self.task.instance.result_traceback = "{}\n\n{}".format(receptor_output, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
-                            self.task.instance.save(update_fields=['result_traceback'])
-                        elif detail:
-                            self.task.instance.result_traceback = detail
-                            self.task.instance.save(update_fields=['result_traceback'])
-                        else:
-                            logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
-                    except Exception:
-                        raise RuntimeError(detail)
+                try:
+                    resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
+                    lines = resultsock.readlines()
+                    receptor_output = b"".join(lines).decode()
+                    if receptor_output:
+                        self.task.runner_callback.delay_update(result_traceback=receptor_output)
+                    elif detail:
+                        self.task.runner_callback.delay_update(result_traceback=detail)
+                    else:
+                        logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
+                except Exception:
+                    raise RuntimeError(detail)
 
         return res
 
