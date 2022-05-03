@@ -21,7 +21,7 @@ const DetailValue = styled(
     <TextListItem {...props} />
   )
 )`
-  word-break: break-all;
+  overflow-wrap: break-word;
   ${(props) =>
     props.fullWidth &&
     `
