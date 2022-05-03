@@ -29,3 +29,15 @@
 
 ## Code of Conduct
 - Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/ansible/latest/community/code_of_conduct.html 
+
+## AWX Release
+- Hi all,\
+\
+We're happy to announce that the next release of AWX, version 21.0.0 is now available!\
+In addition AWX Operator version 0.21.0 has also been release!\
+\
+Please see the releases pages for more details:\
+	AWX: https://github.com/ansible/awx/releases/tag/21.0.0\
+	Operator: https://github.com/ansible/awx-operator/releases/tag/0.20.1\
+\
+The AWX team.
