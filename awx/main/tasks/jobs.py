@@ -568,7 +568,7 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_extra_update_fields())
+        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them

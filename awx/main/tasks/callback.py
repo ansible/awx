@@ -47,7 +47,7 @@ class RunnerCallback:
         return self.instance.event_class.JOB_REFERENCE
 
     def delay_update(self, skip_if_already_set=False, **kwargs):
-        """Save fields to update after the job finishes."""
+        """Stash fields that should be saved along with the job status change"""
         for key, value in kwargs.items():
             if key in self.extra_update_fields and skip_if_already_set:
                 continue
@@ -59,7 +59,8 @@ class RunnerCallback:
             else:
                 self.extra_update_fields[key] = value
 
-    def get_extra_update_fields(self):
+    def get_delayed_update_fields(self):
+        """Return finalized dict of all fields that should be saved along with the job status change"""
         self.extra_update_fields['emitted_events'] = self.event_ct
         if 'got an unexpected keyword argument' in self.extra_update_fields.get('result_traceback', ''):
             self.delay_update(result_traceback=ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)

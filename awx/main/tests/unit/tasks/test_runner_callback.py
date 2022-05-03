@@ -11,7 +11,7 @@ def test_delay_update(mock_me):
     rc.delay_update(foo='foobar')
     assert rc.extra_update_fields == {'foo': 'foobar'}
     rc.delay_update(bar='foo')
-    assert rc.get_extra_update_fields() == {'foo': 'foobar', 'bar': 'foo', 'emitted_events': 0}
+    assert rc.get_delayed_update_fields() == {'foo': 'foobar', 'bar': 'foo', 'emitted_events': 0}
 
 
 def test_delay_update_skip_if_set(mock_me):
@@ -45,7 +45,7 @@ def test_special_ansible_runner_message(mock_me):
     rc = RunnerCallback()
     rc.delay_update(result_traceback='Traceback:\ngot an unexpected keyword argument\nFile: foo.py')
     rc.delay_update(result_traceback='Traceback:\ngot an unexpected keyword argument\nFile: bar.py')
-    assert rc.get_extra_update_fields().get('result_traceback') == (
+    assert rc.get_delayed_update_fields().get('result_traceback') == (
         'Traceback:\ngot an unexpected keyword argument\nFile: foo.py\n'
         'Traceback:\ngot an unexpected keyword argument\nFile: bar.py\n'
         f'{ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE}'
