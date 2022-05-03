@@ -41,3 +41,6 @@ Please see the releases pages for more details:\
 	Operator: https://github.com/ansible/awx-operator/releases/tag/0.20.1\
 \
 The AWX team.
+
+## Try latest version
+- Hello, this issue pertains to an older version of AWX. Try upgrading to the lastest version and see if that resolves your issue.
