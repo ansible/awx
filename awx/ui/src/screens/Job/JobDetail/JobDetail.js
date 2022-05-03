@@ -75,6 +75,14 @@ function JobDetail({ job, inventorySourceLabels }) {
     workflow_job: t`Workflow Job`,
   };
 
+  const scmTypes = {
+    '': t`Manual`,
+    git: t`Git`,
+    svn: t`Subversion`,
+    insights: t`Red Hat Insights`,
+    archive: t`Remote Archive`,
+  };
+
   const deleteJob = async () => {
     try {
       await getJobModel(job.type).destroy(job.id);
@@ -240,6 +248,11 @@ function JobDetail({ job, inventorySourceLabels }) {
           dataCy="job-type"
           label={t`Job Type`}
           value={jobTypes[job.type]}
+        />
+        <Detail
+          dataCy="source-control-type"
+          label={t`Source Control Type`}
+          value={scmTypes[job.scm_type]}
         />
         <LaunchedByDetail dataCy="job-launched-by" job={job} />
         {renderInventoryDetail()}
