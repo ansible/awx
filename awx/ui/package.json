@@ -46,7 +46,7 @@
     "@lingui/macro": "^3.7.1",
     "@nteract/mockument": "^1.0.4",
     "@testing-library/jest-dom": "^5.16.2",
-    "@testing-library/react": "^12.1.4",
+    "@testing-library/react": "^12.1.5",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.5",
     "babel-plugin-macros": "3.1.0",
     "enzyme": "^3.10.0",
