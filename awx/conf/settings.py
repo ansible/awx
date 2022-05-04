@@ -1,7 +1,6 @@
 # Python
 import contextlib
 import logging
-import sys
 import threading
 import time
 import os
@@ -31,7 +30,7 @@ from awx.conf.models import Setting
 
 logger = logging.getLogger('awx.conf.settings')
 
-SETTING_MEMORY_TTL = 5 if 'callback_receiver' in ' '.join(sys.argv) else 0
+SETTING_MEMORY_TTL = 5
 
 # Store a special value to indicate when a setting is not set in the database.
 SETTING_CACHE_NOTSET = '___notset___'
@@ -403,11 +402,15 @@ class SettingsWrapper(UserSettingsHolder):
         key=lambda *args, **kwargs: SettingsWrapper.hashkey(*args, **kwargs),
         lock=lambda self: self.__dict__['_awx_conf_memoizedcache_lock'],
     )
+    def _get_local_with_cache(self, name):
+        """Get value while accepting the in-memory cache if key is available"""
+        with _ctit_db_wrapper(trans_safe=True):
+            return self._get_local(name)
+
     def __getattr__(self, name):
         value = empty
         if name in self.all_supported_settings:
-            with _ctit_db_wrapper(trans_safe=True):
-                value = self._get_local(name)
+            value = self._get_local_with_cache(name)
         if value is not empty:
             return value
         return self._get_default(name)
