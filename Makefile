@@ -15,6 +15,8 @@ MAIN_NODE_TYPE ?= hybrid
 KEYCLOAK ?= false
 # If set to true docker-compose will also start an ldap instance
 LDAP ?= false
+# If set to true docker-compose will also start a splunk instance
+SPLUNK ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -466,7 +468,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
 	    -e enable_keycloak=$(KEYCLOAK) \
-	    -e enable_ldap=$(LDAP)
+	    -e enable_ldap=$(LDAP) \
+	    -e enable_splunk=$(SPLUNK)
 
 
 docker-compose: awx/projects docker-compose-sources
