@@ -16,12 +16,6 @@ then run the script:
 NOTE: `./updater.sh` uses /usr/bin/python3.6, to match the current python version
 (3.6) used to build releases.
 
-##### Note - watch out for the updater script, using paths local to your machine instead of generalized paths; ie
-```bash
-    # via -r /awx_devel/requirements/requirements.in <-RIGHT
-    # via -r /home/foo/bar/awx/requirements/requirements.in <-WRONG
-```
-
 #### Upgrading Unpinned Dependency
 
 If you require a new version of a dependency that does not have a pinned version
