@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { number, string, oneOfType } from 'prop-types';
+import { func, number, string, oneOfType } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { SelectVariant, Select, SelectOption } from '@patternfly/react-core';
@@ -28,8 +28,11 @@ function PlaybookSelect({
       }
       const { data } = await ProjectsAPI.readPlaybooks(projectId);
 
+      if (data.length === 1) {
+        onChange(data[0]);
+      }
       return data;
-    }, [projectId]),
+    }, [projectId, onChange]),
     []
   );
 
@@ -76,9 +79,11 @@ function PlaybookSelect({
 }
 PlaybookSelect.propTypes = {
   projectId: oneOfType([number, string]),
+  onChange: func,
 };
 PlaybookSelect.defaultProps = {
   projectId: null,
+  onChange: () => {},
 };
 
 export { PlaybookSelect as _PlaybookSelect };
