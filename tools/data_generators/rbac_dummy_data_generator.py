@@ -53,6 +53,7 @@ from awx.main.models import (  # noqa
     WorkflowJobTemplateNode,
     batch_role_ancestor_rebuilding,
 )
+from awx.main.models.schedules import Schedule #noqa
 
 from awx.main.signals import disable_activity_stream, disable_computed_fields  # noqa
 
@@ -63,6 +64,7 @@ option_list = [
     make_option('--teams', action='store', type='int', default=5, help='Number of teams to create'),
     make_option('--projects', action='store', type='int', default=10, help='Number of projects to create'),
     make_option('--job-templates', action='store', type='int', default=20, help='Number of job templates to create'),
+    make_option('--schedules', action='store', type='int', default=50, help='Number of schedules to create'),
     make_option('--credentials', action='store', type='int', default=5, help='Number of credentials to create'),
     make_option('--inventories', action='store', type='int', default=5, help='Number of credentials to create'),
     make_option('--inventory-groups', action='store', type='int', default=10, help='Number of credentials to create'),
@@ -110,6 +112,7 @@ n_users = int(options['users'])
 n_teams = int(options['teams'])
 n_projects = int(options['projects'])
 n_job_templates = int(options['job_templates'])
+n_schedules = int(options['schedules'])
 n_credentials = int(options['credentials'])
 n_inventories = int(options['inventories'])
 n_inventory_groups = int(options['inventory_groups'])
@@ -126,6 +129,7 @@ users = []
 teams = []
 projects = []
 job_templates = []
+schedules = []
 credentials = []
 inventories = []
 inventory_groups = []
@@ -569,6 +573,29 @@ def make_the_data():
                 wfjt_idx += 1
                 if n:
                     print('')
+
+            print('# Creating %d Schedules' % n_schedules)
+            jt_idx = 0
+            for n in spread(n_schedules, n_job_templates):
+                jt = job_templates[0]
+                for i in range(n):
+                    ids['schedules'] += 1
+                    schedules_id = ids['schedules']
+                    unified_job_template = job_templates[jt_idx]
+
+                    sys.stdout.write('\r   Assigning %d to %s: %d ' % (n, jt, i + 1))
+                    sys.stdout.flush()
+                    schedule, _ = Schedule.objects.get_or_create(
+                        name='%s Schedule %d' % (prefix, schedules_id),
+                        rrule="DTSTART;TZID=America/New_York:20220505T111500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY",
+                        created_by=next(creator_gen),
+                        modified_by=next(modifier_gen),
+                        unified_job_template=unified_job_template,
+                    )
+                    schedule._is_new = _
+                    schedules.append(schedule)
+
+
 
             print('# Creating %d Labels' % n_labels)
             org_idx = 0
