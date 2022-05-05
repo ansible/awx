@@ -12,6 +12,7 @@ import { TokensAPI } from 'api';
 import { formatDateString } from 'util/dates';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
+import helptext from '../shared/User.helptext';
 
 function UserTokenDetail({ token }) {
   const { scope, description, created, modified, expires, summary_fields } =
@@ -37,6 +38,7 @@ function UserTokenDetail({ token }) {
           label={t`Application`}
           value={summary_fields?.application?.name}
           dataCy="application-token-detail-name"
+          helpText={helptext.application}
         />
         <Detail
           label={t`Description`}
@@ -47,6 +49,7 @@ function UserTokenDetail({ token }) {
           label={t`Scope`}
           value={toTitleCase(scope)}
           dataCy="application-token-detail-scope"
+          helpText={helptext.scope}
         />
         <Detail
           label={t`Expires`}
