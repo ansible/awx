@@ -21,7 +21,6 @@ function WorkflowApprovalListItem({
 }) {
   const labelId = `check-action-${workflowApproval.id}`;
   const workflowJob = workflowApproval?.summary_fields?.source_workflow_job;
-
   return (
     <Tr id={`workflow-approval-row-${workflowApproval.id}`}>
       <Td
@@ -34,7 +33,15 @@ function WorkflowApprovalListItem({
       />
       <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
-          <b>{workflowApproval.name}</b>
+          {workflowJob && workflowJob?.id ? (
+            <Link to={`/jobs/workflow/${workflowJob?.id}`}>
+              <b>{`${workflowJob?.id} - ${workflowApproval?.name}`}</b>
+            </Link>
+          ) : (
+            <b>
+              {t`Deleted`} {`- ${workflowApproval?.name}`}
+            </b>
+          )}
         </Link>
       </Td>
       <Td>
