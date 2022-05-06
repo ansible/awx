@@ -79,7 +79,7 @@ EXAMPLES = '''
     organization: "test"
     state: present
     authorization_grant_type: password
-    client-type: public
+    client_type: public
 
 - name: Add Foo application
   application:
@@ -88,7 +88,7 @@ EXAMPLES = '''
     organization: "test"
     state: present
     authorization_grant_type: authorization-code
-    client-type: confidential
+    client_type: confidential
     redirect_uris:
       - http://tower.com/api/v2/
 '''
