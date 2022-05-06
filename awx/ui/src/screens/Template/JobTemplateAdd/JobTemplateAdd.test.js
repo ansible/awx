@@ -82,7 +82,7 @@ describe('<JobTemplateAdd />', () => {
     CredentialTypesAPI.loadAllTypes = jest.fn();
     CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
     ProjectsAPI.readPlaybooks.mockResolvedValue({
-      data: [],
+      data: ['ping-playbook.yml'],
     });
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
     ProjectsAPI.readDetail.mockReturnValue({
@@ -164,10 +164,6 @@ describe('<JobTemplateAdd />', () => {
         id: 1,
         name: 'Foo',
       });
-      wrapper.update();
-      wrapper.find('Select#template-playbook').prop('onToggle')();
-      wrapper.update();
-      wrapper.find('Select#template-playbook').prop('onSelect')(null, 'Baz');
     });
     wrapper.update();
     act(() => {
@@ -186,7 +182,7 @@ describe('<JobTemplateAdd />', () => {
       name: 'Bar',
       job_type: 'check',
       project: 2,
-      playbook: 'Baz',
+      playbook: 'ping-playbook.yml',
       inventory: 2,
       webhook_credential: undefined,
       webhook_service: '',

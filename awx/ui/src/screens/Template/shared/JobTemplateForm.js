@@ -187,6 +187,14 @@ function JobTemplateForm({
     [setFieldValue, setFieldTouched]
   );
 
+  const handlePlaybookUpdate = useCallback(
+    (value) => {
+      setFieldValue('playbook', value);
+      setFieldTouched('playbook', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
   useEffect(() => {
     validateField('inventory');
   }, [askInventoryOnLaunchField.value, validateField]);
@@ -359,7 +367,7 @@ function JobTemplateForm({
           }
         >
           <PlaybookSelect
-            onChange={playbookHelpers.setValue}
+            onChange={handlePlaybookUpdate}
             projectId={projectField.value?.id}
             isValid={!playbookMeta.touched || !playbookMeta.error}
             selected={playbookField.value}
