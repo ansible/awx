@@ -45,12 +45,8 @@ function WorkflowApprovalsList() {
         WorkflowApprovalsAPI.read(params),
         WorkflowApprovalsAPI.readOptions(),
       ]);
-      const dataWithModifiedName = response.data.results.map((i) => {
-        i.name = `${i.summary_fields.source_workflow_job.id} - ${i.name}`;
-        return i;
-      });
       return {
-        results: dataWithModifiedName,
+        results: response.data.results,
         count: response.data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
