@@ -234,6 +234,8 @@ class SettingsWrapper(UserSettingsHolder):
         self.__dict__['_awx_conf_init_readonly'] = False
         self.__dict__['cache'] = EncryptedCacheProxy(cache, registry)
         self.__dict__['registry'] = registry
+        self.__dict__['_awx_conf_memoizedcache'] = cachetools.TTLCache(maxsize=2048, ttl=SETTING_MEMORY_TTL)
+        self.__dict__['_awx_conf_memoizedcache_lock'] = threading.Lock()
 
         # record the current pid so we compare it post-fork for
         # processes like the dispatcher and callback receiver
@@ -396,7 +398,11 @@ class SettingsWrapper(UserSettingsHolder):
     def SETTINGS_MODULE(self):
         return self._get_default('SETTINGS_MODULE')
 
-    @cachetools.cached(cache=cachetools.TTLCache(maxsize=2048, ttl=SETTING_MEMORY_TTL))
+    @cachetools.cachedmethod(
+        cache=lambda self: self.__dict__['_awx_conf_memoizedcache'],
+        key=lambda *args, **kwargs: SettingsWrapper.hashkey(*args, **kwargs),
+        lock=lambda self: self.__dict__['_awx_conf_memoizedcache_lock'],
+    )
     def __getattr__(self, name):
         value = empty
         if name in self.all_supported_settings:
@@ -474,6 +480,23 @@ class SettingsWrapper(UserSettingsHolder):
                 set_locally = Setting.objects.filter(key=setting, user__isnull=True).exists()
         set_on_default = getattr(self.default_settings, 'is_overridden', lambda s: False)(setting)
         return set_locally or set_on_default
+
+    @classmethod
+    def hashkey(cls, *args, **kwargs):
+        """
+        Usage of @cachetools.cached has changed to @cachetools.cachedmethod
+        The previous cachetools decorator called the hash function and passed in (self, key).
+        The new cachtools decorator calls the hash function with just (key).
+        Ideally, we would continue to pass self, however, the cachetools decorator interface
+        does not allow us to.
+
+        This hashkey function is to maintain that the key generated looks like
+        ('<SettingsWrapper>', key). The thought is that maybe it is important to namespace
+        our cache to the SettingsWrapper scope in case some other usage of this cache exists.
+        I can not think of how any other system could and would use our private cache, but
+        for safety sake we are ensuring the key schema does not change.
+        """
+        return cachetools.keys.hashkey(f"<{cls.__name__}>", *args, **kwargs)
 
 
 def __getattr_without_cache__(self, name):
