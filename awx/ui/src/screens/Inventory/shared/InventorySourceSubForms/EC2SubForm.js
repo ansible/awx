@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { t, Trans } from '@lingui/macro';
-import CredentialLookup from 'components/Lookup/CredentialLookup';
+import { t } from '@lingui/macro';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig } from 'contexts/Config';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
 import {
   OptionsField,
   SourceVarsField,
@@ -12,12 +12,12 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import getInventoryHelpTextStrings from '../Inventory.helptext';
 
 const EC2SubForm = () => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta] = useField('credential');
   const config = useConfig();
-
   const handleCredentialUpdate = useCallback(
     (value) => {
       setFieldValue('credential', value);
@@ -26,11 +26,12 @@ const EC2SubForm = () => {
     [setFieldValue, setFieldTouched]
   );
 
-  const pluginLink = `${getDocsBaseUrl(
-    config
-  )}/html/userguide/inventories.html#inventory-plugins`;
-  const configLink =
-    'https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html';
+  const helpText = getInventoryHelpTextStrings(
+    'ec2',
+    `${getDocsBaseUrl(
+      config
+    )}/html/userguide/inventories.html#inventory-plugins`
+  );
 
   return (
     <>
@@ -47,26 +48,7 @@ const EC2SubForm = () => {
       <EnabledVarField />
       <EnabledValueField />
       <OptionsField />
-      <SourceVarsField
-        popoverContent={
-          <>
-            <Trans>
-              Enter variables to configure the inventory source. For a detailed
-              description of how to configure this plugin, see{' '}
-              <a href={pluginLink} target="_blank" rel="noopener noreferrer">
-                Inventory Plugins
-              </a>{' '}
-              in the documentation and the{' '}
-              <a href={configLink} target="_blank" rel="noopener noreferrer">
-                aws_ec2
-              </a>{' '}
-              plugin configuration guide.
-            </Trans>
-            <br />
-            <br />
-          </>
-        }
-      />
+      <SourceVarsField popoverContent={helpText.sourceVars} />
     </>
   );
 };

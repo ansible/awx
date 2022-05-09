@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { t, Trans } from '@lingui/macro';
-import CredentialLookup from 'components/Lookup/CredentialLookup';
-import { required } from 'util/validators';
+import { t } from '@lingui/macro';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig } from 'contexts/Config';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import { required } from 'util/validators';
 import {
   OptionsField,
   SourceVarsField,
@@ -13,6 +13,7 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import getInventoryHelpTextStrings from '../Inventory.helptext';
 
 const AzureSubForm = ({ autoPopulateCredential }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
@@ -28,11 +29,12 @@ const AzureSubForm = ({ autoPopulateCredential }) => {
     [setFieldValue, setFieldTouched]
   );
 
-  const pluginLink = `${getDocsBaseUrl(
-    config
-  )}/html/userguide/inventories.html#inventory-plugins`;
-  const configLink =
-    'https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_inventory.html';
+  const helpText = getInventoryHelpTextStrings(
+    'azure_rm',
+    `${getDocsBaseUrl(
+      config
+    )}/html/userguide/inventories.html#inventory-plugins`
+  );
 
   return (
     <>
@@ -53,26 +55,7 @@ const AzureSubForm = ({ autoPopulateCredential }) => {
       <EnabledVarField />
       <EnabledValueField />
       <OptionsField />
-      <SourceVarsField
-        popoverContent={
-          <>
-            <Trans>
-              Enter variables to configure the inventory source. For a detailed
-              description of how to configure this plugin, see{' '}
-              <a href={pluginLink} target="_blank" rel="noopener noreferrer">
-                Inventory Plugins
-              </a>{' '}
-              in the documentation and the{' '}
-              <a href={configLink} target="_blank" rel="noopener noreferrer">
-                azure_rm
-              </a>{' '}
-              plugin configuration guide.
-            </Trans>
-            <br />
-            <br />
-          </>
-        }
-      />
+      <SourceVarsField popoverContent={helpText.sourceVars} />
     </>
   );
 };

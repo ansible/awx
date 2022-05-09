@@ -16,10 +16,11 @@ import { InventoriesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { Inventory } from 'types';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import getInventoryHelpTextStrings from '../shared/Inventory.helptext';
 
 function InventoryDetail({ inventory }) {
   const history = useHistory();
-
+  const helpText = getInventoryHelpTextStrings();
   const {
     result: instanceGroups,
     isLoading,
@@ -106,6 +107,7 @@ function InventoryDetail({ inventory }) {
           inventory.summary_fields.labels?.results?.length > 0 && (
             <Detail
               fullWidth
+              helpText={helpText.labels}
               label={t`Labels`}
               value={
                 <ChipGroup
@@ -123,6 +125,7 @@ function InventoryDetail({ inventory }) {
           )}
         <VariablesDetail
           label={t`Variables`}
+          helpText={helpText.variables}
           value={inventory.variables}
           rows={4}
           name="variables"

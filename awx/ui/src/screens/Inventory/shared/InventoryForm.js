@@ -13,6 +13,7 @@ import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import ContentError from 'components/ContentError';
 import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import getInventoryHelpTextStrings from './Inventory.helptext';
 
 function InventoryFormFields({ inventory }) {
   const [contentError, setContentError] = useState(false);
@@ -29,6 +30,8 @@ function InventoryFormFields({ inventory }) {
     },
     [setFieldValue, setFieldTouched]
   );
+
+  const helpText = getInventoryHelpTextStrings();
 
   if (contentError) {
     return <ContentError error={contentError} />;
@@ -72,13 +75,7 @@ function InventoryFormFields({ inventory }) {
       <FormFullWidthLayout>
         <FormGroup
           label={t`Labels`}
-          labelIcon={
-            <Popover
-              content={t`Optional labels that describe this inventory,
-                      such as 'dev' or 'test'. Labels can be used to group and filter
-                      inventories and completed jobs.`}
-            />
-          }
+          labelIcon={<Popover content={helpText.labels} />}
           fieldId="inventory-labels"
         >
           <LabelSelect
@@ -89,7 +86,7 @@ function InventoryFormFields({ inventory }) {
           />
         </FormGroup>
         <VariablesField
-          tooltip={t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`}
+          tooltip={helpText.variables}
           id="inventory-variables"
           name="variables"
           label={t`Variables`}

@@ -154,7 +154,7 @@ VariablesDetail.propTypes = {
   label: node.isRequired,
   rows: oneOfType([number, string]),
   dataCy: string,
-  helpText: string,
+  helpText: oneOfType([node, string]),
   name: string.isRequired,
 };
 VariablesDetail.defaultProps = {
