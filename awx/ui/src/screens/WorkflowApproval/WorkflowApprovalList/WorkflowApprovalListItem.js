@@ -34,9 +34,7 @@ function WorkflowApprovalListItem({
       <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           {workflowJob && workflowJob?.id ? (
-            <Link to={`/jobs/workflow/${workflowJob?.id}`}>
-              <b>{`${workflowJob?.id} - ${workflowApproval?.name}`}</b>
-            </Link>
+            <b>{`${workflowJob?.id} - ${workflowApproval?.name}`}</b>
           ) : (
             <b>
               {t`Deleted`} {`- ${workflowApproval?.name}`}
