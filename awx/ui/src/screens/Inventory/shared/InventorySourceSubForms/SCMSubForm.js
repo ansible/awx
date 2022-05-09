@@ -21,12 +21,14 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import helpText from '../Inventory.helptext';
 
 const SCMSubForm = ({ autoPopulateProject }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
+
   const [projectField, projectMeta, projectHelpers] =
     useField('source_project');
   const [sourcePathField, sourcePathMeta, sourcePathHelpers] = useField({
@@ -104,13 +106,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
         }
         isRequired
         label={t`Inventory file`}
-        labelIcon={
-          <Popover
-            content={t`Select the inventory file
-          to be synced by this source. You can select from
-          the dropdown or enter a file within the input.`}
-          />
-        }
+        labelIcon={<Popover content={helpText.sourcePath} />}
       >
         <Select
           ouiaId="InventorySourceForm-source_path"

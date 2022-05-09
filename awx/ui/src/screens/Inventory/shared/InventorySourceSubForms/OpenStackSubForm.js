@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { t, Trans } from '@lingui/macro';
+import { t } from '@lingui/macro';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import { required } from 'util/validators';
-import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
 import {
   OptionsField,
   SourceVarsField,
@@ -13,6 +13,7 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import helpText from '../Inventory.helptext';
 
 const OpenStackSubForm = ({ autoPopulateCredential }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
@@ -27,12 +28,6 @@ const OpenStackSubForm = ({ autoPopulateCredential }) => {
     },
     [setFieldValue, setFieldTouched]
   );
-
-  const pluginLink = `${getDocsBaseUrl(
-    config
-  )}/html/userguide/inventories.html#inventory-plugins`;
-  const configLink =
-    'https://docs.ansible.com/ansible/latest/collections/openstack/cloud/openstack_inventory.html';
 
   return (
     <>
@@ -54,24 +49,10 @@ const OpenStackSubForm = ({ autoPopulateCredential }) => {
       <EnabledValueField />
       <OptionsField />
       <SourceVarsField
-        popoverContent={
-          <>
-            <Trans>
-              Enter variables to configure the inventory source. For a detailed
-              description of how to configure this plugin, see{' '}
-              <a href={pluginLink} target="_blank" rel="noopener noreferrer">
-                Inventory Plugins
-              </a>{' '}
-              in the documentation and the{' '}
-              <a href={configLink} target="_blank" rel="noopener noreferrer">
-                openstack
-              </a>{' '}
-              plugin configuration guide.
-            </Trans>
-            <br />
-            <br />
-          </>
-        }
+        popoverContent={helpText.sourceVars(
+          getDocsBaseUrl(config),
+          'openstack'
+        )}
       />
     </>
   );
