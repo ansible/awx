@@ -123,6 +123,19 @@ services:
       - '../../docker-compose/_sources/ldap_certs:/opt/bitnami/openldap/certs'
       - '../../docker-compose/_sources/ldap_diffs:/opt/bitnami/openldap/ldiffs'
 {% endif %}
+{% if enable_splunk|bool %}
+  splunk:
+    image: splunk/splunk:latest
+    container_name: tools_splunk_1
+    hostname: splunk
+    ports:
+      - "8000:8000"
+      - "8089:8089"
+      - "9199:9199"
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: splunk_admin
+{% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
   # logstash:
