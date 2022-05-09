@@ -9,7 +9,6 @@ import pytest
 
 from awx.main import models
 from awx.conf.models import Setting
-from awx.conf.settings import in_memory_cache
 from awx.main.management.commands import regenerate_secret_key
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value
 
@@ -53,12 +52,12 @@ class TestKeyRegeneration:
         settings.cache.delete('REDHAT_PASSWORD')
 
         # verify that the old SECRET_KEY doesn't work
-        in_memory_cache.clear()
+        settings._awx_conf_memoizedcache.clear()
         with pytest.raises(InvalidToken):
             settings.REDHAT_PASSWORD
 
         # verify that the new SECRET_KEY *does* work
-        in_memory_cache.clear()
+        settings._awx_conf_memoizedcache.clear()
         with override_settings(SECRET_KEY=new_key):
             assert settings.REDHAT_PASSWORD == 'sensitive'
 

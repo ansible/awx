@@ -19,7 +19,6 @@ from django.urls import reverse, resolve
 
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
-from awx.conf.settings import in_memory_cache
 from awx.main.utils.profiling import AWXProfiler
 
 
@@ -37,7 +36,7 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
 
     def process_request(self, request):
         self.start_time = time.time()
-        in_memory_cache.clear()
+        settings._awx_conf_memoizedcache.clear()
         if settings.AWX_REQUEST_PROFILE:
             self.prof.start()
 

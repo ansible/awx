@@ -29,9 +29,7 @@ def handle_setting_change(key, for_delete=False):
     cache.delete_many(cache_keys)
 
     # if we have changed a setting, we want to avoid mucking with the in-memory cache entirely
-    from awx.conf.settings import in_memory_cache
-
-    in_memory_cache.clear()
+    settings._awx_conf_memoizedcache.clear()
 
     # Send setting_changed signal with new value for each setting.
     for setting_key in setting_keys:
