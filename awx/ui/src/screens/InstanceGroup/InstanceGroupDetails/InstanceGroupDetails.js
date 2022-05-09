@@ -62,10 +62,14 @@ function InstanceGroupDetails({ instanceGroup }) {
         <DetailBadge
           label={t`Policy instance minimum`}
           dataCy="instance-group-policy-instance-minimum"
+          helpText={t`Minimum number of instances that will be automatically
+          assigned to this group when new instances come online.`}
           content={instanceGroup.policy_instance_minimum}
         />
         <DetailBadge
           label={t`Policy instance percentage`}
+          helpText={t`Minimum percentage of all instances that will be automatically
+          assigned to this group when new instances come online.`}
           dataCy="instance-group-policy-instance-percentage"
           content={`${instanceGroup.policy_instance_percentage} %`}
         />

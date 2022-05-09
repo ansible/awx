@@ -50,6 +50,7 @@ function ContainerGroupDetails({ instanceGroup }) {
         {instanceGroup.summary_fields.credential && (
           <Detail
             label={t`Credential`}
+            helpText={t`Credential to authenticate with Kubernetes or OpenShift`}
             value={
               <Link
                 to={`/credentials/${instanceGroup?.summary_fields?.credential?.id}`}
@@ -81,6 +82,7 @@ function ContainerGroupDetails({ instanceGroup }) {
                 : instanceGroup.pod_spec_override
             }
             rows={6}
+            helpText={t`Custom Kubernetes or OpenShift Pod specification.`}
             name="pod_spec_override"
             dataCy="container-group-detail-pod-spec-override"
           />

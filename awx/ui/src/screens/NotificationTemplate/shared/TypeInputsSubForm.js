@@ -25,6 +25,7 @@ import {
   twilioPhoneNumber,
 } from 'util/validators';
 import { NotificationType } from 'types';
+import helpText from './Notifications.helptext';
 
 const TypeFields = {
   email: EmailFields,
@@ -37,7 +38,6 @@ const TypeFields = {
   twilio: TwilioFields,
   webhook: WebhookFields,
 };
-
 function TypeInputsSubForm({ type }) {
   const Fields = TypeFields[type];
   return (
@@ -87,8 +87,7 @@ function EmailFields() {
         validate={required(null)}
         isRequired
         rows={3}
-        tooltip={t`Enter one email address per line to create a recipient
-          list for this type of notification.`}
+        tooltip={helpText.emailRecepients}
       />
       <FormField
         id="email-sender"
@@ -117,9 +116,7 @@ function EmailFields() {
         isRequired
         min="1"
         max="120"
-        tooltip={t`The amount of time (in seconds) before the email
-          notification stops trying to reach the host and times out. Ranges
-          from 1 to 120 seconds.`}
+        tooltip={helpText.emailTimeout}
       />
       <FormGroup fieldId="email-options" label={t`E-mail options`}>
         <FormCheckboxLayout>
@@ -149,9 +146,7 @@ function GrafanaFields() {
         type="text"
         validate={required(null)}
         isRequired
-        tooltip={t`The base URL of the Grafana server - the
-        /api/annotations endpoint will be added automatically to the base
-        Grafana URL.`}
+        tooltip={helpText.grafanaUrl}
       />
       <PasswordField
         id="grafana-key"
@@ -178,7 +173,7 @@ function GrafanaFields() {
         name="notification_configuration.annotation_tags"
         type="textarea"
         rows={3}
-        tooltip={t`Enter one Annotation Tag per line, without commas.`}
+        tooltip={helpText.grafanaTags}
       />
       <CheckboxField
         id="grafana-ssl"
@@ -229,9 +224,7 @@ function IRCFields() {
         type="textarea"
         validate={required(null)}
         isRequired
-        tooltip={t`Enter one IRC channel or username per line. The pound
-          symbol (#) for channels, and the at (@) symbol for users, are not
-          required.`}
+        tooltip={helpText.ircTargets}
       />
       <CheckboxField
         id="grafana-ssl"
@@ -362,14 +355,7 @@ function SlackFields() {
         type="textarea"
         validate={required(null)}
         isRequired
-        tooltip={
-          <>
-            {t`Enter one Slack channel per line. The pound symbol (#)
-          is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack`}{' '}
-            <a href="https://api.slack.com/messaging/retrieving#individual_messages">{t`documentation`}</a>{' '}
-            <span>{t`for more information.`}</span>
-          </>
-        }
+        tooltip={helpText.slackChannels}
       />
       <PasswordField
         id="slack-token"
@@ -383,8 +369,7 @@ function SlackFields() {
         label={t`Notification color`}
         name="notification_configuration.hex_color"
         type="text"
-        tooltip={t`Specify a notification color. Acceptable colors are hex
-          color code (example: #3af or #789abc).`}
+        tooltip={helpText.slackColor}
       />
     </>
   );
@@ -407,8 +392,7 @@ function TwilioFields() {
         type="text"
         validate={combine([required(null), twilioPhoneNumber()])}
         isRequired
-        tooltip={t`Enter the number associated with the "Messaging
-          Service" in Twilio in the format +18005550199.`}
+        tooltip={helpText.twilioSourcePhoneNumber}
       />
       <ArrayTextField
         id="twilio-destination-numbers"
@@ -417,8 +401,7 @@ function TwilioFields() {
         type="textarea"
         validate={combine([required(null), twilioPhoneNumber()])}
         isRequired
-        tooltip={t`Enter one phone number per line to specify where to
-          route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation`}
+        tooltip={helpText.twilioDestinationNumbers}
       />
       <FormField
         id="twilio-account-sid"
@@ -469,8 +452,7 @@ function WebhookFields() {
           name="notification_configuration.headers"
           label={t`HTTP Headers`}
           mode="javascript"
-          tooltip={t`Specify HTTP Headers in JSON format. Refer to
-        the Ansible Tower documentation for example syntax.`}
+          tooltip={helpText.webhookHeaders}
           rows={5}
         />
       </FormFullWidthLayout>
