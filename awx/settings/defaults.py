@@ -955,6 +955,7 @@ RECEPTOR_RELEASE_WORK = True
 
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
+    'awx.main.middleware.SettingsCacheMiddleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',

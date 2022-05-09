@@ -26,6 +26,11 @@ logger = logging.getLogger('awx.main.middleware')
 perf_logger = logging.getLogger('awx.analytics.performance')
 
 
+class SettingsCacheMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        settings._awx_conf_memoizedcache.clear()
+
+
 class TimingMiddleware(threading.local, MiddlewareMixin):
 
     dest = '/var/log/tower/profile'
@@ -36,7 +41,6 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
 
     def process_request(self, request):
         self.start_time = time.time()
-        settings._awx_conf_memoizedcache.clear()
         if settings.AWX_REQUEST_PROFILE:
             self.prof.start()
 
