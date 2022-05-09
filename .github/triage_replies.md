@@ -12,6 +12,9 @@
 ## Create a Pull Request
 - Hello, we think your idea is good, please consider contributing a PR for this, following our contributing guidelines: https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md
 
+## Give us more info
+- Hello, we'd love to help but we need a little more information about the problem you're having. Screenshots, log outputs, or any reproducers would be very helpful. 
+
 ## Receptor
 - You can find the receptor docs here: https://receptor.readthedocs.io/en/latest/ 
 - Hello, your issue seems related to receptor, could you please open an issue in the receptor repository? https://github.com/ansible/receptor. Thanks!
