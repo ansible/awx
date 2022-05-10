@@ -24,7 +24,11 @@ function RoutedTabs({ tabsArray }) {
   const handleTabSelect = (event, eventKey) => {
     const match = tabsArray.find((tab) => tab.id === eventKey);
     if (match) {
-      history.push(match.link);
+      event.preventDefault();
+      const link = match.isBackButton
+        ? `${match.link}?restoreFilters=true`
+        : match.link;
+      history.push(link);
     }
   };
 
@@ -39,7 +43,7 @@ function RoutedTabs({ tabsArray }) {
           aria-label={typeof tab.name === 'string' ? tab.name : null}
           eventKey={tab.id}
           key={tab.id}
-          link={tab.link}
+          href={`#${tab.link}`}
           title={<TabTitleText>{tab.name}</TabTitleText>}
           aria-controls=""
           ouiaId={`${tab.name}-tab`}
