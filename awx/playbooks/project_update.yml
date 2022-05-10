@@ -26,10 +26,9 @@
   tasks:
 
     - name: delete project directory before update
-      command: "rm -rf {{project_path}}/* {{project_path}}/.* 2>&-"  # volume mounted, cannot delete folder itself
+      command: "rm -rf {{project_path}}/*"  # volume mounted, cannot delete folder itself
       tags:
         - delete
-      ignore_errors: true
 
     - block:
         - name: update project using git
