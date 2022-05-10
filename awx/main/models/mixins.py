@@ -407,17 +407,10 @@ class TaskManagerUnifiedJobMixin(models.Model):
     def get_jobs_fail_chain(self):
         return []
 
-    def dependent_jobs_finished(self):
-        return True
-
 
 class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
-
-    def dependent_jobs_finished(self):
-        # if any dependent jobs are pending, waiting, or running, return False
-        return not any(j.status in ACTIVE_STATES for j in self.dependent_jobs.all())
 
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
@@ -430,7 +423,17 @@ class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
         abstract = True
 
     def get_jobs_fail_chain(self):
-        return list(self.unifiedjob_blocked_jobs.all())
+        # project update can be a dependency of an inventory update, in which
+        # case we need to fail the job that may have spawned the inventory
+        # update.
+        # The inventory update will fail, but since it is not running it will
+        # not cascade fail to the job from the errback logic in apply_async. As
+        # such we should capture it here.
+        blocked_jobs = list(self.unifiedjob_blocked_jobs.all().prefetch_related("unifiedjob_blocked_jobs"))
+        other_tasks = []
+        for b in blocked_jobs:
+            other_tasks += list(b.unifiedjob_blocked_jobs.all())
+        return blocked_jobs + other_tasks
 
 
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
@@ -451,10 +454,6 @@ class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
                 if type(dep) is type(self) and dep.id != self.id:
                     other_updates.append(dep)
         return blocked_jobs + other_updates
-
-    def dependent_jobs_finished(self):
-        # if any dependent jobs are pending, waiting, or running, return False
-        return not any(j.status in ACTIVE_STATES for j in self.dependent_jobs.all())
 
 
 class ExecutionEnvironmentMixin(models.Model):

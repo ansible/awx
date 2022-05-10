@@ -34,6 +34,7 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, schedule_task_manager
 from awx.main.utils.common import create_partition
 from awx.main.signals import disable_activity_stream
+from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.scheduler.task_manager_models import TaskManagerInstances
 from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups
@@ -79,10 +80,23 @@ class TaskManager:
         if blocked_by:
             return blocked_by
 
-        if not task.dependent_jobs_finished():
-            blocked_by = task.dependent_jobs.first()
-            if blocked_by:
-                return blocked_by
+        for dep in task.dependent_jobs.all():
+            if dep.status in ACTIVE_STATES:
+                return dep
+            # if we detect a failed or error dependency, go ahead and fail this
+            # task. The errback on the dependency takes some time to trigger,
+            # and we don't want the task to enter running state if its
+            # dependency has failed or errored.
+            elif dep.status in ("error", "failed"):
+                task.status = 'failed'
+                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                    get_type_for_model(type(dep)),
+                    dep.name,
+                    dep.id,
+                )
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status('failed')
+                return dep
 
         return None
 
