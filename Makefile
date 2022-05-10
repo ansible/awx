@@ -225,7 +225,7 @@ ansible_cloud_legacy:
 	cat requirements/ansible_cloud_legacy.txt | $(VENV_BASE)/ansible_cloud_legacy/bin/pip install -r /dev/stdin
 
 ansible_network:
-	virtualenv -p python3 $(VENV_BASE)/ansible_network
+	virtualenv -p python3.9 $(VENV_BASE)/ansible_network
 	cat requirements/ansible_network.txt | $(VENV_BASE)/ansible_network/bin/pip install -r /dev/stdin
 
 ansible_ovzcloud:
