@@ -548,17 +548,21 @@ function selectSourceForLinking(state, sourceNode) {
       invalidLinkTargetIds.push(link.target.id);
     }
     if (!parentMap[link.target.id]) {
-      parentMap[link.target.id] = [];
+      parentMap[link.target.id] = {
+        parents: [],
+        traversed: false,
+      };
     }
-    parentMap[link.target.id].push(link.source.id);
+    parentMap[link.target.id].parents.push(link.source.id);
   });
 
   const getAncestors = (id) => {
-    if (parentMap[id]) {
-      parentMap[id].forEach((parentId) => {
+    if (parentMap[id] && !parentMap[id].traversed) {
+      parentMap[id].parents.forEach((parentId) => {
         invalidLinkTargetIds.push(parentId);
         getAncestors(parentId);
       });
+      parentMap[id].traversed = true;
     }
   };
 
