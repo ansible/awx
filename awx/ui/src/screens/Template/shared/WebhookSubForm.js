@@ -22,6 +22,9 @@ import {
   WorkflowJobTemplatesAPI,
   CredentialTypesAPI,
 } from 'api';
+import wfHelpTextStrings from './WorkflowJobTemplate.helptext';
+
+const helpText = wfHelpTextStrings();
 
 function WebhookSubForm({ templateType }) {
   const { setFieldValue } = useFormikContext();
@@ -125,7 +128,7 @@ function WebhookSubForm({ templateType }) {
         fieldId="webhook_service"
         helperTextInvalid={webhookServiceMeta.error}
         label={t`Webhook Service`}
-        labelIcon={<Popover content={t`Select a webhook service.`} />}
+        labelIcon={<Popover content={helpText.webhookService} />}
       >
         <AnsibleSelect
           {...webhookServiceField}
@@ -157,11 +160,7 @@ function WebhookSubForm({ templateType }) {
           type="text"
           fieldId="jt-webhookURL"
           label={t`Webhook URL`}
-          labelIcon={
-            <Popover
-              content={t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`}
-            />
-          }
+          labelIcon={<Popover content={helpText.webhookURL} />}
           name="webhook_url"
         >
           <TextInput
@@ -173,11 +172,7 @@ function WebhookSubForm({ templateType }) {
         </FormGroup>
         <FormGroup
           label={t`Webhook Key`}
-          labelIcon={
-            <Popover
-              content={t`Webhook services can use this as a shared secret.`}
-            />
-          }
+          labelIcon={<Popover content={helpText.webhookKey} />}
           fieldId="template-webhook_key"
         >
           <InputGroup>
@@ -203,7 +198,7 @@ function WebhookSubForm({ templateType }) {
       {credTypeId && (
         <CredentialLookup
           label={t`Webhook Credential`}
-          tooltip={t`Optionally select the credential to use to send status updates back to the webhook service.`}
+          tooltip={helpText.webhookCredential}
           credentialTypeId={credTypeId}
           onChange={onCredentialChange}
           isValid={!webhookCredentialMeta.error}

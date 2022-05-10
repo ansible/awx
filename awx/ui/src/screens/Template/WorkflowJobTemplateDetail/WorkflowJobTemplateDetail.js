@@ -25,9 +25,10 @@ import Sparkline from 'components/Sparkline';
 import { toTitleCase } from 'util/strings';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import jtHelpTextStrings from '../shared/JobTemplate.helptext';
+import wfHelpTextStrings from '../shared/WorkflowJobTemplate.helptext';
 
-const helpText = jtHelpTextStrings();
+const helpText = wfHelpTextStrings();
+
 function WorkflowJobTemplateDetail({ template }) {
   const {
     id,
@@ -137,11 +138,7 @@ function WorkflowJobTemplateDetail({ template }) {
             helpText={helpText.sourceControlBranch}
           />
         )}
-        <Detail
-          label={t`Job Type`}
-          value={toTitleCase(type)}
-          helpText={helpText.jobType}
-        />
+        <Detail label={t`Job Type`} value={toTitleCase(type)} />
         {summary_fields.inventory && (
           <Detail
             label={t`Inventory`}
