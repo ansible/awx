@@ -620,6 +620,11 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         on_delete=models.SET_NULL,
         help_text=_("If automatically created for a sliced job run, the job template " "the workflow job was created from."),
     )
+    artifacts = JSONBlob(
+        default=dict,
+        blank=True,
+        editable=False,
+    )
     is_sliced_job = models.BooleanField(default=False)
 
     @property
