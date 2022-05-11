@@ -17,6 +17,8 @@ export default function PersistentFilters({ pageKey, children }) {
 
     if (filter.pageKey === pageKey) {
       history.replace(`${location.pathname}${filter.qs}`);
+    } else {
+      history.replace(location.pathname);
     }
   }, [history, location, pageKey]);
 
