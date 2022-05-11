@@ -323,7 +323,7 @@ function JobTemplateForm({
           onBlur={() => executionEnvironmentHelpers.setTouched()}
           value={executionEnvironmentField.value}
           onChange={handleExecutionEnvironmentUpdate}
-          popoverContent={helpText.executionEnvironment}
+          popoverContent={helpText.executionEnvironmentForm}
           tooltip={t`Select a project before editing the execution environment.`}
           globallyAvailable
           isDisabled={!projectField.value?.id}

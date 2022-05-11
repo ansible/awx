@@ -245,7 +245,7 @@ function JobTemplateDetail({ template }) {
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.resolved_environment}
-          helpText={helpText.executionEnvironment}
+          helpText={helpText.executionEnvironmentDetail}
           dataCy="jt-detail-execution-environment"
         />
         <Detail
