@@ -1451,8 +1451,8 @@ class RunProjectUpdate(BaseTask):
         params.setdefault('container_volume_mounts', [])
         params['container_volume_mounts'].extend(
             [
-                f"{project_path}:{project_path}:Z",
-                f"{cache_path}:{cache_path}:Z",
+                f"{project_path}:{project_path}:z",
+                f"{cache_path}:{cache_path}:z",
             ]
         )
         return params
