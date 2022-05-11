@@ -13,6 +13,7 @@ import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import AnsibleSelect from 'components/AnsibleSelect';
 import Popover from 'components/Popover';
+import applicationHelpTextStrings from './Application.helptext';
 
 function ApplicationFormFields({
   application,
@@ -83,7 +84,7 @@ function ApplicationFormFields({
         label={t`Authorization grant type`}
         labelIcon={
           <Popover
-            content={t`The Grant type the user must use to acquire tokens for this application`}
+            content={applicationHelpTextStrings.authorizationGrantType}
           />
         }
       >
@@ -113,7 +114,7 @@ function ApplicationFormFields({
             ? required(null)
             : null
         }
-        tooltip={t`Allowed URIs list, space separated`}
+        tooltip={applicationHelpTextStrings.redirectURIS}
       />
       <FormGroup
         fieldId="clientType"
@@ -123,11 +124,7 @@ function ApplicationFormFields({
         }
         isRequired
         label={t`Client type`}
-        labelIcon={
-          <Popover
-            content={t`Set to Public or Confidential depending on how secure the client device is.`}
-          />
-        }
+        labelIcon={<Popover content={applicationHelpTextStrings.clientType} />}
       >
         <AnsibleSelect
           {...clientTypeField}
@@ -145,7 +142,6 @@ function ApplicationFormFields({
 function ApplicationForm({
   onCancel,
   onSubmit,
-
   submitError,
   application,
   authorizationOptions,

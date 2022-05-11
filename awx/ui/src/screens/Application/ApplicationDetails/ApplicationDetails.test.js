@@ -111,7 +111,7 @@ describe('<ApplicationDetails/>', () => {
     expect(
       wrapper.find('Detail[label="Authorization grant type"]').prop('value')
     ).toBe('Authorization code');
-    expect(wrapper.find('Detail[label="Redirect uris"]').prop('value')).toBe(
+    expect(wrapper.find('Detail[label="Redirect URIs"]').prop('value')).toBe(
       'http://www.google.com'
     );
     expect(wrapper.find('Detail[label="Client type"]').prop('value')).toBe(
