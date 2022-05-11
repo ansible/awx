@@ -537,6 +537,7 @@ class ScheduleList(ListCreateAPIView):
     name = _("Schedules")
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
+    ordering = ('id',)
 
 
 class ScheduleDetail(RetrieveUpdateDestroyAPIView):
