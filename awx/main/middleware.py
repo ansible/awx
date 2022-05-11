@@ -26,6 +26,17 @@ logger = logging.getLogger('awx.main.middleware')
 perf_logger = logging.getLogger('awx.analytics.performance')
 
 
+class SettingsCacheMiddleware(MiddlewareMixin):
+    """
+    Clears the in-memory settings cache at the beginning of a request.
+    We do this so that a script can POST to /api/v2/settings/all/ and then
+    right away GET /api/v2/settings/all/ and see the updated value.
+    """
+
+    def process_request(self, request):
+        settings._awx_conf_memoizedcache.clear()
+
+
 class TimingMiddleware(threading.local, MiddlewareMixin):
 
     dest = '/var/log/tower/profile'
