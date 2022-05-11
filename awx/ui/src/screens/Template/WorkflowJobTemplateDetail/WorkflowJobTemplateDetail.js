@@ -25,6 +25,9 @@ import Sparkline from 'components/Sparkline';
 import { toTitleCase } from 'util/strings';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import wfHelpTextStrings from '../shared/WorkflowJobTemplate.helptext';
+
+const helpText = wfHelpTextStrings();
 
 function WorkflowJobTemplateDetail({ template }) {
   const {
@@ -132,34 +135,48 @@ function WorkflowJobTemplateDetail({ template }) {
             dataCy="source-control-branch"
             label={t`Source Control Branch`}
             value={scmBranch}
+            helpText={helpText.sourceControlBranch}
           />
         )}
         <Detail label={t`Job Type`} value={toTitleCase(type)} />
         {summary_fields.inventory && (
           <Detail
             label={t`Inventory`}
+            helpText={helpText.inventory}
             value={inventoryValue(
               summary_fields.inventory.kind,
               summary_fields.inventory.id
             )}
           />
         )}
-        <Detail dataCy="limit" label={t`Limit`} value={limit} />
+        <Detail
+          dataCy="limit"
+          label={t`Limit`}
+          value={limit}
+          helpText={helpText.limit}
+        />
         <Detail
           label={t`Webhook Service`}
           value={toTitleCase(template.webhook_service)}
+          helpText={helpText.webhookService}
         />
         {related.webhook_receiver && (
           <Detail
             label={t`Webhook URL`}
+            helpText={helpText.webhookURL}
             value={`${urlOrigin}${template.related.webhook_receiver}`}
           />
         )}
-        <Detail label={t`Webhook Key`} value={webhook_key} />
+        <Detail
+          label={t`Webhook Key`}
+          value={webhook_key}
+          helpText={helpText.webhookKey}
+        />
         {webhook_credential && (
           <Detail
             fullWidth
             label={t`Webhook Credentials`}
+            helpText={helpText.webhookCredential}
             value={
               <Link
                 to={`/credentials/${summary_fields.webhook_credential.id}/details`}
@@ -180,12 +197,18 @@ function WorkflowJobTemplateDetail({ template }) {
           user={summary_fields.modified_by}
         />
         {renderOptionsField && (
-          <Detail fullWidth label={t`Enabled Options`} value={renderOptions} />
+          <Detail
+            fullWidth
+            label={t`Enabled Options`}
+            value={renderOptions}
+            helpText={helpText.enabledOptions}
+          />
         )}
         {summary_fields.labels?.results?.length > 0 && (
           <Detail
             fullWidth
             label={t`Labels`}
+            helpText={helpText.labels}
             value={
               <ChipGroup
                 numChips={3}
@@ -203,6 +226,7 @@ function WorkflowJobTemplateDetail({ template }) {
         )}
         <VariablesDetail
           dataCy="workflow-job-template-detail-extra-vars"
+          helpText={helpText.variables}
           label={t`Variables`}
           value={extra_vars}
           rows={4}

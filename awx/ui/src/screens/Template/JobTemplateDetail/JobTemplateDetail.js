@@ -30,8 +30,10 @@ import { LaunchButton } from 'components/LaunchButton';
 import { VariablesDetail } from 'components/CodeEditor';
 import { JobTemplatesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import jtHelpTextStrings from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
   const {
@@ -64,6 +66,8 @@ function JobTemplateDetail({ template }) {
   } = template;
   const { id: templateId } = useParams();
   const history = useHistory();
+  const brandName = useBrandName();
+  const helpText = jtHelpTextStrings(brandName);
 
   const {
     isLoading: isLoadingInstanceGroups,
@@ -192,6 +196,7 @@ function JobTemplateDetail({ template }) {
           label={t`Job Type`}
           value={job_type}
           dataCy="jt-detail-job-type"
+          helpText={helpText.jobType}
         />
         {summary_fields.organization ? (
           <Detail
@@ -216,6 +221,7 @@ function JobTemplateDetail({ template }) {
               summary_fields.inventory.kind,
               summary_fields.inventory.id
             )}
+            helpText={helpText.inventory}
           />
         ) : (
           !ask_inventory_on_launch && (
@@ -231,6 +237,7 @@ function JobTemplateDetail({ template }) {
                 {summary_fields.project.name}
               </Link>
             }
+            helpText={helpText.project}
           />
         ) : (
           <DeletedDetail label={t`Project`} />
@@ -238,9 +245,7 @@ function JobTemplateDetail({ template }) {
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.resolved_environment}
-          helpText={t`The execution environment that will be used when launching
-          this job template. The resolved execution environment can be overridden by
-          explicitly assigning a different one to this job template.`}
+          helpText={helpText.executionEnvironment}
           dataCy="jt-detail-execution-environment"
         />
         <Detail
@@ -252,32 +257,43 @@ function JobTemplateDetail({ template }) {
           label={t`Playbook`}
           value={playbook}
           dataCy="jt-detail-playbook"
+          helpText={helpText.playbook}
         />
         <Detail
           label={t`Forks`}
           value={forks || '0'}
           dataCy="jt-detail-forks"
+          helpText={helpText.forks}
         />
-        <Detail label={t`Limit`} value={limit} dataCy="jt-detail-limit" />
+        <Detail
+          label={t`Limit`}
+          value={limit}
+          dataCy="jt-detail-limit"
+          helpText={helpText.limit}
+        />
         <Detail
           label={t`Verbosity`}
           value={verbosityDetails[0].details}
           dataCy="jt-detail-verbosity"
+          helpText={helpText.verbosity}
         />
         <Detail
           label={t`Timeout`}
           value={timeout || '0'}
           dataCy="jt-detail-timeout"
+          helpText={helpText.timeout}
         />
         <Detail
           label={t`Show Changes`}
           value={diff_mode ? t`On` : t`Off`}
           dataCy="jt-detail-show-changes"
+          helpText={helpText.showChanges}
         />
         <Detail
           label={t`Job Slicing`}
           value={job_slice_count}
           dataCy="jt-detail-job-slice-count"
+          helpText={helpText.jobSlicing}
         />
         {host_config_key && (
           <>
@@ -290,6 +306,7 @@ function JobTemplateDetail({ template }) {
               label={t`Provisioning Callback URL`}
               value={generateCallBackUrl}
               dataCy="jt-detail-provisioning-callback-url"
+              helpText={helpText.provisioningCallbacks}
             />
           </>
         )}
@@ -298,6 +315,7 @@ function JobTemplateDetail({ template }) {
             label={t`Webhook Service`}
             value={webhook_service === 'github' ? t`GitHub` : t`GitLab`}
             dataCy="jt-detail-webhook-service"
+            helpText={helpText.webhookService}
           />
         )}
         {webhook_receiver && (
@@ -305,17 +323,20 @@ function JobTemplateDetail({ template }) {
             label={t`Webhook URL`}
             value={`${document.location.origin}${webhook_receiver}`}
             dataCy="jt-detail-webhook-url"
+            helpText={helpText.webhookURL}
           />
         )}
         <Detail
           label={t`Webhook Key`}
           value={webhook_key}
           dataCy="jt-detail-webhook-key"
+          helpText={helpText.webhookKey}
         />
         {summary_fields.webhook_credential && (
           <Detail
             label={t`Webhook Credential`}
             dataCy="jt-detail-webhook-credential"
+            helpText={helpText.webhookCredential}
             value={
               <Link
                 to={`/credentials/${summary_fields.webhook_credential.id}/details`}
@@ -341,6 +362,7 @@ function JobTemplateDetail({ template }) {
             label={t`Enabled Options`}
             value={renderOptions}
             dataCy="jt-detail-enabled-options"
+            helpText={helpText.enabledOptions}
           />
         )}
         {summary_fields.credentials && summary_fields.credentials.length > 0 && (
@@ -348,6 +370,7 @@ function JobTemplateDetail({ template }) {
             fullWidth
             label={t`Credentials`}
             dataCy="jt-detail-credentials"
+            helpText={helpText.credentials}
             value={
               <ChipGroup
                 numChips={5}
@@ -373,6 +396,7 @@ function JobTemplateDetail({ template }) {
             fullWidth
             label={t`Labels`}
             dataCy="jt-detail-labels"
+            helpText={helpText.labels}
             value={
               <ChipGroup
                 numChips={5}
@@ -393,6 +417,7 @@ function JobTemplateDetail({ template }) {
             fullWidth
             label={t`Instance Groups`}
             dataCy="jt-detail-instance-groups"
+            helpText={helpText.instanceGroups}
             value={
               <ChipGroup
                 numChips={5}
@@ -419,6 +444,7 @@ function JobTemplateDetail({ template }) {
             fullWidth
             label={t`Job Tags`}
             dataCy="jt-detail-job-tags"
+            helpText={helpText.jobTags}
             value={
               <ChipGroup
                 numChips={5}
@@ -443,6 +469,7 @@ function JobTemplateDetail({ template }) {
             fullWidth
             label={t`Skip Tags`}
             dataCy="jt-detail-skip-tags"
+            helpText={helpText.skipTags}
             value={
               <ChipGroup
                 numChips={5}
@@ -468,6 +495,7 @@ function JobTemplateDetail({ template }) {
           label={t`Variables`}
           dataCy={`jt-detail-${template.id}`}
           name="extra_vars"
+          helpText={helpText.variables}
         />
       </DetailList>
       <CardActionsRow>

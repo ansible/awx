@@ -45,6 +45,7 @@ import useIsMounted from 'hooks/useIsMounted';
 import LabelSelect from 'components/LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
+import jtHelpTextStrings from './JobTemplate.helptext';
 
 const { origin } = document.location;
 
@@ -67,6 +68,7 @@ function JobTemplateForm({
   );
   const isMounted = useIsMounted();
   const brandName = useBrandName();
+  const helpText = jtHelpTextStrings(brandName);
 
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
@@ -258,10 +260,7 @@ function JobTemplateForm({
           label={t`Job Type`}
           promptId="template-ask-job-type-on-launch"
           promptName="ask_job_type_on_launch"
-          tooltip={t`For job templates, select run to execute
-            the playbook. Select check to only check playbook syntax,
-            test environment setup, and report problems without
-            executing the playbook.`}
+          tooltip={helpText.jobType}
         >
           <AnsibleSelect
             {...jobTypeField}
@@ -290,8 +289,7 @@ function JobTemplateForm({
             promptId="template-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
             isPromptableField
-            tooltip={t`Select the inventory containing the hosts
-            you want this job to manage.`}
+            tooltip={helpText.inventory}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={handleInventoryUpdate}
             required={!askInventoryOnLaunchField.value}
@@ -305,8 +303,7 @@ function JobTemplateForm({
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
-          tooltip={t`Select the project containing the playbook
-                  you want this job to execute.`}
+          tooltip={helpText.project}
           isValid={Boolean(
             !projectMeta.touched || (!projectMeta.error && projectField.value)
           )}
@@ -326,7 +323,7 @@ function JobTemplateForm({
           onBlur={() => executionEnvironmentHelpers.setTouched()}
           value={executionEnvironmentField.value}
           onChange={handleExecutionEnvironmentUpdate}
-          popoverContent={t`Select the execution environment for this job template.`}
+          popoverContent={helpText.executionEnvironment}
           tooltip={t`Select a project before editing the execution environment.`}
           globallyAvailable
           isDisabled={!projectField.value?.id}
@@ -339,8 +336,7 @@ function JobTemplateForm({
             label={t`Source Control Branch`}
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
-            tooltip={t`Select a branch for the job template. This branch is applied to
-              all job template nodes that prompt for a branch.`}
+            tooltip={helpText.sourceControlBranch}
           >
             <TextInput
               id="template-scm-branch"
@@ -360,11 +356,7 @@ function JobTemplateForm({
           }
           isRequired
           label={t`Playbook`}
-          labelIcon={
-            <Popover
-              content={t`Select the playbook to be executed by this job.`}
-            />
-          }
+          labelIcon={<Popover content={helpText.playbook} />}
         >
           <PlaybookSelect
             onChange={handlePlaybookUpdate}
@@ -381,11 +373,7 @@ function JobTemplateForm({
             label={t`Credentials`}
             promptId="template-ask-credential-on-launch"
             promptName="ask_credential_on_launch"
-            tooltip={t`Select credentials for accessing the nodes this job will be ran
-                against. You can only select one credential of each type. For machine credentials (SSH),
-                checking "Prompt on launch" without selecting credentials will require you to select a machine
-                credential at run time. If you select credentials and check "Prompt on launch", the selected
-                credential(s) become the defaults that can be updated at run time.`}
+            tooltip={helpText.credentials}
           >
             <MultiCredentialsLookup
               value={credentialField.value}
@@ -397,13 +385,7 @@ function JobTemplateForm({
           </FieldWithPrompt>
           <FormGroup
             label={t`Labels`}
-            labelIcon={
-              <Popover
-                content={t`Optional labels that describe this job template,
-                      such as 'dev' or 'test'. Labels can be used to group and filter
-                      job templates and completed jobs.`}
-              />
-            }
+            labelIcon={<Popover content={helpText.labels} />}
             fieldId="template-labels"
           >
             <LabelSelect
@@ -418,10 +400,7 @@ function JobTemplateForm({
             name="extra_vars"
             label={t`Variables`}
             promptId="template-ask-variables-on-launch"
-            tooltip={t`Pass extra command line variables to the playbook. This is the
-              -e or --extra-vars command line parameter for ansible-playbook.
-              Provide key/value pairs using either YAML or JSON. Refer to the
-              documentation for example syntax.`}
+            tooltip={helpText.variables}
           />
           <FormColumnLayout>
             <FormField
@@ -430,28 +409,14 @@ function JobTemplateForm({
               type="number"
               min="0"
               label={t`Forks`}
-              tooltip={
-                <span>
-                  {t`The number of parallel or simultaneous
-                    processes to use while executing the playbook. An empty value,
-                    or a value less than 1 will use the Ansible default which is
-                    usually 5. The default number of forks can be overwritten
-                    with a change to`}{' '}
-                  <code>ansible.cfg</code>.{' '}
-                  {t`Refer to the Ansible documentation for details
-                        about the configuration file.`}
-                </span>
-              }
+              tooltip={helpText.forks}
             />
             <FieldWithPrompt
               fieldId="template-limit"
               label={t`Limit`}
               promptId="template-ask-limit-on-launch"
               promptName="ask_limit_on_launch"
-              tooltip={t`Provide a host pattern to further constrain
-                  the list of hosts that will be managed or affected by the
-                  playbook. Multiple patterns are allowed. Refer to Ansible
-                  documentation for more information and examples on patterns.`}
+              tooltip={helpText.limit}
             >
               <TextInput
                 id="template-limit"
@@ -469,8 +434,7 @@ function JobTemplateForm({
               label={t`Verbosity`}
               promptId="template-ask-verbosity-on-launch"
               promptName="ask_verbosity_on_launch"
-              tooltip={t`Control the level of output ansible will
-                produce as the playbook executes.`}
+              tooltip={helpText.verbosity}
             >
               <AnsibleSelect
                 id="template-verbosity"
@@ -484,9 +448,7 @@ function JobTemplateForm({
               type="number"
               min="1"
               label={t`Job Slicing`}
-              tooltip={t`Divide the work done by this job template
-                  into the specified number of job slices, each running the
-                  same tasks against a portion of the inventory.`}
+              tooltip={helpText.jobSlicing}
             />
             <FormField
               id="template-timeout"
@@ -494,18 +456,14 @@ function JobTemplateForm({
               type="number"
               min="0"
               label={t`Timeout`}
-              tooltip={t`The amount of time (in seconds) to run
-                  before the job is canceled. Defaults to 0 for no job
-                  timeout.`}
+              tooltip={helpText.timeout}
             />
             <FieldWithPrompt
               fieldId="template-diff-mode"
               label={t`Show Changes`}
               promptId="template-ask-diff-mode-on-launch"
               promptName="ask_diff_mode_on_launch"
-              tooltip={t`If enabled, show the changes made by
-                Ansible tasks, where supported. This is equivalent
-                to Ansible's --diff mode.`}
+              tooltip={helpText.showChanges}
             >
               <Switch
                 id="template-show-changes"
@@ -518,8 +476,7 @@ function JobTemplateForm({
               <InstanceGroupsLookup
                 value={instanceGroupsField.value}
                 onChange={(value) => instanceGroupsHelpers.setValue(value)}
-                tooltip={t`Select the Instance Groups for this Job Template
-                        to run on.`}
+                tooltip={helpText.instanceGroups}
                 fieldName="instanceGroups"
               />
               <FieldWithPrompt
@@ -527,11 +484,7 @@ function JobTemplateForm({
                 label={t`Job Tags`}
                 promptId="template-ask-tags-on-launch"
                 promptName="ask_tags_on_launch"
-                tooltip={t`Tags are useful when you have a large
-                    playbook, and you want to run a specific part of a
-                    play or task. Use commas to separate multiple tags.
-                    Refer to the documentation for details on
-                    the usage of tags.`}
+                tooltip={helpText.jobTags}
               >
                 <TagMultiSelect
                   value={jobTagsField.value}
@@ -543,11 +496,7 @@ function JobTemplateForm({
                 label={t`Skip Tags`}
                 promptId="template-ask-skip-tags-on-launch"
                 promptName="ask_skip_tags_on_launch"
-                tooltip={t`Skip tags are useful when you have a
-                    large playbook, and you want to skip specific parts of a
-                    play or task. Use commas to separate multiple tags. Refer
-                    to the documentation for details on the usage
-                    of tags.`}
+                tooltip={helpText.skipTags}
               >
                 <TagMultiSelect
                   value={skipTagsField.value}
@@ -563,8 +512,7 @@ function JobTemplateForm({
                     id="option-privilege-escalation"
                     name="become_enabled"
                     label={t`Privilege Escalation`}
-                    tooltip={t`If enabled, run this playbook as an
-                        administrator.`}
+                    tooltip={helpText.privilegeEscalation}
                   />
                   <Checkbox
                     aria-label={t`Provisioning Callbacks`}
@@ -572,12 +520,7 @@ function JobTemplateForm({
                       <span>
                         {t`Provisioning Callbacks`}
                         &nbsp;
-                        <Popover
-                          content={t`Enables creation of a provisioning
-                              callback URL. Using the URL a host can contact ${brandName}
-                              and request a configuration update using this job
-                              template.`}
-                        />
+                        <Popover content={helpText.provisioningCallbacks} />
                       </span>
                     }
                     id="option-callbacks"
@@ -593,9 +536,7 @@ function JobTemplateForm({
                       <span>
                         {t`Enable Webhook`}
                         &nbsp;
-                        <Popover
-                          content={t`Enable webhook for this template.`}
-                        />
+                        <Popover content={helpText.enableWebhook} />
                       </span>
                     }
                     id="wfjt-enabled-webhooks"
@@ -609,16 +550,13 @@ function JobTemplateForm({
                     id="option-concurrent"
                     name="allow_simultaneous"
                     label={t`Concurrent Jobs`}
-                    tooltip={t`If enabled, simultaneous runs of this job
-                        template will be allowed.`}
+                    tooltip={helpText.concurrentJobs}
                   />
                   <CheckboxField
                     id="option-fact-cache"
                     name="use_fact_cache"
                     label={t`Enable Fact Storage`}
-                    tooltip={t`If enabled, this will store gathered facts so they can
-                      be viewed at the host level. Facts are persisted and
-                      injected into the fact cache at runtime.`}
+                    tooltip={helpText.enableFactStorage}
                   />
                 </FormCheckboxLayout>
               </FormGroup>
