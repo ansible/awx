@@ -30,11 +30,11 @@ import { LaunchButton } from 'components/LaunchButton';
 import { VariablesDetail } from 'components/CodeEditor';
 import { JobTemplatesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import jtHelpTextStrings from '../shared/JobTemplate.helptext';
 
-const helpText = jtHelpTextStrings();
 function JobTemplateDetail({ template }) {
   const {
     ask_inventory_on_launch,
@@ -66,6 +66,8 @@ function JobTemplateDetail({ template }) {
   } = template;
   const { id: templateId } = useParams();
   const history = useHistory();
+  const brandName = useBrandName();
+  const helpText = jtHelpTextStrings(brandName);
 
   const {
     isLoading: isLoadingInstanceGroups,

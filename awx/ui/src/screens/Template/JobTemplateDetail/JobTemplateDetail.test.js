@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI } from 'api';
+import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI, RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -26,6 +26,11 @@ describe('<JobTemplateDetail />', () => {
   beforeEach(async () => {
     JobTemplatesAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
     WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplateDetail template={mockTemplate} />
