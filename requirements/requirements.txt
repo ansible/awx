@@ -82,8 +82,6 @@ defusedxml==0.6.0
     # via
     #   python3-openid
     #   social-auth-core
-dictdiffer==0.8.1
-    # via openshift
 distro==1.5.0
     # via -r /awx_devel/requirements/requirements.in
 django==3.2.13
@@ -153,7 +151,7 @@ idna==2.9
     #   requests
     #   twisted
     #   yarl
-incremental==17.5.0
+incremental==21.3.0
     # via twisted
 irc==18.0.0
     # via -r /awx_devel/requirements/requirements.in
@@ -179,15 +177,15 @@ jaraco-text==3.2.0
     #   irc
     #   jaraco-collections
 jinja2==3.0.3
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   openshift
+    # via -r /awx_devel/requirements/requirements.in
 json-log-formatter==0.3.0
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==3.2.0
     # via -r /awx_devel/requirements/requirements.in
-kubernetes==11.0.0
-    # via openshift
+kubernetes==23.3.0
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   openshift
 lockfile==0.12.2
     # via python-daemon
 lxml==4.7.0
@@ -223,7 +221,7 @@ oauthlib==3.2.0
     #   django-oauth-toolkit
     #   requests-oauthlib
     #   social-auth-core
-openshift==0.11.0
+openshift==0.13.1
     # via -r /awx_devel/requirements/requirements.in
 packaging==21.3
     # via
@@ -260,8 +258,6 @@ pycparser==2.20
     # via cffi
 pygerduty==0.38.2
     # via -r /awx_devel/requirements/requirements.in
-pyhamcrest==2.0.2
-    # via twisted
 pyjwt==2.3.0
     # via
     #   adal
@@ -286,7 +282,7 @@ python-dateutil==2.8.1
     #   receptorctl
 python-dsv-sdk==0.0.1
     # via -r /awx_devel/requirements/requirements.in
-python-ldap==3.3.1
+python-ldap==3.4.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-auth-ldap
@@ -338,8 +334,6 @@ requests-oauthlib==1.3.1
     #   social-auth-core
 rsa==4.7.2
     # via google-auth
-ruamel-yaml==0.16.10
-    # via openshift
 schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
 semantic-version==2.9.0
@@ -382,8 +376,10 @@ social-auth-core==4.2.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   social-auth-app-django
-sqlparse==0.3.1
-    # via django
+sqlparse==0.4.2
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django
 tacacs-plus==1.0
     # via -r /awx_devel/requirements/requirements.in
 tempora==2.1.0
@@ -394,7 +390,7 @@ tomli==2.0.1
     # via setuptools-scm
 twilio==6.37.0
     # via -r /awx_devel/requirements/requirements.in
-twisted[tls]==20.3.0
+twisted[tls]==22.4.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   daphne
@@ -404,6 +400,7 @@ typing-extensions==3.10.0.2
     # via
     #   aiohttp
     #   setuptools-rust
+    #   twisted
 urllib3==1.26.5
     # via
     #   kubernetes

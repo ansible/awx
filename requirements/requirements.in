@@ -5,7 +5,7 @@ autobahn>=20.12.3  # CVE-2020-35678
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
-cryptography>=35.0.0
+cryptography>=36.0.2,<37.0.0 # Until paramiko fixes https://github.com/paramiko/paramiko/issues/2038 we don't want to go to 37 or we end up with blowfish warnings in the job output
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
@@ -30,8 +30,9 @@ irc
 jinja2>=2.11.3  # CVE-2020-28493
 JSON-log-formatter
 jsonschema
+kubernetes>=12.0.0  # CVE-2020-1747
 Markdown  # used for formatting API help
-openshift>=0.11.0  # minimum version to pull in new pyyaml for CVE-2017-18342
+openshift>=0.12.0  # minimum version to pull in new pyyaml for CVE-2017-18342, minimum version to pull in new kubernetes for CVE-2020-1747
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
@@ -41,7 +42,7 @@ pyparsing
 python3-saml==1.13.0
 python-dsv-sdk
 python-tss-sdk==1.0.0
-python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
+python-ldap>=3.4.0 # https://github.com/ansible/awx/security/dependabot/20
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
 receptorctl==1.1.1
 schedule==0.6.0
@@ -49,10 +50,11 @@ social-auth-core==4.2.0  # see UPGRADE BLOCKERs
 social-auth-app-django==5.0.0  # see UPGRADE BLOCKERs
 redis
 requests
+sqlparse>=0.4.2 # Required by Django, pinning for CVE-2021-32839
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
-twisted[tls]>=20.3.0  # CVE-2020-10108, CVE-2020-10109
+twisted[tls]>=22.4.0  # CVE-2020-10108, CVE-2020-10109, CVE-2022-21712 (https://github.com/ansible/awx/security/dependabot/46), https://github.com/ansible/awx/security/dependabot/53
 uWSGI
 uwsgitop
 wheel

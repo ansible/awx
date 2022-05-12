@@ -32,6 +32,7 @@ generate_requirements() {
 }
 
 main() {
+  base_dir=$(pwd)
   _tmp="$(mktemp -d --suffix .awx-requirements XXXX -p /tmp)"
   trap _cleanup INT TERM EXIT
 
@@ -44,7 +45,8 @@ main() {
 
   generate_requirements
 
-  cp -vf requirements.txt "${requirements}"
+  echo "Changing $base_dir to /awx_devel/requirements"
+  cat requirements.txt | sed "s:$base_dir:/awx_devel/requirements:" > "${requirements}"
 
   _cleanup
 }
