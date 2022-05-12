@@ -195,7 +195,7 @@ function ProjectListItem({
           )}
         </TdBreakWord>
         <Td dataLabel={t`Status`}>
-          {job && (
+          {job ? (
             <Tooltip
               position="top"
               content={generateLastJobTooltip(job)}
@@ -204,6 +204,14 @@ function ProjectListItem({
               <Link to={`/jobs/project/${job.id}`}>
                 <StatusLabel status={job.status} />
               </Link>
+            </Tooltip>
+          ) : (
+            <Tooltip
+              position="top"
+              content={t`Unable to load last job update`}
+              key={project.id}
+            >
+              <StatusLabel status={project?.status} />
             </Tooltip>
           )}
         </Td>
