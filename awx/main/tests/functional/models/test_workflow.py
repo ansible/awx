@@ -19,6 +19,7 @@ from awx.api.views import WorkflowJobTemplateNodeSuccessNodesList
 # Django
 from django.test import TransactionTestCase
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 
 
 class TestWorkflowDAGFunctional(TransactionTestCase):
@@ -381,3 +382,34 @@ def test_workflow_ancestors_recursion_prevention(organization):
     WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=wfjt, job=wfj)  # well, this is a problem
     # mostly, we just care that this assertion finishes in finite time
     assert wfj.get_ancestor_workflows() == []
+
+
+@pytest.mark.django_db
+class TestCombinedArtifacts:
+    @pytest.fixture
+    def wfj_artifacts(self, job_template, organization):
+        wfjt = WorkflowJobTemplate.objects.create(organization=organization, name='has_artifacts')
+        wfj = WorkflowJob.objects.create(workflow_job_template=wfjt, launch_type='workflow')
+        job = job_template.create_unified_job(_eager_fields=dict(artifacts={'foooo': 'bar'}, status='successful', finished=now()))
+        WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=job_template, job=job)
+        return wfj
+
+    def test_multiple_types(self, project, wfj_artifacts):
+        project_update = project.create_unified_job()
+        WorkflowJobNode.objects.create(workflow_job=wfj_artifacts, unified_job_template=project, job=project_update)
+
+        assert wfj_artifacts.get_combined_artifacts() == {'foooo': 'bar'}
+
+    def test_precedence_based_on_time(self, wfj_artifacts, job_template):
+        later_job = job_template.create_unified_job(
+            _eager_fields=dict(artifacts={'foooo': 'zoo'}, status='successful', finished=now())  # finished later, should win
+        )
+        WorkflowJobNode.objects.create(workflow_job=wfj_artifacts, unified_job_template=job_template, job=later_job)
+
+        assert wfj_artifacts.get_combined_artifacts() == {'foooo': 'zoo'}
+
+    def test_precedence_based_on_status(self, wfj_artifacts, job_template):
+        failed_job = job_template.create_unified_job(_eager_fields=dict(artifacts={'foooo': 'zoo'}, status='failed', finished=now()))  # failed job, should lose
+        WorkflowJobNode.objects.create(workflow_job=wfj_artifacts, unified_job_template=job_template, job=failed_job)
+
+        assert wfj_artifacts.get_combined_artifacts() == {'foooo': 'bar'}

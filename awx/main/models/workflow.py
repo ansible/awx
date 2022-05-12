@@ -57,6 +57,20 @@ __all__ = [
 logger = logging.getLogger('awx.main.models.workflow')
 
 
+def get_artifacts_from_unified_job(job):
+    """
+    Returns artifacts from job if applicable, and does type checking to avoid errors
+    if the type is workflow job, then it will call the method to collect artifacts
+    """
+    if job is None:
+        return {}
+    if hasattr(job, 'artifacts') and isinstance(job.artifacts, dict):
+        return job.artifacts
+    elif isinstance(job, WorkflowJob):
+        return job.get_combined_artifacts()
+    return {}
+
+
 class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
     class Meta:
         abstract = True
@@ -318,12 +332,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         for parent_node in self.get_parent_nodes():
             is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
-            if not parent_node.job:
-                continue
-            if hasattr(parent_node.job, 'artifacts'):
-                aa_dict.update(parent_node.job.artifacts)
-            elif isinstance(parent_node.job, WorkflowJob):
-                aa_dict.update(parent_node.job.get_combined_artifacts())
+            aa_dict.update(get_artifacts_from_unified_job(parent_node.job))
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
@@ -692,9 +701,14 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         we send aggregated artifacts from the nodes inside of the nested workflow
         """
         artifacts = {}
-        for node in self.workflow_nodes.prefetch_related('job'):
-            if node.job:
-                artifacts.update(node.job.artifacts)
+        job_queryset = (
+            UnifiedJob.objects.filter(unified_job_node__workflow_job=self)
+            .only('artifacts', 'status', 'finished', 'id')
+            .order_by('status', 'finished', 'id')
+            .iterator()
+        )
+        for job in job_queryset:
+            artifacts.update(get_artifacts_from_unified_job(job))
         return artifacts
 
     def get_notification_templates(self):
