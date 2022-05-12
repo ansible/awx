@@ -318,8 +318,12 @@ class WorkflowJobNode(WorkflowNodeBase):
         for parent_node in self.get_parent_nodes():
             is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
-            if parent_node.job and hasattr(parent_node.job, 'artifacts'):
+            if not parent_node.job:
+                continue
+            if hasattr(parent_node.job, 'artifacts'):
                 aa_dict.update(parent_node.job.artifacts)
+            elif isinstance(parent_node.job, WorkflowJob):
+                aa_dict.update(parent_node.job.get_combined_artifacts())
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
@@ -620,11 +624,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         on_delete=models.SET_NULL,
         help_text=_("If automatically created for a sliced job run, the job template " "the workflow job was created from."),
     )
-    artifacts = JSONBlob(
-        default=dict,
-        blank=True,
-        editable=False,
-    )
     is_sliced_job = models.BooleanField(default=False)
 
     @property
@@ -686,6 +685,17 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             ancestors.append(wj.workflow_job_template)
             wj = wj.get_workflow_job()
         return ancestors
+
+    def get_combined_artifacts(self):
+        """
+        For downstream jobs of a workflow nested inside of a workflow,
+        we send aggregated artifacts from the nodes inside of the nested workflow
+        """
+        artifacts = {}
+        for node in self.workflow_nodes.prefetch_related('job'):
+            if node.job:
+                artifacts.update(node.job.artifacts)
+        return artifacts
 
     def get_notification_templates(self):
         return self.workflow_job_template.notification_templates

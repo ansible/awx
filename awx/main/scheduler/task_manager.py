@@ -249,12 +249,6 @@ class TaskManager:
                 status_changed = True
             if status_changed:
                 if workflow_job.spawned_by_workflow:
-                    artifacts = {}
-                    for node in workflow_job.workflow_nodes.prefetch_related('job'):
-                        artifacts.update(node.job.artifacts)
-                    if artifacts:
-                        workflow_job.artifacts = artifacts
-                        workflow_job.save(update_fields=['artifacts'])
                     schedule_task_manager()
                 workflow_job.websocket_emit_status(workflow_job.status)
                 # Operations whose queries rely on modifications made during the atomic scheduling session
