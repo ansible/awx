@@ -63,6 +63,7 @@ function InstanceGroup({ setBreadcrumb }) {
       ),
       link: '/instance_groups',
       id: 99,
+      isBackButton: true,
     },
     {
       name: t`Details`,

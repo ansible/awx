@@ -79,7 +79,7 @@ function Templates() {
         </Route>
         <Route path="/templates">
           <PageSection>
-            <PersistentFilters key="templates">
+            <PersistentFilters pageKey="templates">
               <TemplateList />
             </PersistentFilters>
           </PageSection>

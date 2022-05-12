@@ -67,6 +67,7 @@ function Credential({ setBreadcrumb }) {
       ),
       link: `/credentials`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `/credentials/${id}/details`, id: 0 },
     {

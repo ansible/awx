@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 
 import { Config } from 'contexts/Config';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
-
+import PersistentFilters from 'components/PersistentFilters';
 import HostList from './HostList';
 import HostAdd from './HostAdd';
 import Host from './Host';
@@ -47,7 +46,9 @@ function Hosts() {
           </Config>
         </Route>
         <Route path="/hosts">
-          <HostList />
+          <PersistentFilters pageKey="hosts">
+            <HostList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

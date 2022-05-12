@@ -9,6 +9,7 @@ import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 import ScreenHeader from 'components/ScreenHeader';
 import ContentLoading from 'components/ContentLoading';
+import PersistentFilters from 'components/PersistentFilters';
 import InstanceGroupAdd from './InstanceGroupAdd';
 import InstanceGroupList from './InstanceGroupList';
 import InstanceGroup from './InstanceGroup';
@@ -103,11 +104,13 @@ function InstanceGroups() {
             <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
           </Route>
           <Route path="/instance_groups">
-            <InstanceGroupList
-              isKubernetes={isKubernetes}
-              isSettingsRequestLoading={isSettingsRequestLoading}
-              settingsRequestError={settingsRequestError}
-            />
+            <PersistentFilters pageKey="instanceGroups">
+              <InstanceGroupList
+                isKubernetes={isKubernetes}
+                isSettingsRequestLoading={isSettingsRequestLoading}
+                settingsRequestError={settingsRequestError}
+              />
+            </PersistentFilters>
           </Route>
         </Switch>
       )}

@@ -4,6 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Config } from 'contexts/Config';
 import ScreenHeader from 'components/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import Credential from './Credential';
 import CredentialAdd from './CredentialAdd';
 import { CredentialList } from './CredentialList';
@@ -44,7 +45,9 @@ function Credentials() {
           <Credential setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/credentials">
-          <CredentialList />
+          <PersistentFilters pageKey="credentials">
+            <CredentialList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

@@ -70,6 +70,7 @@ function WorkflowApproval({ setBreadcrumb }) {
         </>
       ),
       link: `/workflow_approvals`,
+      isBackButton: true,
       id: 99,
     },
     {
