@@ -703,7 +703,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         artifacts = {}
         job_queryset = (
             UnifiedJob.objects.filter(unified_job_node__workflow_job=self)
-            .defer('ancestor_artifacts', 'job_args', 'job_cwd', 'start_args', 'result_traceback')
+            .defer('job_args', 'job_cwd', 'start_args', 'result_traceback')
             .order_by('status', 'finished', 'id')
             .iterator()
         )
