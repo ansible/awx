@@ -368,7 +368,7 @@ describe('<AdHocCommandsWizard/>', () => {
         response: {
           config: {
             method: 'get',
-            url: '/api/v2/credentals',
+            url: '/api/v2/credentials',
           },
           data: 'An error occurred',
           status: 403,
