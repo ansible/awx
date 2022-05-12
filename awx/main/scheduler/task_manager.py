@@ -395,11 +395,9 @@ class TaskManager:
         if task.project is not None and task.project.scm_update_on_launch is True:
             latest_project_update = self.get_latest_project_update(task.project_id)
             if self.should_update_related_project(task, latest_project_update):
-                project_task = self.create_project_update(task)
-                created_dependencies.append(project_task)
-                dependencies.append(project_task)
-            else:
-                dependencies.append(latest_project_update)
+                latest_project_update = self.create_project_update(task)
+                created_dependencies.append(latest_project_update)
+            dependencies.append(latest_project_update)
 
         # Inventory created 2 seconds behind job
         try:
@@ -438,7 +436,7 @@ class TaskManager:
                 latest_src_project_update = self.create_project_update(inventory_task, project_id=invsrc.source_project_id)
                 created_dependencies.append(latest_src_project_update)
             self.add_dependencies(inventory_task, [latest_src_project_update])
-
+            latest_src_project_update.scm_inventory_updates.add(inventory_task)
         return created_dependencies
 
     def generate_dependencies(self, undeped_tasks):
