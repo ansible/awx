@@ -241,6 +241,9 @@ SUBSYSTEM_METRICS_INTERVAL_SEND_METRICS = 3
 # Interval in seconds for saving local metrics to redis
 SUBSYSTEM_METRICS_INTERVAL_SAVE_TO_REDIS = 2
 
+# Only record stats from task manager cycles that are >= this execution time (seconds)
+SUBSYSTEM_METRICS_TASK_MANAGER_EXECUTION_TIME = 15
+
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
 
