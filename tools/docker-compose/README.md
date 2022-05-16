@@ -459,3 +459,20 @@ ansible-playbook tools/docker-compose/ansible/plumb_splunk.yml
 ```
 
 Once the playbook is done running Splunk should now be setup in your development environment. You can log into the admin console (see above for username/password) and click on "Searching and Reporting" in the left hand navigation. In the search box enter `source="http:tower_logging_collections"` and click search.
+
+
+### Prometheus and Grafana integration
+
+Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint.
+
+1. Change the `username` and `password` in `tools/prometheus/prometheus.yml`. You can also change the scrape interval.
+2. (optional) if you are in cluster environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
+3. run `make prometheus`
+4. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
+5. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
+
+Prometheus can display basic graphs of your data, but it is minimal. Often Prometheus is paired with an app like Grafana for better visualization features.
+
+1. `make grafana` to run a local docker grafana instance.
+2. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
+4. Now you can create a dashboard and add panels for whichever metrics you like.

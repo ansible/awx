@@ -38,7 +38,7 @@ awx/ui/build
 awx/ui/.env.local
 awx/ui/instrumented
 rsyslog.pid
-tools/prometheus/data
+tools/prometheus
 tools/docker-compose/ansible/awx_dump.sql
 tools/docker-compose/Dockerfile
 tools/docker-compose/_build
