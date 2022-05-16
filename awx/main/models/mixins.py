@@ -407,40 +407,53 @@ class TaskManagerUnifiedJobMixin(models.Model):
     def get_jobs_fail_chain(self):
         return []
 
-    def dependent_jobs_finished(self):
-        return True
-
 
 class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
-
-    def get_jobs_fail_chain(self):
-        return [self.project_update] if self.project_update else []
-
-    def dependent_jobs_finished(self):
-        for j in self.dependent_jobs.all():
-            if j.status in ['pending', 'waiting', 'running']:
-                return False
-        return True
 
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
 
-    def get_jobs_fail_chain(self):
-        return list(self.dependent_jobs.all())
-
 
 class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
 
+    def get_jobs_fail_chain(self):
+        # project update can be a dependency of an inventory update, in which
+        # case we need to fail the job that may have spawned the inventory
+        # update.
+        # The inventory update will fail, but since it is not running it will
+        # not cascade fail to the job from the errback logic in apply_async. As
+        # such we should capture it here.
+        blocked_jobs = list(self.unifiedjob_blocked_jobs.all().prefetch_related("unifiedjob_blocked_jobs"))
+        other_tasks = []
+        for b in blocked_jobs:
+            other_tasks += list(b.unifiedjob_blocked_jobs.all())
+        return blocked_jobs + other_tasks
+
 
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
+
+    def get_jobs_fail_chain(self):
+        blocked_jobs = list(self.unifiedjob_blocked_jobs.all())
+        other_updates = []
+        if blocked_jobs:
+            # blocked_jobs[0] is just a reference to a job that depends on this
+            # inventory update.
+            # We can look at the dependencies of this blocked job to find other
+            # inventory sources that are safe to fail.
+            # Since the dependencies could also include project updates,
+            # we need to check for type.
+            for dep in blocked_jobs[0].dependent_jobs.all():
+                if type(dep) is type(self) and dep.id != self.id:
+                    other_updates.append(dep)
+        return blocked_jobs + other_updates
 
 
 class ExecutionEnvironmentMixin(models.Model):

@@ -26,7 +26,7 @@ class DependencyGraph(object):
         # The reason for tracking both inventory and inventory sources:
         # Consider InvA, which has two sources, InvSource1, InvSource2.
         # JobB might depend on InvA, which launches two updates, one for each source.
-        # To determine if JobB can run, we can just check InvA, which is  marked in
+        # To determine if JobB can run, we can just check InvA, which is marked in
         # INVENTORY_UPDATES, instead of having to check for both entries in
         # INVENTORY_SOURCE_UPDATES.
         self.data[self.INVENTORY_UPDATES] = {}

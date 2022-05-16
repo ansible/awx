@@ -695,7 +695,7 @@ def handle_work_error(task_id, *args, **kwargs):
                 first_instance = instance
                 first_instance_type = each_task['type']
 
-            if instance.celery_task_id != task_id and not instance.cancel_flag and not instance.status == 'successful':
+            if instance.celery_task_id != task_id and not instance.cancel_flag and not instance.status in ('successful', 'failed'):
                 instance.status = 'failed'
                 instance.failed = True
                 if not instance.job_explanation:
