@@ -46,7 +46,12 @@ describe('<JobDetail />', () => {
 
     // StatusIcon adds visibly hidden accessibility text " successful "
     assertDetail('Job ID', '2');
-    assertDetail('Status', 'Successful');
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Successful'
+    );
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Job explanation placeholder'
+    );
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
