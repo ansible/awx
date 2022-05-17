@@ -435,7 +435,7 @@ function Visualizer({ template }) {
           ) {
             if (
               node.originalNodeObject.summary_fields.unified_job_template
-                .unified_job_type === 'workflow_approval'
+                ?.unified_job_type === 'workflow_approval'
             ) {
               nodeRequests.push(
                 WorkflowJobTemplateNodesAPI.replace(
