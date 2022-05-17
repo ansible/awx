@@ -57,20 +57,6 @@ __all__ = [
 logger = logging.getLogger('awx.main.models.workflow')
 
 
-def get_artifacts_from_unified_job(job):
-    """
-    Returns artifacts from job if applicable, and does type checking to avoid errors
-    if the type is workflow job, then it will call the method to collect artifacts
-    """
-    if job is None:
-        return {}
-    if hasattr(job, 'artifacts') and isinstance(job.artifacts, dict):
-        return job.artifacts
-    elif isinstance(job, WorkflowJob):
-        return job.get_combined_artifacts()
-    return {}
-
-
 class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
     class Meta:
         abstract = True
@@ -332,7 +318,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         for parent_node in self.get_parent_nodes():
             is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
-            aa_dict.update(get_artifacts_from_unified_job(parent_node.job))
+            aa_dict.update(parent_node.job.get_effective_artifacts(parents_set=set([self.workflow_job_id])))
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
@@ -695,7 +681,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             wj = wj.get_workflow_job()
         return ancestors
 
-    def get_combined_artifacts(self):
+    def get_effective_artifacts(self, parents_set=None):
         """
         For downstream jobs of a workflow nested inside of a workflow,
         we send aggregated artifacts from the nodes inside of the nested workflow
@@ -707,8 +693,13 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             .order_by('status', 'finished', 'id')
             .iterator()
         )
+        if parents_set is None:
+            parents_set = set()
+        new_parents_set = parents_set | set([self.id])
         for job in job_queryset:
-            artifacts.update(get_artifacts_from_unified_job(job))
+            if job.id in parents_set:
+                continue
+            artifacts.update(job.get_effective_artifacts(parents_set=new_parents_set))
         return artifacts
 
     def get_notification_templates(self):

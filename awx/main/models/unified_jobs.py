@@ -1204,6 +1204,10 @@ class UnifiedJob(
                 pass
         return None
 
+    def get_effective_artifacts(self, **kwargs):
+        """Return unified job artifacts (from set_stats) to pass downstream in workflows"""
+        return {}
+
     def get_passwords_needed_to_start(self):
         return []
 

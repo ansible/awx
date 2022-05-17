@@ -398,7 +398,7 @@ class TestCombinedArtifacts:
         project_update = project.create_unified_job()
         WorkflowJobNode.objects.create(workflow_job=wfj_artifacts, unified_job_template=project, job=project_update)
 
-        assert wfj_artifacts.get_combined_artifacts() == {'foooo': 'bar'}
+        assert wfj_artifacts.get_effective_artifacts() == {'foooo': 'bar'}
 
     def test_precedence_based_on_time(self, wfj_artifacts, job_template):
         later_job = job_template.create_unified_job(
@@ -406,10 +406,20 @@ class TestCombinedArtifacts:
         )
         WorkflowJobNode.objects.create(workflow_job=wfj_artifacts, unified_job_template=job_template, job=later_job)
 
-        assert wfj_artifacts.get_combined_artifacts() == {'foooo': 'zoo'}
+        assert wfj_artifacts.get_effective_artifacts() == {'foooo': 'zoo'}
 
     def test_precedence_based_on_status(self, wfj_artifacts, job_template):
         failed_job = job_template.create_unified_job(_eager_fields=dict(artifacts={'foooo': 'zoo'}, status='failed', finished=now()))  # failed job, should lose
         WorkflowJobNode.objects.create(workflow_job=wfj_artifacts, unified_job_template=job_template, job=failed_job)
 
-        assert wfj_artifacts.get_combined_artifacts() == {'foooo': 'bar'}
+        assert wfj_artifacts.get_effective_artifacts() == {'foooo': 'bar'}
+
+    def test_bad_data_with_artifacts(self, organization):
+        # This is toxic database data, this tests that it doesn't create an infinite loop
+        wfjt = WorkflowJobTemplate.objects.create(organization=organization, name='child')
+        wfj = WorkflowJob.objects.create(workflow_job_template=wfjt, launch_type='workflow')
+        WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=wfjt, job=wfj)
+        job = Job.objects.create(artifacts={'foo': 'bar'})
+        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
+        # mostly, we just care that this assertion finishes in finite time
+        assert wfj.get_effective_artifacts() == {'foo': 'bar'}
