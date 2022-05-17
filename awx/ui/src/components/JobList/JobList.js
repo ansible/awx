@@ -103,13 +103,13 @@ function JobList({
   }, [fetchJobs]);
 
   const fetchJobsById = useCallback(
-    async (ids, qs = {}) => {
-      const params = parseQueryString(qs, location.search);
+    async (ids) => {
+      const params = parseQueryString(qsConfig, location.search);
       params.id__in = ids.join(',');
       const { data } = await UnifiedJobsAPI.read(params);
       return data.results;
     },
-    [location.search]
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const jobs = useWsJobs(results, fetchJobsById, qsConfig);
