@@ -690,7 +690,8 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         job_queryset = (
             UnifiedJob.objects.filter(unified_job_node__workflow_job=self)
             .defer('job_args', 'job_cwd', 'start_args', 'result_traceback')
-            .order_by('status', 'finished', 'id')
+            .order_by('finished', 'id')
+            .filter(status__in=['successful', 'failed'])
             .iterator()
         )
         if parents_set is None:
