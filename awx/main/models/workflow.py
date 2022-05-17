@@ -681,7 +681,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             wj = wj.get_workflow_job()
         return ancestors
 
-    def get_effective_artifacts(self, parents_set=None):
+    def get_effective_artifacts(self, **kwargs):
         """
         For downstream jobs of a workflow nested inside of a workflow,
         we send aggregated artifacts from the nodes inside of the nested workflow
@@ -694,9 +694,8 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             .filter(status__in=['successful', 'failed'])
             .iterator()
         )
-        if parents_set is None:
-            parents_set = set()
-        new_parents_set = parents_set | set([self.id])
+        parents_set = kwargs.get('parents_set', set())
+        new_parents_set = parents_set | {self.id}
         for job in job_queryset:
             if job.id in parents_set:
                 continue
