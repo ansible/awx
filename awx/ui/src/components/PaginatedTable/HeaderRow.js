@@ -7,6 +7,7 @@ import { parseQueryString, updateQueryString } from 'util/qs';
 
 const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
+  --pf-c-table--cell--MaxWidth: none;
 `;
 
 export default function HeaderRow({
