@@ -318,7 +318,8 @@ class WorkflowJobNode(WorkflowNodeBase):
         for parent_node in self.get_parent_nodes():
             is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
-            aa_dict.update(parent_node.job.get_effective_artifacts(parents_set=set([self.workflow_job_id])))
+            if parent_node.job:
+                aa_dict.update(parent_node.job.get_effective_artifacts(parents_set=set([self.workflow_job_id])))
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
