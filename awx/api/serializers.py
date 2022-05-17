@@ -2778,6 +2778,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             'inventory',
             'project',
             'playbook',
+            'fqcn_role',
             'scm_branch',
             'forks',
             'limit',
@@ -2828,25 +2829,27 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         return ret
 
     def validate(self, attrs):
-        if 'project' in self.fields and 'playbook' in self.fields:
+        if 'project' in self.fields and 'playbook' in self.fields and 'fqcn_role' in self.fields:
+            fqcn_role = attrs.get('fqcn_role', self.instance.fqcn_role if self.instance is not None else '')
             project = attrs.get('project', self.instance.project if self.instance else None)
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
             scm_branch = attrs.get('scm_branch', self.instance.scm_branch if self.instance else None)
             ask_scm_branch_on_launch = attrs.get('ask_scm_branch_on_launch', self.instance.ask_scm_branch_on_launch if self.instance else None)
-            if not project:
-                raise serializers.ValidationError({'project': _('This field is required.')})
-            playbook_not_found = bool(
-                (project and project.scm_type and (not project.allow_override) and playbook and force_str(playbook) not in project.playbook_files)
-                or (project and not project.scm_type and playbook and force_str(playbook) not in project.playbooks)  # manual
-            )
-            if playbook_not_found:
-                raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
-            if project and not playbook:
-                raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
-            if scm_branch and not project.allow_override:
-                raise serializers.ValidationError({'scm_branch': _('Project does not allow overriding branch.')})
-            if ask_scm_branch_on_launch and not project.allow_override:
-                raise serializers.ValidationError({'ask_scm_branch_on_launch': _('Project does not allow overriding branch.')})
+            if fqcn_role in (None, ''):
+                if not project:
+                    raise serializers.ValidationError({'project': _('This field is required.')})
+                playbook_not_found = bool(
+                    (project and project.scm_type and (not project.allow_override) and playbook and force_str(playbook) not in project.playbook_files)
+                    or (project and not project.scm_type and playbook and force_str(playbook) not in project.playbooks)  # manual
+                )
+                if playbook_not_found:
+                    raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
+                if project and not playbook:
+                    raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
+                if scm_branch and not project.allow_override:
+                    raise serializers.ValidationError({'scm_branch': _('Project does not allow overriding branch.')})
+                if ask_scm_branch_on_launch and not project.allow_override:
+                    raise serializers.ValidationError({'ask_scm_branch_on_launch': _('Project does not allow overriding branch.')})
 
         ret = super(JobOptionsSerializer, self).validate(attrs)
         return ret
@@ -2970,13 +2973,14 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
         inventory = get_field_from_model_or_attrs('inventory')
         project = get_field_from_model_or_attrs('project')
+        fqcn_role = get_field_from_model_or_attrs('fqcn_role')
 
         if get_field_from_model_or_attrs('host_config_key') and not inventory:
             raise serializers.ValidationError({'host_config_key': _("Cannot enable provisioning callback without an inventory set.")})
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
-        if project is None:
-            raise serializers.ValidationError({'project': _("Job Templates must have a project assigned.")})
+        if project is None and fqcn_role == '':
+            raise serializers.ValidationError({'project': _("Job Templates must have a project or role assigned.")})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
 
@@ -4190,11 +4194,12 @@ class JobLaunchSerializer(BaseSerializer):
         accepted, rejected, errors = template._accept_or_ignore_job_kwargs(_exclude_errors=['prompts'], **attrs)  # make several error types non-blocking
         self._ignored_fields = rejected
 
-        # Basic validation - cannot run a playbook without a playbook
-        if not template.project:
-            errors['project'] = _("A project is required to run a job.")
-        elif template.project.status in ('error', 'failed'):
-            errors['playbook'] = _("Missing a revision to run due to failed project update.")
+        # Basic validation - cannot run a playbook without a playbook ... or a role
+        if template.fqcn_role == '':
+            if not template.project:
+                errors['project'] = _("A project or role is required to run a job.")
+            elif template.project.status in ('error', 'failed'):
+                errors['playbook'] = _("Missing a revision to run due to failed project update.")
 
         # cannot run a playbook without an inventory
         if template.inventory and template.inventory.pending_deletion is True:

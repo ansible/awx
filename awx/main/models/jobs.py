@@ -103,6 +103,12 @@ class JobOptions(BaseModel):
         default='',
         blank=True,
     )
+    fqcn_role = models.CharField(
+        max_length=1024,
+        default='',
+        blank=True,
+        help_text=_('Fully Qualified Name Referencing a Role.' 'This needs to be preloaded and available in the Execution Environment'),
+    )
     scm_branch = models.CharField(
         max_length=1024,
         default='',
@@ -291,14 +297,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 _("Job Template must provide 'inventory' or allow prompting for it."),
             ]
         if self.project is None:
-            validation_errors['project'] = [
-                _("Job Templates must have a project assigned."),
-            ]
+            if self.fqcn_role == '' or self.fqcn_role is None:
+                validation_errors['project'] = [_("Job Templates must have a role or project assigned")]
         return validation_errors
 
     @property
     def resources_needed_to_start(self):
-        return [fd for fd in ['project', 'inventory'] if not getattr(self, '{}_id'.format(fd))]
+        return [fd for fd in ['inventory'] if not getattr(self, '{}_id'.format(fd))]
 
     def clean_forks(self):
         if settings.MAX_FORKS > 0 and self.forks > settings.MAX_FORKS:

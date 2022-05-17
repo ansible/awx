@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+from xxlimited import foo
 import yaml
 import tempfile
 import traceback
@@ -478,12 +479,16 @@ class BaseTask(object):
             params = {
                 'ident': self.instance.id,
                 'private_data_dir': private_data_dir,
-                'playbook': self.build_playbook_path_relative_to_cwd(self.instance, private_data_dir),
                 'inventory': self.build_inventory(self.instance, private_data_dir),
                 'passwords': expect_passwords,
                 'suppress_env_files': getattr(settings, 'AWX_RUNNER_OMIT_ENV_FILES', True),
                 'envvars': env,
             }
+
+            if self.instance.fqcn_role != '':
+                params['role'] = self.instance.fqcn_role
+            else:
+                params['playbook'] = (self.build_playbook_path_relative_to_cwd(self.instance, private_data_dir),)
 
             if ssh_key_data is not None:
                 params['ssh_key'] = ssh_key_data
@@ -506,7 +511,7 @@ class BaseTask(object):
             Delete parameters if the values are None or empty array
             '''
             for v in ['passwords', 'playbook', 'inventory']:
-                if not params[v]:
+                if v in params and not params[v]:
                     del params[v]
 
             runner_settings = {
@@ -845,7 +850,7 @@ class RunJob(BaseTask):
             error = _('Job could not start because it does not have a valid inventory.')
             self.update_model(job.pk, status='failed', job_explanation=error)
             raise RuntimeError(error)
-        elif job.project is None:
+        elif job.project is None and job.fqcn_role == '':
             error = _('Job could not start because it does not have a valid project.')
             self.update_model(job.pk, status='failed', job_explanation=error)
             raise RuntimeError(error)
@@ -853,40 +858,44 @@ class RunJob(BaseTask):
             error = _('Job could not start because no Execution Environment could be found.')
             self.update_model(job.pk, status='error', job_explanation=error)
             raise RuntimeError(error)
-        elif job.project.status in ('error', 'failed'):
+        elif job.project and job.project.status in ('error', 'failed'):
             msg = _('The project revision for this job template is unknown due to a failed update.')
             job = self.update_model(job.pk, status='failed', job_explanation=msg)
             raise RuntimeError(msg)
 
-        project_path = job.project.get_project_path(check_if_exists=False)
-        job_revision = job.project.scm_revision
-        sync_needs = []
-        source_update_tag = 'update_{}'.format(job.project.scm_type)
-        branch_override = bool(job.scm_branch and job.scm_branch != job.project.scm_branch)
-        if not job.project.scm_type:
-            pass  # manual projects are not synced, user has responsibility for that
-        elif not os.path.exists(project_path):
-            logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
-            sync_needs.append(source_update_tag)
-        elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
-            try:
-                git_repo = git.Repo(project_path)
-
-                if job_revision == git_repo.head.commit.hexsha:
-                    logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
-                else:
-                    sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
-                logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
+        if job.fqcn_role == '':
+            project_path = job.project.get_project_path(check_if_exists=False)
+            job_revision = job.project.scm_revision
+            sync_needs = []
+            source_update_tag = 'update_{}'.format(job.project.scm_type)
+            branch_override = bool(job.scm_branch and job.scm_branch != job.project.scm_branch)
+            if not job.project.scm_type:
+                pass  # manual projects are not synced, user has responsibility for that
+            elif not os.path.exists(project_path):
+                logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
                 sync_needs.append(source_update_tag)
-        else:
-            logger.debug('Project not available locally, {} will sync with remote'.format(job.log_format))
-            sync_needs.append(source_update_tag)
+            elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
+                try:
+                    git_repo = git.Repo(project_path)
 
-        has_cache = os.path.exists(os.path.join(job.project.get_cache_path(), job.project.cache_id))
-        # Galaxy requirements are not supported for manual projects
-        if job.project.scm_type and ((not has_cache) or branch_override):
-            sync_needs.extend(['install_roles', 'install_collections'])
+                    if job_revision == git_repo.head.commit.hexsha:
+                        logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
+                    else:
+                        sync_needs.append(source_update_tag)
+                except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
+                    logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
+                    sync_needs.append(source_update_tag)
+            else:
+                logger.debug('Project not available locally, {} will sync with remote'.format(job.log_format))
+                sync_needs.append(source_update_tag)
+
+            has_cache = os.path.exists(os.path.join(job.project.get_cache_path(), job.project.cache_id))
+            # Galaxy requirements are not supported for manual projects
+            if job.project.scm_type and ((not has_cache) or branch_override):
+                sync_needs.extend(['install_roles', 'install_collections'])
+        else:
+            sync_needs = []
+            job_revision = "collection"
 
         if sync_needs:
             pu_ig = job.instance_group
@@ -943,7 +952,8 @@ class RunJob(BaseTask):
             if job_revision:
                 job = self.update_model(job.pk, scm_revision=job_revision)
             # Project update does not copy the folder, so copy here
-            RunProjectUpdate.make_local_copy(job.project, private_data_dir, scm_revision=job_revision)
+            if job.fqcn_role == '':
+                RunProjectUpdate.make_local_copy(job.project, private_data_dir, scm_revision=job_revision)
 
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
