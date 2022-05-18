@@ -47,16 +47,9 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
       return;
     }
     const params = parseQueryString(qsConfig, location.search);
-    const filtersApplied = Object.keys(params).length > 4;
-    if (
-      filtersApplied &&
-      !['completed', 'failed', 'error'].includes(lastMessage.status)
-    ) {
-      return;
-    }
-
     const jobId = lastMessage.unified_job_id;
     const index = jobs.findIndex((j) => j.id === jobId);
+
     if (index > -1) {
       setJobs(sortJobs(updateJob(jobs, index, lastMessage), params));
     } else {

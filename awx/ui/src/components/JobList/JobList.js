@@ -106,8 +106,12 @@ function JobList({
     async (ids) => {
       const params = parseQueryString(qsConfig, location.search);
       params.id__in = ids.join(',');
-      const { data } = await UnifiedJobsAPI.read(params);
-      return data.results;
+      try {
+        const { data } = await UnifiedJobsAPI.read(params);
+        return data.results;
+      } catch (e) {
+        return [];
+      }
     },
     [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
