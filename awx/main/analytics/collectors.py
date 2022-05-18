@@ -12,8 +12,6 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
 from django.utils.translation import gettext_lazy as _
 
-from psycopg2.errors import UntranslatableCharacter
-
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version, camelcase_to_underscore, datetime_hook
 from awx.main import models
@@ -378,10 +376,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
         return query
 
-    try:
-        return _copy_table(table='events', query=query(f"{tbl}.event_data::jsonb"), path=full_path)
-    except UntranslatableCharacter:
-        return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::jsonb"), path=full_path)
+    return _copy_table(table='events', query=query(fr"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
 
 
 @register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
