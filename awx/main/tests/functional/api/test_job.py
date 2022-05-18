@@ -220,7 +220,7 @@ class TestControllerNode:
         assert 'controller_node' not in r.data
 
         r = get(reverse('api:inventory_update_detail', kwargs={'pk': inventory_update.pk}), admin_user, expect=200)
-        assert 'controller_node' not in r.data
+        assert 'controller_node' in r.data
 
         r = get(reverse('api:system_job_detail', kwargs={'pk': system_job.pk}), admin_user, expect=200)
         assert 'controller_node' not in r.data
