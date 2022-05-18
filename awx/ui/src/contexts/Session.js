@@ -102,6 +102,7 @@ function SessionProvider({ children }) {
     if (!isSessionExpired.current) {
       setAuthRedirectTo('/logout');
     }
+    sessionStorage.clear();
     await RootAPI.logout();
     setSessionTimeout(0);
     setSessionCountdown(0);
