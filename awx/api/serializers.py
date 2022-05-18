@@ -2073,7 +2073,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     class Meta:
         model = InventorySource
-        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout', 'source_project', 'update_on_project_update') + (
+        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout', 'source_project') + (
             'last_update_failed',
             'last_updated',
         )  # Backwards compatibility.
@@ -2136,11 +2136,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             raise serializers.ValidationError(_("Cannot use manual project for SCM-based inventory."))
         return value
 
-    def validate_update_on_project_update(self, value):
-        if value and self.instance and self.instance.schedules.exists():
-            raise serializers.ValidationError(_("Setting not compatible with existing schedules."))
-        return value
-
     def validate_inventory(self, value):
         if value and value.kind == 'smart':
             raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
@@ -2191,7 +2186,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             if ('source' in attrs or 'source_project' in attrs) and get_field_from_model_or_attrs('source_project') is None:
                 raise serializers.ValidationError({"source_project": _("Project required for scm type sources.")})
         else:
-            redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path', 'update_on_project_update']))
+            redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path']))
             if redundant_scm_fields:
                 raise serializers.ValidationError({"detail": _("Cannot set %s if not SCM type." % ' '.join(redundant_scm_fields))})
 
@@ -4745,13 +4740,6 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))
-        elif type(value) == InventorySource and value.source == 'scm' and value.update_on_project_update:
-            raise serializers.ValidationError(
-                _(
-                    'Inventory sources with `update_on_project_update` cannot be scheduled. '
-                    'Schedule its source project `{}` instead.'.format(value.source_project.name)
-                )
-            )
         return value
 
     def validate(self, attrs):

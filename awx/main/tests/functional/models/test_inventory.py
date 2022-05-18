@@ -3,8 +3,6 @@
 import pytest
 from unittest import mock
 
-from django.core.exceptions import ValidationError
-
 # AWX
 from awx.main.models import Host, Inventory, InventorySource, InventoryUpdate, CredentialType, Credential, Job
 from awx.main.constants import CLOUD_PROVIDERS
@@ -123,19 +121,6 @@ class TestActiveCount:
 
 @pytest.mark.django_db
 class TestSCMUpdateFeatures:
-    def test_automatic_project_update_on_create(self, inventory, project):
-        inv_src = InventorySource(source_project=project, source_path='inventory_file', inventory=inventory, update_on_project_update=True, source='scm')
-        with mock.patch.object(inv_src, 'update') as mck_update:
-            inv_src.save()
-            mck_update.assert_called_once_with()
-
-    def test_reset_scm_revision(self, scm_inventory_source):
-        starting_rev = scm_inventory_source.scm_last_revision
-        assert starting_rev != ''
-        scm_inventory_source.source_path = '/newfolder/newfile.ini'
-        scm_inventory_source.save()
-        assert scm_inventory_source.scm_last_revision == ''
-
     def test_source_location(self, scm_inventory_source):
         # Combines project directory with the inventory file specified
         inventory_update = InventoryUpdate(inventory_source=scm_inventory_source, source_path=scm_inventory_source.source_path)
@@ -165,22 +150,6 @@ class TestRelatedJobs:
         src = group.inventory_sources.create(name='foo', source='ec2')
         job = InventoryUpdate.objects.create(inventory_source=src, source=src.source)
         assert job.id in [jerb.id for jerb in group._get_related_jobs()]
-
-
-@pytest.mark.django_db
-class TestSCMClean:
-    def test_clean_update_on_project_update_multiple(self, inventory):
-        inv_src1 = InventorySource(inventory=inventory, update_on_project_update=True, source='scm')
-        inv_src1.clean_update_on_project_update()
-        inv_src1.save()
-
-        inv_src1.source_vars = '---\nhello: world'
-        inv_src1.clean_update_on_project_update()
-
-        inv_src2 = InventorySource(inventory=inventory, update_on_project_update=True, source='scm')
-
-        with pytest.raises(ValidationError):
-            inv_src2.clean_update_on_project_update()
 
 
 @pytest.mark.django_db

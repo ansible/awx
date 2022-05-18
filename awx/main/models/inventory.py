@@ -985,22 +985,11 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         default=None,
         null=True,
     )
-    scm_last_revision = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        editable=False,
-    )
-    update_on_project_update = models.BooleanField(
-        default=False,
-        help_text=_(
-            'This field is deprecated and will be removed in a future release. '
-            'In future release, functionality will be migrated to source project update_on_launch.'
-        ),
-    )
+
     update_on_launch = models.BooleanField(
         default=False,
     )
+
     update_cache_timeout = models.PositiveIntegerField(
         default=0,
     )
@@ -1038,14 +1027,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
                 self.name = 'inventory source (%s)' % replace_text
             if 'name' not in update_fields:
                 update_fields.append('name')
-        # Reset revision if SCM source has changed parameters
-        if self.source == 'scm' and not is_new_instance:
-            before_is = self.__class__.objects.get(pk=self.pk)
-            if before_is.source_path != self.source_path or before_is.source_project_id != self.source_project_id:
-                # Reset the scm_revision if file changed to force update
-                self.scm_last_revision = ''
-                if 'scm_last_revision' not in update_fields:
-                    update_fields.append('scm_last_revision')
 
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
@@ -1054,10 +1035,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         if replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
             super(InventorySource, self).save(update_fields=['name'])
-        if self.source == 'scm' and is_new_instance and self.update_on_project_update:
-            # Schedule a new Project update if one is not already queued
-            if self.source_project and not self.source_project.project_updates.filter(status__in=['new', 'pending', 'waiting']).exists():
-                self.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields()
@@ -1146,25 +1123,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
                 + list(base_notification_templates.filter(organization_notification_templates_for_success=self.inventory.organization))
             )
         return dict(error=list(error_notification_templates), started=list(started_notification_templates), success=list(success_notification_templates))
-
-    def clean_update_on_project_update(self):
-        if (
-            self.update_on_project_update is True
-            and self.source == 'scm'
-            and InventorySource.objects.filter(Q(inventory=self.inventory, update_on_project_update=True, source='scm') & ~Q(id=self.id)).exists()
-        ):
-            raise ValidationError(_("More than one SCM-based inventory source with update on project update per-inventory not allowed."))
-        return self.update_on_project_update
-
-    def clean_update_on_launch(self):
-        if self.update_on_project_update is True and self.source == 'scm' and self.update_on_launch is True:
-            raise ValidationError(
-                _(
-                    "Cannot update SCM-based inventory source on launch if set to update on project update. "
-                    "Instead, configure the corresponding source project to update on launch."
-                )
-            )
-        return self.update_on_launch
 
     def clean_source_path(self):
         if self.source != 'scm' and self.source_path:
@@ -1300,13 +1258,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
-
-    def cancel(self, job_explanation=None, is_chain=False):
-        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
-        if res:
-            if self.launch_type != 'scm' and self.source_project_update:
-                self.source_project_update.cancel(job_explanation=job_explanation)
-        return res
 
 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
