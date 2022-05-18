@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 import shutil
 import stat
-from xxlimited import foo
 import yaml
 import tempfile
 import traceback
