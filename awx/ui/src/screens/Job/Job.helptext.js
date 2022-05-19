@@ -25,6 +25,21 @@ const jobHelpText = {
       {t`Refer to the Ansible documentation for details about the configuration file.`}
     </span>
   ),
+  module: (moduleName) =>
+    moduleName ? (
+      <>
+        {t`These arguments are used with the specified module. You can find information about ${moduleName} by clicking `}{' '}
+        <a
+          href={`https://docs.ansible.com/ansible/latest/modules/${moduleName}_module.html`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t`here.`}
+        </a>
+      </>
+    ) : (
+      t`These arguments are used with the specified module.`
+    ),
 };
 
 export default jobHelpText;
