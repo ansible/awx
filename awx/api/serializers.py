@@ -2664,6 +2664,13 @@ class CredentialSerializer(BaseSerializer):
 
         return credential_type
 
+    def validate_inputs(self, inputs):
+        if self.instance and self.instance.credential_type.kind == "vault":
+            if 'vault_id' in inputs and inputs['vault_id'] != self.instance.inputs['vault_id']:
+                raise ValidationError(_('Vault IDs cannot be changed once they have been created.'))
+
+        return inputs
+
 
 class CredentialSerializerCreate(CredentialSerializer):
 

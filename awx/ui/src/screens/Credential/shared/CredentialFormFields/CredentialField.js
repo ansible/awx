@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useField, useFormikContext } from 'formik';
 import { shape, string } from 'prop-types';
 import styled from 'styled-components';
@@ -31,6 +32,7 @@ function CredentialInput({
   fieldOptions,
   isFieldGroupValid,
   credentialKind,
+  isVaultIdDisabled,
   ...rest
 }) {
   const [fileName, setFileName] = useState('');
@@ -148,6 +150,7 @@ function CredentialInput({
       onChange={(value, event) => {
         subFormField.onChange(event);
       }}
+      isDisabled={isVaultIdDisabled}
       validated={isValid ? 'default' : 'error'}
     />
   );
@@ -167,6 +170,7 @@ CredentialInput.defaultProps = {
 
 function CredentialField({ credentialType, fieldOptions }) {
   const { values: formikValues } = useFormikContext();
+  const location = useLocation();
   const requiredFields = credentialType?.inputs?.required || [];
   const isRequired = requiredFields.includes(fieldOptions.id);
   const validateField = () => {
@@ -242,6 +246,15 @@ function CredentialField({ credentialType, fieldOptions }) {
       <BecomeMethodField fieldOptions={fieldOptions} isRequired={isRequired} />
     );
   }
+
+  let disabled = false;
+  if (
+    credentialType.kind === 'vault' &&
+    location.pathname.endsWith('edit') &&
+    fieldOptions.id === 'vault_id'
+  ) {
+    disabled = true;
+  }
   return (
     <CredentialPluginField
       fieldOptions={fieldOptions}
@@ -251,6 +264,7 @@ function CredentialField({ credentialType, fieldOptions }) {
       <CredentialInput
         isFieldGroupValid={isValid}
         fieldOptions={fieldOptions}
+        isVaultIdDisabled={disabled}
       />
     </CredentialPluginField>
   );
