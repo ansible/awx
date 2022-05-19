@@ -408,6 +408,7 @@ class JobNotificationMixin(object):
  'inventory': 'Stub Inventory',
  'id': 42,
  'hosts': {},
+ 'extra_vars': {},
  'friendly_name': 'Job',
  'finished': False,
  'credential': 'Stub credential',
