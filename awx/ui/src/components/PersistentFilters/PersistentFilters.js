@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router';
-
-const STORAGE_KEY = 'persistentFilter';
+import { PERSISTENT_FILTER_KEY } from '../../constants';
 
 export default function PersistentFilters({ pageKey, children }) {
   const location = useLocation();
@@ -12,7 +11,7 @@ export default function PersistentFilters({ pageKey, children }) {
       return;
     }
 
-    const filterString = sessionStorage.getItem(STORAGE_KEY);
+    const filterString = sessionStorage.getItem(PERSISTENT_FILTER_KEY);
     const filter = filterString ? JSON.parse(filterString) : { qs: '' };
 
     if (filter.pageKey === pageKey) {
@@ -27,7 +26,7 @@ export default function PersistentFilters({ pageKey, children }) {
       pageKey,
       qs: location.search,
     };
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(filter));
+    sessionStorage.setItem(PERSISTENT_FILTER_KEY, JSON.stringify(filter));
   }, [location.search, pageKey]);
 
   return children;

@@ -4,7 +4,7 @@ import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import PersistentFilters from './PersistentFilters';
 
-const KEY = 'persistentFilter';
+const KEY = 'awx-persistent-filter';
 
 describe('PersistentFilters', () => {
   test('should initialize filter in sessionStorage', () => {
