@@ -6,6 +6,7 @@ import time
 import traceback
 
 from django.conf import settings
+from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
 from django.db import DatabaseError, OperationalError, transaction, connection as django_connection
 from django.db.utils import InterfaceError, InternalError
@@ -70,7 +71,6 @@ class CallbackBrokerWorker(BaseWorker):
 
     def __init__(self):
         self.buff = {}
-        self.pid = os.getpid()
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
         self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
         self.queue_pop = 0
@@ -78,6 +78,11 @@ class CallbackBrokerWorker(BaseWorker):
         self.prof = AWXProfiler("CallbackBrokerWorker")
         for key in self.redis.keys('awx_callback_receiver_statistics_*'):
             self.redis.delete(key)
+
+    @cached_property
+    def pid(self):
+        """This needs to be obtained after forking, or else it will give the parent process"""
+        return os.getpid()
 
     def read(self, queue):
         try:
