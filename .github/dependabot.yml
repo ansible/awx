@@ -3,11 +3,10 @@ updates:
   - package-ecosystem: "npm"
     directory: "/awx/ui"
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: "monthly"
     open-pull-requests-limit: 5
     allow:
-      - dependency-type: "direct"
+      - dependency-type: "production"
     reviewers:
       - "AlexSCorey"
       - "keithjgrant"
