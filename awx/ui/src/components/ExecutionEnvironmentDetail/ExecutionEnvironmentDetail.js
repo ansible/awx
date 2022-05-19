@@ -60,6 +60,7 @@ function ExecutionEnvironmentDetail({
     return (
       <Detail
         label={label}
+        helpText={helpText}
         value={
           <>
             {t`Missing resource`}
@@ -102,6 +103,7 @@ function ExecutionEnvironmentDetail({
     return (
       <Detail
         label={t`Execution Environment`}
+        helpText={helpText}
         value={
           <>
             {t`Missing resource`}
