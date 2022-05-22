@@ -112,7 +112,8 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
         teams=[],
         roles=[],
         credential_input_source=[],
-        lookup_credentials=[]
+        lookup_credentials=[],
+        labels = []
     )
     with settings.runtime_values(**awx_auth):
         organization = tower_cli.get_resource('organization').get(name=awx_platform_inputs['organization'])
@@ -123,7 +124,7 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
         result['users'] = transform_users_set_to_objects(users_info_set)
         
         result['projects'] = tower_cli.get_resource('project').list(all_pages=True, query=[('organization', organization['id'])])['results']
-
+        result['labels'] = tower_cli.get_resource('label').list(all_pages=True, query=[('organization', organization['id'])])['results']
     return has_changed, result
 
 def awx_auth_config(module):
