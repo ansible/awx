@@ -5,4 +5,4 @@ def get_awx_resources(uri, previousPageResults, awx_auth):
     results = previousPageResults + response['results']
     if response['next']:
         return results
-    return get_awx_resources(awx_auth, response['next'], previousPageResults)
+    return get_awx_resources(response['next'], previousPageResults, awx_auth)
