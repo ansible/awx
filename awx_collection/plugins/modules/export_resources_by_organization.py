@@ -73,6 +73,8 @@ EXAMPLES = '''
 import os
 from ansible.module_utils.basic import AnsibleModule
 
+from module_utils.awx_organization import get_organization_teams, get_organization_roles
+
 try:
     import tower_cli
     import tower_cli.utils.exceptions as exc
@@ -84,6 +86,18 @@ try:
 except ImportError:
     HAS_TOWER_CLI = False
 
+def transform_users_set_to_objects(users_info_set):
+    users = []
+    for user_info in users_info_set:
+        user_array = user_info.split(';')
+        user = {
+            'username': user_array[0],
+            'first_name': user_array[1],
+            'last_name': user_array[2],
+            'email': user_array[3]
+        }
+        users.append(user)
+    return users
 
 def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decryption_inputs, module):
     has_changed = False
@@ -100,7 +114,15 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
         credential_input_source=[],
         lookup_credentials=[]
     )
+    with settings.runtime_values(**awx_auth):
+        organization = tower_cli.get_resource('organization').get(name=awx_platform_inputs['organization'])
+        result['teams'], members_info_set = get_organization_teams(organization, awx_auth)
+        result['roles'], users_info_set = get_organization_roles(organization, awx_auth)
+        users_info_set.update(members_info_set)
 
+        result['users'] = transform_users_set_to_objects(users_info_set)
+        
+        result['projects'] = tower_cli.get_resource('project').list(all_pages=True, query=[('organization', organization['id'])])['results']
 
     return has_changed, result
 
