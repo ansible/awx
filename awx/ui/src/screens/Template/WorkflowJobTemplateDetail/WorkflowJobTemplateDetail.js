@@ -25,9 +25,7 @@ import Sparkline from 'components/Sparkline';
 import { toTitleCase } from 'util/strings';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import wfHelpTextStrings from '../shared/WorkflowJobTemplate.helptext';
-
-const helpText = wfHelpTextStrings();
+import helpText from '../shared/WorkflowJobTemplate.helptext';
 
 function WorkflowJobTemplateDetail({ template }) {
   const {

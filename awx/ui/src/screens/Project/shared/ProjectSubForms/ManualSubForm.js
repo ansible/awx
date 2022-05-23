@@ -63,7 +63,7 @@ const ManualSubForm = ({
         name="base_dir"
         type="text"
         isReadOnly
-        tooltip={projectHelpStrings.projectBasePath}
+        tooltip={projectHelpStrings.projectBasePath(brandName)}
       />
       <FormGroup
         fieldId="project-local-path"

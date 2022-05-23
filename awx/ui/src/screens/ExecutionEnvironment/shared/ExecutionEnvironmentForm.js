@@ -14,7 +14,7 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { required } from 'util/validators';
 import useRequest from 'hooks/useRequest';
-import executionEnvironmentHelpTextString from './ExecutionEnvironment.helptext';
+import helpText from './ExecutionEnvironment.helptext';
 
 function ExecutionEnvironmentFormFields({
   me,
@@ -22,7 +22,6 @@ function ExecutionEnvironmentFormFields({
   executionEnvironment,
   isOrgLookupDisabled,
 }) {
-  const helpText = executionEnvironmentHelpTextString();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
   const [organizationField, organizationMeta, organizationHelpers] =

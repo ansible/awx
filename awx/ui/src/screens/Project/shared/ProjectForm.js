@@ -16,7 +16,7 @@ import ExecutionEnvironmentLookup from 'components/Lookup/ExecutionEnvironmentLo
 import { CredentialTypesAPI, ProjectsAPI } from 'api';
 import { required } from 'util/validators';
 import { FormColumnLayout, SubFormLayout } from 'components/FormLayout';
-import ProjectHelpTextStrings from './Project.helptext';
+import projectHelpText from './Project.helptext';
 import {
   GitSubForm,
   SvnSubForm,
@@ -196,7 +196,7 @@ function ProjectFormFields({
         }
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
-        popoverContent={ProjectHelpTextStrings.execution_environment}
+        popoverContent={projectHelpText.executionEnvironment}
         onChange={handleExecutionEnvironmentUpdate}
         tooltip={t`Select an organization before editing the default execution environment.`}
         globallyAvailable

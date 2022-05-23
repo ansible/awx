@@ -28,9 +28,8 @@ import Popover from 'components/Popover';
 import { WorkFlowJobTemplate } from 'types';
 import LabelSelect from 'components/LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
-import wfHelpTextStrings from './WorkflowJobTemplate.helptext';
+import helpText from './WorkflowJobTemplate.helptext';
 
-const helpText = wfHelpTextStrings();
 const urlOrigin = window.location.origin;
 
 function WorkflowJobTemplateForm({

@@ -12,10 +12,9 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
 import { ExecutionEnvironmentsAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import executionEnvironmentHelpTextString from '../shared/ExecutionEnvironment.helptext';
+import helpText from '../shared/ExecutionEnvironment.helptext';
 
 function ExecutionEnvironmentDetails({ executionEnvironment }) {
-  const helperText = executionEnvironmentHelpTextString();
   const history = useHistory();
   const {
     id,
@@ -54,7 +53,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment }) {
           label={t`Image`}
           value={image}
           dataCy="execution-environment-detail-image"
-          helpText={helperText.image}
+          helpText={helpText.image}
         />
         <Detail
           label={t`Description`}
@@ -96,7 +95,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment }) {
               </Label>
             }
             dataCy="execution-environment-credential"
-            helpText={helperText.registryCredential}
+            helpText={helpText.registryCredential}
           />
         )}
         <UserDateDetail
