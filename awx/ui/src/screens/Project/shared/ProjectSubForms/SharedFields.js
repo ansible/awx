@@ -22,15 +22,15 @@ export const UrlFormField = ({ tooltip }) => (
   />
 );
 
-export const BranchFormField = ({ label }) => {
+export const BranchFormField = ({ label }) => (
   <FormField
     id="project-scm-branch"
     name="scm_branch"
     type="text"
     label={label}
     tooltip={projectHelpStrings.branchFormField}
-  />;
-};
+  />
+);
 
 export const ScmCredentialFormField = ({
   credential,
