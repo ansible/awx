@@ -12,7 +12,7 @@ const ArchiveSubForm = ({
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
-}) => {
+}) => (
   <>
     <UrlFormField tooltip={projectHelpText.archiveUrl} />
     <ScmCredentialFormField
@@ -20,7 +20,7 @@ const ArchiveSubForm = ({
       onCredentialSelection={onCredentialSelection}
     />
     <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
-  </>;
-};
+  </>
+);
 
 export default ArchiveSubForm;

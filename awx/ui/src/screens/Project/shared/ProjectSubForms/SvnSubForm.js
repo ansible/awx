@@ -14,7 +14,7 @@ const SvnSubForm = ({
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
-}) => {
+}) => (
   <>
     <UrlFormField tooltip={projectHelpStrings.svnSourceControlUrl} />
     <BranchFormField label={t`Revision #`} />
@@ -23,7 +23,7 @@ const SvnSubForm = ({
       onCredentialSelection={onCredentialSelection}
     />
     <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
-  </>;
-};
+  </>
+);
 
 export default SvnSubForm;
