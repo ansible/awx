@@ -67,6 +67,10 @@ options:
       description:
         - Path to the playbook to use for the job template within the project provided.
       type: str
+    fqcn_role:
+      description:
+        - Fully Qualified Name referencing a role from a collection available in the Execution Environment
+      type: str
     credential:
       description:
         - Name of the credential to use for the job template.
@@ -359,6 +363,7 @@ def main():
         inventory=dict(),
         project=dict(),
         playbook=dict(),
+        fqcn_role=dict(),
         credential=dict(),
         vault_credential=dict(),
         credentials=dict(type='list', elements='str'),
@@ -463,6 +468,7 @@ def main():
         'description',
         'job_type',
         'playbook',
+        'fqcn_role',
         'scm_branch',
         'forks',
         'limit',
