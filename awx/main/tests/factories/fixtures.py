@@ -161,12 +161,13 @@ def mk_job_template(
     extra_vars='',
     project=None,
     spec=None,
+    fqcn_role='',
     webhook_service='',
 ):
     if extra_vars:
         extra_vars = json.dumps(extra_vars)
 
-    jt = JobTemplate(name=name, job_type=job_type, extra_vars=extra_vars, webhook_service=webhook_service, playbook='helloworld.yml')
+    jt = JobTemplate(name=name, job_type=job_type, extra_vars=extra_vars, webhook_service=webhook_service)
 
     jt.inventory = inventory
     if jt.inventory is None:
@@ -178,7 +179,11 @@ def mk_job_template(
         if jt.machine_credential is None:
             jt.ask_credential_on_launch = True
 
-    jt.project = project
+    if not fqcn_role:
+        jt.project = project
+        jt.playbook = 'helloworld.yml'
+    else:
+        jt.fqcn_role = fqcn_role
 
     if spec is not None:
         jt.survey_spec = spec

@@ -7,10 +7,17 @@ from unittest import mock
 
 
 def test_missing_project_error(job_template_factory):
-    objects = job_template_factory('missing-project-jt', organization='org1', inventory='inventory1', persisted=False)
+    objects = job_template_factory('missing-project-jt', organization='org1', inventory='inventory1', persisted=False, fqcn_role='')
     obj = objects.job_template
     assert 'project' in obj.resources_needed_to_start
     assert 'project' in obj.validation_errors
+
+
+def test_direct_role_replaces_project(job_template_factory):
+    objects = job_template_factory('missing-project-jt', organization='org1', inventory='inventory1', persisted=False, fqcn_role='awx.testrole')
+    obj = objects.job_template
+    assert 'project' not in obj.resources_needed_to_start
+    assert 'project' not in obj.validation_errors
 
 
 def test_inventory_need_to_start(job_template_factory):

@@ -303,7 +303,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
 
     @property
     def resources_needed_to_start(self):
-        return [fd for fd in ['inventory'] if not getattr(self, '{}_id'.format(fd))]
+        resources_actual = []
+        if not self.fqcn_role and not self.project_id:
+            resources_actual.append('project')
+        if not self.inventory_id:
+            resources_actual.append('inventory')
+        return resources_actual
 
     def clean_forks(self):
         if settings.MAX_FORKS > 0 and self.forks > settings.MAX_FORKS:

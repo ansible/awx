@@ -197,7 +197,7 @@ def create_survey_spec(variables=None, default_type='integer', required=True, mi
 #
 
 
-def create_job_template(name, roles=None, persisted=True, webhook_service='', **kwargs):
+def create_job_template(name, roles=None, persisted=True, webhook_service='', fqcn_role='', **kwargs):
     Objects = generate_objects(
         [
             "job_template",
@@ -271,6 +271,7 @@ def create_job_template(name, roles=None, persisted=True, webhook_service='', **
         spec=spec,
         extra_vars=extra_vars,
         persisted=persisted,
+        fqcn_role=fqcn_role,
         webhook_service=webhook_service,
     )
 
