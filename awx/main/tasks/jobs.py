@@ -484,7 +484,7 @@ class BaseTask(object):
                 'envvars': env,
             }
 
-            if self.instance.fqcn_role != '':
+            if getattr(self.instance, 'fqcn_role', ''):
                 params['role'] = self.instance.fqcn_role
             else:
                 params['playbook'] = (self.build_playbook_path_relative_to_cwd(self.instance, private_data_dir),)
