@@ -30,7 +30,7 @@
     "react-router-dom": "^5.1.2",
     "react-virtualized": "^9.21.1",
     "rrule": "2.6.4",
-    "sanitize-html": "2.4.0",
+    "sanitize-html": "2.7.0",
     "styled-components": "5.3.0"
   },
   "devDependencies": {
