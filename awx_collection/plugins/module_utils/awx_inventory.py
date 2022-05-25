@@ -27,18 +27,21 @@ def get_inventory_groups(inventory, awx_auth):
         groups[group_index]['variables'] = parse_extra_vars_to_json(group_item['variables'])
     return groups
 
-def get_inventory_by_id(inventory_id, awx_auth):
-    inventory = get_awx_resource_by_id('inventory', inventory_id, awx_auth)
-    if inventory['has_inventory_sources']:
-        inventory['inventory_sources'] = get_awx_resources('/api/v2/inventory_sources/?inventory='+str(inventory['id']), previousPageResults=[], awx_auth=awx_auth)
-        for inventory_source_index, inventory_source in enumerate(inventory['inventory_sources']):
-            inventory['inventory_sources'][inventory_source_index]['source_vars'] = parse_extra_vars_to_json(inventory_source['source_vars'])
-        inventory['hosts'] = []
-        inventory['groups'] = []
-    else:
-        inventory['inventory_sources'] = []
-        inventory['hosts'] = get_inventory_hosts(inventory, awx_auth)
-        inventory['groups'] = get_inventory_groups(inventory, awx_auth)
-    inventory['variables'] = parse_extra_vars_to_json(inventory['variables'])
-    return inventory
+def get_inventories_by_organization(organization, awx_auth):
+    exported_inventories=[]
+    inventories = get_awx_resources(uri='/api/v2/inventories?organization=' + str(organization['id']), previousPageResults=[], awx_auth=awx_auth)
+    for inventory in inventories:
+        if inventory['has_inventory_sources']:
+            inventory['inventory_sources'] = get_awx_resources('/api/v2/inventory_sources/?inventory='+str(inventory['id']), previousPageResults=[], awx_auth=awx_auth)
+            for inventory_source_index, inventory_source in enumerate(inventory['inventory_sources']):
+                inventory['inventory_sources'][inventory_source_index]['source_vars'] = parse_extra_vars_to_json(inventory_source['source_vars'])
+            inventory['hosts'] = []
+            inventory['groups'] = []
+        else:
+            inventory['inventory_sources'] = []
+            inventory['hosts'] = get_inventory_hosts(inventory, awx_auth)
+            inventory['groups'] = get_inventory_groups(inventory, awx_auth)
+        inventory['variables'] = parse_extra_vars_to_json(inventory['variables'])
+        exported_inventories.append(inventory)
+    return exported_inventories
 

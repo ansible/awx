@@ -1,10 +1,9 @@
 #!/usr/bin/python
 import copy
-from .awx_schedules import get_schedules
-from .export_tools import parse_extra_vars_to_json, is_object_in_list_by_id
+from .awx_schedule import get_schedules
+from .export_tools import parse_extra_vars_to_json
 from .awx_notification import get_notifications_by_unified_job_template
 from .awx_request import get_awx_resources
-from .awx_inventory import get_inventory_by_id
 import requests
 
 def filter_end_nodes(workflow_nodes, sorted_nodes, begin_sorting):
@@ -59,7 +58,6 @@ def remove_duplicate_workflow_job_template_nodes(sorted_nodes):
     return filtered_nodes
 
 def get_workflow_job_templates(organization, notification_templates, awx_auth):
-    inventories = []
     workflows = []
     unified_job_template_type = 'workflow_job_templates'
     workflow_job_templates = get_awx_resources(uri='/api/v2/workflow_job_templates/?organization=' + str(organization['id']), previousPageResults=[], awx_auth=awx_auth)
@@ -71,11 +69,9 @@ def get_workflow_job_templates(organization, notification_templates, awx_auth):
         workflow_job_template['extra_vars'] = parse_extra_vars_to_json(workflow_job_template['extra_vars'])
         workflow_job_template['survey_spec'] = requests.get(url='https://'+awx_auth['host']+'/api/v2/workflow_job_templates/' + str(workflow_job_template['id']) + '/survey_spec/', auth=(awx_auth['username'], awx_auth['password']), verify=awx_auth['validate_certs']).json()
         workflow_job_template['schedules'] = get_schedules(workflow_job_template, awx_auth)
-        if workflow_job_template['inventory'] is not None and not is_object_in_list_by_id(workflow_job_template['inventory'], inventories):
-            inventories.append(get_inventory_by_id(workflow_job_template['inventory'], awx_auth))
         workflow_job_template['sorted_nodes'] = sort_workflow_job_template_nodes(workflow_nodes=workflow_job_template['workflow_nodes'], sorted_nodes=[], begin_sorting=True)
         workflow_job_template['sorted_nodes'] = remove_duplicate_workflow_job_template_nodes(workflow_job_template['sorted_nodes'])
         workflow_job_template.pop('workflow_nodes', None)
         workflows.append(workflow_job_template)
-    return workflows, notification_templates, inventories
+    return workflows, notification_templates
 

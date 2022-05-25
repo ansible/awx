@@ -73,12 +73,15 @@ EXAMPLES = '''
 import os
 import json
 
+from ..module_utils.awxkit import ControllerAWXKitModule
+
+from ..module_utils.awx_job_template import get_job_templates_by_projects
+from ..module_utils.awx_inventory import get_inventories_by_organization
 from ..module_utils.awx_credential import get_project_credential
 from ..module_utils.export_tools import transform_users_set_to_objects
 from ..module_utils.awx_workflow import get_workflow_job_templates
-from ..module_utils.awx_request import get_awx_resource_by_name, get_awx_resource_by_id, get_awx_resources
+from ..module_utils.awx_request import get_awx_resource_by_name, get_awx_resources
 from ..module_utils.awx_organization import get_organization_teams, get_organization_roles
-from ..module_utils.awxkit import ControllerAWXKitModule
 
 def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decryption_inputs, module):
     has_changed = False
@@ -105,14 +108,20 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
     
     result['projects'] = get_awx_resources(uri='/api/v2/projects/?organization='+organization['id'], previousPageResults=[], awx_auth=awx_auth)
     result['labels'] = get_awx_resources(uri='/api/v2/labels/?organization='+organization['id'], previousPageResults=[], awx_auth=awx_auth)
-    result['workflow_job_templates'], result['notification_templates'], result['inventories'] = get_workflow_job_templates(organization=organization, notification_templates=[], awx_auth=awx_auth)
-
+    result['inventories'] = get_inventories_by_organization(organization, awx_auth)
+    
     credential_ids = set()
+    project_ids = []
 
     for project_index, project in enumerate(result['projects']):
         scm_credential_id_set, project = get_project_credential(project, awx_auth)
         result['projects'][project_index] = project
-        credential_ids.add(scm_credential_id_set)
+        credential_ids.update(scm_credential_id_set)
+        project_ids.append(project['id'])
+
+    result['job_templates'], credential_ids, result['notification_templates'] = get_job_templates_by_projects(project_ids, credential_ids=credential_ids, notification_templates=[], awx_auth=awx_auth)
+    result['workflow_job_templates'], result['notification_templates'] = get_workflow_job_templates(organization=organization, notification_templates=result['notification_templates'], awx_auth=awx_auth)
+
     return has_changed, result
 
 def awx_auth_config(module):

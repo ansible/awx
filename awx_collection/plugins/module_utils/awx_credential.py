@@ -8,3 +8,10 @@ def get_project_credential(project, awx_auth):
         project['credential'] = credential['name']
         scm_credential_id_set.update(credential['id'])
     return scm_credential_id_set, project
+
+def get_job_templates_credentials(job_template):
+    credential_ids = set()
+    if 'credentials' in job_template['summary_fields']:
+        for credential in job_template['summary_fields']['credentials']:
+            credential_ids.add(credential[id])
+    return credential_ids
