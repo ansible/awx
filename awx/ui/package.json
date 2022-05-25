@@ -6,7 +6,7 @@
     "node": ">=16.13.1"
   },
   "dependencies": {
-    "@lingui/react": "3.9.0",
+    "@lingui/react": "3.13.3",
     "@patternfly/patternfly": "4.192.1",
     "@patternfly/react-core": "^4.201.0",
     "@patternfly/react-icons": "4.49.19",
