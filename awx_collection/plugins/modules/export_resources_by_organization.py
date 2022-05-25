@@ -26,7 +26,7 @@ options:
         description:
             - The password of Automation Platform Controller
         required: false
-    verify_ssl:
+    validate_certs:
         description:
             - Boolean for validating ssl certs
         required: false
@@ -71,20 +71,12 @@ EXAMPLES = '''
     controller_database_password: "{{ awx_database_password }}"
 '''
 import os
-from ansible.module_utils.basic import AnsibleModule
+import json
 
-from module_utils.awx_organization import get_organization_teams, get_organization_roles
-
-try:
-    import tower_cli
-    import tower_cli.utils.exceptions as exc
-
-    from tower_cli.conf import settings
-    from tower_cli.utils import parser
-
-    HAS_TOWER_CLI = True
-except ImportError:
-    HAS_TOWER_CLI = False
+from ..module_utils.awx_workflow import get_workflow_job_templates
+from ..module_utils.awx_request import get_awx_resource_by_name, get_awx_resource_by_id, get_awx_resources
+from ..module_utils.awx_organization import get_organization_teams, get_organization_roles
+from ..module_utils.awxkit import ControllerAWXKitModule
 
 def transform_users_set_to_objects(users_info_set):
     users = []
@@ -115,16 +107,17 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
         lookup_credentials=[],
         labels = []
     )
-    with settings.runtime_values(**awx_auth):
-        organization = tower_cli.get_resource('organization').get(name=awx_platform_inputs['organization'])
-        result['teams'], members_info_set = get_organization_teams(organization, awx_auth)
-        result['roles'], users_info_set = get_organization_roles(organization, awx_auth)
-        users_info_set.update(members_info_set)
+    organization = get_awx_resource_by_name(resource='organization', name=awx_platform_inputs['organization'])
+    result['teams'], members_info_set = get_organization_teams(organization, awx_auth)
+    result['roles'], users_info_set = get_organization_roles(organization, awx_auth)
+    users_info_set.update(members_info_set)
 
-        result['users'] = transform_users_set_to_objects(users_info_set)
-        
-        result['projects'] = tower_cli.get_resource('project').list(all_pages=True, query=[('organization', organization['id'])])['results']
-        result['labels'] = tower_cli.get_resource('label').list(all_pages=True, query=[('organization', organization['id'])])['results']
+    result['users'] = transform_users_set_to_objects(users_info_set)
+    
+    result['projects'] = get_awx_resources(uri='/api/v2/projects/?organization='+organization['id'], previousPageResults=[], awx_auth=awx_auth)
+    result['labels'] = get_awx_resources(uri='/api/v2/labels/?organization='+organization['id'], previousPageResults=[], awx_auth=awx_auth)
+    result['workflow_job_templates'], result['notification_templates'], result['inventories'] = get_workflow_job_templates(organization=organization, notification_templates=[], awx_auth=awx_auth)
+
     return has_changed, result
 
 def awx_auth_config(module):
@@ -136,8 +129,8 @@ def awx_auth_config(module):
         if os.path.isdir(config_file):
             module.fail_json(msg='directory can not be used as config file: %s' % config_file)
 
-        with open(config_file, 'rb') as f:
-            return parser.string_to_dict(f.read())
+        with open(config_file, 'r') as f:
+            return json.load(f.read().rstrip())
     else:
         auth_config = {}
         host = module.params.get('controller_host')
@@ -149,18 +142,14 @@ def awx_auth_config(module):
         password = module.params.get('controller_password')
         if password:
             auth_config['password'] = password
-        verify_ssl = module.params.get('verify_ssl')
-        if verify_ssl:
-            auth_config['verify_ssl'] = verify_ssl
+        validate_certs = module.params.get('validate_certs')
+        if validate_certs:
+            auth_config['validate_certs'] = validate_certs
         return auth_config
 
 def main():
     argument_spec = dict(
         organization=dict(type='str', required=True),
-        controller_host=dict(type='str', no_log=True),
-        controller_username=dict(type='str'),
-        controller_password=dict(type='str'),
-        verify_ssl=dict(type='bool', required=False, default=True),
         controller_secret_key=dict(type='str', required=True, no_log=True),
         controller_database=dict(type='str', required=True),
         controller_database_user=dict(type='str', required=True, no_log=True),
@@ -173,31 +162,27 @@ def main():
         message='Module requirements are met and syntax ok'
     )
 
-    module = AnsibleModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True
+    module = ControllerAWXKitModule(
+        argument_spec=argument_spec
     )
 
     if module.check_mode:
         return result
 
-    if not HAS_TOWER_CLI:
-        module.fail_json(msg='ansible-tower-cli required for this module')
-
     awx_platform_inputs = dict(
-        organization = module.params['organization'],
-        controller_host = module.params['controller_host'],
-        controller_username = module.params['controller_username'],
-        controller_password = module.params['controller_password'],
-        verify_ssl = module.params['verify_ssl']
+        organization = module.params.get('organization'),
+        controller_host = module.params.get('controller_host'),
+        controller_username = module.params.get('controller_username'),
+        controller_password = module.params.get('controller_password'),
+        validate_certs = module.params.get('validate_certs')
     )
 
     awx_decryption_inputs = dict(
-        controller_secret_key = module.params['controller_secret_key'],
-        controller_database = module.params['controller_database'],
-        controller_database_user = module.params['controller_database_user'],
-        controller_database_password = module.params['controller_database_password'],
-        controller_database_port = module.params['controller_database_port']
+        controller_secret_key = module.params.get('controller_secret_key'),
+        controller_database = module.params.get('controller_database'),
+        controller_database_user = module.params.get('controller_database_user'),
+        controller_database_password = module.params.get('controller_database_password'),
+        controller_database_port = module.params.get('controller_database_port')
     )
 
     awx_auth = awx_auth_config(module)

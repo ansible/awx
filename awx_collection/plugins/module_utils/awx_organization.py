@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from awx_request import get_awx_resources
+from .awx_request import get_awx_resources
 
 def get_team_members(team, awx_auth):
     members = get_awx_resources(uri='/api/v2/teams/' + str(team['id']) + '/users/', previousPageResults=[], awx_auth=awx_auth)
