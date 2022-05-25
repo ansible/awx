@@ -73,6 +73,7 @@ describe('<JobDetail />', () => {
     );
 
     assertDetail('Job Slice', '0/1');
+    assertDetail('Forks', '42');
 
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`

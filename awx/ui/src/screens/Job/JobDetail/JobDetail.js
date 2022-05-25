@@ -361,6 +361,9 @@ function JobDetail({ job, inventorySourceLabels }) {
             value={t`True`}
           />
         )}
+        {typeof job.forks === 'number' && (
+          <Detail dataCy="forks" label={t`Forks`} value={`${job.forks}`} />
+        )}
 
         {credential && (
           <Detail
