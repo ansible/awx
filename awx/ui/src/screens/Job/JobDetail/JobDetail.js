@@ -194,6 +194,9 @@ function JobDetail({ job, inventorySourceLabels }) {
           value={
             <StatusDetailValue>
               {job.status && <StatusLabel status={job.status} />}
+              {job.job_explanation && job.job_explanation !== job.status
+                ? job.job_explanation
+                : null}
             </StatusDetailValue>
           }
         />
