@@ -10,7 +10,7 @@
     "@patternfly/patternfly": "4.192.1",
     "@patternfly/react-core": "^4.201.0",
     "@patternfly/react-icons": "4.49.19",
-    "@patternfly/react-table": "4.75.2",
+    "@patternfly/react-table": "4.83.1",
     "ace-builds": "^1.4.12",
     "ansi-to-html": "0.7.2",
     "axios": "0.22.0",
