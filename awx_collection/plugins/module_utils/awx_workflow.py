@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import copy
-from msilib import sequence
 from .awx_schedules import get_schedules
 from .export_tools import parse_extra_vars_to_json, is_object_in_list_by_id
 from .awx_notification import get_notifications_by_unified_job_template
