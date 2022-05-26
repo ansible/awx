@@ -7,6 +7,8 @@ DOCUMENTATION = '''
 module: export_resources_by_organization
 short_description: This module is intended for exporting awx resources within the scope of an organization
 version_added: "3.7.0"
+author:
+    - SIENG SENG Oudom
 description
     - Export assets from Automation Platform Controller within the scope of an organization facilitating for huge enterprise with manny organizations.
 options:
@@ -77,7 +79,7 @@ from ..module_utils.awxkit import ControllerAWXKitModule
 
 from ..module_utils.awx_job_template import get_job_templates_by_projects
 from ..module_utils.awx_inventory import get_inventories_by_organization
-from ..module_utils.awx_credential import get_project_credential
+from ..module_utils.awx_credential import decrypt_credentials_inputs, get_awx_credentials_from_db, get_credential_input_sources, get_project_credential
 from ..module_utils.export_tools import transform_users_set_to_objects
 from ..module_utils.awx_workflow import get_workflow_job_templates
 from ..module_utils.awx_request import get_awx_resource_by_name, get_awx_resources
@@ -121,7 +123,8 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
 
     result['job_templates'], credential_ids, result['notification_templates'] = get_job_templates_by_projects(project_ids, credential_ids=credential_ids, notification_templates=[], awx_auth=awx_auth)
     result['workflow_job_templates'], result['notification_templates'] = get_workflow_job_templates(organization=organization, notification_templates=result['notification_templates'], awx_auth=awx_auth)
-
+    result['credentials'] = decrypt_credentials_inputs(get_awx_credentials_from_db(credential_ids, awx_decryption_inputs, module), awx_decryption_inputs['secret_key'], module)
+    result['lookup_credentials'], result['credential_input_source'] = get_credential_input_sources(credential_ids, awx_auth, awx_decryption_inputs, module)
     return has_changed, result
 
 def awx_auth_config(module):
