@@ -97,7 +97,7 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
         users=[],
         teams=[],
         roles=[],
-        credential_input_source=[],
+        credential_input_sources=[],
         lookup_credentials=[],
         labels = []
     )
@@ -124,7 +124,7 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
     result['job_templates'], credential_ids, result['notification_templates'] = get_job_templates_by_projects(project_ids, credential_ids=credential_ids, notification_templates=[], awx_auth=awx_auth)
     result['workflow_job_templates'], result['notification_templates'] = get_workflow_job_templates(organization=organization, notification_templates=result['notification_templates'], awx_auth=awx_auth)
     result['credentials'] = decrypt_credentials_inputs(get_awx_credentials_from_db(credential_ids, awx_decryption_inputs, module), awx_decryption_inputs['secret_key'], module)
-    result['lookup_credentials'], result['credential_input_source'] = get_credential_input_sources(credential_ids, awx_auth, awx_decryption_inputs, module)
+    result['lookup_credentials'], result['credential_input_sources'] = get_credential_input_sources(credential_ids, awx_auth, awx_decryption_inputs, module)
     return has_changed, result
 
 def awx_auth_config(module):
