@@ -6,6 +6,8 @@ import psycopg2
 import psycopg2.extras
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
+
+from .awx_organization import get_role_members
 from .awx_request import get_awx_resource_by_id, get_awx_resources
 
 class Fernet256(Fernet):
@@ -73,14 +75,14 @@ def get_awx_credentials_from_db(credential_ids, awx_db_cred, module):
         module.fail_json(msg='Database error :\n\n%s\n' % e)
     awx_credentials = []
     for row in table:
-        credential = dict(pk=row[0], name=row[1], inputs=row[2], credential_type=row[3], description=row[4])
+        credential = dict(id=row[0], name=row[1], inputs=row[2], credential_type=row[3], description=row[4])
         awx_credentials.append(credential)
     return awx_credentials
 
 def decrypt_credentials_inputs(awx_credentials, awx_secret_key, module):
     credentials = []
     for awx_cred in awx_credentials:
-        pk = awx_cred['pk']
+        pk = awx_cred['id']
         inputs = awx_cred['inputs']
         name = awx_cred['name']
         for k, v in inputs.items():
@@ -117,3 +119,23 @@ def get_credential_input_sources(target_credential_ids, awx_auth, awx_decryption
         decrypted_lookup_credentials = decrypt_credentials_inputs(get_awx_credentials_from_db(unique_source_cred_ids, awx_decryption_inputs, module), awx_decryption_inputs['secret_key'], module)
 
     return decrypted_lookup_credentials, credential_input_sources
+
+def set_credentials_roles(credentials, lookup_credentials, existing_members_set, awx_auth):
+
+    for credential in credentials:
+        object_roles = get_awx_resources(uri='/api/v2/credentials/'+credential['id']+'/object_roles/', previousPageResults=[], awx_auth=awx_auth)
+        credential['roles'] = []
+        for role in object_roles:
+            exported_role, members_info_set = get_role_members(role, awx_auth)
+            existing_members_set.update(members_info_set)
+            credential['roles'].append(exported_role)
+
+    for lookup_credential in lookup_credentials:
+        object_roles = get_awx_resources(uri='/api/v2/credentials/'+lookup_credential['id']+'/object_roles/', previousPageResults=[], awx_auth=awx_auth)
+        lookup_credential['roles'] = []
+        for role in object_roles:
+            exported_role, members_info_set = get_role_members(role, awx_auth)
+            existing_members_set.update(members_info_set)
+            lookup_credential['roles'].append(exported_role)
+
+    return credentials, lookup_credentials, existing_members_set

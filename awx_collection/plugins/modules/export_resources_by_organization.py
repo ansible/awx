@@ -79,11 +79,11 @@ from ..module_utils.awxkit import ControllerAWXKitModule
 
 from ..module_utils.awx_job_template import get_job_templates_by_projects
 from ..module_utils.awx_inventory import get_inventories_by_organization
-from ..module_utils.awx_credential import decrypt_credentials_inputs, get_awx_credentials_from_db, get_credential_input_sources, get_project_credential
+from ..module_utils.awx_credential import decrypt_credentials_inputs, get_awx_credentials_from_db, get_credential_input_sources, get_project_credential, set_credentials_roles
 from ..module_utils.export_tools import transform_users_set_to_objects
 from ..module_utils.awx_workflow import get_workflow_job_templates
 from ..module_utils.awx_request import get_awx_resource_by_name, get_awx_resources
-from ..module_utils.awx_organization import get_organization_teams, get_organization_roles
+from ..module_utils.awx_organization import get_organization_teams, get_organization_roles, get_role_members
 
 def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decryption_inputs, module):
     has_changed = False
@@ -105,26 +105,33 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
     result['teams'], members_info_set = get_organization_teams(organization, awx_auth)
     result['roles'], users_info_set = get_organization_roles(organization, awx_auth)
     users_info_set.update(members_info_set)
-
-    result['users'] = transform_users_set_to_objects(users_info_set)
     
     result['projects'] = get_awx_resources(uri='/api/v2/projects/?organization='+organization['id'], previousPageResults=[], awx_auth=awx_auth)
     result['labels'] = get_awx_resources(uri='/api/v2/labels/?organization='+organization['id'], previousPageResults=[], awx_auth=awx_auth)
-    result['inventories'] = get_inventories_by_organization(organization, awx_auth)
+    result['inventories'], users_info_set = get_inventories_by_organization(organization, users_info_set, awx_auth)
     
     credential_ids = set()
     project_ids = []
 
     for project_index, project in enumerate(result['projects']):
         scm_credential_id_set, project = get_project_credential(project, awx_auth)
+        project['roles'] = []
+        for role_name, role in project['summary_fields']['object_roles'].items():
+            role['name'] = role_name
+            exported_role, members_info_set = get_role_members(role, awx_auth)
+            users_info_set.update(members_info_set)
+            project['roles'].append(exported_role)
         result['projects'][project_index] = project
         credential_ids.update(scm_credential_id_set)
         project_ids.append(project['id'])
 
-    result['job_templates'], credential_ids, result['notification_templates'] = get_job_templates_by_projects(project_ids, credential_ids=credential_ids, notification_templates=[], awx_auth=awx_auth)
-    result['workflow_job_templates'], result['notification_templates'] = get_workflow_job_templates(organization=organization, notification_templates=result['notification_templates'], awx_auth=awx_auth)
+    result['job_templates'], credential_ids, result['notification_templates'], users_info_set = get_job_templates_by_projects(project_ids, credential_ids=credential_ids, notification_templates=[], existing_members_set=users_info_set, awx_auth=awx_auth)
+    result['workflow_job_templates'], result['notification_templates'], users_info_set = get_workflow_job_templates(organization=organization, notification_templates=result['notification_templates'], existing_members_set=users_info_set, awx_auth=awx_auth)
     result['credentials'] = decrypt_credentials_inputs(get_awx_credentials_from_db(credential_ids, awx_decryption_inputs, module), awx_decryption_inputs['secret_key'], module)
     result['lookup_credentials'], result['credential_input_sources'] = get_credential_input_sources(credential_ids, awx_auth, awx_decryption_inputs, module)
+    
+    result['credentials'], result['lookup_credentials'], users_info_set = set_credentials_roles(result['credentials'], result['lookup_credentials'], users_info_set, awx_auth)
+    result['users'] = transform_users_set_to_objects(users_info_set)
     return has_changed, result
 
 def awx_auth_config(module):

@@ -38,7 +38,7 @@ def get_role_members(role, awx_auth):
     teams = get_awx_resources(uri='/api/v2/roles/' + str(role['id']) + '/teams/', previousPageResults=[], awx_auth=awx_auth)
     team_names = [team['name'] for team in teams]
 
-    exported_role = {'name': role['name'], 'users': users, 'teams': team_names}
+    exported_role = {'name': role['name'].lower().replace(' ', '_'), 'users': users, 'teams': team_names}
     return exported_role, members_info_set
 
 def get_organization_roles(organization, awx_auth):

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 from tokenize import group
+
+from .awx_organization import get_role_members
 from .export_tools import parse_extra_vars_to_json
 from .awx_request import get_awx_resource_by_id, get_awx_resources
 
@@ -27,7 +29,7 @@ def get_inventory_groups(inventory, awx_auth):
         groups[group_index]['variables'] = parse_extra_vars_to_json(group_item['variables'])
     return groups
 
-def get_inventories_by_organization(organization, awx_auth):
+def get_inventories_by_organization(organization, existing_members_set, awx_auth):
     exported_inventories=[]
     inventories = get_awx_resources(uri='/api/v2/inventories?organization=' + str(organization['id']), previousPageResults=[], awx_auth=awx_auth)
     for inventory in inventories:
@@ -42,6 +44,12 @@ def get_inventories_by_organization(organization, awx_auth):
             inventory['hosts'] = get_inventory_hosts(inventory, awx_auth)
             inventory['groups'] = get_inventory_groups(inventory, awx_auth)
         inventory['variables'] = parse_extra_vars_to_json(inventory['variables'])
+        inventory['roles'] = []
+        for role_name, role in inventory['summary_fields']['object_roles'].items():
+            role['name'] = role_name
+            exported_role, members_info_set = get_role_members(role, awx_auth)
+            existing_members_set.update(members_info_set)
+            inventory['roles'].append(exported_role)
         exported_inventories.append(inventory)
-    return exported_inventories
+    return exported_inventories, existing_members_set
 

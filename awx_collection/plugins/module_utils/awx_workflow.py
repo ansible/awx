@@ -1,5 +1,7 @@
 #!/usr/bin/python
 import copy
+
+from .awx_organization import get_role_members
 from .awx_schedule import get_schedules
 from .export_tools import parse_extra_vars_to_json
 from .awx_notification import get_notifications_by_unified_job_template
@@ -57,7 +59,7 @@ def remove_duplicate_workflow_job_template_nodes(sorted_nodes):
             filtered_nodes.append(original_node)
     return filtered_nodes
 
-def get_workflow_job_templates(organization, notification_templates, awx_auth):
+def get_workflow_job_templates(organization, notification_templates, existing_members_set, awx_auth):
     workflows = []
     unified_job_template_type = 'workflow_job_templates'
     workflow_job_templates = get_awx_resources(uri='/api/v2/workflow_job_templates/?organization=' + str(organization['id']), previousPageResults=[], awx_auth=awx_auth)
@@ -72,6 +74,12 @@ def get_workflow_job_templates(organization, notification_templates, awx_auth):
         workflow_job_template['sorted_nodes'] = sort_workflow_job_template_nodes(workflow_nodes=workflow_job_template['workflow_nodes'], sorted_nodes=[], begin_sorting=True)
         workflow_job_template['sorted_nodes'] = remove_duplicate_workflow_job_template_nodes(workflow_job_template['sorted_nodes'])
         workflow_job_template.pop('workflow_nodes', None)
+        workflow_job_template['roles'] = []
+        for role_name, role in workflow_job_template['summary_fields']['object_roles'].items():
+            role['name'] = role_name
+            exported_role, members_info_set = get_role_members(role, awx_auth)
+            existing_members_set.update(members_info_set)
+            workflow_job_template['roles'].append(exported_role)
         workflows.append(workflow_job_template)
     return workflows, notification_templates
 
