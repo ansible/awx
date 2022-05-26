@@ -10,7 +10,7 @@ version_added: "3.7.0"
 author:
     - SIENG SENG Oudom
 description
-    - Export assets from Automation Platform Controller within the scope of an organization facilitating for huge enterprise with manny organizations.
+    - Export assets from Automation Platform Controller within the scope of an organization facilitating for huge enterprise with many organizations.
 options:
     organization:
         description:
