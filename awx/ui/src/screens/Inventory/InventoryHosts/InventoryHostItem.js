@@ -35,6 +35,12 @@ function InventoryHostItem({
           <b>{host.name}</b>
         </Link>
       </TdBreakWord>
+      <TdBreakWord
+        id={`host-description-${host.id}`}
+        dataLabel={t`Description`}
+      >
+        {host.description}
+      </TdBreakWord>
       <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
         <HostToggle host={host} />
         <ActionItem

@@ -31,7 +31,7 @@ function InventoryGroupHostListItem({
     <Tr
       id={host.id}
       ouiaId={`inventory-group-host-row-${host.id}`}
-      arialabelledby={labelId}
+      aria-labelledby={labelId}
     >
       <Td
         select={{
@@ -41,11 +41,12 @@ function InventoryGroupHostListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId}>
+      <Td dataLabel={t`host-name-${host.id}`} id={labelId}>
         <Link to={`${detailUrl}`}>
           <b>{host.name}</b>
         </Link>
       </Td>
+      <Td dataLabel={t`host-description-${host.id}`}>{host.description}</Td>
       <Td dataLabel={t`Activity`}>
         <Sparkline jobs={recentPlaybookJobs} />
       </Td>

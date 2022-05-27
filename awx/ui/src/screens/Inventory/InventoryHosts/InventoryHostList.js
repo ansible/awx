@@ -136,6 +136,7 @@ function InventoryHostList() {
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
             <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>
         }
