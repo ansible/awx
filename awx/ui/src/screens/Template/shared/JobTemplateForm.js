@@ -64,7 +64,7 @@ function JobTemplateForm({
     Boolean(template?.host_config_key)
   );
   const [enableWebhooks, setEnableWebhooks] = useState(
-    Boolean(template.webhook_service)
+    Boolean(template?.webhook_service)
   );
   const isMounted = useIsMounted();
   const brandName = useBrandName();
@@ -646,7 +646,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ template = {} }) {
+  mapPropsToValues({ projectValues = {}, template = {} }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -684,7 +684,7 @@ const FormikApp = withFormik({
       limit: template.limit || '',
       name: template.name || '',
       playbook: template.playbook || '',
-      project: summary_fields?.project || null,
+      project: summary_fields?.project || projectValues || null,
       scm_branch: template.scm_branch || '',
       skip_tags: template.skip_tags || '',
       timeout: template.timeout || 0,

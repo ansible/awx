@@ -174,7 +174,12 @@ function Project({ setBreadcrumb }) {
               </Route>
             )}
             <Route path="/projects/:id/job_templates">
-              <RelatedTemplateList searchParams={{ project__id: project.id }} />
+              <RelatedTemplateList
+                searchParams={{
+                  project__id: project.id,
+                }}
+                projectName={project.name}
+              />
             </Route>
             {project?.scm_type && project.scm_type !== '' && (
               <Route path="/projects/:id/schedules">

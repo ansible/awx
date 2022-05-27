@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { node, string, func, bool } from 'prop-types';
+import { node, string, func, bool, object, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
@@ -184,7 +184,7 @@ ProjectLookup.propTypes = {
   onChange: func.isRequired,
   required: bool,
   tooltip: string,
-  value: Project,
+  value: oneOfType([Project, object]),
   isOverrideDisabled: bool,
   validate: func,
   fieldName: string,
