@@ -83,7 +83,7 @@ from ..module_utils.awx_credential import decrypt_credentials_inputs, get_awx_cr
 from ..module_utils.export_tools import transform_users_set_to_objects
 from ..module_utils.awx_workflow import get_workflow_job_templates
 from ..module_utils.awx_request import get_awx_resource_by_name, get_awx_resources
-from ..module_utils.awx_organization import get_organization_teams, get_organization_roles, get_role_members
+from ..module_utils.awx_organization import get_organization_teams, get_organization_roles, get_resource_access_list, get_role_members
 
 def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decryption_inputs, module):
     has_changed = False
@@ -115,12 +115,7 @@ def export_resources_by_organization(awx_auth, awx_platform_inputs, awx_decrypti
 
     for project_index, project in enumerate(result['projects']):
         scm_credential_id_set, project = get_project_credential(project, awx_auth)
-        project['roles'] = []
-        for role_name, role in project['summary_fields']['object_roles'].items():
-            role['name'] = role_name
-            exported_role, members_info_set = get_role_members(role, awx_auth)
-            users_info_set.update(members_info_set)
-            project['roles'].append(exported_role)
+        project['roles'], existing_members_set = get_resource_access_list('projects', project['id'], existing_members_set, awx_auth)
         result['projects'][project_index] = project
         credential_ids.update(scm_credential_id_set)
         project_ids.append(project['id'])

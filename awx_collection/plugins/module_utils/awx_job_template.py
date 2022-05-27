@@ -1,7 +1,7 @@
 
 import requests
 
-from .awx_organization import get_role_members
+from .awx_organization import get_resource_access_list
 
 from .awx_notification import get_notifications_by_unified_job_template
 from .export_tools import parse_extra_vars_to_json
@@ -25,12 +25,7 @@ def get_job_templates_by_projects(project_ids, credential_ids, notification_temp
         notification_templates, job_template['notification_templates_started'] = get_notifications_by_unified_job_template(unified_job_template_type, job_template['id'], 'notification_templates_started', notification_templates, awx_auth)
         notification_templates, job_template['notification_templates_error'] = get_notifications_by_unified_job_template(unified_job_template_type, job_template['id'], 'notification_templates_error', notification_templates, awx_auth)
         
-        job_template['roles'] = []
-        for role_name, role in job_template['summary_fields']['object_roles'].items():
-            role['name'] = role_name
-            exported_role, members_info_set = get_role_members(role, awx_auth)
-            existing_members_set.update(members_info_set)
-            job_template['roles'].append(exported_role)
+        job_template['roles'], existing_members_set = get_resource_access_list('job_templates', job_template['id'], existing_members_set, awx_auth)
         exported_job_templates.append(job_template)
 
     return exported_job_templates, credential_ids, notification_templates, existing_members_set
