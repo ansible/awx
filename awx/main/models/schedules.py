@@ -88,6 +88,24 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     def get_zoneinfo(self):
         return sorted(get_zonefile_instance().zones)
 
+    @classmethod
+    def get_zoneinfo_with_links(self):
+        zone_instance = get_zonefile_instance()
+        return_val = {'zones': sorted(zone_instance.zones), 'links': {}}
+        for zone_name in return_val['zones']:
+            if str(zone_name) != str(zone_instance.zones[zone_name]._filename):
+                return_val['links'][zone_name] = zone_instance.zones[zone_name]._filename
+        return return_val
+
+    @classmethod
+    def get_linked_timezone(self, timezone_name):
+        # Returns two values:
+        #    A boolean True means its linked, false means its not a linked timezone
+        #    The name of the link (or the same name if its not a link)
+        zone_instance = get_zonefile_instance()
+        file_name = zone_instance.zones[timezone_name]._filename
+        return file_name != timezone_name, file_name
+
     @property
     def timezone(self):
         utc = tzutc()

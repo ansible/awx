@@ -578,8 +578,8 @@ class ScheduleZoneInfo(APIView):
     swagger_topic = 'System Configuration'
 
     def get(self, request):
-        zones = [{'name': zone} for zone in models.Schedule.get_zoneinfo()]
-        return Response(zones)
+        zone_info = models.Schedule.get_zoneinfo_with_links()
+        return Response(zone_info)
 
 
 class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
