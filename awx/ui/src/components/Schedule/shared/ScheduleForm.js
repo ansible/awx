@@ -100,15 +100,24 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
   });
   const [{ name: dateFieldName }] = useField('startDate');
   const [{ name: timeFieldName }] = useField('startTime');
-  const warnLinkedTZ = (event, selected_value) => {
-    console.log(selected_value)
-    console.log(event)
-    if(selected_value in zoneLinks) {
-       console.log("Warning: "+ selected_value +" is a link to "+ zoneLinks[selected_value] +" and will be saved as that.")
+  const [timezoneMessage, setTimezoneMessage] = useState('');
+  const warnLinkedTZ = (event, selectedValue) => {
+    if (zoneLinks[selectedValue]) {
+      setTimezoneMessage(
+        `Warning: ${selectedValue} is a link to ${zoneLinks[selectedValue]} and will be saved as that.`
+      );
+    } else {
+      setTimezoneMessage('');
     }
-    timezone.onChange();
+    timezone.onChange(event, selectedValue);
   };
 
+  let timezoneValidatedStatus = 'default';
+  if (timezoneMeta.touched && timezoneMeta.error) {
+    timezoneValidatedStatus = 'error';
+  } else if (timezoneMessage) {
+    timezoneValidatedStatus = 'warning';
+  }
   return (
     <>
       <FormField
@@ -133,18 +142,17 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
       <FormGroup
         name="timezone"
         fieldId="schedule-timezone"
-        helperTextInvalid={timezoneMeta.error}
+        helperTextInvalid={timezoneMeta.error || timezoneMessage}
         isRequired
-        validated={
-          !timezoneMeta.touched || !timezoneMeta.error ? 'default' : 'error'
-        }
+        validated={timezoneValidatedStatus}
         label={t`Local time zone`}
+        helperText={timezoneMessage}
       >
         <AnsibleSelect
           id="schedule-timezone"
           data={zoneOptions}
           {...timezone}
-	  onChange={warnLinkedTZ}
+          onChange={warnLinkedTZ}
         />
       </FormGroup>
       <FormGroup
@@ -243,7 +251,7 @@ function ScheduleForm({
 
       return {
         zoneOptions: zones,
-        zoneLinks: data.zones.links,
+        zoneLinks: data.links,
         credentials: creds || [],
       };
     }, [schedule]),
@@ -642,6 +650,7 @@ function ScheduleForm({
                 <ScheduleFormFields
                   hasDaysToKeepField={hasDaysToKeepField}
                   zoneOptions={zoneOptions}
+                  zoneLinks={zoneLinks}
                 />
                 {isWizardOpen && (
                   <SchedulePromptableFields
