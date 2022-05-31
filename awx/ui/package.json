@@ -14,7 +14,7 @@
     "ace-builds": "^1.4.12",
     "ansi-to-html": "0.7.2",
     "axios": "0.22.0",
-    "codemirror": "^5.47.0",
+    "codemirror": "^5.65.4",
     "d3": "7.4.4",
     "dagre": "^0.8.4",
     "formik": "2.2.9",
