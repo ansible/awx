@@ -69,7 +69,7 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
-    image: haproxy:2.3
+    image: haproxy
     user: "{{ ansible_user_uid }}"
     volumes:
       - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:Z"
