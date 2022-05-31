@@ -89,7 +89,7 @@ const generateRunOnTheDay = (days = []) => {
   return null;
 };
 
-function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
+function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
     validate: required(t`Select a value for this field`),
@@ -100,6 +100,15 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
   });
   const [{ name: dateFieldName }] = useField('startDate');
   const [{ name: timeFieldName }] = useField('startTime');
+  const warnLinkedTZ = (event, selected_value) => {
+    console.log(selected_value)
+    console.log(event)
+    if(selected_value in zoneLinks) {
+       console.log("Warning: "+ selected_value +" is a link to "+ zoneLinks[selected_value] +" and will be saved as that.")
+    }
+    timezone.onChange();
+  };
+
   return (
     <>
       <FormField
@@ -135,6 +144,7 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
           id="schedule-timezone"
           data={zoneOptions}
           {...timezone}
+	  onChange={warnLinkedTZ}
         />
       </FormGroup>
       <FormGroup
@@ -212,7 +222,7 @@ function ScheduleForm({
     request: loadScheduleData,
     error: contentError,
     isLoading: contentLoading,
-    result: { zoneOptions, credentials },
+    result: { zoneOptions, zoneLinks, credentials },
   } = useRequest(
     useCallback(async () => {
       const { data } = await SchedulesAPI.readZoneInfo();
@@ -225,19 +235,21 @@ function ScheduleForm({
         creds = results;
       }
 
-      const zones = data.map((zone) => ({
-        value: zone.name,
-        key: zone.name,
-        label: zone.name,
+      const zones = data.zones.map((zone) => ({
+        value: zone,
+        key: zone,
+        label: zone,
       }));
 
       return {
         zoneOptions: zones,
+        zoneLinks: data.zones.links,
         credentials: creds || [],
       };
     }, [schedule]),
     {
       zonesOptions: [],
+      zoneLinks: {},
       credentials: [],
       isLoading: true,
     }
