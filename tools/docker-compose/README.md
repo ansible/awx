@@ -466,7 +466,7 @@ Once the playbook is done running Splunk should now be setup in your development
 Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint.
 
 1. Change the `username` and `password` in `tools/prometheus/prometheus.yml`. You can also change the scrape interval.
-2. (optional) if you are in cluster environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
+2. (optional) if you are in a clustered environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
 3. run `make prometheus`
 4. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
 5. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
