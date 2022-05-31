@@ -34,7 +34,7 @@ class BaseM:
     def to_prometheus(self, instance_data):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
-            output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
+            output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance].get(self.field, -1)}\n'  # TODO: fix because this -1 is neccessary when dealing with old instances (ex. you didn't clean up your database)
         return output_text
 
 
@@ -161,7 +161,7 @@ class Metrics:
             IntM('callback_receiver_events_popped_redis', 'Number of events popped from redis'),
             IntM('callback_receiver_events_in_memory', 'Current number of events in memory (in transfer from redis to db)'),
             IntM('callback_receiver_batch_events_errors', 'Number of times batch insertion failed'),
-            FloatM('callback_receiver_events_insert_db_seconds', 'Time spent saving events to database'),
+            FloatM('callback_receiver_events_insert_db_seconds', 'Total time spent saving events to database'),
             IntM('callback_receiver_events_insert_db', 'Number of events batch inserted into database'),
             IntM('callback_receiver_events_broadcast', 'Number of events broadcast to other control plane nodes'),
             HistogramM(
@@ -170,6 +170,7 @@ class Metrics:
             FloatM('subsystem_metrics_pipe_execute_seconds', 'Time spent saving metrics to redis'),
             IntM('subsystem_metrics_pipe_execute_calls', 'Number of calls to pipe_execute'),
             FloatM('subsystem_metrics_send_metrics_seconds', 'Time spent sending metrics to other nodes'),
+            SetFloatM('callback_receiver_event_processing_avg_seconds', 'Average processing time per event per callback receiver batch'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}
@@ -179,9 +180,11 @@ class Metrics:
         # track last time metrics were sent to other nodes
         self.previous_send_metrics = SetFloatM('send_metrics_time', 'Timestamp of previous send_metrics call')
 
-    def clear_values(self):
-        for m in self.METRICS.values():
-            m.clear_value(self.conn)
+    def clear_values(self, fields=None):
+        if not fields:
+            fields = self.METRICS.keys()
+        for m in fields:
+            self.METRICS[m].clear_value(self.conn)
         self.metrics_have_changed = True
         self.conn.delete(root_key + "_lock")
 
