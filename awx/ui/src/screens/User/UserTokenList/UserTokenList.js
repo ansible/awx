@@ -135,6 +135,10 @@ function UserTokenList() {
             key: 'application__name',
           },
           {
+            name: t`Description`,
+            key: 'description',
+          },
+          {
             name: t`Scope`,
             key: 'scope',
           },
@@ -181,6 +185,7 @@ function UserTokenList() {
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="application__name">{t`Application Name`}</HeaderCell>
+            <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
             <HeaderCell sortKey="scope">{t`Scope`}</HeaderCell>
             <HeaderCell sortKey="expires">{t`Expires`}</HeaderCell>
           </HeaderRow>
