@@ -22,9 +22,7 @@ import {
   WorkflowJobTemplatesAPI,
   CredentialTypesAPI,
 } from 'api';
-import wfHelpTextStrings from './WorkflowJobTemplate.helptext';
-
-const helpText = wfHelpTextStrings();
+import helpText from './WorkflowJobTemplate.helptext';
 
 function WebhookSubForm({ templateType }) {
   const { setFieldValue } = useFormikContext();

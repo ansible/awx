@@ -2,6 +2,8 @@ import 'styled-components/macro';
 import React from 'react';
 import { t } from '@lingui/macro';
 import FormField from 'components/FormField';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 
 import {
   UrlFormField,
@@ -10,14 +12,17 @@ import {
   ScmTypeOptions,
 } from './SharedFields';
 
-import ProjectHelpTextStrings from '../Project.helptext';
+import projectHelpStrings from '../Project.helptext';
 
 const GitSubForm = ({
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
 }) => {
-  const projectHelpStrings = ProjectHelpTextStrings();
+  const docsURL = `${getDocsBaseUrl(
+    useConfig()
+  )}/html/userguide/projects.html#manage-playbooks-using-source-control`;
+
   return (
     <>
       <UrlFormField tooltip={projectHelpStrings.githubSourceControlUrl} />
@@ -28,7 +33,7 @@ const GitSubForm = ({
         name="scm_refspec"
         type="text"
         tooltipMaxWidth="400px"
-        tooltip={projectHelpStrings.sourceControlRefspec}
+        tooltip={projectHelpStrings.sourceControlRefspec(docsURL)}
       />
       <ScmCredentialFormField
         credential={credential}

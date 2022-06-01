@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { Project } from 'types';
-import { Config } from 'contexts/Config';
+import { Config, useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
 import DeleteButton from 'components/DeleteButton';
@@ -24,12 +24,14 @@ import CredentialChip from 'components/CredentialChip';
 import { ProjectsAPI } from 'api';
 import { toTitleCase } from 'util/strings';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useBrandName from 'hooks/useBrandName';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import StatusLabel from 'components/StatusLabel';
 import { formatDateString } from 'util/dates';
 import Popover from 'components/Popover';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import ProjectHelpTextStrings from '../shared/Project.helptext';
+import projectHelpText from '../shared/Project.helptext';
 import useWsProject from './useWsProject';
 
 const Label = styled.span`
@@ -58,8 +60,10 @@ function ProjectDetail({ project }) {
     scm_url,
     summary_fields,
   } = useWsProject(project);
+  const docsURL = `${getDocsBaseUrl(
+    useConfig()
+  )}/html/userguide/projects.html#manage-playbooks-using-source-control`;
   const history = useHistory();
-  const projectHelpText = ProjectHelpTextStrings();
   const {
     request: deleteProject,
     isLoading,
@@ -70,6 +74,7 @@ function ProjectDetail({ project }) {
       history.push(`/projects`);
     }, [id, history])
   );
+  const brandName = useBrandName();
 
   const { error, dismissError } = useDismissableError(deleteError);
   const deleteDetailsRequests = relatedResourceDeleteRequests.project(project);
@@ -225,7 +230,7 @@ function ProjectDetail({ project }) {
           value={scm_branch}
         />
         <Detail
-          helpText={projectHelpText.sourceControlRefspec}
+          helpText={projectHelpText.sourceControlRefspec(docsURL)}
           label={t`Source Control Refspec`}
           value={scm_refspec}
         />
@@ -254,7 +259,7 @@ function ProjectDetail({ project }) {
         <Config>
           {({ project_base_dir }) => (
             <Detail
-              helpText={projectHelpText.projectBasePath}
+              helpText={projectHelpText.projectBasePath(brandName)}
               label={t`Project Base Path`}
               value={project_base_dir}
             />

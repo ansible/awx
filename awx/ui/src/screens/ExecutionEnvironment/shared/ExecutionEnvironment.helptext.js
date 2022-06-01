@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const executionEnvironmentHelpTextStrings = () => ({
+const executionEnvironmentHelpTextStrings = {
   image: (
     <span>
       {t`The full image location, including the container registry, image name, and version tag.`}
@@ -19,6 +19,6 @@ const executionEnvironmentHelpTextStrings = () => ({
     </span>
   ),
   registryCredential: t`Credential to authenticate with a protected container registry.`,
-});
+};
 
 export default executionEnvironmentHelpTextStrings;

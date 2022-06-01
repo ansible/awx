@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const jtHelpTextStrings = (brandName = '') => ({
+const jtHelpTextStrings = {
   jobType: t`For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.`,
   inventory: t`Select the inventory containing the hosts you want this job to manage.`,
   project: t`Select the project containing the playbook you want this job to execute.`,
@@ -24,7 +24,8 @@ const jtHelpTextStrings = (brandName = '') => ({
   webhookKey: t`Webhook services can use this as a shared secret.`,
   webhookCredential: t`Optionally select the credential to use to send status updates back to the webhook service.`,
   sourceControlBranch: t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`,
-  provisioningCallbacks: t`Enables creation of a provisioning callback URL. Using the URL a host can contact ${brandName} and request a configuration update using this job template.`,
+  provisioningCallbacks: (brandName = '') =>
+    t`Enables creation of a provisioning callback URL. Using the URL a host can contact ${brandName} and request a configuration update using this job template.`,
   privilegeEscalation: t`If enabled, run this playbook as an administrator.`,
   enableWebhook: t`Enable webhook for this template.`,
   concurrentJobs: t`If enabled, simultaneous runs of this job template will be allowed.`,
@@ -45,6 +46,6 @@ const jtHelpTextStrings = (brandName = '') => ({
       {t`Refer to the Ansible documentation for details about the configuration file.`}
     </span>
   ),
-});
+};
 
 export default jtHelpTextStrings;

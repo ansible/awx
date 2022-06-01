@@ -1,12 +1,9 @@
 import React from 'react';
 import { t } from '@lingui/macro';
-import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
-import useBrandName from 'hooks/useBrandName';
 
-const ProjectHelpTextStrings = () => ({
+const projectHelpTextStrings = {
   executionEnvironment: t`The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level.`,
-  projectBasePath: (
+  projectBasePath: (brandName = '') => (
     <span>
       {t`Base path used for locating playbooks. Directories
               found inside this path will be listed in the playbook directory drop-down.
@@ -15,7 +12,7 @@ const ProjectHelpTextStrings = () => ({
       <br />
       <br />
       {t`Change PROJECTS_ROOT when deploying
-              ${useBrandName()} to change this location.`}
+              ${brandName} to change this location.`}
     </span>
   ),
   projectLocalPath: t`Select from the list of directories found in
@@ -74,7 +71,7 @@ const ProjectHelpTextStrings = () => ({
     </span>
   ),
 
-  sourceControlRefspec: (
+  sourceControlRefspec: (url = '') => (
     <span>
       {t`A refspec to fetch (passed to the Ansible git
             module). This parameter allows access to references via
@@ -99,13 +96,7 @@ const ProjectHelpTextStrings = () => ({
       <br />
       <br />
       {t`For more information, refer to the`}{' '}
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href={`${getDocsBaseUrl(
-          useConfig()
-        )}/html/userguide/projects.html#manage-playbooks-using-source-control`}
-      >
+      <a target="_blank" rel="noopener noreferrer" href={`${url}`}>
         {t`Documentation.`}
       </a>
     </span>
@@ -137,6 +128,6 @@ const ProjectHelpTextStrings = () => ({
                     considered current, and a new project update will be
                     performed.`,
   },
-});
+};
 
-export default ProjectHelpTextStrings;
+export default projectHelpTextStrings;

@@ -45,7 +45,7 @@ import useIsMounted from 'hooks/useIsMounted';
 import LabelSelect from 'components/LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
-import jtHelpTextStrings from './JobTemplate.helptext';
+import helpText from './JobTemplate.helptext';
 
 const { origin } = document.location;
 
@@ -68,7 +68,6 @@ function JobTemplateForm({
   );
   const isMounted = useIsMounted();
   const brandName = useBrandName();
-  const helpText = jtHelpTextStrings(brandName);
 
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
@@ -520,7 +519,9 @@ function JobTemplateForm({
                       <span>
                         {t`Provisioning Callbacks`}
                         &nbsp;
-                        <Popover content={helpText.provisioningCallbacks} />
+                        <Popover
+                          content={helpText.provisioningCallbacks(brandName)}
+                        />
                       </span>
                     }
                     id="option-callbacks"

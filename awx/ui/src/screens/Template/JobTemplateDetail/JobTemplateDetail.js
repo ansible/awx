@@ -33,7 +33,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import jtHelpTextStrings from '../shared/JobTemplate.helptext';
+import helpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
   const {
@@ -67,7 +67,6 @@ function JobTemplateDetail({ template }) {
   const { id: templateId } = useParams();
   const history = useHistory();
   const brandName = useBrandName();
-  const helpText = jtHelpTextStrings(brandName);
 
   const {
     isLoading: isLoadingInstanceGroups,
@@ -306,7 +305,7 @@ function JobTemplateDetail({ template }) {
               label={t`Provisioning Callback URL`}
               value={generateCallBackUrl}
               dataCy="jt-detail-provisioning-callback-url"
-              helpText={helpText.provisioningCallbacks}
+              helpText={helpText.provisioningCallbacks(brandName)}
             />
           </>
         )}
