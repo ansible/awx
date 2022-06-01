@@ -62,6 +62,17 @@ def pk_or_name(v2, model_name, value, page=None):
     return value
 
 
+class JsonDumpsAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        # This Action gets called repeatedly on each instance of the flag that it is
+        # tied to, and unfortunately doesn't come with a good way of noticing we are at
+        # the end. So it's necessary to keep doing json.loads and json.dumps each time.
+
+        json_vars = json.loads(getattr(namespace, self.dest, None) or '{}')
+        json_vars.update(values)
+        setattr(namespace, self.dest, json.dumps(json_vars))
+
+
 class ResourceOptionsParser(object):
 
     deprecated = False
@@ -132,6 +143,7 @@ class ResourceOptionsParser(object):
         for k, param in self.options.get(http_method, {}).items():
             required = method == 'create' and param.get('required', False) is True
             help_text = param.get('help_text', '')
+            args = ['--{}'.format(k)]
 
             if method == 'list':
                 if k == 'id':
@@ -165,9 +177,6 @@ class ResourceOptionsParser(object):
                         parsed[k] = open(path).read()
 
                 return parsed
-
-            def jsonstr(v):
-                return json.dumps(json_or_yaml(v))
 
             kwargs = {
                 'help': help_text,
@@ -235,16 +244,20 @@ class ResourceOptionsParser(object):
             if (self.resource in ('job_templates', 'workflow_job_templates') and k == 'extra_vars') or (
                 self.resource in ('inventory', 'groups', 'hosts') and k == 'variables'
             ):
-                kwargs['type'] = jsonstr
+                kwargs['type'] = json_or_yaml
+                kwargs['action'] = JsonDumpsAction
+
+                if k == 'extra_vars':
+                    args.append('-e')
 
             if required:
                 if required_group is None:
                     required_group = self.parser.choices[method].add_argument_group('required arguments')
                     # put the required group first (before the optional args group)
                     self.parser.choices[method]._action_groups.reverse()
-                required_group.add_argument('--{}'.format(k), **kwargs)
+                required_group.add_argument(*args, **kwargs)
             else:
-                self.parser.choices[method].add_argument('--{}'.format(k), **kwargs)
+                self.parser.choices[method].add_argument(*args, **kwargs)
 
     def handle_custom_actions(self):
         for _, action in CustomAction.registry.items():
