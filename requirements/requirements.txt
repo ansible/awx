@@ -364,7 +364,6 @@ six==1.14.0
     #   pyrsistent
     #   python-dateutil
     #   tacacs-plus
-    #   twilio
     #   websocket-client
 slack-sdk==3.11.2
     # via -r /awx_devel/requirements/requirements.in
@@ -388,7 +387,7 @@ tempora==2.1.0
     #   jaraco-logging
 tomli==2.0.1
     # via setuptools-scm
-twilio==6.37.0
+twilio==7.9.1
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==22.4.0
     # via
