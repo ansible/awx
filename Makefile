@@ -529,7 +529,12 @@ docker-compose-cluster-elk: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 prometheus:
-	docker run -u0 --net=tools_default --link=`docker ps | egrep -o "tools_awx(_run)?_([^ ]+)?"`:awxweb --volume `pwd`/tools/prometheus:/prometheus --name prometheus -d -p 0.0.0.0:9090:9090 prom/prometheus --web.enable-lifecycle --config.file=/prometheus/prometheus.yml
+	docker volume create prometheus
+	docker run -d --rm --net=_sources_default --link=awx_1:awx1 --volume prometheus-storage:/prometheus --volume `pwd`/tools/prometheus:/etc/prometheus --name prometheus -p 9090:9090 prom/prometheus
+
+grafana:
+	docker volume create grafana
+	docker run -d --rm --net=_sources_default --volume grafana-storage:/var/lib/grafana --volume `pwd`/tools/grafana:/etc/grafana/provisioning --name grafana -p 3001:3000 grafana/grafana-enterprise
 
 docker-compose-container-group:
 	MINIKUBE_CONTAINER_GROUP=true make docker-compose
