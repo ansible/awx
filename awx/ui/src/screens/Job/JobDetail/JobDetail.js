@@ -381,7 +381,12 @@ function JobDetail({ job, inventorySourceLabels }) {
           />
         )}
         {typeof job.forks === 'number' && (
-          <Detail dataCy="forks" label={t`Forks`} value={`${job.forks}`} />
+          <Detail
+            dataCy="forks"
+            label={t`Forks`}
+            value={`${job.forks}`}
+            helpText={jobHelpText.forks}
+          />
         )}
 
         {credential && (
