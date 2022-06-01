@@ -28,6 +28,7 @@ import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from 'util/jobs';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
+import jobHelpText from '../Job.helptext';
 
 const StatusDetailValue = styled.div`
   align-items: center;
@@ -110,6 +111,7 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-inventory"
           label={t`Inventory`}
+          helpText={jobHelpText.inventory}
           value={
             <Link
               to={
@@ -123,7 +125,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           }
         />
       ) : (
-        <DeletedDetail label={t`Inventory`} />
+        <DeletedDetail label={t`Inventory`} helpText={jobHelpText.inventory} />
       );
     }
     if (job.type === 'workflow_job') {
@@ -131,6 +133,7 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-inventory"
           label={t`Inventory`}
+          helpText={jobHelpText.inventory}
           value={
             <Link
               to={
@@ -160,6 +163,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           <Detail
             dataCy="job-project"
             label={t`Project`}
+            helpText={jobHelpText.project}
             value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
           />
           <Detail
@@ -250,6 +254,7 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-type"
           label={t`Job Type`}
+          helpText={jobHelpText.jobType}
           value={jobTypes[job.type]}
         />
         <Detail
@@ -304,6 +309,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           <Detail
             dataCy="source-control-branch"
             label={t`Source Control Branch`}
+            helpText={jobHelpText.sourceControlBranch}
             value={scmBranch}
           />
         )}
@@ -315,18 +321,26 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-playbook"
           label={t`Playbook`}
+          helpText={jobHelpText.playbook}
           value={job.playbook}
         />
-        <Detail dataCy="job-limit" label={t`Limit`} value={job.limit} />
+        <Detail
+          dataCy="job-limit"
+          label={t`Limit`}
+          helpText={jobHelpText.limit}
+          value={job.limit}
+        />
         <Detail
           dataCy="job-verbosity"
           label={t`Verbosity`}
+          helpText={jobHelpText.verbosity}
           value={VERBOSITY[job.verbosity]}
         />
         {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
           <ExecutionEnvironmentDetail
             dataCy="job-execution-environment"
             executionEnvironment={executionEnvironment}
+            helpText={jobHelpText.executionEnvironment}
             verifyMissingVirtualEnv={false}
           />
         )}
@@ -339,6 +353,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           <Detail
             dataCy="job-instance-group"
             label={t`Instance Group`}
+            helpText={jobHelpText.instanceGroups}
             value={buildInstanceGroupLink(instanceGroup)}
           />
         )}
@@ -354,6 +369,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             <Detail
               dataCy="job-slice"
               label={t`Job Slice`}
+              helpText={jobHelpText.jobSlicing}
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
@@ -365,7 +381,12 @@ function JobDetail({ job, inventorySourceLabels }) {
           />
         )}
         {typeof job.forks === 'number' && (
-          <Detail dataCy="forks" label={t`Forks`} value={`${job.forks}`} />
+          <Detail
+            dataCy="forks"
+            label={t`Forks`}
+            value={`${job.forks}`}
+            helpText={jobHelpText.forks}
+          />
         )}
 
         {credential && (
@@ -392,6 +413,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           <Detail
             dataCy="job-credentials"
             fullWidth
+            helpText={jobHelpText.credentials}
             label={t`Credentials`}
             value={
               <ChipGroup
@@ -416,6 +438,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             dataCy="job-labels"
             fullWidth
             label={t`Labels`}
+            helpText={jobHelpText.labels}
             value={
               <ChipGroup
                 numChips={5}
@@ -436,6 +459,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             dataCy="job-tags"
             fullWidth
             label={t`Job Tags`}
+            helpText={jobHelpText.jobTags}
             value={
               <ChipGroup
                 numChips={5}
@@ -460,6 +484,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             dataCy="job-skip-tags"
             fullWidth
             label={t`Skip Tags`}
+            helpText={jobHelpText.skipTags}
             value={
               <ChipGroup
                 numChips={5}
@@ -483,6 +508,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           dataCy="job-module-name"
           label={t`Module Name`}
           value={job.module_name}
+          helpText={jobHelpText.module(job.module_name)}
         />
         <Detail
           dataCy="job-module-arguments"
@@ -505,6 +531,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             label={t`Variables`}
             name="extra_vars"
             dataCy="job-detail-extra-variables"
+            helpText={jobHelpText.variables}
           />
         )}
         {job.artifacts && (
