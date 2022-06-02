@@ -117,5 +117,11 @@ This workflow will take the generated images and promote them to quay.io.
 
 ![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
 
-## Notify the AWX mailing list
+## Notify the AWX mailing list and bullhorn
 Send an email to the [AWX Mailing List](mailto:awx-project@googlegroups.com) with a message format of type "AWX Release" from the [mailing list triage standard replies](../.github/triage_replies.md#awx-release)
+
+## Send an IRC message over matrix to #social:ansible.com:
+
+@newsbot
+We're happy to announce that [AWX version 21.1.0](https://github.com/ansible/awx/releases/tag/21.1.0) is now available!
+We're happy to announce that [AWX Operator version 0.22.0](https://github.com/ansible/awx-operator/releases/tag/0.22.0) is now available!
