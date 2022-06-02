@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import fcntl
 from unittest import mock
@@ -36,10 +37,21 @@ from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
 from awx.main.tasks import jobs, system
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
-from awx.main.utils.execution_environments import CONTAINER_ROOT, to_host_path
+from awx.main.utils.execution_environments import CONTAINER_ROOT
 
 from awx.main.utils.licensing import Licenser
 from awx.main.constants import JOB_VARIABLE_PREFIXES
+
+
+def to_host_path(path, private_data_dir):
+    """Given a path inside of the EE container, this gives the absolute path
+    on the host machine within the private_data_dir
+    """
+    if not os.path.isabs(private_data_dir):
+        raise RuntimeError('The private_data_dir path must be absolute')
+    if CONTAINER_ROOT != path and Path(CONTAINER_ROOT) not in Path(path).resolve().parents:
+        raise RuntimeError(f'Cannot convert path {path} unless it is a subdir of {CONTAINER_ROOT}')
+    return path.replace(CONTAINER_ROOT, private_data_dir, 1)
 
 
 class TestJobExecution(object):
