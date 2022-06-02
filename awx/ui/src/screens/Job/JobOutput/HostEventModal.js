@@ -107,6 +107,12 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             gutter="sm"
           >
             <Detail label={t`Host`} value={hostEvent.host_name} />
+            {hostEvent.summary_fields.host?.description ? (
+              <Detail
+                label={t`Description`}
+                value={hostEvent.summary_fields.host.description}
+              />
+            ) : null}
             {hostStatus ? (
               <Detail
                 label={t`Status`}

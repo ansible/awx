@@ -52,6 +52,12 @@ function HostListItem({
             <b>{host.name}</b>
           </Link>
         </TdBreakWord>
+        <TdBreakWord
+          id={`host-description-${host.id}}`}
+          dataLabel={t`Description`}
+        >
+          {host.description}
+        </TdBreakWord>
         <TdBreakWord dataLabel={t`Inventory`}>
           {host.summary_fields.inventory && (
             <Link

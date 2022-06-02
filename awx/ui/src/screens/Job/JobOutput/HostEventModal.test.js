@@ -43,6 +43,13 @@ const hostEvent = {
   task: 'command',
   type: 'job_event',
   url: '/api/v2/job_events/123/',
+  summary_fields: {
+    host: {
+      id: 1,
+      name: 'foo',
+      description: 'Bar',
+    },
+  },
 };
 
 /* eslint-disable no-useless-escape */
@@ -86,7 +93,7 @@ describe('HostEventModal', () => {
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
     expect(wrapper.find('Tabs').prop('activeKey')).toEqual(0);
-    expect(wrapper.find('Detail')).toHaveLength(5);
+    expect(wrapper.find('Detail')).toHaveLength(6);
 
     function assertDetail(index, label, value) {
       const detail = wrapper.find('Detail').at(index);
@@ -96,10 +103,11 @@ describe('HostEventModal', () => {
 
     const detail = wrapper.find('Detail').first();
     expect(detail.prop('value')).toEqual('foo');
-    assertDetail(1, 'Play', 'all');
-    assertDetail(2, 'Task', 'command');
-    assertDetail(3, 'Module', 'command');
-    assertDetail(4, 'Command', hostEvent.event_data.res.cmd);
+    assertDetail(1, 'Description', 'Bar');
+    assertDetail(2, 'Play', 'all');
+    assertDetail(3, 'Task', 'command');
+    assertDetail(4, 'Module', 'command');
+    assertDetail(5, 'Command', hostEvent.event_data.res.cmd);
   });
 
   test('should display successful host status label', () => {

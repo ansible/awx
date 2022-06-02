@@ -419,6 +419,7 @@ function HostFilterLookup({
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
                 <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
                 <HeaderCell>{t`Inventory`}</HeaderCell>
               </HeaderRow>
             }

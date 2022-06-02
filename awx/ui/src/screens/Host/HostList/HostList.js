@@ -167,6 +167,7 @@ function HostList() {
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG} isExpandable>
               <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
               <HeaderCell>{t`Inventory`}</HeaderCell>
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
