@@ -130,8 +130,7 @@ class JobOptions(BaseModel):
             )
         )
     )
-    job_tags = models.CharField(
-        max_length=1024,
+    job_tags = models.TextField(
         blank=True,
         default='',
     )
