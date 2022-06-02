@@ -58,9 +58,12 @@ def to_container_path(path, private_data_dir):
     """
     if not os.path.isabs(private_data_dir):
         raise RuntimeError('The private_data_dir path must be absolute')
-    if private_data_dir != path and Path(private_data_dir) not in Path(path).resolve().parents:
+    # due to how tempfile.mkstemp works, we are probably passed a resolved path, but unresolved private_data_dir
+    resolved_path = Path(path).resolve()
+    resolved_pdd = Path(private_data_dir).resolve()
+    if private_data_dir != path and resolved_pdd not in resolved_path.parents:
         raise RuntimeError(f'Cannot convert path {path} unless it is a subdir of {private_data_dir}')
-    return path.replace(private_data_dir, CONTAINER_ROOT, 1)
+    return str(resolved_path).replace(str(resolved_pdd), CONTAINER_ROOT, 1)
 
 
 def to_host_path(path, private_data_dir):
