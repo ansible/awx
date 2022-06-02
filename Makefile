@@ -288,6 +288,7 @@ COLLECTION_TEST_TARGET ?=
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
 COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
+COLLECTION_TEMPLATE_VERSION ?= false
 
 test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
@@ -315,7 +316,7 @@ awx_collection_build: $(shell find awx_collection -type f)
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
 	  -e collection_version=$(COLLECTION_VERSION) \
-	  -e '{"awx_template_version":false}'
+	  -e '{"awx_template_version": $(COLLECTION_TEMPLATE_VERSION)}'
 	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
 
 build_collection: awx_collection_build
