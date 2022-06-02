@@ -53,7 +53,7 @@ requests
 sqlparse>=0.4.2 # Required by Django, pinning for CVE-2021-32839
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
-twilio
+twilio>7.9.0  # Pick up fix for use with proxy server via environment variables
 twisted[tls]>=22.4.0  # CVE-2020-10108, CVE-2020-10109, CVE-2022-21712 (https://github.com/ansible/awx/security/dependabot/46), https://github.com/ansible/awx/security/dependabot/53
 uWSGI
 uwsgitop
