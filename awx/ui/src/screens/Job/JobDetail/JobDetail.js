@@ -186,7 +186,6 @@ function JobDetail({ job, inventorySourceLabels }) {
     }
     return null;
   };
-
   return (
     <CardBody>
       <DetailList>
@@ -349,6 +348,13 @@ function JobDetail({ job, inventorySourceLabels }) {
           label={t`Execution Node`}
           value={job.execution_node}
         />
+        {job?.controller_node ? (
+          <Detail
+            dataCy="job-controller-node"
+            label={t`Controller Node`}
+            value={job.controller_node}
+          />
+        ) : null}
         {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
             dataCy="job-instance-group"
@@ -388,7 +394,6 @@ function JobDetail({ job, inventorySourceLabels }) {
             helpText={jobHelpText.forks}
           />
         )}
-
         {credential && (
           <Detail
             dataCy="job-machine-credential"

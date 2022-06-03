@@ -2236,7 +2236,6 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             'source_project_update',
             'custom_virtualenv',
             'instance_group',
-            '-controller_node',
         )
 
     def get_related(self, obj):
@@ -2311,7 +2310,6 @@ class InventoryUpdateDetailSerializer(InventoryUpdateSerializer):
 class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSerializer):
     class Meta:
         model = InventoryUpdate
-        fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
 
 class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
