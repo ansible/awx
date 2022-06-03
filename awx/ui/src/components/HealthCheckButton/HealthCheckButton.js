@@ -29,7 +29,7 @@ function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
           onClick={onClick}
           ouiaId="health-check"
         >
-          {t`Health Check`}
+          {t`Run health check`}
         </DropdownItem>
       </Tooltip>
     );
@@ -42,7 +42,7 @@ function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
           variant="secondary"
           ouiaId="health-check"
           onClick={onClick}
-        >{t`Health Check`}</Button>
+        >{t`Run health check`}</Button>
       </div>
     </Tooltip>
   );
