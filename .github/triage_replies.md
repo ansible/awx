@@ -46,4 +46,4 @@ Please see the releases pages for more details:\
 The AWX team.
 
 ## Try latest version
-- Hello, this issue pertains to an older version of AWX. Try upgrading to the lastest version and see if that resolves your issue.
+- Hello, this issue pertains to an older version of AWX. Try upgrading to the latest version and see if that resolves your issue.
