@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Issues are for **concrete, actionable bugs and feature requests** only. For debugging help or technical support, please use:
+        Feature Request issues are for **feature requests** only. For debugging help or technical support, please use:
         - The #ansible-awx channel on irc.libera.chat
         - The awx project mailing list, https://groups.google.com/forum/#!forum/awx-project
 
