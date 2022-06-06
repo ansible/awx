@@ -5,6 +5,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { Config } from 'contexts/Config';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import { InventoryList } from './InventoryList';
 import Inventory from './Inventory';
 import SmartInventory from './SmartInventory';
@@ -119,7 +120,9 @@ function Inventories() {
           <SmartInventory setBreadcrumb={setBreadcrumbConfig} />
         </Route>
         <Route path="/inventories">
-          <InventoryList />
+          <PersistentFilters pageKey="inventories">
+            <InventoryList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

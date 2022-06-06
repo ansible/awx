@@ -3,6 +3,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import NotificationTemplateList from './NotificationTemplateList';
 import NotificationTemplateAdd from './NotificationTemplateAdd';
 import NotificationTemplate from './NotificationTemplate';
@@ -39,7 +40,9 @@ function NotificationTemplates() {
           <NotificationTemplate setBreadcrumb={updateBreadcrumbConfig} />
         </Route>
         <Route path={`${match.url}`}>
-          <NotificationTemplateList />
+          <PersistentFilters pageKey="notificationTemplates">
+            <NotificationTemplateList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

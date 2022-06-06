@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 import ScreenHeader from 'components/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import { InstanceList } from './InstanceList';
 import Instance from './Instance';
 
@@ -30,7 +31,9 @@ function Instances() {
           <Instance setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/instances">
-          <InstanceList />
+          <PersistentFilters pageKey="instances">
+            <InstanceList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

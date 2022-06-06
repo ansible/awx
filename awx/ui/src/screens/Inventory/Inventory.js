@@ -59,6 +59,7 @@ function Inventory({ setBreadcrumb }) {
       ),
       link: `/inventories`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `${match.url}/details`, id: 0 },
     { name: t`Access`, link: `${match.url}/access`, id: 1 },

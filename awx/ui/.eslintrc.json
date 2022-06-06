@@ -11,7 +11,7 @@
     },
     "babelOptions": {
       "presets": ["@babel/preset-react"]
-   }
+    }
   },
   "plugins": ["react-hooks", "jsx-a11y", "i18next", "@babel"],
   "extends": [
@@ -96,9 +96,18 @@
           "modifier",
           "data-cy",
           "fieldName",
-          "splitButtonVariant"
+          "splitButtonVariant",
+          "pageKey"
         ],
-        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg", "hh:mm AM/PM", "Twilio"],
+        "ignore": [
+          "Ansible",
+          "Tower",
+          "JSON",
+          "YAML",
+          "lg",
+          "hh:mm AM/PM",
+          "Twilio"
+        ],
         "ignoreComponent": [
           "AboutModal",
           "code",
@@ -139,7 +148,7 @@
     "object-curly-newline": "off",
     "no-trailing-spaces": ["error"],
     "no-unused-expressions": ["error", { "allowShortCircuit": true }],
-    "react/jsx-props-no-spreading":["off"],
+    "react/jsx-props-no-spreading": ["off"],
     "react/prefer-stateless-function": "off",
     "react/prop-types": "off",
     "react/sort-comp": ["error", {}],

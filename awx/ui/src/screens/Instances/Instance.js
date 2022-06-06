@@ -20,6 +20,7 @@ function Instance({ setBreadcrumb }) {
       ),
       link: `/instances`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `${match.url}/details`, id: 0 },
   ];

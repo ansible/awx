@@ -59,6 +59,7 @@ function User({ setBreadcrumb, me }) {
       ),
       link: `/users`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `${match.url}/details`, id: 0 },
     {

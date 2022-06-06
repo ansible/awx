@@ -11,6 +11,7 @@ import {
 } from '@patternfly/react-core';
 import ScreenHeader from 'components/ScreenHeader';
 import { Detail, DetailList } from 'components/DetailList';
+import PersistentFilters from 'components/PersistentFilters';
 import ApplicationsList from './ApplicationsList';
 import ApplicationAdd from './ApplicationAdd';
 import Application from './Application';
@@ -56,7 +57,9 @@ function Applications() {
           <Application setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/applications">
-          <ApplicationsList />
+          <PersistentFilters pageKey="applications">
+            <ApplicationsList />
+          </PersistentFilters>
         </Route>
       </Switch>
       {applicationModalSource && (

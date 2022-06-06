@@ -99,6 +99,7 @@ function Project({ setBreadcrumb }) {
       ),
       link: `/projects`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `/projects/${id}/details` },
     { name: t`Access`, link: `/projects/${id}/access` },
