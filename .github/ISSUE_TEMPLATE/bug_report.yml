@@ -45,6 +45,9 @@ body:
         - label: UI
         - label: API
         - label: Docs
+        - label: Collection
+        - label: awxkit
+        - label: Other
 
   - type: dropdown
     id: awx-install-method
@@ -60,6 +63,7 @@ body:
         - docker on linux
         - docker for mac
         - boot2docker
+        - N/A
     validations:
       required: true
 
