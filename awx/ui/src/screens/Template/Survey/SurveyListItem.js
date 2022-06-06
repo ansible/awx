@@ -44,7 +44,7 @@ function SurveyListItem({ canEdit, question, isChecked, onSelect, rowIndex }) {
               question.variable
             )}`}
           >
-            {question.question_name}
+            <b>{question.question_name}</b>
           </Link>
           {question.required && (
             <Required
