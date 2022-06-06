@@ -100,23 +100,10 @@ jobs:
           AWX_TEST_IMAGE: ${{ github.repository }}
           AWX_TEST_VERSION: ${{ github.event.inputs.version }}
 
-      - name: Generate changelog
-        uses: shanemcd/simple-changelog-generator@v1
-        id: changelog
-        with:
-          repo: "${{ github.repository }}"
-
-      - name: Write changelog to file
-        run: |
-          cat << 'EOF' > /tmp/awx-changelog
-          ${{ steps.changelog.outputs.changelog }}
-          EOF
-
       - name: Create draft release for AWX
         working-directory: awx
         run: |
           ansible-playbook -v tools/ansible/stage.yml \
-            -e changelog_path=/tmp/awx-changelog \
             -e repo=${{ github.repository }} \
             -e awx_image=ghcr.io/${{ github.repository }} \
             -e version=${{ github.event.inputs.version }} \
