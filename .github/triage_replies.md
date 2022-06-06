@@ -12,21 +12,34 @@
 
 ### Denied Submission
 
-- Hi! \
+- Hi!\
 \
-Thanks very much for your submission to AWX. It means a lot to us that you've taken time to contribute. \
+Thanks very much for your submission to AWX. It means a lot to us that you have taken time to contribute.\
 \
-Unfortunately, we're not sure if we want this feature in the program, and I don't want this to seem confrontational. Our reasons for this are:\
+At this time we do not want to merge this PR. Our reasons for this are:\
 \
 (A) INSERT ITEM HERE\
 \
-However, we're absolutely always up for discussion. Because this project is very active, we're unlikely to see comments made on closed tickets and we lock them after some time. If you or anyone else has any further questions, please let us know by using any of the communication methods listed in the page below:\
+Please know that we are always up for discussion but this project is very active. Because of this, we're unlikely to see comments made on closed PRs and we lock them after some time. If you or anyone else has any further questions, please let us know by using any of the communication methods listed in the page below:\
 \
 https://github.com/ansible/awx/#get-involved\
 \
-In the future, sometimes starting a discussion on the development list prior to implementing a feature can make getting things included a little easier, but it's not always necessary.\
+In the future, sometimes starting a discussion on the development list prior to implementing a feature can make getting things included a little easier, but it is not always necessary.\
 \
 Thank you once again for this and your interest in AWX!
+
+
+### No Progress
+- Hi!\
+\
+Thank you very much for your submission to AWX. It means a lot to us that you have taken time to contribute.\
+\
+On this PR changes were requested but it has been some time since then. We think this PR has merit but without the requested changes we are unable to merge it. At this time we are closing you PR. If you get time to address the changes you are welcome to open another PR or we can reopen this PR upon request if you contact us by using any of the communication methods listed in the page below:\
+\
+https://github.com/ansible/awx/#get-involved\
+\
+Thank you once again for this and your interest in AWX!
+
 
 
 
