@@ -5,10 +5,10 @@
 
 
 
-## PRs
+## PRs/Issues
 
 ### Visit our mailing list
-- Hello, your question seems like a good one to ask on our mailing list at https://groups.google.com/g/awx-project. You can also join #ansible-awx on https://libera.chat/ and ask your question there.
+- Hello, this appears to be less of a bug report or feature request and more of a question. Could you please ask this on our mailing list? See https://github.com/ansible/awx/#get-involved for information for ways to connect with us.
 
 ### Denied Submission
 
@@ -80,14 +80,14 @@ Thank you once again for this and your interest in AWX!
 ### AWX Release
 - Hi all,\
 \
-We're happy to announce that the next release of AWX, version 21.0.0 is now available!\
-In addition AWX Operator version 0.21.0 has also been release!\
+We're happy to announce that the next release of AWX, version <X> is now available!\
+In addition AWX Operator version <Y> has also been release!\
 \
 Please see the releases pages for more details:\
-	AWX: https://github.com/ansible/awx/releases/tag/21.0.0\
-	Operator: https://github.com/ansible/awx-operator/releases/tag/0.20.1\
+	AWX: https://github.com/ansible/awx/releases/tag/<X>\
+	Operator: https://github.com/ansible/awx-operator/releases/tag/<Y>\
 \
 The AWX team.
 
 ## Try latest version
-- Hello, this issue pertains to an older version of AWX. Try upgrading to the latest version and see if that resolves your issue.
+- Hello, this issue pertains to an older version of AWX. Try upgrading to the latest version and let us know if that resolves your issue.
