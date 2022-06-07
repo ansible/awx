@@ -97,7 +97,11 @@ function InstanceDetail({ setBreadcrumb }) {
     }
   }, [instance, setBreadcrumb]);
 
-  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
+  const {
+    error: healthCheckError,
+    isLoading: isRunningHealthCheck,
+    request: fetchHealthCheck,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await InstancesAPI.healthCheck(id);
       setHealthCheck(data);
@@ -220,12 +224,14 @@ function InstanceDetail({ setBreadcrumb }) {
         <CardActionsRow>
           <Tooltip content={t`Run a health check on the instance`}>
             <Button
-              isDisabled={!me.is_superuser}
+              isDisabled={!me.is_superuser || isRunningHealthCheck}
               variant="primary"
               ouiaId="health-check-button"
               onClick={fetchHealthCheck}
+              isLoading={isRunningHealthCheck}
+              spinnerAriaLabel={t`Running health check`}
             >
-              {t`Health Check`}
+              {t`Run health check`}
             </Button>
           </Tooltip>
           <InstanceToggle
