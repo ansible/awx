@@ -4,6 +4,7 @@ import os
 import signal
 import time
 import traceback
+import datetime
 
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -151,12 +152,17 @@ class CallbackBrokerWorker(BaseWorker):
             metrics_singular_events_saved = 0
             metrics_events_batch_save_errors = 0
             metrics_events_broadcast = 0
+            metrics_events_missing_created = 0
+            metrics_total_job_event_processing_seconds = datetime.timedelta(seconds=0)
             for cls, events in self.buff.items():
                 logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})')
                 for e in events:
+                    e.modified = now  # this can be set before created because now is set above on line 149
                     if not e.created:
                         e.created = now
-                    e.modified = now
+                        metrics_events_missing_created += 1
+                    else:  # only calculate the seconds if the created time already has been set
+                        metrics_total_job_event_processing_seconds += e.modified - e.created
                 metrics_duration_to_save = time.perf_counter()
                 try:
                     cls.objects.bulk_create(events)
@@ -189,6 +195,11 @@ class CallbackBrokerWorker(BaseWorker):
                 self.subsystem_metrics.observe('callback_receiver_batch_events_insert_db', metrics_bulk_events_saved)
                 self.subsystem_metrics.inc('callback_receiver_events_in_memory', -(metrics_bulk_events_saved + metrics_singular_events_saved))
                 self.subsystem_metrics.inc('callback_receiver_events_broadcast', metrics_events_broadcast)
+                self.subsystem_metrics.set(
+                    'callback_receiver_event_processing_avg_seconds',
+                    metrics_total_job_event_processing_seconds.total_seconds()
+                    / (metrics_bulk_events_saved + metrics_singular_events_saved - metrics_events_missing_created),
+                )
             if self.subsystem_metrics.should_pipe_execute() is True:
                 self.subsystem_metrics.pipe_execute()
 
