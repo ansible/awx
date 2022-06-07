@@ -4685,11 +4685,9 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         help_text=_(
             'The timezone this schedule runs in. This field is extracted from the RRULE. If the timezone in the RRULE is a link to another timezone this field will show the links name.'
         ),
-        read_only=True,
     )
     until = serializers.SerializerMethodField(
         help_text=_('The date this schedule will end. This field is computed from the RRULE. If the schedule does not end an emptry string will be returned'),
-        read_only=True,
     )
 
     class Meta:
