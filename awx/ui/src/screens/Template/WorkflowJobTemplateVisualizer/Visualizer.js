@@ -297,7 +297,11 @@ function Visualizer({ template }) {
     }
   }, [links, nodes]);
 
-  const { error: saveVisualizerError, request: saveVisualizer } = useRequest(
+  const {
+    error: saveVisualizerError,
+    isLoading: isSavingVisualizer,
+    request: saveVisualizer,
+  } = useRequest(
     useCallback(async () => {
       const nodeRequests = [];
       const approvalTemplateRequests = [];
@@ -553,7 +557,7 @@ function Visualizer({ template }) {
   const { error: nodeRequestError, dismissError: dismissNodeRequestError } =
     useDismissableError(saveVisualizerError);
 
-  if (isLoading) {
+  if (isLoading || isSavingVisualizer) {
     return (
       <CenteredContent>
         <ContentLoading />
