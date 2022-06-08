@@ -14,4 +14,6 @@
   - any: ["awx_collection/**/*"]
 
 "dependencies":
-  - any: ["awx/ui/package.json", "awx/requirements/*.txt", "awx/requirements/requirements.in"]
+  - any: ["awx/ui/package.json"]
+  - any: ["awx/requirements/*.txt"]
+  - any: ["awx/requirements/requirements.in"]

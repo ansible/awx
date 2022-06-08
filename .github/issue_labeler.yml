@@ -1,9 +1,9 @@
 needs_triage:
   - '.*'
 "type:bug":
-  - "Bug Report issues are"
+  - "Bug Summary"
 "type:enhancement":
-  - "Feature Request issues are"
+  - "Feature Summary"
 "component:ui":
   - "\\[X\\] UI"
 "component:api":
