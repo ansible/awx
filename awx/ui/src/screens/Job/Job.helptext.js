@@ -18,6 +18,7 @@ const jobHelpText = {
   jobTags: t`Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to the documentation for details on the usage of tags.`,
   skipTags: t`Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to the documentation for details on the usage of tags.`,
   sourceControlBranch: t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`,
+  projectUpdate: t`Project checkout results`,
   forks: (
     <span>
       {t`The number of parallel or simultaneous processes to use while executing the playbook. An empty value, or a value less than 1 will use the Ansible default which is usually 5. The default number of forks can be overwritten with a change to`}{' '}
