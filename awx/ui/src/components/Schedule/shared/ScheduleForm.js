@@ -243,7 +243,7 @@ function ScheduleForm({
         creds = results;
       }
 
-      const zones = data.zones.map((zone) => ({
+      const zones = (data.zones || []).map((zone) => ({
         value: zone,
         key: zone,
         label: zone,
