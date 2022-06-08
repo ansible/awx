@@ -5,6 +5,8 @@ from . import page
 
 
 class SystemJobTemplate(UnifiedJobTemplate, HasNotifications):
+    NATURAL_KEY = ('name', 'organization')
+
     def launch(self, payload={}):
         """Launch the system_job_template using related->launch endpoint."""
         result = self.related.launch.post(payload)
