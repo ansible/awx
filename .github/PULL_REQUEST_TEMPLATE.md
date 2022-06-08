@@ -18,7 +18,7 @@ the change does.
  - API
  - UI
  - Collection
- - awxkit
+ - CLI
  - Docs
  - Other
 
