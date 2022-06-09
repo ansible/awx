@@ -32,8 +32,10 @@ class Command(BaseCommand):
                             name='Demo Project',
                             scm_type='git',
                             scm_url='https://github.com/ansible/ansible-tower-samples',
-                            scm_update_on_launch=True,
                             scm_update_cache_timeout=0,
+                            status='successful',
+                            scm_revision='347e44fea036c94d5f60e544de006453ee5c71ad',
+                            playbook_files=['hello_world.yml'],
                         )
 
                     p.organization = o

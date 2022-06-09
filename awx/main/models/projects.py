@@ -354,7 +354,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        skip_update = bool(kwargs.pop('skip_update', False))
+        self._skip_update = bool(kwargs.pop('skip_update', False))
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(str(self.name)).replace(u'-', u'_')
@@ -372,14 +372,16 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                 from awx.main.signals import disable_activity_stream
 
                 with disable_activity_stream():
-                    self.save(update_fields=update_fields)
+                    self.save(update_fields=update_fields, skip_update=self._skip_update)
         # If we just created a new project with SCM, start the initial update.
         # also update if certain fields have changed
         relevant_change = any(pre_save_vals.get(fd_name, None) != self._prior_values_store.get(fd_name, None) for fd_name in self.FIELDS_TRIGGER_UPDATE)
-        if (relevant_change or new_instance) and (not skip_update) and self.scm_type:
+        if (relevant_change or new_instance) and (not self._skip_update) and self.scm_type:
             self.update()
 
     def _get_current_status(self):
+        if getattr(self, '_skip_update', False):
+            return self.status
         if self.scm_type:
             if self.current_job and self.current_job.status:
                 return self.current_job.status
