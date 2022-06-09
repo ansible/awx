@@ -141,7 +141,8 @@ EXAMPLES = '''
   role:
     user: joe
     role: execute
-    workflow: test-role-workflow
+    workflows:
+      - test-role-workflow
     job_templates:
       - jt1
       - jt2
