@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 
 import { t, Plural } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
@@ -14,7 +14,12 @@ import PaginatedTable, {
   ToolbarDeleteButton,
   getSearchableKeys,
 } from 'components/PaginatedTable';
-import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import {
+  getQSConfig,
+  parseQueryString,
+  mergeParams,
+  encodeQueryString,
+} from 'util/qs';
 import useWsTemplates from 'hooks/useWsTemplates';
 import useSelected from 'hooks/useSelected';
 import useExpanded from 'hooks/useExpanded';
@@ -29,7 +34,8 @@ const QS_CONFIG = getQSConfig('template', {
   order_by: 'name',
 });
 
-function RelatedTemplateList({ searchParams }) {
+function RelatedTemplateList({ searchParams, projectName = null }) {
+  const { id: projectId } = useParams();
   const location = useLocation();
   const { addToast, Toast, toastProps } = useToast();
 
@@ -122,9 +128,18 @@ function RelatedTemplateList({ searchParams }) {
   const canAddJT =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
-  const addButton = (
-    <ToolbarAddButton key="add" linkTo="/templates/job_template/add/" />
-  );
+  let linkTo = '';
+
+  if (projectName) {
+    const qs = encodeQueryString({
+      project_id: projectId,
+      project_name: projectName,
+    });
+    linkTo = `/templates/job_template/add/?${qs}`;
+  } else {
+    linkTo = '/templates/job_template/add';
+  }
+  const addButton = <ToolbarAddButton key="add" linkTo={linkTo} />;
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
     selected[0]

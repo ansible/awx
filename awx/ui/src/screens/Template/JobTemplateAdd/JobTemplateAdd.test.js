@@ -257,4 +257,33 @@ describe('<JobTemplateAdd />', () => {
     });
     expect(history.location.pathname).toEqual('/templates');
   });
+
+  test('should parse and pre-fill project field from query params', async () => {
+    const history = createMemoryHistory({
+      initialEntries: [
+        '/templates/job_template/add/add?project_id=6&project_name=Demo%20Project',
+      ],
+    });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />, {
+        context: { router: { history } },
+      });
+    });
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
+    expect(wrapper.find('input#project').prop('value')).toEqual('Demo Project');
+    expect(ProjectsAPI.readPlaybooks).toBeCalledWith('6');
+  });
+
+  test('should not call ProjectsAPI.readPlaybooks if there is no project', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/job_template/add'],
+    });
+    await act(async () =>
+      mountWithContexts(<JobTemplateAdd />, {
+        context: { router: history },
+      })
+    );
+    expect(ProjectsAPI.readPlaybooks).not.toBeCalled();
+  });
 });

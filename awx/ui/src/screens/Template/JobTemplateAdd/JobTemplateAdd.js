@@ -9,6 +9,32 @@ function JobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
+  const projectParams = {
+    project_id: null,
+    project_name: null,
+  };
+  history.location.search
+    .replace(/^\?/, '')
+    .split('&')
+    .map((s) => s.split('='))
+    .forEach(([key, val]) => {
+      if (!(key in projectParams)) {
+        return;
+      }
+      projectParams[key] = decodeURIComponent(val);
+    });
+
+  let projectValues = null;
+
+  if (
+    Object.values(projectParams).filter((item) => item !== null).length === 2
+  ) {
+    projectValues = {
+      id: projectParams.project_id,
+      name: projectParams.project_name,
+    };
+  }
+
   const handleSubmit = async (values) => {
     const {
       labels,
@@ -35,7 +61,11 @@ function JobTemplateAdd() {
         execution_environment: values.execution_environment?.id,
       });
       await Promise.all([
-        submitLabels(id, values.project.summary_fields.organization.id, labels),
+        submitLabels(
+          id,
+          values.project.summary_fields?.organization.id,
+          labels
+        ),
         submitInstanceGroups(id, instanceGroups),
         submitCredentials(id, credentials),
       ]);
@@ -92,6 +122,7 @@ function JobTemplateAdd() {
             handleCancel={handleCancel}
             handleSubmit={handleSubmit}
             submitError={formSubmitError}
+            projectValues={projectValues}
             isOverrideDisabledLookup
           />
         </CardBody>
