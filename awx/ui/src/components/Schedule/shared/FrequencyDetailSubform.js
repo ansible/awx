@@ -62,7 +62,7 @@ export function requiredPositiveInteger() {
   };
 }
 
-const FrequencyDetailSubform = () => {
+const FrequencyDetailSubform = ({ frequency }) => {
   const [runOnDayMonth] = useField({
     name: 'runOnDayMonth',
   });
@@ -98,9 +98,9 @@ const FrequencyDetailSubform = () => {
     name: 'runOn',
     validate: required(t`Select a value for this field`),
   });
-  const [frequency] = useField({
-    name: 'frequency',
-  });
+  // const [frequency] = useField({
+  //   name: 'frequency',
+  // });
   useField({
     name: 'occurrences',
     validate: requiredPositiveInteger(),
@@ -184,7 +184,7 @@ const FrequencyDetailSubform = () => {
   const getRunEveryLabel = () => {
     const intervalValue = interval.value;
 
-    switch (frequency.value) {
+    switch (frequency) {
       case 'minute':
         return <Plural value={intervalValue} one="minute" other="minutes" />;
       case 'hour':
@@ -202,9 +202,11 @@ const FrequencyDetailSubform = () => {
     }
   };
 
-  /* eslint-disable no-restricted-globals */
   return (
     <>
+      <p css="grid-column: 1/-1">
+        <b>{frequency}</b>
+      </p>
       <FormGroup
         name="interval"
         fieldId="schedule-run-every"
@@ -230,7 +232,7 @@ const FrequencyDetailSubform = () => {
           <RunEveryLabel>{getRunEveryLabel()}</RunEveryLabel>
         </div>
       </FormGroup>
-      {frequency?.value === 'week' && (
+      {frequency === 'week' && (
         <FormGroup
           name="daysOfWeek"
           fieldId="schedule-days-of-week"
@@ -324,8 +326,8 @@ const FrequencyDetailSubform = () => {
           </div>
         </FormGroup>
       )}
-      {(frequency?.value === 'month' || frequency?.value === 'year') &&
-        !isNaN(new Date(startDate.value)) && (
+      {(frequency === 'month' || frequency === 'year') &&
+        !Number.isNaN(new Date(startDate.value)) && (
           <FormGroup
             name="runOn"
             fieldId="schedule-run-on"
@@ -341,7 +343,7 @@ const FrequencyDetailSubform = () => {
               name="runOn"
               label={
                 <div css="display: flex;align-items: center;">
-                  {frequency?.value === 'month' && (
+                  {frequency === 'month' && (
                     <span
                       id="radio-schedule-run-on-day"
                       css="margin-right: 10px;"
@@ -349,7 +351,7 @@ const FrequencyDetailSubform = () => {
                       <Trans>Day</Trans>
                     </span>
                   )}
-                  {frequency?.value === 'year' && (
+                  {frequency === 'year' && (
                     <AnsibleSelect
                       id="schedule-run-on-day-month"
                       css="margin-right: 10px"
@@ -464,7 +466,7 @@ const FrequencyDetailSubform = () => {
                     ]}
                     {...runOnTheDay}
                   />
-                  {frequency?.value === 'year' && (
+                  {frequency === 'year' && (
                     <>
                       <span
                         id="of-schedule-run-on-the-month"

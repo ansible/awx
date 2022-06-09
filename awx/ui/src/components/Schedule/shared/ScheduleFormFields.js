@@ -2,15 +2,26 @@ import React, { useState } from 'react';
 import { useField } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
+import styled from 'styled-components';
 import { required } from 'util/validators';
 import { useConfig } from 'contexts/Config';
 import Popover from '../../Popover';
 import AnsibleSelect from '../../AnsibleSelect';
-import FormField from '../../FormField';
+import FormField, {
+  Select,
+  SelectOption,
+  SelectVariant,
+} from '../../FormField';
 import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 import { SubFormLayout, FormColumnLayout } from '../../FormLayout';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import DateTimePicker from './DateTimePicker';
+
+const SelectClearOption = styled(SelectOption)`
+  & > input[type='checkbox'] {
+    display: none;
+  }
+`;
 
 export default function ScheduleFormFields({
   hasDaysToKeepField,
@@ -21,10 +32,15 @@ export default function ScheduleFormFields({
     name: 'timezone',
     validate: required(t`Select a value for this field`),
   });
-  const [frequency, frequencyMeta] = useField({
+  const [frequency, frequencyMeta, frequencyHelper] = useField({
     name: 'frequency',
     validate: required(t`Select a value for this field`),
   });
+  // const [exemptFrequency, exemptFrequencyMeta, exemptFrequencyHelper] =
+  //   useField({
+  //     name: 'exempt_frequency',
+  //     validate: required(t`Select a value for this field`),
+  //   });
   const [{ name: dateFieldName }] = useField('startDate');
   const [{ name: timeFieldName }] = useField('startTime');
   const [timezoneMessage, setTimezoneMessage] = useState('');
@@ -92,8 +108,41 @@ export default function ScheduleFormFields({
         validated={
           !frequencyMeta.touched || !frequencyMeta.error ? 'default' : 'error'
         }
-        label={t`Run frequency`}
+        label={t`Repeat frequency`}
       >
+        <Select
+          variant={SelectVariant.checkbox}
+          onChange={frequencyHelper.setValue}
+          value={frequency.value}
+          placeholderText={
+            frequency.value.length ? t`Select frequency` : t`None (run once)`
+          }
+          onBlur={frequencyHelper.setTouched}
+        >
+          <SelectClearOption value="none">{t`None (run once)`}</SelectClearOption>
+          <SelectOption value="minute">{t`Minute`}</SelectOption>
+          <SelectOption value="hour">{t`Hour`}</SelectOption>
+          <SelectOption value="day">{t`Day`}</SelectOption>
+          <SelectOption value="week">{t`Week`}</SelectOption>
+          <SelectOption value="month">{t`Month`}</SelectOption>
+          <SelectOption value="year">{t`Year`}</SelectOption>
+        </Select>
+        {/* <Select
+          variant={SelectVariant.checkbox}
+          onSelect={(a, b) => console.log({ a, b })}
+          selections={[]}
+          placeholderText={t`Select frequency`}
+          onToggle={(val) => setIsOpen(val)}
+          isOpen={isOpen}
+        >
+          <SelectOption value="none">{t`None (run once)`}</SelectOption>
+          <SelectOption value="minute">{t`Minute`}</SelectOption>
+          <SelectOption value="hour">{t`Hour`}</SelectOption>
+          <SelectOption value="day">{t`Day`}</SelectOption>
+          <SelectOption value="week">{t`Week`}</SelectOption>
+          <SelectOption value="month">{t`Month`}</SelectOption>
+          <SelectOption value="year">{t`Year`}</SelectOption>
+        </Select>
         <AnsibleSelect
           id="schedule-frequency"
           data={[
@@ -106,7 +155,7 @@ export default function ScheduleFormFields({
             { value: 'year', key: 'year', label: t`Year` },
           ]}
           {...frequency}
-        />
+        /> */}
       </FormGroup>
       {hasDaysToKeepField ? (
         <FormField
@@ -118,16 +167,19 @@ export default function ScheduleFormFields({
           isRequired
         />
       ) : null}
-      {frequency.value !== 'none' && (
+      {frequency.value.length ? (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
             {t`Frequency Details`}
           </Title>
-          <FormColumnLayout>
-            <FrequencyDetailSubform />
-          </FormColumnLayout>
+          {/* TODO: sort into predictable/logical order */}
+          {frequency.value.map((val) => (
+            <FormColumnLayout key={val} stacked>
+              <FrequencyDetailSubform frequency={val} />
+            </FormColumnLayout>
+          ))}
         </SubFormLayout>
-      )}
+      ) : null}
     </>
   );
 }

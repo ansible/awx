@@ -10,6 +10,10 @@ export const FormColumnLayout = styled.div`
   @media (min-width: 1210px) {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  ${(props) =>
+    props.stacked &&
+    `border-bottom: 1px solid var(--pf-global--BorderColor--100);`}
 `;
 
 export const FormFullWidthLayout = styled.div`
