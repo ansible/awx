@@ -4683,7 +4683,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 
     timezone = serializers.SerializerMethodField(
         help_text=_(
-            'The timezone this schedule runs in. This field is extracted from the RRULE. If the timezone in the RRULE is a link to another timezone this field will show the links name.'
+            'The timezone this schedule runs in. This field is extracted from the RRULE. If the timezone in the RRULE is a link to another timezone, the link will be reflected in this field.'
         ),
     )
     until = serializers.SerializerMethodField(

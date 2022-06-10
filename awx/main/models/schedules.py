@@ -85,16 +85,16 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
 
     @classmethod
-    def get_zoneinfo(self):
+    def get_zoneinfo(cls):
         return sorted(get_zonefile_instance().zones)
 
     @classmethod
-    def get_zoneinfo_with_links(self):
+    def get_zoneinfo_links(cls):
+        return_val = {}
         zone_instance = get_zonefile_instance()
-        return_val = {'zones': sorted(zone_instance.zones), 'links': {}}
-        for zone_name in return_val['zones']:
+        for zone_name in zone_instance.zones:
             if str(zone_name) != str(zone_instance.zones[zone_name]._filename):
-                return_val['links'][zone_name] = zone_instance.zones[zone_name]._filename
+                return_val[zone_name] = zone_instance.zones[zone_name]._filename
         return return_val
 
     @property
