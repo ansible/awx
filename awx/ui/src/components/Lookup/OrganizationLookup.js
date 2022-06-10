@@ -109,6 +109,7 @@ function OrganizationLookup({
         onBlur={onBlur}
         onChange={onChange}
         onDebounce={checkOrganizationName}
+        onUpdate={fetchOrganizations}
         fieldName={fieldName}
         validate={validate}
         qsConfig={QS_CONFIG}

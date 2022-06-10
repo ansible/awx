@@ -141,6 +141,7 @@ function MultiCredentialsLookup({
       validate={validate}
       multiple
       onChange={onChange}
+      onUpdate={fetchCredentials}
       qsConfig={QS_CONFIG}
       isLoading={isTypesLoading || isCredentialsLoading}
       renderItemChip={renderChip}

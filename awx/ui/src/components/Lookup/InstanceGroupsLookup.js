@@ -75,6 +75,7 @@ function InstanceGroupsLookup({
         header={t`Instance Groups`}
         value={value}
         onChange={onChange}
+        onUpdate={fetchInstanceGroups}
         fieldName={fieldName}
         validate={validate}
         qsConfig={QS_CONFIG}

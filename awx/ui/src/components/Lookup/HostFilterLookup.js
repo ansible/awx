@@ -271,6 +271,7 @@ function HostFilterLookup({
       pathname: `${location.pathname}`,
       search: queryString,
     });
+    fetchHosts(organizationId);
     toggleModal();
   };
 

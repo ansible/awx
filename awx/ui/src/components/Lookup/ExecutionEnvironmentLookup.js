@@ -156,6 +156,7 @@ function ExecutionEnvironmentLookup({
       value={value}
       onBlur={onBlur}
       onChange={onChange}
+      onUpdate={fetchExecutionEnvironments}
       onDebounce={checkExecutionEnvironmentName}
       fieldName={fieldName}
       validate={validate}

@@ -111,6 +111,7 @@ function ProjectLookup({
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onUpdate={fetchProjects}
         onDebounce={checkProjectName}
         fieldName={fieldName}
         validate={validate}

@@ -168,6 +168,7 @@ function CredentialLookup({
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onUpdate={fetchCredentials}
         onDebounce={checkCredentialName}
         fieldName={fieldName}
         validate={validate}
