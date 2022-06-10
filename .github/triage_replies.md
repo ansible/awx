@@ -12,31 +12,31 @@
 
 ### Denied Submission
 
-- Hi!\
+- Hi! \
 \
-Thanks very much for your submission to AWX. It means a lot to us that you have taken time to contribute.\
+Thanks very much for your submission to AWX. It means a lot to us that you have taken time to contribute. \
 \
-At this time we do not want to merge this PR. Our reasons for this are:\
+At this time we do not want to merge this PR. Our reasons for this are: \
 \
-(A) INSERT ITEM HERE\
+(A) INSERT ITEM HERE \
 \
-Please know that we are always up for discussion but this project is very active. Because of this, we're unlikely to see comments made on closed PRs, and we lock them after some time. If you or anyone else has any further questions, please let us know by using any of the communication methods listed in the page below:\
+Please know that we are always up for discussion but this project is very active. Because of this, we're unlikely to see comments made on closed PRs, and we lock them after some time. If you or anyone else has any further questions, please let us know by using any of the communication methods listed in the page below: \
 \
-https://github.com/ansible/awx/#get-involved\
+https://github.com/ansible/awx/#get-involved \
 \
-In the future, sometimes starting a discussion on the development list prior to implementing a feature can make getting things included a little easier, but it is not always necessary.\
+In the future, sometimes starting a discussion on the development list prior to implementing a feature can make getting things included a little easier, but it is not always necessary. \
 \
 Thank you once again for this and your interest in AWX!
 
 
 ### No Progress
-- Hi!\
+- Hi! \
 \
-Thank you very much for your submission to AWX. It means a lot to us that you have taken time to contribute.\
+Thank you very much for your submission to AWX. It means a lot to us that you have taken time to contribute. \
 \
-On this PR, changes were requested but it has been some time since then. We think this PR has merit but without the requested changes we are unable to merge it. At this time we are closing you PR. If you get time to address the changes you are welcome to open another PR or we can reopen this PR upon request if you contact us by using any of the communication methods listed in the page below:\
+On this PR, changes were requested but it has been some time since then. We think this PR has merit but without the requested changes we are unable to merge it. At this time we are closing you PR. If you get time to address the changes you are welcome to open another PR or we can reopen this PR upon request if you contact us by using any of the communication methods listed in the page below: \
 \
-https://github.com/ansible/awx/#get-involved\
+https://github.com/ansible/awx/#get-involved \
 \
 Thank you once again for this and your interest in AWX!
 
@@ -78,14 +78,14 @@ Thank you once again for this and your interest in AWX!
 - AWX-Operator: https://github.com/ansible/awx-operator/blob/devel/CONTRIBUTING.md
 
 ### AWX Release
-- Hi all,\
+- Hi all, \
 \
-We're happy to announce that the next release of AWX, version <X> is now available!\
-In addition AWX Operator version <Y> has also been release!\
+We're happy to announce that the next release of AWX, version <X> is now available! \
+In addition AWX Operator version <Y> has also been release! \
 \
-Please see the releases pages for more details:\
-	AWX: https://github.com/ansible/awx/releases/tag/<X>\
-	Operator: https://github.com/ansible/awx-operator/releases/tag/<Y>\
+Please see the releases pages for more details: \
+	AWX: https://github.com/ansible/awx/releases/tag/<X> \
+	Operator: https://github.com/ansible/awx-operator/releases/tag/<Y> \
 \
 The AWX team.
 
