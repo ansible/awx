@@ -166,7 +166,8 @@ function ScheduleList({
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-            <HeaderCell sortKey="unified_job_template__polymorphic_ctype__model">{t`Type`}</HeaderCell>
+            <HeaderCell sortKey="unified_job_template">{t`Related resource`}</HeaderCell>
+            <HeaderCell sortKey="unified_job_template__polymorphic_ctype__model">{t`Resource type`}</HeaderCell>
             <HeaderCell sortKey="next_run">{t`Next Run`}</HeaderCell>
             <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>

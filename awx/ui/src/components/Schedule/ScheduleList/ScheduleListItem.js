@@ -41,22 +41,28 @@ function ScheduleListItem({
   };
 
   let scheduleBaseUrl;
+  let relatedResourceUrl;
 
   switch (schedule.summary_fields.unified_job_template.unified_job_type) {
     case 'inventory_update':
       scheduleBaseUrl = `/inventories/inventory/${schedule.summary_fields.inventory.id}/sources/${schedule.summary_fields.unified_job_template.id}/schedules/${schedule.id}`;
+      relatedResourceUrl = `/inventories/inventory/${schedule.summary_fields.inventory.id}/sources/${schedule.summary_fields.unified_job_template.id}/details`;
       break;
     case 'job':
       scheduleBaseUrl = `/templates/job_template/${schedule.summary_fields.unified_job_template.id}/schedules/${schedule.id}`;
+      relatedResourceUrl = `/templates/job_template/${schedule.summary_fields.unified_job_template.id}/details`;
       break;
     case 'project_update':
       scheduleBaseUrl = `/projects/${schedule.summary_fields.unified_job_template.id}/schedules/${schedule.id}`;
+      relatedResourceUrl = `/projects/${schedule.summary_fields.unified_job_template.id}/details`;
       break;
     case 'system_job':
       scheduleBaseUrl = `/management_jobs/${schedule.summary_fields.unified_job_template.id}/schedules/${schedule.id}`;
+      relatedResourceUrl = `/management_jobs`;
       break;
     case 'workflow_job':
       scheduleBaseUrl = `/templates/workflow_job_template/${schedule.summary_fields.unified_job_template.id}/schedules/${schedule.id}`;
+      relatedResourceUrl = `/templates/workflow_job_template/${schedule.summary_fields.unified_job_template.id}/details`;
       break;
     default:
       break;
@@ -94,7 +100,15 @@ function ScheduleListItem({
           </span>
         )}
       </TdBreakWord>
-      <Td dataLabel={t`Type`}>
+      <TdBreakWord
+        id={`related-resource-${schedule.id}`}
+        dataLabel={t`Related resource`}
+      >
+        <Link to={`${relatedResourceUrl}`}>
+          <b>{schedule.summary_fields.unified_job_template.name}</b>
+        </Link>
+      </TdBreakWord>
+      <Td dataLabel={t`Resource type`}>
         {
           jobTypeLabels[
             schedule.summary_fields.unified_job_template.unified_job_type
