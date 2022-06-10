@@ -8,12 +8,13 @@ import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 
 function JobCancelButton({
-  job = {},
   errorTitle,
   title,
   showIconButton,
   errorMessage,
   buttonText,
+  style = {},
+  job = {},
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { error: cancelError, request: cancelJob } = useRequest(
@@ -38,6 +39,7 @@ function JobCancelButton({
             ouiaId="cancel-job-button"
             onClick={() => setIsOpen(true)}
             variant="plain"
+            style={style}
           >
             <MinusCircleIcon />
           </Button>
@@ -48,6 +50,7 @@ function JobCancelButton({
             variant="secondary"
             ouiaId="cancel-job-button"
             onClick={() => setIsOpen(true)}
+            style={style}
           >
             {buttonText || t`Cancel Job`}
           </Button>
