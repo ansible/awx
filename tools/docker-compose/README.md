@@ -27,7 +27,7 @@ Here are the main `make` targets:
 
 Notable files:
 
-- `tools/docker-compose/inventory` file - used to configure the local AWX development.
+- `tools/docker-compose/inventory` file - used to configure the AWX development environment.
 - `migrate.yml` - playbook for migrating data from Local Docker to the Development Environment
 
 ### Prerequisites
