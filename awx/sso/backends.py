@@ -124,9 +124,9 @@ class LDAPBackend(BaseLDAPBackend):
                 logger.debug("Forcing LDAP connection to close")
                 try:
                     ldap_user.ldap_user._connection.unbind_s()
-                except Exception as unbind_e:
-                    logger.error("Got unexpected exception when forcing disconnect")
-                    logger.error(unbind_e)
+                    ldap_user.ldap_user._connection_bound = False
+                except Exception:
+                    logger.exception(f"Got unexpected LDAP exception when forcing LDAP disconnect for user {ldap_user}, login will still proceed")
             return ldap_user
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
