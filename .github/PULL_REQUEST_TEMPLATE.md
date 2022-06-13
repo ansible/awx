@@ -1,11 +1,3 @@
-<!--- changelog-entry
-# Fill in 'msg' below to have an entry automatically added to the next release changelog.
-# Leaving 'msg' blank will not generate a changelog entry for this PR.
-# Please ensure this is a simple (and readable) one-line string.
----
-msg: ""
--->
-
 ##### SUMMARY
 <!--- Describe the change, including rationale and design decisions -->
 
@@ -17,15 +9,18 @@ the change does.
 
 ##### ISSUE TYPE
 <!--- Pick one below and delete the rest: -->
- - Feature Pull Request
- - Bugfix Pull Request
- - Docs Pull Request
+ - Breaking Change 
+ - New or Enhanced Feature
+ - Bug or Docs Fix
 
 ##### COMPONENT NAME
 <!--- Name of the module/plugin/module/task -->
  - API
  - UI
  - Collection
+ - CLI
+ - Docs
+ - Other
 
 ##### AWX VERSION
 <!--- Paste verbatim output from `make VERSION` between quotes below -->

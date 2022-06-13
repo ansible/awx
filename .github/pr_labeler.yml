@@ -10,5 +10,10 @@
 "component:cli":
   - any: ["awxkit/**/*"]
 
-"component:collection":
+"component:awx_collection":
   - any: ["awx_collection/**/*"]
+
+"dependencies":
+  - any: ["awx/ui/package.json"]
+  - any: ["awx/requirements/*.txt"]
+  - any: ["awx/requirements/requirements.in"]
