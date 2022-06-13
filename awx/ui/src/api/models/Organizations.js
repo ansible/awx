@@ -77,6 +77,10 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
       disassociate: true,
     });
   }
+
+  readAdmins(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/admins/`, { params });
+  }
 }
 
 export default Organizations;
