@@ -241,6 +241,7 @@ function TemplateList({ defaultParams }) {
             <HeaderRow qsConfig={qsConfig} isExpandable>
               <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
               <HeaderCell sortKey="type">{t`Type`}</HeaderCell>
+              <HeaderCell sortKey="organization">{t`Organization`}</HeaderCell>
               <HeaderCell sortKey="last_job_run">{t`Last Ran`}</HeaderCell>
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>

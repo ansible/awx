@@ -10,6 +10,50 @@ import TemplateListItem from './TemplateListItem';
 jest.mock('../../api');
 
 describe('<TemplateListItem />', () => {
+  test('should display expected data', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <TemplateListItem
+            isSelected={false}
+            template={{
+              id: 1,
+              name: 'Template 1',
+              url: '/templates/job_template/1',
+              type: 'job_template',
+              summary_fields: {
+                organization: {
+                  id: 1,
+                  name: 'Foo',
+                },
+                user_capabilities: {
+                  start: true,
+                },
+                recent_jobs: [
+                  {
+                    id: 123,
+                    name: 'Template 1',
+                    status: 'failed',
+                    finished: '2020-02-26T22:38:41.037991Z',
+                  },
+                ],
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    expect(wrapper.find('Td[dataLabel="Name"]').text()).toBe('Template 1');
+    expect(wrapper.find('Td[dataLabel="Type"]').text()).toBe('Job Template');
+    expect(wrapper.find('Td[dataLabel="Organization"]').text()).toBe('Foo');
+    expect(
+      wrapper.find('Td[dataLabel="Organization"]').find('Link').prop('to')
+    ).toBe('/organizations/1/details');
+    expect(wrapper.find('Td[dataLabel="Last Ran"]').text()).toBe(
+      '2/26/2020, 10:38:41 PM'
+    );
+  });
+
   test('launch button shown to users with start capabilities', () => {
     const wrapper = mountWithContexts(
       <table>
@@ -401,7 +445,6 @@ describe('<TemplateListItem />', () => {
     }
 
     assertDetail('Description', 'mock description');
-    assertDetail('Organization', "Mike's Org");
     assertDetail('Inventory', "Mike's Inventory");
     assertDetail('Project', "Mike's Project");
     assertDetail('Execution Environment', 'Mock EE 1.2.3');
@@ -420,9 +463,6 @@ describe('<TemplateListItem />', () => {
         .find('Detail[label="Labels"]')
         .containsAllMatchingElements([<span>L_91o2</span>])
     ).toEqual(true);
-    expect(wrapper.find('Detail[label="Organization"] dd a').prop('href')).toBe(
-      '/organizations/1/details'
-    );
     expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(1);
   });
 });
