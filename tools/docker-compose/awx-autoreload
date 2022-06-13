@@ -8,7 +8,7 @@ fi
 
 last_reload=`date +%s`
 
-inotifywait -mrq -e create,delete,attrib,close_write,move --exclude '/awx_devel/awx/ui' $1 | while read directory action file; do
+inotifywait -mrq -e create,delete,attrib,close_write,move --exclude '(/awx_devel/awx/ui|/awx_devel/awx/.*/tests)' $1 | while read directory action file; do
    this_reload=`date +%s`
    since_last=$((this_reload-last_reload))
    if [[ "$file" =~ .*py$ ]] && [[ "$since_last" -gt 1 ]]; then
