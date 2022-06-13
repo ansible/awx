@@ -21,7 +21,10 @@ function InventoryHostGroupItem({
   const editUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/edit`;
 
   return (
-    <Tr id={`inventory-host-group-row-${group.id}`}>
+    <Tr
+      id={`inventory-host-group-row-${group.id}`}
+      ouiaId={`inventory-host-group-row-${group.id}`}
+    >
       <Td
         data-cy={labelId}
         select={{
@@ -32,7 +35,7 @@ function InventoryHostGroupItem({
       />
       <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`} id={labelId}>
-          {group.name}
+          <b>{group.name}</b>
         </Link>
       </Td>
       <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">

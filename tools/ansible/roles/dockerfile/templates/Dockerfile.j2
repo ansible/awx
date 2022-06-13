@@ -5,7 +5,7 @@
 ###
 
 # Build container
-FROM quay.io/centos/centos:8 as builder
+FROM quay.io/centos/centos:stream9 as builder
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -15,15 +15,13 @@ ENV LC_ALL en_US.UTF-8
 USER root
 
 # Install build dependencies
-RUN dnf -y module enable 'postgresql:12'
-RUN dnf -y update && \
-    dnf -y install epel-release 'dnf-command(config-manager)' && \
-    dnf module -y enable 'postgresql:12' && \
-    dnf config-manager --set-enabled powertools && \
+RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
+    dnf config-manager --set-enabled crb && \
     dnf -y install \
     gcc \
     gcc-c++ \
     git-core \
+    gettext \
     glibc-langpack-en \
     libffi-devel \
     libtool-ltdl-devel \
@@ -34,18 +32,18 @@ RUN dnf -y update && \
     nss \
     openldap-devel \
     patch \
-    @postgresql:12 \
+    postgresql \
     postgresql-devel \
-    python38-devel \
-    python38-pip \
-    python38-psycopg2 \
-    python38-setuptools \
+    python3-devel \
+    python3-pip \
+    python3-psycopg2 \
+    python3-setuptools \
     swig \
     unzip \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN python3.8 -m ensurepip && pip3 install "virtualenv < 20"
+RUN pip3 install virtualenv
 
 
 # Install & build requirements
@@ -69,7 +67,7 @@ RUN cd /tmp && make requirements_awx_dev
 # Use the distro provided npm to bootstrap our required version of node
 
 {% if not headless|bool %}
-RUN npm install -g n && n 14.15.1
+RUN npm install -g n && n 16.13.1
 {% endif %}
 
 # Copy source into builder, build sdist, install it into awx venv
@@ -85,7 +83,7 @@ RUN SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic
 {% endif %}
 
 # Final container(s)
-FROM quay.io/centos/centos:8
+FROM quay.io/centos/centos:stream9
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -94,43 +92,35 @@ ENV LC_ALL en_US.UTF-8
 USER root
 
 # Install runtime requirements
-RUN dnf -y module enable 'postgresql:12'
-RUN dnf -y update && \
-    dnf -y install epel-release 'dnf-command(config-manager)' && \
-    dnf module -y enable 'postgresql:12' && \
-    dnf config-manager --set-enabled powertools && \
+RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
+    dnf config-manager --set-enabled crb && \
     dnf -y install acl \
     git-core \
     git-lfs \
     glibc-langpack-en \
     krb5-workstation \
-    libcgroup-tools \
     nginx \
-    @postgresql:12 \
+    postgresql \
     python3-devel \
     python3-libselinux \
-    python38-pip \
-    python38-psycopg2 \
-    python38-setuptools \
+    python3-pip \
+    python3-psycopg2 \
+    python3-setuptools \
     rsync \
+    "rsyslog >= 8.1911.0" \
     subversion \
     sudo \
     vim-minimal \
     which \
     unzip \
     xmlsec1-openssl && \
-    dnf -y install centos-release-stream && dnf -y install "rsyslog >= 8.1911.0" && dnf -y remove centos-release-stream && \
     dnf -y clean all
 
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
     chmod 700 get_helm.sh && \
     ./get_helm.sh
 
-# Install tini
-RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
-    chmod +x /usr/bin/tini
-
-RUN python3.8 -m ensurepip && pip3 install "virtualenv < 20" supervisor
+RUN pip3 install virtualenv supervisor dumb-init
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -141,9 +131,12 @@ RUN dnf -y install \
     gdb \
     gtk3 \
     gettext \
+    hostname \
+    procps \
     alsa-lib \
     libX11-xcb \
     libXScrnSaver \
+    iproute \
     strace \
     vim \
     nmap-ncat \
@@ -157,29 +150,17 @@ RUN dnf -y install \
     wget \
     diffutils \
     unzip && \
-    npm install -g n && n 14.15.1 && npm install -g npm@7.20.3 && dnf remove -y nodejs
+    npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
 RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
 # Add it back to the list above if the repo ever straighten up.
-RUN dnf --enablerepo=debuginfo -y install python3-debuginfo || :
-{% endif %}
+RUN dnf --enablerepo=baseos-debug -y install python3-debuginfo || :
 
-{% if build_dev|bool %}
-RUN dnf install -y podman
-RUN echo -e '[engine]\ncgroup_manager = "cgroupfs"\nevents_logger = "file"\nruntime = "crun"' > /etc/containers/containers.conf
+RUN dnf install -y epel-next-release && dnf install -y inotify-tools && dnf remove -y epel-next-release
 {% endif %}
-
-# Fix overlay filesystem issue
-{% if build_dev|bool %}
-RUN sed -i '/^#mount_program/s/^#//' /etc/containers/storage.conf
-{% endif %}
-
-# Ensure we must use fully qualified image names
-# This prevents podman prompt that hangs when trying to pull unqualified images
-RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
 
 # Copy app from builder
 COPY --from=builder /var/lib/awx /var/lib/awx
@@ -188,15 +169,30 @@ RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 
 {%if build_dev|bool %}
 COPY --from={{ receptor_image }} /usr/bin/receptor /usr/bin/receptor
+
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
         -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost" && \
     openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \
     chmod 640 /etc/nginx/nginx.{csr,key,crt}
 {% endif %}
 
+{% if build_dev|bool %}
+RUN dnf install -y podman && rpm --restore shadow-utils 2>/dev/null
+
+# chmod containers.conf and adjust storage.conf to enable Fuse storage.
+RUN sed -i -e 's|^#mount_program|mount_program|g' -e '/additionalimage.*/a "/var/lib/shared",' -e 's|^mountopt[[:space:]]*=.*$|mountopt = "nodev,fsync=0"|g' /etc/containers/storage.conf
+
+ENV _CONTAINERS_USERNS_CONFIGURED=""
+
+# Ensure we must use fully qualified image names
+# This prevents podman prompt that hangs when trying to pull unqualified images
+RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
+{% endif %}
+
 # Create default awx rsyslog config
 ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
+ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
 
 ## File mappings
 {% if build_dev|bool %}
@@ -206,13 +202,16 @@ ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.defaul
 ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
+ADD tools/scripts/config-watcher /usr/bin/config-watcher
+ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanimage/stable/containers.conf /etc/containers/containers.conf
+ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanimage/stable/podman-containers.conf /var/lib/awx/.config/containers/containers.conf
 {% else %}
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
+ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
-ADD tools/scripts/config-watcher /usr/bin/config-watcher
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
@@ -233,7 +232,7 @@ RUN for dir in \
       /var/run/supervisor \
       /var/run/awx-receptor \
       /var/lib/nginx ; \
-    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    do mkdir -m 0775 -p $dir ; chmod g+rwx $dir ; chgrp root $dir ; done && \
     for file in \
       /etc/subuid \
       /etc/subgid \
@@ -244,19 +243,32 @@ RUN for dir in \
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 RUN for dir in \
+      /etc/containers \
+      /var/lib/awx/.config/containers \
+      /var/lib/awx/.config/cni \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
-      /var/lib/awx/venv/awx/lib/python3.8 \
-      /var/lib/awx/venv/awx/lib/python3.8/site-packages \
+      /var/lib/awx/venv/awx/lib/python3.9 \
+      /var/lib/awx/venv/awx/lib/python3.9/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \
       /.ansible \
+      /var/lib/shared/overlay-images \
+      /var/lib/shared/overlay-layers \
+      /var/lib/shared/vfs-images \
+      /var/lib/shared/vfs-layers \
       /var/lib/awx/vendor ; \
-    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    do mkdir -m 0775 -p $dir ; chmod g+rwx $dir ; chgrp root $dir ; done && \
     for file in \
+      /etc/containers/containers.conf \
+      /var/lib/awx/.config/containers/containers.conf \
+      /var/lib/shared/overlay-images/images.lock \
+      /var/lib/shared/overlay-layers/layers.lock \
+      /var/lib/shared/vfs-images/images.lock \
+      /var/lib/shared/vfs-layers/layers.lock \
       /var/run/nginx.pid \
-      /var/lib/awx/venv/awx/lib/python3.8/site-packages/awx.egg-link ; \
+      /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
     do touch $file ; chmod g+rw $file ; done
 {% endif %}
 
@@ -279,8 +291,8 @@ CMD ["/bin/bash"]
 USER 1000
 EXPOSE 8052
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["dumb-init", "--"]
 CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
-VOLUME /var/lib/awx/.local/share/containers/storage
+VOLUME /var/lib/awx/.local/share/containers
 {% endif %}

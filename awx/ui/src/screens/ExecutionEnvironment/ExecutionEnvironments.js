@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
-
+import PersistentFilters from 'components/PersistentFilters';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import ExecutionEnvironment from './ExecutionEnvironment';
 import ExecutionEnvironmentAdd from './ExecutionEnvironmentAdd';
@@ -40,7 +40,9 @@ function ExecutionEnvironments() {
           <ExecutionEnvironment setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/execution_environments">
-          <ExecutionEnvironmentList />
+          <PersistentFilters pageKey="executionEnvironments">
+            <ExecutionEnvironmentList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

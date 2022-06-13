@@ -43,6 +43,14 @@ jobs:
         with:
           path: awx
 
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
+
       - name: Checkout awx-logos
         uses: actions/checkout@v2
         with:
@@ -75,7 +83,8 @@ jobs:
       - name: Build and stage awx-operator
         working-directory: awx-operator
         run: |
-          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }}" \
+          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }} \
+                      --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
           IMAGE_TAG_BASE=ghcr.io/${{ github.repository_owner }}/awx-operator \
           VERSION=${{ github.event.inputs.operator_version }} make docker-build docker-push
 
@@ -91,23 +100,10 @@ jobs:
           AWX_TEST_IMAGE: ${{ github.repository }}
           AWX_TEST_VERSION: ${{ github.event.inputs.version }}
 
-      - name: Generate changelog
-        uses: shanemcd/simple-changelog-generator@v1
-        id: changelog
-        with:
-          repo: "${{ github.repository }}"
-
-      - name: Write changelog to file
-        run: |
-          cat << 'EOF' > /tmp/awx-changelog
-          ${{ steps.changelog.outputs.changelog }}
-          EOF
-
       - name: Create draft release for AWX
         working-directory: awx
         run: |
           ansible-playbook -v tools/ansible/stage.yml \
-            -e changelog_path=/tmp/awx-changelog \
             -e repo=${{ github.repository }} \
             -e awx_image=ghcr.io/${{ github.repository }} \
             -e version=${{ github.event.inputs.version }} \

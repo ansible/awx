@@ -70,7 +70,11 @@ const mockTemplate = {
 describe('<NotificationTemplateDetail />', () => {
   let wrapper;
 
-  beforeEach(async () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should render Details', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <NotificationTemplateDetail
@@ -80,13 +84,29 @@ describe('<NotificationTemplateDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    function assertDetail(label, value) {
+      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+    }
+    assertDetail('Name', mockTemplate.name);
+    assertDetail('Description', mockTemplate.description);
+    expect(
+      wrapper
+        .find('Detail[label="Email Options"]')
+        .containsAllMatchingElements([<li>Use SSL</li>, <li>Use TLS</li>])
+    ).toEqual(true);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('should render Details', () => {
+  test('should render Details when defaultMessages is missing', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <NotificationTemplateDetail
+          template={mockTemplate}
+          defaultMessages={null}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     function assertDetail(label, value) {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);

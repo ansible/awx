@@ -10,13 +10,14 @@ from django.db import models
 from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.db import connection
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str, force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str, force_str
 from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.fields import JSONBlob
 from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel, prevent_search
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
@@ -28,7 +29,6 @@ from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.grafana_backend import GrafanaBackend
 from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
-from awx.main.fields import JSONField
 
 
 logger = logging.getLogger('awx.main.models.notifications')
@@ -70,12 +70,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = prevent_search(JSONField(blank=False))
+    notification_configuration = prevent_search(JSONBlob(default=dict))
 
     def default_messages():
         return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
-    messages = JSONField(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
+    messages = JSONBlob(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
 
     def has_message(self, condition):
         potential_template = self.messages.get(condition, {})
@@ -187,7 +187,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
     def display_notification_configuration(self):
         field_val = self.notification_configuration.copy()
         for field in self.notification_class.init_parameters:
-            if field in field_val and force_text(field_val[field]).startswith('$encrypted$'):
+            if field in field_val and force_str(field_val[field]).startswith('$encrypted$'):
                 field_val[field] = '$encrypted$'
         return field_val
 
@@ -237,7 +237,7 @@ class Notification(CreatedModifiedModel):
         default='',
         editable=False,
     )
-    body = JSONField(blank=True)
+    body = JSONBlob(default=dict, blank=True)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)
@@ -421,21 +421,8 @@ class JobNotificationMixin(object):
         The context will contain allowed content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_ALLOWED_LIST the job's friendly name,
         and a url to the job run."""
-        job_context = {'host_status_counts': {}}
-        summary = None
-        try:
-            has_event_property = any([f for f in self.event_class._meta.fields if f.name == 'event'])
-        except NotImplementedError:
-            has_event_property = False
-        if has_event_property:
-            qs = self.get_event_queryset()
-            if qs:
-                event = qs.only('event_data').filter(event='playbook_on_stats').first()
-                if event:
-                    summary = event.get_host_status_counts()
-        job_context['host_status_counts'] = summary
         context = {
-            'job': job_context,
+            'job': {'host_status_counts': self.host_status_counts},
             'job_friendly_name': self.get_notification_friendly_name(),
             'url': self.get_ui_url(),
             'job_metadata': json.dumps(self.notification_data(), ensure_ascii=False, indent=4),
@@ -508,14 +495,14 @@ class JobNotificationMixin(object):
         return (msg, body)
 
     def send_notification_templates(self, status):
-        from awx.main.tasks import send_notifications  # avoid circular import
+        from awx.main.tasks.system import send_notifications  # avoid circular import
 
         if status not in ['running', 'succeeded', 'failed']:
             raise ValueError(_("status must be either running, succeeded or failed"))
         try:
             notification_templates = self.get_notification_templates()
         except Exception:
-            logger.warn("No notification template defined for emitting notification")
+            logger.warning("No notification template defined for emitting notification")
             return
 
         if not notification_templates:

@@ -26,6 +26,10 @@ options:
         - Name to use for the project.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      type: str
     copy_from:
       description:
         - Name or id to copy the project from.
@@ -41,7 +45,7 @@ options:
     scm_type:
       description:
         - Type of SCM resource.
-      choices: ["manual", "git", "svn", "insights"]
+      choices: ["manual", "git", "svn", "insights", "archive"]
       default: "manual"
       type: str
     scm_url:
@@ -163,7 +167,7 @@ options:
         - The interval to request an update from the controller.
         - Requires wait.
       required: False
-      default: 1
+      default: 2
       type: float
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -249,9 +253,10 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         copy_from=dict(),
         description=dict(),
-        scm_type=dict(choices=['manual', 'git', 'svn', 'insights'], default='manual'),
+        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive'], default='manual'),
         scm_url=dict(),
         local_path=dict(),
         scm_branch=dict(),
@@ -273,7 +278,7 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
-        interval=dict(default=1.0, type='float'),
+        interval=dict(default=2.0, type='float'),
     )
 
     # Create a module for ourselves
@@ -281,6 +286,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     copy_from = module.params.get('copy_from')
     scm_type = module.params.get('scm_type')
     if scm_type == "manual":
@@ -347,7 +353,7 @@ def main():
 
     # Create the data that gets sent for create and update
     project_fields = {
-        'name': module.get_item_name(project) if project else name,
+        'name': new_name if new_name else (module.get_item_name(project) if project else name),
         'scm_type': scm_type,
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,

@@ -1,7 +1,7 @@
-# AWX-PF
+# AWX-UI
 
 ## Requirements
-- node 14.x LTS, npm 7.x LTS, make, git
+- node >= 16.13.1, npm >= 8.x make, git
 
 ## Development
 The API development server will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
@@ -17,7 +17,7 @@ npm --prefix=awx/ui start
 
 ### Build for the Development Containers
 If you just want to build a ui for the container-based awx development
-environment, use these make targets:
+environment and do not need to work on the ui code, use these make targets:
 
 ```shell
 # The ui will be reachable at https://localhost:8043 or
@@ -108,8 +108,8 @@ To run:
 
 ```shell
 cd awx/awx/ui
-docker build -t awx-ui-next .
-docker run --name tools_ui_1 --network _sources_default --link 'tools_awx_1:awx' -e TARGET="https://awx:8043" -p '3001:3001' --rm -v $(pwd)/src:/ui/src awx-ui-next
+docker build -t awx-ui .
+docker run --name tools_ui_1 --network _sources_default --link 'tools_awx_1:awx' -e TARGET="https://awx:8043" -p '3001:3001' --rm -v $(pwd)/src:/ui/src awx-ui
 ```
 
 **Note:** This is for CI, test systems, zuul, etc. For local development, see [usage](https://github.com/ansible/awx/blob/devel/awx/ui/README.md#Development)

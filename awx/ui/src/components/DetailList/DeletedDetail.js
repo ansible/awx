@@ -11,8 +11,15 @@ const Detail = styled(_Detail)`
   }
 `;
 
-function DeletedDetail({ label }) {
-  return <Detail label={label} value={t`Deleted`} />;
+function DeletedDetail({ label, dataCy, helpText }) {
+  return (
+    <Detail
+      label={label}
+      dataCy={dataCy}
+      value={t`Deleted`}
+      helpText={helpText}
+    />
+  );
 }
 
 DeletedDetail.propTypes = {

@@ -93,45 +93,48 @@ function JobOutputSearch({
       key: 'stdout__icontains',
       isDefault: true,
     },
-    {
+  ];
+
+  if (job.type !== 'system_job' && job.type !== 'inventory_update') {
+    columns.push({
       name: t`Event`,
-      key: 'event',
+      key: 'or__event',
       options: [
-        ['runner_on_failed', t`Host Failed`],
-        ['runner_on_start', t`Host Started`],
-        ['runner_on_ok', t`Host OK`],
-        ['runner_on_error', t`Host Failure`],
-        ['runner_on_skipped', t`Host Skipped`],
-        ['runner_on_unreachable', t`Host Unreachable`],
-        ['runner_on_no_hosts', t`No Hosts Remaining`],
-        ['runner_on_async_poll', t`Host Polling`],
-        ['runner_on_async_ok', t`Host Async OK`],
-        ['runner_on_async_failed', t`Host Async Failure`],
-        ['runner_item_on_ok', t`Item OK`],
-        ['runner_item_on_failed', t`Item Failed`],
-        ['runner_item_on_skipped', t`Item Skipped`],
-        ['runner_retry', t`Host Retry`],
+        ['debug', t`Debug`],
+        ['deprecated', t`Deprecated`],
+        ['error', t`Error`],
         ['runner_on_file_diff', t`File Difference`],
-        ['playbook_on_start', t`Playbook Started`],
-        ['playbook_on_notify', t`Running Handlers`],
+        ['playbook_on_setup', t`Gathering Facts`],
+        ['runner_on_async_failed', t`Host Async Failure`],
+        ['runner_on_async_ok', t`Host Async OK`],
+        ['runner_on_failed', t`Host Failed`],
+        ['runner_on_error', t`Host Failure`],
+        ['runner_on_ok', t`Host OK`],
+        ['runner_on_async_poll', t`Host Polling`],
+        ['runner_retry', t`Host Retry`],
+        ['runner_on_skipped', t`Host Skipped`],
+        ['runner_on_start', t`Host Started`],
+        ['runner_on_unreachable', t`Host Unreachable`],
         ['playbook_on_include', t`Including File`],
+        ['runner_item_on_failed', t`Item Failed`],
+        ['runner_item_on_ok', t`Item OK`],
+        ['runner_item_on_skipped', t`Item Skipped`],
         ['playbook_on_no_hosts_matched', t`No Hosts Matched`],
         ['playbook_on_no_hosts_remaining', t`No Hosts Remaining`],
-        ['playbook_on_task_start', t`Task Started`],
-        ['playbook_on_vars_prompt', t`Variables Prompted`],
-        ['playbook_on_setup', t`Gathering Facts`],
+        ['runner_on_no_hosts', t`No Hosts Remaining`],
         ['playbook_on_play_start', t`Play Started`],
         ['playbook_on_stats', t`Playbook Complete`],
-        ['debug', t`Debug`],
-        ['verbose', t`Verbose`],
-        ['deprecated', t`Deprecated`],
-        ['warning', t`Warning`],
+        ['playbook_on_start', t`Playbook Started`],
+        ['playbook_on_notify', t`Running Handlers`],
         ['system_warning', t`System Warning`],
-        ['error', t`Error`],
+        ['playbook_on_task_start', t`Task Started`],
+        ['playbook_on_vars_prompt', t`Variables Prompted`],
+        ['verbose', t`Verbose`],
+        ['warning', t`Warning`],
       ],
-    },
-    { name: t`Advanced`, key: 'advanced' },
-  ];
+    });
+  }
+  columns.push({ name: t`Advanced`, key: 'advanced' });
   const isDisabled = isJobRunning(job.status);
 
   return (
@@ -140,6 +143,7 @@ function JobOutputSearch({
       clearAllFilters={handleRemoveAllSearchTerms}
       collapseListedFiltersBreakpoint="lg"
       clearFiltersButtonText={t`Clear all filters`}
+      ouiaId="job-output-toolbar"
     >
       <SearchToolbarContent>
         <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">

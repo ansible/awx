@@ -10,9 +10,7 @@ from django.db.models import Count
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
-from django.utils.translation import ugettext_lazy as _
-
-from psycopg2.errors import UntranslatableCharacter
+from django.utils.translation import gettext_lazy as _
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version, camelcase_to_underscore, datetime_hook
@@ -84,7 +82,7 @@ def _identify_lower(key, since, until, last_gather):
     return lower, last_entries
 
 
-@register('config', '1.3', description=_('General platform configuration.'))
+@register('config', '1.4', description=_('General platform configuration.'))
 def config(since, **kwargs):
     license_info = get_license()
     install_type = 'traditional'
@@ -104,6 +102,22 @@ def config(since, **kwargs):
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
         'license_type': license_info.get('license_type', 'UNLICENSED'),
+        'license_date': license_info.get('license_date'),
+        'subscription_name': license_info.get('subscription_name'),
+        'sku': license_info.get('sku'),
+        'support_level': license_info.get('support_level'),
+        'product_name': license_info.get('product_name'),
+        'valid_key': license_info.get('valid_key'),
+        'satellite': license_info.get('satellite'),
+        'pool_id': license_info.get('pool_id'),
+        'current_instances': license_info.get('current_instances'),
+        'automated_instances': license_info.get('automated_instances'),
+        'automated_since': license_info.get('automated_since'),
+        'trial': license_info.get('trial'),
+        'grace_period_remaining': license_info.get('grace_period_remaining'),
+        'compliant': license_info.get('compliant'),
+        'date_warning': license_info.get('date_warning'),
+        'date_expired': license_info.get('date_expired'),
         'free_instances': license_info.get('free_instances', 0),
         'total_licensed_instances': license_info.get('instance_count', 0),
         'license_expiry': license_info.get('time_remaining', 0),
@@ -211,7 +225,7 @@ def projects_by_scm_type(since, **kwargs):
     return counts
 
 
-@register('instance_info', '1.1', description=_('Cluster topology and capacity'))
+@register('instance_info', '1.2', description=_('Cluster topology and capacity'))
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
@@ -337,6 +351,8 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           {tbl}.parent_uuid,
                           {tbl}.event,
                           task_action,
+                          resolved_action,
+                          resolved_role,
                           -- '-' operator listed here:
                           -- https://www.postgresql.org/docs/12/functions-json.html
                           -- note that operator is only supported by jsonb objects
@@ -356,33 +372,31 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           x.duration AS duration,
                           x.res->'warnings' AS warnings,
                           x.res->'deprecations' AS deprecations
-                          FROM {tbl}, json_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
+                          FROM {tbl}, jsonb_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "resolved_action" text, "resolved_role" text, "start" text, "end" text)
                           WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
         return query
 
-    try:
-        return _copy_table(table='events', query=query(f"{tbl}.event_data::jsonb"), path=full_path)
-    except UntranslatableCharacter:
-        return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::jsonb"), path=full_path)
+    return _copy_table(table='events', query=query(fr"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
 
 
-@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table_unpartitioned(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', 'created', **kwargs)
 
 
-@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
 def events_table_partitioned_modified(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
 
-@register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
+@register('unified_jobs_table', '1.3', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
 def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
                                  django_content_type.model,
                                  main_unifiedjob.organization_id,
                                  main_organization.name as organization_name,
+                                 main_executionenvironment.image as execution_environment_image,
                                  main_job.inventory_id,
                                  main_inventory.name as inventory_name,
                                  main_unifiedjob.created,
@@ -407,6 +421,7 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                  LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
                                  LEFT JOIN main_inventory ON main_job.inventory_id = main_inventory.id
                                  LEFT JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
+                                 LEFT JOIN main_executionenvironment ON main_executionenvironment.id = main_unifiedjob.execution_environment_id
                                  WHERE ((main_unifiedjob.created > '{0}' AND main_unifiedjob.created <= '{1}')
                                        OR (main_unifiedjob.finished > '{0}' AND main_unifiedjob.finished <= '{1}'))
                                        AND main_unifiedjob.launch_type != 'sync'
@@ -417,11 +432,12 @@ def unified_jobs_table(since, full_path, until, **kwargs):
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
-@register('unified_job_template_table', '1.0', format='csv', description=_('Data on job templates'))
+@register('unified_job_template_table', '1.1', format='csv', description=_('Data on job templates'))
 def unified_job_template_table(since, full_path, **kwargs):
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id,
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
                                  django_content_type.model,
+                                 main_executionenvironment.image as execution_environment_image,
                                  main_unifiedjobtemplate.created,
                                  main_unifiedjobtemplate.modified,
                                  main_unifiedjobtemplate.created_by_id,
@@ -434,7 +450,8 @@ def unified_job_template_table(since, full_path, **kwargs):
                                  main_unifiedjobtemplate.next_job_run,
                                  main_unifiedjobtemplate.next_schedule_id,
                                  main_unifiedjobtemplate.status
-                                 FROM main_unifiedjobtemplate, django_content_type
+                                 FROM main_unifiedjobtemplate
+                                 LEFT JOIN main_executionenvironment ON main_executionenvironment.id = main_unifiedjobtemplate.execution_environment_id, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)

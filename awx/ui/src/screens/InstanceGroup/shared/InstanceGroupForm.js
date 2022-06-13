@@ -1,44 +1,26 @@
 import React from 'react';
 import { func, shape } from 'prop-types';
-import { Formik, useField } from 'formik';
+import { Formik } from 'formik';
 
 import { t } from '@lingui/macro';
-import { Form, Tooltip } from '@patternfly/react-core';
+import { Form } from '@patternfly/react-core';
 
 import FormField, { FormSubmitError } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required, minMaxValue } from 'util/validators';
 import { FormColumnLayout } from 'components/FormLayout';
 
-function InstanceGroupFormFields({ defaultControlPlane, defaultExecution }) {
-  const [{ value }, ,] = useField('name');
-  const isDisabled =
-    value === defaultExecution || value === defaultControlPlane;
-
+function InstanceGroupFormFields() {
   return (
     <>
-      {isDisabled ? (
-        <Tooltip content={t`Name cannot be changed on this Instance Group`}>
-          <FormField
-            name="name"
-            id="instance-group-name"
-            label={t`Name`}
-            type="text"
-            validate={required(null)}
-            isRequired
-            isDisabled={isDisabled}
-          />
-        </Tooltip>
-      ) : (
-        <FormField
-          name="name"
-          id="instance-group-name"
-          label={t`Name`}
-          type="text"
-          validate={required(null)}
-          isRequired
-        />
-      )}
+      <FormField
+        name="name"
+        id="instance-group-name"
+        label={t`Name`}
+        type="text"
+        validate={required(null)}
+        isRequired
+      />
       <FormField
         id="instance-group-policy-instance-minimum"
         label={t`Policy instance minimum`}
@@ -66,7 +48,6 @@ function InstanceGroupFormFields({ defaultControlPlane, defaultExecution }) {
 
 function InstanceGroupForm({
   instanceGroup = {},
-
   onSubmit,
   onCancel,
   submitError,

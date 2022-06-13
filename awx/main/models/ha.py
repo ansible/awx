@@ -2,14 +2,14 @@
 # All Rights Reserved.
 
 from decimal import Decimal
-import random
 import logging
+import os
 
 from django.core.validators import MinValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 
@@ -18,8 +18,8 @@ from solo.models import SingletonModel
 
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
-from awx.main.managers import InstanceManager, InstanceGroupManager, UUID_DEFAULT
-from awx.main.fields import JSONField
+from awx.main.fields import JSONBlob
+from awx.main.managers import InstanceManager, UUID_DEFAULT
 from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.unified_jobs import UnifiedJob
@@ -29,7 +29,7 @@ from awx.main.models.mixins import RelatedJobsMixin
 # ansible-runner
 from ansible_runner.utils.capacity import get_cpu_count, get_mem_in_bytes
 
-__all__ = ('Instance', 'InstanceGroup', 'TowerScheduleState')
+__all__ = ('Instance', 'InstanceGroup', 'InstanceLink', 'TowerScheduleState')
 
 logger = logging.getLogger('awx.main.models.ha')
 
@@ -54,6 +54,14 @@ class HasPolicyEditsMixin(HasEditsMixin):
         return self._values_have_edits(new_values)
 
 
+class InstanceLink(BaseModel):
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
+    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+
+    class Meta:
+        unique_together = ('source', 'target')
+
+
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
 
@@ -74,8 +82,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     modified = models.DateTimeField(auto_now=True)
     # Fields defined in health check or heartbeat
     version = models.CharField(max_length=120, blank=True)
-    cpu = models.IntegerField(
-        default=0,
+    cpu = models.DecimalField(
+        default=Decimal(0.0),
+        max_digits=4,
+        decimal_places=1,
         editable=False,
     )
     memory = models.BigIntegerField(
@@ -116,8 +126,15 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    NODE_TYPE_CHOICES = [("control", "Control plane node"), ("execution", "Execution plane node"), ("hybrid", "Controller and execution")]
+    NODE_TYPE_CHOICES = [
+        ("control", "Control plane node"),
+        ("execution", "Execution plane node"),
+        ("hybrid", "Controller and execution"),
+        ("hop", "Message-passing node, no execution capability"),
+    ]
     node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
+
+    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
 
     class Meta:
         app_label = 'main'
@@ -130,7 +147,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @property
     def consumed_capacity(self):
-        return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+        capacity_consumed = 0
+        if self.node_type in ('hybrid', 'execution'):
+            capacity_consumed += sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+        if self.node_type in ('hybrid', 'control'):
+            capacity_consumed += sum(
+                settings.AWX_CONTROL_NODE_TASK_IMPACT for x in UnifiedJob.objects.filter(controller_node=self.hostname, status__in=('running', 'waiting'))
+            )
+        return capacity_consumed
 
     @property
     def remaining_capacity(self):
@@ -150,12 +174,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
-    @staticmethod
-    def choose_online_control_plane_node():
-        return random.choice(
-            Instance.objects.filter(enabled=True, capacity__gt=0).filter(node_type__in=['control', 'hybrid']).values_list('hostname', flat=True)
-        )
-
     def get_cleanup_task_kwargs(self, **kwargs):
         """
         Produce options to use for the command: ansible-runner worker cleanup
@@ -164,10 +182,16 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         """
         vargs = dict()
         if settings.AWX_CLEANUP_PATHS:
-            vargs['file_pattern'] = '/tmp/{}*'.format(JOB_FOLDER_PREFIX % '*')
+            vargs['file_pattern'] = os.path.join(settings.AWX_ISOLATION_BASE_PATH, JOB_FOLDER_PREFIX % '*') + '*'
         vargs.update(kwargs)
+        if not isinstance(vargs.get('grace_period'), int):
+            vargs['grace_period'] = 60  # grace period of 60 minutes, need to set because CLI default will not take effect
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
-            active_pks = list(UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')).values_list('pk', flat=True))
+            active_pks = list(
+                UnifiedJob.objects.filter(
+                    (models.Q(execution_node=self.hostname) | models.Q(controller_node=self.hostname)) & models.Q(status__in=('running', 'waiting'))
+                ).values_list('pk', flat=True)
+            )
             if active_pks:
                 vargs['exclude_strings'] = [JOB_FOLDER_PREFIX % job_id for job_id in active_pks]
         if 'remove_images' in vargs or 'image_prune' in vargs:
@@ -180,7 +204,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if ref_time is None:
             ref_time = now()
         grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 2
-        if self.node_type == 'execution':
+        if self.node_type in ('execution', 'hop'):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
@@ -200,7 +224,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
-        if self.enabled:
+        if self.enabled and self.node_type != 'hop':
             lower_cap = min(self.mem_capacity, self.cpu_capacity)
             higher_cap = max(self.mem_capacity, self.cpu_capacity)
             self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
@@ -209,13 +233,19 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def refresh_capacity_fields(self):
         """Update derived capacity fields from cpu and memory (no save)"""
-        self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
-        self.mem_capacity = get_mem_effective_capacity(self.memory)
+        if self.node_type == 'hop':
+            self.cpu_capacity = 0
+            self.mem_capacity = 0  # formula has a non-zero offset, so we make sure it is 0 for hop nodes
+        else:
+            self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
+            self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
-    def save_health_data(self, version, cpu, memory, uuid=None, update_last_seen=False, errors=''):
-        self.last_health_check = now()
-        update_fields = ['last_health_check']
+    def save_health_data(self, version=None, cpu=0, memory=0, uuid=None, update_last_seen=False, errors=''):
+        update_fields = ['errors']
+        if self.node_type != 'hop':
+            self.last_health_check = now()
+            update_fields.append('last_health_check')
 
         if update_last_seen:
             self.last_seen = self.last_health_check
@@ -223,11 +253,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
         if uuid is not None and self.uuid != uuid:
             if self.uuid is not None:
-                logger.warn(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
+                logger.warning(f'Self-reported uuid of {self.hostname} changed from {self.uuid} to {uuid}')
             self.uuid = uuid
             update_fields.append('uuid')
 
-        if self.version != version:
+        if version is not None and self.version != version:
             self.version = version
             update_fields.append('version')
 
@@ -246,9 +276,13 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.errors = ''
         else:
             self.mark_offline(perform_save=False, errors=errors)
-        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity', 'errors'])
+        update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
-        self.save(update_fields=update_fields)
+        # disabling activity stream will avoid extra queries, which is important for heatbeat actions
+        from awx.main.signals import disable_activity_stream
+
+        with disable_activity_stream():
+            self.save(update_fields=update_fields)
 
     def local_health_check(self):
         """Only call this method on the instance that this record represents"""
@@ -265,8 +299,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
-
-    objects = InstanceGroupManager()
 
     name = models.CharField(max_length=250, unique=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -294,8 +326,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     )
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
-    policy_instance_list = JSONField(
-        default=[], blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
+    policy_instance_list = JSONBlob(
+        default=list, blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 
     POLICY_FIELDS = frozenset(('policy_instance_list', 'policy_instance_minimum', 'policy_instance_percentage'))
@@ -305,7 +337,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
-        return sum([inst.capacity for inst in self.instances.all()])
+        return sum(inst.capacity for inst in self.instances.all())
 
     @property
     def jobs_running(self):
@@ -325,31 +357,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     class Meta:
         app_label = 'main'
 
-    @staticmethod
-    def fit_task_to_most_remaining_capacity_instance(task, instances):
-        instance_most_capacity = None
-        for i in instances:
-            if i.node_type not in (task.capacity_type, 'hybrid'):
-                continue
-            if i.remaining_capacity >= task.task_impact and (
-                instance_most_capacity is None or i.remaining_capacity > instance_most_capacity.remaining_capacity
-            ):
-                instance_most_capacity = i
-        return instance_most_capacity
-
-    @staticmethod
-    def find_largest_idle_instance(instances, capacity_type='execution'):
-        largest_instance = None
-        for i in instances:
-            if i.node_type not in (capacity_type, 'hybrid'):
-                continue
-            if i.jobs_running == 0:
-                if largest_instance is None:
-                    largest_instance = i
-                elif i.capacity > largest_instance.capacity:
-                    largest_instance = i
-        return largest_instance
-
     def set_default_policy_fields(self):
         self.policy_instance_list = []
         self.policy_instance_minimum = 0
@@ -361,7 +368,7 @@ class TowerScheduleState(SingletonModel):
 
 
 def schedule_policy_task():
-    from awx.main.tasks import apply_cluster_membership_policies
+    from awx.main.tasks.system import apply_cluster_membership_policies
 
     connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 

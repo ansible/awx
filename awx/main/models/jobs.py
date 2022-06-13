@@ -19,7 +19,7 @@ from django.db import models
 # from django.core.cache import cache
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import FieldDoesNotExist
 
 # REST Framework
@@ -44,7 +44,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
-from awx.main.fields import ImplicitRoleField, JSONField, AskForField
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -55,6 +55,7 @@ from awx.main.models.mixins import (
     WebhookMixin,
     WebhookTemplateMixin,
 )
+from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -129,8 +130,7 @@ class JobOptions(BaseModel):
             )
         )
     )
-    job_tags = models.CharField(
-        max_length=1024,
+    job_tags = models.TextField(
         blank=True,
         default='',
     )
@@ -546,9 +546,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         editable=False,
         through='JobHostSummary',
     )
-    artifacts = JSONField(
-        blank=True,
+    artifacts = JSONBlob(
         default=dict,
+        blank=True,
         editable=False,
     )
     scm_revision = models.CharField(
@@ -583,7 +583,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunJob
+        from awx.main.tasks.jobs import RunJob
 
         return RunJob
 
@@ -769,14 +769,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def awx_meta_vars(self):
         r = super(Job, self).awx_meta_vars()
         if self.project:
-            for name in ('awx', 'tower'):
+            for name in JOB_VARIABLE_PREFIXES:
                 r['{}_project_revision'.format(name)] = self.project.scm_revision
                 r['{}_project_scm_branch'.format(name)] = self.project.scm_branch
         if self.scm_branch:
-            for name in ('awx', 'tower'):
+            for name in JOB_VARIABLE_PREFIXES:
                 r['{}_job_scm_branch'.format(name)] = self.scm_branch
         if self.job_template:
-            for name in ('awx', 'tower'):
+            for name in JOB_VARIABLE_PREFIXES:
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
                 r['{}_job_template_name'.format(name)] = self.job_template.name
         return r
@@ -885,7 +885,7 @@ class LaunchTimeConfigBase(BaseModel):
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
-    char_prompts = JSONField(blank=True, default=dict)
+    char_prompts = JSONBlob(default=dict, blank=True)
 
     def prompts_dict(self, display=False):
         data = {}
@@ -938,12 +938,12 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
         abstract = True
 
     # Special case prompting fields, even more special than the other ones
-    extra_data = JSONField(blank=True, default=dict)
+    extra_data = JSONBlob(default=dict, blank=True)
     survey_passwords = prevent_search(
-        JSONField(
-            blank=True,
+        JSONBlob(
             default=dict,
             editable=False,
+            blank=True,
         )
     )
     # Credentials needed for non-unified job / unified JT models
@@ -1213,7 +1213,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunSystemJob
+        from awx.main.tasks.jobs import RunSystemJob
 
         return RunSystemJob
 

@@ -15,7 +15,7 @@ import { jsonToYaml, isJsonString } from 'util/yaml';
 import { InstanceGroupsAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 
-function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
+function ContainerGroupDetails({ instanceGroup }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -50,6 +50,7 @@ function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
         {instanceGroup.summary_fields.credential && (
           <Detail
             label={t`Credential`}
+            helpText={t`Credential to authenticate with Kubernetes or OpenShift`}
             value={
               <Link
                 to={`/credentials/${instanceGroup?.summary_fields?.credential?.id}`}
@@ -81,7 +82,9 @@ function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
                 : instanceGroup.pod_spec_override
             }
             rows={6}
+            helpText={t`Custom Kubernetes or OpenShift Pod specification.`}
             name="pod_spec_override"
+            dataCy="container-group-detail-pod-spec-override"
           />
         )}
       </DetailList>
@@ -98,8 +101,7 @@ function ContainerGroupDetails({ instanceGroup, defaultExecution }) {
               {t`Edit`}
             </Button>
           )}
-        {name !== defaultExecution &&
-          instanceGroup.summary_fields.user_capabilities &&
+        {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
               ouiaId="container-group-detail-delete-button"

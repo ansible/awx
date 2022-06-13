@@ -33,10 +33,10 @@ function RevertButton({
     isMatch = true;
   }
 
-  function handleConfirm() {
+  const handleConfirm = () => {
     helpers.setValue(isRevertable ? defaultValue : initialValue);
     onRevertCallback();
-  }
+  };
 
   const revertTooltipContent = isRevertable
     ? t`Revert to factory default.`

@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 # Django
 from django.db import connection, models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 # from django import settings as tower_settings
@@ -28,7 +28,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, AskForField
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -40,7 +40,6 @@ from awx.main.models.mixins import (
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
-from awx.main.fields import JSONField
 from awx.main.utils import schedule_task_manager
 
 
@@ -232,9 +231,9 @@ class WorkflowJobNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
-    ancestor_artifacts = JSONField(
-        blank=True,
+    ancestor_artifacts = JSONBlob(
         default=dict,
+        blank=True,
         editable=False,
     )
     do_not_run = models.BooleanField(
@@ -813,7 +812,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return True
 
     def send_approval_notification(self, approval_status):
-        from awx.main.tasks import send_notifications  # avoid circular import
+        from awx.main.tasks.system import send_notifications  # avoid circular import
 
         if self.workflow_job_template is None:
             return

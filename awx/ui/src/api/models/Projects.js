@@ -8,7 +8,7 @@ class Projects extends SchedulesMixin(
 ) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/projects/';
+    this.baseUrl = 'api/v2/projects/';
 
     this.readAccessList = this.readAccessList.bind(this);
     this.readAccessOptions = this.readAccessOptions.bind(this);

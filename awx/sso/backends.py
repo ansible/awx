@@ -13,7 +13,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -179,7 +179,7 @@ def _get_or_set_enterprise_user(username, password, provider):
         created = True
     if created or user.is_in_enterprise_category(provider):
         return user
-    logger.warn("Enterprise user %s already defined in Tower." % username)
+    logger.warning("Enterprise user %s already defined in Tower." % username)
 
 
 class RADIUSBackend(BaseRADIUSBackend):
@@ -199,8 +199,8 @@ class RADIUSBackend(BaseRADIUSBackend):
         if not user.has_usable_password():
             return user
 
-    def get_django_user(self, username, password=None):
-        return _get_or_set_enterprise_user(force_text(username), force_text(password), 'radius')
+    def get_django_user(self, username, password=None, groups=[], is_staff=False, is_superuser=False):
+        return _get_or_set_enterprise_user(force_str(username), force_str(password), 'radius')
 
 
 class TACACSPlusBackend(object):
@@ -257,7 +257,7 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         if isinstance(value, (list, tuple)):
             value = value[0]
         if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
-            logger.warn(
+            logger.warning(
                 "Could not map user detail '%s' from SAML attribute '%s'; " "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
                 conf_key[5:],
                 key,
@@ -292,9 +292,12 @@ class SAMLAuth(BaseSAMLAuth):
         user = super(SAMLAuth, self).authenticate(request, *args, **kwargs)
         # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
         if getattr(user, 'is_new', False):
-            _decorate_enterprise_user(user, 'saml')
+            enterprise_auth = _decorate_enterprise_user(user, 'saml')
+            logger.debug("Created enterprise user %s from %s backend." % (user.username, enterprise_auth.get_provider_display()))
         elif user and not user.is_in_enterprise_category('saml'):
             return None
+        if user:
+            logger.debug("Enterprise user %s already created in Tower." % user.username)
         return user
 
     def get_user(self, user_id):
@@ -367,7 +370,7 @@ def on_populate_user(sender, **kwargs):
         if field_len > max_len:
             setattr(user, field, getattr(user, field)[:max_len])
             force_user_update = True
-            logger.warn('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
+            logger.warning('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
 
     # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})

@@ -1,6 +1,6 @@
 from .plugin import CredentialPlugin
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 from azure.common.credentials import ServicePrincipalCredentials
 from msrestazure import azure_cloud

@@ -1,0 +1,43 @@
+---
+name: Build/Push Development Images
+on:
+  push:
+    branches:
+      - devel
+      - release_*
+jobs:
+  push:
+    if: endsWith(github.repository, '/awx') || startsWith(github.ref, 'refs/heads/release_')
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
+
+      - name: Log in to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pre-pull image to warm build cache
+        run: |
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/} || :
+          docker pull ghcr.io/${{ github.repository_owner }}/awx_kube_devel:${GITHUB_REF##*/} || :
+
+      - name: Build images
+        run: |
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-dev-build
+
+      - name: Push image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
+          docker push ghcr.io/${{ github.repository_owner }}/awx_kube_devel:${GITHUB_REF##*/}

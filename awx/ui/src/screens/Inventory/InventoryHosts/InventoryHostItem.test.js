@@ -6,6 +6,7 @@ const mockHost = {
   id: 1,
   name: 'Host 1',
   url: '/api/v2/hosts/1',
+  description: 'Bar',
   inventory: 1,
   summary_fields: {
     inventory: {
@@ -42,6 +43,14 @@ describe('<InventoryHostItem />', () => {
         </tbody>
       </table>
     );
+  });
+
+  test('should display expected details', () => {
+    expect(wrapper.find('InventoryHostItem').length).toBe(1);
+    expect(wrapper.find('Td[dataLabel="Name"]').find('Link').prop('to')).toBe(
+      '/host/1'
+    );
+    expect(wrapper.find('Td[dataLabel="Description"]').text()).toBe('Bar');
   });
 
   test('edit button shown to users with edit capabilities', () => {

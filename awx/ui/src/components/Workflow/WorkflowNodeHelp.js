@@ -133,14 +133,12 @@ function WorkflowNodeHelp({ node }) {
   return (
     <>
       {!unifiedJobTemplate && (!job || job.type !== 'workflow_approval') && (
-        <>
-          <ResourceDeleted job={job}>
-            <StyledExclamationTriangleIcon />
-            <Trans>
-              The resource associated with this node has been deleted.
-            </Trans>
-          </ResourceDeleted>
-        </>
+        <ResourceDeleted job={job}>
+          <StyledExclamationTriangleIcon />
+          <Trans>
+            The resource associated with this node has been deleted.
+          </Trans>
+        </ResourceDeleted>
       )}
       {job && (
         <GridDL>
@@ -155,7 +153,9 @@ function WorkflowNodeHelp({ node }) {
           <dt>
             <b>{t`Resource Name`}</b>
           </dt>
-          <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
+          <dd id="workflow-node-help-name">
+            {unifiedJobTemplate?.name || t`Deleted`}
+          </dd>
           <dt>
             <b>{t`Type`}</b>
           </dt>
@@ -189,7 +189,9 @@ function WorkflowNodeHelp({ node }) {
           <dt>
             <b>{t`Resource Name`}</b>
           </dt>
-          <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
+          <dd id="workflow-node-help-name">
+            {unifiedJobTemplate?.name || t`Deleted`}
+          </dd>
           <dt>
             <b>{t`Type`}</b>
           </dt>

@@ -77,6 +77,7 @@ function TACACSDetail() {
               isInline
               data-cy="TACACS-deprecation-warning"
               title={t`This feature is deprecated and will be removed in a future release.`}
+              ouiaId="tacacs-deprecation-alert"
             />
             <DetailList>
               {Object.keys(tacacs).map((key) => {

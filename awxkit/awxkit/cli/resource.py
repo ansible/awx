@@ -7,11 +7,11 @@ from awxkit.exceptions import ImportExportError
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
 from awxkit.api.pages.api import EXPORTABLE_RESOURCES
-from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
+from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments, add_formatting_import_export
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
 
-CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics']
+CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics', 'mesh_visualizer']
 
 DEPRECATED_RESOURCES = {
     'ad_hoc_commands': 'ad_hoc',
@@ -125,6 +125,10 @@ class Import(CustomCommand):
     help_text = 'import resources into Tower'
 
     def handle(self, client, parser):
+        if parser:
+            parser.usage = 'awx import < exportfile'
+            parser.description = 'import resources from stdin'
+            add_formatting_import_export(parser, {})
         if client.help:
             parser.print_help()
             raise SystemExit()
@@ -159,7 +163,9 @@ class Export(CustomCommand):
 
     def handle(self, client, parser):
         self.extend_parser(parser)
-
+        parser.usage = 'awx export > exportfile'
+        parser.description = 'export resources to stdout'
+        add_formatting_import_export(parser, {})
         if client.help:
             parser.print_help()
             raise SystemExit()

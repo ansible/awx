@@ -6,7 +6,6 @@ import {
   shallowWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../testUtils/testUtils';
 import SelectResourceStep from './SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {
@@ -114,7 +113,6 @@ describe('<SelectResourceStep />', () => {
         />
       );
     });
-    await sleep(0);
     wrapper.update();
     const checkboxListItemWrapper = wrapper.find('CheckboxListItem');
     expect(checkboxListItemWrapper.length).toBe(2);

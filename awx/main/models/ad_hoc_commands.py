@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.db import models
 from django.utils.text import Truncator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
 # AWX
@@ -144,7 +144,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunAdHocCommand
+        from awx.main.tasks.jobs import RunAdHocCommand
 
         return RunAdHocCommand
 
@@ -160,9 +160,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @property
     def notification_templates(self):
-        all_orgs = set()
-        for h in self.hosts.all():
-            all_orgs.add(h.inventory.organization)
+        all_orgs = {h.inventory.organization for h in self.hosts.all()}
         active_templates = dict(error=set(), success=set(), started=set())
         base_notification_templates = NotificationTemplate.objects
         for org in all_orgs:

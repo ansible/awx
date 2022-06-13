@@ -9,7 +9,33 @@ function JobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
-  async function handleSubmit(values) {
+  const projectParams = {
+    project_id: null,
+    project_name: null,
+  };
+  history.location.search
+    .replace(/^\?/, '')
+    .split('&')
+    .map((s) => s.split('='))
+    .forEach(([key, val]) => {
+      if (!(key in projectParams)) {
+        return;
+      }
+      projectParams[key] = decodeURIComponent(val);
+    });
+
+  let projectValues = null;
+
+  if (
+    Object.values(projectParams).filter((item) => item !== null).length === 2
+  ) {
+    projectValues = {
+      id: projectParams.project_id,
+      name: projectParams.project_name,
+    };
+  }
+
+  const handleSubmit = async (values) => {
     const {
       labels,
       instanceGroups,
@@ -35,7 +61,11 @@ function JobTemplateAdd() {
         execution_environment: values.execution_environment?.id,
       });
       await Promise.all([
-        submitLabels(id, labels, values.project.summary_fields.organization.id),
+        submitLabels(
+          id,
+          values.project.summary_fields?.organization.id,
+          labels
+        ),
         submitInstanceGroups(id, instanceGroups),
         submitCredentials(id, credentials),
       ]);
@@ -43,9 +73,9 @@ function JobTemplateAdd() {
     } catch (error) {
       setFormSubmitError(error);
     }
-  }
+  };
 
-  async function submitLabels(templateId, labels = [], orgId) {
+  async function submitLabels(templateId, orgId, labels = []) {
     if (!orgId) {
       // eslint-disable-next-line no-useless-catch
       try {
@@ -80,9 +110,9 @@ function JobTemplateAdd() {
     return Promise.all(associateCredentials);
   }
 
-  function handleCancel() {
+  const handleCancel = () => {
     history.push(`/templates`);
-  }
+  };
 
   return (
     <PageSection>
@@ -92,6 +122,7 @@ function JobTemplateAdd() {
             handleCancel={handleCancel}
             handleSubmit={handleSubmit}
             submitError={formSubmitError}
+            projectValues={projectValues}
             isOverrideDisabledLookup
           />
         </CardBody>

@@ -1,4 +1,4 @@
-from awx.main.utils.receptor import _convert_args_to_cli
+from awx.main.tasks.receptor import _convert_args_to_cli
 
 
 def test_file_cleanup_scenario():

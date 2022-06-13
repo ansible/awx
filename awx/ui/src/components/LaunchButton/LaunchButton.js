@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { number, shape } from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -32,7 +32,8 @@ function canLaunchWithoutPrompt(launchData) {
   );
 }
 
-function LaunchButton({ resource, children, history }) {
+function LaunchButton({ resource, children }) {
+  const history = useHistory();
   const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
@@ -60,7 +61,7 @@ function LaunchButton({ resource, children, history }) {
       }
 
       if (canLaunchWithoutPrompt(launch)) {
-        launchWithParams({});
+        await launchWithParams({});
       } else {
         setShowLaunchPrompt(true);
       }
@@ -184,4 +185,4 @@ LaunchButton.propTypes = {
   }).isRequired,
 };
 
-export default withRouter(LaunchButton);
+export default LaunchButton;

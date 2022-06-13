@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.utils.timezone
-import jsonfield.fields
 import django.db.models.deletion
 from django.conf import settings
 import taggit.managers
@@ -70,7 +69,7 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ('event_data', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('event_data', awx.main.fields.JSONBlob(default=dict, blank=True)),
                 ('failed', models.BooleanField(default=False, editable=False)),
                 ('changed', models.BooleanField(default=False, editable=False)),
                 ('counter', models.PositiveIntegerField(default=0)),
@@ -433,7 +432,7 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ('event_data', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('event_data', awx.main.fields.JSONBlob(default=dict, blank=True)),
                 ('failed', models.BooleanField(default=False, editable=False)),
                 ('changed', models.BooleanField(default=False, editable=False)),
                 ('host_name', models.CharField(default='', max_length=1024, editable=False)),
@@ -623,7 +622,7 @@ class Migration(migrations.Migration):
                 ('dtend', models.DateTimeField(default=None, null=True, editable=False)),
                 ('rrule', models.CharField(max_length=255)),
                 ('next_run', models.DateTimeField(default=None, null=True, editable=False)),
-                ('extra_data', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('extra_data', awx.main.fields.JSONBlob(default=dict, blank=True)),
                 (
                     'created_by',
                     models.ForeignKey(
@@ -751,7 +750,7 @@ class Migration(migrations.Migration):
                 ('elapsed', models.DecimalField(editable=False, max_digits=12, decimal_places=3)),
                 ('job_args', models.TextField(default='', editable=False, blank=True)),
                 ('job_cwd', models.CharField(default='', max_length=1024, editable=False, blank=True)),
-                ('job_env', jsonfield.fields.JSONField(default=dict, editable=False, blank=True)),
+                ('job_env', awx.main.fields.JSONBlob(default=dict, editable=False, blank=True)),
                 ('job_explanation', models.TextField(default='', editable=False, blank=True)),
                 ('start_args', models.TextField(default='', editable=False, blank=True)),
                 ('result_stdout_text', models.TextField(default='', editable=False, blank=True)),
@@ -1035,7 +1034,7 @@ class Migration(migrations.Migration):
                 ('host_config_key', models.CharField(default='', max_length=1024, blank=True)),
                 ('ask_variables_on_launch', models.BooleanField(default=False)),
                 ('survey_enabled', models.BooleanField(default=False)),
-                ('survey_spec', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('survey_spec', awx.main.fields.JSONBlob(default=dict, blank=True)),
             ],
             options={
                 'ordering': ('name',),

@@ -60,7 +60,7 @@ class AWXConsumerBase(object):
         return f'listening on {self.queues}'
 
     def control(self, body):
-        logger.warn(body)
+        logger.warning(f'Received control signal:\n{body}')
         control = body.get('control')
         if control in ('status', 'running'):
             reply_queue = body['reply_to']
@@ -118,7 +118,7 @@ class AWXConsumerBase(object):
 
     def stop(self, signum, frame):
         self.should_stop = True
-        logger.warn('received {}, stopping'.format(signame(signum)))
+        logger.warning('received {}, stopping'.format(signame(signum)))
         self.worker.on_stop()
         raise SystemExit()
 
@@ -134,10 +134,17 @@ class AWXConsumerRedis(AWXConsumerBase):
 
 
 class AWXConsumerPG(AWXConsumerBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pg_max_wait = settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE
+        # if no successful loops have ran since startup, then we should fail right away
+        self.pg_is_down = True  # set so that we fail if we get database errors on startup
+        self.pg_down_time = time.time() - self.pg_max_wait  # allow no grace period
+
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
 
-        logger.warn(f"Running worker {self.name} listening to queues {self.queues}")
+        logger.info(f"Running worker {self.name} listening to queues {self.queues}")
         init = False
 
         while True:
@@ -150,11 +157,28 @@ class AWXConsumerPG(AWXConsumerBase):
                         init = True
                     for e in conn.events():
                         self.process_task(json.loads(e.payload))
+                        self.pg_is_down = False
                     if self.should_stop:
                         return
             except psycopg2.InterfaceError:
-                logger.warn("Stale Postgres message bus connection, reconnecting")
+                logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
+            except (db.DatabaseError, psycopg2.OperationalError):
+                # If we have attained stady state operation, tolerate short-term database hickups
+                if not self.pg_is_down:
+                    logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")
+                    self.pg_down_time = time.time()
+                    self.pg_is_down = True
+                if time.time() - self.pg_down_time > self.pg_max_wait:
+                    logger.warning(f"Postgres event consumer has not recovered in {self.pg_max_wait} s, exiting")
+                    raise
+                # Wait for a second before next attempt, but still listen for any shutdown signals
+                for i in range(10):
+                    if self.should_stop:
+                        return
+                    time.sleep(0.1)
+                for conn in db.connections.all():
+                    conn.close_if_unusable_or_obsolete()
 
 
 class BaseWorker(object):
@@ -188,7 +212,7 @@ class BaseWorker(object):
                 if 'uuid' in body:
                     uuid = body['uuid']
                     finished.put(uuid)
-        logger.warn('worker exiting gracefully pid:{}'.format(os.getpid()))
+        logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def perform_work(self, body):
         raise NotImplementedError()

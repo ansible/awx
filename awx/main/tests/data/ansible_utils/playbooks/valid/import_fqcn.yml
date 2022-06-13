@@ -1,0 +1,2 @@
+---
+- ansible.builtin.import_playbook: foo

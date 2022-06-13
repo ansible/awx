@@ -2,12 +2,16 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import ProjectSyncButton from './ProjectSyncButton';
 
 jest.mock('../../../api');
-
+jest.mock('hooks/useBrandName', () => ({
+  __esModule: true,
+  default: () => ({
+    current: 'AWX',
+  }),
+}));
 describe('ProjectSyncButton', () => {
   let wrapper;
 
@@ -89,13 +93,11 @@ describe('ProjectSyncButton', () => {
     await act(async () => {
       wrapper.find('button').prop('onClick')();
     });
-    await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(1);
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').simulate('click');
     });
-    await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(0);
   });

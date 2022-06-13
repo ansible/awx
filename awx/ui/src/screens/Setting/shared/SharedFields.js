@@ -435,7 +435,7 @@ TextAreaField.propTypes = {
   config: shape({}).isRequired,
 };
 
-const ObjectField = ({ name, config, isRequired = false }) => {
+const ObjectField = ({ name, config, revertValue, isRequired = false }) => {
   const validate = isRequired ? required(null) : null;
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
@@ -446,7 +446,7 @@ const ObjectField = ({ name, config, isRequired = false }) => {
   return config ? (
     <FormFullWidthLayout>
       <SettingGroup
-        defaultValue={defaultRevertValue}
+        defaultValue={revertValue ?? defaultRevertValue}
         fieldId={name}
         helperTextInvalid={meta.error}
         isRequired={isRequired}

@@ -1,1 +1,6 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
+# Remove pbr from requirements.in when moving ansible-runner to requirements.in
+git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
+# django-radius has an aggressive pin of future==0.16.0, see https://github.com/robgolding/django-radius/pull/25
+git+https://github.com/ansible/django-radius.git@develop#egg=django-radius
+git+https://github.com/PythonCharmers/python-future@master#egg=future

@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from './Detail';
+import Popover from '../Popover';
 
 const Value = styled(DetailValue)`
   margin-top: var(--pf-global--spacer--xs);
@@ -12,7 +13,7 @@ const Value = styled(DetailValue)`
   overflow: auto;
 `;
 
-function ArrayDetail({ label, value, dataCy }) {
+function ArrayDetail({ label, helpText, value, dataCy }) {
   const labelCy = dataCy ? `${dataCy}-label` : null;
   const valueCy = dataCy ? `${dataCy}-value` : null;
 
@@ -22,6 +23,7 @@ function ArrayDetail({ label, value, dataCy }) {
     <div css="grid-column: span 2">
       <DetailName component={TextListItemVariants.dt} data-cy={labelCy}>
         {label}
+        {helpText && <Popover header={label} content={helpText} id={dataCy} />}
       </DetailName>
       <Value component={TextListItemVariants.dd} data-cy={valueCy}>
         {vals.map((v) => (

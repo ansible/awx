@@ -7,29 +7,12 @@ from urllib import parse as urlparse
 from django.conf import settings
 from kubernetes import client, config
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from awx.main.utils.common import parse_yaml_or_json
+from awx.main.utils.common import parse_yaml_or_json, deepmerge
 from awx.main.utils.execution_environments import get_default_pod_spec
 
 logger = logging.getLogger('awx.main.scheduler')
-
-
-def deepmerge(a, b):
-    """
-    Merge dict structures and return the result.
-
-    >>> a = {'first': {'all_rows': {'pass': 'dog', 'number': '1'}}}
-    >>> b = {'first': {'all_rows': {'fail': 'cat', 'number': '5'}}}
-    >>> import pprint; pprint.pprint(deepmerge(a, b))
-    {'first': {'all_rows': {'fail': 'cat', 'number': '5', 'pass': 'dog'}}}
-    """
-    if isinstance(a, dict) and isinstance(b, dict):
-        return dict([(k, deepmerge(a.get(k), b.get(k))) for k in set(a.keys()).union(b.keys())])
-    elif b is None:
-        return a
-    else:
-        return b
 
 
 class PodManager(object):
@@ -183,7 +166,7 @@ class PodManager(object):
         pod_spec_override = {}
         if self.task and self.task.instance_group.pod_spec_override:
             pod_spec_override = parse_yaml_or_json(self.task.instance_group.pod_spec_override)
-        pod_spec = {**default_pod_spec, **pod_spec_override}
+        pod_spec = deepmerge(default_pod_spec, pod_spec_override)
 
         if self.task:
             pod_spec['metadata'] = deepmerge(

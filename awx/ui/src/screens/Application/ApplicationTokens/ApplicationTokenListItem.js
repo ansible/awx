@@ -16,7 +16,7 @@ function ApplicationTokenListItem({
   rowIndex,
 }) {
   return (
-    <Tr id={`token-row-${token.id}`}>
+    <Tr id={`token-row-${token.id}`} ouiaId={`token-row-${token.id}`}>
       <Td
         select={{
           rowIndex,
@@ -26,7 +26,9 @@ function ApplicationTokenListItem({
         dataLabel={t`Selected`}
       />
       <Td dataLabel={t`Name`}>
-        <Link to={detailUrl}>{token.summary_fields.user.username}</Link>
+        <Link to={detailUrl}>
+          <b>{token.summary_fields.user.username}</b>
+        </Link>
       </Td>
       <Td dataLabel={t`Scope`}>{toTitleCase(token.scope)}</Td>
       <Td dataLabel={t`Expires`}>{formatDateString(token.expires)}</Td>

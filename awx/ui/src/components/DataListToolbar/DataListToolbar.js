@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -11,6 +10,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
   ToolbarToggleGroup,
+  Tooltip,
   Dropdown,
   DropdownPosition,
   KebabToggle,
@@ -55,8 +55,9 @@ function DataListToolbar({
   pagination,
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
+  handleIsAnsibleFactsSelected,
+  isFilterCleared,
 }) {
-  const { search } = useLocation();
   const showExpandCollapse = onCompact && onExpand;
   const [isKebabOpen, setIsKebabOpen] = useState(false);
   const [isKebabModalOpen, setIsKebabModalOpen] = useState(false);
@@ -77,12 +78,21 @@ function DataListToolbar({
       setIsKebabOpen(false);
     }
   }, [isKebabModalOpen]);
+
+  const kebabProviderValue = useMemo(
+    () => ({
+      isKebabified: true,
+      onKebabModalChange: setIsKebabModalOpen,
+    }),
+    [setIsKebabModalOpen]
+  );
   return (
     <Toolbar
       id={`${qsConfig.namespace}-list-toolbar`}
+      ouiaId={`${qsConfig.namespace}-list-toolbar`}
       clearAllFilters={clearAllFilters}
       collapseListedFiltersBreakpoint="lg"
-      clearFiltersButtonText={Boolean(search) && t`Clear all filters`}
+      clearFiltersButtonText={t`Clear all filters`}
     >
       <ToolbarContent>
         {onExpandAll && (
@@ -108,12 +118,15 @@ function DataListToolbar({
         {onSelectAll && (
           <ToolbarGroup>
             <ToolbarItem>
-              <Checkbox
-                isChecked={isAllSelected}
-                onChange={onSelectAll}
-                aria-label={t`Select all`}
-                id="select-all"
-              />
+              <Tooltip content={t`Select all`} position="top">
+                <Checkbox
+                  isChecked={isAllSelected}
+                  onChange={onSelectAll}
+                  aria-label={t`Select all`}
+                  id="select-all"
+                  ouiaId="select-all"
+                />
+              </Tooltip>
             </ToolbarItem>
           </ToolbarGroup>
         )}
@@ -133,6 +146,8 @@ function DataListToolbar({
               onRemove={onRemove}
               enableNegativeFiltering={enableNegativeFiltering}
               enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
+              handleIsAnsibleFactsSelected={handleIsAnsibleFactsSelected}
+              isFilterCleared={isFilterCleared}
             />
           </ToolbarItem>
           {sortColumns && (
@@ -143,25 +158,18 @@ function DataListToolbar({
         </ToolbarToggleGroup>
         {showExpandCollapse && (
           <ToolbarGroup>
-            <>
-              <ToolbarItem>
-                <ExpandCollapse
-                  isCompact={isCompact}
-                  onCompact={onCompact}
-                  onExpand={onExpand}
-                />
-              </ToolbarItem>
-            </>
+            <ToolbarItem>
+              <ExpandCollapse
+                isCompact={isCompact}
+                onCompact={onCompact}
+                onExpand={onExpand}
+              />
+            </ToolbarItem>
           </ToolbarGroup>
         )}
         {isAdvancedSearchShown && additionalControls.length > 0 && (
           <ToolbarItem>
-            <KebabifiedProvider
-              value={{
-                isKebabified: true,
-                onKebabModalChange: setIsKebabModalOpen,
-              }}
-            >
+            <KebabifiedProvider value={kebabProviderValue}>
               <Dropdown
                 toggle={
                   <KebabToggle
@@ -177,6 +185,7 @@ function DataListToolbar({
                 position={dropdownPosition}
                 isPlain
                 dropdownItems={additionalControls}
+                ouiaId="actions-dropdown"
               />
             </KebabifiedProvider>
           </ToolbarItem>

@@ -14,21 +14,25 @@ _cleanup() {
 generate_requirements() {
   venv="`pwd`/venv"
   echo $venv
-  /usr/bin/python3.8 -m venv "${venv}"
+  /usr/bin/python3 -m venv "${venv}"
   # shellcheck disable=SC1090
   source ${venv}/bin/activate
 
-  ${venv}/bin/python3.8 -m pip install -U pip pip-tools
+  # FIXME: https://github.com/jazzband/pip-tools/issues/1558
+  ${venv}/bin/python3 -m pip install -U 'pip<22.0' pip-tools
 
-  ${pip_compile} --output-file requirements.txt "${requirements_in}" "${requirements_git}"
+  ${pip_compile} "${requirements_in}" "${requirements_git}" --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps
   # Then remove any git+ lines from requirements.txt
   while IFS= read -r line; do
-    sed -i "\!${line%#*}!d" requirements.txt
+    if [[ $line != \#* ]]; then  # ignore comments
+      sed -i "\!${line%#*}!d" requirements.txt
+    fi
   done < "${requirements_git}"
 }
 
 main() {
+  base_dir=$(pwd)
   _tmp="$(mktemp -d --suffix .awx-requirements XXXX -p /tmp)"
   trap _cleanup INT TERM EXIT
 
@@ -41,7 +45,8 @@ main() {
 
   generate_requirements
 
-  cp -vf requirements.txt "${requirements}"
+  echo "Changing $base_dir to /awx_devel/requirements"
+  cat requirements.txt | sed "s:$base_dir:/awx_devel/requirements:" > "${requirements}"
 
   _cleanup
 }

@@ -65,6 +65,7 @@ function CredentialPluginTestAlert({
             </>
           }
           variant={testVariant}
+          ouiaId="credential-plugin-test-alert"
         />
       )}
     </AlertGroup>

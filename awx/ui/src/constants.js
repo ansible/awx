@@ -10,3 +10,4 @@ export const JOB_TYPE_URL_SEGMENTS = {
 
 export const SESSION_TIMEOUT_KEY = 'awx-session-timeout';
 export const SESSION_REDIRECT_URL = 'awx-redirect-url';
+export const PERSISTENT_FILTER_KEY = 'awx-persistent-filter';

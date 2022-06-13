@@ -30,7 +30,7 @@ function HostListItem({
 
   return (
     <>
-      <Tr id={`host-row-${host.id}`}>
+      <Tr id={`host-row-${host.id}`} ouiaId={`host-row-${host.id}`}>
         <Td
           expand={{
             rowIndex,
@@ -51,6 +51,12 @@ function HostListItem({
           <Link to={`${detailUrl}`}>
             <b>{host.name}</b>
           </Link>
+        </TdBreakWord>
+        <TdBreakWord
+          id={`host-description-${host.id}}`}
+          dataLabel={t`Description`}
+        >
+          {host.description}
         </TdBreakWord>
         <TdBreakWord dataLabel={t`Inventory`}>
           {host.summary_fields.inventory && (
@@ -79,7 +85,7 @@ function HostListItem({
           </ActionItem>
         </ActionsTd>
       </Tr>
-      <Tr isExpanded={isExpanded}>
+      <Tr ouiaId={`host-row-${host.id}-expanded`} isExpanded={isExpanded}>
         <Td colSpan={2} />
         <Td colSpan={4}>
           <ExpandableRowContent>

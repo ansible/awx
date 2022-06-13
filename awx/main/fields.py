@@ -11,7 +11,6 @@ from jinja2 import sandbox, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError, SecurityError
 
 # Django
-from django.contrib.postgres.fields import JSONField as upstream_JSONBField
 from django.core import exceptions as django_exceptions
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import (
@@ -28,16 +27,14 @@ from django.db.models.fields.related_descriptors import (
     ReverseManyToOneDescriptor,
     create_forward_many_to_many_manager,
 )
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
+from django.db.models import JSONField
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # jsonschema
 from jsonschema import Draft4Validator, FormatChecker
 import jsonschema.exceptions
-
-# Django-JSONField
-from jsonfield import JSONField as upstream_JSONField
 
 # DRF
 from rest_framework import serializers
@@ -46,15 +43,14 @@ from rest_framework import serializers
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
-from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.constants import ENV_BLOCKLIST
 from awx.main import utils
 
 
 __all__ = [
+    'JSONBlob',
     'AutoOneToOneField',
     'ImplicitRoleField',
-    'JSONField',
     'SmartFilterField',
     'OrderedManyToManyField',
     'update_role_parentage_for_instance',
@@ -71,34 +67,9 @@ def __enum_validate__(validator, enums, instance, schema):
 Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 
 
-class JSONField(upstream_JSONField):
-    def db_type(self, connection):
-        return 'text'
-
-    def from_db_value(self, value, expression, connection):
-        if value in {'', None} and not self.null:
-            return {}
-        return super(JSONField, self).from_db_value(value, expression, connection)
-
-
-class JSONBField(upstream_JSONBField):
-    def get_prep_lookup(self, lookup_type, value):
-        if isinstance(value, str) and value == "null":
-            return 'null'
-        return super(JSONBField, self).get_prep_lookup(lookup_type, value)
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if connection.vendor == 'sqlite':
-            # sqlite (which we use for tests) does not support jsonb;
-            return json.dumps(value, cls=DjangoJSONEncoder)
-        return super(JSONBField, self).get_db_prep_value(value, connection, prepared)
-
-    def from_db_value(self, value, expression, connection):
-        # Work around a bug in django-jsonfield
-        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, str):
-            return json.loads(value)
-        return value
+class JSONBlob(JSONField):
+    def get_internal_type(self):
+        return "TextField"
 
 
 # Based on AutoOneToOneField from django-annoying:
@@ -140,7 +111,7 @@ def resolve_role_field(obj, field):
         # use extremely generous duck typing to accomidate all possible forms
         # of the model that may be used during various migrations
         if obj._meta.model_name != 'role' or obj._meta.app_label != 'main':
-            raise Exception(smart_text('{} refers to a {}, not a Role'.format(field, type(obj))))
+            raise Exception(smart_str('{} refers to a {}, not a Role'.format(field, type(obj))))
         ret.append(obj.id)
     else:
         if type(obj) is ManyToManyDescriptor:
@@ -158,6 +129,9 @@ def is_implicit_parent(parent_role, child_role):
     the model definition. This does not include any role parents that
     might have been set by the user.
     """
+    # Avoid circular import
+    from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
+
     if child_role.content_object is None:
         # The only singleton implicit parent is the system admin being
         # a parent of the system auditor role
@@ -314,6 +288,9 @@ class ImplicitRoleField(models.ForeignKey):
         Model = utils.get_current_apps().get_model('main', instance.__class__.__name__)
         latest_instance = Model.objects.get(pk=instance.pk)
 
+        # Avoid circular import
+        from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+
         with batch_role_ancestor_rebuilding():
             # Create any missing role objects
             missing_roles = []
@@ -368,6 +345,10 @@ class ImplicitRoleField(models.ForeignKey):
         Role_ = utils.get_current_apps().get_model('main', 'Role')
         child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
         Role_.objects.filter(id__in=role_ids).delete()
+
+        # Avoid circular import
+        from awx.main.models.rbac import Role
+
         Role.rebuild_role_ancestor_list([], child_ids)
 
 
@@ -385,7 +366,7 @@ class SmartFilterField(models.TextField):
         return super(SmartFilterField, self).get_prep_value(value)
 
 
-class JSONSchemaField(JSONBField):
+class JSONSchemaField(models.JSONField):
     """
     A JSONB field that self-validates against a defined JSON schema
     (http://json-schema.org).  This base class is intended to be overwritten by
@@ -398,8 +379,13 @@ class JSONSchemaField(JSONBField):
     # validation
     empty_values = (None, '')
 
+    def __init__(self, encoder=None, decoder=None, **options):
+        if encoder is None:
+            encoder = DjangoJSONEncoder
+        super().__init__(encoder=encoder, decoder=decoder, **options)
+
     def get_default(self):
-        return copy.deepcopy(super(JSONBField, self).get_default())
+        return copy.deepcopy(super(models.JSONField, self).get_default())
 
     def schema(self, model_instance):
         raise NotImplementedError()

@@ -11,6 +11,7 @@ import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import { ApplicationsAPI } from 'api';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
+import applicationHelpTextStrings from '../shared/Application.helptext';
 
 function ApplicationDetails({
   application,
@@ -81,6 +82,7 @@ function ApplicationDetails({
             application.authorization_grant_type
           )}
           dataCy="app-detail-authorization-grant-type"
+          helpText={applicationHelpTextStrings.authorizationGrantType}
         />
         <Detail
           label={t`Client ID`}
@@ -88,14 +90,16 @@ function ApplicationDetails({
           dataCy="app-detail-client-id"
         />
         <Detail
-          label={t`Redirect uris`}
+          label={t`Redirect URIs`}
           value={application.redirect_uris}
           dataCy="app-detail-redirect-uris"
+          helpText={applicationHelpTextStrings.redirectURIS}
         />
         <Detail
           label={t`Client type`}
           value={getClientType(application.client_type)}
           dataCy="app-detail-client-type"
+          helpText={applicationHelpTextStrings.clientType}
         />
         <UserDateDetail label={t`Created`} date={application.created} />
         <UserDateDetail label={t`Last Modified`} date={application.modified} />

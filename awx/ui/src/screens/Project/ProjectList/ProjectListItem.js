@@ -39,6 +39,7 @@ function ProjectListItem({
   project,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchProjects,
   rowIndex,
@@ -53,11 +54,14 @@ function ProjectListItem({
   };
 
   const copyProject = useCallback(async () => {
-    await ProjectsAPI.copy(project.id, {
+    const response = await ProjectsAPI.copy(project.id, {
       name: `${project.name} @ ${timeOfDay()}`,
     });
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchProjects();
-  }, [project.id, project.name, fetchProjects]);
+  }, [project.id, project.name, fetchProjects, onCopy]);
 
   const generateLastJobTooltip = (job) => (
     <>
@@ -155,7 +159,7 @@ function ProjectListItem({
 
   return (
     <>
-      <Tr id={`${project.id}`}>
+      <Tr id={`${project.id}`} ouiaId={`project-row-${project.id}`}>
         <Td
           expand={{
             rowIndex,
@@ -168,6 +172,7 @@ function ProjectListItem({
             rowIndex,
             isSelected,
             onSelect,
+            disable: isJobRunning(job?.status),
           }}
           dataLabel={t`Selected`}
         />
@@ -190,7 +195,7 @@ function ProjectListItem({
           )}
         </TdBreakWord>
         <Td dataLabel={t`Status`}>
-          {job && (
+          {job ? (
             <Tooltip
               position="top"
               content={generateLastJobTooltip(job)}
@@ -199,6 +204,14 @@ function ProjectListItem({
               <Link to={`/jobs/project/${job.id}`}>
                 <StatusLabel status={job.status} />
               </Link>
+            </Tooltip>
+          ) : (
+            <Tooltip
+              position="top"
+              content={t`Unable to load last job update`}
+              key={project.id}
+            >
+              <StatusLabel status={project?.status} />
             </Tooltip>
           )}
         </Td>

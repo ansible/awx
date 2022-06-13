@@ -75,12 +75,16 @@ function CredentialTypeDetails({ credentialType }) {
           value={jsonToYaml(JSON.stringify(inputs))}
           rows={6}
           name="input"
+          dataCy="credential-type-detail-input"
+          helpText={t`Input schema which defines a set of ordered fields for that type.`}
         />
         <VariablesDetail
           label={t`Injector configuration`}
           value={jsonToYaml(JSON.stringify(injectors))}
           rows={6}
           name="injector"
+          dataCy="credential-type-detail-injector"
+          helpText={t`Environment variables or extra variables that specify the values a credential type can inject.`}
         />
         <UserDateDetail
           label={t`Created`}

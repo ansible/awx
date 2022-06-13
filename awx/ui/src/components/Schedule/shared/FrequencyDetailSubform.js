@@ -17,6 +17,9 @@ import FormField from '../../FormField';
 import DateTimePicker from './DateTimePicker';
 
 const RunOnRadio = styled(Radio)`
+  display: flex;
+  align-items: center;
+
   label {
     display: block;
     width: 100%;
@@ -249,6 +252,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Sunday`}
               id="schedule-days-of-week-sun"
+              ouiaId="schedule-days-of-week-sun"
               name="daysOfWeek"
             />
             <Checkbox
@@ -259,6 +263,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Monday`}
               id="schedule-days-of-week-mon"
+              ouiaId="schedule-days-of-week-mon"
               name="daysOfWeek"
             />
             <Checkbox
@@ -269,6 +274,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Tuesday`}
               id="schedule-days-of-week-tue"
+              ouiaId="schedule-days-of-week-tue"
               name="daysOfWeek"
             />
             <Checkbox
@@ -279,6 +285,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Wednesday`}
               id="schedule-days-of-week-wed"
+              ouiaId="schedule-days-of-week-wed"
               name="daysOfWeek"
             />
             <Checkbox
@@ -289,6 +296,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Thursday`}
               id="schedule-days-of-week-thu"
+              ouiaId="schedule-days-of-week-thu"
               name="daysOfWeek"
             />
             <Checkbox
@@ -299,6 +307,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Friday`}
               id="schedule-days-of-week-fri"
+              ouiaId="schedule-days-of-week-fri"
               name="daysOfWeek"
             />
             <Checkbox
@@ -309,6 +318,7 @@ const FrequencyDetailSubform = () => {
               }}
               aria-label={t`Saturday`}
               id="schedule-days-of-week-sat"
+              ouiaId="schedule-days-of-week-sat"
               name="daysOfWeek"
             />
           </div>
@@ -499,6 +509,7 @@ const FrequencyDetailSubform = () => {
             event.target.value = 'never';
             end.onChange(event);
           }}
+          ouiaId="end-never-radio-button"
         />
         <Radio
           id="end-after"
@@ -510,6 +521,7 @@ const FrequencyDetailSubform = () => {
             event.target.value = 'after';
             end.onChange(event);
           }}
+          ouiaId="end-after-radio-button"
         />
         <Radio
           id="end-on-date"
@@ -521,6 +533,7 @@ const FrequencyDetailSubform = () => {
             event.target.value = 'onDate';
             end.onChange(event);
           }}
+          ouiaId="end-on-radio-button"
         />
       </FormGroup>
       {end?.value === 'after' && (

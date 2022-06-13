@@ -201,24 +201,6 @@ describe('<InstanceListItem/>', () => {
     expect(wrapper.find('Td').at(1).prop('select').onSelect).toEqual(onSelect);
   });
 
-  test('should disable checkbox', async () => {
-    const onSelect = jest.fn();
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <table>
-          <tbody>
-            <InstanceListItem
-              instance={instance[1]}
-              onSelect={onSelect}
-              fetchInstances={() => {}}
-            />
-          </tbody>
-        </table>
-      );
-    });
-    expect(wrapper.find('Td').at(1).prop('select').disable).toEqual(true);
-  });
-
   test('should display instance toggle', () => {
     expect(wrapper.find('InstanceToggle').length).toBe(1);
   });
@@ -292,9 +274,8 @@ describe('<InstanceListItem/>', () => {
       );
     });
     expect(wrapper.find('InstanceListItem').prop('isExpanded')).toBe(true);
-    expect(wrapper.find('Detail[label="Node Type"]').prop('value')).toBe(
-      'hybrid'
-    );
+    expect(wrapper.find('Detail[label="Running Jobs"]').prop('value')).toBe(0);
+    expect(wrapper.find('Detail[label="Total Jobs"]').prop('value')).toBe(68);
     expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
       'Auto'
     );

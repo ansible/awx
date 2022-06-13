@@ -20,7 +20,8 @@ export function toSearchParams(string = '') {
   const unescapeString = (v) =>
     //  This is necessary when editing a string that was initially
     //  escaped to allow white space
-    v.replace(/"/g, '');
+    v ? v.replace(/"/g, '') : '';
+
   return orArr
     .join(' and ')
     .split(/ and | or /)
@@ -67,11 +68,12 @@ export function toQueryString(config, searchParams = {}) {
 
 /**
  * Escape a string with double quote in case there was a white space
+ * @param {string} key The key of the value to be parsed
  * @param {string} value A string to be parsed
  * @return {string}  string
  */
-const escapeString = (value) => {
-  if (verifySpace(value)) {
+const escapeString = (key, value) => {
+  if (verifySpace(value) || key.includes('regex')) {
     return `"${value}"`;
   }
   return value;
@@ -94,9 +96,11 @@ export function toHostFilter(searchParams = {}) {
     .sort()
     .flatMap((key) => {
       if (Array.isArray(searchParams[key])) {
-        return searchParams[key].map((val) => `${key}=${escapeString(val)}`);
+        return searchParams[key].map(
+          (val) => `${key}=${escapeString(key, val)}`
+        );
       }
-      return `${key}=${escapeString(searchParams[key])}`;
+      return `${key}=${escapeString(key, searchParams[key])}`;
     });
 
   const filteredSearchParams = flattenSearchParams.filter(
@@ -158,4 +162,33 @@ export function removeDefaultParams(config, obj = {}) {
     delete clonedObj[keyToOmit];
   });
   return clonedObj;
+}
+
+/**
+ * Helper function to update host_filter value
+ * @param {string} value A string with host_filter value from querystring
+ * @param {object} obj An object returned by toSearchParams - in which the
+ * host_filter value was partially removed.
+ * @return {object} An object with the value of host_filter modified
+ */
+export function modifyHostFilter(value, obj) {
+  if (!value.includes('host_filter=')) return obj;
+  const clonedObj = { ...obj };
+  const host_filter = {};
+  value.split(' ').forEach((item) => {
+    if (item.includes('host_filter')) {
+      host_filter.host_filter = item.slice('host_filter='.length);
+    }
+  });
+
+  Object.keys(clonedObj).forEach((key) => {
+    if (key.indexOf('host_filter') !== -1) {
+      delete clonedObj[key];
+    }
+  });
+
+  return {
+    ...clonedObj,
+    ...host_filter,
+  };
 }

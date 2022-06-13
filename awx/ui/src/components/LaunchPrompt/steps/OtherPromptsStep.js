@@ -186,6 +186,7 @@ function ShowChangesToggle() {
         labelOff={t`Off`}
         isChecked={field.value}
         onChange={helpers.setValue}
+        ouiaId="prompt-show-changes"
       />
     </FormGroup>
   );

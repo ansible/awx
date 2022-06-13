@@ -2,10 +2,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { RootAPI } from 'api';
 import * as SessionContext from 'contexts/Session';
+import { shallow } from 'enzyme';
 import { mountWithContexts } from '../testUtils/enzymeHelpers';
 import App, { ProtectedRoute } from './App';
 
 jest.mock('./api');
+jest.mock('util/webWorker', () => jest.fn());
 
 describe('<App />', () => {
   beforeEach(() => {
@@ -29,7 +31,7 @@ describe('<App />', () => {
 
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<App />);
+      wrapper = shallow(<App />);
     });
     expect(wrapper.length).toBe(1);
     jest.clearAllMocks();

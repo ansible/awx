@@ -1,0 +1,81 @@
+---
+- name: Plumb a keycloak instance
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    private_key_file: ../_sources/keycloak.key
+    public_key_file: ../_sources/keycloak.cert
+    awx_host: "https://localhost:8043"
+    keycloak_realm_template: ../_sources/keycloak.awx.realm.json
+    keycloak_user: admin
+    keycloak_pass: admin
+    cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
+  tasks:
+    - name: Generate certificates for keycloak
+      command: 'openssl req -new -x509 -days 365 -nodes -out {{ public_key_file }} -keyout {{ private_key_file }} -subj "{{ cert_subject }}"'
+      args:
+        creates: "{{ public_key_file }}"
+
+    - name: Load certs, existing and new SAML settings
+      set_fact:
+        private_key: "{{ private_key_content }}"
+        public_key: "{{ public_key_content }}"
+        public_key_trimmed: "{{ public_key_content | regex_replace('-----BEGIN CERTIFICATE-----\\\\n', '') | regex_replace('\\\\n-----END CERTIFICATE-----', '') }}"
+        existing_saml: "{{ lookup('awx.awx.controller_api', 'settings/saml', host=awx_host, verify_ssl=false) }}"
+        new_saml: "{{ lookup('template', 'saml_settings.json.j2') }}"
+      vars:
+        # We add the extra \\ in here so that when jinja is templating out the files we end up with \n in the strings.
+        public_key_content: "{{ lookup('file', public_key_file) | regex_replace('\n', '\\\\n') }}"
+        private_key_content: "{{ lookup('file', private_key_file) | regex_replace('\n', '\\\\n') }}"
+
+    - name: Displauy existing SAML configuration
+      debug:
+        msg:
+          - "Here is your existing SAML configuration for reference:"
+          - "{{ existing_saml }}"
+
+    - pause:
+        prompt: "Continuing to run this will replace your existing saml settings (displayed above). They will all be captured except for your private key. Be sure that is backed up before continuing"
+
+    - name: Write out the existing content
+      copy:
+        dest: "../_sources/existing_saml_adapter_settings.json"
+        content: "{{ existing_saml }}"
+
+    - name: Configure AWX SAML adapter
+      awx.awx.settings:
+        settings: "{{ new_saml }}"
+        controller_host: "{{ awx_host }}"
+        validate_certs: False
+
+    - name: Get a keycloak token
+      uri:
+        url: "https://localhost:8443/auth/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          client_id: "admin-cli"
+          username: "{{ keycloak_user }}"
+          password: "{{ keycloak_pass }}"
+          grant_type: "password"
+        validate_certs: False
+      register: keycloak_response
+
+    - name: Template the AWX realm
+      template:
+        src: keycloak.awx.realm.json.j2
+        dest: "{{ keycloak_realm_template }}"
+
+    - name: Create the AWX realm
+      uri:
+        url: "https://localhost:8443/auth/admin/realms"
+        method: POST
+        body_format: json
+        body: "{{ lookup('file', keycloak_realm_template) }}"
+        validate_certs: False
+        headers:
+          Authorization: "Bearer {{ keycloak_response.json.access_token }}"
+        status_code: 201
+      register: realm_creation
+      changed_when: True

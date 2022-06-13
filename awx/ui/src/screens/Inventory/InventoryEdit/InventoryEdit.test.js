@@ -1,12 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI } from 'api';
+import { LabelsAPI, InventoriesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import InventoryEdit from './InventoryEdit';
 
@@ -27,6 +26,12 @@ const mockInventory = {
       delete: true,
       copy: true,
       adhoc: true,
+    },
+    labels: {
+      results: [
+        { name: 'Sushi', id: 1 },
+        { name: 'Major', id: 2 },
+      ],
     },
   },
   created: '2019-10-04T16:56:48.025455Z',
@@ -60,6 +65,15 @@ describe('<InventoryEdit />', () => {
   let history;
 
   beforeEach(async () => {
+    LabelsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { name: 'Sushi', id: 1 },
+          { name: 'Major', id: 2 },
+        ],
+      },
+    });
+
     InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {
         results: associatedInstanceGroups,
@@ -97,15 +111,33 @@ describe('<InventoryEdit />', () => {
       { name: 'Bizz', id: 2 },
       { name: 'Buzz', id: 3 },
     ];
+    const labels = [{ name: 'label' }, { name: 'Major', id: 2 }];
     await act(async () => {
       wrapper.find('InventoryForm').prop('onSubmit')({
         name: 'Foo',
         id: 13,
         organization: { id: 1 },
         instanceGroups,
+        labels,
       });
     });
-    await sleep(0);
+
+    expect(InventoriesAPI.update).toHaveBeenCalledWith(1, {
+      id: 13,
+      labels: [{ name: 'label' }, { name: 'Major', id: 2 }],
+      name: 'Foo',
+      organization: 1,
+    });
+
+    expect(InventoriesAPI.associateLabel).toBeCalledWith(
+      1,
+      { name: 'label' },
+      1
+    );
+    expect(InventoriesAPI.disassociateLabel).toBeCalledWith(1, {
+      name: 'Sushi',
+      id: 1,
+    });
     expect(InventoriesAPI.orderInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id,
       instanceGroups,

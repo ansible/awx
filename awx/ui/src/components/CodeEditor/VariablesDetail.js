@@ -109,6 +109,7 @@ function VariablesDetail({
       <Modal
         variant="xlarge"
         title={label}
+        ouiaId={`${dataCy}-modal`}
         isOpen={isExpanded}
         onClose={() => setIsExpanded(false)}
         actions={[
@@ -153,7 +154,7 @@ VariablesDetail.propTypes = {
   label: node.isRequired,
   rows: oneOfType([number, string]),
   dataCy: string,
-  helpText: string,
+  helpText: oneOfType([node, string]),
   name: string.isRequired,
 };
 VariablesDetail.defaultProps = {

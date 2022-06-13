@@ -1,12 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI } from 'api';
+import { LabelsAPI, InventoriesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import InventoryAdd from './InventoryAdd';
 
@@ -18,6 +17,7 @@ describe('<InventoryAdd />', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory({ initialEntries: ['/inventories'] });
+    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
     InventoriesAPI.create.mockResolvedValue({ data: { id: 13 } });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryAdd />, {
@@ -41,13 +41,19 @@ describe('<InventoryAdd />', () => {
         name: 'new Foo',
         organization: { id: 2 },
         instanceGroups,
+        labels: [{ name: 'label' }],
       });
     });
-    await sleep(1);
     expect(InventoriesAPI.create).toHaveBeenCalledWith({
       name: 'new Foo',
       organization: 2,
+      labels: [{ name: 'label' }],
     });
+    expect(InventoriesAPI.associateLabel).toBeCalledWith(
+      13,
+      { name: 'label' },
+      2
+    );
     instanceGroups.map((IG) =>
       expect(InventoriesAPI.associateInstanceGroup).toHaveBeenCalledWith(
         13,

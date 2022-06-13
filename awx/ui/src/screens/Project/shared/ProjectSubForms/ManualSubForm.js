@@ -8,6 +8,7 @@ import AnsibleSelect from 'components/AnsibleSelect';
 import FormField from 'components/FormField';
 import Popover from 'components/Popover';
 import useBrandName from 'hooks/useBrandName';
+import projectHelpStrings from '../Project.helptext';
 
 const ManualSubForm = ({
   localPath,
@@ -15,7 +16,6 @@ const ManualSubForm = ({
   project_local_paths,
 }) => {
   const brandName = useBrandName();
-
   const localPaths = [...new Set([...project_local_paths, localPath])];
   const options = [
     {
@@ -44,6 +44,7 @@ const ManualSubForm = ({
           css="grid-column: 1/-1"
           variant="warning"
           isInline
+          ouiaId="project-manual-subform-alert"
         >
           {t`
             There are no available playbook directories in ${project_base_dir}.
@@ -60,18 +61,7 @@ const ManualSubForm = ({
         name="base_dir"
         type="text"
         isReadOnly
-        tooltip={
-          <span>
-            {t`Base path used for locating playbooks. Directories
-              found inside this path will be listed in the playbook directory drop-down.
-              Together the base path and selected playbook directory provide the full
-              path used to locate playbooks.`}
-            <br />
-            <br />
-            {t`Change PROJECTS_ROOT when deploying
-              ${brandName} to change this location.`}
-          </span>
-        }
+        tooltip={projectHelpStrings.projectBasePath(brandName)}
       />
       <FormGroup
         fieldId="project-local-path"
@@ -79,13 +69,7 @@ const ManualSubForm = ({
         isRequired
         validated={!pathMeta.touched || !pathMeta.error ? 'default' : 'error'}
         label={t`Playbook Directory`}
-        labelIcon={
-          <Popover
-            content={t`Select from the list of directories found in
-          the Project Base Path. Together the base path and the playbook
-          directory provide the full path used to locate playbooks.`}
-          />
-        }
+        labelIcon={<Popover content={projectHelpStrings.projectLocalPath} />}
       >
         <AnsibleSelect
           {...pathField}

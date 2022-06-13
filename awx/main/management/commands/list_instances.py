@@ -11,13 +11,16 @@ class Ungrouped(object):
     policy_instance_percentage = None
     policy_instance_minimum = None
 
+    def __init__(self):
+        self.qs = Instance.objects.filter(rampart_groups__isnull=True)
+
     @property
     def instances(self):
-        return Instance.objects.filter(rampart_groups__isnull=True)
+        return self.qs
 
     @property
     def capacity(self):
-        return sum(x.capacity for x in self.instances)
+        return sum(x.capacity for x in self.instances.all())
 
 
 class Command(BaseCommand):
@@ -29,26 +32,29 @@ class Command(BaseCommand):
 
         groups = list(InstanceGroup.objects.all())
         ungrouped = Ungrouped()
-        if len(ungrouped.instances):
+        if len(ungrouped.instances.all()):
             groups.append(ungrouped)
 
-        for instance_group in groups:
-            fmt = '[{0.name} capacity={0.capacity}'
-            if instance_group.policy_instance_percentage:
-                fmt += ' policy={0.policy_instance_percentage}%'
-            if instance_group.policy_instance_minimum:
-                fmt += ' policy>={0.policy_instance_minimum}'
-            print((fmt + ']').format(instance_group))
-            for x in instance_group.instances.all():
+        for ig in groups:
+            policy = ''
+            if ig.policy_instance_percentage:
+                policy = f' policy={ig.policy_instance_percentage}%'
+            if ig.policy_instance_minimum:
+                policy = f' policy>={ig.policy_instance_minimum}'
+            print(f'[{ig.name} capacity={ig.capacity}{policy}]')
+
+            for x in ig.instances.all():
                 color = '\033[92m'
-                if x.capacity == 0:
+                if x.capacity == 0 and x.node_type != 'hop':
                     color = '\033[91m'
-                if x.enabled is False:
+                if not x.enabled:
                     color = '\033[90m[DISABLED] '
                 if no_color:
                     color = ''
-                fmt = '\t' + color + '{0.hostname} capacity={0.capacity} node_type={0.node_type} version={1}'
-                if x.capacity:
-                    fmt += ' heartbeat="{0.modified:%Y-%m-%d %H:%M:%S}"'
-                print((fmt + '\033[0m').format(x, x.version or '?'))
-            print('')
+
+                capacity = f' capacity={x.capacity}' if x.node_type != 'hop' else ''
+                version = f" version={x.version or '?'}" if x.node_type != 'hop' else ''
+                heartbeat = f' heartbeat="{x.modified:%Y-%m-%d %H:%M:%S}"' if x.capacity or x.node_type == 'hop' else ''
+                print(f'\t{color}{x.hostname}{capacity} node_type={x.node_type}{version}{heartbeat}\033[0m')
+
+            print()

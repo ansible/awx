@@ -16,7 +16,7 @@ from collections import OrderedDict
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 # DRF error class to distinguish license exceptions
 from rest_framework.exceptions import PermissionDenied
@@ -78,6 +78,20 @@ class AnsibleInventoryLoader(object):
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
         ee = get_default_execution_environment()
 
+        if settings.IS_K8S:
+            logger.warning('This command is not able to run on kubernetes-based deployment. This action should be done using the API.')
+            sys.exit(1)
+
+        if ee.credential:
+            process = subprocess.run(['podman', 'image', 'exists', ee.image], capture_output=True)
+            if process.returncode != 0:
+                logger.warning(
+                    f'The default execution environment (id={ee.id}, name={ee.name}, image={ee.image}) is not available on this node. '
+                    'The image needs to be available locally before using this command, due to registry authentication. '
+                    'To pull this image, either run a job on this node or manually pull the image.'
+                )
+                sys.exit(1)
+
         bargs.extend([ee.image])
 
         bargs.extend(['ansible-inventory', '-i', self.source])
@@ -95,8 +109,8 @@ class AnsibleInventoryLoader(object):
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        stdout = smart_text(stdout)
-        stderr = smart_text(stderr)
+        stdout = smart_str(stdout)
+        stderr = smart_str(stderr)
 
         if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % ('ansible-inventory', proc.returncode, stdout, stderr))
@@ -210,7 +224,7 @@ class Command(BaseCommand):
                     from_dict = instance_id
                 if instance_id:
                     break
-        return smart_text(instance_id)
+        return smart_str(instance_id)
 
     def _get_enabled(self, from_dict, default=None):
         """

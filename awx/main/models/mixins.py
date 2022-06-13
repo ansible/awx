@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.crypto import get_random_string
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.main.models.base import prevent_search
@@ -24,7 +24,7 @@ from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_lice
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
-from awx.main.fields import JSONField, AskForField
+from awx.main.fields import AskForField, JSONBlob
 from awx.main.constants import ACTIVE_STATES
 
 
@@ -103,12 +103,7 @@ class SurveyJobTemplateMixin(models.Model):
     survey_enabled = models.BooleanField(
         default=False,
     )
-    survey_spec = prevent_search(
-        JSONField(
-            blank=True,
-            default=dict,
-        )
-    )
+    survey_spec = prevent_search(JSONBlob(default=dict, blank=True))
     ask_variables_on_launch = AskForField(blank=True, default=False, allows_field='extra_vars')
 
     def survey_password_variables(self):
@@ -370,10 +365,10 @@ class SurveyJobMixin(models.Model):
         abstract = True
 
     survey_passwords = prevent_search(
-        JSONField(
-            blank=True,
+        JSONBlob(
             default=dict,
             editable=False,
+            blank=True,
         )
     )
 
@@ -412,40 +407,53 @@ class TaskManagerUnifiedJobMixin(models.Model):
     def get_jobs_fail_chain(self):
         return []
 
-    def dependent_jobs_finished(self):
-        return True
-
 
 class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
-
-    def get_jobs_fail_chain(self):
-        return [self.project_update] if self.project_update else []
-
-    def dependent_jobs_finished(self):
-        for j in self.dependent_jobs.all():
-            if j.status in ['pending', 'waiting', 'running']:
-                return False
-        return True
 
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
 
-    def get_jobs_fail_chain(self):
-        return list(self.dependent_jobs.all())
-
 
 class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
 
+    def get_jobs_fail_chain(self):
+        # project update can be a dependency of an inventory update, in which
+        # case we need to fail the job that may have spawned the inventory
+        # update.
+        # The inventory update will fail, but since it is not running it will
+        # not cascade fail to the job from the errback logic in apply_async. As
+        # such we should capture it here.
+        blocked_jobs = list(self.unifiedjob_blocked_jobs.all().prefetch_related("unifiedjob_blocked_jobs"))
+        other_tasks = []
+        for b in blocked_jobs:
+            other_tasks += list(b.unifiedjob_blocked_jobs.all())
+        return blocked_jobs + other_tasks
+
 
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
+
+    def get_jobs_fail_chain(self):
+        blocked_jobs = list(self.unifiedjob_blocked_jobs.all())
+        other_updates = []
+        if blocked_jobs:
+            # blocked_jobs[0] is just a reference to a job that depends on this
+            # inventory update.
+            # We can look at the dependencies of this blocked job to find other
+            # inventory sources that are safe to fail.
+            # Since the dependencies could also include project updates,
+            # we need to check for type.
+            for dep in blocked_jobs[0].dependent_jobs.all():
+                if type(dep) is type(self) and dep.id != self.id:
+                    other_updates.append(dep)
+        return blocked_jobs + other_updates
 
 
 class ExecutionEnvironmentMixin(models.Model):
@@ -587,7 +595,7 @@ class WebhookMixin(models.Model):
         if not self.webhook_credential:
             return
 
-        status_api = self.extra_vars_dict.get('tower_webhook_status_api')
+        status_api = self.extra_vars_dict.get('awx_webhook_status_api')
         if not status_api:
             logger.debug("Webhook event did not have a status API endpoint associated, skipping.")
             return

@@ -82,7 +82,7 @@ describe('<JobTemplateAdd />', () => {
     CredentialTypesAPI.loadAllTypes = jest.fn();
     CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
     ProjectsAPI.readPlaybooks.mockResolvedValue({
-      data: [],
+      data: ['ping-playbook.yml'],
     });
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
     ProjectsAPI.readDetail.mockReturnValue({
@@ -164,10 +164,6 @@ describe('<JobTemplateAdd />', () => {
         id: 1,
         name: 'Foo',
       });
-      wrapper.update();
-      wrapper.find('Select#template-playbook').prop('onToggle')();
-      wrapper.update();
-      wrapper.find('Select#template-playbook').prop('onSelect')(null, 'Baz');
     });
     wrapper.update();
     act(() => {
@@ -186,7 +182,7 @@ describe('<JobTemplateAdd />', () => {
       name: 'Bar',
       job_type: 'check',
       project: 2,
-      playbook: 'Baz',
+      playbook: 'ping-playbook.yml',
       inventory: 2,
       webhook_credential: undefined,
       webhook_service: '',
@@ -260,5 +256,34 @@ describe('<JobTemplateAdd />', () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
     expect(history.location.pathname).toEqual('/templates');
+  });
+
+  test('should parse and pre-fill project field from query params', async () => {
+    const history = createMemoryHistory({
+      initialEntries: [
+        '/templates/job_template/add/add?project_id=6&project_name=Demo%20Project',
+      ],
+    });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobTemplateAdd />, {
+        context: { router: { history } },
+      });
+    });
+    await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
+    expect(wrapper.find('input#project').prop('value')).toEqual('Demo Project');
+    expect(ProjectsAPI.readPlaybooks).toBeCalledWith('6');
+  });
+
+  test('should not call ProjectsAPI.readPlaybooks if there is no project', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/job_template/add'],
+    });
+    await act(async () =>
+      mountWithContexts(<JobTemplateAdd />, {
+        context: { router: history },
+      })
+    );
+    expect(ProjectsAPI.readPlaybooks).not.toBeCalled();
   });
 });

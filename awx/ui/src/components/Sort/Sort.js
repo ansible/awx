@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
@@ -92,7 +93,11 @@ function Sort({ columns, qsConfig, onSort }) {
   const sortDropdownItems = columns
     .filter(({ key }) => key !== sortKey)
     .map(({ key, name }) => (
-      <DropdownItem key={key} component="button">
+      <DropdownItem
+        key={key}
+        component="button"
+        ouiaId={`${name}-dropdown-item`}
+      >
         {name}
       </DropdownItem>
     ));
@@ -115,8 +120,13 @@ function Sort({ columns, qsConfig, onSort }) {
               onSelect={handleDropdownSelect}
               direction={up}
               isOpen={isSortDropdownOpen}
+              ouiaId="sort-dropdown"
               toggle={
-                <DropdownToggle id="awx-sort" onToggle={handleDropdownToggle}>
+                <DropdownToggle
+                  id="awx-sort"
+                  onToggle={handleDropdownToggle}
+                  ouiaId="sort-dropdown-toggle"
+                >
                   {sortedColumnName}
                 </DropdownToggle>
               }
@@ -128,6 +138,7 @@ function Sort({ columns, qsConfig, onSort }) {
             variant={ButtonVariant.control}
             aria-label={t`Sort`}
             onClick={handleSort}
+            ouiaId="sort-button"
           >
             <SortIcon />
           </Button>

@@ -28,7 +28,7 @@ options:
       type: str
     new_name:
       description:
-        - Setting this option will change the existing name (looed up via the name field.
+        - Setting this option will change the existing name (looked up via the name field.
       type: str
     copy_from:
       description:
@@ -255,6 +255,7 @@ options:
     labels:
       description:
         - The labels applied to this job template
+        - Must be created with the labels module first. This will error if the label has not been created.
       type: list
       elements: str
     state:
@@ -538,7 +539,10 @@ def main():
         association_fields['labels'] = []
         for item in labels:
             label_id = module.get_one('labels', name_or_id=item, **{'data': search_fields})
-            association_fields['labels'].append(label_id['id'])
+            if label_id is None:
+                module.fail_json(msg='Could not find label entry with name {0}'.format(item))
+            else:
+                association_fields['labels'].append(label_id['id'])
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:

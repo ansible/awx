@@ -47,6 +47,7 @@ from awx.main.models.execution_environments import ExecutionEnvironment  # noqa
 from awx.main.models.activity_stream import ActivityStream  # noqa
 from awx.main.models.ha import (  # noqa
     Instance,
+    InstanceLink,
     InstanceGroup,
     TowerScheduleState,
 )

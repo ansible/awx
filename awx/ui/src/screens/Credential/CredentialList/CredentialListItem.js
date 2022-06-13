@@ -18,7 +18,7 @@ function CredentialListItem({
   detailUrl,
   isSelected,
   onSelect,
-
+  onCopy,
   fetchCredentials,
   rowIndex,
 }) {
@@ -28,11 +28,14 @@ function CredentialListItem({
   const canEdit = credential.summary_fields.user_capabilities.edit;
 
   const copyCredential = useCallback(async () => {
-    await CredentialsAPI.copy(credential.id, {
+    const response = await CredentialsAPI.copy(credential.id, {
       name: `${credential.name} @ ${timeOfDay()}`,
     });
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchCredentials();
-  }, [credential.id, credential.name, fetchCredentials]);
+  }, [credential.id, credential.name, fetchCredentials, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);
@@ -43,7 +46,7 @@ function CredentialListItem({
   }, []);
 
   return (
-    <Tr id={`${credential.id}`}>
+    <Tr id={`${credential.id}`} ouiaId={`${credential.id}`}>
       <Td
         select={{
           rowIndex,

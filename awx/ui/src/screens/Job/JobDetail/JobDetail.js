@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import {
+  DeletedDetail,
   DetailList,
   Detail,
   UserDateDetail,
@@ -21,13 +22,13 @@ import { VariablesDetail } from 'components/CodeEditor';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
 import { LaunchButton, ReLaunchDropDown } from 'components/LaunchButton';
-import StatusIcon from 'components/StatusIcon';
+import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from 'util/jobs';
-import { toTitleCase } from 'util/strings';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
+import jobHelpText from '../Job.helptext';
 
 const StatusDetailValue = styled.div`
   align-items: center;
@@ -75,6 +76,14 @@ function JobDetail({ job, inventorySourceLabels }) {
     workflow_job: t`Workflow Job`,
   };
 
+  const scmTypes = {
+    '': t`Manual`,
+    git: t`Git`,
+    svn: t`Subversion`,
+    insights: t`Red Hat Insights`,
+    archive: t`Remote Archive`,
+  };
+
   const deleteJob = async () => {
     try {
       await getJobModel(job.type).destroy(job.id);
@@ -92,25 +101,91 @@ function JobDetail({ job, inventorySourceLabels }) {
     <Link to={`/instance_groups/container_group/${item.id}`}>{item.name}</Link>
   );
 
-  const buildProjectDetailValue = () => {
-    if (projectUpdate) {
-      return (
-        <StatusDetailValue>
-          <Link to={`/jobs/project/${projectUpdate.id}`}>
-            <StatusIcon status={project.status} />
-          </Link>
-          <Link to={`/projects/${project.id}`}>{project.name}</Link>
-        </StatusDetailValue>
+  const renderInventoryDetail = () => {
+    if (
+      job.type !== 'project_update' &&
+      job.type !== 'system_job' &&
+      job.type !== 'workflow_job'
+    ) {
+      return inventory ? (
+        <Detail
+          dataCy="job-inventory"
+          label={t`Inventory`}
+          helpText={jobHelpText.inventory}
+          value={
+            <Link
+              to={
+                inventory.kind === 'smart'
+                  ? `/inventories/smart_inventory/${inventory.id}`
+                  : `/inventories/inventory/${inventory.id}`
+              }
+            >
+              {inventory.name}
+            </Link>
+          }
+        />
+      ) : (
+        <DeletedDetail label={t`Inventory`} helpText={jobHelpText.inventory} />
       );
     }
-    return (
-      <StatusDetailValue>
-        <StatusIcon status={project.status} />
-        <Link to={`/projects/${project.id}`}>{project.name}</Link>
-      </StatusDetailValue>
-    );
+    if (job.type === 'workflow_job') {
+      return inventory ? (
+        <Detail
+          dataCy="job-inventory"
+          label={t`Inventory`}
+          helpText={jobHelpText.inventory}
+          value={
+            <Link
+              to={
+                inventory.kind === 'smart'
+                  ? `/inventories/smart_inventory/${inventory.id}`
+                  : `/inventories/inventory/${inventory.id}`
+              }
+            >
+              {inventory.name}
+            </Link>
+          }
+        />
+      ) : null;
+    }
+    return null;
   };
 
+  const renderProjectDetail = () => {
+    if (
+      job.type !== 'ad_hoc_command' &&
+      job.type !== 'inventory_update' &&
+      job.type !== 'system_job' &&
+      job.type !== 'workflow_job'
+    ) {
+      return project ? (
+        <>
+          <Detail
+            dataCy="job-project"
+            label={t`Project`}
+            helpText={jobHelpText.project}
+            value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
+          />
+          <Detail
+            dataCy="job-project-status"
+            label={t`Project Status`}
+            value={
+              projectUpdate ? (
+                <Link to={`/jobs/project/${projectUpdate.id}`}>
+                  <StatusLabel status={project.status} />
+                </Link>
+              ) : (
+                <StatusLabel status={project.status} />
+              )
+            }
+          />
+        </>
+      ) : (
+        <DeletedDetail label={t`Project`} />
+      );
+    }
+    return null;
+  };
   return (
     <CardBody>
       <DetailList>
@@ -121,10 +196,10 @@ function JobDetail({ job, inventorySourceLabels }) {
           label={t`Status`}
           value={
             <StatusDetailValue>
-              {job.status && <StatusIcon status={job.status} />}
-              {job.job_explanation
+              {job.status && <StatusLabel status={job.status} />}
+              {job.job_explanation && job.job_explanation !== job.status
                 ? job.job_explanation
-                : toTitleCase(job.status)}
+                : null}
             </StatusDetailValue>
           }
         />
@@ -178,26 +253,16 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-type"
           label={t`Job Type`}
+          helpText={jobHelpText.jobType}
           value={jobTypes[job.type]}
         />
+        <Detail
+          dataCy="source-control-type"
+          label={t`Source Control Type`}
+          value={scmTypes[job.scm_type]}
+        />
         <LaunchedByDetail dataCy="job-launched-by" job={job} />
-        {inventory && (
-          <Detail
-            dataCy="job-inventory"
-            label={t`Inventory`}
-            value={
-              <Link
-                to={
-                  inventory.kind === 'smart'
-                    ? `/inventories/smart_inventory/${inventory.id}`
-                    : `/inventories/inventory/${inventory.id}`
-                }
-              >
-                {inventory.name}
-              </Link>
-            }
-          />
-        )}
+        {renderInventoryDetail()}
         {inventory_source && (
           <>
             <Detail
@@ -229,7 +294,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             value={
               <StatusDetailValue>
                 {source_project.status && (
-                  <StatusIcon status={source_project.status} />
+                  <StatusLabel status={source_project.status} />
                 )}
                 <Link to={`/projects/${source_project.id}`}>
                   {source_project.name}
@@ -238,17 +303,12 @@ function JobDetail({ job, inventorySourceLabels }) {
             }
           />
         )}
-        {project && (
-          <Detail
-            dataCy="job-project"
-            label={t`Project`}
-            value={buildProjectDetailValue()}
-          />
-        )}
+        {renderProjectDetail()}
         {scmBranch && (
           <Detail
             dataCy="source-control-branch"
             label={t`Source Control Branch`}
+            helpText={jobHelpText.sourceControlBranch}
             value={scmBranch}
           />
         )}
@@ -260,18 +320,26 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-playbook"
           label={t`Playbook`}
+          helpText={jobHelpText.playbook}
           value={job.playbook}
         />
-        <Detail dataCy="job-limit" label={t`Limit`} value={job.limit} />
+        <Detail
+          dataCy="job-limit"
+          label={t`Limit`}
+          helpText={jobHelpText.limit}
+          value={job.limit}
+        />
         <Detail
           dataCy="job-verbosity"
           label={t`Verbosity`}
+          helpText={jobHelpText.verbosity}
           value={VERBOSITY[job.verbosity]}
         />
         {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
           <ExecutionEnvironmentDetail
             dataCy="job-execution-environment"
             executionEnvironment={executionEnvironment}
+            helpText={jobHelpText.executionEnvironment}
             verifyMissingVirtualEnv={false}
           />
         )}
@@ -280,10 +348,18 @@ function JobDetail({ job, inventorySourceLabels }) {
           label={t`Execution Node`}
           value={job.execution_node}
         />
+        {job?.controller_node ? (
+          <Detail
+            dataCy="job-controller-node"
+            label={t`Controller Node`}
+            value={job.controller_node}
+          />
+        ) : null}
         {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
             dataCy="job-instance-group"
             label={t`Instance Group`}
+            helpText={jobHelpText.instanceGroups}
             value={buildInstanceGroupLink(instanceGroup)}
           />
         )}
@@ -299,6 +375,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             <Detail
               dataCy="job-slice"
               label={t`Job Slice`}
+              helpText={jobHelpText.jobSlicing}
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
@@ -309,17 +386,29 @@ function JobDetail({ job, inventorySourceLabels }) {
             value={t`True`}
           />
         )}
-
+        {typeof job.forks === 'number' && (
+          <Detail
+            dataCy="forks"
+            label={t`Forks`}
+            value={`${job.forks}`}
+            helpText={jobHelpText.forks}
+          />
+        )}
         {credential && (
           <Detail
             dataCy="job-machine-credential"
             label={t`Machine Credential`}
             value={
-              <ChipGroup numChips={5} totalChips={1}>
+              <ChipGroup
+                numChips={5}
+                totalChips={1}
+                ouiaId="job-machine-credential-chips"
+              >
                 <CredentialChip
                   key={credential.id}
                   credential={credential}
                   isReadOnly
+                  ouiaId={`job-machine-credential-${credential.id}-chip`}
                 />
               </ChipGroup>
             }
@@ -329,11 +418,21 @@ function JobDetail({ job, inventorySourceLabels }) {
           <Detail
             dataCy="job-credentials"
             fullWidth
+            helpText={jobHelpText.credentials}
             label={t`Credentials`}
             value={
-              <ChipGroup numChips={5} totalChips={credentials.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={credentials.length}
+                ouiaId="job-credential-chips"
+              >
                 {credentials.map((c) => (
-                  <CredentialChip key={c.id} credential={c} isReadOnly />
+                  <CredentialChip
+                    key={c.id}
+                    credential={c}
+                    isReadOnly
+                    ouiaId={`job-credential-${c.id}-chip`}
+                  />
                 ))}
               </ChipGroup>
             }
@@ -344,10 +443,15 @@ function JobDetail({ job, inventorySourceLabels }) {
             dataCy="job-labels"
             fullWidth
             label={t`Labels`}
+            helpText={jobHelpText.labels}
             value={
-              <ChipGroup numChips={5} totalChips={labels.results.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={labels.results.length}
+                ouiaId="job-label-chips"
+              >
                 {labels.results.map((l) => (
-                  <Chip key={l.id} isReadOnly>
+                  <Chip key={l.id} isReadOnly ouiaId={`job-label-${l.id}-chip`}>
                     {l.name}
                   </Chip>
                 ))}
@@ -360,13 +464,19 @@ function JobDetail({ job, inventorySourceLabels }) {
             dataCy="job-tags"
             fullWidth
             label={t`Job Tags`}
+            helpText={jobHelpText.jobTags}
             value={
               <ChipGroup
                 numChips={5}
                 totalChips={job.job_tags.split(',').length}
+                ouiaId="job-tag-chips"
               >
                 {job.job_tags.split(',').map((jobTag) => (
-                  <Chip key={jobTag} isReadOnly>
+                  <Chip
+                    key={jobTag}
+                    isReadOnly
+                    ouiaId={`job-tag-${jobTag}-chip`}
+                  >
                     {jobTag}
                   </Chip>
                 ))}
@@ -379,13 +489,19 @@ function JobDetail({ job, inventorySourceLabels }) {
             dataCy="job-skip-tags"
             fullWidth
             label={t`Skip Tags`}
+            helpText={jobHelpText.skipTags}
             value={
               <ChipGroup
                 numChips={5}
                 totalChips={job.skip_tags.split(',').length}
+                ouiaId="job-skip-tag-chips"
               >
                 {job.skip_tags.split(',').map((skipTag) => (
-                  <Chip key={skipTag} isReadOnly>
+                  <Chip
+                    key={skipTag}
+                    isReadOnly
+                    ouiaId={`job-skip-tag-${skipTag}-chip`}
+                  >
                     {skipTag}
                   </Chip>
                 ))}
@@ -397,6 +513,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           dataCy="job-module-name"
           label={t`Module Name`}
           value={job.module_name}
+          helpText={jobHelpText.module(job.module_name)}
         />
         <Detail
           dataCy="job-module-arguments"
@@ -418,6 +535,8 @@ function JobDetail({ job, inventorySourceLabels }) {
             rows={4}
             label={t`Variables`}
             name="extra_vars"
+            dataCy="job-detail-extra-variables"
+            helpText={jobHelpText.variables}
           />
         )}
         {job.artifacts && (
@@ -429,6 +548,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             rows={4}
             label={t`Artifacts`}
             name="artifacts"
+            dataCy="job-detail-artifacts"
           />
         )}
       </DetailList>
@@ -452,7 +572,7 @@ function JobDetail({ job, inventorySourceLabels }) {
                 <Button
                   ouiaId="job-detail-relaunch-button"
                   type="submit"
-                  onClick={handleRelaunch}
+                  onClick={() => handleRelaunch()}
                   isDisabled={isLaunching}
                 >
                   {t`Relaunch`}

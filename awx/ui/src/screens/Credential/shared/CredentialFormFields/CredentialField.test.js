@@ -13,6 +13,12 @@ const fieldOptions = {
   secret: true,
 };
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    pathname: '/credentials/3/edit',
+  }),
+}));
 describe('<CredentialField />', () => {
   let wrapper;
   test('renders correctly without initial value', () => {
@@ -112,5 +118,34 @@ describe('<CredentialField />', () => {
     expect(wrapper.find('TextInput').props().isDisabled).toBe(true);
     expect(wrapper.find('TextInput').props().value).toBe('');
     expect(wrapper.find('TextInput').props().placeholder).toBe('ENCRYPTED');
+  });
+  test('Should check to see if the ability to edit vault ID is disabled after creation.', () => {
+    const vaultCredential = credentialTypes.find((type) => type.id === 3);
+    const vaultFieldOptions = {
+      id: 'vault_id',
+      label: 'Vault Identifier',
+      type: 'string',
+      secret: true,
+    };
+    wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          passwordPrompts: {},
+          inputs: {
+            password: 'password',
+            vault_id: 'vault_id',
+          },
+        }}
+      >
+        {() => (
+          <CredentialField
+            fieldOptions={vaultFieldOptions}
+            credentialType={vaultCredential}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('CredentialInput').props().isDisabled).toBe(true);
+    expect(wrapper.find('KeyIcon').length).toBe(1);
   });
 });

@@ -82,6 +82,45 @@ describe('JobTemplatesList', () => {
     });
   });
 
+  test('Row should display popover', async () => {
+    JobTemplatesAPI.read.mockResolvedValueOnce({
+      data: {
+        count: 1,
+        results: [
+          {
+            id: 1,
+            name: 'Test Job Template',
+            type: 'job_template',
+            url: '/api/v2/job_templates/1',
+            inventory: 1,
+            project: 2,
+          },
+        ],
+      },
+    });
+    JobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplatesList
+          nodeResource={nodeResource}
+          onUpdateNodeResource={onUpdateNodeResource}
+        />
+      );
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('CheckboxListItem[name="Test Job Template"] Popover').length
+    ).toBe(1);
+  });
+
   test('Error shown when read() request errors', async () => {
     JobTemplatesAPI.read.mockRejectedValue(new Error());
     JobTemplatesAPI.readOptions.mockResolvedValue({

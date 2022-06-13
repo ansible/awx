@@ -1,3 +1,4 @@
+from collections import defaultdict
 import itertools
 import logging
 
@@ -24,6 +25,7 @@ EXPORTABLE_RESOURCES = [
     'job_templates',
     'workflow_job_templates',
     'execution_environments',
+    'applications',
 ]
 
 
@@ -52,6 +54,7 @@ DEPENDENT_EXPORT = [
     ('InventorySource', 'schedules'),
     ('Inventory', 'groups'),
     ('Inventory', 'hosts'),
+    ('Inventory', 'labels'),
 ]
 
 
@@ -98,7 +101,13 @@ class ApiV2(base.Base):
             else:
                 if post_fields[key]['type'] == 'id' and _page.json.get(key) is not None:
                     log.warning("Related link %r missing from %s, attempting to reconstruct endpoint.", key, _page.endpoint)
-                    resource = getattr(self, key, None)
+                    res_pattern, resource = getattr(resources, key, None), None
+                    if res_pattern:
+                        try:
+                            top_level = res_pattern.split('/')[3]
+                            resource = getattr(self, top_level, None)
+                        except IndexError:
+                            pass
                     if resource is None:
                         log.error("Unable to infer endpoint for %r on %s.", key, _page.endpoint)
                         continue
@@ -183,7 +192,7 @@ class ApiV2(base.Base):
             return endpoint.get(id=int(value))
         options = self._cache.get_options(endpoint)
         identifier = next(field for field in options['search_fields'] if field in ('name', 'username', 'hostname'))
-        return endpoint.get(**{identifier: value})
+        return endpoint.get(**{identifier: value}, all_pages=True)
 
     def export_assets(self, **kwargs):
         self._cache = page.PageCache()
@@ -204,7 +213,7 @@ class ApiV2(base.Base):
 
     # Import methods
 
-    def _dependent_resources(self, data):
+    def _dependent_resources(self):
         page_resource = {getattr(self, resource)._create().__item_class__: resource for resource in self.json}
         data_pages = [getattr(self, resource)._create().__item_class__ for resource in EXPORTABLE_RESOURCES]
 
@@ -242,10 +251,15 @@ class ApiV2(base.Base):
                         # JTs have valid options for playbook names
                         _page.wait_until_completed()
                 else:
+                    # If we are an existing project and our scm_tpye is not changing don't try and import the local_path setting
+                    if asset['natural_key']['type'] == 'project' and 'local_path' in post_data and _page['scm_type'] == post_data['scm_type']:
+                        del post_data['local_path']
+
                     _page = _page.put(post_data)
                     changed = True
             except (exc.Common, AssertionError) as e:
-                log.error("Object import failed: %s.", e)
+                identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
+                log.error(f"{endpoint} \"{identifier}\": {e}.")
                 log.debug("post_data: %r", post_data)
                 continue
 
@@ -256,7 +270,12 @@ class ApiV2(base.Base):
                 if not S:
                     continue
                 if name == 'roles':
-                    self._roles.append((_page, S))
+                    indexed_roles = defaultdict(list)
+                    for role in S:
+                        if 'content_object' not in role:
+                            continue
+                        indexed_roles[role['content_object']['type']].append(role)
+                    self._roles.append((_page, indexed_roles))
                 else:
                     self._related.append((_page, name, S))
 
@@ -278,17 +297,17 @@ class ApiV2(base.Base):
             log.debug("post_data: %r", {'id': role_page['id']})
 
     def _assign_membership(self):
-        for _page, roles in self._roles:
+        for _page, indexed_roles in self._roles:
             role_endpoint = _page.json['related']['roles']
-            for role in roles:
-                if role['name'] == 'Member':
+            for content_type in ('organization', 'team'):
+                for role in indexed_roles.get(content_type, []):
                     self._assign_role(role_endpoint, role)
 
     def _assign_roles(self):
-        for _page, roles in self._roles:
+        for _page, indexed_roles in self._roles:
             role_endpoint = _page.json['related']['roles']
-            for role in roles:
-                if role['name'] != 'Member':
+            for content_type in set(indexed_roles) - {'organization', 'team'}:
+                for role in indexed_roles.get(content_type, []):
                     self._assign_role(role_endpoint, role)
 
     def _assign_related(self):
@@ -330,7 +349,7 @@ class ApiV2(base.Base):
 
         changed = False
 
-        for resource in self._dependent_resources(data):
+        for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
             # Load up existing objects, so that we can try to update or link to them
             self._cache.get_page(endpoint)

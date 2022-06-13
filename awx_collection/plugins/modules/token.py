@@ -74,7 +74,7 @@ EXAMPLES = '''
 
     - name: Delete this token
       token:
-        existing_token: "{{ token }}"
+        existing_token: "{{ controller_token }}"
         state: absent
 
     - name: Create a new token using username/password
@@ -87,12 +87,12 @@ EXAMPLES = '''
 
     - name: Use our new token to make another call
       job_list:
-        controller_oauthtoken: "{{ token }}"
+        controller_oauthtoken: "{{ controller_token }}"
 
   always:
     - name: Delete our Token with the token we created
       token:
-        existing_token: "{{ token }}"
+        existing_token: "{{ controller_token }}"
         state: absent
       when: token is defined
 

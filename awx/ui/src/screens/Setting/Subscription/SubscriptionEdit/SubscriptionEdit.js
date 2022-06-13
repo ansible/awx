@@ -199,7 +199,7 @@ function SubscriptionEdit() {
     ...(!hasValidKey
       ? [
           {
-            name: t`User and Insights analytics`,
+            name: t`User and Automation Analytics`,
             id: 'analytics-step',
             component: <AnalyticsStep />,
           },

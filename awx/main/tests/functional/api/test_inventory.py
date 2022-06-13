@@ -77,6 +77,22 @@ def test_inventory_host_name_unique(scm_inventory, post, admin_user):
 
 
 @pytest.mark.django_db
+def test_inventory_host_list_ordering(scm_inventory, get, admin_user):
+    # create 3 hosts, hit the inventory host list view 3 times and get the order visible there each time and compare
+    inv_src = scm_inventory.inventory_sources.first()
+    host1 = inv_src.hosts.create(name='1', inventory=scm_inventory)
+    host2 = inv_src.hosts.create(name='2', inventory=scm_inventory)
+    host3 = inv_src.hosts.create(name='3', inventory=scm_inventory)
+    expected_ids = [host1.id, host2.id, host3.id]
+    resp = get(
+        reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+        admin_user,
+    ).data['results']
+    host_list = [host['id'] for host in resp]
+    assert host_list == expected_ids
+
+
+@pytest.mark.django_db
 def test_inventory_group_name_unique(scm_inventory, post, admin_user):
     inv_src = scm_inventory.inventory_sources.first()
     inv_src.hosts.create(name='barfoo', inventory=scm_inventory)
@@ -92,6 +108,24 @@ def test_inventory_group_name_unique(scm_inventory, post, admin_user):
 
     assert resp.status_code == 400
     assert "A Host with that name already exists." in json.dumps(resp.data)
+
+
+@pytest.mark.django_db
+def test_inventory_group_list_ordering(scm_inventory, get, put, admin_user):
+    # create 3 groups, hit the inventory groups list view 3 times and get the order visible there each time and compare
+    inv_src = scm_inventory.inventory_sources.first()
+    group1 = inv_src.groups.create(name='1', inventory=scm_inventory)
+    group2 = inv_src.groups.create(name='2', inventory=scm_inventory)
+    group3 = inv_src.groups.create(name='3', inventory=scm_inventory)
+    expected_ids = [group1.id, group2.id, group3.id]
+    group_ids = {}
+    for x in range(3):
+        resp = get(
+            reverse('api:inventory_groups_list', kwargs={'pk': scm_inventory.id}),
+            admin_user,
+        ).data['results']
+        group_ids[x] = [group['id'] for group in resp]
+    assert group_ids[0] == group_ids[1] == group_ids[2] == expected_ids
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [(None, 403), ('admin_role', 200), ('update_role', 403), ('adhoc_role', 403), ('use_role', 403)])

@@ -25,8 +25,8 @@ from django.contrib.auth.password_validation import validate_password as django_
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import force_str
 from django.utils.text import capfirst
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -57,6 +57,7 @@ from awx.main.models import (
     Host,
     Instance,
     InstanceGroup,
+    InstanceLink,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -96,7 +97,7 @@ from awx.main.models import (
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import get_roles_on_resource, role_summary_fields_generator
-from awx.main.fields import ImplicitRoleField, JSONBField
+from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model,
     get_model_for_type,
@@ -112,6 +113,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.named_url_graph import reset_counters
+from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
 from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
@@ -356,7 +358,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         }
         choices = []
         for t in self.get_types():
-            name = _(type_name_map.get(t, force_text(get_model_for_type(t)._meta.verbose_name).title()))
+            name = _(type_name_map.get(t, force_str(get_model_for_type(t)._meta.verbose_name).title()))
             choices.append((t, name))
         return choices
 
@@ -378,19 +380,22 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
     def _get_related(self, obj):
         return {} if obj is None else self.get_related(obj)
 
-    def _generate_named_url(self, url_path, obj, node):
-        url_units = url_path.split('/')
+    def _generate_friendly_id(self, obj, node):
         reset_counters()
-        named_url = node.generate_named_url(obj)
-        url_units[4] = named_url
-        return '/'.join(url_units)
+        return node.generate_named_url(obj)
 
     def get_related(self, obj):
         res = OrderedDict()
         view = self.context.get('view', None)
         if view and (hasattr(view, 'retrieve') or view.request.method == 'POST') and type(obj) in settings.NAMED_URL_GRAPH:
-            original_url = self.get_url(obj)
-            res['named_url'] = self._generate_named_url(original_url, obj, settings.NAMED_URL_GRAPH[type(obj)])
+            original_path = self.get_url(obj)
+            path_components = original_path.lstrip('/').rstrip('/').split('/')
+
+            friendly_id = self._generate_friendly_id(obj, settings.NAMED_URL_GRAPH[type(obj)])
+            path_components[-1] = friendly_id
+
+            new_path = '/' + '/'.join(path_components) + '/'
+            res['named_url'] = new_path
         if getattr(obj, 'created_by', None):
             res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):
@@ -641,7 +646,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                         v2.extend(e)
                     else:
                         v2.append(e)
-                d[k] = list(map(force_text, v2))
+                d[k] = list(map(force_str, v2))
             raise ValidationError(d)
         return attrs
 
@@ -861,7 +866,7 @@ class UnifiedJobSerializer(BaseSerializer):
         if 'elapsed' in ret:
             if obj and obj.pk and obj.started and not obj.finished:
                 td = now() - obj.started
-                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
+                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
             ret['elapsed'] = float(ret['elapsed'])
         # Because this string is saved in the db in the source language,
         # it must be marked for translation after it is pulled from the db, not when set
@@ -1259,6 +1264,12 @@ class OAuth2ApplicationSerializer(BaseSerializer):
                 activity_stream=self.reverse('api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.organization_id:
+            res.update(
+                dict(
+                    organization=self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id}),
+                )
+            )
         return res
 
     def get_modified(self, obj):
@@ -1596,7 +1607,6 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
 class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
 
-    host_status_counts = serializers.SerializerMethodField(help_text=_('A count of hosts uniquely assigned to each status.'))
     playbook_counts = serializers.SerializerMethodField(help_text=_('A count of all plays and tasks for the job run.'))
 
     class Meta:
@@ -1610,14 +1620,6 @@ class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
         data = {'play_count': play_count, 'task_count': task_count}
 
         return data
-
-    def get_host_status_counts(self, obj):
-        try:
-            counts = obj.project_update_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
-        except ProjectUpdateEvent.DoesNotExist:
-            counts = {}
-
-        return counts
 
 
 class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSerializer):
@@ -1639,7 +1641,25 @@ class BaseSerializerWithVariables(BaseSerializer):
         return vars_validate_or_raise(value)
 
 
-class InventorySerializer(BaseSerializerWithVariables):
+class LabelsListMixin(object):
+    def _summary_field_labels(self, obj):
+        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
+        if has_model_field_prefetched(obj, 'labels'):
+            label_ct = len(obj.labels.all())
+        else:
+            if len(label_list) < 10:
+                label_ct = len(label_list)
+            else:
+                label_ct = obj.labels.count()
+        return {'count': label_ct, 'results': label_list}
+
+    def get_summary_fields(self, obj):
+        res = super(LabelsListMixin, self).get_summary_fields(obj)
+        res['labels'] = self._summary_field_labels(obj)
+        return res
+
+
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1680,6 +1700,7 @@ class InventorySerializer(BaseSerializerWithVariables):
                 object_roles=self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
                 instance_groups=self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
                 copy=self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
+                labels=self.reverse('api:inventory_label_list', kwargs={'pk': obj.pk}),
             )
         )
         if obj.organization:
@@ -1695,7 +1716,7 @@ class InventorySerializer(BaseSerializerWithVariables):
     def validate_host_filter(self, host_filter):
         if host_filter:
             try:
-                for match in JSONBField.get_lookups().keys():
+                for match in models.JSONField.get_lookups().keys():
                     if match == 'exact':
                         # __exact is allowed
                         continue
@@ -1824,11 +1845,11 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_text(port))
+                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_str(port))
         return name, port
 
     def validate_name(self, value):
-        name = force_text(value or '')
+        name = force_str(value or '')
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
         return value
@@ -1842,13 +1863,13 @@ class HostSerializer(BaseSerializerWithVariables):
         return vars_validate_or_raise(value)
 
     def validate(self, attrs):
-        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         host, port = self._get_host_port_from_name(name)
 
         if port:
             attrs['name'] = host
-            variables = force_text(attrs.get('variables', self.instance and self.instance.variables or ''))
+            variables = force_str(attrs.get('variables', self.instance and self.instance.variables or ''))
             vars_dict = parse_yaml_or_json(variables)
             vars_dict['ansible_ssh_port'] = port
             attrs['variables'] = json.dumps(vars_dict)
@@ -1921,7 +1942,7 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
-        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Host with that name already exists.'))
@@ -2215,7 +2236,6 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             'source_project_update',
             'custom_virtualenv',
             'instance_group',
-            '-controller_node',
         )
 
     def get_related(self, obj):
@@ -2290,7 +2310,6 @@ class InventoryUpdateDetailSerializer(InventoryUpdateSerializer):
 class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSerializer):
     class Meta:
         model = InventoryUpdate
-        fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
 
 class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
@@ -2643,6 +2662,13 @@ class CredentialSerializer(BaseSerializer):
 
         return credential_type
 
+    def validate_inputs(self, inputs):
+        if self.instance and self.instance.credential_type.kind == "vault":
+            if 'vault_id' in inputs and inputs['vault_id'] != self.instance.inputs['vault_id']:
+                raise ValidationError(_('Vault IDs cannot be changed once they have been created.'))
+
+        return inputs
+
 
 class CredentialSerializerCreate(CredentialSerializer):
 
@@ -2749,24 +2775,6 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
         fields = ('*', '-user', '-team')
 
 
-class LabelsListMixin(object):
-    def _summary_field_labels(self, obj):
-        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
-        if has_model_field_prefetched(obj, 'labels'):
-            label_ct = len(obj.labels.all())
-        else:
-            if len(label_list) < 10:
-                label_ct = len(label_list)
-            else:
-                label_ct = obj.labels.count()
-        return {'count': label_ct, 'results': label_list}
-
-    def get_summary_fields(self, obj):
-        res = super(LabelsListMixin, self).get_summary_fields(obj)
-        res['labels'] = self._summary_field_labels(obj)
-        return res
-
-
 class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
     class Meta:
         fields = (
@@ -2833,8 +2841,8 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
             playbook_not_found = bool(
-                (project and project.scm_type and (not project.allow_override) and playbook and force_text(playbook) not in project.playbook_files)
-                or (project and not project.scm_type and playbook and force_text(playbook) not in project.playbooks)  # manual
+                (project and project.scm_type and (not project.allow_override) and playbook and force_str(playbook) not in project.playbook_files)
+                or (project and not project.scm_type and playbook and force_str(playbook) not in project.playbooks)  # manual
             )
             if playbook_not_found:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
@@ -3095,7 +3103,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
 class JobDetailSerializer(JobSerializer):
 
-    host_status_counts = serializers.SerializerMethodField(help_text=_('A count of hosts uniquely assigned to each status.'))
     playbook_counts = serializers.SerializerMethodField(help_text=_('A count of all plays and tasks for the job run.'))
     custom_virtualenv = serializers.ReadOnlyField()
 
@@ -3110,14 +3117,6 @@ class JobDetailSerializer(JobSerializer):
         data = {'play_count': play_count, 'task_count': task_count}
 
         return data
-
-    def get_host_status_counts(self, obj):
-        try:
-            counts = obj.get_event_queryset().only('event_data').get(event='playbook_on_stats').get_host_status_counts()
-        except JobEvent.DoesNotExist:
-            counts = {}
-
-        return counts
 
 
 class JobCancelSerializer(BaseSerializer):
@@ -3307,20 +3306,9 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
 
 class AdHocCommandDetailSerializer(AdHocCommandSerializer):
-
-    host_status_counts = serializers.SerializerMethodField(help_text=_('A count of hosts uniquely assigned to each status.'))
-
     class Meta:
         model = AdHocCommand
         fields = ('*', 'host_status_counts')
-
-    def get_host_status_counts(self, obj):
-        try:
-            counts = obj.ad_hoc_command_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
-        except AdHocCommandEvent.DoesNotExist:
-            counts = {}
-
-        return counts
 
 
 class AdHocCommandCancelSerializer(AdHocCommandSerializer):
@@ -3623,7 +3611,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
-    diff_mode = serializers.NullBooleanField(required=False, default=None)
+    diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
     exclude_errors = ()
 
@@ -4490,7 +4478,10 @@ class NotificationTemplateSerializer(BaseSerializer):
                 body = messages[event].get('body', {})
                 if body:
                     try:
-                        potential_body = json.loads(body)
+                        rendered_body = (
+                            sandbox.ImmutableSandboxedEnvironment(undefined=DescriptiveUndefined).from_string(body).render(JobNotificationMixin.context_stub())
+                        )
+                        potential_body = json.loads(rendered_body)
                         if not isinstance(potential_body, dict):
                             error_list.append(
                                 _("Webhook body for '{}' should be a json dictionary. Found type '{}'.".format(event, type(potential_body).__name__))
@@ -4633,61 +4624,60 @@ class SchedulePreviewSerializer(BaseSerializer):
 
     # We reject rrules if:
     # - DTSTART is not include
-    # - INTERVAL is not included
-    # - SECONDLY is used
-    # - TZID is used
-    # - BYDAY prefixed with a number (MO is good but not 20MO)
-    # - BYYEARDAY
-    # - BYWEEKNO
-    # - Multiple DTSTART or RRULE elements
-    # - Can't contain both COUNT and UNTIL
-    # - COUNT > 999
+    # - Multiple DTSTART
+    # - At least one of RRULE is not included
+    # - EXDATE or RDATE is included
+    # For any rule in the ruleset:
+    #   - INTERVAL is not included
+    #   - SECONDLY is used
+    #   - BYDAY prefixed with a number (MO is good but not 20MO)
+    #   - Can't contain both COUNT and UNTIL
+    #   - COUNT > 999
     def validate_rrule(self, value):
         rrule_value = value
-        multi_by_month_day = r".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
-        multi_by_month = r".*?BYMONTH[\:\=][0-9]+,[0-9]+"
         by_day_with_numeric_prefix = r".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
-        match_count = re.match(r".*?(COUNT\=[0-9]+)", rrule_value)
         match_multiple_dtstart = re.findall(r".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)
         match_native_dtstart = re.findall(r".*?(DTSTART:[0-9]+T[0-9]+) ", rrule_value)
-        match_multiple_rrule = re.findall(r".*?(RRULE\:)", rrule_value)
+        match_multiple_rrule = re.findall(r".*?(RULE\:[^\s]*)", rrule_value)
+        errors = []
         if not len(match_multiple_dtstart):
-            raise serializers.ValidationError(_('Valid DTSTART required in rrule. Value should start with: DTSTART:YYYYMMDDTHHMMSSZ'))
+            errors.append(_('Valid DTSTART required in rrule. Value should start with: DTSTART:YYYYMMDDTHHMMSSZ'))
         if len(match_native_dtstart):
-            raise serializers.ValidationError(_('DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ.'))
+            errors.append(_('DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ.'))
         if len(match_multiple_dtstart) > 1:
-            raise serializers.ValidationError(_('Multiple DTSTART is not supported.'))
-        if not len(match_multiple_rrule):
-            raise serializers.ValidationError(_('RRULE required in rrule.'))
-        if len(match_multiple_rrule) > 1:
-            raise serializers.ValidationError(_('Multiple RRULE is not supported.'))
-        if 'interval' not in rrule_value.lower():
-            raise serializers.ValidationError(_('INTERVAL required in rrule.'))
-        if 'secondly' in rrule_value.lower():
-            raise serializers.ValidationError(_('SECONDLY is not supported.'))
-        if re.match(multi_by_month_day, rrule_value):
-            raise serializers.ValidationError(_('Multiple BYMONTHDAYs not supported.'))
-        if re.match(multi_by_month, rrule_value):
-            raise serializers.ValidationError(_('Multiple BYMONTHs not supported.'))
-        if re.match(by_day_with_numeric_prefix, rrule_value):
-            raise serializers.ValidationError(_("BYDAY with numeric prefix not supported."))
-        if 'byyearday' in rrule_value.lower():
-            raise serializers.ValidationError(_("BYYEARDAY not supported."))
-        if 'byweekno' in rrule_value.lower():
-            raise serializers.ValidationError(_("BYWEEKNO not supported."))
-        if 'COUNT' in rrule_value and 'UNTIL' in rrule_value:
-            raise serializers.ValidationError(_("RRULE may not contain both COUNT and UNTIL"))
-        if match_count:
-            count_val = match_count.groups()[0].strip().split("=")
-            if int(count_val[1]) > 999:
-                raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
+            errors.append(_('Multiple DTSTART is not supported.'))
+        if "rrule:" not in rrule_value.lower():
+            errors.append(_('One or more rule required in rrule.'))
+        if "exdate:" in rrule_value.lower():
+            raise serializers.ValidationError(_('EXDATE not allowed in rrule.'))
+        if "rdate:" in rrule_value.lower():
+            raise serializers.ValidationError(_('RDATE not allowed in rrule.'))
+        for a_rule in match_multiple_rrule:
+            if 'interval' not in a_rule.lower():
+                errors.append("{0}: {1}".format(_('INTERVAL required in rrule'), a_rule))
+            elif 'secondly' in a_rule.lower():
+                errors.append("{0}: {1}".format(_('SECONDLY is not supported'), a_rule))
+            if re.match(by_day_with_numeric_prefix, a_rule):
+                errors.append("{0}: {1}".format(_("BYDAY with numeric prefix not supported"), a_rule))
+            if 'COUNT' in a_rule and 'UNTIL' in a_rule:
+                errors.append("{0}: {1}".format(_("RRULE may not contain both COUNT and UNTIL"), a_rule))
+            match_count = re.match(r".*?(COUNT\=[0-9]+)", a_rule)
+            if match_count:
+                count_val = match_count.groups()[0].strip().split("=")
+                if int(count_val[1]) > 999:
+                    errors.append("{0}: {1}".format(_("COUNT > 999 is unsupported"), a_rule))
+
         try:
             Schedule.rrulestr(rrule_value)
         except Exception as e:
             import traceback
 
             logger.error(traceback.format_exc())
-            raise serializers.ValidationError(_("rrule parsing failed validation: {}").format(e))
+            errors.append(_("rrule parsing failed validation: {}").format(e))
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
         return value
 
 
@@ -4767,6 +4757,28 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return super(ScheduleSerializer, self).validate(attrs)
 
 
+class InstanceLinkSerializer(BaseSerializer):
+    class Meta:
+        model = InstanceLink
+        fields = ('source', 'target')
+
+    source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+    target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+
+
+class InstanceNodeSerializer(BaseSerializer):
+    class Meta:
+        model = Instance
+        fields = ('id', 'hostname', 'node_type', 'node_state')
+
+    node_state = serializers.SerializerMethodField()
+
+    def get_node_state(self, obj):
+        if not obj.enabled:
+            return "disabled"
+        return "error" if obj.errors else "healthy"
+
+
 class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
@@ -4810,7 +4822,8 @@ class InstanceSerializer(BaseSerializer):
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
-            res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
+            if obj.node_type != 'hop':
+                res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
     def get_consumed_capacity(self, obj):
@@ -4821,6 +4834,11 @@ class InstanceSerializer(BaseSerializer):
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
+
+    def validate(self, attrs):
+        if self.instance.node_type == 'hop':
+            raise serializers.ValidationError(_('Hop node instances may not be changed.'))
+        return attrs
 
 
 class InstanceHealthCheckSerializer(BaseSerializer):
@@ -4834,7 +4852,6 @@ class InstanceGroupSerializer(BaseSerializer):
 
     show_capabilities = ['edit', 'delete']
 
-    committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.IntegerField(
@@ -4883,7 +4900,6 @@ class InstanceGroupSerializer(BaseSerializer):
             "created",
             "modified",
             "capacity",
-            "committed_capacity",
             "consumed_capacity",
             "percent_capacity_remaining",
             "jobs_running",
@@ -4908,6 +4924,9 @@ class InstanceGroupSerializer(BaseSerializer):
         return res
 
     def validate_policy_instance_list(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if self.instance.policy_instance_list != value:
+                raise serializers.ValidationError(_('%s instance group policy_instance_list may not be changed.' % self.instance.name))
         for instance_name in value:
             if value.count(instance_name) > 1:
                 raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
@@ -4918,6 +4937,11 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_policy_instance_percentage(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if value != self.instance.policy_instance_percentage:
+                raise serializers.ValidationError(
+                    _('%s instance group policy_instance_percentage may not be changed from the initial value set by the installer.' % self.instance.name)
+                )
         if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
@@ -4936,6 +4960,13 @@ class InstanceGroupSerializer(BaseSerializer):
 
         return value
 
+    def validate_is_container_group(self, value):
+        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            if value != self.instance.is_container_group:
+                raise serializers.ValidationError(_('%s instance group is_container_group may not be changed.' % self.instance.name))
+
+        return value
+
     def validate_credential(self, value):
         if value and not value.kubernetes:
             raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
@@ -4949,30 +4980,29 @@ class InstanceGroupSerializer(BaseSerializer):
 
         return attrs
 
-    def get_capacity_dict(self):
+    def get_ig_mgr(self):
         # Store capacity values (globally computed) in the context
-        if 'capacity_map' not in self.context:
-            ig_qs = None
+        if 'task_manager_igs' not in self.context:
+            instance_groups_queryset = None
             jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
             if self.parent:  # Is ListView:
-                ig_qs = self.parent.instance
-            self.context['capacity_map'] = InstanceGroup.objects.capacity_values(qs=ig_qs, tasks=jobs_qs, breakdown=True)
-        return self.context['capacity_map']
+                instance_groups_queryset = self.parent.instance
+
+            instances = TaskManagerInstances(jobs_qs)
+            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, instance_groups_queryset=instance_groups_queryset)
+
+            self.context['task_manager_igs'] = instance_groups
+        return self.context['task_manager_igs']
 
     def get_consumed_capacity(self, obj):
-        return self.get_capacity_dict()[obj.name]['running_capacity']
-
-    def get_committed_capacity(self, obj):
-        return self.get_capacity_dict()[obj.name]['committed_capacity']
+        ig_mgr = self.get_ig_mgr()
+        return ig_mgr.get_consumed_capacity(obj.name)
 
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
             return 0.0
-        consumed = self.get_consumed_capacity(obj)
-        if consumed >= obj.capacity:
-            return 0.0
-        else:
-            return float("{0:.2f}".format(((float(obj.capacity) - float(consumed)) / (float(obj.capacity))) * 100))
+        ig_mgr = self.get_ig_mgr()
+        return float("{0:.2f}".format((float(ig_mgr.get_remaining_capacity(obj.name)) / (float(obj.capacity))) * 100))
 
     def get_instances(self, obj):
         return obj.instances.count()
@@ -5050,7 +5080,7 @@ class ActivityStreamSerializer(BaseSerializer):
         try:
             return json.loads(obj.changes)
         except Exception:
-            logger.warn("Error deserializing activity stream json changes")
+            logger.warning("Error deserializing activity stream json changes")
         return {}
 
     def get_object_association(self, obj):

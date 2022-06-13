@@ -26,6 +26,8 @@
     mode: '0600'
   when: not lookup('vars', item.item, default='') and not item.stat.exists
   loop: "{{ secrets.results }}"
+  loop_control:
+    label: '{{ item.item }}'
 
 - name: Include generated secrets unless they are explicitly passed in
   include_vars: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
@@ -88,6 +90,10 @@
   command: openssl rsa -in {{ work_sign_private_keyfile }} -out {{ work_sign_public_keyfile }} -outform PEM -pubout
   args:
     creates: "{{ work_sign_public_keyfile }}"
+
+- name: Include LDAP tasks if enabled
+  include_tasks: ldap.yml
+  when: enable_ldap | bool
 
 - name: Render Docker-Compose
   template:

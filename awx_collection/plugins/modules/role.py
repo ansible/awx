@@ -34,7 +34,7 @@ options:
         - The role type to grant/revoke.
       required: True
       choices: ["admin", "read", "member", "execute", "adhoc", "update", "use", "approval", "auditor", "project_admin", "inventory_admin", "credential_admin",
-                "workflow_admin", "notification_admin", "job_template_admin"]
+                "workflow_admin", "notification_admin", "job_template_admin", "execution_environment_admin"]
       type: str
     target_team:
       description:
@@ -141,7 +141,8 @@ EXAMPLES = '''
   role:
     user: joe
     role: execute
-    workflow: test-role-workflow
+    workflows:
+      - test-role-workflow
     job_templates:
       - jt1
       - jt2
@@ -173,6 +174,7 @@ def main():
                 "workflow_admin",
                 "notification_admin",
                 "job_template_admin",
+                "execution_environment_admin",
             ],
             required=True,
         ),

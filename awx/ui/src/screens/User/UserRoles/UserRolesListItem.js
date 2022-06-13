@@ -8,7 +8,7 @@ function UserRolesListItem({ role, detailUrl, onSelect }) {
   const labelId = `userRole-${role.id}`;
 
   return (
-    <Tr id={`user-role-row-${role.id}`}>
+    <Tr id={`user-role-row-${role.id}`} ouiaId={`user-role-row-${role.id}`}>
       <Td id={labelId} dataLabel={t`Name`}>
         {role.summary_fields.resource_name ? (
           <Link to={`${detailUrl}`} id={labelId}>

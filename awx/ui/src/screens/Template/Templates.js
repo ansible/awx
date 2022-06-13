@@ -6,6 +6,7 @@ import { PageSection } from '@patternfly/react-core';
 
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import TemplateList from 'components/TemplateList';
+import PersistentFilters from 'components/PersistentFilters';
 import Template from './Template';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
 import JobTemplateAdd from './JobTemplateAdd';
@@ -78,7 +79,9 @@ function Templates() {
         </Route>
         <Route path="/templates">
           <PageSection>
-            <TemplateList />
+            <PersistentFilters pageKey="templates">
+              <TemplateList />
+            </PersistentFilters>
           </PageSection>
         </Route>
       </Switch>

@@ -1,22 +1,28 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { Form } from '@patternfly/react-core';
+import { Form, FormGroup } from '@patternfly/react-core';
 import { VariablesField } from 'components/CodeEditor';
+import Popover from 'components/Popover';
 import FormField, { FormSubmitError } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required } from 'util/validators';
+import LabelSelect from 'components/LabelSelect';
 import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import ContentError from 'components/ContentError';
 import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import helpText from './Inventory.helptext';
 
 function InventoryFormFields({ inventory }) {
+  const [contentError, setContentError] = useState(false);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] =
     useField('organization');
   const [instanceGroupsField, , instanceGroupsHelpers] =
     useField('instanceGroups');
+  const [labelsField, , labelsHelpers] = useField('labels');
   const handleOrganizationUpdate = useCallback(
     (value) => {
       setFieldValue('organization', value);
@@ -24,6 +30,10 @@ function InventoryFormFields({ inventory }) {
     },
     [setFieldValue, setFieldTouched]
   );
+
+  if (contentError) {
+    return <ContentError error={contentError} />;
+  }
 
   return (
     <>
@@ -61,8 +71,20 @@ function InventoryFormFields({ inventory }) {
         fieldName="instanceGroups"
       />
       <FormFullWidthLayout>
+        <FormGroup
+          label={t`Labels`}
+          labelIcon={<Popover content={helpText.labels} />}
+          fieldId="inventory-labels"
+        >
+          <LabelSelect
+            value={labelsField.value}
+            onChange={(labels) => labelsHelpers.setValue(labels)}
+            onError={setContentError}
+            createText={t`Create`}
+          />
+        </FormGroup>
         <VariablesField
-          tooltip={t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`}
+          tooltip={helpText.variables()}
           id="inventory-variables"
           name="variables"
           label={t`Variables`}
@@ -88,8 +110,8 @@ function InventoryForm({
       (inventory.summary_fields && inventory.summary_fields.organization) ||
       null,
     instanceGroups: instanceGroups || [],
+    labels: inventory?.summary_fields?.labels?.results || [],
   };
-
   return (
     <Formik
       initialValues={initialValues}

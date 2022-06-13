@@ -17,6 +17,7 @@ const hostEvent = {
       msg: 'This is a debug message: 1',
       stdout:
         '              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023',
+      stderr: 'problems',
       cmd: ['free', '-m'],
       stderr_lines: [],
       stdout_lines: [
@@ -42,6 +43,13 @@ const hostEvent = {
   task: 'command',
   type: 'job_event',
   url: '/api/v2/job_events/123/',
+  summary_fields: {
+    host: {
+      id: 1,
+      name: 'foo',
+      description: 'Bar',
+    },
+  },
 };
 
 /* eslint-disable no-useless-escape */
@@ -51,6 +59,7 @@ const jsonValue = `{
   \"item\": \"1\",
   \"msg\": \"This is a debug message: 1\",
   \"stdout\": \"              total        used        free      shared  buff/cache   available\\nMem:           7973        3005         960          30        4007        4582\\nSwap:          1023           0        1023\",
+  \"stderr\": \"problems\",
   \"cmd\": [
     \"free\",
     \"-m\"
@@ -62,18 +71,6 @@ const jsonValue = `{
     \"Swap:          1023           0        1023\"
   ]
 }`;
-
-// let detailsSection;
-// let jsonSection;
-// let standardOutSection;
-// let standardErrorSection;
-//
-// const findSections = wrapper => {
-//   detailsSection = wrapper.find('section').at(0);
-//   jsonSection = wrapper.find('section').at(1);
-//   standardOutSection = wrapper.find('section').at(2);
-//   standardErrorSection = wrapper.find('section').at(3);
-// };
 
 describe('HostEventModal', () => {
   test('initially renders successfully', () => {
@@ -96,7 +93,7 @@ describe('HostEventModal', () => {
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
     expect(wrapper.find('Tabs').prop('activeKey')).toEqual(0);
-    expect(wrapper.find('Detail')).toHaveLength(5);
+    expect(wrapper.find('Detail')).toHaveLength(6);
 
     function assertDetail(index, label, value) {
       const detail = wrapper.find('Detail').at(index);
@@ -105,14 +102,15 @@ describe('HostEventModal', () => {
     }
 
     const detail = wrapper.find('Detail').first();
-    expect(detail.prop('value').props.children).toEqual([null, 'foo']);
-    assertDetail(1, 'Play', 'all');
-    assertDetail(2, 'Task', 'command');
-    assertDetail(3, 'Module', 'command');
-    assertDetail(4, 'Command', hostEvent.event_data.res.cmd);
+    expect(detail.prop('value')).toEqual('foo');
+    assertDetail(1, 'Description', 'Bar');
+    assertDetail(2, 'Play', 'all');
+    assertDetail(3, 'Task', 'command');
+    assertDetail(4, 'Module', 'command');
+    assertDetail(5, 'Command', hostEvent.event_data.res.cmd);
   });
 
-  test('should display successful host status icon', () => {
+  test('should display successful host status label', () => {
     const successfulHostEvent = { ...hostEvent, changed: false };
     const wrapper = mountWithContexts(
       <HostEventModal
@@ -121,25 +119,21 @@ describe('HostEventModal', () => {
         isOpen
       />
     );
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('ok');
-    expect(icon.find('StatusIcon SuccessfulTop').length).toBe(1);
-    expect(icon.find('StatusIcon SuccessfulBottom').length).toBe(1);
   });
 
-  test('should display skipped host status icon', () => {
+  test('should display skipped host status label', () => {
     const skippedHostEvent = { ...hostEvent, event: 'runner_on_skipped' };
     const wrapper = mountWithContexts(
       <HostEventModal hostEvent={skippedHostEvent} onClose={() => {}} isOpen />
     );
 
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('skipped');
-    expect(icon.find('StatusIcon SkippedTop').length).toBe(1);
-    expect(icon.find('StatusIcon SkippedBottom').length).toBe(1);
   });
 
-  test('should display unreachable host status icon', () => {
+  test('should display unreachable host status label', () => {
     const unreachableHostEvent = {
       ...hostEvent,
       event: 'runner_on_unreachable',
@@ -153,13 +147,11 @@ describe('HostEventModal', () => {
       />
     );
 
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('unreachable');
-    expect(icon.find('StatusIcon UnreachableTop').length).toBe(1);
-    expect(icon.find('StatusIcon UnreachableBottom').length).toBe(1);
   });
 
-  test('should display failed host status icon', () => {
+  test('should display failed host status label', () => {
     const unreachableHostEvent = {
       ...hostEvent,
       changed: false,
@@ -174,10 +166,8 @@ describe('HostEventModal', () => {
       />
     );
 
-    const icon = wrapper.find('StatusIcon');
+    const icon = wrapper.find('StatusLabel');
     expect(icon.prop('status')).toBe('failed');
-    expect(icon.find('StatusIcon FailedTop').length).toBe(1);
-    expect(icon.find('StatusIcon FailedBottom').length).toBe(1);
   });
 
   test('should display JSON tab content on tab click', () => {
@@ -189,7 +179,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 1);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=1] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(jsonValue);
@@ -204,7 +194,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(hostEvent.event_data.res.stdout);
@@ -215,7 +205,7 @@ describe('HostEventModal', () => {
       ...hostEvent,
       event_data: {
         res: {
-          stderr: '',
+          stderr: 'error content',
         },
       },
     };
@@ -227,10 +217,10 @@ describe('HostEventModal', () => {
     handleTabClick(null, 3);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
-    expect(codeEditor.prop('value')).toEqual(' ');
+    expect(codeEditor.prop('value')).toEqual('error content');
   });
 
   test('should pass onClose to Modal', () => {
@@ -246,7 +236,7 @@ describe('HostEventModal', () => {
     const debugTaskAction = {
       ...hostEvent,
       event_data: {
-        taskAction: 'debug',
+        task_action: 'debug',
         res: {
           result: {
             stdout: 'foo bar',
@@ -262,7 +252,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('foo bar');
@@ -272,7 +262,7 @@ describe('HostEventModal', () => {
     const yumTaskAction = {
       ...hostEvent,
       event_data: {
-        taskAction: 'yum',
+        task_action: 'yum',
         res: {
           results: ['baz', 'bar'],
         },
@@ -286,9 +276,9 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
-    expect(codeEditor.prop('value')).toEqual('baz');
+    expect(codeEditor.prop('value')).toEqual('baz\nbar');
   });
 });

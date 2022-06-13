@@ -59,6 +59,7 @@ function AdHocCommands({
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
   const {
     isLoading: isLaunchLoading,
     error: launchError,
@@ -79,11 +80,19 @@ function AdHocCommands({
   );
 
   const handleSubmit = async (values) => {
-    const { credential, execution_environment, ...remainingValues } = values;
-    const newCredential = credential[0].id;
+    const {
+      credentials,
+      credential_passwords: { become_password, ssh_password, ssh_key_unlock },
+      execution_environment,
+      ...remainingValues
+    } = values;
+    const newCredential = credentials[0].id;
 
     const manipulatedValues = {
       credential: newCredential,
+      become_password,
+      ssh_password,
+      ssh_key_unlock,
       execution_environment: execution_environment[0]?.id,
       ...remainingValues,
     };
@@ -128,6 +137,7 @@ function AdHocCommands({
             component="button"
             aria-label={t`Run Command`}
             onClick={() => setIsWizardOpen(true)}
+            ouiaId="run-command-dropdown-item"
           >
             {t`Run Command`}
           </DropdownItem>
@@ -163,6 +173,8 @@ function AdHocCommands({
 AdHocCommands.propTypes = {
   adHocItems: PropTypes.arrayOf(PropTypes.object).isRequired,
   hasListItems: PropTypes.bool.isRequired,
+  onLaunchLoading: PropTypes.func.isRequired,
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
 };
 
 export default AdHocCommands;

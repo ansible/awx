@@ -10,7 +10,6 @@ import {
   WorkflowJobTemplatesAPI,
 } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../testUtils/testUtils';
 
 import LaunchButton from './LaunchButton';
 
@@ -74,7 +73,6 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
-    await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
@@ -111,7 +109,6 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
-    await sleep(0);
     expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
@@ -128,7 +125,7 @@ describe('LaunchButton', () => {
     WorkflowJobTemplatesAPI.launch.mockImplementation(async () => {
       // return asynchronously so isLaunching isn't set back to false in the
       // same tick
-      await sleep(10);
+      await new Promise((resolve) => setTimeout(resolve, 10));
       return {
         data: {
           id: 9000,
@@ -190,7 +187,6 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     expect(JobsAPI.readRelaunch).toHaveBeenCalledWith(1);
-    await sleep(0);
     expect(JobsAPI.relaunch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
@@ -227,7 +223,6 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     expect(WorkflowJobsAPI.readRelaunch).toHaveBeenCalledWith(1);
-    await sleep(0);
     expect(WorkflowJobsAPI.relaunch).toHaveBeenCalledWith(1);
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
@@ -265,7 +260,6 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     expect(ProjectsAPI.readLaunchUpdate).toHaveBeenCalledWith(5);
-    await sleep(0);
     expect(ProjectsAPI.launchUpdate).toHaveBeenCalledWith(5);
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
@@ -303,7 +297,6 @@ describe('LaunchButton', () => {
     const button = wrapper.find('button');
     await act(() => button.prop('onClick')());
     expect(InventorySourcesAPI.readLaunchUpdate).toHaveBeenCalledWith(5);
-    await sleep(0);
     expect(InventorySourcesAPI.launchUpdate).toHaveBeenCalledWith(5);
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
@@ -326,11 +319,9 @@ describe('LaunchButton', () => {
     );
     expect(wrapper.find('Modal').length).toBe(0);
     await act(() => wrapper.find('button').prop('onClick')());
-    await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(1);
     wrapper.find('ModalBoxCloseButton').simulate('click');
-    await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(0);
   });

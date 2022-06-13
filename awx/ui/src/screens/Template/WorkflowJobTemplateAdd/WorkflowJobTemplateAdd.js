@@ -23,25 +23,27 @@ function WorkflowJobTemplateAdd() {
       organization,
       webhook_credential,
       webhook_key,
+      limit,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id;
     templatePayload.organization = organization?.id;
     templatePayload.webhook_credential = webhook_credential?.id;
+    templatePayload.limit = limit === '' ? null : limit;
     const organizationId =
       organization?.id || inventory?.summary_fields?.organization.id;
     try {
       const {
         data: { id },
       } = await WorkflowJobTemplatesAPI.create(templatePayload);
-      await Promise.all(await submitLabels(id, labels, organizationId));
+      await Promise.all(await submitLabels(id, organizationId, labels));
       history.push(`/templates/workflow_job_template/${id}/visualizer`);
     } catch (err) {
       setFormSubmitError(err);
     }
   };
 
-  const submitLabels = async (templateId, labels = [], organizationId) => {
+  const submitLabels = async (templateId, organizationId, labels = []) => {
     if (!organizationId) {
       // eslint-disable-next-line no-useless-catch
       try {

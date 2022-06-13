@@ -35,9 +35,9 @@ export default function useCredentialsStep(
     validate: () => {
       helpers.setError(
         credentialsValidator(
-          resourceDefaultCredentials,
           allowCredentialsWithPasswords,
-          field.value
+          field.value,
+          resourceDefaultCredentials
         )
       );
     },

@@ -26,7 +26,11 @@ import JobListItem from './JobListItem';
 import JobListCancelButton from './JobListCancelButton';
 import useWsJobs from './useWsJobs';
 
-function JobList({ defaultParams, showTypeColumn = false }) {
+function JobList({
+  defaultParams,
+  showTypeColumn = false,
+  additionalRelatedSearchableKeys = [],
+}) {
   const qsConfig = getQSConfig(
     'job',
     {
@@ -99,13 +103,17 @@ function JobList({ defaultParams, showTypeColumn = false }) {
   }, [fetchJobs]);
 
   const fetchJobsById = useCallback(
-    async (ids, qs = {}) => {
-      const params = parseQueryString(qs, location.search);
+    async (ids) => {
+      const params = parseQueryString(qsConfig, location.search);
       params.id__in = ids.join(',');
-      const { data } = await UnifiedJobsAPI.read(params);
-      return data.results;
+      try {
+        const { data } = await UnifiedJobsAPI.read(params);
+        return data.results;
+      } catch (e) {
+        return [];
+      }
     },
-    [location.search]
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const jobs = useWsJobs(results, fetchJobsById, qsConfig);
@@ -214,7 +222,7 @@ function JobList({ defaultParams, showTypeColumn = false }) {
             },
             {
               name: t`Status`,
-              key: 'status',
+              key: 'or__status',
               options: [
                 [`new`, t`New`],
                 [`pending`, t`Pending`],
@@ -243,7 +251,10 @@ function JobList({ defaultParams, showTypeColumn = false }) {
           }
           clearSelected={clearSelected}
           toolbarSearchableKeys={searchableKeys}
-          toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          toolbarRelatedSearchableKeys={[
+            ...relatedSearchableKeys,
+            ...additionalRelatedSearchableKeys,
+          ]}
           renderToolbar={(props) => (
             <DatalistToolbar
               {...props}

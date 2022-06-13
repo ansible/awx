@@ -3,7 +3,6 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { JobsAPI, ProjectUpdatesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 import JobDetail from './JobDetail';
 import mockJobData from '../shared/data.job.json';
 
@@ -47,7 +46,12 @@ describe('<JobDetail />', () => {
 
     // StatusIcon adds visibly hidden accessibility text " successful "
     assertDetail('Job ID', '2');
-    assertDetail('Status', ' successful Successful');
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Successful'
+    );
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Job explanation placeholder'
+    );
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
@@ -55,10 +59,7 @@ describe('<JobDetail />', () => {
     assertDetail('Job Type', 'Playbook Run');
     assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
     assertDetail('Inventory', mockJobData.summary_fields.inventory.name);
-    assertDetail(
-      'Project',
-      ` successful ${mockJobData.summary_fields.project.name}`
-    );
+    assertDetail('Project', mockJobData.summary_fields.project.name);
     assertDetail('Revision', mockJobData.scm_revision);
     assertDetail('Playbook', mockJobData.playbook);
     assertDetail('Verbosity', '0 (Normal)');
@@ -67,7 +68,6 @@ describe('<JobDetail />', () => {
       'Instance Group',
       mockJobData.summary_fields.instance_group.name
     );
-    assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
     assertDetail('Source Control Branch', 'main');
@@ -78,6 +78,7 @@ describe('<JobDetail />', () => {
     );
 
     assertDetail('Job Slice', '0/1');
+    assertDetail('Forks', '42');
 
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`
@@ -99,16 +100,30 @@ describe('<JobDetail />', () => {
     ).toEqual(true);
 
     const statusDetail = wrapper.find('Detail[label="Status"]');
-    expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
-    expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
+    const statusLabel = statusDetail.find('StatusLabel');
+    expect(statusLabel.prop('status')).toEqual('successful');
 
-    const projectStatusDetail = wrapper.find('Detail[label="Project"]');
-    expect(projectStatusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(
-      1
-    );
-    expect(
-      projectStatusDetail.find('StatusIcon SuccessfulBottom')
-    ).toHaveLength(1);
+    const projectStatusDetail = wrapper.find('Detail[label="Project Status"]');
+    expect(projectStatusDetail.find('StatusLabel')).toHaveLength(1);
+    const projectStatusLabel = statusDetail.find('StatusLabel');
+    expect(projectStatusLabel.prop('status')).toEqual('successful');
+  });
+
+  test('should display Deleted for Inventory and Project for job type run', () => {
+    const job = {
+      ...mockJobData,
+      summary_fields: {
+        ...mockJobData.summary_fields,
+        project: null,
+        inventory: null,
+      },
+      project: null,
+      inventory: null,
+    };
+
+    wrapper = mountWithContexts(<JobDetail job={job} />);
+    expect(wrapper.find(`DeletedDetail[label="Project"]`).length).toBe(1);
+    expect(wrapper.find(`DeletedDetail[label="Inventory"]`).length).toBe(1);
   });
 
   test('should not display finished date', () => {
@@ -153,6 +168,7 @@ describe('<JobDetail />', () => {
     assertDetail('Module Name', 'command');
     assertDetail('Module Arguments', 'echo hello_world');
     assertDetail('Job Type', 'Run Command');
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should display source data', () => {
@@ -189,6 +205,7 @@ describe('<JobDetail />', () => {
       />
     );
     assertDetail('Source', 'Sourced from Project');
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should show schedule that launched workflow job', async () => {
@@ -196,6 +213,7 @@ describe('<JobDetail />', () => {
       <JobDetail
         job={{
           ...mockJobData,
+          type: 'workflow_job',
           launch_type: 'scheduled',
           summary_fields: {
             user_capabilities: {},
@@ -221,7 +239,7 @@ describe('<JobDetail />', () => {
     ).toHaveLength(1);
   });
 
-  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', async () => {
+  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', () => {
     wrapper = mountWithContexts(
       <JobDetail
         job={{
@@ -249,7 +267,6 @@ describe('<JobDetail />', () => {
   test('should properly delete job', async () => {
     wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');
-    await sleep(1);
     wrapper.update();
     const modal = wrapper.find('Modal[aria-label="Alert modal"]');
     expect(modal.length).toBe(1);
@@ -283,26 +300,6 @@ describe('<JobDetail />', () => {
     expect(errorModal.length).toBe(1);
   });
 
-  test('DELETED is shown for required Job resources that have been deleted', () => {
-    const newMockData = {
-      ...mockJobData,
-      summary_fields: {
-        ...mockJobData.summary_fields,
-        inventory: null,
-        project: null,
-      },
-    };
-    wrapper = mountWithContexts(<JobDetail job={newMockData} />);
-    const detail = wrapper.find('JobDetail');
-    async function assertMissingDetail(label) {
-      expect(detail.length).toBe(1);
-      await sleep(0);
-      expect(detail.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(detail.find(`Detail[label="${label}"] dd`).text()).toBe('DELETED');
-    }
-    assertMissingDetail('Project');
-    assertMissingDetail('Inventory');
-  });
   test('should display Playbook Check detail', () => {
     wrapper = mountWithContexts(
       <JobDetail
@@ -344,6 +341,7 @@ describe('<JobDetail />', () => {
     expect(
       wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
     ).toHaveLength(0);
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should not show cancel job button, job completed', async () => {
@@ -540,7 +538,7 @@ describe('<JobDetail />', () => {
       webhook_guid: '',
     };
     wrapper = mountWithContexts(<JobDetail job={workFlowJob} />);
-    assertDetail('Status', ' successful Successful');
+    assertDetail('Status', 'Successful');
     assertDetail('Started', '7/6/2021, 7:40:17 PM');
     assertDetail('Finished', '7/6/2021, 7:40:42 PM');
     assertDetail('Job Template', 'Sliced Job Template');

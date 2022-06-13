@@ -27,6 +27,10 @@ options:
         - The name of the credential type.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      type: str
     description:
       description:
         - The description of the credential type to give more detail about it.
@@ -89,6 +93,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         description=dict(),
         kind=dict(choices=list(KIND_CHOICES.keys())),
         inputs=dict(type='dict'),
@@ -101,7 +106,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
-    new_name = None
+    new_name = module.params.get("new_name")
     kind = module.params.get('kind')
     state = module.params.get('state')
 

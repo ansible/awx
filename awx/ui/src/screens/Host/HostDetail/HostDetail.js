@@ -74,6 +74,7 @@ function HostDetail({ host }) {
         <Detail
           label={t`Inventory`}
           dataCy="host-inventory"
+          helpText={t`The inventory that this host belongs to.`}
           value={
             <Link to={`/inventories/inventory/${inventory.id}/details`}>
               {inventory.name}
@@ -91,6 +92,7 @@ function HostDetail({ host }) {
           rows={4}
           value={variables}
           name="variables"
+          dataCy="host-detail-variables"
         />
       </DetailList>
       <CardActionsRow>

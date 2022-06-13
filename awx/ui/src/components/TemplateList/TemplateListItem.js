@@ -39,6 +39,7 @@ function TemplateListItem({
   template,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchTemplates,
   rowIndex,
@@ -52,17 +53,21 @@ function TemplateListItem({
   )}/html/upgrade-migration-guide/upgrade_to_ees.html`;
 
   const copyTemplate = useCallback(async () => {
+    let response;
     if (template.type === 'job_template') {
-      await JobTemplatesAPI.copy(template.id, {
+      response = await JobTemplatesAPI.copy(template.id, {
         name: `${template.name} @ ${timeOfDay()}`,
       });
     } else {
-      await WorkflowJobTemplatesAPI.copy(template.id, {
+      response = await WorkflowJobTemplatesAPI.copy(template.id, {
         name: `${template.name} @ ${timeOfDay()}`,
       });
     }
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchTemplates();
-  }, [fetchTemplates, template.id, template.name, template.type]);
+  }, [fetchTemplates, template.id, template.name, template.type, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);
@@ -115,7 +120,10 @@ function TemplateListItem({
 
   return (
     <>
-      <Tr id={`template-row-${template.id}`}>
+      <Tr
+        id={`template-row-${template.id}`}
+        ouiaId={`template-row-${template.id}`}
+      >
         <Td
           expand={{
             rowIndex,
@@ -242,7 +250,10 @@ function TemplateListItem({
           </ActionItem>
         </ActionsTd>
       </Tr>
-      <Tr isExpanded={isExpanded}>
+      <Tr
+        isExpanded={isExpanded}
+        ouiaId={`template-row-${template.id}-expanded`}
+      >
         <Td colSpan={2} />
         <Td colSpan={4}>
           <ExpandableRowContent>
@@ -317,9 +328,15 @@ function TemplateListItem({
                     <ChipGroup
                       numChips={5}
                       totalChips={summaryFields.credentials.length}
+                      ouiaId={`template-${template.id}-credential-chips`}
                     >
                       {summaryFields.credentials.map((c) => (
-                        <CredentialChip key={c.id} credential={c} isReadOnly />
+                        <CredentialChip
+                          key={c.id}
+                          credential={c}
+                          isReadOnly
+                          ouiaId={`credential-${c.id}-chip`}
+                        />
                       ))}
                     </ChipGroup>
                   }
@@ -334,9 +351,14 @@ function TemplateListItem({
                     <ChipGroup
                       numChips={5}
                       totalChips={summaryFields.labels.results.length}
+                      ouiaId={`template-${template.id}-label-chips`}
                     >
                       {summaryFields.labels.results.map((l) => (
-                        <Chip key={l.id} isReadOnly>
+                        <Chip
+                          key={l.id}
+                          isReadOnly
+                          ouiaId={`label-${l.id}-chip`}
+                        >
                           {l.name}
                         </Chip>
                       ))}

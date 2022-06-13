@@ -28,12 +28,15 @@ from awx.main.models import (
 #
 
 
-def mk_instance(persisted=True, hostname='instance.example.org'):
+def mk_instance(persisted=True, hostname='instance.example.org', node_type='hybrid', capacity=100):
     if not persisted:
         raise RuntimeError('creating an Instance requires persisted=True')
     from django.conf import settings
 
-    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname)[0]
+    instance = Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname, node_type=node_type, capacity=capacity)[0]
+    if node_type in ('control', 'hybrid'):
+        mk_instance_group(name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, instance=instance)
+    return instance
 
 
 def mk_instance_group(name='default', instance=None, minimum=0, percentage=0):
@@ -52,7 +55,9 @@ def mk_organization(name, description=None, persisted=True):
     description = description or '{}-description'.format(name)
     org = Organization(name=name, description=description)
     if persisted:
-        mk_instance(persisted)
+        instances = Instance.objects.all()
+        if not instances:
+            mk_instance(persisted)
         org.save()
     return org
 
@@ -175,8 +180,8 @@ def mk_job_template(
 
     jt.project = project
 
-    jt.survey_spec = spec
-    if jt.survey_spec is not None:
+    if spec is not None:
+        jt.survey_spec = spec
         jt.survey_enabled = True
 
     if persisted:
@@ -207,8 +212,8 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, 
 
     wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization, webhook_service=webhook_service)
 
-    wfjt.survey_spec = spec
-    if wfjt.survey_spec:
+    if spec:
+        wfjt.survey_spec = spec
         wfjt.survey_enabled = True
 
     if persisted:

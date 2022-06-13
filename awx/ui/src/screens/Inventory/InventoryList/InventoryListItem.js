@@ -18,6 +18,7 @@ function InventoryListItem({
   rowIndex,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchInventories,
 }) {
@@ -30,11 +31,14 @@ function InventoryListItem({
   const [isCopying, setIsCopying] = useState(false);
 
   const copyInventory = useCallback(async () => {
-    await InventoriesAPI.copy(inventory.id, {
+    const response = await InventoriesAPI.copy(inventory.id, {
       name: `${inventory.name} @ ${timeOfDay()}`,
     });
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchInventories();
-  }, [inventory.id, inventory.name, fetchInventories]);
+  }, [inventory.id, inventory.name, fetchInventories, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsCopying(true);
@@ -72,7 +76,11 @@ function InventoryListItem({
   }
 
   return (
-    <Tr id={inventory.id} aria-labelledby={labelId}>
+    <Tr
+      id={inventory.id}
+      aria-labelledby={labelId}
+      ouiaId={`inventory-row-${inventory.id}`}
+    >
       <Td
         select={{
           rowIndex,
@@ -91,9 +99,19 @@ function InventoryListItem({
         )}
       </TdBreakWord>
       <Td dataLabel={t`Status`}>
-        {inventory.kind !== 'smart' && (
-          <StatusLabel status={syncStatus} tooltipContent={tooltipContent} />
-        )}
+        {inventory.kind !== 'smart' &&
+          (inventory.has_inventory_sources ? (
+            <Link
+              to={`/inventories/inventory/${inventory.id}/jobs?job.or__inventoryupdate__inventory_source__inventory__id=${inventory.id}`}
+            >
+              <StatusLabel
+                status={syncStatus}
+                tooltipContent={tooltipContent}
+              />
+            </Link>
+          ) : (
+            <StatusLabel status={syncStatus} tooltipContent={tooltipContent} />
+          ))}
       </Td>
       <Td dataLabel={t`Type`}>
         {inventory.kind === 'smart' ? t`Smart Inventory` : t`Inventory`}
@@ -142,6 +160,7 @@ function InventoryListItem({
               onCopyStart={handleCopyStart}
               onCopyFinish={handleCopyFinish}
               errorMessage={t`Failed to copy inventory.`}
+              ouiaId={`${inventory.id}-copy-button`}
             />
           </ActionItem>
         </ActionsTd>

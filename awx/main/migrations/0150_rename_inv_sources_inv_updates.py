@@ -15,10 +15,10 @@ def forwards(apps, schema_editor):
 
     r = InventoryUpdate.objects.filter(source='tower').update(source='controller')
     if r:
-        logger.warn(f'Renamed {r} tower inventory updates to controller')
+        logger.warning(f'Renamed {r} tower inventory updates to controller')
     InventorySource.objects.filter(source='tower').update(source='controller')
     if r:
-        logger.warn(f'Renamed {r} tower inventory sources to controller')
+        logger.warning(f'Renamed {r} tower inventory sources to controller')
 
     CredentialType = apps.get_model('main', 'CredentialType')
 
@@ -32,7 +32,7 @@ def forwards(apps, schema_editor):
         registry_type = ManagedCredentialType.registry.get('controller')
         if not registry_type:
             raise RuntimeError('Excpected to find controller credential, this may need to be edited in the future!')
-        logger.warn('Renaming the Ansible Tower credential type for existing install')
+        logger.warning('Renaming the Ansible Tower credential type for existing install')
         tower_type.name = registry_type.name  # sensitive to translations
         tower_type.namespace = 'controller'  # if not done, will error setup_tower_managed_defaults
         tower_type.save(update_fields=['name', 'namespace'])
@@ -46,10 +46,10 @@ def backwards(apps, schema_editor):
 
     r = InventoryUpdate.objects.filter(source='controller').update(source='tower')
     if r:
-        logger.warn(f'Renamed {r} controller inventory updates to tower')
+        logger.warning(f'Renamed {r} controller inventory updates to tower')
     r = InventorySource.objects.filter(source='controller').update(source='tower')
     if r:
-        logger.warn(f'Renamed {r} controller inventory sources to tower')
+        logger.warning(f'Renamed {r} controller inventory sources to tower')
 
     CredentialType = apps.get_model('main', 'CredentialType')
 

@@ -3,7 +3,7 @@ from unittest import mock
 
 from rest_framework.exceptions import ValidationError
 
-from awx.sso.fields import SAMLOrgAttrField, SAMLTeamAttrField, LDAPGroupTypeParamsField, LDAPServerURIField
+from awx.sso.fields import SAMLOrgAttrField, SAMLTeamAttrField, SAMLUserFlagsAttrField, LDAPGroupTypeParamsField, LDAPServerURIField
 
 
 class TestSAMLOrgAttrField:
@@ -79,7 +79,7 @@ class TestSAMLTeamAttrField:
                 'remove': True,
                 'saml_attr': 'foobar',
                 'team_org_map': [
-                    {'team': 'Engineering', 'team_alias': 'Engineering Team', 'organization': 'Ansible', 'organization_alias': 'Awesome Org'},
+                    {'team': 'Engineering', 'team_alias': 'Engineering Team', 'organization': 'Ansible'},
                     {'team': 'Engineering', 'organization': 'Ansible2'},
                     {'team': 'Engineering2', 'organization': 'Ansible'},
                 ],
@@ -112,6 +112,66 @@ class TestSAMLTeamAttrField:
         field = SAMLTeamAttrField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(data)
+        assert e.value.detail == expected
+
+
+class TestSAMLUserFlagsAttrField:
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {},
+            {'is_superuser_attr': 'something'},
+            {'is_superuser_value': 'value'},
+            {'is_superuser_role': 'my_peeps'},
+            {'is_system_auditor_attr': 'something_else'},
+            {'is_system_auditor_value': 'value2'},
+            {'is_system_auditor_role': 'other_peeps'},
+        ],
+    )
+    def test_internal_value_valid(self, data):
+        field = SAMLUserFlagsAttrField()
+        res = field.to_internal_value(data)
+        assert res == data
+
+    @pytest.mark.parametrize(
+        "data, expected",
+        [
+            (
+                {
+                    'junk': 'something',
+                    'is_superuser_value': 'value',
+                    'is_superuser_role': 'my_peeps',
+                    'is_system_auditor_attr': 'else',
+                    'is_system_auditor_value': 'value2',
+                    'is_system_auditor_role': 'other_peeps',
+                },
+                {'junk': ['Invalid field.']},
+            ),
+            (
+                {
+                    'junk': 'something',
+                },
+                {
+                    'junk': ['Invalid field.'],
+                },
+            ),
+            (
+                {
+                    'junk': 'something',
+                    'junk2': 'else',
+                },
+                {
+                    'junk': ['Invalid field.'],
+                    'junk2': ['Invalid field.'],
+                },
+            ),
+        ],
+    )
+    def test_internal_value_invalid(self, data, expected):
+        field = SAMLUserFlagsAttrField()
+        with pytest.raises(ValidationError) as e:
+            field.to_internal_value(data)
+        print(e.value.detail)
         assert e.value.detail == expected
 
 

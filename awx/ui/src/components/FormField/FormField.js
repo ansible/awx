@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
@@ -26,6 +27,7 @@ function FormField(props) {
       {(type === 'textarea' && (
         <FormGroup
           fieldId={id}
+          data-cy={`${id}-form-group`}
           helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
@@ -48,6 +50,7 @@ function FormField(props) {
       )) || (
         <FormGroup
           fieldId={id}
+          data-cy={`${id}-form-group`}
           helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}

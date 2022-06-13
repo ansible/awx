@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-
+import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import {
   Card,
   PageSection,
   PageSectionVariants,
   SelectGroup,
-  Select,
+  Select as PFSelect,
   SelectVariant,
   SelectOption,
   Title,
@@ -20,10 +20,19 @@ import PaginatedTable, {
   getSearchableKeys,
 } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
+import useTitle from 'hooks/useTitle';
 import { getQSConfig, parseQueryString, updateQueryString } from 'util/qs';
 import { ActivityStreamAPI } from 'api';
 
 import ActivityStreamListItem from './ActivityStreamListItem';
+
+const Select = styled(PFSelect)`
+  && {
+    width: auto;
+    white-space: nowrap;
+    max-height: 480px;
+  }
+`;
 
 function ActivityStream() {
   const { light } = PageSectionVariants;
@@ -31,6 +40,7 @@ function ActivityStream() {
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const location = useLocation();
   const history = useHistory();
+  useTitle(t`Activity Stream`);
   const urlParams = new URLSearchParams(location.search);
 
   const activityStreamType = urlParams.get('type') || 'all';
@@ -114,8 +124,6 @@ function ActivityStream() {
           {t`Activity Stream type selector`}
         </span>
         <Select
-          width="250px"
-          maxHeight="480px"
           variant={SelectVariant.single}
           aria-labelledby="grouped-type-select-id"
           typeAheadAriaLabel={t`Select an activity type`}
@@ -132,6 +140,7 @@ function ActivityStream() {
           isOpen={isTypeDropdownOpen}
           isGrouped
           noResultsFoundText={t`No results found`}
+          ouiaId="activity-type-select"
         >
           <SelectGroup label={t`Views`} key="views">
             <SelectOption key="all_activity" value="all">

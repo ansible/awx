@@ -14,7 +14,7 @@ from dateutil.zoneinfo import get_zonefile_instance
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.api.versioning import reverse
@@ -81,7 +81,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     dtend = models.DateTimeField(
         null=True, default=None, editable=False, help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires.")
     )
-    rrule = models.CharField(max_length=255, help_text=_("A value representing the schedules iCal recurrence rule."))
+    rrule = models.TextField(help_text=_("A value representing the schedules iCal recurrence rule."))
     next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
 
     @classmethod
@@ -91,22 +91,22 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     @property
     def timezone(self):
         utc = tzutc()
+        # All rules in a ruleset will have the same dtstart so we can just take the first rule
+        tzinfo = Schedule.rrulestr(self.rrule)._rrule[0]._dtstart.tzinfo
+        if tzinfo is utc:
+            return 'UTC'
         all_zones = Schedule.get_zoneinfo()
         all_zones.sort(key=lambda x: -len(x))
-        for r in Schedule.rrulestr(self.rrule)._rrule:
-            if r._dtstart:
-                tzinfo = r._dtstart.tzinfo
-                if tzinfo is utc:
-                    return 'UTC'
-                fname = getattr(tzinfo, '_filename', None)
-                if fname:
-                    for zone in all_zones:
-                        if fname.endswith(zone):
-                            return zone
-        logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
+        fname = getattr(tzinfo, '_filename', None)
+        if fname:
+            for zone in all_zones:
+                if fname.endswith(zone):
+                    return zone
+        logger.warning('Could not detect valid zoneinfo for {}'.format(self.rrule))
         return ''
 
     @property
+    # TODO: How would we handle multiple until parameters? The UI is currently using this on the edit screen of a schedule
     def until(self):
         # The UNTIL= datestamp (if any) coerced from UTC to the local naive time
         # of the DTSTART
@@ -134,34 +134,48 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         # timezone (America/New_York), and so we'll coerce to UTC _for you_
         # automatically.
         #
-        if 'until=' in rrule.lower():
-            # if DTSTART;TZID= is used, coerce "naive" UNTIL values
-            # to the proper UTC date
-            match_until = re.match(r".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
-            if not len(match_until.group('utcflag')):
-                # rrule = DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
 
-                # Find the UNTIL=N part of the string
-                # naive_until = UNTIL=20200601T170000
-                naive_until = match_until.group('until')
+        # Find the DTSTART rule or raise an error, its usually the first rule but that is not strictly enforced
+        start_date_rule = re.sub('^.*(DTSTART[^\s]+)\s.*$', r'\1', rrule)
+        if not start_date_rule:
+            raise ValueError('A DTSTART field needs to be in the rrule')
 
-                # What is the DTSTART timezone for:
-                # DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000Z
-                # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
-                local_tz = dateutil.rrule.rrulestr(rrule.replace(naive_until, naive_until + 'Z'), tzinfos=UTC_TIMEZONES)._dtstart.tzinfo
+        rules = re.split(r'\s+', rrule)
+        for index in range(0, len(rules)):
+            rule = rules[index]
+            if 'until=' in rule.lower():
+                # if DTSTART;TZID= is used, coerce "naive" UNTIL values
+                # to the proper UTC date
+                match_until = re.match(r".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rule)
+                if not len(match_until.group('utcflag')):
+                    # rule = DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
 
-                # Make a datetime object with tzinfo=<the DTSTART timezone>
-                # localized_until = datetime.datetime(2020, 6, 1, 17, 0, tzinfo=tzfile('/usr/share/zoneinfo/America/New_York'))
-                localized_until = make_aware(datetime.datetime.strptime(re.sub('^UNTIL=', '', naive_until), "%Y%m%dT%H%M%S"), local_tz)
+                    # Find the UNTIL=N part of the string
+                    # naive_until = UNTIL=20200601T170000
+                    naive_until = match_until.group('until')
 
-                # Coerce the datetime to UTC and format it as a string w/ Zulu format
-                # utc_until = UNTIL=20200601T220000Z
-                utc_until = 'UNTIL=' + localized_until.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+                    # What is the DTSTART timezone for:
+                    # DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000Z
+                    # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
+                    # We are going to construct a 'dummy' rule for parsing which will include the DTSTART and the rest of the rule
+                    temp_rule = "{} {}".format(start_date_rule, rule.replace(naive_until, naive_until + 'Z'))
+                    # If the rule is an EX rule we have to add an RRULE to it because an EX rule alone will not manifest into a ruleset
+                    if rule.lower().startswith('ex'):
+                        temp_rule = "{} {}".format(temp_rule, 'RRULE:FREQ=MINUTELY;INTERVAL=1;UNTIL=20380601T170000Z')
+                    local_tz = dateutil.rrule.rrulestr(temp_rule, tzinfos=UTC_TIMEZONES, **{'forceset': True})._rrule[0]._dtstart.tzinfo
 
-                # rrule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
-                # rrule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
-                rrule = rrule.replace(naive_until, utc_until)
-        return rrule
+                    # Make a datetime object with tzinfo=<the DTSTART timezone>
+                    # localized_until = datetime.datetime(2020, 6, 1, 17, 0, tzinfo=tzfile('/usr/share/zoneinfo/America/New_York'))
+                    localized_until = make_aware(datetime.datetime.strptime(re.sub('^UNTIL=', '', naive_until), "%Y%m%dT%H%M%S"), local_tz)
+
+                    # Coerce the datetime to UTC and format it as a string w/ Zulu format
+                    # utc_until = UNTIL=20200601T220000Z
+                    utc_until = 'UNTIL=' + localized_until.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+
+                    # rule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
+                    # rule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
+                    rules[index] = rule.replace(naive_until, utc_until)
+        return " ".join(rules)
 
     @classmethod
     def rrulestr(cls, rrule, fast_forward=True, **kwargs):
@@ -176,20 +190,28 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             if r._dtstart and r._dtstart.tzinfo is None:
                 raise ValueError('A valid TZID must be provided (e.g., America/New_York)')
 
-        if fast_forward and ('MINUTELY' in rrule or 'HOURLY' in rrule) and 'COUNT=' not in rrule:
+        # Fast forward is a way for us to limit the number of events in the rruleset
+        # If we are fastforwading and we don't have a count limited rule that is minutely or hourley
+        # We will modify the start date of the rule to last week to prevent a large number of entries
+        if fast_forward:
             try:
+                # All rules in a ruleset will have the same dtstart value
+                #   so lets compare the first event to now to see if its > 7 days old
                 first_event = x[0]
-                # If the first event was over a week ago...
                 if (now() - first_event).days > 7:
-                    # hourly/minutely rrules with far-past DTSTART values
-                    # are *really* slow to precompute
-                    # start *from* one week ago to speed things up drastically
-                    dtstart = x._rrule[0]._dtstart.strftime(':%Y%m%dT')
-                    new_start = (now() - datetime.timedelta(days=7)).strftime(':%Y%m%dT')
-                    new_rrule = rrule.replace(dtstart, new_start)
-                    return Schedule.rrulestr(new_rrule, fast_forward=False)
+                    for rule in x._rrule:
+                        # If any rule has a minutely or hourly rule without a count...
+                        if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
+                            # hourly/minutely rrules with far-past DTSTART values
+                            # are *really* slow to precompute
+                            # start *from* one week ago to speed things up drastically
+                            new_start = (now() - datetime.timedelta(days=7)).strftime('%Y%m%d')
+                            # Now we want to repalce the DTSTART:<value>T with the new date (which includes the T)
+                            new_rrule = re.sub('(DTSTART[^:]*):[^T]+T', r'\1:{0}T'.format(new_start), rrule)
+                            return Schedule.rrulestr(new_rrule, fast_forward=False)
             except IndexError:
                 pass
+
         return x
 
     def __str__(self):
@@ -205,6 +227,22 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             logger.info('Errors creating scheduled job: {}'.format(errors))
         job_kwargs['_eager_fields'] = {'launch_type': 'scheduled', 'schedule': self}
         return job_kwargs
+
+    def get_end_date(ruleset):
+        # if we have a complex ruleset with a lot of options getting the last index of the ruleset can take some time
+        # And a ruleset without a count/until can come back as datetime.datetime(9999, 12, 31, 15, 0, tzinfo=tzfile('US/Eastern'))
+        # So we are going to do a quick scan to make sure we would have an end date
+        for a_rule in ruleset._rrule:
+            # if this rule does not have until or count in it then we have no end date
+            if not a_rule._until and not a_rule._count:
+                return None
+
+        # If we made it this far we should have an end date and can ask the ruleset what the last date is
+        # However, if the until/count is before dtstart we will get an IndexError when trying to get [-1]
+        try:
+            return ruleset[-1].astimezone(pytz.utc)
+        except IndexError:
+            return None
 
     def update_computed_fields_no_save(self):
         affects_fields = ['next_run', 'dtstart', 'dtend']
@@ -229,12 +267,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             self.dtstart = future_rs[0].astimezone(pytz.utc)
         except IndexError:
             self.dtstart = None
-        self.dtend = None
-        if 'until' in self.rrule.lower() or 'count' in self.rrule.lower():
-            try:
-                self.dtend = future_rs[-1].astimezone(pytz.utc)
-            except IndexError:
-                self.dtend = None
+        self.dtend = Schedule.get_end_date(future_rs)
 
         changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
         return changed

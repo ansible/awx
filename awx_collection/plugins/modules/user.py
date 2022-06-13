@@ -26,6 +26,10 @@ options:
         - Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
       required: True
       type: str
+    new_username:
+      description:
+        - Setting this option will change the existing username (looked up via the name field.
+      type: str
     first_name:
       description:
         - First name of the user.
@@ -37,6 +41,10 @@ options:
     email:
       description:
         - Email address of the user.
+      type: str
+    organization:
+      description:
+        - The user will be created as a member of that organization (needed for organization admins to create new organization users).
       type: str
     is_superuser:
       description:
@@ -99,6 +107,14 @@ EXAMPLES = '''
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
+- name: Add user as a member of an organization (permissions on the organization are required)
+  user:
+    username: jdoe
+    password: foobarbaz
+    email: jdoe@example.org
+    organization: devopsorg
+    state: present
+
 - name: Delete user
   user:
     username: jdoe
@@ -114,6 +130,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         username=dict(required=True),
+        new_username=dict(),
         first_name=dict(),
         last_name=dict(),
         email=dict(),
@@ -121,6 +138,7 @@ def main():
         is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
         password=dict(no_log=True),
         update_secrets=dict(type='bool', default=True, no_log=False),
+        organization=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -129,12 +147,14 @@ def main():
 
     # Extract our parameters
     username = module.params.get('username')
+    new_username = module.params.get("new_username")
     first_name = module.params.get('first_name')
     last_name = module.params.get('last_name')
     email = module.params.get('email')
     is_superuser = module.params.get('is_superuser')
     is_system_auditor = module.params.get('is_system_auditor')
     password = module.params.get('password')
+    organization = module.params.get('organization')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -149,7 +169,7 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
     if username is not None:
-        new_fields['username'] = module.get_item_name(existing_item) if existing_item else username
+        new_fields['username'] = new_username if new_username else (module.get_item_name(existing_item) if existing_item else username)
     if first_name is not None:
         new_fields['first_name'] = first_name
     if last_name is not None:
@@ -163,8 +183,13 @@ def main():
     if password is not None:
         new_fields['password'] = password
 
-    # If the state was present and we can let the module build or update the existing item, this will return on its own
-    module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
+    if organization:
+        org_id = module.resolve_name_to_id('organizations', organization)
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(existing_item, new_fields, endpoint='organizations/{0}/users'.format(org_id), item_type='user')
+    else:
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
 
 
 if __name__ == '__main__':

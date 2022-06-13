@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { t, Trans } from '@lingui/macro';
+import { t } from '@lingui/macro';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import { required } from 'util/validators';
-import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
 import {
   OptionsField,
   SourceVarsField,
@@ -13,13 +13,13 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import helpText from '../Inventory.helptext';
 
 const SatelliteSubForm = ({ autoPopulateCredential }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
   const config = useConfig();
-
   const handleCredentialUpdate = useCallback(
     (value) => {
       setFieldValue('credential', value);
@@ -27,12 +27,6 @@ const SatelliteSubForm = ({ autoPopulateCredential }) => {
     },
     [setFieldValue, setFieldTouched]
   );
-
-  const pluginLink = `${getDocsBaseUrl(
-    config
-  )}/html/userguide/inventories.html#inventory-plugins`;
-  const configLink =
-    'https://docs.ansible.com/ansible/latest/collections/theforeman/foreman/foreman_inventory.html';
 
   return (
     <>
@@ -54,24 +48,10 @@ const SatelliteSubForm = ({ autoPopulateCredential }) => {
       <EnabledValueField />
       <OptionsField />
       <SourceVarsField
-        popoverContent={
-          <>
-            <Trans>
-              Enter variables to configure the inventory source. For a detailed
-              description of how to configure this plugin, see{' '}
-              <a href={pluginLink} target="_blank" rel="noopener noreferrer">
-                Inventory Plugins
-              </a>{' '}
-              in the documentation and the{' '}
-              <a href={configLink} target="_blank" rel="noopener noreferrer">
-                foreman
-              </a>{' '}
-              plugin configuration guide.
-            </Trans>
-            <br />
-            <br />
-          </>
-        }
+        popoverContent={helpText.sourceVars(
+          getDocsBaseUrl(config),
+          'satellite6'
+        )}
       />
     </>
   );

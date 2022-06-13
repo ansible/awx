@@ -1,0 +1,18 @@
+---
+- name: Create LDAP cert directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ ldap_cert_dir }}"
+    - "{{ ldap_diff_dir }}"
+
+- name: General LDAP cert
+  command: 'openssl req -new -x509 -days 365 -nodes -out {{ ldap_public_key_file }} -keyout {{ ldap_private_key_file }} -subj "{{ ldap_cert_subject }}"'
+  args:
+    creates: "{{ ldap_public_key_file }}"
+
+- name: Copy ldap.diff
+  copy:
+    src: "ldap.ldif"
+    dest: "{{ ldap_diff_dir }}/ldap.ldif"

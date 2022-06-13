@@ -70,6 +70,7 @@ function WorkflowApproval({ setBreadcrumb }) {
         </>
       ),
       link: `/workflow_approvals`,
+      isBackButton: true,
       id: 99,
     },
     {
@@ -90,10 +91,7 @@ function WorkflowApproval({ setBreadcrumb }) {
           />
           {workflowApproval && (
             <Route path="/workflow_approvals/:id/details">
-              <WorkflowApprovalDetail
-                workflowApproval={workflowApproval}
-                isLoading={isLoading}
-              />
+              <WorkflowApprovalDetail workflowApproval={workflowApproval} />
             </Route>
           )}
           <Route key="not-found" path="*">

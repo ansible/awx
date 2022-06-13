@@ -3,7 +3,7 @@
 
 import re
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 __all__ = [
     'CLOUD_PROVIDERS',
@@ -85,3 +85,24 @@ RECEPTOR_PENDING = 'ansible-runner-???'
 # Naming pattern for AWX jobs in /tmp folder, like /tmp/awx_42_xiwm
 # also update awxkit.api.pages.unified_jobs if changed
 JOB_FOLDER_PREFIX = 'awx_%s_'
+
+# :z option tells Podman that two containers share the volume content with r/w
+# :O option tells Podman to mount the directory from the host as a temporary storage using the overlay file system.
+# :ro or :rw option to mount a volume in read-only or read-write mode, respectively. By default, the volumes are mounted read-write.
+# see podman-run manpage for further details
+# /HOST-DIR:/CONTAINER-DIR:OPTIONS
+CONTAINER_VOLUMES_MOUNT_TYPES = ['z', 'O', 'ro', 'rw']
+MAX_ISOLATED_PATH_COLON_DELIMITER = 2
+
+SURVEY_TYPE_MAPPING = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}
+
+JOB_VARIABLE_PREFIXES = [
+    'awx',
+    'tower',
+]
+
+# Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
+# Importing a library just for this message seemed like overkill
+ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
+    '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
+)

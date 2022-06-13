@@ -1,18 +1,15 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import sys
 import logging
-import os
 from django.db import models
 from django.conf import settings
-
+from django.db.models.functions import Lower
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
-from awx.main.utils.common import get_capacity_type
 from awx.main.constants import RECEPTOR_PENDING
 
-___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager', 'UUID_DEFAULT']
+___all__ = ['HostManager', 'InstanceManager', 'DeferJobCreatedManager', 'UUID_DEFAULT']
 
 logger = logging.getLogger('awx.main.managers')
 UUID_DEFAULT = '00000000-0000-0000-0000-000000000000'
@@ -35,7 +32,7 @@ class HostManager(models.Manager):
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(inventory_sources__source='controller').values('name').distinct().count()
+        return self.order_by().exclude(inventory_sources__source='controller').values(name_lower=Lower('name')).distinct().count()
 
     def org_active_count(self, org_id):
         """Return count of active, unique hosts used by an organization.
@@ -104,10 +101,6 @@ class InstanceManager(models.Manager):
 
     def me(self):
         """Return the currently active instance."""
-        # If we are running unit tests, return a stub record.
-        if settings.IS_TESTING(sys.argv) or hasattr(sys, '_called_from_test'):
-            return self.model(id=1, hostname=settings.CLUSTER_HOST_ID, uuid=UUID_DEFAULT)
-
         node = self.filter(hostname=settings.CLUSTER_HOST_ID)
         if node.exists():
             return node[0]
@@ -168,119 +161,3 @@ class InstanceManager(models.Manager):
                 create_defaults['version'] = RECEPTOR_PENDING
             instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults, **uuid_option)
         return (True, instance)
-
-    def get_or_register(self):
-        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            from awx.main.management.commands.register_queue import RegisterQueue
-
-            pod_ip = os.environ.get('MY_POD_IP')
-            if settings.IS_K8S:
-                registered = self.register(ip_address=pod_ip, node_type='control', uuid=settings.SYSTEM_UUID)
-            else:
-                registered = self.register(ip_address=pod_ip, uuid=settings.SYSTEM_UUID)
-            RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
-            RegisterQueue(settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True).register()
-            return registered
-        else:
-            return (False, self.me())
-
-    def active_count(self):
-        """Return count of active Tower nodes for licensing."""
-        return self.all().count()
-
-
-class InstanceGroupManager(models.Manager):
-    """A custom manager class for the Instance model.
-
-    Used for global capacity calculations
-    """
-
-    def capacity_mapping(self, qs=None):
-        """
-        Another entry-point to Instance manager method by same name
-        """
-        if qs is None:
-            qs = self.all().prefetch_related('instances')
-        instance_ig_mapping = {}
-        ig_instance_mapping = {}
-        # Create dictionaries that represent basic m2m memberships
-        for group in qs:
-            ig_instance_mapping[group.name] = set(instance.hostname for instance in group.instances.all() if instance.capacity != 0)
-            for inst in group.instances.all():
-                if inst.capacity == 0:
-                    continue
-                instance_ig_mapping.setdefault(inst.hostname, set())
-                instance_ig_mapping[inst.hostname].add(group.name)
-        # Get IG capacity overlap mapping
-        ig_ig_mapping = get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping)
-
-        return instance_ig_mapping, ig_ig_mapping
-
-    @staticmethod
-    def zero_out_group(graph, name, breakdown):
-        if name not in graph:
-            graph[name] = {}
-        graph[name]['consumed_capacity'] = 0
-        for capacity_type in ('execution', 'control'):
-            graph[name][f'consumed_{capacity_type}_capacity'] = 0
-        if breakdown:
-            graph[name]['committed_capacity'] = 0
-            graph[name]['running_capacity'] = 0
-
-    def capacity_values(self, qs=None, tasks=None, breakdown=False, graph=None):
-        """
-        Returns a dictionary of capacity values for all IGs
-        """
-        if qs is None:  # Optionally BYOQS - bring your own queryset
-            qs = self.all().prefetch_related('instances')
-        instance_ig_mapping, ig_ig_mapping = self.capacity_mapping(qs=qs)
-
-        if tasks is None:
-            tasks = self.model.unifiedjob_set.related.related_model.objects.filter(status__in=('running', 'waiting'))
-
-        if graph is None:
-            graph = {group.name: {} for group in qs}
-        for group_name in graph:
-            self.zero_out_group(graph, group_name, breakdown)
-        for t in tasks:
-            # TODO: dock capacity for isolated job management tasks running in queue
-            impact = t.task_impact
-            if t.status == 'waiting' or not t.execution_node:
-                # Subtract capacity from any peer groups that share instances
-                if not t.instance_group:
-                    impacted_groups = []
-                elif t.instance_group.name not in ig_ig_mapping:
-                    # Waiting job in group with 0 capacity has no collateral impact
-                    impacted_groups = [t.instance_group.name]
-                else:
-                    impacted_groups = ig_ig_mapping[t.instance_group.name]
-                for group_name in impacted_groups:
-                    if group_name not in graph:
-                        self.zero_out_group(graph, group_name, breakdown)
-                    graph[group_name]['consumed_capacity'] += impact
-                    capacity_type = get_capacity_type(t)
-                    graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
-                    if breakdown:
-                        graph[group_name]['committed_capacity'] += impact
-            elif t.status == 'running':
-                # Subtract capacity from all groups that contain the instance
-                if t.execution_node not in instance_ig_mapping:
-                    if not t.is_container_group_task:
-                        logger.warning('Detected %s running inside lost instance, ' 'may still be waiting for reaper.', t.log_format)
-                    if t.instance_group:
-                        impacted_groups = [t.instance_group.name]
-                    else:
-                        impacted_groups = []
-                else:
-                    impacted_groups = instance_ig_mapping[t.execution_node]
-                for group_name in impacted_groups:
-                    if group_name not in graph:
-                        self.zero_out_group(graph, group_name, breakdown)
-                    graph[group_name]['consumed_capacity'] += impact
-                    capacity_type = get_capacity_type(t)
-                    graph[group_name][f'consumed_{capacity_type}_capacity'] += impact
-                    if breakdown:
-                        graph[group_name]['running_capacity'] += impact
-            else:
-                logger.error('Programming error, %s not in ["running", "waiting"]', t.log_format)
-        return graph

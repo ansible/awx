@@ -27,7 +27,7 @@ function FieldWithPrompt({
   isDisabled,
 }) {
   return (
-    <div className="pf-c-form__group">
+    <div className="pf-c-form__group" data-cy={`${fieldId}-form-group`}>
       <FieldHeader>
         <div>
           <label className="pf-c-form__label" htmlFor={fieldId}>
@@ -45,6 +45,7 @@ function FieldWithPrompt({
           id={promptId}
           label={t`Prompt on launch`}
           name={promptName}
+          ouiaId={`${promptId}-checkbox`}
         />
       </FieldHeader>
       {children}

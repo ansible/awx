@@ -4,12 +4,7 @@ export default styled.div`
   display: flex;
 
   &:hover {
-    background-color: white;
     cursor: ${(props) => (props.isClickable ? 'pointer' : 'default')};
-  }
-
-  &:hover div {
-    background-color: white;
   }
 
   &--hidden {

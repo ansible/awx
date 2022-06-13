@@ -5,7 +5,7 @@ from awx.api.versioning import reverse
 from awx.main.utils import decrypt_field
 from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowApprovalTemplate
 from awx.main.models.jobs import JobTemplate
-from awx.main.tasks import deep_copy_model_obj
+from awx.main.tasks.system import deep_copy_model_obj
 
 
 @pytest.mark.django_db

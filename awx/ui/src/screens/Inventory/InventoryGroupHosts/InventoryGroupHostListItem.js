@@ -28,7 +28,11 @@ function InventoryGroupHostListItem({
   const labelId = `check-action-${host.id}`;
 
   return (
-    <Tr id={host.id} arialabelledby={labelId}>
+    <Tr
+      id={host.id}
+      ouiaId={`inventory-group-host-row-${host.id}`}
+      aria-labelledby={labelId}
+    >
       <Td
         select={{
           rowIndex,
@@ -37,11 +41,12 @@ function InventoryGroupHostListItem({
         }}
         dataLabel={t`Selected`}
       />
-      <Td id={labelId}>
+      <Td dataLabel={t`host-name-${host.id}`} id={labelId}>
         <Link to={`${detailUrl}`}>
           <b>{host.name}</b>
         </Link>
       </Td>
+      <Td dataLabel={t`host-description-${host.id}`}>{host.description}</Td>
       <Td dataLabel={t`Activity`}>
         <Sparkline jobs={recentPlaybookJobs} />
       </Td>

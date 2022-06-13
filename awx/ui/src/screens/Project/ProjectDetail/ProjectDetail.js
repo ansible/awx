@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { Project } from 'types';
-import { Config } from 'contexts/Config';
+import { Config, useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
 import DeleteButton from 'components/DeleteButton';
@@ -24,10 +24,14 @@ import CredentialChip from 'components/CredentialChip';
 import { ProjectsAPI } from 'api';
 import { toTitleCase } from 'util/strings';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useBrandName from 'hooks/useBrandName';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import StatusLabel from 'components/StatusLabel';
 import { formatDateString } from 'util/dates';
+import Popover from 'components/Popover';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
+import projectHelpText from '../shared/Project.helptext';
 import useWsProject from './useWsProject';
 
 const Label = styled.span`
@@ -56,8 +60,10 @@ function ProjectDetail({ project }) {
     scm_url,
     summary_fields,
   } = useWsProject(project);
+  const docsURL = `${getDocsBaseUrl(
+    useConfig()
+  )}/html/userguide/projects.html#manage-playbooks-using-source-control`;
   const history = useHistory();
-
   const {
     request: deleteProject,
     isLoading,
@@ -68,6 +74,7 @@ function ProjectDetail({ project }) {
       history.push(`/projects`);
     }, [id, history])
   );
+  const brandName = useBrandName();
 
   const { error, dismissError } = useDismissableError(deleteError);
   const deleteDetailsRequests = relatedResourceDeleteRequests.project(project);
@@ -82,29 +89,37 @@ function ProjectDetail({ project }) {
     optionsList = (
       <TextList component={TextListVariants.ul}>
         {scm_clean && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >{t`Discard local changes before syncing`}</TextListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Discard local changes before syncing`}
+            <Popover content={projectHelpText.options.clean} />
+          </TextListItem>
         )}
         {scm_delete_on_update && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >{t`Delete the project before syncing`}</TextListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Delete the project before syncing`}{' '}
+            <Popover
+              content={projectHelpText.options.delete}
+              id="scm-delete-on-update"
+            />
+          </TextListItem>
         )}
         {scm_track_submodules && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >{t`Track submodules latest commit on branch`}</TextListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Track submodules latest commit on branch`}{' '}
+            <Popover content={projectHelpText.options.trackSubModules} />
+          </TextListItem>
         )}
         {scm_update_on_launch && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >{t`Update revision on job launch`}</TextListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Update revision on job launch`}{' '}
+            <Popover content={projectHelpText.options.updateOnLaunch} />
+          </TextListItem>
         )}
         {allow_override && (
-          <TextListItem
-            component={TextListItemVariants.li}
-          >{t`Allow branch override`}</TextListItem>
+          <TextListItem component={TextListItemVariants.li}>
+            {t`Allow branch override`}{' '}
+            <Popover content={projectHelpText.options.allowBranchOverride} />
+          </TextListItem>
         )}
       </TextList>
     );
@@ -134,7 +149,10 @@ function ProjectDetail({ project }) {
   } else if (summary_fields?.last_job) {
     job = summary_fields.last_job;
   }
-
+  const getSourceControlUrlHelpText = () =>
+    scm_type === 'git'
+      ? projectHelpText.githubSourceControlUrl
+      : projectHelpText.svnSourceControlUrl;
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -197,9 +215,25 @@ function ProjectDetail({ project }) {
           }
           alwaysVisible
         />
-        <Detail label={t`Source Control URL`} value={scm_url} />
-        <Detail label={t`Source Control Branch`} value={scm_branch} />
-        <Detail label={t`Source Control Refspec`} value={scm_refspec} />
+        <Detail
+          helpText={
+            scm_type === 'git' || scm_type === 'svn'
+              ? getSourceControlUrlHelpText()
+              : ''
+          }
+          label={t`Source Control URL`}
+          value={scm_url}
+        />
+        <Detail
+          helpText={projectHelpText.branchFormField}
+          label={t`Source Control Branch`}
+          value={scm_branch}
+        />
+        <Detail
+          helpText={projectHelpText.sourceControlRefspec(docsURL)}
+          label={t`Source Control Refspec`}
+          value={scm_refspec}
+        />
         {summary_fields.credential && (
           <Detail
             label={t`Source Control Credential`}
@@ -217,16 +251,25 @@ function ProjectDetail({ project }) {
           value={`${scm_update_cache_timeout} ${t`Seconds`}`}
         />
         <ExecutionEnvironmentDetail
+          helpText={projectHelpText.executionEnvironment}
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.default_environment}
           isDefaultEnvironment
         />
         <Config>
           {({ project_base_dir }) => (
-            <Detail label={t`Project Base Path`} value={project_base_dir} />
+            <Detail
+              helpText={projectHelpText.projectBasePath(brandName)}
+              label={t`Project Base Path`}
+              value={project_base_dir}
+            />
           )}
         </Config>
-        <Detail label={t`Playbook Directory`} value={local_path} />
+        <Detail
+          helpText={projectHelpText.projectLocalPath}
+          label={t`Playbook Directory`}
+          value={local_path}
+        />
         <UserDateDetail
           label={t`Created`}
           date={created}

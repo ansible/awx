@@ -26,8 +26,6 @@ function ContainerGroupFormFields({ instanceGroup }) {
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
 
-  const [nameField] = useField('name');
-
   const [overrideField] = useField('override');
 
   const handleCredentialUpdate = useCallback(
@@ -46,7 +44,6 @@ function ContainerGroupFormFields({ instanceGroup }) {
         label={t`Name`}
         type="text"
         validate={required(null)}
-        isDisabled={nameField.value === 'default'}
         isRequired
       />
       <CredentialLookup

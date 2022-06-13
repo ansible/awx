@@ -59,9 +59,10 @@ function ManagementJobListItem({
     }
   };
 
+  const rowId = `mgmt-jobs-row-${jobType ? jobType.replace('_', '-') : ''}`;
   return (
     <>
-      <Tr id={`mgmt-jobs-row-${jobType ? jobType.replace('_', '-') : ''}`}>
+      <Tr id={rowId} ouiaId={rowId}>
         <Td />
         <Td dataLabel={t`Name`}>
           <Link to={`${detailsUrl}`}>
@@ -74,16 +75,14 @@ function ManagementJobListItem({
             {isSuperUser ? (
               <>
                 {isPrompted ? (
-                  <>
-                    <LaunchManagementPrompt
-                      isOpen={isManagementPromptOpen}
-                      isLoading={isManagementPromptLoading}
-                      onClick={handleManagementPromptClick}
-                      onClose={handleManagementPromptClose}
-                      onConfirm={handleManagementPromptConfirm}
-                      defaultDays={30}
-                    />
-                  </>
+                  <LaunchManagementPrompt
+                    isOpen={isManagementPromptOpen}
+                    isLoading={isManagementPromptLoading}
+                    onClick={handleManagementPromptClick}
+                    onClose={handleManagementPromptClose}
+                    onConfirm={handleManagementPromptConfirm}
+                    defaultDays={30}
+                  />
                 ) : (
                   <Tooltip content={t`Launch management job`} position="top">
                     <Button

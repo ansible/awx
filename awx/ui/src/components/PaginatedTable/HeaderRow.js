@@ -7,6 +7,7 @@ import { parseQueryString, updateQueryString } from 'util/qs';
 
 const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
+  --pf-c-table--cell--MaxWidth: none;
 `;
 
 export default function HeaderRow({
@@ -38,7 +39,7 @@ export default function HeaderRow({
   // empty first Th aligns with checkboxes in table rows
   return (
     <Thead>
-      <Tr>
+      <Tr ouiaId="paginated-table-header-row">
         {isExpandable && <Th />}
         {isSelectable && <Th />}
         {React.Children.map(
@@ -69,6 +70,7 @@ export function HeaderCell({
   idPrefix,
   className,
   children,
+  tooltip,
 }) {
   const sort = sortKey
     ? {
@@ -79,6 +81,11 @@ export function HeaderCell({
     : null;
   return (
     <Th
+      info={
+        tooltip && {
+          popover: <div>{tooltip}</div>,
+        }
+      }
       id={sortKey ? `${idPrefix}-${sortKey}` : null}
       className={className}
       sort={sort}

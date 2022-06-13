@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useState, useEffect } from 'react';
 
 import { t } from '@lingui/macro';
@@ -51,6 +52,7 @@ function Team({ setBreadcrumb }) {
       ),
       link: `/teams`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `/teams/${id}/details`, id: 0 },
     { name: t`Access`, link: `/teams/${id}/access`, id: 1 },

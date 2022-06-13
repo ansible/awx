@@ -37,7 +37,7 @@ function SurveyToolbar({
   isDeleteDisabled = !canEdit || isDeleteDisabled;
   const match = useRouteMatch();
   return (
-    <Toolbar id="survey-toolbar">
+    <Toolbar id="survey-toolbar" ouiaId="survey-toolbar">
       <ToolbarContent>
         <ToolbarItem>
           <Checkbox
@@ -48,6 +48,7 @@ function SurveyToolbar({
             }}
             aria-label={t`Select all`}
             id="select-all"
+            ouiaId="select-all"
           />
         </ToolbarItem>
         <ToolbarGroup>

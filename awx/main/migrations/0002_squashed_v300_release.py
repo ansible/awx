@@ -12,7 +12,6 @@ import django.db.models.deletion
 from django.conf import settings
 from django.utils.timezone import now
 
-import jsonfield.fields
 import taggit.managers
 
 
@@ -199,7 +198,7 @@ class Migration(migrations.Migration):
                 ),
                 ('recipients', models.TextField(default='', editable=False, blank=True)),
                 ('subject', models.TextField(default='', editable=False, blank=True)),
-                ('body', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('body', awx.main.fields.JSONBlob(default=dict, blank=True)),
             ],
             options={
                 'ordering': ('pk',),
@@ -230,7 +229,7 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ('notification_configuration', jsonfield.fields.JSONField(default=dict)),
+                ('notification_configuration', awx.main.fields.JSONBlob(default=dict)),
                 (
                     'created_by',
                     models.ForeignKey(
@@ -324,9 +323,7 @@ class Migration(migrations.Migration):
                 ('module', models.CharField(max_length=128)),
                 (
                     'facts',
-                    awx.main.fields.JSONBField(
-                        default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True
-                    ),
+                    models.JSONField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
                 ),
                 (
                     'host',

@@ -4,13 +4,14 @@ import inspect
 import json
 import re
 
+import six
+
 # Python LDAP
 import ldap
 import awx
 
 # Django
-from django.utils import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django Auth LDAP
 import django_auth_ldap.config
@@ -456,7 +457,7 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
         params = self.get_depends_on() or {}
         params_sanitized = dict()
 
-        cls_args = inspect.getargspec(cls.__init__).args[1:]
+        cls_args = inspect.getfullargspec(cls.__init__).args[1:]
 
         if cls_args:
             if not isinstance(params, dict):
@@ -487,7 +488,7 @@ class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):
             # Fail safe
             return {}
 
-        invalid_keys = set(value.keys()) - set(inspect.getargspec(group_type_cls.__init__).args[1:])
+        invalid_keys = set(value.keys()) - set(inspect.getfullargspec(group_type_cls.__init__).args[1:])
         if invalid_keys:
             invalid_keys = sorted(list(invalid_keys))
             keys_display = json.dumps(invalid_keys).lstrip('[').rstrip(']')
@@ -582,11 +583,11 @@ class SocialMapField(fields.ListField):
     def to_representation(self, value):
         if isinstance(value, (list, tuple)):
             return super(SocialMapField, self).to_representation(value)
-        elif value in fields.NullBooleanField.TRUE_VALUES:
+        elif value in fields.BooleanField.TRUE_VALUES:
             return True
-        elif value in fields.NullBooleanField.FALSE_VALUES:
+        elif value in fields.BooleanField.FALSE_VALUES:
             return False
-        elif value in fields.NullBooleanField.NULL_VALUES:
+        elif value in fields.BooleanField.NULL_VALUES:
             return None
         elif isinstance(value, (str, type(re.compile('')))):
             return self.child.to_representation(value)
@@ -596,11 +597,11 @@ class SocialMapField(fields.ListField):
     def to_internal_value(self, data):
         if isinstance(data, (list, tuple)):
             return super(SocialMapField, self).to_internal_value(data)
-        elif data in fields.NullBooleanField.TRUE_VALUES:
+        elif data in fields.BooleanField.TRUE_VALUES:
             return True
-        elif data in fields.NullBooleanField.FALSE_VALUES:
+        elif data in fields.BooleanField.FALSE_VALUES:
             return False
-        elif data in fields.NullBooleanField.NULL_VALUES:
+        elif data in fields.BooleanField.NULL_VALUES:
             return None
         elif isinstance(data, str):
             return self.child.run_validation(data)
@@ -614,6 +615,7 @@ class SocialSingleOrganizationMapField(HybridDictField):
     users = SocialMapField(allow_null=True, required=False)
     remove_admins = fields.BooleanField(required=False)
     remove_users = fields.BooleanField(required=False)
+    organization_alias = SocialMapField(allow_null=True, required=False)
 
     child = _Forbidden()
 
@@ -723,7 +725,6 @@ class SAMLTeamAttrTeamOrgMapField(HybridDictField):
     team = fields.CharField(required=True, allow_null=False)
     team_alias = fields.CharField(required=False, allow_null=True)
     organization = fields.CharField(required=True, allow_null=False)
-    organization_alias = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()
 
@@ -733,5 +734,17 @@ class SAMLTeamAttrField(HybridDictField):
     team_org_map = fields.ListField(required=False, child=SAMLTeamAttrTeamOrgMapField(), allow_null=True)
     remove = fields.BooleanField(required=False)
     saml_attr = fields.CharField(required=False, allow_null=True)
+
+    child = _Forbidden()
+
+
+class SAMLUserFlagsAttrField(HybridDictField):
+
+    is_superuser_attr = fields.CharField(required=False, allow_null=True)
+    is_superuser_value = fields.CharField(required=False, allow_null=True)
+    is_superuser_role = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_attr = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_value = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_role = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()

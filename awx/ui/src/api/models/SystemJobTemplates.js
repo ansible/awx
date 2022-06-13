@@ -7,7 +7,7 @@ const Mixins = SchedulesMixin(NotificationsMixin(Base));
 class SystemJobTemplates extends Mixins {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/system_job_templates/';
+    this.baseUrl = 'api/v2/system_job_templates/';
   }
 
   launch(id, data) {

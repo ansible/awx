@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 function AppendBody({ children }) {
-  const el = document.createElement('div');
+  const [el] = useState(document.createElement('div'));
 
   useEffect(() => {
     document.body.appendChild(el);

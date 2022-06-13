@@ -50,6 +50,7 @@ describe('<ApplicationAdd/>', () => {
         <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />
       );
     });
+
     expect(wrapper.find('ApplicationAdd').length).toBe(1);
     expect(wrapper.find('ApplicationForm').length).toBe(1);
     expect(ApplicationsAPI.readOptions).toBeCalled();

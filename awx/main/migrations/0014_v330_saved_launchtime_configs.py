@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='schedule',
             name='char_prompts',
-            field=awx.main.fields.JSONField(default=dict, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, blank=True),
         ),
         migrations.AddField(
             model_name='schedule',
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='schedule',
             name='survey_passwords',
-            field=awx.main.fields.JSONField(default=dict, editable=False, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
@@ -47,12 +47,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobnode',
             name='extra_data',
-            field=awx.main.fields.JSONField(default=dict, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
             name='survey_passwords',
-            field=awx.main.fields.JSONField(default=dict, editable=False, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
@@ -62,12 +62,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='extra_data',
-            field=awx.main.fields.JSONField(default=dict, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, blank=True),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='survey_passwords',
-            field=awx.main.fields.JSONField(default=dict, editable=False, blank=True),
+            field=awx.main.fields.JSONBlob(default=dict, editable=False, blank=True),
         ),
         # Run data migration before removing the old credential field
         migrations.RunPython(migration_utils.set_current_apps_for_migrations, migrations.RunPython.noop),
@@ -85,9 +85,9 @@ class Migration(migrations.Migration):
             name='JobLaunchConfig',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('extra_data', awx.main.fields.JSONField(blank=True, default=dict)),
-                ('survey_passwords', awx.main.fields.JSONField(blank=True, default=dict, editable=False)),
-                ('char_prompts', awx.main.fields.JSONField(blank=True, default=dict)),
+                ('extra_data', awx.main.fields.JSONBlob(blank=True, default=dict)),
+                ('survey_passwords', awx.main.fields.JSONBlob(blank=True, default=dict, editable=False)),
+                ('char_prompts', awx.main.fields.JSONBlob(blank=True, default=dict)),
                 ('credentials', models.ManyToManyField(related_name='joblaunchconfigs', to='main.Credential')),
                 (
                     'inventory',

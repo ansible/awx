@@ -38,6 +38,10 @@
   "AWX_ISOLATION_BASE_PATH":"/tmp",
   "AWX_ISOLATION_SHOW_PATHS":[],
   "AWX_TASK_ENV":{},
+  "GALAXY_TASK_ENV": {
+    "ANSIBLE_FORCE_COLOR": "false",
+    "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+   },
   "INSIGHTS_TRACKING_STATE":false,
   "PROJECT_UPDATE_VVV":false,
   "AWX_ROLES_ENABLED":true,
@@ -70,6 +74,7 @@
   "LOG_AGGREGATOR_MAX_DISK_USAGE_GB":1,
   "LOG_AGGREGATOR_MAX_DISK_USAGE_PATH":"/var/lib/awx",
   "LOG_AGGREGATOR_RSYSLOGD_DEBUG":false,
+  "API_400_ERROR_LOG_FORMAT":"status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}",
   "AUTOMATION_ANALYTICS_LAST_GATHER":null,
   "AUTOMATION_ANALYTICS_GATHER_INTERVAL":14400,
   "SESSION_COOKIE_AGE":1800,
@@ -247,6 +252,7 @@
   "SOCIAL_AUTH_SAML_TEAM_MAP":null,
   "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR":{},
   "SOCIAL_AUTH_SAML_TEAM_ATTR":{},
+  "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR":{},
   "NAMED_URL_FORMATS":{
     "organizations":"<name>",
     "teams":"<name>++<organization.name>",
@@ -295,5 +301,6 @@
     "users":{"fields":["username"],"adj_list":[]},
     "instances":{"fields":["hostname"],"adj_list":[]}
   },
-  "DEFAULT_EXECUTION_ENVIRONMENT": 1
+  "DEFAULT_EXECUTION_ENVIRONMENT": 1,
+  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false
 }

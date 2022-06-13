@@ -77,14 +77,40 @@ When a job is made to run, AWX will add `1` to the number of forks selected to c
 systems with a `forks` value of `5`, then the actual `forks` value from the perspective of Job Impact will be 6.
 
 #### Impact of Job Types in AWX
+Jobs have two types of impact. Task "execution" impact and task "control" impact.
+
+For instances that are the "controller_node" for a task,
+the impact is set by settings.AWX_CONTROL_NODE_TASK_IMPACT and it is the same no matter what type of job.
+
+For instances that are the "execution_node" for a task, the impact is calculated as following:
 
 Jobs and Ad-hoc jobs follow the above model, `forks + 1`.
 
-Other job types have a fixed impact:
+Other job types have a fixed execution impact:
 
 * Inventory Updates: 1
 * Project Updates: 1
 * System Jobs: 5
+
+For jobs that execute on the same node as they are controlled by, both settings.AWX_CONTROL_NODE_TASK_IMPACT and the job task execution impact apply.
+
+Examples:
+Given settings.AWX_CONTROL_NODE_TASK_IMPACT is 1:
+  - Project updates (where the execution_node is always the same as the controller_node), have a total impact of 2.
+  - Container group jobs (where the execution node is not a member of the cluster) only control impact applies, and the controller node has a total task impact of 1.
+
+### Selecting the Right settings.AWX_CONTROL_NODE_TASK_IMPACT
+
+This setting allows you to determine how much impact controlling jobs has. This
+can be helpful if you notice symptoms of your control plane exceeding desired
+CPU or memory usage, as it effectivly throttles how many jobs can be run
+concurrently by your control plane. This is usually a concern with container
+groups, which at this time effectively have infinite capacity, so it is easy to
+end up with too many jobs running concurrently, overwhelming the control plane
+pods with events and control processes.
+
+If you want more throttling behavior, increase the setting.
+If you want less throttling behavior, lower the setting.
 
 ### Selecting the Right Capacity
 

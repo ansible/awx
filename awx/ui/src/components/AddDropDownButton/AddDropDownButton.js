@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useState, useRef, useEffect } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
@@ -12,7 +13,7 @@ function AddDropDownButton({ dropdownItems, ouiaId }) {
 
   useEffect(() => {
     const toggle = (e) => {
-      if (!isKebabified && (!element || !element.current.contains(e.target))) {
+      if (!isKebabified && (!element || !element.current?.contains(e.target))) {
         setIsOpen(false);
       }
     };
@@ -42,6 +43,7 @@ function AddDropDownButton({ dropdownItems, ouiaId }) {
           />
         }
         dropdownItems={dropdownItems}
+        ouiaId="add-dropdown"
       />
     </div>
   );

@@ -1,10 +1,10 @@
-django-debug-toolbar==1.11
+django-debug-toolbar==3.2.4
 django-rest-swagger
 # pprofile - re-add once https://github.com/vpelletier/pprofile/issues/41 is addressed
-ipython==7.21.0
+ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
 black
-pytest
+pytest!=7.0.0
 pytest-cov
 pytest-django
 pytest-pythonpath

@@ -35,9 +35,9 @@ function CredentialsStep({
     name: 'credentials',
     validate: (val) =>
       credentialsValidator(
-        defaultCredentials,
         allowCredentialsWithPasswords,
-        val
+        val,
+        defaultCredentials
       ),
   });
   const [selectedType, setSelectedType] = useState(null);
@@ -102,9 +102,9 @@ function CredentialsStep({
   useEffect(() => {
     helpers.setError(
       credentialsValidator(
-        defaultCredentials,
         allowCredentialsWithPasswords,
-        field.value
+        field.value,
+        defaultCredentials
       )
     );
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -127,6 +127,7 @@ function CredentialsStep({
       onClick={() => removeItem(item)}
       isReadOnly={!canDelete}
       credential={item}
+      ouiaId={`credential-chip-${item.id}`}
     />
   );
 

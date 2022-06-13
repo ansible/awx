@@ -10,8 +10,8 @@ const DetailList = ({ children, stacked, ...props }) => (
 
 export default styled(DetailList)`
   display: grid;
-  grid-gap: 20px;
   align-items: start;
+  ${(props) => (props.compact ? `column-gap: 20px;` : `grid-gap: 20px;`)}
   ${(props) =>
     props.stacked
       ? `

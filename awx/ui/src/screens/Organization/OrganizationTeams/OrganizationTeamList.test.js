@@ -6,7 +6,6 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import OrganizationTeamList from './OrganizationTeamList';
 
@@ -100,7 +99,6 @@ describe('<OrganizationTeamList />', () => {
         <OrganizationTeamList id={1} searchString="" />
       );
     });
-    await sleep(0);
     wrapper.update();
 
     const list = wrapper.find('PaginatedTable');

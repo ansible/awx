@@ -7,12 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-01 18:39+0000\n"
+"POT-Creation-Date: 2021-07-29 13:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: ja \n"
-"MIME-Version: 1.0\n"
+"Language: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
@@ -304,7 +303,7 @@ msgstr "認証付与タイプ"
 
 #: awx/api/serializers.py:1239 awx/main/credential_plugins/azure_kv.py:25
 #: awx/main/credential_plugins/dsv.py:26
-#: awx/main/models/credential/__init__.py:895
+#: awx/main/models/credential/__init__.py:898
 msgid "Client Secret"
 msgstr "クライアントシークレット"
 
@@ -579,11 +578,11 @@ msgstr "ジョブテンプレートインベントリーが見つからないか
 msgid "Unknown, job may have been ran before launch configurations were saved."
 msgstr "不明です。ジョブは起動設定が保存される前に実行された可能性があります。"
 
-#: awx/api/serializers.py:3305 awx/main/tasks.py:2849 awx/main/tasks.py:2865
+#: awx/api/serializers.py:3305 awx/main/tasks.py:2752 awx/main/tasks.py:2768
 msgid "{} are prohibited from use in ad hoc commands."
 msgstr "{} の使用はアドホックコマンドで禁止されています。"
 
-#: awx/api/serializers.py:3387 awx/api/views/__init__.py:4141
+#: awx/api/serializers.py:3387 awx/api/views/__init__.py:4131
 #, python-brace-format
 msgid ""
 "Standard Output too large to display ({text_size} bytes), only download "
@@ -596,7 +595,7 @@ msgstr "指定された変数 {} には置き換えるデータベースの値�
 
 #: awx/api/serializers.py:3739
 msgid "\"$encrypted$ is a reserved keyword, may not be used for {}.\""
-msgstr "\"$encrypted$ は予約されたキーワードで、{} には使用できません。\""
+msgstr "\"$encrypted は予約されたキーワードで {} には使用できません。\""
 
 #: awx/api/serializers.py:4212
 msgid "A project is required to run a job."
@@ -800,109 +799,109 @@ msgstr "このインスタンスにターゲット設定されている実行中
 msgid "Count of all jobs that target this instance"
 msgstr "このインスタンスをターゲットに設定するすべてのジョブの数"
 
-#: awx/api/serializers.py:4829
+#: awx/api/serializers.py:4828
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance group"
 msgstr "このインスタンスグループにターゲット設定されている実行中または待機状態のジョブの数"
 
-#: awx/api/serializers.py:4831
+#: awx/api/serializers.py:4830
 msgid "Count of all jobs that target this instance group"
 msgstr "このインスタンスグループをターゲットに設定するすべてのジョブの数"
 
-#: awx/api/serializers.py:4835
+#: awx/api/serializers.py:4834
 msgid ""
 "Indicates whether instances in this group are containerized.Containerized "
 "groups have a designated Openshift or Kubernetes cluster."
 msgstr "このグループ内でインスタンスをコンテナー化するかを指定します。コンテナー化したグループには、指定の OpenShift または Kubernetes クラスターが含まれます。"
 
-#: awx/api/serializers.py:4845
+#: awx/api/serializers.py:4844
 msgid "Policy Instance Percentage"
 msgstr "ポリシーインスタンスの割合"
 
-#: awx/api/serializers.py:4846
+#: awx/api/serializers.py:4845
 msgid ""
 "Minimum percentage of all instances that will be automatically assigned to "
 "this group when new instances come online."
 msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンスの割合を選択します。"
 
-#: awx/api/serializers.py:4853
+#: awx/api/serializers.py:4852
 msgid "Policy Instance Minimum"
 msgstr "ポリシーインスタンスの最小値"
 
-#: awx/api/serializers.py:4854
+#: awx/api/serializers.py:4853
 msgid ""
 "Static minimum number of Instances that will be automatically assign to this "
 "group when new instances come online."
 msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンス数を入力します。"
 
-#: awx/api/serializers.py:4859
+#: awx/api/serializers.py:4858
 msgid "Policy Instance List"
 msgstr "ポリシーインスタンスの一覧"
 
-#: awx/api/serializers.py:4860
+#: awx/api/serializers.py:4859
 msgid "List of exact-match Instances that will be assigned to this group"
 msgstr "このグループに割り当てられる完全一致のインスタンスの一覧"
 
-#: awx/api/serializers.py:4901
+#: awx/api/serializers.py:4900
 msgid "Duplicate entry {}."
 msgstr "重複するエントリー {}。"
 
-#: awx/api/serializers.py:4903
+#: awx/api/serializers.py:4902
 msgid "{} is not a valid hostname of an existing instance."
 msgstr "{} は既存インスタンスの有効なホスト名ではありません。"
 
-#: awx/api/serializers.py:4905 awx/api/serializers.py:4910
-#: awx/api/serializers.py:4915
+#: awx/api/serializers.py:4904 awx/api/serializers.py:4909
+#: awx/api/serializers.py:4914
 msgid "Containerized instances may not be managed via the API"
 msgstr "コンテナー化されたインスタンスは API で管理されないことがあります"
 
-#: awx/api/serializers.py:4920 awx/api/serializers.py:4923
+#: awx/api/serializers.py:4919 awx/api/serializers.py:4922
 #, python-format
 msgid "%s instance group name may not be changed."
 msgstr "%s のインスタンスグループ名は変更できません。"
 
-#: awx/api/serializers.py:4929
+#: awx/api/serializers.py:4928
 msgid "Only Kubernetes credentials can be associated with an Instance Group"
 msgstr "インスタンスグループに関連付けることができる Kubernetes 認証情報のみです"
 
-#: awx/api/serializers.py:4936
+#: awx/api/serializers.py:4935
 msgid ""
 "is_container_group must be True when associating a credential to an Instance "
 "Group"
 msgstr "認証情報をインスタンスグループに関連付けるときは、is_container_group を True にする必要があります"
 
-#: awx/api/serializers.py:4972
+#: awx/api/serializers.py:4971
 msgid ""
 "When present, shows the field name of the role or relationship that changed."
 msgstr "これがある場合には、変更された関係またはロールのフィールド名を表示します。"
 
-#: awx/api/serializers.py:4973
+#: awx/api/serializers.py:4972
 msgid ""
 "When present, shows the model on which the role or relationship was defined."
 msgstr "これがある場合には、ロールまたは関係が定義されているモデルを表示します。"
 
-#: awx/api/serializers.py:5019
+#: awx/api/serializers.py:5018
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr "オブジェクトの作成、更新または削除時の新規値および変更された値の概要"
 
-#: awx/api/serializers.py:5022
+#: awx/api/serializers.py:5021
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
 "associated or disassociated with object2."
 msgstr "作成、更新、および削除イベントの場合、これは影響を受けたオブジェクトタイプになります。関連付けおよび関連付け解除イベントの場合、これは object2 に関連付けられたか、またはその関連付けが解除されたオブジェクトタイプになります。"
 
-#: awx/api/serializers.py:5027
+#: awx/api/serializers.py:5026
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated "
 "with."
 msgstr "作成、更新、および削除イベントの場合は設定されません。関連付けおよび関連付け解除イベントの場合、これは object1 が関連付けられるオブジェクトタイプになります。"
 
-#: awx/api/serializers.py:5031
+#: awx/api/serializers.py:5030
 msgid "The action taken with respect to the given object(s)."
 msgstr "指定されたオブジェクトについて実行されたアクション。"
 
@@ -939,446 +938,433 @@ msgstr "インスタンスジョブ"
 msgid "Instance's Instance Groups"
 msgstr "インスタンスのインスタンスグループ"
 
-#: awx/api/views/__init__.py:407
-#, python-brace-format
-msgid ""
-"Cannot change instance group membership of control-only node: {parent."
-"hostname}."
-msgstr "制御専用ノードのインスタンスグループメンバーシップを変更できません: {parent.hostname} 。"
-
-#: awx/api/views/__init__.py:413
+#: awx/api/views/__init__.py:408
 msgid "Instance Groups"
 msgstr "インスタンスグループ"
 
-#: awx/api/views/__init__.py:421
+#: awx/api/views/__init__.py:416
 msgid "Instance Group Detail"
 msgstr "インスタンスグループの詳細"
 
-#: awx/api/views/__init__.py:436
+#: awx/api/views/__init__.py:431
 msgid "Instance Group Running Jobs"
 msgstr "ジョブを実行しているインスタンスグループ"
 
-#: awx/api/views/__init__.py:445
+#: awx/api/views/__init__.py:440
 msgid "Instance Group's Instances"
 msgstr "インスタンスグループのインスタンス"
 
-#: awx/api/views/__init__.py:454
-#, python-brace-format
-msgid ""
-"Cannot change instance group membership of control-only node: {sub.hostname}."
-msgstr "制御専用ノードのインスタンスグループメンバーシップを変更できません: {sub.hostname} 。"
-
-#: awx/api/views/__init__.py:460
+#: awx/api/views/__init__.py:450
 msgid "Schedules"
 msgstr "スケジュール"
 
-#: awx/api/views/__init__.py:474
+#: awx/api/views/__init__.py:464
 msgid "Schedule Recurrence Rule Preview"
 msgstr "繰り返しルールプレビューのスケジュール"
 
-#: awx/api/views/__init__.py:515
+#: awx/api/views/__init__.py:505
 msgid "Cannot assign credential when related template is null."
 msgstr "関連するテンプレートが null の場合は認証情報を割り当てることができません。"
 
-#: awx/api/views/__init__.py:520
+#: awx/api/views/__init__.py:510
 msgid "Related template cannot accept {} on launch."
 msgstr "関連するテンプレートは起動時に {} を受け入れません。"
 
-#: awx/api/views/__init__.py:522
+#: awx/api/views/__init__.py:512
 msgid ""
 "Credential that requires user input on launch cannot be used in saved launch "
 "configuration."
 msgstr "起動時にユーザー入力を必要とする認証情報は保存された起動設定で使用できません。"
 
-#: awx/api/views/__init__.py:527
+#: awx/api/views/__init__.py:517
 msgid "Related template is not configured to accept credentials on launch."
 msgstr "関連するテンプレートは起動時に認証情報を受け入れるよう設定されていません。"
 
-#: awx/api/views/__init__.py:530
+#: awx/api/views/__init__.py:520
 #, python-brace-format
 msgid ""
 "This launch configuration already provides a {credential_type} credential."
 msgstr "この起動設定は {credential_type} 認証情報をすでに指定しています。"
 
-#: awx/api/views/__init__.py:533
+#: awx/api/views/__init__.py:523
 #, python-brace-format
 msgid "Related template already uses {credential_type} credential."
 msgstr "関連するテンプレートは {credential_type} 認証情報をすでに使用しています。"
 
-#: awx/api/views/__init__.py:550
+#: awx/api/views/__init__.py:540
 msgid "Schedule Jobs List"
 msgstr "スケジュールジョブの一覧"
 
-#: awx/api/views/__init__.py:632 awx/api/views/__init__.py:4347
+#: awx/api/views/__init__.py:622 awx/api/views/__init__.py:4337
 msgid ""
 "You cannot assign an Organization participation role as a child role for a "
 "Team."
 msgstr "組織の参加ロールをチームの子ロールとして割り当てることができません。"
 
-#: awx/api/views/__init__.py:636 awx/api/views/__init__.py:4361
+#: awx/api/views/__init__.py:626 awx/api/views/__init__.py:4351
 msgid "You cannot grant system-level permissions to a team."
 msgstr "システムレベルのパーミッションをチームに付与できません。"
 
-#: awx/api/views/__init__.py:643 awx/api/views/__init__.py:4353
+#: awx/api/views/__init__.py:633 awx/api/views/__init__.py:4343
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
 msgstr "組織フィールドが設定されていないか、または別の組織に属する場合に認証情報のアクセス権をチームに付与できません"
 
-#: awx/api/views/__init__.py:730
+#: awx/api/views/__init__.py:720
 msgid "Only the 'pull' field can be edited for managed execution environments."
 msgstr "管理対象の実行環境では、「プル」フィールドのみを編集できます。"
 
-#: awx/api/views/__init__.py:805
+#: awx/api/views/__init__.py:795
 msgid "Project Schedules"
 msgstr "プロジェクトのスケジュール"
 
-#: awx/api/views/__init__.py:816
+#: awx/api/views/__init__.py:806
 msgid "Project SCM Inventory Sources"
 msgstr "プロジェクト SCM のインベントリーソース"
 
-#: awx/api/views/__init__.py:913
+#: awx/api/views/__init__.py:903
 msgid "Project Update Events List"
 msgstr "プロジェクト更新イベント一覧"
 
-#: awx/api/views/__init__.py:933
+#: awx/api/views/__init__.py:923
 msgid "System Job Events List"
 msgstr "システムジョブイベント一覧"
 
-#: awx/api/views/__init__.py:973
+#: awx/api/views/__init__.py:963
 msgid "Project Update SCM Inventory Updates"
 msgstr "プロジェクト更新 SCM のインベントリー更新"
 
-#: awx/api/views/__init__.py:1018
+#: awx/api/views/__init__.py:1008
 msgid "Me"
 msgstr "自分"
 
-#: awx/api/views/__init__.py:1027
+#: awx/api/views/__init__.py:1017
 msgid "OAuth 2 Applications"
 msgstr "OAuth 2 アプリケーション"
 
-#: awx/api/views/__init__.py:1036
+#: awx/api/views/__init__.py:1026
 msgid "OAuth 2 Application Detail"
 msgstr "OAuth 2 アプリケーションの詳細"
 
-#: awx/api/views/__init__.py:1049
+#: awx/api/views/__init__.py:1039
 msgid "OAuth 2 Application Tokens"
 msgstr "OAuth 2 アプリケーショントークン"
 
-#: awx/api/views/__init__.py:1071
+#: awx/api/views/__init__.py:1061
 msgid "OAuth2 Tokens"
 msgstr "OAuth2 トークン"
 
-#: awx/api/views/__init__.py:1080
+#: awx/api/views/__init__.py:1070
 msgid "OAuth2 User Tokens"
 msgstr "OAuth2 ユーザートークン"
 
-#: awx/api/views/__init__.py:1092
+#: awx/api/views/__init__.py:1082
 msgid "OAuth2 User Authorized Access Tokens"
 msgstr "OAuth2 ユーザー認可アクセストークン"
 
-#: awx/api/views/__init__.py:1107
+#: awx/api/views/__init__.py:1097
 msgid "Organization OAuth2 Applications"
 msgstr "組織 OAuth2 アプリケーション"
 
-#: awx/api/views/__init__.py:1119
+#: awx/api/views/__init__.py:1109
 msgid "OAuth2 Personal Access Tokens"
 msgstr "OAuth2 パーソナルアクセストークン"
 
-#: awx/api/views/__init__.py:1134
+#: awx/api/views/__init__.py:1124
 msgid "OAuth Token Detail"
 msgstr "OAuth トークンの詳細"
 
-#: awx/api/views/__init__.py:1193 awx/api/views/__init__.py:4314
+#: awx/api/views/__init__.py:1183 awx/api/views/__init__.py:4304
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr "認証情報の組織に属さないユーザーに認証情報のアクセス権を付与することはできません"
 
-#: awx/api/views/__init__.py:1197 awx/api/views/__init__.py:4318
+#: awx/api/views/__init__.py:1187 awx/api/views/__init__.py:4308
 msgid "You cannot grant private credential access to another user"
 msgstr "非公開の認証情報のアクセス権を別のユーザーに付与することはできません"
 
-#: awx/api/views/__init__.py:1294
+#: awx/api/views/__init__.py:1284
 #, python-format
 msgid "Cannot change %s."
 msgstr "%s を変更できません。"
 
-#: awx/api/views/__init__.py:1300
+#: awx/api/views/__init__.py:1290
 msgid "Cannot delete user."
 msgstr "ユーザーを削除できません。"
 
-#: awx/api/views/__init__.py:1324
+#: awx/api/views/__init__.py:1314
 msgid "Deletion not allowed for managed credential types"
 msgstr "管理されている認証情報タイプで削除は許可されません"
 
-#: awx/api/views/__init__.py:1326
+#: awx/api/views/__init__.py:1316
 msgid "Credential types that are in use cannot be deleted"
 msgstr "使用中の認証情報タイプを削除できません"
 
-#: awx/api/views/__init__.py:1439
+#: awx/api/views/__init__.py:1429
 msgid "Deletion not allowed for managed credentials"
 msgstr "管理されている認証情報では削除が許可されません"
 
-#: awx/api/views/__init__.py:1483
+#: awx/api/views/__init__.py:1473
 msgid "External Credential Test"
 msgstr "外部認証情報のテスト"
 
-#: awx/api/views/__init__.py:1515
+#: awx/api/views/__init__.py:1505
 msgid "Credential Input Source Detail"
 msgstr "認証情報の入力ソース詳細"
 
-#: awx/api/views/__init__.py:1523 awx/api/views/__init__.py:1531
+#: awx/api/views/__init__.py:1513 awx/api/views/__init__.py:1521
 msgid "Credential Input Sources"
 msgstr "認証情報の入力ソース"
 
-#: awx/api/views/__init__.py:1546
+#: awx/api/views/__init__.py:1536
 msgid "External Credential Type Test"
 msgstr "外部認証情報の種類テスト"
 
-#: awx/api/views/__init__.py:1608
+#: awx/api/views/__init__.py:1598
 msgid "The inventory for this host is already being deleted."
 msgstr "このホストのインベントリーはすでに削除されています。"
 
-#: awx/api/views/__init__.py:1775
+#: awx/api/views/__init__.py:1765
 msgid "Cyclical Group association."
 msgstr "循環的なグループの関連付け"
 
-#: awx/api/views/__init__.py:1938
+#: awx/api/views/__init__.py:1928
 msgid "Inventory subset argument must be a string."
 msgstr "インベントリーサブセットの引数は文字列でなければなりません。"
 
-#: awx/api/views/__init__.py:1942
+#: awx/api/views/__init__.py:1932
 msgid "Subset does not use any supported syntax."
 msgstr "サポートされている構文がサブセットで使用されていません。"
 
-#: awx/api/views/__init__.py:1986
+#: awx/api/views/__init__.py:1976
 msgid "Inventory Source List"
 msgstr "インベントリーソース一覧"
 
-#: awx/api/views/__init__.py:1998
+#: awx/api/views/__init__.py:1988
 msgid "Inventory Sources Update"
 msgstr "インベントリーソースの更新"
 
-#: awx/api/views/__init__.py:2030
+#: awx/api/views/__init__.py:2020
 msgid "Could not start because `can_update` returned False"
 msgstr "`can_update` が False を返したので開始できませんでした"
 
-#: awx/api/views/__init__.py:2038
+#: awx/api/views/__init__.py:2028
 msgid "No inventory sources to update."
 msgstr "更新するインベントリーソースがありません。"
 
-#: awx/api/views/__init__.py:2059
+#: awx/api/views/__init__.py:2049
 msgid "Inventory Source Schedules"
 msgstr "インベントリーソースのスケジュール"
 
-#: awx/api/views/__init__.py:2087
+#: awx/api/views/__init__.py:2077
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr "ソースが {} のいずれかである場合、通知テンプレートのみを割り当てることができます。"
 
-#: awx/api/views/__init__.py:2183
+#: awx/api/views/__init__.py:2173
 msgid "Source already has credential assigned."
 msgstr "ソースには認証情報がすでに割り当てられています。"
 
-#: awx/api/views/__init__.py:2395
+#: awx/api/views/__init__.py:2385
 msgid "Job Template Schedules"
 msgstr "ジョブテンプレートスケジュール"
 
-#: awx/api/views/__init__.py:2433
+#: awx/api/views/__init__.py:2423
 msgid "Field '{}' is missing from survey spec."
 msgstr "Survey の指定にフィールド '{}' がありません。"
 
-#: awx/api/views/__init__.py:2435
+#: awx/api/views/__init__.py:2425
 msgid "Expected {} for field '{}', received {} type."
 msgstr "フィールド '{}' の予期される {}。{} タイプを受信しました。"
 
-#: awx/api/views/__init__.py:2438
+#: awx/api/views/__init__.py:2428
 msgid "'spec' doesn't contain any items."
 msgstr "「spec」には項目が含まれません。"
 
-#: awx/api/views/__init__.py:2449
+#: awx/api/views/__init__.py:2439
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr "Survey の質問 %s は json オブジェクトではありません。"
 
-#: awx/api/views/__init__.py:2453
+#: awx/api/views/__init__.py:2443
 #, python-brace-format
 msgid "'{field_name}' missing from survey question {idx}"
 msgstr "Survey の質問 {idx} に '{field_name}' がありません。"
 
-#: awx/api/views/__init__.py:2465
+#: awx/api/views/__init__.py:2455
 #, python-brace-format
 msgid "'{field_name}' in survey question {idx} expected to be {type_label}."
 msgstr "Survey の質問 {idx} の '{field_name}' は {type_label} である必要があります。"
 
-#: awx/api/views/__init__.py:2473
+#: awx/api/views/__init__.py:2463
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr "Survey の質問 %(survey)s で '変数' '%(item)s' が重複しています。"
 
-#: awx/api/views/__init__.py:2485
+#: awx/api/views/__init__.py:2475
 #, python-brace-format
 msgid ""
 "'{survey_item[type]}' in survey question {idx} is not one of "
 "'{allowed_types}' allowed question types."
 msgstr "Survey の質問 {idx} の '{survey_item[type]}' は、'{allowed_types}' で許可されている質問タイプではありません。"
 
-#: awx/api/views/__init__.py:2498
+#: awx/api/views/__init__.py:2488
 #, python-brace-format
 msgid ""
 "Default value {survey_item[default]} in survey question {idx} expected to be "
 "{type_label}."
 msgstr "Survey の質問 {idx} のデフォルト値 {survey_item[default]} は、{type_label} である必要があります。"
 
-#: awx/api/views/__init__.py:2510
+#: awx/api/views/__init__.py:2500
 #, python-brace-format
 msgid "The {min_or_max} limit in survey question {idx} expected to be integer."
 msgstr "Survey の質問 {idx} の {min_or_max} の制限は整数である必要があります。"
 
-#: awx/api/views/__init__.py:2521
+#: awx/api/views/__init__.py:2511
 #, python-brace-format
 msgid "Survey question {idx} of type {survey_item[type]} must specify choices."
 msgstr "タイプ {survey_item[type]} の Survey の質問 {idx} には選択肢を指定する必要があります。"
 
-#: awx/api/views/__init__.py:2536
+#: awx/api/views/__init__.py:2526
 msgid "Multiple Choice (Single Select) can only have one default value."
 msgstr "選択肢方式 (単一の選択) では、デフォルト値を 1 つだけ使用できます。"
 
-#: awx/api/views/__init__.py:2541
+#: awx/api/views/__init__.py:2531
 msgid "Default choice must be answered from the choices listed."
 msgstr "デフォルトで指定されている選択項目は、一覧から回答する必要があります。"
 
-#: awx/api/views/__init__.py:2551
+#: awx/api/views/__init__.py:2541
 #, python-brace-format
 msgid ""
 "$encrypted$ is a reserved keyword for password question defaults, survey "
 "question {idx} is type {survey_item[type]}."
-msgstr "$encrypted$ は、デフォルト設定されているパスワードの質問に予約されたキーワードで、Survey の質問 {idx} は {survey_item[type]} タイプです。"
+msgstr "$encrypted$ はパスワードの質問のデフォルトの予約されたキーワードで、Survey の質問 {idx} はタイプ {survey_item[type]} です。"
 
-#: awx/api/views/__init__.py:2567
+#: awx/api/views/__init__.py:2557
 #, python-brace-format
 msgid ""
 "$encrypted$ is a reserved keyword, may not be used for new default in "
 "position {idx}."
 msgstr "$encrypted$ は予約されたキーワードで、位置 {idx} の新規デフォルトに使用できません。"
 
-#: awx/api/views/__init__.py:2639
+#: awx/api/views/__init__.py:2629
 #, python-brace-format
 msgid "Cannot assign multiple {credential_type} credentials."
 msgstr "複数の {credential_type} 認証情報を割り当てることができません。"
 
-#: awx/api/views/__init__.py:2642
+#: awx/api/views/__init__.py:2632
 msgid "Cannot assign a Credential of kind `{}`."
 msgstr "`{}`の種類の認証情報を割り当てることができません。"
 
-#: awx/api/views/__init__.py:2666
+#: awx/api/views/__init__.py:2656
 msgid "Maximum number of labels for {} reached."
 msgstr "{} のラベルの最大数に達しました。"
 
-#: awx/api/views/__init__.py:2783
+#: awx/api/views/__init__.py:2773
 msgid "No matching host could be found!"
 msgstr "一致するホストが見つかりませんでした!"
 
-#: awx/api/views/__init__.py:2786
+#: awx/api/views/__init__.py:2776
 msgid "Multiple hosts matched the request!"
 msgstr "複数のホストが要求に一致しました!"
 
-#: awx/api/views/__init__.py:2791
+#: awx/api/views/__init__.py:2781
 msgid "Cannot start automatically, user input required!"
 msgstr "自動的に開始できません。ユーザー入力が必要です!"
 
-#: awx/api/views/__init__.py:2797
+#: awx/api/views/__init__.py:2787
 msgid "Host callback job already pending."
 msgstr "ホストのコールバックジョブがすでに保留中です。"
 
-#: awx/api/views/__init__.py:2813 awx/api/views/__init__.py:3567
+#: awx/api/views/__init__.py:2803 awx/api/views/__init__.py:3557
 msgid "Error starting job!"
 msgstr "ジョブの開始時にエラーが発生しました!"
 
-#: awx/api/views/__init__.py:2938 awx/api/views/__init__.py:2957
+#: awx/api/views/__init__.py:2928 awx/api/views/__init__.py:2947
 msgid "Cycle detected."
 msgstr "サイクルが検出されました。"
 
-#: awx/api/views/__init__.py:2949
+#: awx/api/views/__init__.py:2939
 msgid "Relationship not allowed."
 msgstr "リレーションシップは許可されていません。"
 
-#: awx/api/views/__init__.py:3178
+#: awx/api/views/__init__.py:3168
 msgid "Cannot relaunch slice workflow job orphaned from job template."
 msgstr "ジョブテンプレートから孤立しているスライスされたワークフロージョブを再起動することはできません。"
 
-#: awx/api/views/__init__.py:3180
+#: awx/api/views/__init__.py:3170
 msgid "Cannot relaunch sliced workflow job after slice count has changed."
 msgstr "スライス数を変更した後は、スライスされたワークフロージョブを再起動することはできません。"
 
-#: awx/api/views/__init__.py:3213
+#: awx/api/views/__init__.py:3203
 msgid "Workflow Job Template Schedules"
 msgstr "ワークフロージョブテンプレートのスケジュール"
 
-#: awx/api/views/__init__.py:3356 awx/api/views/__init__.py:3988
+#: awx/api/views/__init__.py:3346 awx/api/views/__init__.py:3978
 msgid "Superuser privileges needed."
 msgstr "スーパーユーザー権限が必要です。"
 
-#: awx/api/views/__init__.py:3389
+#: awx/api/views/__init__.py:3379
 msgid "System Job Template Schedules"
 msgstr "システムジョブテンプレートのスケジュール"
 
-#: awx/api/views/__init__.py:3547
+#: awx/api/views/__init__.py:3537
 #, python-brace-format
 msgid "Wait until job finishes before retrying on {status_value} hosts."
 msgstr "ジョブの終了を待機してから {status_value} ホストで再試行します。"
 
-#: awx/api/views/__init__.py:3553
+#: awx/api/views/__init__.py:3543
 #, python-brace-format
 msgid "Cannot retry on {status_value} hosts, playbook stats not available."
 msgstr "Playbook 統計を利用できないため、{status_value} ホストで再試行できません。"
 
-#: awx/api/views/__init__.py:3559
+#: awx/api/views/__init__.py:3549
 #, python-brace-format
 msgid "Cannot relaunch because previous job had 0 {status_value} hosts."
 msgstr "直前のジョブにあるのが 0 {status_value} ホストがあるため、再起動できません。"
 
-#: awx/api/views/__init__.py:3589
+#: awx/api/views/__init__.py:3579
 msgid "Cannot create schedule because job requires credential passwords."
 msgstr "ジョブには認証情報パスワードが必要なため、スケジュールを削除できません。"
 
-#: awx/api/views/__init__.py:3593
+#: awx/api/views/__init__.py:3583
 msgid "Cannot create schedule because job was launched by legacy method."
 msgstr "ジョブがレガシー方式で起動したため、スケジュールを作成できません。"
 
-#: awx/api/views/__init__.py:3594
+#: awx/api/views/__init__.py:3584
 msgid "Cannot create schedule because a related resource is missing."
 msgstr "関連するリソースがないため、スケジュールを作成できません。"
 
-#: awx/api/views/__init__.py:3648
+#: awx/api/views/__init__.py:3638
 msgid "Job Host Summaries List"
 msgstr "ジョブホスト概要一覧"
 
-#: awx/api/views/__init__.py:3704
+#: awx/api/views/__init__.py:3694
 msgid "Job Event Children List"
 msgstr "ジョブイベント子一覧"
 
-#: awx/api/views/__init__.py:3735
+#: awx/api/views/__init__.py:3725
 msgid "Job Events List"
 msgstr "ジョブイベント一覧"
 
-#: awx/api/views/__init__.py:3936
+#: awx/api/views/__init__.py:3926
 msgid "Ad Hoc Command Events List"
 msgstr "アドホックコマンドイベント一覧"
 
-#: awx/api/views/__init__.py:4187
+#: awx/api/views/__init__.py:4177
 msgid "Delete not allowed while there are pending notifications"
 msgstr "保留中の通知がある場合に削除は許可されません"
 
-#: awx/api/views/__init__.py:4194
+#: awx/api/views/__init__.py:4184
 msgid "Notification Template Test"
 msgstr "通知テンプレートテスト"
 
-#: awx/api/views/__init__.py:4450 awx/api/views/__init__.py:4465
+#: awx/api/views/__init__.py:4440 awx/api/views/__init__.py:4455
 msgid "User does not have permission to approve or deny this workflow."
 msgstr "このワークフローを承認または拒否するパーミッションはありません。"
 
-#: awx/api/views/__init__.py:4452 awx/api/views/__init__.py:4467
+#: awx/api/views/__init__.py:4442 awx/api/views/__init__.py:4457
 msgid "This workflow step has already been approved or denied."
 msgstr "このワークフローの手順はすでに承認または拒否されています。"
 
@@ -1411,7 +1397,7 @@ msgstr "実行中のジョブリソースを削除できません。"
 msgid "Job has not finished processing events."
 msgstr "ジョブはイベント処理を終了していません。"
 
-#: awx/api/views/mixin.py:149
+#: awx/api/views/mixin.py:138
 msgid "Related job {} is still processing events."
 msgstr "関連するジョブ {} は依然としてイベントを処理しています。"
 
@@ -2633,12 +2619,12 @@ msgstr "Vault URL (DNS 名)"
 
 #: awx/main/credential_plugins/azure_kv.py:22
 #: awx/main/credential_plugins/dsv.py:23
-#: awx/main/models/credential/__init__.py:892
+#: awx/main/models/credential/__init__.py:895
 msgid "Client ID"
 msgstr "クライアント ID"
 
 #: awx/main/credential_plugins/azure_kv.py:29
-#: awx/main/models/credential/__init__.py:899
+#: awx/main/models/credential/__init__.py:902
 msgid "Tenant ID"
 msgstr "テナント ID"
 
@@ -2742,17 +2728,17 @@ msgstr "アカウント"
 
 #: awx/main/credential_plugins/conjur.py:31
 #: awx/main/credential_plugins/tss.py:16
-#: awx/main/models/credential/__init__.py:585
-#: awx/main/models/credential/__init__.py:621
-#: awx/main/models/credential/__init__.py:662
-#: awx/main/models/credential/__init__.py:733
-#: awx/main/models/credential/__init__.py:797
-#: awx/main/models/credential/__init__.py:822
-#: awx/main/models/credential/__init__.py:885
-#: awx/main/models/credential/__init__.py:956
-#: awx/main/models/credential/__init__.py:981
-#: awx/main/models/credential/__init__.py:1032
-#: awx/main/models/credential/__init__.py:1122
+#: awx/main/models/credential/__init__.py:588
+#: awx/main/models/credential/__init__.py:624
+#: awx/main/models/credential/__init__.py:665
+#: awx/main/models/credential/__init__.py:736
+#: awx/main/models/credential/__init__.py:800
+#: awx/main/models/credential/__init__.py:825
+#: awx/main/models/credential/__init__.py:888
+#: awx/main/models/credential/__init__.py:959
+#: awx/main/models/credential/__init__.py:984
+#: awx/main/models/credential/__init__.py:1035
+#: awx/main/models/credential/__init__.py:1125
 msgid "Username"
 msgstr "ユーザー名"
 
@@ -2807,8 +2793,8 @@ msgid "The URL to the HashiCorp Vault"
 msgstr "HashiCorp Vault の URL"
 
 #: awx/main/credential_plugins/hashivault.py:22
-#: awx/main/models/credential/__init__.py:920
-#: awx/main/models/credential/__init__.py:939
+#: awx/main/models/credential/__init__.py:923
+#: awx/main/models/credential/__init__.py:942
 msgid "Token"
 msgstr "トークン"
 
@@ -2941,15 +2927,15 @@ msgid "The (Application) user username"
 msgstr "(アプリケーション) ユーザーのユーザー名"
 
 #: awx/main/credential_plugins/tss.py:22
-#: awx/main/models/credential/__init__.py:586
-#: awx/main/models/credential/__init__.py:622
-#: awx/main/models/credential/__init__.py:665
-#: awx/main/models/credential/__init__.py:800
-#: awx/main/models/credential/__init__.py:825
-#: awx/main/models/credential/__init__.py:888
-#: awx/main/models/credential/__init__.py:957
-#: awx/main/models/credential/__init__.py:984
-#: awx/main/models/credential/__init__.py:1040
+#: awx/main/models/credential/__init__.py:589
+#: awx/main/models/credential/__init__.py:625
+#: awx/main/models/credential/__init__.py:668
+#: awx/main/models/credential/__init__.py:803
+#: awx/main/models/credential/__init__.py:828
+#: awx/main/models/credential/__init__.py:891
+#: awx/main/models/credential/__init__.py:960
+#: awx/main/models/credential/__init__.py:987
+#: awx/main/models/credential/__init__.py:1043
 msgid "Password"
 msgstr "パスワード"
 
@@ -3210,417 +3196,417 @@ msgid ""
 msgstr "作成する必要のある証明書のタイプを指定します。それぞれのタイプの詳細については、ドキュメントを参照してください。"
 
 #: awx/main/models/credential/__init__.py:106
-#: awx/main/models/credential/__init__.py:345
+#: awx/main/models/credential/__init__.py:348
 msgid ""
 "Enter inputs using either JSON or YAML syntax. Refer to the documentation "
 "for example syntax."
 msgstr "JSON または YAML 構文のいずれかを使用して入力を行います。構文のサンプルについてはドキュメントを参照してください。"
 
-#: awx/main/models/credential/__init__.py:328
-#: awx/main/models/credential/__init__.py:582
+#: awx/main/models/credential/__init__.py:331
+#: awx/main/models/credential/__init__.py:585
 msgid "Machine"
 msgstr "マシン"
 
-#: awx/main/models/credential/__init__.py:329
-#: awx/main/models/credential/__init__.py:632
+#: awx/main/models/credential/__init__.py:332
+#: awx/main/models/credential/__init__.py:635
 msgid "Vault"
 msgstr "Vault"
 
-#: awx/main/models/credential/__init__.py:330
-#: awx/main/models/credential/__init__.py:658
+#: awx/main/models/credential/__init__.py:333
+#: awx/main/models/credential/__init__.py:661
 msgid "Network"
 msgstr "ネットワーク"
 
-#: awx/main/models/credential/__init__.py:331
-#: awx/main/models/credential/__init__.py:617
+#: awx/main/models/credential/__init__.py:334
+#: awx/main/models/credential/__init__.py:620
 msgid "Source Control"
 msgstr "ソースコントロール"
 
-#: awx/main/models/credential/__init__.py:332
+#: awx/main/models/credential/__init__.py:335
 msgid "Cloud"
 msgstr "クラウド"
 
-#: awx/main/models/credential/__init__.py:333
-#: awx/main/models/credential/__init__.py:1110
+#: awx/main/models/credential/__init__.py:336
+#: awx/main/models/credential/__init__.py:1113
 msgid "Container Registry"
 msgstr "コンテナーレジストリー"
 
-#: awx/main/models/credential/__init__.py:334
+#: awx/main/models/credential/__init__.py:337
 msgid "Personal Access Token"
 msgstr "パーソナルアクセストークン"
 
-#: awx/main/models/credential/__init__.py:335
-#: awx/main/models/credential/__init__.py:952
+#: awx/main/models/credential/__init__.py:338
+#: awx/main/models/credential/__init__.py:955
 msgid "Insights"
 msgstr "Insights"
 
-#: awx/main/models/credential/__init__.py:336
+#: awx/main/models/credential/__init__.py:339
 msgid "External"
 msgstr "外部"
 
-#: awx/main/models/credential/__init__.py:337
+#: awx/main/models/credential/__init__.py:340
 msgid "Kubernetes"
 msgstr "Kubernetes"
 
-#: awx/main/models/credential/__init__.py:338
+#: awx/main/models/credential/__init__.py:341
 msgid "Galaxy/Automation Hub"
 msgstr "Galaxy / Automation Hub"
 
-#: awx/main/models/credential/__init__.py:350
+#: awx/main/models/credential/__init__.py:353
 msgid ""
 "Enter injectors using either JSON or YAML syntax. Refer to the documentation "
 "for example syntax."
 msgstr "JSON または YAML 構文のいずれかを使用してインジェクターを入力します。構文のサンプルについてはドキュメントを参照してください。"
 
-#: awx/main/models/credential/__init__.py:409
+#: awx/main/models/credential/__init__.py:412
 #, python-format
 msgid "adding %s credential type"
 msgstr "%s 認証情報タイプの追加"
 
-#: awx/main/models/credential/__init__.py:587
-#: awx/main/models/credential/__init__.py:669
+#: awx/main/models/credential/__init__.py:590
+#: awx/main/models/credential/__init__.py:672
 msgid "SSH Private Key"
 msgstr "SSH 秘密鍵"
 
-#: awx/main/models/credential/__init__.py:590
+#: awx/main/models/credential/__init__.py:593
 msgid "Signed SSH Certificate"
 msgstr "署名済みの SSH 証明書"
 
-#: awx/main/models/credential/__init__.py:595
-#: awx/main/models/credential/__init__.py:624
-#: awx/main/models/credential/__init__.py:672
+#: awx/main/models/credential/__init__.py:598
+#: awx/main/models/credential/__init__.py:627
+#: awx/main/models/credential/__init__.py:675
 msgid "Private Key Passphrase"
 msgstr "秘密鍵のパスフレーズ"
 
-#: awx/main/models/credential/__init__.py:598
+#: awx/main/models/credential/__init__.py:601
 msgid "Privilege Escalation Method"
 msgstr "権限昇格方法"
 
-#: awx/main/models/credential/__init__.py:601
+#: awx/main/models/credential/__init__.py:604
 msgid ""
 "Specify a method for \"become\" operations. This is equivalent to specifying "
 "the --become-method Ansible parameter."
 msgstr "「become」操作の方式を指定します。これは --become-method Ansible パラメーターを指定することに相当します。"
 
-#: awx/main/models/credential/__init__.py:606
+#: awx/main/models/credential/__init__.py:609
 msgid "Privilege Escalation Username"
 msgstr "権限昇格のユーザー名"
 
-#: awx/main/models/credential/__init__.py:609
+#: awx/main/models/credential/__init__.py:612
 msgid "Privilege Escalation Password"
 msgstr "権限昇格のパスワード"
 
-#: awx/main/models/credential/__init__.py:623
+#: awx/main/models/credential/__init__.py:626
 msgid "SCM Private Key"
 msgstr "SCM 秘密鍵"
 
-#: awx/main/models/credential/__init__.py:636
+#: awx/main/models/credential/__init__.py:639
 msgid "Vault Password"
 msgstr "Vault パスワード"
 
-#: awx/main/models/credential/__init__.py:639
+#: awx/main/models/credential/__init__.py:642
 msgid "Vault Identifier"
 msgstr "Vault ID"
 
-#: awx/main/models/credential/__init__.py:643
+#: awx/main/models/credential/__init__.py:646
 msgid ""
 "Specify an (optional) Vault ID. This is equivalent to specifying the --vault-"
 "id Ansible parameter for providing multiple Vault passwords.  Note: this "
 "feature only works in Ansible 2.4+."
 msgstr "(オプションの) Vault ID を指定します。これは、複数の Vault パスワードを指定するために --vault-id Ansible パラメーターを指定することに相当します。注: この機能は Ansible 2.4+ でのみ機能します。"
 
-#: awx/main/models/credential/__init__.py:678
+#: awx/main/models/credential/__init__.py:681
 msgid "Authorize"
 msgstr "承認"
 
-#: awx/main/models/credential/__init__.py:683
+#: awx/main/models/credential/__init__.py:686
 msgid "Authorize Password"
 msgstr "パスワードの承認"
 
-#: awx/main/models/credential/__init__.py:698
+#: awx/main/models/credential/__init__.py:701
 msgid "Amazon Web Services"
 msgstr "Amazon Web Services"
 
-#: awx/main/models/credential/__init__.py:702
+#: awx/main/models/credential/__init__.py:705
 msgid "Access Key"
 msgstr "アクセスキー"
 
-#: awx/main/models/credential/__init__.py:705
+#: awx/main/models/credential/__init__.py:708
 msgid "Secret Key"
 msgstr "シークレットキー"
 
-#: awx/main/models/credential/__init__.py:711
+#: awx/main/models/credential/__init__.py:714
 msgid "STS Token"
 msgstr "STS トークン"
 
-#: awx/main/models/credential/__init__.py:715
+#: awx/main/models/credential/__init__.py:718
 msgid ""
 "Security Token Service (STS) is a web service that enables you to request "
 "temporary, limited-privilege credentials for AWS Identity and Access "
 "Management (IAM) users."
 msgstr "セキュリティートークンサービス (STS) は、AWS Identity and Access Management (IAM) ユーザーの一時的な、権限の制限された認証情報を要求できる web サービスです。"
 
-#: awx/main/models/credential/__init__.py:729 awx/main/models/inventory.py:811
+#: awx/main/models/credential/__init__.py:732 awx/main/models/inventory.py:811
 msgid "OpenStack"
 msgstr "OpenStack"
 
-#: awx/main/models/credential/__init__.py:736
+#: awx/main/models/credential/__init__.py:739
 msgid "Password (API Key)"
 msgstr "パスワード (API キー)"
 
-#: awx/main/models/credential/__init__.py:742
-#: awx/main/models/credential/__init__.py:980
+#: awx/main/models/credential/__init__.py:745
+#: awx/main/models/credential/__init__.py:983
 msgid "Host (Authentication URL)"
 msgstr "ホスト (認証 URL)"
 
-#: awx/main/models/credential/__init__.py:744
+#: awx/main/models/credential/__init__.py:747
 msgid ""
 "The host to authenticate with.  For example, https://openstack.business.com/"
 "v2.0/"
 msgstr "認証に使用するホスト。例: https://openstack.business.com/v2.0/"
 
-#: awx/main/models/credential/__init__.py:748
+#: awx/main/models/credential/__init__.py:751
 msgid "Project (Tenant Name)"
 msgstr "プロジェクト (テナント名)"
 
-#: awx/main/models/credential/__init__.py:753
+#: awx/main/models/credential/__init__.py:756
 msgid "Project (Domain Name)"
 msgstr "プロジェクト (ドメイン名)"
 
-#: awx/main/models/credential/__init__.py:758
+#: awx/main/models/credential/__init__.py:761
 msgid "Domain Name"
 msgstr "ドメイン名"
 
-#: awx/main/models/credential/__init__.py:761
+#: awx/main/models/credential/__init__.py:764
 msgid ""
 "OpenStack domains define administrative boundaries. It is only needed for "
 "Keystone v3 authentication URLs. Refer to the documentation for common "
 "scenarios."
 msgstr "OpenStack ドメインは管理上の境界を定義します。これは Keystone v3 認証 URL にのみ必要です。共通するシナリオについてはドキュメントを参照してください。"
 
-#: awx/main/models/credential/__init__.py:769
+#: awx/main/models/credential/__init__.py:772
 msgid "Region Name"
 msgstr "リージョン名"
 
-#: awx/main/models/credential/__init__.py:771
+#: awx/main/models/credential/__init__.py:774
 msgid "For some cloud providers, like OVH, region must be specified"
 msgstr "OVH などの一部のクラウドプロバイダーでは、リージョンを指定する必要があります"
 
-#: awx/main/models/credential/__init__.py:775
-#: awx/main/models/credential/__init__.py:1051
-#: awx/main/models/credential/__init__.py:1091
-#: awx/main/models/credential/__init__.py:1134
+#: awx/main/models/credential/__init__.py:778
+#: awx/main/models/credential/__init__.py:1054
+#: awx/main/models/credential/__init__.py:1094
+#: awx/main/models/credential/__init__.py:1137
 msgid "Verify SSL"
 msgstr "SSL の検証"
 
-#: awx/main/models/credential/__init__.py:787 awx/main/models/inventory.py:809
+#: awx/main/models/credential/__init__.py:790 awx/main/models/inventory.py:809
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: awx/main/models/credential/__init__.py:793
+#: awx/main/models/credential/__init__.py:796
 msgid "VCenter Host"
 msgstr "vCenter ホスト"
 
-#: awx/main/models/credential/__init__.py:795
+#: awx/main/models/credential/__init__.py:798
 msgid ""
 "Enter the hostname or IP address that corresponds to your VMware vCenter."
 msgstr "VMware vCenter に対応するホスト名または IP アドレスを入力します。"
 
-#: awx/main/models/credential/__init__.py:812 awx/main/models/inventory.py:810
+#: awx/main/models/credential/__init__.py:815 awx/main/models/inventory.py:810
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: awx/main/models/credential/__init__.py:818
+#: awx/main/models/credential/__init__.py:821
 msgid "Satellite 6 URL"
 msgstr "Satellite 6 URL"
 
-#: awx/main/models/credential/__init__.py:820
+#: awx/main/models/credential/__init__.py:823
 msgid ""
 "Enter the URL that corresponds to your Red Hat Satellite 6 server. For "
 "example, https://satellite.example.org"
 msgstr "Red Hat Satellite 6 Server に対応する URL を入力します (例: https://satellite.example.org)。"
 
-#: awx/main/models/credential/__init__.py:837 awx/main/models/inventory.py:807
+#: awx/main/models/credential/__init__.py:840 awx/main/models/inventory.py:807
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: awx/main/models/credential/__init__.py:843
+#: awx/main/models/credential/__init__.py:846
 msgid "Service Account Email Address"
 msgstr "サービスアカウントのメールアドレス"
 
-#: awx/main/models/credential/__init__.py:845
+#: awx/main/models/credential/__init__.py:848
 msgid ""
 "The email address assigned to the Google Compute Engine service account."
 msgstr "Google Compute Engine サービスアカウントに割り当てられたメールアドレス。"
 
-#: awx/main/models/credential/__init__.py:852
+#: awx/main/models/credential/__init__.py:855
 msgid ""
 "The Project ID is the GCE assigned identification. It is often constructed "
 "as three words or two words followed by a three-digit number. Examples: "
 "project-id-000 and another-project-id"
 msgstr "プロジェクト ID は GCE によって割り当てられる識別情報です。これは 3 語か、または 2 語とそれに続く 3 桁の数字のいずれかで構成されます。例: project-id-000、another-project-id"
 
-#: awx/main/models/credential/__init__.py:860
+#: awx/main/models/credential/__init__.py:863
 msgid "RSA Private Key"
 msgstr "RSA 秘密鍵"
 
-#: awx/main/models/credential/__init__.py:865
+#: awx/main/models/credential/__init__.py:868
 msgid ""
 "Paste the contents of the PEM file associated with the service account email."
 msgstr "サービスアカウントメールに関連付けられた PEM ファイルの内容を貼り付けます。"
 
-#: awx/main/models/credential/__init__.py:875 awx/main/models/inventory.py:808
+#: awx/main/models/credential/__init__.py:878 awx/main/models/inventory.py:808
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: awx/main/models/credential/__init__.py:881
+#: awx/main/models/credential/__init__.py:884
 msgid "Subscription ID"
 msgstr "サブスクリプション ID"
 
-#: awx/main/models/credential/__init__.py:883
+#: awx/main/models/credential/__init__.py:886
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr "サブスクリプション ID は、ユーザー名にマップされる Azure コンストラクトです。"
 
-#: awx/main/models/credential/__init__.py:902
+#: awx/main/models/credential/__init__.py:905
 msgid "Azure Cloud Environment"
 msgstr "Azure クラウド環境"
 
-#: awx/main/models/credential/__init__.py:904
+#: awx/main/models/credential/__init__.py:907
 msgid ""
 "Environment variable AZURE_CLOUD_ENVIRONMENT when using Azure GovCloud or "
 "Azure stack."
 msgstr "Azure GovCloud または Azure スタック使用時の環境変数 AZURE_CLOUD_ENVIRONMENT。"
 
-#: awx/main/models/credential/__init__.py:914
+#: awx/main/models/credential/__init__.py:917
 msgid "GitHub Personal Access Token"
 msgstr "GitHub パーソナルアクセストークン"
 
-#: awx/main/models/credential/__init__.py:923
+#: awx/main/models/credential/__init__.py:926
 msgid "This token needs to come from your profile settings in GitHub"
 msgstr "このトークンは GitHub のプロファイル設定から取得する必要があります。"
 
-#: awx/main/models/credential/__init__.py:933
+#: awx/main/models/credential/__init__.py:936
 msgid "GitLab Personal Access Token"
 msgstr "GitLab パーソナルアクセストークン"
 
-#: awx/main/models/credential/__init__.py:942
+#: awx/main/models/credential/__init__.py:945
 msgid "This token needs to come from your profile settings in GitLab"
 msgstr "このトークンは GitLab のプロファイル設定から取得する必要があります。"
 
-#: awx/main/models/credential/__init__.py:976 awx/main/models/inventory.py:812
+#: awx/main/models/credential/__init__.py:979 awx/main/models/inventory.py:812
 msgid "Red Hat Virtualization"
 msgstr "Red Hat Virtualization"
 
-#: awx/main/models/credential/__init__.py:980
+#: awx/main/models/credential/__init__.py:983
 msgid "The host to authenticate with."
 msgstr "認証するホスト。"
 
-#: awx/main/models/credential/__init__.py:990
+#: awx/main/models/credential/__init__.py:993
 msgid "CA File"
 msgstr "CA ファイル"
 
-#: awx/main/models/credential/__init__.py:992
+#: awx/main/models/credential/__init__.py:995
 msgid "Absolute file path to the CA file to use (optional)"
 msgstr "使用する CA ファイルへの絶対ファイルパス (オプション)"
 
-#: awx/main/models/credential/__init__.py:1020
-#: awx/main/models/credential/__init__.py:1026 awx/main/models/inventory.py:813
+#: awx/main/models/credential/__init__.py:1023
+#: awx/main/models/credential/__init__.py:1029 awx/main/models/inventory.py:813
 msgid "Red Hat Ansible Automation Platform"
 msgstr "Red Hat Ansible Automation Platform"
 
-#: awx/main/models/credential/__init__.py:1028
+#: awx/main/models/credential/__init__.py:1031
 msgid "Red Hat Ansible Automation Platform base URL to authenticate with."
 msgstr "認証に使用する RedHat Ansible Automation Platform のベース URL。"
 
-#: awx/main/models/credential/__init__.py:1035
+#: awx/main/models/credential/__init__.py:1038
 msgid ""
 "Red Hat Ansible Automation Platform username id to authenticate as.This "
 "should not be set if an OAuth token is being used."
 msgstr "認証する Red Hat Ansible Automation Platform ユーザー名 ID。OAuth トークンが使用されている場合は、これを設定しないでください。"
 
-#: awx/main/models/credential/__init__.py:1046
+#: awx/main/models/credential/__init__.py:1049
 msgid "OAuth Token"
 msgstr "OAuth トークン"
 
-#: awx/main/models/credential/__init__.py:1049
+#: awx/main/models/credential/__init__.py:1052
 msgid ""
 "An OAuth token to use to authenticate with.This should not be set if "
 "username/password are being used."
 msgstr "認証に使用する OAuth トークン。ユーザー名/パスワードが使用されている場合は設定しないでください。"
 
-#: awx/main/models/credential/__init__.py:1074
+#: awx/main/models/credential/__init__.py:1077
 msgid "OpenShift or Kubernetes API Bearer Token"
 msgstr "OpenShift または Kubernetes API Bearer トークン"
 
-#: awx/main/models/credential/__init__.py:1079
+#: awx/main/models/credential/__init__.py:1082
 msgid "OpenShift or Kubernetes API Endpoint"
 msgstr "OpenShift または Kubernetes API エンドポイント"
 
-#: awx/main/models/credential/__init__.py:1081
+#: awx/main/models/credential/__init__.py:1084
 msgid "The OpenShift or Kubernetes API Endpoint to authenticate with."
 msgstr "認証する OpenShift または Kubernetes API エンドポイント。"
 
-#: awx/main/models/credential/__init__.py:1085
+#: awx/main/models/credential/__init__.py:1088
 msgid "API authentication bearer token"
 msgstr "API 認証ベアラートークン"
 
-#: awx/main/models/credential/__init__.py:1097
+#: awx/main/models/credential/__init__.py:1100
 msgid "Certificate Authority data"
 msgstr "認証局データ"
 
-#: awx/main/models/credential/__init__.py:1115
+#: awx/main/models/credential/__init__.py:1118
 msgid "Authentication URL"
 msgstr "認証 URL"
 
-#: awx/main/models/credential/__init__.py:1117
+#: awx/main/models/credential/__init__.py:1120
 msgid "Authentication endpoint for the container registry."
 msgstr "コンテナーレジストリーの認証エンドポイント。"
 
-#: awx/main/models/credential/__init__.py:1127
+#: awx/main/models/credential/__init__.py:1130
 msgid "Password or Token"
 msgstr "パスワードまたはトークン"
 
-#: awx/main/models/credential/__init__.py:1130
+#: awx/main/models/credential/__init__.py:1133
 msgid "A password or token used to authenticate with"
 msgstr "認証に使用されるパスワードまたはトークン"
 
-#: awx/main/models/credential/__init__.py:1147
+#: awx/main/models/credential/__init__.py:1150
 msgid "Ansible Galaxy/Automation Hub API Token"
 msgstr "Ansible Galaxy/Automation Hub API トークン"
 
-#: awx/main/models/credential/__init__.py:1152
+#: awx/main/models/credential/__init__.py:1155
 msgid "Galaxy Server URL"
 msgstr "Galaxy Server URL"
 
-#: awx/main/models/credential/__init__.py:1154
+#: awx/main/models/credential/__init__.py:1157
 msgid "The URL of the Galaxy instance to connect to."
 msgstr "接続する Galaxy インスタンスの URL。"
 
-#: awx/main/models/credential/__init__.py:1158
+#: awx/main/models/credential/__init__.py:1161
 msgid "Auth Server URL"
 msgstr "認証サーバー URL"
 
-#: awx/main/models/credential/__init__.py:1160
+#: awx/main/models/credential/__init__.py:1163
 msgid "The URL of a Keycloak server token_endpoint, if using SSO auth."
 msgstr "SSO 認証を使用している場合は、Keycloak サーバー token_endpoint の URL。"
 
-#: awx/main/models/credential/__init__.py:1164
+#: awx/main/models/credential/__init__.py:1167
 msgid "API Token"
 msgstr "API トークン"
 
-#: awx/main/models/credential/__init__.py:1167
+#: awx/main/models/credential/__init__.py:1170
 msgid "A token to use for authentication against the Galaxy instance."
 msgstr "Galaxy インスタンスに対する認証に使用するトークン。"
 
-#: awx/main/models/credential/__init__.py:1206
+#: awx/main/models/credential/__init__.py:1209
 msgid "Target must be a non-external credential"
 msgstr "ターゲットには、外部の認証情報以外を使用してください。"
 
-#: awx/main/models/credential/__init__.py:1211
+#: awx/main/models/credential/__init__.py:1214
 msgid "Source must be an external credential"
 msgstr "ソースは、外部の認証情報でなければなりません。"
 
-#: awx/main/models/credential/__init__.py:1217
+#: awx/main/models/credential/__init__.py:1220
 msgid "Input field must be defined on target credential (options are {})."
 msgstr "入力フィールドは、ターゲットの認証情報 (オプションは {}) で定義する必要があります。"
 
@@ -3784,30 +3770,20 @@ msgstr "コンテナーレジストリー、イメージ名、およびバージ
 msgid "Pull image before running?"
 msgstr "実行前にイメージをプルしますか?"
 
-#: awx/main/models/ha.py:83
-msgid "Total system memory of this instance in bytes."
-msgstr "このインスタンスの合計システムメモリー (バイト単位)。"
-
-#: awx/main/models/ha.py:88
-msgid ""
-"Last time instance ran its heartbeat task for main cluster nodes. Last known "
-"connection to receptor mesh for execution nodes."
-msgstr "インスタンスが主要なクラスターノードに対してハートビートタスクを最後に実行した時間。実行ノードのレセプターメッシュに対する最後の接続。"
-
-#: awx/main/models/ha.py:243
+#: awx/main/models/ha.py:167
 msgid "Instances that are members of this InstanceGroup"
 msgstr "このインスタンスグループのメンバーであるインスタンス"
 
-#: awx/main/models/ha.py:260
+#: awx/main/models/ha.py:184
 msgid "Percentage of Instances to automatically assign to this group"
 msgstr "このグループに自動的に割り当てるインスタンスの割合"
 
-#: awx/main/models/ha.py:261
+#: awx/main/models/ha.py:185
 msgid ""
 "Static minimum number of Instances to automatically assign to this group"
 msgstr "このグループに自動的に割り当てるインスタンスの静的な最小数。"
 
-#: awx/main/models/ha.py:263
+#: awx/main/models/ha.py:187
 msgid ""
 "List of exact-match Instances that will always be automatically assigned to "
 "this group"
@@ -4047,7 +4023,7 @@ msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr "このプロジェクト更新のインベントリーファイルがインベントリー更新に使用されました。"
 
-#: awx/main/models/inventory.py:1312
+#: awx/main/models/inventory.py:1316
 msgid "Inventory script contents"
 msgstr "インベントリースクリプトの内容"
 
@@ -4137,37 +4113,37 @@ msgstr "スライスされたジョブの一部として実行された場合に
 msgid "{status_value} is not a valid status option."
 msgstr "{status_value} は、有効なステータスオプションではありません。"
 
-#: awx/main/models/jobs.py:884
+#: awx/main/models/jobs.py:888
 msgid ""
 "Inventory applied as a prompt, assuming job template prompts for inventory"
 msgstr "インベントリーがプロンプトとして適用されると、ジョブテンプレートでインベントリーをプロンプトで要求することが前提となります。"
 
-#: awx/main/models/jobs.py:1035
+#: awx/main/models/jobs.py:1039
 msgid "job host summaries"
 msgstr "ジョブホストの概要"
 
-#: awx/main/models/jobs.py:1097
+#: awx/main/models/jobs.py:1101
 msgid "Remove jobs older than a certain number of days"
 msgstr "特定の日数より前のジョブを削除"
 
-#: awx/main/models/jobs.py:1098
+#: awx/main/models/jobs.py:1102
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr "特定の日数より前のアクティビティーストリームのエントリーを削除"
 
-#: awx/main/models/jobs.py:1099
+#: awx/main/models/jobs.py:1103
 msgid "Removes expired browser sessions from the database"
 msgstr "期限切れブラウザーセッションをデータベースから削除"
 
-#: awx/main/models/jobs.py:1100
+#: awx/main/models/jobs.py:1104
 msgid "Removes expired OAuth 2 access tokens and refresh tokens"
 msgstr "期限切れの OAuth 2 アクセストークンを削除し、トークンを更新"
 
-#: awx/main/models/jobs.py:1164
+#: awx/main/models/jobs.py:1168
 #, python-brace-format
 msgid "Variables {list_of_keys} are not allowed for system jobs."
 msgstr "システムジョブでは変数 {list_of_keys} を使用できません。"
 
-#: awx/main/models/jobs.py:1179
+#: awx/main/models/jobs.py:1183
 msgid "days must be a positive integer."
 msgstr "日数は正の整数である必要があります。"
 
@@ -4884,7 +4860,7 @@ msgid "Exception connecting to PagerDuty: {}"
 msgstr "PagerDuty への接続時の例外: {}"
 
 #: awx/main/notifications/pagerduty_backend.py:87
-#: awx/main/notifications/slack_backend.py:48
+#: awx/main/notifications/slack_backend.py:49
 #: awx/main/notifications/twilio_backend.py:47
 msgid "Exception sending messages: {}"
 msgstr "メッセージの送信時の例外: {}"
@@ -4934,63 +4910,63 @@ msgid ""
 "has permission to create a secret."
 msgstr "imagePullSecret: {} の作成に失敗しました。openshift または k8s の認証情報にシークレットを作成する権限があることを確認してください。"
 
-#: awx/main/scheduler/task_manager.py:181
+#: awx/main/scheduler/task_manager.py:166
 msgid ""
 "Workflow Job spawned from workflow could not start because it would result "
 "in recursion (spawn order, most recent first: {})"
 msgstr "ワークフローから起動されるワークフロージョブは、再帰が生じるために開始できませんでした (起動順、もっとも新しいものから: {})"
 
-#: awx/main/scheduler/task_manager.py:192
+#: awx/main/scheduler/task_manager.py:177
 msgid ""
 "Job spawned from workflow could not start because it was missing a related "
 "resource such as project or inventory"
 msgstr "ワークフローから起動されるジョブは、プロジェクトまたはインベントリーなどの関連するリソースがないために開始できませんでした"
 
-#: awx/main/scheduler/task_manager.py:202
+#: awx/main/scheduler/task_manager.py:187
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
 msgstr "ワークフローから起動されるジョブは、正常な状態にないか、または手動の認証が必要であるために開始できませんでした"
 
-#: awx/main/scheduler/task_manager.py:243
+#: awx/main/scheduler/task_manager.py:228
 msgid "No error handling paths found, marking workflow as failed"
 msgstr "エラーの処理パスが見つかりません。ワークフローを失敗としてマークしました"
 
-#: awx/main/scheduler/task_manager.py:493
+#: awx/main/scheduler/task_manager.py:470
 #, python-brace-format
 msgid "waiting for {blocked_by._meta.model_name}-{blocked_by.id} to finish"
 msgstr "{blocked_by._meta.model_name}-{blocked_by.id} が終わるのを待機中"
 
-#: awx/main/scheduler/task_manager.py:557
+#: awx/main/scheduler/task_manager.py:533
 msgid ""
 "This job is not ready to start because there is not enough available "
 "capacity."
 msgstr "使用可能な容量が十分でないため、このジョブを開始する準備ができていません。"
 
-#: awx/main/scheduler/task_manager.py:576
+#: awx/main/scheduler/task_manager.py:552
 #, python-brace-format
 msgid "The approval node {name} ({pk}) has expired after {timeout} seconds."
 msgstr "承認ノード {name} ({pk}) は {timeout} 秒後に失効しました。"
 
-#: awx/main/tasks.py:668
+#: awx/main/tasks.py:567
 msgid ""
 "Scheduled job could not start because it                     was not in the "
 "right state or required manual credentials"
 msgstr "スケジュール済みのジョブは、正常な状態にないか、手動の認証が必要であるために開始できませんでした"
 
-#: awx/main/tasks.py:1825
+#: awx/main/tasks.py:1728
 msgid "Job could not start because it does not have a valid inventory."
 msgstr "ジョブは有効なインベントリーがないために開始できませんでした。"
 
-#: awx/main/tasks.py:1829
+#: awx/main/tasks.py:1732
 msgid "Job could not start because it does not have a valid project."
 msgstr "ジョブは有効なプロジェクトがないために開始できませんでした。"
 
-#: awx/main/tasks.py:1833
+#: awx/main/tasks.py:1736
 msgid "Job could not start because no Execution Environment could be found."
 msgstr "実行環境が見つからなかったため、ジョブを開始できませんでした。"
 
-#: awx/main/tasks.py:1837
+#: awx/main/tasks.py:1740
 msgid ""
 "The project revision for this job template is unknown due to a failed update."
 msgstr "更新に失敗したため、このジョブテンプレートのプロジェクトリビジョンは不明です。"
@@ -5010,53 +4986,53 @@ msgid ""
 "missing unified job template and error handling path [{}]."
 msgstr "ワークフロージョブのノードにエラーハンドルパスがありません [] ワークフロージョブのノードに統一されたジョブテンプレートおよびエラーハンドルパスがありません [{}]。"
 
-#: awx/main/utils/common.py:118
+#: awx/main/utils/common.py:124
 #, python-format
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "\"%s\" をブール値に変換できません"
 
-#: awx/main/utils/common.py:262
+#: awx/main/utils/common.py:268
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "サポートされない SCM タイプ \"%s\""
 
-#: awx/main/utils/common.py:269 awx/main/utils/common.py:281
-#: awx/main/utils/common.py:300
+#: awx/main/utils/common.py:275 awx/main/utils/common.py:287
+#: awx/main/utils/common.py:306
 #, python-format
 msgid "Invalid %s URL"
 msgstr "無効な %s URL"
 
-#: awx/main/utils/common.py:271 awx/main/utils/common.py:310
+#: awx/main/utils/common.py:277 awx/main/utils/common.py:316
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "サポートされない %s URL"
 
-#: awx/main/utils/common.py:312
+#: awx/main/utils/common.py:318
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "file:// URL でサポートされないホスト \"%s\""
 
-#: awx/main/utils/common.py:314
+#: awx/main/utils/common.py:320
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "%s URL にはホストが必要です"
 
-#: awx/main/utils/common.py:332
+#: awx/main/utils/common.py:338
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "%s への SSH アクセスではユーザー名を \"git\" にする必要があります。"
 
-#: awx/main/utils/common.py:670
+#: awx/main/utils/common.py:662
 #, python-brace-format
 msgid "Input type `{data_type}` is not a dictionary"
 msgstr "入力タイプ `{data_type}` は辞書ではありません"
 
-#: awx/main/utils/common.py:700
+#: awx/main/utils/common.py:692
 #, python-brace-format
 msgid "Variables not compatible with JSON standard (error: {json_error})"
 msgstr "変数には JSON 標準との互換性がありません (エラー: {json_error})"
 
-#: awx/main/utils/common.py:705
+#: awx/main/utils/common.py:697
 #, python-brace-format
 msgid ""
 "Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error})."
@@ -6261,4 +6237,3 @@ msgstr "%s が現在アップグレード中です。"
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "このページは完了すると更新されます。"
-

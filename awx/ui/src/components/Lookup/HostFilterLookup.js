@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { SearchIcon } from '@patternfly/react-icons';
 import {
+  Alert as PFAlert,
   Button,
   ButtonVariant,
   Chip,
@@ -16,6 +17,8 @@ import {
 } from '@patternfly/react-core';
 import { HostsAPI } from 'api';
 import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import ChipGroup from '../ChipGroup';
 import Popover from '../Popover';
@@ -33,7 +36,14 @@ import {
   toHostFilter,
   toQueryString,
   toSearchParams,
+  modifyHostFilter,
 } from './shared/HostFilterUtils';
+
+const Alert = styled(PFAlert)`
+  && {
+    margin-bottom: 8px;
+  }
+`;
 
 const ChipHolder = styled.div`
   && {
@@ -131,7 +141,10 @@ function HostFilterLookup({
   const [chips, setChips] = useState({});
   const [queryString, setQueryString] = useState('');
   const { isModalOpen, toggleModal, closeModal } = useModal();
+  const [isAnsibleFactsSelected, setIsAnsibleFactsSelected] = useState(false);
+
   const searchColumns = buildSearchColumns();
+  const config = useConfig();
 
   const parseRelatedSearchFields = (searchFields) => {
     if (searchFields.indexOf('__search') !== -1) {
@@ -185,8 +198,10 @@ function HostFilterLookup({
 
   useEffect(() => {
     const filters = toSearchParams(value);
-    setQueryString(toQueryString(QS_CONFIG, filters));
-    setChips(buildChips(filters));
+    let modifiedFilters = modifyHostFilter(value, filters);
+    setQueryString(toQueryString(QS_CONFIG, modifiedFilters));
+    modifiedFilters = removeHostFilter(modifiedFilters);
+    setChips(buildChips(modifiedFilters));
   }, [value]);
 
   function qsToHostFilter(qs) {
@@ -207,6 +222,17 @@ function HostFilterLookup({
       pathname: `${location.pathname}`,
       search: '',
     });
+  };
+
+  const removeHostFilter = (filter) => {
+    if ('host_filter' in filter) {
+      filter.ansible_facts = filter.host_filter.substring(
+        'ansible_facts__'.length
+      );
+      delete filter.host_filter;
+    }
+
+    return filter;
   };
 
   function buildChips(filter = {}) {
@@ -275,6 +301,7 @@ function HostFilterLookup({
             key={name}
             numChips={5}
             totalChips={chips[key]?.chips?.length || 0}
+            ouiaId="host-filter-search-chips"
           >
             {chips[key]?.chips?.map((chip) => (
               <Chip key={chip.key} isReadOnly>
@@ -296,6 +323,7 @@ function HostFilterLookup({
                 key={chips[leftoverKey].key}
                 numChips={5}
                 totalChips={chips[leftoverKey]?.chips?.length || 0}
+                ouiaId="host-filter-advanced-search-chips"
               >
                 {chips[leftoverKey]?.chips?.map((chip) => (
                   <Chip key={chip.key} isReadOnly>
@@ -318,7 +346,7 @@ function HostFilterLookup({
       labelIcon={
         <Popover
           content={t`Populate the hosts for this inventory by using a search
-              filter. Example: ansible_facts.ansible_distribution:"RedHat".
+              filter. Example: ansible_facts__ansible_distribution:"RedHat".
               Refer to the documentation for further syntax and
               examples.  Refer to the Ansible Tower documentation for further syntax and
               examples.`}
@@ -361,6 +389,26 @@ function HostFilterLookup({
         ]}
       >
         <ModalList>
+          {isAnsibleFactsSelected && (
+            <Alert
+              variant="info"
+              title={
+                <>
+                  {t`Searching by ansible_facts requires special syntax. Refer to the`}{' '}
+                  <a
+                    href={`${getDocsBaseUrl(
+                      config
+                    )}/html/userguide/inventories.html#smart-host-filter`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t`documentation`}
+                  </a>{' '}
+                  {t`for more info.`}
+                </>
+              }
+            />
+          )}
           <PaginatedTable
             contentError={error}
             hasContentLoading={isLoading}
@@ -371,6 +419,7 @@ function HostFilterLookup({
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
                 <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
                 <HeaderCell>{t`Inventory`}</HeaderCell>
               </HeaderRow>
             }
@@ -381,6 +430,7 @@ function HostFilterLookup({
                 fillWidth
                 enableNegativeFiltering={enableNegativeFiltering}
                 enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
+                handleIsAnsibleFactsSelected={setIsAnsibleFactsSelected}
               />
             )}
             toolbarSearchColumns={searchColumns}

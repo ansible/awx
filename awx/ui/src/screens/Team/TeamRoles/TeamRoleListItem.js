@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 
 function TeamRoleListItem({ role, detailUrl, onDisassociate }) {
   return (
-    <Tr id={`role-item-row-${role.id}`}>
+    <Tr id={`role-item-row-${role.id}`} ouiaId={`role-item-row-${role.id}`}>
       <Td dataLabel={t`Resource Name`}>
         <Link to={{ pathname: `${detailUrl}` }}>
           <b>{role.summary_fields.resource_name}</b>

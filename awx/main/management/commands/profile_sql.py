@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from awx.main.tasks import profile_sql
+from awx.main.tasks.system import profile_sql
 
 
 class Command(BaseCommand):

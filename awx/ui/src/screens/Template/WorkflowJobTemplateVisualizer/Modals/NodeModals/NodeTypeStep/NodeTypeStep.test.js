@@ -7,6 +7,7 @@ import {
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
 } from 'api';
+import { useUserProfile } from 'contexts/Config';
 import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 
 import NodeTypeStep from './NodeTypeStep';
@@ -17,6 +18,17 @@ jest.mock('../../../../../../api/models/Projects');
 jest.mock('../../../../../../api/models/WorkflowJobTemplates');
 
 describe('NodeTypeStep', () => {
+  beforeEach(() => {
+    useUserProfile.mockImplementation(() => {
+      return {
+        isSuperUser: true,
+        isSystemAuditor: false,
+        isOrgAdmin: false,
+        isNotificationAdmin: false,
+        isExecEnvAdmin: false,
+      };
+    });
+  });
   beforeAll(() => {
     JobTemplatesAPI.read.mockResolvedValue({
       data: {
@@ -221,5 +233,66 @@ describe('NodeTypeStep', () => {
     );
     expect(wrapper.find('input[name="timeoutMinutes"]').prop('value')).toBe(5);
     expect(wrapper.find('input[name="timeoutSeconds"]').prop('value')).toBe(30);
+  });
+
+  test('it does not show management job as a choice for non system admin', async () => {
+    useUserProfile.mockImplementation(() => {
+      return {
+        isSuperUser: false,
+        isSystemAuditor: false,
+        isOrgAdmin: true,
+        isNotificationAdmin: false,
+        isExecEnvAdmin: false,
+      };
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ nodeType: 'workflow_job_template' }}>
+          <NodeTypeStep />
+        </Formik>
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('AnsibleSelect').prop('data').length).toBe(5);
+    expect(
+      wrapper
+        .find('AnsibleSelect')
+        .prop('data')
+        .map((item) => item.key)
+    ).toEqual([
+      'workflow_approval_template',
+      'inventory_source',
+      'job_template',
+      'project',
+      'workflow_job_template',
+    ]);
+  });
+
+  test('it does show management job as a choice for system admin', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ nodeType: 'workflow_job_template' }}>
+          <NodeTypeStep />
+        </Formik>
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('AnsibleSelect').prop('data').length).toBe(6);
+    expect(
+      wrapper
+        .find('AnsibleSelect')
+        .prop('data')
+        .map((item) => item.key)
+    ).toEqual([
+      'workflow_approval_template',
+      'inventory_source',
+      'job_template',
+      'project',
+      'workflow_job_template',
+      'system_job_template',
+    ]);
   });
 });

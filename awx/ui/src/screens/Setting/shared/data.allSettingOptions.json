@@ -51,7 +51,7 @@
         "type": "list",
         "required": true,
         "label": "Remote Host Headers",
-        "help_text": "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy. See the \"Proxy Support\" section of the Adminstrator guide for more details.",
+        "help_text": "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy. See the \"Proxy Support\" section of the AAP Installation guide for more details.",
         "category": "System",
         "category_slug": "system",
         "default": ["REMOTE_ADDR", "REMOTE_HOST"],
@@ -79,7 +79,7 @@
         "type": "string",
         "required": false,
         "label": "Red Hat customer username",
-        "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This username is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -88,7 +88,7 @@
         "type": "string",
         "required": false,
         "label": "Red Hat customer password",
-        "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This password is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -114,8 +114,8 @@
       "AUTOMATION_ANALYTICS_URL": {
         "type": "string",
         "required": false,
-        "label": "Insights for Ansible Automation Platform upload URL",
-        "help_text": "This setting is used to to configure the upload URL for data collection for Red Hat Insights.",
+        "label": "Automation Analytics upload URL",
+        "help_text": "This setting is used to to configure the upload URL for data collection for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": "https://example.com"
@@ -231,11 +231,31 @@
           "read_only": false
         }
       },
+      "GALAXY_TASK_ENV": {
+        "type": "nested object",
+         "required": true,
+        "label": "Environment Variables for Galaxy Commands",
+         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+         "category": "Jobs",
+         "category_slug": "jobs",
+         "placeholder": {
+              "HTTP_PROXY": "myproxy.local:8080"
+          },
+         "default": {
+             "ANSIBLE_FORCE_COLOR": "false",
+              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+          "child": {
+            "type": "string",
+              "required": true,
+            "read_only": false
+        }
+       },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "required": false,
-        "label": "Gather data for Insights for Ansible Automation Platform",
-        "help_text": "Enables the service to gather data on automation and send it to Red Hat Insights.",
+        "label": "Gather data for Automation Analytics",
+        "help_text": "Enables the service to gather data on automation and send it to Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": false
@@ -272,6 +292,15 @@
         "required": false,
         "label": "Follow symlinks",
         "help_text": "Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead to infinite recursion if a link points to a parent directory of itself.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "default": false
+      },
+      "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": {
+        "type": "boolean",
+        "required": false,
+        "label": "Expose host paths for Container Groups",
+        "help_text": "Expose paths via hostPath for the Pods created by a Container Group. HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "default": false
@@ -564,10 +593,19 @@
         "category_slug": "logging",
         "default": false
       },
+      "API_400_ERROR_LOG_FORMAT": {
+        "type": "string",
+        "required": false,
+        "label": "Log Format For API 4XX Errors",
+        "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
+      },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
         "required": true,
-        "label": "Last gather date for Insights for Ansible Automation Platform.",
+        "label": "Last gather date for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": null
@@ -575,7 +613,7 @@
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
         "required": false,
-        "label": "Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.",
+        "label": "Last gathered entries from the data collection service of Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -583,7 +621,7 @@
       "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
         "type": "integer",
         "required": false,
-        "label": "Insights for Ansible Automation Platform Gather Interval",
+        "label": "Automation Analytics Gather Interval",
         "help_text": "Interval (in seconds) between data gathering.",
         "min_value": 1800,
         "category": "System",
@@ -3706,6 +3744,28 @@
           "required": true,
           "read_only": false
         }
+      },
+      "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "type": "nested object",
+        "required": false,
+        "label": "SAML User Flags Attribute Mapping",
+        "help_text": "Used to map super users and system auditors from SAML.",
+        "category": "SAML",
+        "category_slug": "saml",
+        "placeholder": {
+          "is_superuser_attr": "saml_attr",
+          "is_superuser_value": "value",
+          "is_superuser_role": "saml_role",
+          "is_system_auditor_attr": "saml_attr",
+          "is_system_auditor_value": "value",
+          "is_system_auditor_role": "saml_role"
+        },
+        "default": {},
+        "child": {
+          "type": "field",
+          "required": true,
+          "read_only": false
+        }
       }
     },
     "GET": {
@@ -3785,7 +3845,7 @@
       "REDHAT_USERNAME": {
         "type": "string",
         "label": "Red Hat customer username",
-        "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This username is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3793,7 +3853,7 @@
       "REDHAT_PASSWORD": {
         "type": "string",
         "label": "Red Hat customer password",
-        "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This password is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3816,8 +3876,8 @@
       },
       "AUTOMATION_ANALYTICS_URL": {
         "type": "string",
-        "label": "Insights for Ansible Automation Platform upload URL",
-        "help_text": "This setting is used to to configure the upload URL for data collection for Red Hat Insights.",
+        "label": "Automation Analytics upload URL",
+        "help_text": "This setting is used to to configure the upload URL for data collection for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3902,10 +3962,30 @@
           "type": "string"
         }
       },
+      "GALAXY_TASK_ENV": {
+        "type": "nested object",
+         "required": true,
+        "label": "Environment Variables for Galaxy Commands",
+         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+         "category": "Jobs",
+         "category_slug": "jobs",
+         "placeholder": {
+              "HTTP_PROXY": "myproxy.local:8080"
+          },
+         "default": {
+             "ANSIBLE_FORCE_COLOR": "false",
+              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+          "child": {
+            "type": "string",
+              "required": true,
+            "read_only": false
+        }
+       },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
-        "label": "Gather data for Insights for Ansible Automation Platform",
-        "help_text": "Enables the service to gather data on automation and send it to Red Hat Insights.",
+        "label": "Gather data for Automation Analytics",
+        "help_text": "Enables the service to gather data on automation and send it to Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3938,6 +4018,14 @@
         "type": "boolean",
         "label": "Follow symlinks",
         "help_text": "Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead to infinite recursion if a link points to a parent directory of itself.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false
+      },
+      "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": {
+        "type": "boolean",
+        "label": "Expose host paths for Container Groups",
+        "help_text": "Expose paths via hostPath for the Pods created by a Container Group. HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "defined_in_file": false
@@ -4199,23 +4287,32 @@
         "category_slug": "logging",
         "defined_in_file": false
       },
+      "API_400_ERROR_LOG_FORMAT": {
+        "type": "string",
+        "required": false,
+        "label": "Log Format For API 4XX Errors",
+        "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
+        "category": "Logging",
+        "category_slug": "logging",
+        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
+      },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
-        "label": "Last gather date for Insights for Ansible Automation Platform.",
+        "label": "Last gather date for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
-        "label": "Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.",
+        "label": "Last gathered entries from the data collection service of Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
         "type": "integer",
-        "label": "Insights for Ansible Automation Platform Gather Interval",
+        "label": "Automation Analytics Gather Interval",
         "help_text": "Interval (in seconds) between data gathering.",
         "min_value": 1800,
         "category": "System",
@@ -6298,6 +6395,17 @@
         "type": "nested object",
         "label": "SAML Team Attribute Mapping",
         "help_text": "Used to translate user team membership.",
+        "category": "SAML",
+        "category_slug": "saml",
+        "defined_in_file": false,
+        "child": {
+          "type": "field"
+        }
+      },
+      "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
+        "type": "nested object",
+	      "label": "SAML User Flags Attribute Mapping",
+        "help_text": "Used to map super users and system auditors from SAML.",
         "category": "SAML",
         "category_slug": "saml",
         "defined_in_file": false,

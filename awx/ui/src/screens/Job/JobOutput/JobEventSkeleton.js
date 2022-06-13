@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   JobEventLine,
   JobEventLineToggle,
@@ -14,7 +14,11 @@ function JobEventSkeletonContent({ contentLength }) {
   );
 }
 
-function JobEventSkeleton({ counter, contentLength, style }) {
+function JobEventSkeleton({ counter, contentLength, style, measure }) {
+  useEffect(() => {
+    measure();
+  }, [measure]);
+
   return (
     counter > 1 && (
       <div style={style}>

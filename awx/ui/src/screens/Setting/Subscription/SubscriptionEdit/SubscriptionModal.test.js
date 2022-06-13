@@ -125,14 +125,14 @@ describe('<SubscriptionModal />', () => {
             password: '$encrypted',
           }}
           selectedSubscription={{
-            pool_id: 8,
+            id: 2,
           }}
         />
       );
       await waitForElement(wrapper, 'table');
-      expect(wrapper.find('tr[id=7] input').prop('checked')).toBe(false);
-      expect(wrapper.find('tr[id=8] input').prop('checked')).toBe(true);
-      expect(wrapper.find('tr[id=9] input').prop('checked')).toBe(false);
+      expect(wrapper.find('tr[id="row-1"] input').prop('checked')).toBe(false);
+      expect(wrapper.find('tr[id="row-2"] input').prop('checked')).toBe(true);
+      expect(wrapper.find('tr[id="row-3"] input').prop('checked')).toBe(false);
     });
   });
 

@@ -31,8 +31,27 @@ describe('<Inventory />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 7);
+    wrapper.update();
+    expect(wrapper.find('Inventory').length).toBe(1);
+    expect(wrapper.find('RoutedTabs li').length).toBe(8);
+  });
+
+  test('should render expected tabs', async () => {
+    const expectedTabs = [
+      'Back to Inventories',
+      'Details',
+      'Access',
+      'Groups',
+      'Hosts',
+      'Jobs',
+      'Job Templates',
+    ];
+    await act(async () => {
+      wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
+    });
+    wrapper.find('RoutedTabs li').forEach((tab, index) => {
+      expect(tab.text()).toEqual(expectedTabs[index]);
+    });
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

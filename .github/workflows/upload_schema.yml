@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - devel
+      - release_**
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -12,6 +13,14 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v2
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}       
 
       - name: Log in to registry
         run: |
@@ -38,6 +47,6 @@ jobs:
         run: |
           ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
           ansible localhost -c local -m aws_s3 \
-            -a 'src=${{ github.workspace }}/schema.json bucket=awx-public-ci-files object=schema.json mode=put permission=public-read'
+            -a "src=${{ github.workspace }}/schema.json bucket=awx-public-ci-files object=${GITHUB_REF##*/}/schema.json mode=put permission=public-read"
 
 

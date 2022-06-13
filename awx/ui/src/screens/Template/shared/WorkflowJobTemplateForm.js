@@ -26,8 +26,9 @@ import ContentError from 'components/ContentError';
 import CheckboxField from 'components/FormField/CheckboxField';
 import Popover from 'components/Popover';
 import { WorkFlowJobTemplate } from 'types';
-import LabelSelect from './LabelSelect';
+import LabelSelect from 'components/LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
+import helpText from './WorkflowJobTemplate.helptext';
 
 const urlOrigin = window.location.origin;
 
@@ -137,7 +138,7 @@ function WorkflowJobTemplateForm({
           <InventoryLookup
             promptId="wfjt-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
-            tooltip={t`Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory.`}
+            tooltip={helpText.inventory}
             fieldId="wfjt-inventory"
             isPromptableField
             value={inventoryField.value}
@@ -152,10 +153,7 @@ function WorkflowJobTemplateForm({
           label={t`Limit`}
           promptId="template-ask-limit-on-launch"
           promptName="ask_limit_on_launch"
-          tooltip={t`Provide a host pattern to further constrain
-                  the list of hosts that will be managed or affected by the
-                  playbook. Multiple patterns are allowed. Refer to Ansible
-                  documentation for more information and examples on patterns.`}
+          tooltip={helpText.limit}
         >
           <TextInput
             id="wfjt-limit"
@@ -174,7 +172,7 @@ function WorkflowJobTemplateForm({
           label={t`Source control branch`}
           promptId="wfjt-ask-scm-branch-on-launch"
           promptName="ask_scm_branch_on_launch"
-          tooltip={t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`}
+          tooltip={helpText.sourceControlBranch}
         >
           <TextInput
             id="wfjt-scm-branch"
@@ -189,13 +187,7 @@ function WorkflowJobTemplateForm({
       <FormFullWidthLayout>
         <FormGroup
           label={t`Labels`}
-          labelIcon={
-            <Popover
-              content={t`Optional labels that describe this job template,
-                    such as 'dev' or 'test'. Labels can be used to group and filter
-                    job templates and completed jobs.`}
-            />
-          }
+          labelIcon={<Popover content={helpText.labels} />}
           fieldId="template-labels"
         >
           <LabelSelect
@@ -212,7 +204,7 @@ function WorkflowJobTemplateForm({
           name="extra_vars"
           label={t`Variables`}
           promptId="template-ask-variables-on-launch"
-          tooltip={t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`}
+          tooltip={helpText.variables}
         />
       </FormFullWidthLayout>
       <FormGroup fieldId="options" label={t`Options`}>
@@ -223,12 +215,11 @@ function WorkflowJobTemplateForm({
               <span>
                 {t`Enable Webhook`}
                 &nbsp;
-                <Popover
-                  content={t`Enable Webhook for this workflow job template.`}
-                />
+                <Popover content={helpText.enableWebhook} />
               </span>
             }
             id="wfjt-enabled-webhooks"
+            ouiaId="wfjt-enabled-webhooks"
             isChecked={enableWebhooks}
             onChange={(checked) => {
               setEnableWebhooks(checked);
@@ -237,7 +228,7 @@ function WorkflowJobTemplateForm({
           <CheckboxField
             name="allow_simultaneous"
             id="allow_simultaneous"
-            tooltip={t`If enabled, simultaneous runs of this workflow job template will be allowed.`}
+            tooltip={helpText.enableConcurrentJobs}
             label={t`Enable Concurrent Jobs`}
           />
         </FormCheckboxLayout>

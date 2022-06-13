@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Django
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 # Django REST Framework
@@ -28,13 +28,17 @@ class NullFieldMixin(object):
         return (is_empty_value, data)
 
 
-class BooleanNullField(NullFieldMixin, serializers.NullBooleanField):
+class BooleanNullField(NullFieldMixin, serializers.BooleanField):
     """
     Custom boolean field that allows null and empty string as False values.
     """
 
+    def __init__(self, **kwargs):
+        kwargs['allow_null'] = True
+        super().__init__(**kwargs)
+
     def to_internal_value(self, data):
-        return bool(super(BooleanNullField, self).to_internal_value(data))
+        return bool(super().to_internal_value(data))
 
 
 class CharNullField(NullFieldMixin, serializers.CharField):
@@ -47,7 +51,7 @@ class CharNullField(NullFieldMixin, serializers.CharField):
         super(CharNullField, self).__init__(**kwargs)
 
     def to_internal_value(self, data):
-        return super(CharNullField, self).to_internal_value(data or u'')
+        return super(CharNullField, self).to_internal_value(data or '')
 
 
 class ChoiceNullField(NullFieldMixin, serializers.ChoiceField):
@@ -60,7 +64,7 @@ class ChoiceNullField(NullFieldMixin, serializers.ChoiceField):
         super(ChoiceNullField, self).__init__(**kwargs)
 
     def to_internal_value(self, data):
-        return super(ChoiceNullField, self).to_internal_value(data or u'')
+        return super(ChoiceNullField, self).to_internal_value(data or '')
 
 
 class VerbatimField(serializers.Field):

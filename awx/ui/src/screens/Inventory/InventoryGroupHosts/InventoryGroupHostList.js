@@ -161,6 +161,7 @@ function InventoryGroupHostList() {
           onClick={() => setIsModalOpen(true)}
           key={addExistingHost}
           aria-label={addExistingHost}
+          ouiaId="add-existing-host-dropdown-item"
         >
           {addExistingHost}
         </DropdownItem>,
@@ -169,6 +170,7 @@ function InventoryGroupHostList() {
           to={`${addFormUrl}`}
           key={addNewHost}
           aria-label={addNewHost}
+          ouiaId="add-new-host-dropdown-item"
         >
           {addNewHost}
         </DropdownItem>,
@@ -211,6 +213,7 @@ function InventoryGroupHostList() {
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
             <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
             <HeaderCell>{t`Activity`}</HeaderCell>
             <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>

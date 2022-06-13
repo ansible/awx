@@ -85,7 +85,7 @@ options:
     interval:
       description:
         - The interval to request an update from the controller.
-      default: 1
+      default: 2
       type: float
     timeout:
       description:
@@ -129,7 +129,7 @@ def main():
         become_enabled=dict(type='bool'),
         diff_mode=dict(type='bool'),
         wait=dict(default=False, type='bool'),
-        interval=dict(default=1.0, type='float'),
+        interval=dict(default=2.0, type='float'),
         timeout=dict(default=None, type='int'),
         execution_environment=dict(),
     )

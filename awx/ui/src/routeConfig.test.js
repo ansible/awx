@@ -1,4 +1,5 @@
 import getRouteConfig from './routeConfig';
+jest.mock('util/webWorker', () => jest.fn());
 
 const userProfile = {
   isSuperUser: false,
@@ -40,8 +41,10 @@ describe('getRouteConfig', () => {
       '/notification_templates',
       '/management_jobs',
       '/instance_groups',
+      '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
       '/settings',
     ]);
   });
@@ -67,8 +70,10 @@ describe('getRouteConfig', () => {
       '/notification_templates',
       '/management_jobs',
       '/instance_groups',
+      '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
       '/settings',
     ]);
   });
@@ -93,8 +98,10 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
+      '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 
@@ -120,6 +127,7 @@ describe('getRouteConfig', () => {
       '/teams',
       '/credential_types',
       '/notification_templates',
+      '/instances',
       '/applications',
       '/execution_environments',
     ]);
@@ -143,6 +151,7 @@ describe('getRouteConfig', () => {
       '/users',
       '/teams',
       '/credential_types',
+      '/instances',
       '/applications',
       '/execution_environments',
     ]);
@@ -166,6 +175,7 @@ describe('getRouteConfig', () => {
       '/users',
       '/teams',
       '/credential_types',
+      '/instances',
       '/applications',
       '/execution_environments',
     ]);
@@ -194,6 +204,7 @@ describe('getRouteConfig', () => {
       '/teams',
       '/credential_types',
       '/notification_templates',
+      '/instances',
       '/applications',
       '/execution_environments',
     ]);
@@ -223,8 +234,10 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
+      '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 
@@ -252,8 +265,10 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
+      '/instances',
       '/applications',
       '/execution_environments',
+      '/topology_view',
     ]);
   });
 });

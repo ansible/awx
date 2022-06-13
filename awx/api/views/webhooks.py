@@ -4,7 +4,7 @@ import logging
 import urllib.parse
 
 from django.utils.encoding import force_bytes
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status
@@ -16,7 +16,7 @@ from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
 from awx.main.models import Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
-
+from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 logger = logging.getLogger('awx.api.views.webhooks')
 
@@ -136,14 +136,15 @@ class WebhookReceiverBase(APIView):
                 'webhook_credential': obj.webhook_credential,
                 'webhook_guid': event_guid,
             },
-            'extra_vars': {
-                'tower_webhook_event_type': event_type,
-                'tower_webhook_event_guid': event_guid,
-                'tower_webhook_event_ref': event_ref,
-                'tower_webhook_status_api': status_api,
-                'tower_webhook_payload': request.data,
-            },
+            'extra_vars': {},
         }
+
+        for name in JOB_VARIABLE_PREFIXES:
+            kwargs['extra_vars']['{}_webhook_event_type'.format(name)] = event_type
+            kwargs['extra_vars']['{}_webhook_event_guid'.format(name)] = event_guid
+            kwargs['extra_vars']['{}_webhook_event_ref'.format(name)] = event_ref
+            kwargs['extra_vars']['{}_webhook_status_api'.format(name)] = status_api
+            kwargs['extra_vars']['{}_webhook_payload'.format(name)] = request.data
 
         new_job = obj.create_unified_job(**kwargs)
         new_job.signal_start()

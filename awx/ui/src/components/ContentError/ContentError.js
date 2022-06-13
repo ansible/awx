@@ -1,4 +1,5 @@
-import React, { Fragment } from 'react';
+/* eslint-disable react/jsx-no-useless-fragment */
+import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import { bool, instanceOf } from 'prop-types';
 import { t } from '@lingui/macro';

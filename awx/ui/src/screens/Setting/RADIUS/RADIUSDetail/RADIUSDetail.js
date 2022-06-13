@@ -72,6 +72,7 @@ function RADIUSDetail() {
               isInline
               data-cy="RADIUS-deprecation-warning"
               title={t`This feature is deprecated and will be removed in a future release.`}
+              ouiaId="radius-deprecation-alert"
             />
             <DetailList>
               {Object.keys(radius).map((key) => {

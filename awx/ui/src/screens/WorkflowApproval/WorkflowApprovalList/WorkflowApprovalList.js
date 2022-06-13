@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-import { WorkflowApprovalsAPI } from 'api';
+import { WorkflowApprovalsAPI, WorkflowJobsAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
@@ -20,8 +20,7 @@ import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import WorkflowApprovalListItem from './WorkflowApprovalListItem';
 import useWsWorkflowApprovals from './useWsWorkflowApprovals';
-import WorkflowApprovalListApproveButton from './WorkflowApprovalListApproveButton';
-import WorkflowApprovalListDenyButton from './WorkflowApprovalListDenyButton';
+import WorkflowApprovalControls from '../shared/WorkflowApprovalControls';
 
 const QS_CONFIG = getQSConfig('workflow_approvals', {
   page: 1,
@@ -32,6 +31,7 @@ const QS_CONFIG = getQSConfig('workflow_approvals', {
 function WorkflowApprovalsList() {
   const location = useLocation();
   const match = useRouteMatch();
+  const [isKebabOpen, setIsKebabModalOpen] = useState(false);
 
   const {
     result: { results, count, relatedSearchableKeys, searchableKeys },
@@ -141,12 +141,47 @@ function WorkflowApprovalsList() {
   );
 
   const handleDeny = async () => {
+    setIsKebabModalOpen(false);
     await denyWorkflowApprovals();
     clearSelected();
   };
 
-  const { error: actionError, dismissError: dismissActionError } =
-    useDismissableError(approveApprovalError || denyApprovalError);
+  const {
+    error: cancelApprovalError,
+    isLoading: isCancelLoading,
+    request: cancelWorkflowApprovals,
+  } = useRequest(
+    useCallback(
+      async () =>
+        Promise.all(
+          selected.map(({ summary_fields }) =>
+            WorkflowJobsAPI.cancel(summary_fields.source_workflow_job.id)
+          )
+        ),
+      [selected]
+    ),
+    {}
+  );
+
+  const handleCancel = async () => {
+    setIsKebabModalOpen(false);
+    await cancelWorkflowApprovals();
+    clearSelected();
+  };
+
+  const { error: approveError, dismissError: dismissApproveError } =
+    useDismissableError(approveApprovalError);
+  const { error: cancelError, dismissError: dismissCancelError } =
+    useDismissableError(cancelApprovalError);
+  const { error: denyError, dismissError: dismissDenyError } =
+    useDismissableError(denyApprovalError);
+
+  const isLoading =
+    isWorkflowApprovalsLoading ||
+    isDeleteLoading ||
+    isApproveLoading ||
+    isDenyLoading ||
+    isCancelLoading;
 
   return (
     <>
@@ -154,12 +189,7 @@ function WorkflowApprovalsList() {
         <Card>
           <PaginatedTable
             contentError={contentError}
-            hasContentLoading={
-              isWorkflowApprovalsLoading ||
-              isDeleteLoading ||
-              isApproveLoading ||
-              isDenyLoading
-            }
+            hasContentLoading={isLoading}
             items={workflowApprovals}
             itemCount={count}
             pluralizedItemName={t`Workflow Approvals`}
@@ -185,15 +215,16 @@ function WorkflowApprovalsList() {
                 onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
-                  <WorkflowApprovalListApproveButton
-                    key="approve"
-                    onApprove={handleApprove}
-                    selectedItems={selected}
-                  />,
-                  <WorkflowApprovalListDenyButton
-                    key="deny"
-                    onDeny={handleDeny}
-                    selectedItems={selected}
+                  <WorkflowApprovalControls
+                    key="approvalControls"
+                    onHandleApprove={handleApprove}
+                    selected={selected}
+                    onHandleDeny={handleDeny}
+                    onHandleCancel={handleCancel}
+                    onHandleToggleToolbarKebab={(isOpen) =>
+                      setIsKebabModalOpen(isOpen)
+                    }
+                    isKebabOpen={isKebabOpen}
                   />,
                   <ToolbarDeleteButton
                     key="delete"
@@ -218,7 +249,7 @@ function WorkflowApprovalsList() {
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
                 <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-                <HeaderCell>{t`Job`}</HeaderCell>
+                <HeaderCell>{t`Workflow Job`}</HeaderCell>
                 <HeaderCell sortKey="started">{t`Started`}</HeaderCell>
                 <HeaderCell>{t`Status`}</HeaderCell>
               </HeaderRow>
@@ -250,17 +281,37 @@ function WorkflowApprovalsList() {
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
-      {actionError && (
+      {approveError && (
         <AlertModal
-          isOpen={actionError}
+          isOpen={approveError}
           variant="error"
           title={t`Error!`}
-          onClose={dismissActionError}
+          onClose={dismissApproveError}
         >
-          {approveApprovalError
-            ? t`Failed to approve one or more workflow approval.`
-            : t`Failed to deny one or more workflow approval.`}
-          <ErrorDetail error={actionError} />
+          {t`Failed to approve one or more workflow approval.`}
+          <ErrorDetail error={approveError} />
+        </AlertModal>
+      )}
+      {cancelError && (
+        <AlertModal
+          isOpen={cancelError}
+          variant="error"
+          title={t`Error!`}
+          onClose={dismissCancelError}
+        >
+          {t`Failed to cancel one or more workflow approval.`}
+          <ErrorDetail error={cancelError} />
+        </AlertModal>
+      )}
+      {denyError && (
+        <AlertModal
+          isOpen={denyError}
+          variant="error"
+          title={t`Error!`}
+          onClose={dismissDenyError}
+        >
+          {t`Failed to deny one or more workflow approval.`}
+          <ErrorDetail error={denyError} />
         </AlertModal>
       )}
     </>

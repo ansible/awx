@@ -17,6 +17,7 @@ Have questions about this document or anything not covered here? Come chat with 
   - [Building API Documentation](#building-api-documentation)
   - [Accessing the AWX web interface](#accessing-the-awx-web-interface)
   - [Purging containers and images](#purging-containers-and-images)
+  - [Pre commit hooks](#pre-commit-hooks)
 - [What should I work on?](#what-should-i-work-on)
 - [Submitting Pull Requests](#submitting-pull-requests)
 - [PR Checks run by Zuul](#pr-checks-run-by-zuul)
@@ -103,6 +104,14 @@ When necessary, remove any AWX containers and images by running the following:
 ```bash
 (host)$ make docker-clean
 ```
+
+### Pre commit hooks
+
+When you attempt to perform a `git commit` there will be a pre-commit hook that gets run before the commit is allowed to your local repository. For example, python's [black](https://pypi.org/project/black/) will be run to test the formatting of any python files.
+
+While you can use environment variables to skip the pre-commit hooks GitHub will run similar tests and prevent merging of PRs if the tests do not pass.
+
+ If you would like to add additional commit hooks for your own usage you can create a directory in the root of the repository called `pre-commit-user`. Any executable file in that directory will be executed as part of the pre-commit hooks. If any of the pre-commit checks fail the commit will be halted. For your convenience in user scripts, a variable called `CHANGED_FILES` will be set with any changed files present in the commit.
 
 ## What should I work on?
 

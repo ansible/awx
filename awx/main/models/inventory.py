@@ -14,7 +14,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models, connection
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
@@ -29,7 +29,6 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
-    JSONBField,
     SmartFilterField,
     OrderedManyToManyField,
 )
@@ -169,6 +168,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default=False,
         editable=False,
         help_text=_('Flag indicating the inventory is being deleted.'),
+    )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='inventory_labels',
+        help_text=_('Labels associated with this inventory.'),
     )
 
     def get_absolute_url(self, request=None):
@@ -366,7 +371,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
     @transaction.atomic
     def schedule_deletion(self, user_id=None):
-        from awx.main.tasks import delete_inventory
+        from awx.main.tasks.system import delete_inventory
         from awx.main.signals import activity_stream_delete
 
         if self.pending_deletion is True:
@@ -382,7 +387,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         if self.kind == 'smart' and settings.AWX_REBUILD_SMART_MEMBERSHIP:
 
             def on_commit():
-                from awx.main.tasks import update_host_smart_inventory_memberships
+                from awx.main.tasks.system import update_host_smart_inventory_memberships
 
                 update_host_smart_inventory_memberships.delay()
 
@@ -482,7 +487,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this host.'),
     )
-    ansible_facts = JSONBField(
+    ansible_facts = models.JSONField(
         blank=True,
         default=dict,
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
@@ -551,7 +556,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         if settings.AWX_REBUILD_SMART_MEMBERSHIP:
 
             def on_commit():
-                from awx.main.tasks import update_host_smart_inventory_memberships
+                from awx.main.tasks.system import update_host_smart_inventory_memberships
 
                 update_host_smart_inventory_memberships.delay()
 
@@ -631,7 +636,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     @transaction.atomic
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
-        from awx.main.tasks import update_inventory_computed_fields
+        from awx.main.tasks.system import update_inventory_computed_fields
         from awx.main.signals import disable_activity_stream, activity_stream_delete
 
         def mark_actual():
@@ -988,6 +993,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     )
     update_on_project_update = models.BooleanField(
         default=False,
+        help_text=_(
+            'This field is deprecated and will be removed in a future release. '
+            'In future release, functionality will be migrated to source project update_on_launch.'
+        ),
     )
     update_on_launch = models.BooleanField(
         default=False,
@@ -1219,7 +1228,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @classmethod
     def _get_task_class(cls):
-        from awx.main.tasks import RunInventoryUpdate
+        from awx.main.tasks.jobs import RunInventoryUpdate
 
         return RunInventoryUpdate
 

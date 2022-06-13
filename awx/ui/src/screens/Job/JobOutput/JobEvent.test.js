@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { shallow } from 'enzyme';
 import JobEvent from './JobEvent';
 
 const mockOnPlayStartEvent = {
@@ -18,9 +18,6 @@ const mockRunnerOnOkEvent = {
   start_line: 4,
   end_line: 5,
   stdout: '\u001b[0;32mok: [localhost]\u001b[0m',
-};
-const selectors = {
-  lineText: 'JobEventLineText',
 };
 
 const singleDigitTimestampEvent = {
@@ -52,55 +49,51 @@ const mockOnPlayStartLineTextHtml = [
 ];
 
 describe('<JobEvent />', () => {
-  test('initially renders successfully', () => {
-    mountWithContexts(
-      <JobEvent
-        lineTextHtml={mockOnPlayStartLineTextHtml}
-        {...mockOnPlayStartEvent}
-      />
-    );
-  });
-
   test('playbook event timestamps are rendered', () => {
-    let wrapper = mountWithContexts(
+    const wrapper1 = shallow(
       <JobEvent
         lineTextHtml={mockOnPlayStartLineTextHtml}
-        {...mockOnPlayStartEvent}
+        event={mockOnPlayStartEvent}
       />
     );
-    let lineText = wrapper.find(selectors.lineText);
-    expect(
-      lineText.filterWhere((e) => e.text().includes('18:11:22'))
-    ).toHaveLength(1);
+    const lineText1 = wrapper1.find('JobEventLineText');
+    const html1 = lineText1.at(1).prop('dangerouslySetInnerHTML').__html;
+    expect(html1.includes('18:11:22')).toBe(true);
 
-    wrapper = mountWithContexts(
+    const wrapper2 = shallow(
       <JobEvent
         lineTextHtml={mockSingleDigitTimestampEventLineTextHtml}
-        {...singleDigitTimestampEvent}
+        event={singleDigitTimestampEvent}
       />
     );
-    lineText = wrapper.find(selectors.lineText);
-    expect(
-      lineText.filterWhere((e) => e.text().includes('08:01:02'))
-    ).toHaveLength(1);
+    const lineText2 = wrapper2.find('JobEventLineText');
+    const html2 = lineText2.at(1).prop('dangerouslySetInnerHTML').__html;
+    expect(html2.includes('08:01:02')).toBe(true);
   });
 
   test('ansi stdout colors are rendered as html', () => {
-    const wrapper = mountWithContexts(
-      <JobEvent lineTextHtml={mockAnsiLineTextHtml} {...mockRunnerOnOkEvent} />
+    const wrapper = shallow(
+      <JobEvent
+        lineTextHtml={mockAnsiLineTextHtml}
+        event={mockRunnerOnOkEvent}
+      />
     );
-    const lineText = wrapper.find(selectors.lineText);
+    const lineText = wrapper.find('JobEventLineText');
     expect(
       lineText
-        .html()
-        .includes('<span class="output--1977390340">ok: [localhost]</span>')
+        .prop('dangerouslySetInnerHTML')
+        .__html.includes(
+          '<span class="output--1977390340">ok: [localhost]</span>'
+        )
     ).toBe(true);
   });
 
   test("events without stdout aren't rendered", () => {
     const missingStdoutEvent = { ...mockOnPlayStartEvent };
     delete missingStdoutEvent.stdout;
-    const wrapper = mountWithContexts(<JobEvent {...missingStdoutEvent} />);
-    expect(wrapper.find(selectors.lineText)).toHaveLength(0);
+    const wrapper = shallow(
+      <JobEvent lineTextHtml={[]} event={missingStdoutEvent} />
+    );
+    expect(wrapper.find('JobEventLineText')).toHaveLength(0);
   });
 });

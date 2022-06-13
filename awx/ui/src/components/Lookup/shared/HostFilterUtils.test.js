@@ -4,6 +4,7 @@ import {
   toHostFilter,
   toQueryString,
   toSearchParams,
+  modifyHostFilter,
 } from './HostFilterUtils';
 
 const QS_CONFIG = {
@@ -135,6 +136,17 @@ describe('toHostFilter', () => {
     );
   });
 
+  test('should escape name__regex and name__iregex', () => {
+    const object = {
+      or__name__regex: '(t|e)st',
+      or__name__iregex: '(f|o)',
+      or__name: 'foo',
+    };
+    expect(toHostFilter(object)).toEqual(
+      'name=foo or name__iregex="(f|o)" or name__regex="(t|e)st"'
+    );
+  });
+
   test('should return a host filter with or conditional when value is array', () => {
     const object = {
       or__groups__id: ['1', '2'],
@@ -169,5 +181,36 @@ describe('removeDefaultParams', () => {
       foo: ['bar', 'baz', 'qux'],
       apat: 'lima',
     });
+  });
+});
+
+describe('modifyHostFilter', () => {
+  test('should modify host_filter', () => {
+    const object = {
+      foo: ['bar', 'baz', 'qux'],
+      apat: 'lima',
+      page: 10,
+      order_by: '-name',
+    };
+    expect(
+      modifyHostFilter(
+        'host_filter=ansible_facts__ansible_lo__ipv6[]__scope="host"',
+        object
+      )
+    ).toEqual({
+      apat: 'lima',
+      foo: ['bar', 'baz', 'qux'],
+      host_filter: 'ansible_facts__ansible_lo__ipv6[]__scope="host"',
+      order_by: '-name',
+      page: 10,
+    });
+  });
+  test('should not modify host_filter', () => {
+    const object = { groups__name__icontains: '1' };
+    expect(
+      modifyHostFilter('groups__name__icontains=1', {
+        groups__name__icontains: '1',
+      })
+    ).toEqual(object);
   });
 });

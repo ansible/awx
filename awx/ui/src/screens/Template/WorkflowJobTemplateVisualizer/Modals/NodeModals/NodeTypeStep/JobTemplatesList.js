@@ -2,13 +2,19 @@ import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
+import { Popover } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { func, shape } from 'prop-types';
 import { JobTemplatesAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest from 'hooks/useRequest';
-import DataListToolbar from 'components/DataListToolbar';
 import CheckboxListItem from 'components/CheckboxListItem';
+import ChipGroup from 'components/ChipGroup';
+import CredentialChip from 'components/CredentialChip';
+import DataListToolbar from 'components/DataListToolbar';
+import { Detail, DetailList } from 'components/DetailList';
 import PaginatedTable, {
+  ActionItem,
   HeaderCell,
   HeaderRow,
   getSearchableKeys,
@@ -19,6 +25,52 @@ const QS_CONFIG = getQSConfig('job-templates', {
   page_size: 5,
   order_by: 'name',
 });
+
+function TemplatePopoverContent({ template }) {
+  return (
+    <DetailList compact stacked>
+      <Detail
+        label={t`Inventory`}
+        value={template.summary_fields?.inventory?.name}
+        dataCy={`template-${template.id}-inventory`}
+      />
+      <Detail
+        label={t`Project`}
+        value={template.summary_fields?.project?.name}
+        dataCy={`template-${template.id}-project`}
+      />
+      <Detail
+        label={t`Playbook`}
+        value={template?.playbook}
+        dataCy={`template-${template.id}-playbook`}
+      />
+      {template.summary_fields?.credentials &&
+      template.summary_fields.credentials.length ? (
+        <Detail
+          fullWidth
+          label={t`Credentials`}
+          dataCy={`template-${template.id}-credentials`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={template.summary_fields.credentials.length}
+              ouiaId={`template-${template.id}-credential-chips`}
+            >
+              {template.summary_fields.credentials.map((c) => (
+                <CredentialChip
+                  key={c.id}
+                  credential={c}
+                  isReadOnly
+                  ouiaId={`credential-${c.id}-chip`}
+                />
+              ))}
+            </ChipGroup>
+          }
+        />
+      ) : null}
+    </DetailList>
+  );
+}
 
 function JobTemplatesList({ nodeResource, onUpdateNodeResource }) {
   const location = useLocation();
@@ -81,6 +133,18 @@ function JobTemplatesList({ nodeResource, onUpdateNodeResource }) {
           onSelect={() => onUpdateNodeResource(item)}
           onDeselect={() => onUpdateNodeResource(null)}
           isRadio
+          rowActions={[
+            <ActionItem id={item.id} visible>
+              <Popover
+                bodyContent={<TemplatePopoverContent template={item} />}
+                headerContent={<div>{t`Details`}</div>}
+                id={`item-${item.id}-info-popover`}
+                position="right"
+              >
+                <OutlinedQuestionCircleIcon />
+              </Popover>
+            </ActionItem>,
+          ]}
         />
       )}
       renderToolbar={(props) => <DataListToolbar {...props} fillWidth />}

@@ -26,6 +26,10 @@ options:
         - Name to use for the execution environment.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      type: str
     image:
       description:
         - The fully qualified url of the container image.
@@ -74,6 +78,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         image=dict(required=True),
         description=dict(default=''),
         organization=dict(),
@@ -87,6 +92,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     image = module.params.get('image')
     description = module.params.get('description')
     state = module.params.get('state')
@@ -98,7 +104,7 @@ def main():
         module.delete_if_needed(existing_item)
 
     new_fields = {
-        'name': name,
+        'name': new_name if new_name else (module.get_item_name(existing_item) if existing_item else name),
         'image': image,
     }
     if description:

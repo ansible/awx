@@ -40,6 +40,14 @@ function HostList() {
     }
   });
 
+  const hasAnsibleFactsKeys = () => {
+    const nonDefaultSearchValues = Object.values(nonDefaultSearchParams);
+    return (
+      nonDefaultSearchValues.filter((value) => value.includes('ansible_facts'))
+        .length > 0
+    );
+  };
+
   const hasInvalidHostFilterKeys = () => {
     const nonDefaultSearchKeys = Object.keys(nonDefaultSearchParams);
     return (
@@ -159,6 +167,7 @@ function HostList() {
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG} isExpandable>
               <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="description">{t`Description`}</HeaderCell>
               <HeaderCell>{t`Inventory`}</HeaderCell>
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
@@ -185,9 +194,11 @@ function HostList() {
                   ? [
                       <SmartInventoryButton
                         hasInvalidKeys={hasInvalidHostFilterKeys()}
+                        hasAnsibleFactsKeys={hasAnsibleFactsKeys()}
                         isDisabled={
                           Object.keys(nonDefaultSearchParams).length === 0 ||
-                          hasInvalidHostFilterKeys()
+                          hasInvalidHostFilterKeys() ||
+                          hasAnsibleFactsKeys()
                         }
                         onClick={() => handleSmartInventoryClick()}
                       />,

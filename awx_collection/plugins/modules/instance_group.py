@@ -33,7 +33,7 @@ options:
       type: str
     credential:
       description:
-        - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token".
+        - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "OpenShift or Kubernetes API Bearer Token".
       required: False
       type: str
     is_container_group:

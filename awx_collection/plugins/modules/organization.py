@@ -26,6 +26,10 @@ options:
         - Name to use for the organization.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      type: str
     description:
       description:
         - The description to use for the organization.
@@ -116,6 +120,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         description=dict(),
         default_environment=dict(),
         custom_virtualenv=dict(),
@@ -134,6 +139,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     description = module.params.get('description')
     default_ee = module.params.get('default_environment')
     custom_virtualenv = module.params.get('custom_virtualenv')
@@ -186,7 +192,9 @@ def main():
             association_fields['galaxy_credentials'].append(module.resolve_name_to_id('credentials', item))
 
     # Create the data that gets sent for create and update
-    org_fields = {'name': module.get_item_name(organization) if organization else name}
+    org_fields = {
+        'name': new_name if new_name else (module.get_item_name(organization) if organization else name),
+    }
     if description is not None:
         org_fields['description'] = description
     if default_ee is not None:

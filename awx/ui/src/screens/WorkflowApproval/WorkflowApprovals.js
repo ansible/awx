@@ -3,6 +3,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import WorkflowApprovalList from './WorkflowApprovalList';
 import WorkflowApproval from './WorkflowApproval';
 
@@ -35,7 +36,9 @@ function WorkflowApprovals() {
           <WorkflowApproval setBreadcrumb={updateBreadcrumbConfig} />
         </Route>
         <Route path={`${match.url}`}>
-          <WorkflowApprovalList />
+          <PersistentFilters pageKey="workflowApprovals">
+            <WorkflowApprovalList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

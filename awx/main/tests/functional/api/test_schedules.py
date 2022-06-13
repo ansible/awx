@@ -111,21 +111,41 @@ def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, su
     [
         ("", "This field may not be blank"),
         ("DTSTART:NONSENSE", "Valid DTSTART required in rrule"),
+        ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
         ("DTSTART:20300308T050000Z DTSTART:20310308T050000", "Multiple DTSTART is not supported"),
-        ("DTSTART:20300308T050000Z", "RRULE required in rrule"),
-        ("DTSTART:20300308T050000Z RRULE:NONSENSE", "INTERVAL required in rrule"),
+        ("DTSTART:20300308T050000Z", "One or more rule required in rrule"),
+        ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1; EXDATE:20220401", "EXDATE not allowed in rrule"),
+        ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1; RDATE:20220401", "RDATE not allowed in rrule"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=SECONDLY;INTERVAL=5;COUNT=6", "SECONDLY is not supported"),
-        ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4", "Multiple BYMONTHDAYs not supported"),  # noqa
-        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1,2", "Multiple BYMONTHs not supported"),  # noqa
+        # Individual rule test
+        ("DTSTART:20300308T050000Z RRULE:NONSENSE", "INTERVAL required in rrule"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO", "BYDAY with numeric prefix not supported"),  # noqa
-        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYYEARDAY=100", "BYYEARDAY not supported"),  # noqa
-        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYWEEKNO=20", "BYWEEKNO not supported"),
+        ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000", "COUNT > 999 is unsupported"),  # noqa
+        # Individual rule test with multiple rules
+        ## Bad Rule:  RRULE:NONSENSE
+        ("DTSTART:20300308T050000Z RRULE:NONSENSE RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU", "INTERVAL required in rrule"),
+        ## Bad Rule:  RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO
+        (
+            "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO",
+            "BYDAY with numeric prefix not supported",
+        ),  # noqa
+        ## Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z
+        (
+            "DTSTART:20030925T104941Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z",
+            "RRULE may not contain both COUNT and UNTIL",
+        ),  # noqa
+        ## Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000
+        (
+            "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000",
+            "COUNT > 999 is unsupported",
+        ),  # noqa
+        # Multiple errors, first condition should be returned
+        ("DTSTART:NONSENSE RRULE:NONSENSE RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4", "Valid DTSTART required in rrule"),
+        # Parsing Tests
         ("DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5", "A valid TZID must be provided"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation: invalid 'FREQ': REGULARLY"),  # noqa
-        ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
         ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
-        ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
     ],
 )
 def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
@@ -141,6 +161,29 @@ def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
         expect=400,
     )
     assert error in smart_str(resp.content)
+
+
+def test_multiple_invalid_rrules(post, admin_user, project, inventory):
+    job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    resp = post(
+        url,
+        {
+            'name': 'Some Schedule',
+            'rrule': "EXRULE:FREQ=SECONDLY DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5;UNTIL=20220101 DTSTART;TZID=US-Eastern:19961105T090000",
+        },
+        admin_user,
+        expect=400,
+    )
+    expected_result = {
+        "rrule": [
+            "Multiple DTSTART is not supported.",
+            "INTERVAL required in rrule: RULE:FREQ=SECONDLY",
+            "RRULE may not contain both COUNT and UNTIL: RULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5;UNTIL=20220101",
+            "rrule parsing failed validation: 'NoneType' object has no attribute 'group'",
+        ]
+    }
+    assert expected_result == resp.data
 
 
 @pytest.mark.django_db
@@ -379,6 +422,78 @@ def test_dst_rollback_duplicates(post, admin_user):
         '2030-11-03 02:30:00-05:00',
         '2030-11-03 03:30:00-05:00',
     ]
+
+
+@pytest.mark.parametrize(
+    'rrule, expected_result',
+    (
+        pytest.param(
+            'DTSTART;TZID=America/New_York:20300302T150000 RRULE:INTERVAL=1;FREQ=DAILY;UNTIL=20300304T1500 EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU',
+            ['2030-03-02 15:00:00-05:00', '2030-03-04 15:00:00-05:00'],
+            id="Every day except sundays",
+        ),
+        pytest.param(
+            'DTSTART;TZID=US/Eastern:20300428T170000 RRULE:INTERVAL=1;FREQ=DAILY;COUNT=4 EXRULE:INTERVAL=1;FREQ=DAILY;BYMONTH=4;BYMONTHDAY=30',
+            ['2030-04-28 17:00:00-04:00', '2030-04-29 17:00:00-04:00', '2030-05-01 17:00:00-04:00'],
+            id="Every day except April 30th",
+        ),
+        pytest.param(
+            'DTSTART;TZID=America/New_York:20300313T164500 RRULE:INTERVAL=5;FREQ=MINUTELY EXRULE:FREQ=MINUTELY;INTERVAL=5;BYDAY=WE;BYHOUR=17,18',
+            [
+                '2030-03-13 16:45:00-04:00',
+                '2030-03-13 16:50:00-04:00',
+                '2030-03-13 16:55:00-04:00',
+                '2030-03-13 19:00:00-04:00',
+                '2030-03-13 19:05:00-04:00',
+                '2030-03-13 19:10:00-04:00',
+                '2030-03-13 19:15:00-04:00',
+                '2030-03-13 19:20:00-04:00',
+                '2030-03-13 19:25:00-04:00',
+                '2030-03-13 19:30:00-04:00',
+            ],
+            id="Every 5 minutes but not Wednesdays from 5-7pm",
+        ),
+        pytest.param(
+            'DTSTART;TZID=America/New_York:20300426T100100 RRULE:INTERVAL=15;FREQ=MINUTELY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10,11 EXRULE:INTERVAL=15;FREQ=MINUTELY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=11;BYMINUTE=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,34,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59',
+            [
+                '2030-04-26 10:01:00-04:00',
+                '2030-04-26 10:16:00-04:00',
+                '2030-04-26 10:31:00-04:00',
+                '2030-04-26 10:46:00-04:00',
+                '2030-04-26 11:01:00-04:00',
+                '2030-04-29 10:01:00-04:00',
+                '2030-04-29 10:16:00-04:00',
+                '2030-04-29 10:31:00-04:00',
+                '2030-04-29 10:46:00-04:00',
+                '2030-04-29 11:01:00-04:00',
+            ],
+            id="Every 15 minutes Monday - Friday from 10:01am to 11:02pm (inclusive)",
+        ),
+        pytest.param(
+            'DTSTART:20301219T130551Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYDAY=SA;BYMONTHDAY=12,13,14,15,16,17,18',
+            [
+                '2031-01-18 13:05:51+00:00',
+                '2031-02-15 13:05:51+00:00',
+                '2031-03-15 13:05:51+00:00',
+                '2031-04-12 13:05:51+00:00',
+                '2031-05-17 13:05:51+00:00',
+                '2031-06-14 13:05:51+00:00',
+                '2031-07-12 13:05:51+00:00',
+                '2031-08-16 13:05:51+00:00',
+                '2031-09-13 13:05:51+00:00',
+                '2031-10-18 13:05:51+00:00',
+            ],
+            id="Any Saturday whose month day is between 12 and 18",
+        ),
+    ),
+)
+def test_complex_schedule(post, admin_user, rrule, expected_result):
+    # Every day except Sunday, 2022-05-01 is a Sunday
+
+    url = reverse('api:schedule_rrule')
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert list(map(str, r.data['local'])) == expected_result
 
 
 @pytest.mark.django_db

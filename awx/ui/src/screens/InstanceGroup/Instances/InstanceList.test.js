@@ -41,6 +41,7 @@ const instances = [
     jobs_running: 0,
     jobs_total: 68,
     cpu: 6,
+    node_type: 'control',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -67,6 +68,7 @@ const instances = [
     jobs_running: 0,
     jobs_total: 68,
     cpu: 6,
+    node_type: 'hybrid',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -93,6 +95,7 @@ const instances = [
     jobs_running: 0,
     jobs_total: 68,
     cpu: 6,
+    node_type: 'execution',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -120,7 +123,7 @@ describe('<InstanceList/>', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Route path="/instance_groups/:id/instances">
-          <InstanceList />
+          <InstanceList instanceGroup={{ name: 'Alex' }} />
         </Route>,
         {
           context: {
@@ -196,5 +199,30 @@ describe('<InstanceList/>', () => {
     );
     wrapper.update();
     expect(wrapper.find('AlertModal')).toHaveLength(1);
+  });
+
+  test('should disable disassociate button', async () => {
+    expect(
+      wrapper.find('Button[ouiaId="disassociate-button"]').prop('isDisabled')
+    ).toBe(true);
+    await act(async () =>
+      wrapper.find('DataListToolbar').prop('onSelectAll')(instances)
+    );
+
+    wrapper.update();
+    expect(
+      wrapper.find('Button[ouiaId="disassociate-button"]').prop('isDisabled')
+    ).toBe(true);
+    await act(async () =>
+      wrapper
+        .find('Tr#instance-row-1')
+        .find('SelectColumn[aria-label="Select row 0"]')
+        .prop('onSelect')(false)
+    );
+
+    wrapper.update();
+    expect(
+      wrapper.find('Button[ouiaId="disassociate-button"]').prop('isDisabled')
+    ).toBe(false);
   });
 });

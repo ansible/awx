@@ -64,6 +64,7 @@ function ScheduleToggle({ schedule, onToggle, className, isDisabled }) {
           }
           onChange={toggleSchedule}
           aria-label={t`Toggle schedule`}
+          ouiaId={`schedule-${schedule.id}-toggle`}
         />
       </Tooltip>
       {showError && error && !isLoading && (

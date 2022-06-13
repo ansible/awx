@@ -4,6 +4,7 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from 'contexts/Workflow';
+import { useUserProfile } from 'contexts/Config';
 import {
   mountWithContexts,
   waitForElement,
@@ -41,6 +42,17 @@ const workflowContext = {
 };
 
 describe('NodeEditModal', () => {
+  beforeEach(() => {
+    useUserProfile.mockImplementation(() => {
+      return {
+        isSuperUser: true,
+        isSystemAuditor: false,
+        isOrgAdmin: false,
+        isNotificationAdmin: false,
+        isExecEnvAdmin: false,
+      };
+    });
+  });
   test('Node modal confirmation dispatches as expected', async () => {
     const wrapper = mountWithContexts(
       <WorkflowDispatchContext.Provider value={dispatch}>

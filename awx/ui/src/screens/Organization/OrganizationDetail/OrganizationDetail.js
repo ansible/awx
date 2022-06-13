@@ -94,12 +94,22 @@ function OrganizationDetail({ organization }) {
         />
         <Detail label={t`Description`} value={description} />
         {license_info?.license_type !== 'open' && (
-          <Detail label={t`Max Hosts`} value={`${max_hosts}`} />
+          <Detail
+            label={t`Max Hosts`}
+            value={`${max_hosts}`}
+            helpText={t`The maximum number of hosts allowed to be managed by
+            this organization. Value defaults to 0 which means no limit.
+            Refer to the Ansible documentation for more details.`}
+          />
         )}
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.default_environment}
           isDefaultEnvironment
+          helpText={t`The execution environment that will be used for jobs
+          inside of this organization. This will be used a fallback when
+          an execution environment has not been explicitly assigned at the
+          project, job template or workflow level.`}
         />
         <UserDateDetail
           label={t`Created`}
@@ -115,11 +125,20 @@ function OrganizationDetail({ organization }) {
           <Detail
             fullWidth
             label={t`Instance Groups`}
+            helpText={t`The Instance Groups for this Organization to run on.`}
             value={
-              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={instanceGroups.length}
+                ouiaId="instance-group-chips"
+              >
                 {instanceGroups.map((ig) => (
                   <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                    <Chip key={ig.id} isReadOnly>
+                    <Chip
+                      key={ig.id}
+                      isReadOnly
+                      ouiaId={`instance-group-${ig.id}-chip`}
+                    >
                       {ig.name}
                     </Chip>
                   </Link>
@@ -133,7 +152,11 @@ function OrganizationDetail({ organization }) {
             fullWidth
             label={t`Galaxy Credentials`}
             value={
-              <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={galaxy_credentials.length}
+                ouiaId="galaxy-credential-chips"
+              >
                 {galaxy_credentials.map((credential) => (
                   <Link
                     key={credential.id}
@@ -143,6 +166,7 @@ function OrganizationDetail({ organization }) {
                       credential={credential}
                       key={credential.id}
                       isReadOnly
+                      ouiaId={`galaxy-credential-${credential.id}-chip`}
                     />
                   </Link>
                 ))}

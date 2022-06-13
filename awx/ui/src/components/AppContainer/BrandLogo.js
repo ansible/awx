@@ -14,7 +14,7 @@ const BrandImg = styled.img`
 `;
 
 const BrandLogo = ({ alt }) => (
-  <BrandImg src="/static/media/logo-header.svg" alt={alt} />
+  <BrandImg src="static/media/logo-header.svg" alt={alt} />
 );
 
 export default BrandLogo;

@@ -10,7 +10,8 @@ import {
   ProjectDiagramIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import StatusIcon from 'components/StatusIcon';
+import StatusLabel from 'components/StatusLabel';
+import JobCancelButton from 'components/JobCancelButton';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
@@ -24,8 +25,13 @@ const Toolbar = styled.div`
 `;
 
 const ToolbarJob = styled.div`
+  display: inline-flex;
   align-items: center;
-  display: flex;
+
+  h1 {
+    margin-right: 10px;
+    font-weight: var(--pf-global--FontWeight--bold);
+  }
 `;
 
 const ToolbarActions = styled.div`
@@ -56,11 +62,6 @@ const ActionButton = styled(Button)`
     color: white;
   }
 `;
-
-const StatusIconWithMargin = styled(StatusIcon)`
-  margin-right: 20px;
-`;
-
 function WorkflowOutputToolbar({ job }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const history = useHistory();
@@ -73,12 +74,24 @@ function WorkflowOutputToolbar({ job }) {
     );
   };
   return (
-    <Toolbar id="workflow-output-toolbar">
+    <Toolbar id="workflow-output-toolbar" ouiaId="workflow-output-toolbar">
       <ToolbarJob>
-        <StatusIconWithMargin status={job.status} />
-        <b>{job.name}</b>
+        <h1>{job.name}</h1>
+        <StatusLabel status={job.status} />
       </ToolbarJob>
       <ToolbarActions>
+        {['new', 'pending', 'waiting', 'running'].includes(job?.status) &&
+        job?.summary_fields?.user_capabilities?.start ? (
+          <JobCancelButton
+            style={{ margin: '0px 6px', padding: '6px 10px' }}
+            job={job}
+            errorTitle={t`Job Cancel Error`}
+            title={t`Cancel ${job.name}`}
+            errorMessage={t`Failed to cancel ${job.name}`}
+            showIconButton
+          />
+        ) : null}
+
         <ActionButton
           ouiaId="edit-workflow"
           aria-label={t`Edit workflow`}

@@ -5,13 +5,50 @@ env:
 on:
   pull_request:
 jobs:
-  api-test:
+  common-tests:
+    name: ${{ matrix.tests.name }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        tests:
+          - name: api-test
+            command: /start_tests.sh
+            label: Run API Tests
+          - name: api-lint
+            command: /var/lib/awx/venv/awx/bin/tox -e linters
+            label: Run API Linters
+          - name: api-swagger
+            command: /start_tests.sh swagger
+            label: Generate API Reference
+          - name: awx-collection
+            command: /start_tests.sh test_collection_all
+            label: Run Collection Tests
+          - name: api-schema
+            label: Check API Schema
+            command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+          - name: ui-lint
+            label: Run UI Linters
+            command: make ui-lint
+          - name: ui-test-screens
+            label: Run UI Screens Tests
+            command: make ui-test-screens
+          - name: ui-test-general
+            label: Run UI General Tests
+            command: make ui-test-general
     steps:
       - uses: actions/checkout@v2
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
 
       - name: Log in to registry
         run: |
@@ -25,17 +62,22 @@ jobs:
         run: |
           DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
 
-      - name: Run API Tests
+      - name: ${{ matrix.texts.label }}
         run: |
           docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh
-  api-lint:
+            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} ${{ matrix.tests.command }}
+  dev-env:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
       - uses: actions/checkout@v2
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
 
       - name: Log in to registry
         run: |
@@ -49,130 +91,12 @@ jobs:
         run: |
           DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
 
-      - name: Run API Linters
+      - name: Run smoke test
         run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /var/lib/awx/venv/awx/bin/tox -e linters
-  api-swagger:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v2
+          export DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }}
+          export COMPOSE_TAG=${{ env.BRANCH }}
+          ansible-playbook tools/docker-compose/ansible/smoke-test.yml -e repo_dir=$(pwd) -v
 
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }}  make docker-compose-build
-
-      - name: Generate API Reference
-        run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh swagger
-  awx-collection:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }}  make docker-compose-build
-
-      - name: Run Collection Tests
-        run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh test_collection_all
-  api-schema:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }}  make docker-compose-build
-
-      - name: Check API Schema
-        run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} /start_tests.sh detect-schema-change
-  ui-lint:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
-
-      - name: Run UI Linters
-        run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} make ui-lint
-  ui-test:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
-
-      - name: Run UI Tests
-        run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} make ui-test
   awx-operator:
     runs-on: ubuntu-latest
     steps:
@@ -207,7 +131,7 @@ jobs:
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
           make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule test -s kind
+          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind
         env:
           AWX_TEST_IMAGE: awx
           AWX_TEST_VERSION: ci

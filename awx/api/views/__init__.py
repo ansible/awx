@@ -29,7 +29,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 # Django REST Framework
@@ -62,7 +62,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications, update_inventory_computed_fields
+from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset, HostAccess
 from awx.api.generics import (
     APIView,
@@ -105,7 +105,6 @@ from awx.api.permissions import (
     ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission,
     UserPermission,
-    InstanceGroupTowerPermission,
     VariableDataPermission,
     WorkflowApprovalPermission,
     IsSystemAdminOrAuditor,
@@ -113,7 +112,7 @@ from awx.api.permissions import (
 from awx.api import renderers
 from awx.api import serializers
 from awx.api.metadata import RoleMetadata
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, SURVEY_TYPE_MAPPING
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
     ControlledByScmMixin,
@@ -157,8 +156,10 @@ from awx.api.views.inventory import (  # noqa
     InventoryAccessList,
     InventoryObjectRolesList,
     InventoryJobTemplateList,
+    InventoryLabelList,
     InventoryCopy,
 )
+from awx.api.views.mesh_visualizer import MeshVisualizer  # noqa
 from awx.api.views.root import (  # noqa
     ApiRootView,
     ApiOAuthAuthorizationRootView,
@@ -171,6 +172,7 @@ from awx.api.views.root import (  # noqa
 )
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
 from awx.api.pagination import UnifiedJobEventPagination
+from awx.main.utils import set_environ
 
 
 logger = logging.getLogger('awx.api.views')
@@ -363,6 +365,7 @@ class InstanceList(ListAPIView):
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
+    ordering = ('id',)
 
 
 class InstanceDetail(RetrieveUpdateAPIView):
@@ -406,6 +409,16 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
     def is_valid_relation(self, parent, sub, created=False):
         if parent.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {parent.hostname}.")}
+        if parent.node_type == 'hop':
+            return {'msg': _(f"Cannot change instance group membership of hop node : {parent.hostname}.")}
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        res = self.is_valid_relation(parent, sub)
+        if res:
+            return res
+        if sub.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and parent.node_type == 'hybrid':
+            return {'msg': _(f"Cannot disassociate hybrid instance {parent.hostname} from {sub.name}.")}
         return None
 
 
@@ -416,6 +429,10 @@ class InstanceHealthCheck(GenericAPIView):
     serializer_class = serializers.InstanceHealthCheckSerializer
     permission_classes = (IsSystemAdminOrAuditor,)
 
+    def get_queryset(self):
+        # FIXME: For now, we don't have a good way of checking the health of a hop node.
+        return super().get_queryset().exclude(node_type='hop')
+
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         data = self.get_serializer(data=request.data).to_representation(obj)
@@ -425,7 +442,7 @@ class InstanceHealthCheck(GenericAPIView):
         obj = self.get_object()
 
         if obj.node_type == 'execution':
-            from awx.main.tasks import execution_node_health_check
+            from awx.main.tasks.system import execution_node_health_check
 
             runner_data = execution_node_health_check(obj.hostname)
             obj.refresh_from_db()
@@ -435,7 +452,7 @@ class InstanceHealthCheck(GenericAPIView):
                 if extra_field in runner_data:
                     data[extra_field] = runner_data[extra_field]
         else:
-            from awx.main.tasks import cluster_node_health_check
+            from awx.main.tasks.system import cluster_node_health_check
 
             if settings.CLUSTER_HOST_ID == obj.hostname:
                 cluster_node_health_check(obj.hostname)
@@ -472,7 +489,6 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     name = _("Instance Group Detail")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
-    permission_classes = (InstanceGroupTowerPermission,)
 
     def update_raw_data(self, data):
         if self.get_object().is_container_group:
@@ -503,6 +519,16 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     def is_valid_relation(self, parent, sub, created=False):
         if sub.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {sub.hostname}.")}
+        if sub.node_type == 'hop':
+            return {'msg': _(f"Cannot change instance group membership of hop node : {sub.hostname}.")}
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        res = self.is_valid_relation(parent, sub)
+        if res:
+            return res
+        if sub.node_type == 'hybrid' and parent.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+            return {'msg': _(f"Cannot disassociate hybrid node {sub.hostname} from {parent.name}.")}
         return None
 
 
@@ -511,6 +537,7 @@ class ScheduleList(ListCreateAPIView):
     name = _("Schedules")
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
+    ordering = ('id',)
 
 
 class ScheduleDetail(RetrieveUpdateDestroyAPIView):
@@ -1547,8 +1574,9 @@ class CredentialExternalTest(SubDetailAPIView):
                 backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.credential_type.plugin.backend(**backend_kwargs)
-            return Response({}, status=status.HTTP_202_ACCEPTED)
+            with set_environ(**settings.AWX_TASK_ENV):
+                obj.credential_type.plugin.backend(**backend_kwargs)
+                return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
             message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
@@ -2458,8 +2486,6 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = serializers.EmptySerializer
 
-    ALLOWED_TYPES = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': float}
-
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         return Response(obj.display_survey_spec())
@@ -2530,17 +2556,17 @@ class JobTemplateSurveySpec(GenericAPIView):
             # Type-specific validation
             # validate question type <-> default type
             qtype = survey_item["type"]
-            if qtype not in JobTemplateSurveySpec.ALLOWED_TYPES:
+            if qtype not in SURVEY_TYPE_MAPPING:
                 return Response(
                     dict(
                         error=_("'{survey_item[type]}' in survey question {idx} is not one of '{allowed_types}' allowed question types.").format(
-                            allowed_types=', '.join(JobTemplateSurveySpec.ALLOWED_TYPES.keys()), **context
+                            allowed_types=', '.join(SURVEY_TYPE_MAPPING.keys()), **context
                         )
                     ),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if 'default' in survey_item and survey_item['default'] != '':
-                if not isinstance(survey_item['default'], JobTemplateSurveySpec.ALLOWED_TYPES[qtype]):
+                if not isinstance(survey_item['default'], SURVEY_TYPE_MAPPING[qtype]):
                     type_label = 'string'
                     if qtype in ['integer', 'float']:
                         type_label = qtype
@@ -3816,6 +3842,84 @@ class JobJobEventsList(BaseJobEventsList):
         job = self.get_parent_object()
         self.check_parent_access(job)
         return job.get_event_queryset().select_related('host').order_by('start_line')
+
+
+class JobJobEventsChildrenSummary(APIView):
+
+    renderer_classes = [JSONRenderer]
+    meta_events = ('debug', 'verbose', 'warning', 'error', 'system_warning', 'deprecated')
+
+    def get(self, request, **kwargs):
+        resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False)
+        job = get_object_or_404(models.Job, pk=kwargs['pk'])
+        if not job.event_processing_finished:
+            return Response(resp)
+        else:
+            resp["event_processing_finished"] = True
+
+        events = list(job.get_event_queryset().values('counter', 'uuid', 'parent_uuid', 'event').order_by('counter'))
+        if len(events) == 0:
+            return Response(resp)
+
+        # key is counter, value is number of total children (including children of children, etc.)
+        map_counter_children_tally = {i['counter']: {"rowNumber": 0, "numChildren": 0} for i in events}
+        # key is uuid, value is counter
+        map_uuid_counter = {i['uuid']: i['counter'] for i in events}
+        # key is uuid, value is parent uuid. Used as a quick lookup
+        map_uuid_puuid = {i['uuid']: i['parent_uuid'] for i in events}
+        # key is counter of meta events (i.e. verbose), value is uuid of the assigned parent
+        map_meta_counter_nested_uuid = {}
+
+        prev_non_meta_event = events[0]
+        for i, e in enumerate(events):
+            if not e['event'] in JobJobEventsChildrenSummary.meta_events:
+                prev_non_meta_event = e
+            if not e['uuid']:
+                continue
+            puuid = e['parent_uuid']
+
+            # if event is verbose (or debug, etc), we need to "assign" it a
+            # parent. This code looks at the event level of the previous
+            # non-verbose event, and the level of the next (by looking ahead)
+            # non-verbose event. The verbose event is assigned the same parent
+            # uuid of the higher level event.
+            # e.g.
+            # E1
+            #  E2
+            # verbose
+            # verbose <- we are on this event currently
+            #    E4
+            # We'll compare E2 and E4, and the verbose event
+            # will be assigned the parent uuid of E4 (higher event level)
+            if e['event'] in JobJobEventsChildrenSummary.meta_events:
+                event_level_before = models.JobEvent.LEVEL_FOR_EVENT[prev_non_meta_event['event']]
+                # find next non meta event
+                z = i
+                next_non_meta_event = events[-1]
+                while z < len(events):
+                    if events[z]['event'] not in JobJobEventsChildrenSummary.meta_events:
+                        next_non_meta_event = events[z]
+                        break
+                    z += 1
+                event_level_after = models.JobEvent.LEVEL_FOR_EVENT[next_non_meta_event['event']]
+                if event_level_after and event_level_after > event_level_before:
+                    puuid = next_non_meta_event['parent_uuid']
+                else:
+                    puuid = prev_non_meta_event['parent_uuid']
+                if puuid:
+                    map_meta_counter_nested_uuid[e['counter']] = puuid
+            map_counter_children_tally[e['counter']]['rowNumber'] = i
+            if not puuid:
+                continue
+            # now traverse up the parent, grandparent, etc. events and tally those
+            while puuid:
+                map_counter_children_tally[map_uuid_counter[puuid]]['numChildren'] += 1
+                puuid = map_uuid_puuid.get(puuid, None)
+
+        # create new dictionary, dropping events with 0 children
+        resp["children_summary"] = {k: v for k, v in map_counter_children_tally.items() if v['numChildren'] != 0}
+        resp["meta_event_nested_uuid"] = map_meta_counter_nested_uuid
+        return Response(resp)
 
 
 class AdHocCommandList(ListCreateAPIView):

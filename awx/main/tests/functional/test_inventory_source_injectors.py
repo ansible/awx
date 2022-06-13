@@ -5,7 +5,7 @@ import json
 import re
 from collections import namedtuple
 
-from awx.main.tasks import RunInventoryUpdate
+from awx.main.tasks.jobs import RunInventoryUpdate
 from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
 from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.tests import data
@@ -150,11 +150,14 @@ def read_content(private_data_dir, raw_env, inventory_update):
                 referenced_paths.add(target_path)
                 dir_contents[abs_file_path] = file_content.replace(target_path, '{{ ' + other_alias + ' }}')
 
+    # The env/settings file should be ignored, nothing needs to reference it as its picked up directly from runner
+    ignore_files = [os.path.join(private_data_dir, 'env', 'settings')]
+
     # build dict content which is the directory contents keyed off the file aliases
     content = {}
     for abs_file_path, file_content in dir_contents.items():
         # assert that all files laid down are used
-        if abs_file_path not in referenced_paths:
+        if abs_file_path not in referenced_paths and abs_file_path not in ignore_files:
             raise AssertionError(
                 "File {} is not referenced. References and files:\n{}\n{}".format(abs_file_path, json.dumps(env, indent=4), json.dumps(dir_contents, indent=4))
             )
@@ -181,7 +184,7 @@ def create_reference_data(source_dir, env, content):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
-def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory):
+def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory, mock_me):
     ExecutionEnvironment.objects.create(name='Control Plane EE', managed=True)
     ExecutionEnvironment.objects.create(name='Default Job EE', managed=False)
 
@@ -257,6 +260,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         # Also do not send websocket status updates
         with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
             # The point of this test is that we replace run with assertions
-            with mock.patch('awx.main.tasks.AWXReceptorJob.run', substitute_run):
+            with mock.patch('awx.main.tasks.receptor.AWXReceptorJob.run', substitute_run):
                 # so this sets up everything for a run and then yields control over to substitute_run
                 task.run(inventory_update.pk)

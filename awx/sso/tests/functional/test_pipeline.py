@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.utils.timezone import now
 
-from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr
+from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr, _check_flag
 
 from awx.main.models import User, Team, Organization, Credential, CredentialType
 
@@ -32,7 +32,16 @@ class TestSAMLMap:
     def backend(self):
         class Backend:
             s = {
-                'ORGANIZATION_MAP': {'Default': {'remove': True, 'admins': 'foobar', 'remove_admins': True, 'users': 'foo', 'remove_users': True}},
+                'ORGANIZATION_MAP': {
+                    'Default': {
+                        'remove': True,
+                        'admins': 'foobar',
+                        'remove_admins': True,
+                        'users': 'foo',
+                        'remove_users': True,
+                        'organization_alias': '',
+                    }
+                },
                 'TEAM_MAP': {'Blue': {'organization': 'Default', 'remove': True, 'users': ''}, 'Red': {'organization': 'Default', 'remove': True, 'users': ''}},
             }
 
@@ -76,6 +85,11 @@ class TestSAMLMap:
 
         assert org.admin_role.members.count() == 2
         assert org.member_role.members.count() == 2
+
+        # Test organization alias feature
+        backend.setting('ORGANIZATION_MAP')['Default']['organization_alias'] = 'Default_Alias'
+        update_user_orgs(backend, None, u1)
+        assert Organization.objects.get(name="Default_Alias") is not None
 
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
@@ -191,7 +205,28 @@ class TestSAMLAttr:
 
         return MockSettings()
 
-    def test_update_user_orgs_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings):
+    @pytest.fixture
+    def backend(self):
+        class Backend:
+            s = {
+                'ORGANIZATION_MAP': {
+                    'Default1': {
+                        'remove': True,
+                        'admins': 'foobar',
+                        'remove_admins': True,
+                        'users': 'foo',
+                        'remove_users': True,
+                        'organization_alias': 'o1_alias',
+                    }
+                }
+            }
+
+            def setting(self, key):
+                return self.s[key]
+
+        return Backend()
+
+    def test_update_user_orgs_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings, backend):
         with mock.patch('django.conf.settings', mock_settings):
             o1, o2, o3 = orgs
             u1, u2, u3 = users
@@ -223,6 +258,9 @@ class TestSAMLAttr:
             assert o1.member_role.members.count() == 3
             assert o2.member_role.members.count() == 3
             assert o3.member_role.members.count() == 1
+
+            update_user_orgs_by_saml_attr(backend, None, u1, **kwargs)
+            assert Organization.objects.get(name="o1_alias").member_role.members.count() == 1
 
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
@@ -298,11 +336,11 @@ class TestSAMLAttr:
             update_user_teams_by_saml_attr(None, None, u1, **kwargs)
 
             assert Team.objects.filter(name='Yellow', organization__name='Default4').count() == 0
-            assert Team.objects.filter(name='Yellow_Alias', organization__name='Default4_Alias').count() == 1
-            assert Team.objects.get(name='Yellow_Alias', organization__name='Default4_Alias').member_role.members.count() == 1
+            assert Team.objects.filter(name='Yellow_Alias', organization__name='Default4').count() == 1
+            assert Team.objects.get(name='Yellow_Alias', organization__name='Default4').member_role.members.count() == 1
 
         # only Org 4 got created/updated
-        org = Organization.objects.get(name='Default4_Alias')
+        org = Organization.objects.get(name='Default4')
         assert org.galaxy_credentials.count() == 1
         assert org.galaxy_credentials.first().name == 'Ansible Galaxy'
 
@@ -357,3 +395,83 @@ class TestSAMLAttr:
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
             assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+
+
+@pytest.mark.django_db
+class TestSAMLUserFlags:
+    @pytest.mark.parametrize(
+        "user_flags_settings, expected",
+        [
+            # In this case we will pass no user flags so new_flag should be false and changed will def be false
+            (
+                {},
+                (False, False),
+            ),
+            # In this case we will give the user a group to make them an admin
+            (
+                {'is_superuser_role': 'test-role-1'},
+                (True, True),
+            ),
+            # In this case we will give the user a flag that will make then an admin
+            (
+                {'is_superuser_attr': 'is_superuser'},
+                (True, True),
+            ),
+            # In this case we will give the user a flag but the wrong value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
+                (False, False),
+            ),
+            # In this case we will give the user a flag and the right value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
+                (True, True),
+            ),
+            # In this case we will give the user a proper role and an is_superuser_attr role that they dont have, this should make them an admin
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'gibberish', 'is_superuser_value': 'true'},
+                (True, True),
+            ),
+            # In this case we will give the user a proper role and an is_superuser_attr role that they have, this should make them an admin
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'test-role-1'},
+                (True, True),
+            ),
+            # In this case we will give the user a proper role and an is_superuser_attr role that they have but a bad value, this should make them an admin
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
+                (False, False),
+            ),
+            # In this case we will give the user everything
+            (
+                {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
+                (True, True),
+            ),
+            # In this test case we will validate that a single attribute (instead of a list) still works
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'test_id'},
+                (True, True),
+            ),
+            # This will be a negative test for a single atrribute
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk'},
+                (False, False),
+            ),
+        ],
+    )
+    def test__check_flag(self, user_flags_settings, expected):
+        user = User()
+        user.username = 'John'
+        user.is_superuser = False
+
+        attributes = {
+            'email': ['noone@nowhere.com'],
+            'last_name': ['Westcott'],
+            'is_superuser': ['something', 'else', 'true'],
+            'username': ['test_id'],
+            'first_name': ['John'],
+            'Role': ['test-role-1', 'something', 'different'],
+            'name_id': 'test_id',
+        }
+
+        assert expected == _check_flag(user, 'superuser', attributes, user_flags_settings)

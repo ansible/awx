@@ -13,7 +13,7 @@ from socket import SHUT_RDWR
 from django.db import connection
 from django.conf import settings
 from django.http import Http404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied
@@ -26,7 +26,7 @@ from awx.api.generics import APIView, GenericAPIView, ListAPIView, RetrieveUpdat
 from awx.api.permissions import IsSystemAdminOrAuditor
 from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
-from awx.main.tasks import handle_setting_changes
+from awx.main.tasks.system import handle_setting_changes
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry

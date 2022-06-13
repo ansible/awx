@@ -10,18 +10,18 @@ import urllib.parse
 
 # Django
 from django.conf import settings
+from django.contrib.auth import views as auth_views
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.core.exceptions import FieldDoesNotExist
 from django.db import connection
-from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth import views as auth_views
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable, UnsupportedMediaType
@@ -44,6 +44,7 @@ from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
+from awx.conf import settings_registry
 
 __all__ = [
     'APIView',
@@ -92,17 +93,18 @@ class LoggedLoginView(auth_views.LoginView):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
         if request.user.is_authenticated:
-            logger.info(smart_text(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
+            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
             ret.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
-            current_user = smart_text(JSONRenderer().render(current_user.data))
+            current_user = smart_str(JSONRenderer().render(current_user.data))
             current_user = urllib.parse.quote('%s' % current_user, '')
             ret.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
+            ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
 
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warn(smart_text(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
+                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
             ret.status_code = 401
             return ret
 
@@ -208,12 +210,27 @@ class APIView(views.APIView):
             return response
 
         if response.status_code >= 400:
-            status_msg = "status %s received by user %s attempting to access %s from %s" % (
-                response.status_code,
-                request.user,
-                request.path,
-                request.META.get('REMOTE_ADDR', None),
-            )
+            msg_data = {
+                'status_code': response.status_code,
+                'user_name': request.user,
+                'url_path': request.path,
+                'remote_addr': request.META.get('REMOTE_ADDR', None),
+            }
+
+            if type(response.data) is dict:
+                msg_data['error'] = response.data.get('error', response.status_text)
+            elif type(response.data) is list:
+                msg_data['error'] = ", ".join(list(map(lambda x: x.get('error', response.status_text), response.data)))
+            else:
+                msg_data['error'] = response.status_text
+
+            try:
+                status_msg = getattr(settings, 'API_400_ERROR_LOG_FORMAT').format(**msg_data)
+            except Exception as e:
+                if getattr(settings, 'API_400_ERROR_LOG_FORMAT', None):
+                    logger.error("Unable to format API_400_ERROR_LOG_FORMAT setting, defaulting log message: {}".format(e))
+                status_msg = settings_registry.get_setting_field('API_400_ERROR_LOG_FORMAT').get_default().format(**msg_data)
+
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
@@ -221,6 +238,7 @@ class APIView(views.APIView):
                 logger.info(status_msg)
             else:
                 logger.warning(status_msg)
+
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         response['X-API-Product-Version'] = get_awx_version()
@@ -374,8 +392,8 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             if hasattr(self.model._meta, "verbose_name"):
                 d.update(
                     {
-                        'model_verbose_name': smart_text(self.model._meta.verbose_name),
-                        'model_verbose_name_plural': smart_text(self.model._meta.verbose_name_plural),
+                        'model_verbose_name': smart_str(self.model._meta.verbose_name),
+                        'model_verbose_name_plural': smart_str(self.model._meta.verbose_name_plural),
                     }
                 )
             serializer = self.get_serializer()
@@ -506,8 +524,8 @@ class SubListAPIView(ParentMixin, ListAPIView):
         d = super(SubListAPIView, self).get_description_context()
         d.update(
             {
-                'parent_model_verbose_name': smart_text(self.parent_model._meta.verbose_name),
-                'parent_model_verbose_name_plural': smart_text(self.parent_model._meta.verbose_name_plural),
+                'parent_model_verbose_name': smart_str(self.parent_model._meta.verbose_name),
+                'parent_model_verbose_name_plural': smart_str(self.parent_model._meta.verbose_name_plural),
             }
         )
         return d
@@ -620,6 +638,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # attaching/detaching them from the parent.
 
     def is_valid_relation(self, parent, sub, created=False):
+        "Override in subclasses to do efficient validation of attaching"
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        "Same as is_valid_relation but called on disassociation"
         return None
 
     def get_description_context(self):
@@ -703,6 +726,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
 
         if not request.user.can_access(self.parent_model, 'unattach', parent, sub, self.relationship, request.data):
             raise PermissionDenied()
+
+        # Verify that removing the relationship is valid.
+        unattach_errors = self.is_valid_removal(parent, sub)
+        if unattach_errors is not None:
+            return Response(unattach_errors, status=status.HTTP_400_BAD_REQUEST)
 
         if parent_key:
             sub.delete()
@@ -817,7 +845,7 @@ class ResourceAccessList(ParentMixin, ListAPIView):
 
 
 def trigger_delayed_deep_copy(*args, **kwargs):
-    from awx.main.tasks import deep_copy_model_obj
+    from awx.main.tasks.system import deep_copy_model_obj
 
     connection.on_commit(lambda: deep_copy_model_obj.delay(*args, **kwargs))
 

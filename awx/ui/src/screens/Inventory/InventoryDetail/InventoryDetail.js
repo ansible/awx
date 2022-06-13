@@ -16,10 +16,10 @@ import { InventoriesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { Inventory } from 'types';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import helpText from '../shared/Inventory.helptext';
 
 function InventoryDetail({ inventory }) {
   const history = useHistory();
-
   const {
     result: instanceGroups,
     isLoading,
@@ -78,14 +78,23 @@ function InventoryDetail({ inventory }) {
             </Link>
           }
         />
+        <Detail label={t`Total hosts`} value={inventory.total_hosts} />
         {instanceGroups && instanceGroups.length > 0 && (
           <Detail
             fullWidth
             label={t`Instance Groups`}
             value={
-              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={instanceGroups.length}
+                ouiaId="instance-group-chips"
+              >
                 {instanceGroups.map((ig) => (
-                  <Chip key={ig.id} isReadOnly>
+                  <Chip
+                    key={ig.id}
+                    isReadOnly
+                    ouiaId={`instance-group-${ig.id}-chip`}
+                  >
                     {ig.name}
                   </Chip>
                 ))}
@@ -93,11 +102,33 @@ function InventoryDetail({ inventory }) {
             }
           />
         )}
+        {inventory.summary_fields.labels &&
+          inventory.summary_fields.labels?.results?.length > 0 && (
+            <Detail
+              fullWidth
+              helpText={helpText.labels}
+              label={t`Labels`}
+              value={
+                <ChipGroup
+                  numChips={5}
+                  totalChips={inventory.summary_fields.labels.results.length}
+                >
+                  {inventory.summary_fields.labels.results.map((l) => (
+                    <Chip key={l.id} isReadOnly>
+                      {l.name}
+                    </Chip>
+                  ))}
+                </ChipGroup>
+              }
+            />
+          )}
         <VariablesDetail
           label={t`Variables`}
+          helpText={helpText.variables()}
           value={inventory.variables}
           rows={4}
           name="variables"
+          dataCy="inventory-detail-variables"
         />
         <UserDateDetail
           label={t`Created`}

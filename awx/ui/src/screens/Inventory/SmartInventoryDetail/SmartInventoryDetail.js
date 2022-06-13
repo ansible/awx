@@ -28,6 +28,7 @@ function SmartInventoryDetail({ inventory }) {
     id,
     modified,
     name,
+    total_hosts,
     variables,
     summary_fields: {
       created_by,
@@ -116,14 +117,23 @@ function SmartInventoryDetail({ inventory }) {
             label={t`Smart host filter`}
             value={<Label variant="outline">{host_filter}</Label>}
           />
+          <Detail label={t`Total hosts`} value={total_hosts} />
           {instanceGroups.length > 0 && (
             <Detail
               fullWidth
               label={t`Instance groups`}
               value={
-                <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+                <ChipGroup
+                  numChips={5}
+                  totalChips={instanceGroups.length}
+                  ouiaId="instance-group-chips"
+                >
                   {instanceGroups.map((ig) => (
-                    <Chip key={ig.id} isReadOnly>
+                    <Chip
+                      key={ig.id}
+                      isReadOnly
+                      ouiaId={`instance-group-${ig.id}-chip`}
+                    >
                       {ig.name}
                     </Chip>
                   ))}
@@ -136,6 +146,7 @@ function SmartInventoryDetail({ inventory }) {
             value={variables}
             rows={4}
             name="variables"
+            dataCy="smart-inventory-detail-variables"
           />
           <UserDateDetail label={t`Created`} date={created} user={created_by} />
           <UserDateDetail

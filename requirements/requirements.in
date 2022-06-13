@@ -1,63 +1,70 @@
-aiohttp
-ansible-runner==2.1.1
+aiohttp>=3.7.4
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 autobahn>=20.12.3  # CVE-2020-35678
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
-cryptography<3.0.0
+cryptography>=36.0.2,<37.0.0 # Until paramiko fixes https://github.com/paramiko/paramiko/issues/2038 we don't want to go to 37 or we end up with blowfish warnings in the job output
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
-django==2.2.20  # see UPGRADE BLOCKERs
+django==3.2.13  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers>=3.5.0
 django-crum
 django-extensions>=2.2.9  # https://github.com/ansible/awx/pull/6441
-django-guid==2.2.0  # pinned to match Django 2.2
-django-jsonfield==1.2.0  # see UPGRADE BLOCKERs
-django-oauth-toolkit==1.1.3  # see UPGRADE BLOCKERs
+django-guid==3.2.1
+django-oauth-toolkit==1.4.1
 django-polymorphic
 django-pglocks
 django-qsstats-magic
-django-radius==1.3.3  # FIX auth does not work with later versions
 django-redis
 django-solo
 django-split-settings
 django-taggit
-djangorestframework>=3.12.1
+djangorestframework==3.13.1
 djangorestframework-yaml
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
-jinja2>=2.11.0  # required for ChainableUndefined
+jinja2>=2.11.3  # CVE-2020-28493
 JSON-log-formatter
 jsonschema
+kubernetes>=12.0.0  # CVE-2020-1747
 Markdown  # used for formatting API help
-openshift>=0.11.0  # minimum version to pull in new pyyaml for CVE-2017-18342
+openshift>=0.12.0  # minimum version to pull in new pyyaml for CVE-2017-18342, minimum version to pull in new kubernetes for CVE-2020-1747
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
 psutil
 pygerduty
 pyparsing
-python3-saml
+python3-saml==1.13.0
 python-dsv-sdk
 python-tss-sdk==1.0.0
-python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
+python-ldap>=3.4.0 # https://github.com/ansible/awx/security/dependabot/20
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
 receptorctl==1.1.1
 schedule==0.6.0
-social-auth-core==3.3.1  # see UPGRADE BLOCKERs
-social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
+social-auth-core==4.2.0  # see UPGRADE BLOCKERs
+social-auth-app-django==5.0.0  # see UPGRADE BLOCKERs
 redis
 requests
+sqlparse>=0.4.2 # Required by Django, pinning for CVE-2021-32839
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
-twilio
-twisted[tls]>=20.3.0  # CVE-2020-10108, CVE-2020-10109
+twilio>7.9.0  # Pick up fix for use with proxy server via environment variables
+twisted[tls]>=22.4.0  # CVE-2020-10108, CVE-2020-10109, CVE-2022-21712 (https://github.com/ansible/awx/security/dependabot/46), https://github.com/ansible/awx/security/dependabot/53
 uWSGI
 uwsgitop
 wheel
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools==58.2.0  # see UPGRADE BLOCKERs
+setuptools_scm[toml]>=3.4  # see UPGRADE BLOCKERs, xmlsec build dep
+lxml>=3.8 # xmlsec build dep
+pkgconfig>=1.5.1 # xmlsec build dep
+setuptools-rust >= 0.11.4 # cryptography build dep
+
+# Temporarily added to use ansible-runner from git branch, to be removed
+# when ansible-runner moves from requirements_git.txt to here
+pbr

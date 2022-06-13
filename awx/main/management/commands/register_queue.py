@@ -17,13 +17,14 @@ class InstanceNotFound(Exception):
 
 
 class RegisterQueue:
-    def __init__(self, queuename, instance_percent, inst_min, hostname_list, is_container_group=None):
+    def __init__(self, queuename, instance_percent, inst_min, hostname_list, is_container_group=None, pod_spec_override=None):
         self.instance_not_found_err = None
         self.queuename = queuename
         self.instance_percent = instance_percent
         self.instance_min = inst_min
         self.hostname_list = hostname_list
         self.is_container_group = is_container_group
+        self.pod_spec_override = pod_spec_override
 
     def get_create_update_instance_group(self):
         created = False
@@ -40,6 +41,10 @@ class RegisterQueue:
             ig.is_container_group = self.is_container_group
             changed = True
 
+        if self.pod_spec_override and (ig.pod_spec_override != self.pod_spec_override):
+            ig.pod_spec_override = self.pod_spec_override
+            changed = True
+
         if changed:
             ig.save()
 
@@ -48,14 +53,14 @@ class RegisterQueue:
     def add_instances_to_group(self, ig):
         changed = False
 
-        instance_list_unique = set([x.strip() for x in self.hostname_list if x])
+        instance_list_unique = {x for x in (x.strip() for x in self.hostname_list) if x}
         instances = []
         for inst_name in instance_list_unique:
-            instance = Instance.objects.filter(hostname=inst_name)
+            instance = Instance.objects.filter(hostname=inst_name).exclude(node_type='hop')
             if instance.exists():
                 instances.append(instance[0])
             else:
-                raise InstanceNotFound("Instance does not exist: {}".format(inst_name), changed)
+                raise InstanceNotFound("Instance does not exist or cannot run jobs: {}".format(inst_name), changed)
 
         ig.instances.add(*instances)
 

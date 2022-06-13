@@ -30,8 +30,10 @@ import { LaunchButton } from 'components/LaunchButton';
 import { VariablesDetail } from 'components/CodeEditor';
 import { JobTemplatesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import helpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
   const {
@@ -64,6 +66,7 @@ function JobTemplateDetail({ template }) {
   } = template;
   const { id: templateId } = useParams();
   const history = useHistory();
+  const brandName = useBrandName();
 
   const {
     isLoading: isLoadingInstanceGroups,
@@ -183,11 +186,21 @@ function JobTemplateDetail({ template }) {
     <CardBody>
       <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} dataCy="jt-detail-name" />
-        <Detail label={t`Description`} value={description} />
-        <Detail label={t`Job Type`} value={job_type} />
+        <Detail
+          label={t`Description`}
+          value={description}
+          dataCy="jt-detail-description"
+        />
+        <Detail
+          label={t`Job Type`}
+          value={job_type}
+          dataCy="jt-detail-job-type"
+          helpText={helpText.jobType}
+        />
         {summary_fields.organization ? (
           <Detail
             label={t`Organization`}
+            dataCy="jt-detail-organization"
             value={
               <Link
                 to={`/organizations/${summary_fields.organization.id}/details`}
@@ -202,22 +215,28 @@ function JobTemplateDetail({ template }) {
         {summary_fields.inventory ? (
           <Detail
             label={t`Inventory`}
+            dataCy="jt-detail-inventory"
             value={inventoryValue(
               summary_fields.inventory.kind,
               summary_fields.inventory.id
             )}
+            helpText={helpText.inventory}
           />
         ) : (
-          !ask_inventory_on_launch && <DeletedDetail label={t`Inventory`} />
+          !ask_inventory_on_launch && (
+            <DeletedDetail label={t`Inventory`} dataCy="jt-detail-inventory" />
+          )
         )}
         {summary_fields.project ? (
           <Detail
             label={t`Project`}
+            dataCy="jt-detail-project"
             value={
               <Link to={`/projects/${summary_fields.project.id}/details`}>
                 {summary_fields.project.name}
               </Link>
             }
+            helpText={helpText.project}
           />
         ) : (
           <DeletedDetail label={t`Project`} />
@@ -225,24 +244,68 @@ function JobTemplateDetail({ template }) {
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.resolved_environment}
-          helpText={t`The execution environment that will be used when launching
-          this job template. The resolved execution environment can be overridden by
-          explicitly assigning a different one to this job template.`}
+          helpText={helpText.executionEnvironmentDetail}
+          dataCy="jt-detail-execution-environment"
         />
-        <Detail label={t`Source Control Branch`} value={template.scm_branch} />
-        <Detail label={t`Playbook`} value={playbook} />
-        <Detail label={t`Forks`} value={forks || '0'} />
-        <Detail label={t`Limit`} value={limit} />
-        <Detail label={t`Verbosity`} value={verbosityDetails[0].details} />
-        <Detail label={t`Timeout`} value={timeout || '0'} />
-        <Detail label={t`Show Changes`} value={diff_mode ? t`On` : t`Off`} />
-        <Detail label={t`Job Slicing`} value={job_slice_count} />
+        <Detail
+          label={t`Source Control Branch`}
+          value={template.scm_branch}
+          dataCy="jt-detail-scm-branch"
+        />
+        <Detail
+          label={t`Playbook`}
+          value={playbook}
+          dataCy="jt-detail-playbook"
+          helpText={helpText.playbook}
+        />
+        <Detail
+          label={t`Forks`}
+          value={forks || '0'}
+          dataCy="jt-detail-forks"
+          helpText={helpText.forks}
+        />
+        <Detail
+          label={t`Limit`}
+          value={limit}
+          dataCy="jt-detail-limit"
+          helpText={helpText.limit}
+        />
+        <Detail
+          label={t`Verbosity`}
+          value={verbosityDetails[0].details}
+          dataCy="jt-detail-verbosity"
+          helpText={helpText.verbosity}
+        />
+        <Detail
+          label={t`Timeout`}
+          value={timeout || '0'}
+          dataCy="jt-detail-timeout"
+          helpText={helpText.timeout}
+        />
+        <Detail
+          label={t`Show Changes`}
+          value={diff_mode ? t`On` : t`Off`}
+          dataCy="jt-detail-show-changes"
+          helpText={helpText.showChanges}
+        />
+        <Detail
+          label={t`Job Slicing`}
+          value={job_slice_count}
+          dataCy="jt-detail-job-slice-count"
+          helpText={helpText.jobSlicing}
+        />
         {host_config_key && (
           <>
-            <Detail label={t`Host Config Key`} value={host_config_key} />
+            <Detail
+              label={t`Host Config Key`}
+              value={host_config_key}
+              dataCy="jt-detail-host-config-key"
+            />
             <Detail
               label={t`Provisioning Callback URL`}
               value={generateCallBackUrl}
+              dataCy="jt-detail-provisioning-callback-url"
+              helpText={helpText.provisioningCallbacks(brandName)}
             />
           </>
         )}
@@ -250,18 +313,29 @@ function JobTemplateDetail({ template }) {
           <Detail
             label={t`Webhook Service`}
             value={webhook_service === 'github' ? t`GitHub` : t`GitLab`}
+            dataCy="jt-detail-webhook-service"
+            helpText={helpText.webhookService}
           />
         )}
         {webhook_receiver && (
           <Detail
             label={t`Webhook URL`}
             value={`${document.location.origin}${webhook_receiver}`}
+            dataCy="jt-detail-webhook-url"
+            helpText={helpText.webhookURL}
           />
         )}
-        <Detail label={t`Webhook Key`} value={webhook_key} />
+        <Detail
+          label={t`Webhook Key`}
+          value={webhook_key}
+          dataCy="jt-detail-webhook-key"
+          helpText={helpText.webhookKey}
+        />
         {summary_fields.webhook_credential && (
           <Detail
             label={t`Webhook Credential`}
+            dataCy="jt-detail-webhook-credential"
+            helpText={helpText.webhookCredential}
             value={
               <Link
                 to={`/credentials/${summary_fields.webhook_credential.id}/details`}
@@ -282,20 +356,34 @@ function JobTemplateDetail({ template }) {
           user={summary_fields.modified_by}
         />
         {renderOptionsField && (
-          <Detail fullWidth label={t`Enabled Options`} value={renderOptions} />
+          <Detail
+            fullWidth
+            label={t`Enabled Options`}
+            value={renderOptions}
+            dataCy="jt-detail-enabled-options"
+            helpText={helpText.enabledOptions}
+          />
         )}
         {summary_fields.credentials && summary_fields.credentials.length > 0 && (
           <Detail
             fullWidth
             label={t`Credentials`}
+            dataCy="jt-detail-credentials"
+            helpText={helpText.credentials}
             value={
               <ChipGroup
                 numChips={5}
                 totalChips={summary_fields.credentials.length}
+                ouiaId="jt-detail-credential-chips"
               >
                 {summary_fields.credentials.map((c) => (
                   <Link to={`/credentials/${c.id}/details`} key={c.id}>
-                    <CredentialChip key={c.id} credential={c} isReadOnly />
+                    <CredentialChip
+                      key={c.id}
+                      credential={c}
+                      ouiaId={`credential-${c.id}-chip`}
+                      isReadOnly
+                    />
                   </Link>
                 ))}
               </ChipGroup>
@@ -306,13 +394,16 @@ function JobTemplateDetail({ template }) {
           <Detail
             fullWidth
             label={t`Labels`}
+            dataCy="jt-detail-labels"
+            helpText={helpText.labels}
             value={
               <ChipGroup
                 numChips={5}
                 totalChips={summary_fields.labels.results.length}
+                ouiaId="label-chips"
               >
                 {summary_fields.labels.results.map((l) => (
-                  <Chip key={l.id} isReadOnly>
+                  <Chip key={l.id} ouiaId={`label-${l.id}-chip`} isReadOnly>
                     {l.name}
                   </Chip>
                 ))}
@@ -324,11 +415,21 @@ function JobTemplateDetail({ template }) {
           <Detail
             fullWidth
             label={t`Instance Groups`}
+            dataCy="jt-detail-instance-groups"
+            helpText={helpText.instanceGroups}
             value={
-              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={instanceGroups.length}
+                ouiaId="instance-group-chips"
+              >
                 {instanceGroups.map((ig) => (
                   <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                    <Chip key={ig.id} isReadOnly>
+                    <Chip
+                      key={ig.id}
+                      ouiaId={`instance-group-${ig.id}-chip`}
+                      isReadOnly
+                    >
                       {ig.name}
                     </Chip>
                   </Link>
@@ -341,10 +442,20 @@ function JobTemplateDetail({ template }) {
           <Detail
             fullWidth
             label={t`Job Tags`}
+            dataCy="jt-detail-job-tags"
+            helpText={helpText.jobTags}
             value={
-              <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={job_tags.split(',').length}
+                ouiaId="job-tag-chips"
+              >
                 {job_tags.split(',').map((jobTag) => (
-                  <Chip key={jobTag} isReadOnly>
+                  <Chip
+                    key={jobTag}
+                    ouiaId={`job-tag-${jobTag}-chip`}
+                    isReadOnly
+                  >
                     {jobTag}
                   </Chip>
                 ))}
@@ -356,10 +467,20 @@ function JobTemplateDetail({ template }) {
           <Detail
             fullWidth
             label={t`Skip Tags`}
+            dataCy="jt-detail-skip-tags"
+            helpText={helpText.skipTags}
             value={
-              <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
+              <ChipGroup
+                numChips={5}
+                totalChips={skip_tags.split(',').length}
+                ouiaId="skip-tag-chips"
+              >
                 {skip_tags.split(',').map((skipTag) => (
-                  <Chip key={skipTag} isReadOnly>
+                  <Chip
+                    key={skipTag}
+                    ouiaId={`skip-tag-${skipTag}-chip`}
+                    isReadOnly
+                  >
                     {skipTag}
                   </Chip>
                 ))}
@@ -371,8 +492,9 @@ function JobTemplateDetail({ template }) {
           value={extra_vars}
           rows={4}
           label={t`Variables`}
-          dataCy={`jt-details-${template.id}`}
+          dataCy={`jt-detail-${template.id}`}
           name="extra_vars"
+          helpText={helpText.variables}
         />
       </DetailList>
       <CardActionsRow>

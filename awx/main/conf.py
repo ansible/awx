@@ -2,7 +2,7 @@
 import logging
 
 # Django
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework import serializers
@@ -72,8 +72,8 @@ register(
         'HTTP headers and meta keys to search to determine remote host '
         'name or IP. Add additional items to this list, such as '
         '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
-        'See the "Proxy Support" section of the Adminstrator guide for '
-        'more details.'
+        'See the "Proxy Support" section of the AAP Installation guide '
+        'for more details.'
     ),
     category=_('System'),
     category_slug='system',
@@ -112,7 +112,7 @@ register(
     encrypted=False,
     read_only=False,
     label=_('Red Hat customer username'),
-    help_text=_('This username is used to send data to Insights for Ansible Automation Platform'),
+    help_text=_('This username is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -125,7 +125,7 @@ register(
     encrypted=True,
     read_only=False,
     label=_('Red Hat customer password'),
-    help_text=_('This password is used to send data to Insights for Ansible Automation Platform'),
+    help_text=_('This password is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -162,8 +162,8 @@ register(
     default='https://example.com',
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Insights for Ansible Automation Platform upload URL'),
-    help_text=_('This setting is used to to configure the upload URL for data collection for Red Hat Insights.'),
+    label=_('Automation Analytics upload URL'),
+    help_text=_('This setting is used to to configure the upload URL for data collection for Automation Analytics.'),
     category=_('System'),
     category_slug='system',
 )
@@ -259,10 +259,14 @@ register(
 
 register(
     'AWX_ISOLATION_SHOW_PATHS',
-    field_class=fields.StringListField,
+    field_class=fields.StringListIsolatedPathField,
     required=False,
     label=_('Paths to expose to isolated jobs'),
-    help_text=_('List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
+    help_text=_(
+        'List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. '
+        'Volumes will be mounted from the execution node to the container. '
+        'The supported format is HOST-DIR[:CONTAINER-DIR[:OPTIONS]]. '
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -279,11 +283,24 @@ register(
 )
 
 register(
+    'GALAXY_TASK_ENV',
+    field_class=fields.KeyValueField,
+    label=_('Environment Variables for Galaxy Commands'),
+    help_text=_(
+        'Additional environment variables set for invocations of ansible-galaxy within project updates. '
+        'Useful if you must use a proxy server for ansible-galaxy but not git.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+    placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
+)
+
+register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Gather data for Insights for Ansible Automation Platform'),
-    help_text=_('Enables the service to gather data on automation and send it to Red Hat Insights.'),
+    label=_('Gather data for Automation Analytics'),
+    help_text=_('Enables the service to gather data on automation and send it to Automation Analytics.'),
     category=_('System'),
     category_slug='system',
 )
@@ -325,6 +342,19 @@ register(
     help_text=_(
         'Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead '
         'to infinite recursion if a link points to a parent directory of itself.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_MOUNT_ISOLATED_PATHS_ON_K8S',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Expose host paths for Container Groups'),
+    help_text=_(
+        'Expose paths via hostPath for the Pods created by a Container Group. '
+        'HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. '
     ),
     category=_('Jobs'),
     category_slug='jobs',
@@ -674,12 +704,30 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'API_400_ERROR_LOG_FORMAT',
+    field_class=fields.CharField,
+    default='status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}',
+    label=_('Log Format For API 4XX Errors'),
+    help_text=_(
+        'The format of logged messages when an API 4XX error occurs, '
+        'the following variables will be substituted: \n'
+        'status_code - The HTTP status code of the error\n'
+        'user_name - The user name attempting to use the API\n'
+        'url_path - The URL path to the API endpoint called\n'
+        'remote_addr - The remote address seen for the user\n'
+        'error - The error set by the api endpoint\n'
+        'Variables need to be in the format {<variable name>}.'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(
     'AUTOMATION_ANALYTICS_LAST_GATHER',
     field_class=fields.DateTimeField,
-    label=_('Last gather date for Insights for Ansible Automation Platform.'),
+    label=_('Last gather date for Automation Analytics.'),
     allow_null=True,
     category=_('System'),
     category_slug='system',
@@ -687,7 +735,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
     field_class=fields.CharField,
-    label=_('Last gathered entries for expensive collectors for Insights for Ansible Automation Platform.'),
+    label=_('Last gathered entries from the data collection service of Automation Analytics'),
     default='',
     allow_blank=True,
     category=_('System'),
@@ -698,7 +746,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
     field_class=fields.IntegerField,
-    label=_('Insights for Ansible Automation Platform Gather Interval'),
+    label=_('Automation Analytics Gather Interval'),
     help_text=_('Interval (in seconds) between data gathering.'),
     default=14400,  # every 4 hours
     min_value=1800,  # every 30 minutes

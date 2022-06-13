@@ -7,9 +7,9 @@ import traceback
 from kubernetes.config import kube_config
 
 from django.conf import settings
-from django_guid.middleware import GuidMiddleware
+from django_guid import set_guid
 
-from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
+from awx.main.tasks.system import dispatch_startup, inform_cluster_of_shutdown
 
 from .base import BaseWorker
 
@@ -30,8 +30,8 @@ class TaskWorker(BaseWorker):
         """
         Transform a dotted notation task into an imported, callable function, e.g.,
 
-        awx.main.tasks.delete_inventory
-        awx.main.tasks.RunProjectUpdate
+        awx.main.tasks.system.delete_inventory
+        awx.main.tasks.jobs.RunProjectUpdate
         """
         if not task.startswith('awx.'):
             raise ValueError('{} is not a valid awx task'.format(task))
@@ -54,7 +54,7 @@ class TaskWorker(BaseWorker):
         args = body.get('args', [])
         kwargs = body.get('kwargs', {})
         if 'guid' in body:
-            GuidMiddleware.set_guid(body.pop('guid'))
+            set_guid(body.pop('guid'))
         _call = TaskWorker.resolve_callable(task)
         if inspect.isclass(_call):
             # the callable is a class, e.g., RunJob; instantiate and
@@ -73,15 +73,15 @@ class TaskWorker(BaseWorker):
             'callbacks': [{
                 'args': [],
                 'kwargs': {}
-                'task': u'awx.main.tasks.handle_work_success'
+                'task': u'awx.main.tasks.system.handle_work_success'
             }],
             'errbacks': [{
                 'args': [],
                 'kwargs': {},
-                'task': 'awx.main.tasks.handle_work_error'
+                'task': 'awx.main.tasks.system.handle_work_error'
             }],
             'kwargs': {},
-            'task': u'awx.main.tasks.RunProjectUpdate'
+            'task': u'awx.main.tasks.jobs.RunProjectUpdate'
         }
         """
         settings.__clean_on_fork__()

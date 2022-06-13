@@ -77,6 +77,7 @@ function AlertModal({
       isOpen={Boolean(isOpen)}
       variant="small"
       title={title}
+      ouiaId="alert-modal"
       {...props}
     >
       {children}

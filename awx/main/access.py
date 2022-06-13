@@ -11,7 +11,7 @@ from functools import reduce
 from django.conf import settings
 from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 # Django REST Framework
@@ -465,7 +465,7 @@ class BaseAccess(object):
             if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment)):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource, ExecutionEnvironment, InstanceGroup)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
@@ -573,6 +573,11 @@ class InstanceGroupAccess(BaseAccess):
         return self.user.is_superuser
 
     def can_change(self, obj, data):
+        return self.user.is_superuser
+
+    def can_delete(self, obj):
+        if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+            return False
         return self.user.is_superuser
 
 
@@ -853,7 +858,12 @@ class InventoryAccess(BaseAccess):
     """
 
     model = Inventory
-    prefetch_related = ('created_by', 'modified_by', 'organization')
+    prefetch_related = (
+        'created_by',
+        'modified_by',
+        'organization',
+        Prefetch('labels', queryset=Label.objects.all().order_by('name')),
+    )
 
     def filtered_queryset(self, allowed=None, ad_hoc=None):
         return self.model.accessible_objects(self.user, 'read_role')

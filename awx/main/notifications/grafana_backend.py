@@ -7,8 +7,8 @@ import logging
 import requests
 import dateutil.parser as dp
 
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
@@ -54,8 +54,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     ):
         super(GrafanaBackend, self).__init__(fail_silently=fail_silently)
         self.grafana_key = grafana_key
-        self.dashboardId = dashboardId
-        self.panelId = panelId
+        self.dashboardId = int(dashboardId) if dashboardId is not None else None
+        self.panelId = int(panelId) if panelId is not None else None
         self.annotation_tags = annotation_tags if annotation_tags is not None else []
         self.grafana_no_verify_ssl = grafana_no_verify_ssl
         self.isRegion = isRegion
@@ -82,12 +82,14 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
                     if m.body.get('finished'):
                         grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
                 except ValueError:
-                    logger.error(smart_text(_("Error converting time {} or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
+                    logger.error(smart_str(_("Error converting time {} or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
                     if not self.fail_silently:
-                        raise Exception(smart_text(_("Error converting time {} and/or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
+                        raise Exception(smart_str(_("Error converting time {} and/or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
             grafana_data['isRegion'] = self.isRegion
-            grafana_data['dashboardId'] = self.dashboardId
-            grafana_data['panelId'] = self.panelId
+            if self.dashboardId is not None:
+                grafana_data['dashboardId'] = self.dashboardId
+            if self.panelId is not None:
+                grafana_data['panelId'] = self.panelId
             if self.annotation_tags:
                 grafana_data['tags'] = self.annotation_tags
             grafana_data['text'] = m.subject
@@ -97,8 +99,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 "{}/api/annotations".format(m.recipients()[0]), json=grafana_data, headers=grafana_headers, verify=(not self.grafana_no_verify_ssl)
             )
             if r.status_code >= 400:
-                logger.error(smart_text(_("Error sending notification grafana: {}").format(r.status_code)))
+                logger.error(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
                 if not self.fail_silently:
-                    raise Exception(smart_text(_("Error sending notification grafana: {}").format(r.status_code)))
+                    raise Exception(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
             sent_messages += 1
         return sent_messages

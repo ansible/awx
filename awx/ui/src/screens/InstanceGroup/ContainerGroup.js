@@ -13,7 +13,7 @@ import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import useRequest from 'hooks/useRequest';
-import { InstanceGroupsAPI, SettingsAPI } from 'api';
+import { InstanceGroupsAPI } from 'api';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
@@ -30,24 +30,15 @@ function ContainerGroup({ setBreadcrumb }) {
     isLoading,
     error: contentError,
     request: fetchInstanceGroups,
-    result: { instanceGroup, defaultExecution },
+    result: { instanceGroup },
   } = useRequest(
     useCallback(async () => {
-      const [
-        { data },
-        {
-          data: { DEFAULT_EXECUTION_QUEUE_NAME },
-        },
-      ] = await Promise.all([
-        InstanceGroupsAPI.readDetail(id),
-        SettingsAPI.readAll(),
-      ]);
+      const { data } = await InstanceGroupsAPI.readDetail(id);
       return {
         instanceGroup: data,
-        defaultExecution: DEFAULT_EXECUTION_QUEUE_NAME,
       };
     }, [id]),
-    { instanceGroup: null, defaultExecution: '' }
+    { instanceGroup: null }
   );
 
   useEffect(() => {
@@ -91,7 +82,7 @@ function ContainerGroup({ setBreadcrumb }) {
             {contentError.response?.status === 404 && (
               <span>
                 {t`Container group not found.`}
-                {''}
+
                 <Link to="/instance_groups">{t`View all instance groups`}</Link>
               </span>
             )}
@@ -121,16 +112,10 @@ function ContainerGroup({ setBreadcrumb }) {
             {instanceGroup && (
               <>
                 <Route path="/instance_groups/container_group/:id/edit">
-                  <ContainerGroupEdit
-                    instanceGroup={instanceGroup}
-                    defaultExecution={defaultExecution}
-                  />
+                  <ContainerGroupEdit instanceGroup={instanceGroup} />
                 </Route>
                 <Route path="/instance_groups/container_group/:id/details">
-                  <ContainerGroupDetails
-                    instanceGroup={instanceGroup}
-                    defaultExecution={defaultExecution}
-                  />
+                  <ContainerGroupDetails instanceGroup={instanceGroup} />
                 </Route>
                 <Route path="/instance_groups/container_group/:id/jobs">
                   <JobList

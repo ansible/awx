@@ -116,7 +116,11 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
     fetchDetails();
   }, [fetchDetails]);
 
-  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
+  const {
+    error: healthCheckError,
+    isLoading: isRunningHealthCheck,
+    request: fetchHealthCheck,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await InstancesAPI.healthCheck(instanceId);
       setHealthCheck(data);
@@ -265,21 +269,26 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
         <CardActionsRow>
           <Tooltip content={t`Run a health check on the instance`}>
             <Button
-              isDisabled={!me.is_superuser}
+              isDisabled={!me.is_superuser || isRunningHealthCheck}
               variant="primary"
               ouiaId="health-check-button"
               onClick={fetchHealthCheck}
+              isLoading={isRunningHealthCheck}
+              spinnerAriaLabel={t`Running health check`}
             >
-              {t`Health Check`}
+              {t`Run health check`}
             </Button>
           </Tooltip>
-          <DisassociateButton
-            verifyCannotDisassociate={!me.is_superuser}
-            key="disassociate"
-            onDisassociate={disassociateInstance}
-            itemsToDisassociate={[instance]}
-            modalTitle={t`Disassociate instance from instance group?`}
-          />
+          {me.is_superuser && instance.node_type !== 'control' && (
+            <DisassociateButton
+              verifyCannotDisassociate={instanceGroup.name === 'controlplane'}
+              key="disassociate"
+              onDisassociate={disassociateInstance}
+              itemsToDisassociate={[instance]}
+              isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
+              modalTitle={t`Disassociate instance from instance group?`}
+            />
+          )}
           <InstanceToggle
             css="display: inline-flex;"
             fetchInstances={fetchDetails}

@@ -1,5 +1,6 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import useTitle from 'hooks/useTitle';
 
 import { t } from '@lingui/macro';
 import {
@@ -12,7 +13,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { HistoryIcon } from '@patternfly/react-icons';
-import { Link, Route, useRouteMatch } from 'react-router-dom';
+import { Link, Route, useRouteMatch, useLocation } from 'react-router-dom';
 
 const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
   const { light } = PageSectionVariants;
@@ -20,6 +21,16 @@ const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
     path: Object.keys(breadcrumbConfig)[0],
     strict: true,
   });
+
+  const location = useLocation();
+  const parts = location.pathname.split('/');
+  if (parts.length > 2) {
+    parts.pop();
+  }
+
+  const pathTitle = breadcrumbConfig[parts.join('/')];
+  useTitle(pathTitle);
+
   const isOnlyOneCrumb = oneCrumbMatch && oneCrumbMatch.isExact;
 
   return (
@@ -33,7 +44,7 @@ const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
       >
         <div>
           {!isOnlyOneCrumb && (
-            <Breadcrumb>
+            <Breadcrumb ouiaId="breadcrumb-list">
               <Route path="/:path">
                 <Crumb breadcrumbConfig={breadcrumbConfig} />
               </Route>
@@ -103,7 +114,7 @@ const Crumb = ({ breadcrumbConfig, showDivider }) => {
   const crumb = breadcrumbConfig[match.url];
 
   let crumbElement = (
-    <BreadcrumbItem key={match.url} showDivider={showDivider}>
+    <BreadcrumbItem key={match.url} showDivider={showDivider} data-cy={crumb}>
       <Link to={match.url}>{crumb}</Link>
     </BreadcrumbItem>
   );
@@ -119,7 +130,11 @@ const Crumb = ({ breadcrumbConfig, showDivider }) => {
     <>
       {crumbElement}
       <Route path={`${match.url}/:path`}>
-        <Crumb breadcrumbConfig={breadcrumbConfig} showDivider />
+        <Crumb
+          breadcrumbConfig={breadcrumbConfig}
+          showDivider
+          data-cy={crumb}
+        />
       </Route>
     </>
   );

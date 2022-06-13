@@ -9,7 +9,7 @@ import { formatDateString } from 'util/dates';
 function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
   const { id } = useParams();
   return (
-    <Tr id={`token-row-${token.id}`}>
+    <Tr id={`token-row-${token.id}`} ouiaId={`token-row-${token.id}`}>
       <Td
         select={{
           rowIndex,
@@ -25,6 +25,9 @@ function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
             ? token.summary_fields.application.name
             : t`Personal access token`}
         </Link>
+      </Td>
+      <Td dataLabel={t`Description`} id={`token-description-${token.id}`}>
+        {toTitleCase(token.description)}
       </Td>
       <Td dataLabel={t`Scope`} id={`token-scope-${token.id}`}>
         {toTitleCase(token.scope)}

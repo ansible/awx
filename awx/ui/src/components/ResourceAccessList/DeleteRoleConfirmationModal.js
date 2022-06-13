@@ -1,4 +1,5 @@
-import React, { Fragment } from 'react';
+/* eslint-disable react/jsx-no-useless-fragment */
+import React from 'react';
 import { func, string } from 'prop-types';
 import { Button } from '@patternfly/react-core';
 

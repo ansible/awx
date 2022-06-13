@@ -12,7 +12,6 @@ import {
   ExecutionEnvironmentsAPI,
   CredentialsAPI,
 } from 'api';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
@@ -310,7 +309,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
       wrapper.find('Formik').prop('onSubmit')({});
     });
     wrapper.update();
-    sleep(0);
     expect(handleSubmit).toBeCalled();
   });
 

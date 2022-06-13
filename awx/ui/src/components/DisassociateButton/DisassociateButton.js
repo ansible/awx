@@ -18,14 +18,15 @@ function DisassociateButton({
   modalTitle = t`Disassociate?`,
   onDisassociate,
   verifyCannotDisassociate = true,
+  isProtectedInstanceGroup = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
 
-  function handleDisassociate() {
+  const handleDisassociate = () => {
     onDisassociate();
     setIsOpen(false);
-  }
+  };
 
   useEffect(() => {
     if (isKebabified) {
@@ -33,18 +34,33 @@ function DisassociateButton({
     }
   }, [isKebabified, isOpen, onKebabModalChange]);
 
-  function cannotDisassociate(item) {
+  function cannotDisassociateAllOthers(item) {
     return !item.summary_fields?.user_capabilities?.delete;
   }
+  function cannotDisassociateInstances(item) {
+    return (
+      item.node_type === 'control' ||
+      (isProtectedInstanceGroup && item.node_type === 'hybrid')
+    );
+  }
+
+  const cannotDisassociate = itemsToDisassociate.some(
+    (i) => i.type === 'instance'
+  )
+    ? cannotDisassociateInstances
+    : cannotDisassociateAllOthers;
 
   function renderTooltip() {
     if (verifyCannotDisassociate) {
       const itemsUnableToDisassociate = itemsToDisassociate
         .filter(cannotDisassociate)
-        .map((item) => item.name)
+        .map((item) => item.name ?? item.hostname)
         .join(', ');
-
-      if (itemsToDisassociate.some(cannotDisassociate)) {
+      if (
+        cannotDisassociate
+          ? itemsToDisassociate.some(cannotDisassociateInstances)
+          : itemsToDisassociate.some(cannotDisassociateAllOthers)
+      ) {
         return (
           <div>
             {t`You do not have permission to disassociate the following: ${itemsUnableToDisassociate}`}
@@ -61,11 +77,7 @@ function DisassociateButton({
 
   let isDisabled = false;
   if (verifyCannotDisassociate) {
-    isDisabled =
-      itemsToDisassociate.length === 0 ||
-      itemsToDisassociate.some(cannotDisassociate);
-  } else {
-    isDisabled = itemsToDisassociate.length === 0;
+    isDisabled = itemsToDisassociate.some(cannotDisassociate);
   }
 
   // NOTE: Once PF supports tooltips on disabled elements,
@@ -77,21 +89,26 @@ function DisassociateButton({
         <DropdownItem
           key="add"
           aria-label={t`disassociate`}
-          isDisabled={isDisabled}
+          isDisabled={isDisabled || !itemsToDisassociate.length}
           component="button"
+          ouiaId="disassociate-tooltip"
           onClick={() => setIsOpen(true)}
         >
           {t`Disassociate`}
         </DropdownItem>
       ) : (
-        <Tooltip content={renderTooltip()} position="top">
+        <Tooltip
+          content={renderTooltip()}
+          ouiaId="disassociate-tooltip"
+          position="top"
+        >
           <div>
             <Button
               ouiaId="disassociate-button"
               variant="secondary"
               aria-label={t`Disassociate`}
               onClick={() => setIsOpen(true)}
-              isDisabled={isDisabled}
+              isDisabled={isDisabled || !itemsToDisassociate.length}
             >
               {t`Disassociate`}
             </Button>

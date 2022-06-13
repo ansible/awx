@@ -17,6 +17,7 @@ import { ResourceAccessList } from 'components/ResourceAccessList';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import RoutedTabs from 'components/RoutedTabs';
+import RelatedTemplateList from 'components/RelatedTemplateList';
 import { CredentialsAPI } from 'api';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
@@ -66,12 +67,18 @@ function Credential({ setBreadcrumb }) {
       ),
       link: `/credentials`,
       id: 99,
+      isBackButton: true,
     },
     { name: t`Details`, link: `/credentials/${id}/details`, id: 0 },
     {
       name: t`Access`,
       link: `/credentials/${id}/access`,
       id: 1,
+    },
+    {
+      name: t`Job Templates`,
+      link: `/credentials/${id}/job_templates`,
+      id: 2,
     },
   ];
 
@@ -121,6 +128,11 @@ function Credential({ setBreadcrumb }) {
                 <ResourceAccessList
                   resource={credential}
                   apiModel={CredentialsAPI}
+                />
+              </Route>,
+              <Route key="job_templates" path="/credentials/:id/job_templates">
+                <RelatedTemplateList
+                  searchParams={{ credentials__id: credential.id }}
                 />
               </Route>,
               <Route key="not-found" path="*">

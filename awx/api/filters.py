@@ -7,15 +7,15 @@ import json
 from functools import reduce
 
 # Django
-from django.core.exceptions import FieldError, ValidationError
+from django.core.exceptions import FieldError, ValidationError, FieldDoesNotExist
 from django.db import models
-from django.db.models import Q, CharField, IntegerField, BooleanField
-from django.db.models.fields import FieldDoesNotExist
+from django.db.models import Q, CharField, IntegerField, BooleanField, TextField, JSONField
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField, ForeignKey
+from django.db.models.functions import Cast
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -185,16 +185,14 @@ class FieldLookupBackend(BaseFilterBackend):
         return (field_list[-1], new_lookup)
 
     def to_python_related(self, value):
-        value = force_text(value)
+        value = force_str(value)
         if value.lower() in ('none', 'null'):
             return None
         else:
             return int(value)
 
     def value_to_python_for_field(self, field, value):
-        if isinstance(field, models.NullBooleanField):
-            return to_python_boolean(value, allow_none=True)
-        elif isinstance(field, models.BooleanField):
+        if isinstance(field, models.BooleanField):
             return to_python_boolean(value)
         elif isinstance(field, (ForeignObjectRel, ManyToManyField, GenericForeignKey, ForeignKey)):
             try:
@@ -244,6 +242,8 @@ class FieldLookupBackend(BaseFilterBackend):
                     new_lookups.append('{}__{}__icontains'.format(new_lookup[:-8], rm_field.name))
             return value, new_lookups, needs_distinct
         else:
+            if isinstance(field, JSONField):
+                new_lookup = new_lookup.replace(field.name, f'{field.name}_as_txt')
             value = self.value_to_python_for_field(field, value)
         return value, new_lookup, needs_distinct
 
@@ -293,7 +293,7 @@ class FieldLookupBackend(BaseFilterBackend):
                         search_filter_relation = 'AND'
                         values = reduce(lambda list1, list2: list1 + list2, [i.split(',') for i in values])
                     for value in values:
-                        search_value, new_keys, _ = self.value_to_python(queryset.model, key, force_text(value))
+                        search_value, new_keys, _ = self.value_to_python(queryset.model, key, force_str(value))
                         assert isinstance(new_keys, list)
                         search_filters[search_value] = new_keys
                     # by definition, search *only* joins across relations,
@@ -325,6 +325,9 @@ class FieldLookupBackend(BaseFilterBackend):
                     value, new_key, distinct = self.value_to_python(queryset.model, key, value)
                     if distinct:
                         needs_distinct = True
+                    if '_as_txt' in new_key:
+                        fname = next(item for item in new_key.split('__') if item.endswith('_as_txt'))
+                        queryset = queryset.annotate(**{fname: Cast(fname[:-7], output_field=TextField())})
                     if q_chain:
                         chain_filters.append((q_not, new_key, value))
                     elif q_or:
@@ -395,11 +398,11 @@ class OrderByBackend(BaseFilterBackend):
                         order_by = value.split(',')
                     else:
                         order_by = (value,)
-            if order_by is None:
-                order_by = self.get_default_ordering(view)
+            default_order_by = self.get_default_ordering(view)
+            # glue the order by and default order by together so that the default is the backup option
+            order_by = list(order_by or []) + list(default_order_by or [])
             if order_by:
                 order_by = self._validate_ordering_fields(queryset.model, order_by)
-
                 # Special handling of the type field for ordering. In this
                 # case, we're not sorting exactly on the type field, but
                 # given the limited number of views with multiple types,
