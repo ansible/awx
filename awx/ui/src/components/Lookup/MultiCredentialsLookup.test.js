@@ -203,6 +203,7 @@ describe('<Formik><MultiCredentialsLookup /></Formik>', () => {
     await act(async () => {
       searchButton.invoke('onClick')();
     });
+    expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
     const select = await waitForElement(wrapper, 'AnsibleSelect');
     CredentialsAPI.read.mockResolvedValueOnce({
       data: {
@@ -212,12 +213,10 @@ describe('<Formik><MultiCredentialsLookup /></Formik>', () => {
         count: 1,
       },
     });
-    expect(CredentialsAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
       select.invoke('onChange')({}, 500);
     });
     wrapper.update();
-    expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
     expect(wrapper.find('OptionsList').prop('options')).toEqual([
       {
         id: 1,
