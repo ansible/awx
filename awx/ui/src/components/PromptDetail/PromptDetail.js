@@ -14,6 +14,7 @@ import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';
 import PromptJobTemplateDetail from './PromptJobTemplateDetail';
 import PromptWFJobTemplateDetail from './PromptWFJobTemplateDetail';
+import { VERBOSITY } from '../../constants';
 
 const PromptTitle = styled(Title)`
   margin-top: var(--pf-global--spacer--xl);
@@ -93,14 +94,6 @@ function PromptDetail({
   overrides = {},
   workflowNode = false,
 }) {
-  const VERBOSITY = {
-    0: t`0 (Normal)`,
-    1: t`1 (Verbose)`,
-    2: t`2 (More Verbose)`,
-    3: t`3 (Debug)`,
-    4: t`4 (Connection Debug)`,
-  };
-
   const details = omitOverrides(resource, overrides, launchConfig.defaults);
   details.type = overrides?.nodeType || details.type;
   const hasOverrides = Object.keys(overrides).length > 0;

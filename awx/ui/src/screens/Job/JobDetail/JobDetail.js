@@ -28,6 +28,7 @@ import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { getJobModel, isJobRunning } from 'util/jobs';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
+import { VERBOSITY } from '../../../constants';
 import jobHelpText from '../Job.helptext';
 
 const StatusDetailValue = styled.div`
@@ -36,14 +37,6 @@ const StatusDetailValue = styled.div`
   grid-gap: 10px;
   grid-template-columns: auto auto;
 `;
-
-const VERBOSITY = {
-  0: '0 (Normal)',
-  1: '1 (Verbose)',
-  2: '2 (More Verbose)',
-  3: '3 (Debug)',
-  4: '4 (Connection Debug)',
-};
 
 function JobDetail({ job, inventorySourceLabels }) {
   const { me } = useConfig();

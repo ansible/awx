@@ -33,6 +33,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import { VERBOSITY } from '../../../constants';
 import helpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
@@ -104,17 +105,6 @@ function JobTemplateDetail({ template }) {
     relatedResourceDeleteRequests.template(template);
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
-  const verbosityOptions = [
-    { verbosity: 0, details: t`0 (Normal)` },
-    { verbosity: 1, details: t`1 (Verbose)` },
-    { verbosity: 2, details: t`2 (More Verbose)` },
-    { verbosity: 3, details: t`3 (Debug)` },
-    { verbosity: 4, details: t`4 (Connection Debug)` },
-    { verbosity: 5, details: t`5 (WinRM Debug)` },
-  ];
-  const verbosityDetails = verbosityOptions.filter(
-    (option) => option.verbosity === verbosity
-  );
   const generateCallBackUrl = `${window.location.origin + url}callback/`;
   const renderOptionsField =
     become_enabled ||
@@ -272,7 +262,7 @@ function JobTemplateDetail({ template }) {
         />
         <Detail
           label={t`Verbosity`}
-          value={verbosityDetails[0].details}
+          value={VERBOSITY[verbosity]}
           dataCy="jt-detail-verbosity"
           helpText={helpText.verbosity}
         />

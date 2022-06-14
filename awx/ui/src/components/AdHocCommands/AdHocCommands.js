@@ -14,6 +14,8 @@ import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 import ContentError from '../ContentError';
 
+import { VERBOSE_OPTIONS } from '../../constants';
+
 function AdHocCommands({
   adHocItems,
   hasListItems,
@@ -26,13 +28,6 @@ function AdHocCommands({
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
 
-  const verbosityOptions = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
-  ];
   useEffect(() => {
     if (isKebabified) {
       onKebabModalChange(isWizardOpen);
@@ -159,7 +154,7 @@ function AdHocCommands({
           adHocItems={adHocItems}
           organizationId={organizationId}
           moduleOptions={moduleOptions}
-          verbosityOptions={verbosityOptions}
+          verbosityOptions={VERBOSE_OPTIONS}
           credentialTypeId={credentialTypeId}
           onCloseWizard={() => setIsWizardOpen(false)}
           onLaunch={handleSubmit}

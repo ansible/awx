@@ -13,6 +13,7 @@ import { VariablesDetail } from '../CodeEditor';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
+import { VERBOSITY } from '../../constants';
 
 function PromptInventorySourceDetail({ resource }) {
   const {
@@ -31,14 +32,6 @@ function PromptInventorySourceDetail({ resource }) {
     update_on_project_update,
     verbosity,
   } = resource;
-
-  const VERBOSITY = {
-    0: t`0 (Normal)`,
-    1: t`1 (Verbose)`,
-    2: t`2 (More Verbose)`,
-    3: t`3 (Debug)`,
-    4: t`4 (Connection Debug)`,
-  };
 
   let optionsList = '';
   if (

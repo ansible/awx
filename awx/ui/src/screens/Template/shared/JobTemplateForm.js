@@ -46,6 +46,7 @@ import LabelSelect from 'components/LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
 import helpText from './JobTemplate.helptext';
+import { VERBOSE_OPTIONS } from '../../../constants';
 
 const { origin } = document.location;
 
@@ -214,13 +215,6 @@ function JobTemplateForm({
       label: t`Check`,
       isDisabled: false,
     },
-  ];
-  const verbosityOptions = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
   ];
   let callbackUrl;
   if (template?.related) {
@@ -437,7 +431,7 @@ function JobTemplateForm({
             >
               <AnsibleSelect
                 id="template-verbosity"
-                data={verbosityOptions}
+                data={VERBOSE_OPTIONS}
                 {...verbosityField}
               />
             </FieldWithPrompt>

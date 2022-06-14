@@ -9,6 +9,7 @@ import { TagMultiSelect } from '../../MultiSelect';
 import AnsibleSelect from '../../AnsibleSelect';
 import { VariablesField } from '../../CodeEditor';
 import Popover from '../../Popover';
+import { VERBOSE_OPTIONS } from '../../../constants';
 
 const FieldHeader = styled.div`
   display: flex;
@@ -130,14 +131,6 @@ function JobTypeField() {
 
 function VerbosityField() {
   const [field, meta, helpers] = useField('verbosity');
-  const options = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
-  ];
-
   const isValid = !(meta.touched && meta.error);
 
   return (
@@ -154,7 +147,7 @@ function VerbosityField() {
     >
       <AnsibleSelect
         id="prompt-verbosity"
-        data={options}
+        data={VERBOSE_OPTIONS}
         {...field}
         onChange={(event, value) => helpers.setValue(value)}
       />
