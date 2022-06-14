@@ -241,6 +241,10 @@ SUBSYSTEM_METRICS_INTERVAL_SEND_METRICS = 3
 # Interval in seconds for saving local metrics to redis
 SUBSYSTEM_METRICS_INTERVAL_SAVE_TO_REDIS = 2
 
+# Record task manager metrics at the following interval in seconds
+# If using Prometheus, it is recommended to be => the Prometheus scrape interval
+SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL = 15
+
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
 

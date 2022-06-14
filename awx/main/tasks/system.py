@@ -103,7 +103,8 @@ def dispatch_startup():
     #
     apply_cluster_membership_policies()
     cluster_node_heartbeat()
-    Metrics().clear_values()
+    m = Metrics()
+    m.reset_values()
 
     # Update Tower's rsyslog.conf file based on loggins settings in the db
     reconfigure_rsyslog()
