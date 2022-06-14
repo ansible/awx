@@ -182,6 +182,15 @@ function TemplateListItem({
           )}
         </TdBreakWord>
         <Td dataLabel={t`Type`}>{toTitleCase(template.type)}</Td>
+        <Td dataLabel={t`Organization`}>
+          {summaryFields.organization ? (
+            <Link
+              to={`/organizations/${summaryFields.organization.id}/details`}
+            >
+              {summaryFields.organization.name}
+            </Link>
+          ) : null}
+        </Td>
         <Td dataLabel={t`Last Ran`}>{lastRun}</Td>
         <ActionsTd dataLabel={t`Actions`}>
           <ActionItem
@@ -270,19 +279,6 @@ function TemplateListItem({
                   dataCy={`template-${template.id}-activity`}
                 />
               ) : null}
-              {summaryFields.organization && (
-                <Detail
-                  label={t`Organization`}
-                  value={
-                    <Link
-                      to={`/organizations/${summaryFields.organization.id}/details`}
-                    >
-                      {summaryFields.organization.name}
-                    </Link>
-                  }
-                  dataCy={`template-${template.id}-organization`}
-                />
-              )}
               {summaryFields.inventory ? (
                 <Detail
                   label={t`Inventory`}
