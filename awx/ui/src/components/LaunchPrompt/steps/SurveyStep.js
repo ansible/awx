@@ -122,7 +122,7 @@ function MultipleChoiceField({ question }) {
           setIsOpen(false);
         }}
         selections={field.value}
-        variant={SelectVariant.single}
+        variant={SelectVariant.typeahead}
         id={id}
         ouiaId={`single-survey-question-${question.variable}`}
         isOpen={isOpen}

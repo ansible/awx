@@ -63,6 +63,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
           setOptions([...options, { value: option }]);
         }}
         noResultsFoundText={t`No results found`}
+        createText={t`Create`}
       >
         {options.map((option) => (
           <SelectOption key={option.value} value={option.value} />
