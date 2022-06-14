@@ -72,9 +72,9 @@ function ScheduleAdd({
       launchConfiguration?.ask_variables_on_launch &&
       (values.extra_vars || '---');
     if (surveyConfiguration?.spec) {
-      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
+      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, surveyValues));
     } else {
-      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
+      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, {}));
     }
     submitValues.extra_data = extraVars && parseVariableField(extraVars);
     delete values.extra_vars;
