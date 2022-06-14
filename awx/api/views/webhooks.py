@@ -204,7 +204,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         return h.hexdigest()
 
     def get_event_status_api(self):
-        if self.get_event_type() != 'Merge Request Hook':
+        if self.get_event_type() not in self.ref_keys.keys():
             return
         project = self.request.data.get('project', {})
         repo_url = project.get('web_url')
