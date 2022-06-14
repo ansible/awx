@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -31,7 +31,8 @@ import { AuthAPI, RootAPI } from 'api';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from 'contexts/Session';
-import { SESSION_REDIRECT_URL } from '../../constants';
+import { getCurrentUserId } from 'util/auth';
+import { SESSION_REDIRECT_URL, SESSION_USER_ID } from '../../constants';
 
 const loginLogoSrc = 'static/media/logo-login.svg';
 
@@ -43,6 +44,8 @@ const Login = styled(PFLogin)`
 
 function AWXLogin({ alt, isAuthenticated }) {
   const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
+  const isNewUser = useRef(true);
+  const hasVerifiedUser = useRef(false);
 
   const {
     isLoading: isCustomLoginInfoLoading,
@@ -112,8 +115,26 @@ function AWXLogin({ alt, isAuthenticated }) {
   if (isCustomLoginInfoLoading) {
     return null;
   }
-  if (isAuthenticated(document.cookie)) {
-    return <Redirect to={authRedirectTo || '/'} />;
+
+  if (isAuthenticated(document.cookie) && !hasVerifiedUser.current) {
+    const currentUserId = getCurrentUserId(document.cookie);
+    const verifyIsNewUser = () => {
+      const previousUserId = JSON.parse(
+        window.localStorage.getItem(SESSION_USER_ID)
+      );
+      if (previousUserId === null) {
+        return true;
+      }
+      return currentUserId.toString() !== previousUserId.toString();
+    };
+    isNewUser.current = verifyIsNewUser();
+    hasVerifiedUser.current = true;
+    window.localStorage.setItem(SESSION_USER_ID, JSON.stringify(currentUserId));
+  }
+
+  if (isAuthenticated(document.cookie) && hasVerifiedUser.current) {
+    const redirect = isNewUser.current ? '/' : authRedirectTo;
+    return <Redirect to={redirect} />;
   }
 
   let helperText;

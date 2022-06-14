@@ -11,7 +11,7 @@ import { DateTime } from 'luxon';
 import { RootAPI, MeAPI } from 'api';
 import { isAuthenticated } from 'util/auth';
 import useRequest from 'hooks/useRequest';
-import { SESSION_TIMEOUT_KEY } from '../constants';
+import { SESSION_TIMEOUT_KEY, SESSION_USER_ID } from '../constants';
 
 // The maximum supported timeout for setTimeout(), in milliseconds,
 // is the highest number you can represent as a signed 32bit
@@ -101,6 +101,7 @@ function SessionProvider({ children }) {
     setIsUserBeingLoggedOut(true);
     if (!isSessionExpired.current) {
       setAuthRedirectTo('/logout');
+      window.localStorage.setItem(SESSION_USER_ID, null);
     }
     sessionStorage.clear();
     await RootAPI.logout();
@@ -167,21 +168,21 @@ function SessionProvider({ children }) {
 
   const sessionValue = useMemo(
     () => ({
-      isUserBeingLoggedOut,
-      loginRedirectOverride,
       authRedirectTo,
       handleSessionContinue,
       isSessionExpired,
+      isUserBeingLoggedOut,
+      loginRedirectOverride,
       logout,
       sessionCountdown,
       setAuthRedirectTo,
     }),
     [
-      isUserBeingLoggedOut,
-      loginRedirectOverride,
       authRedirectTo,
       handleSessionContinue,
       isSessionExpired,
+      isUserBeingLoggedOut,
+      loginRedirectOverride,
       logout,
       sessionCountdown,
       setAuthRedirectTo,

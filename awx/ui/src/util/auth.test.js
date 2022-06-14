@@ -1,4 +1,4 @@
-import { isAuthenticated } from './auth';
+import { isAuthenticated, getCurrentUserId } from './auth';
 
 const invalidCookie = 'invalid';
 const validLoggedOutCookie =
@@ -17,5 +17,19 @@ describe('isAuthenticated', () => {
 
   test('returns true for valid authenticated cookie', () => {
     expect(isAuthenticated(validLoggedInCookie)).toEqual(true);
+  });
+});
+
+describe('getCurrentUserId', () => {
+  test('returns null for invalid cookie', () => {
+    expect(getCurrentUserId(invalidCookie)).toEqual(null);
+  });
+
+  test('returns null for expired cookie', () => {
+    expect(getCurrentUserId(validLoggedOutCookie)).toEqual(null);
+  });
+
+  test('returns current user id for valid authenticated cookie', () => {
+    expect(getCurrentUserId(validLoggedInCookie)).toEqual(1);
   });
 });
