@@ -168,15 +168,14 @@ function JobDetail({ job, inventorySourceLabels }) {
           />
           <Detail
             dataCy="job-project-status"
-            label={t`Project Status`}
+            label={t`Project Update Status`}
+            helpText={jobHelpText.projectUpdate}
             value={
               projectUpdate ? (
                 <Link to={`/jobs/project/${projectUpdate.id}`}>
-                  <StatusLabel status={project.status} />
+                  <StatusLabel status={projectUpdate.status} />
                 </Link>
-              ) : (
-                <StatusLabel status={project.status} />
-              )
+              ) : null
             }
           />
         </>

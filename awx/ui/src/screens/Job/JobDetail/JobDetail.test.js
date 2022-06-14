@@ -103,7 +103,9 @@ describe('<JobDetail />', () => {
     const statusLabel = statusDetail.find('StatusLabel');
     expect(statusLabel.prop('status')).toEqual('successful');
 
-    const projectStatusDetail = wrapper.find('Detail[label="Project Status"]');
+    const projectStatusDetail = wrapper.find(
+      'Detail[label="Project Update Status"]'
+    );
     expect(projectStatusDetail.find('StatusLabel')).toHaveLength(1);
     const projectStatusLabel = statusDetail.find('StatusLabel');
     expect(projectStatusLabel.prop('status')).toEqual('successful');
