@@ -1,11 +1,10 @@
-#! /bin/bash/
-
+#!/bin/bash
 # Create a directory for core (locale)
-rm -rf locale
+# rm -rf locale
 mkdir locale
 
 # Copy all subdirectories to locale
-cp -r translations/* locale/
+cp -r translations/ locale/
 
 # Loop over each directory and create another directory LC_Messages
 # Move django.po files to LC_Messages and remove messages.po
@@ -21,11 +20,11 @@ cd ..
 # echo $(pwd)
 
 # Create a directory for ui (locales)
-rm -rf locales
+# rm -rf locales
 mkdir locales
 
 # Copy all subdirectories to locales
-cp -r translations/* locales/
+cp -r translations/ locales/
 
 # Loop over each directory and remove django.po
 cd locales
@@ -36,6 +35,19 @@ done
 
 cd .. 
 
-awx_core_path="/awx/" # locale will be dropped here
-awx_ui_path="/awx/ui/src/" # locales will be dropped here
+echo $pwd
 
+# cd to repository
+
+# cd _clones/
+
+awx_core_path="awx/" # locale will be dropped here
+awx_ui_path="awx/ui/src/" # locales will be dropped here
+
+rm -rf $aws_core_path/locale
+rm -rf $awx_ui_path/locales
+
+mv ../locale/ $awx_core_path
+mv ../locales/ $awx_ui_path
+
+rm -rf translations/
