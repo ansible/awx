@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Rename the zh_cn folder 
+mv translations/zh_cn translations/zh
+
 # Create a directory for core (locale)
 # rm -rf locale
 mkdir locale
