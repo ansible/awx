@@ -35,7 +35,7 @@ done
 
 cd .. 
 
-echo $pwd
+# echo $pwd
 
 # cd to repository
 
@@ -44,10 +44,10 @@ echo $pwd
 awx_core_path="awx/" # locale will be dropped here
 awx_ui_path="awx/ui/src/" # locales will be dropped here
 
-rm -rf $aws_core_path/locale
+rm -rf $awx_core_path/locale
 rm -rf $awx_ui_path/locales
 
-mv ../locale/ $awx_core_path
-mv ../locales/ $awx_ui_path
+mv locale/ $awx_core_path
+mv locales/ $awx_ui_path
 
 rm -rf translations/
