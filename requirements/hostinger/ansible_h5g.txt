@@ -1,0 +1,24 @@
+# psutil is mondatory in every AWX env
+psutil
+
+#
+ansible==5.0.1
+ansible-core==2.12.6
+certifi==2022.5.18.1
+cffi==1.15.0
+charset-normalizer==2.0.12
+cryptography==37.0.2
+hvac==0.10.5
+idna==3.3
+Jinja2==2.11.3
+jmespath==0.10.0
+MarkupSafe==1.1.1
+netaddr==0.8.0
+packaging==21.3
+pycparser==2.21
+pyparsing==3.0.9
+PyYAML==6.0
+requests==2.28.0
+resolvelib==0.5.4
+six==1.16.0
+urllib3==1.26.9
