@@ -15,7 +15,7 @@ This is a legacy template used for internal testing ONLY.
 
 Any issues opened will this template will be automatically closed.
 
-Instead use the bug for feature request.
+Instead use the bug or feature request.
 
 -->
 
