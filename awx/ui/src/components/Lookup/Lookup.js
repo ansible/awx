@@ -52,6 +52,7 @@ function Lookup(props) {
     fieldName,
     validate,
     modalDescription,
+    onUpdate,
   } = props;
   const [typedText, setTypedText] = useState('');
   const debounceRequest = useDebounce(onDebounce, 1000);
@@ -120,6 +121,11 @@ function Lookup(props) {
     dispatch({ type: 'CLOSE_MODAL' });
   };
 
+  const onClick = () => {
+    onUpdate();
+    dispatch({ type: 'TOGGLE_MODAL' });
+  };
+
   const { isModalOpen, selectedItems } = state;
   const canDelete =
     (!required || (multiple && value.length > 1)) && !isDisabled;
@@ -137,7 +143,7 @@ function Lookup(props) {
           aria-label={t`Search`}
           id={`${id}-open`}
           ouiaId={`${id}-open`}
-          onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
+          onClick={onClick}
           variant={ButtonVariant.control}
           isDisabled={isLoading || isDisabled}
         >
@@ -223,6 +229,7 @@ Lookup.propTypes = {
   header: string,
   modalDescription: oneOfType([string, node]),
   onChange: func.isRequired,
+  onUpdate: func,
   value: oneOfType([Item, arrayOf(Item), object]),
   multiple: bool,
   required: bool,
@@ -255,6 +262,7 @@ Lookup.defaultProps = {
   ),
   validate: () => undefined,
   onDebounce: () => undefined,
+  onUpdate: () => {},
   isDisabled: false,
 };
 

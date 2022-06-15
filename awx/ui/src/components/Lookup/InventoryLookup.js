@@ -138,6 +138,7 @@ function InventoryLookup({
         header={t`Inventory`}
         value={value}
         onChange={onChange}
+        onUpdate={fetchInventories}
         onBlur={onBlur}
         required={required}
         onDebounce={checkInventoryName}
