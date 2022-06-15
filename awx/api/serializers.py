@@ -4684,8 +4684,14 @@ class SchedulePreviewSerializer(BaseSerializer):
 class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
 
-    timezone = serializers.SerializerMethodField()
-    until = serializers.SerializerMethodField()
+    timezone = serializers.SerializerMethodField(
+        help_text=_(
+            'The timezone this schedule runs in. This field is extracted from the RRULE. If the timezone in the RRULE is a link to another timezone, the link will be reflected in this field.'
+        ),
+    )
+    until = serializers.SerializerMethodField(
+        help_text=_('The date this schedule will end. This field is computed from the RRULE. If the schedule does not end an emptry string will be returned'),
+    )
 
     class Meta:
         model = Schedule

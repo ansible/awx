@@ -500,7 +500,7 @@ def test_complex_schedule(post, admin_user, rrule, expected_result):
 def test_zoneinfo(get, admin_user):
     url = reverse('api:schedule_zoneinfo')
     r = get(url, admin_user, expect=200)
-    assert {'name': 'America/New_York'} in r.data
+    assert 'America/New_York' in r.data['zones']
 
 
 @pytest.mark.django_db
