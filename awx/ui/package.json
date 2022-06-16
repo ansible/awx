@@ -17,6 +17,7 @@
     "codemirror": "^5.65.4",
     "d3": "7.4.4",
     "dagre": "^0.8.4",
+    "dompurify": "2.3.8",
     "formik": "2.2.9",
     "has-ansi": "5.0.1",
     "html-entities": "2.3.2",
@@ -30,7 +31,6 @@
     "react-router-dom": "^5.1.2",
     "react-virtualized": "^9.21.1",
     "rrule": "2.7.0",
-    "sanitize-html": "2.4.0",
     "styled-components": "5.3.5"
   },
   "devDependencies": {

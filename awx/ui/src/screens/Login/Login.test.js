@@ -145,7 +145,9 @@ describe('<Login />', () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
     });
     await findChildren(wrapper);
-    expect(wrapper.find('footer').html()).toContain('<div>TEST</div>');
+    expect(wrapper.find('footer').html()).toContain(
+      '<footer class="pf-c-login__footer" data-cy="login-footer"><div id="custom-button">TEST</div></footer>'
+    );
   });
 
   test('data initialization error is properly handled', async () => {

@@ -5,7 +5,8 @@ import { Redirect, withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import styled from 'styled-components';
-import sanitizeHtml from 'sanitize-html';
+import DOMPurify from 'dompurify';
+
 import {
   Alert,
   Brand,
@@ -152,7 +153,7 @@ function AWXLogin({ alt, isAuthenticated }) {
     <LoginFooter
       data-cy="login-footer"
       dangerouslySetInnerHTML={{
-        __html: sanitizeHtml(loginInfo),
+        __html: DOMPurify.sanitize(loginInfo),
       }}
     />
   );
