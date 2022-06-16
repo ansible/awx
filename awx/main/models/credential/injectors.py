@@ -35,6 +35,7 @@ def gce(cred, env, private_data_dir):
     container_path = to_container_path(path, private_data_dir)
     env['GCE_CREDENTIALS_FILE_PATH'] = container_path
     env['GCP_SERVICE_ACCOUNT_FILE'] = container_path
+    env['GOOGLE_APPLICATION_CREDENTIALS'] = container_path
 
     # Handle env variables for new module types.
     # This includes gcp_compute inventory plugin and
