@@ -467,7 +467,14 @@ Prometheus is a metrics collecting tool, and we support prometheus formatted dat
 
 Before you run anything, you should perform this basic setup:
 
-1. Change the `username` and `password` in `tools/prometheus/prometheus.yml`. You can also change the scrape interval.
+1. Copy the prometheus configuration:
+
+```
+cp tools/prometheus/prometheus.yml.example tools/prometheus/prometheus.yml
+```
+
+Set the `username` and `password` in that file to your AWX user. You can also change the scrape interval.
+
 2. (optional) if you are in a clustered environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
 
 You can use this as part of the docker-compose target:
