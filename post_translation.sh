@@ -52,3 +52,5 @@ rsync -av locale/ $awx_api_path
 rsync -av locales/ $awx_ui_path
 
 rm -rf translations/
+rm -rf locale/
+rm -rf locales/
