@@ -3,7 +3,7 @@
 # Rename the zh_cn folder 
 mv translations/zh_cn translations/zh
 
-# Create a directory for core (locale)
+# Create a directory for api (locale)
 # rm -rf locale
 mkdir locale
 
@@ -45,10 +45,10 @@ cd ..
 
 # cd _clones/
 
-awx_core_path="awx/" # locale will be dropped here
-awx_ui_path="awx/ui/src/" # locales will be dropped here
+awx_api_path="awx/locale" # locale will be dropped here
+awx_ui_path="awx/ui/src/locales" # locales will be dropped here
 
-rsync -av locale/ $awx_core_path
+rsync -av locale/ $awx_api_path
 rsync -av locales/ $awx_ui_path
 
 rm -rf translations/
