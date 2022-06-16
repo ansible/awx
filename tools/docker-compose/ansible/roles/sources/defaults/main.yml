@@ -29,3 +29,5 @@ ldap_private_key_file: '{{ ldap_cert_dir }}/{{ ldap_private_key_file_name }}'
 ldap_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
 
 enable_splunk: false
+enable_grafana: false
+enable_prometheus: false

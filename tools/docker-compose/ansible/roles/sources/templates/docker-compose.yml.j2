@@ -136,6 +136,35 @@ services:
       SPLUNK_START_ARGS: --accept-license
       SPLUNK_PASSWORD: splunk_admin
 {% endif %}
+{% if enable_prometheus|bool %}
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tools_prometheus_1
+    hostname: splunk
+    ports:
+      - "9090:9090"
+    volumes:
+      - "../../prometheus:/etc/prometheus"
+      - "prometheus_storage:/prometheus:rw"
+    links:
+      - awx_1:awx1
+{% endif %}
+{% if enable_grafana|bool %}
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: tools_grafana_1
+    hostname: splunk
+    ports:
+      - "3001:3000"
+    volumes:
+      - "../../grafana:/etc/grafana/provisioning"
+      - "grafana_storage:/var/lib/grafana:rw"
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: splunk_admin
+    links:
+      - prometheus
+{% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
   # logstash:
@@ -197,6 +226,14 @@ volumes:
   openldap_data:
     name: tools_ldap_1
     driver: local
+{% endif %}
+{% if enable_prometheus|bool %}
+  prometheus_storage:
+    name: tools_prometheus_storage
+{% endif %}
+{% if enable_grafana|bool %}
+  grafana_storage:
+    name: tools_grafana_storage
 {% endif %}
 {% if minikube_container_group|bool %}
 networks:

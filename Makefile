@@ -470,7 +470,9 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
 	    -e enable_keycloak=$(KEYCLOAK) \
 	    -e enable_ldap=$(LDAP) \
-	    -e enable_splunk=$(SPLUNK)
+	    -e enable_splunk=$(SPLUNK) \
+	    -e enable_prometheus=$(PROMETHEUS) \
+	    -e enable_grafana=$(GRAFANA)
 
 
 docker-compose: awx/projects docker-compose-sources
